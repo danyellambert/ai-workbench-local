@@ -120,8 +120,27 @@ Guia da Fase 0.5:
 
 Fase atual em andamento:
 
-- **Fase 1 — Base do produto com melhor experiência**
+- **Fase 2 — Arquitetura modular**
 
 Próxima etapa natural:
 
-- implementar melhorias de UX no chat local: streaming, sidebar, seletor de modelo e controle de histórico
+- organizar melhor a estrutura do projeto para sair de um arquivo único e preparar a evolução das próximas fases
+
+### O que já foi entregue na Fase 1
+
+- streaming da resposta no chat local
+- sidebar com configurações
+- seletor de modelo local
+- controle de temperatura
+- botão para limpar conversa
+- histórico simples persistido em arquivo local
+- medição da latência da última resposta
+- mensagens de erro mais amigáveis
+
+## Arquivo de histórico local
+
+Durante a Fase 1, o chat passou a salvar o histórico localmente em:
+
+- `.chat_history.json`
+
+Esse arquivo fica fora do Git por segurança e para evitar versionar histórico de uso.
