@@ -5,18 +5,27 @@ from pathlib import Path
 VALID_ROLES = {"user", "assistant"}
 
 
+def _sanitize_json_like(value: object):
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+
+    if isinstance(value, list):
+        return [_sanitize_json_like(item) for item in value]
+
+    if isinstance(value, dict):
+        sanitized: dict[str, object] = {}
+        for key, item in value.items():
+            if isinstance(key, str):
+                sanitized[key] = _sanitize_json_like(item)
+        return sanitized
+
+    return str(value)
+
+
 def _sanitize_metadata(metadata: object) -> dict[str, object]:
     if not isinstance(metadata, dict):
         return {}
-
-    sanitized: dict[str, object] = {}
-    for key, value in metadata.items():
-        if not isinstance(key, str):
-            continue
-        if isinstance(value, (str, int, float, bool)) or value is None:
-            sanitized[key] = value
-
-    return sanitized
+    return _sanitize_json_like(metadata)
 
 
 def load_chat_history(history_path: Path) -> list[dict[str, object]]:

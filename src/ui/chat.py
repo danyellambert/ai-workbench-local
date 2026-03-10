@@ -30,3 +30,24 @@ def render_chat_message(message: dict[str, object]) -> None:
 
             if info_parts:
                 st.caption(" · ".join(info_parts))
+
+            sources = metadata.get("sources")
+            if isinstance(sources, list) and sources:
+                with st.expander("Fontes usadas"):
+                    for index, source in enumerate(sources, start=1):
+                        if not isinstance(source, dict):
+                            continue
+                        source_name = source.get("source", "documento")
+                        score = source.get("score")
+                        snippet = source.get("snippet", "")
+                        chunk_id = source.get("chunk_id")
+
+                        title_parts = [f"{index}. {source_name}"]
+                        if chunk_id is not None:
+                            title_parts.append(f"chunk {chunk_id}")
+                        if score is not None:
+                            title_parts.append(f"score {score}")
+
+                        st.markdown("**" + " · ".join(title_parts) + "**")
+                        if snippet:
+                            st.code(snippet)

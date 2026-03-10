@@ -1,0 +1,1 @@
+"""Módulos de RAG local do projeto."""

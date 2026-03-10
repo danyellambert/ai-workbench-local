@@ -26,6 +26,13 @@ class OpenAIProvider:
             stream=True,
         )
 
+    def create_embeddings(self, texts: list[str], model: str) -> list[list[float]]:
+        if self.client is None:
+            raise RuntimeError("OPENAI_API_KEY não configurada")
+
+        response = self.client.embeddings.create(model=model, input=texts)
+        return [item.embedding for item in response.data]
+
     @staticmethod
     def iter_stream_text(stream):
         for chunk in stream:

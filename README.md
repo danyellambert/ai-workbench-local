@@ -126,6 +126,7 @@ Guia da Fase 0.5:
 
 - `docs/PUBLICATION_GUIDE.md`
 - `docs/PHASE_3_NOTES.md`
+- `docs/PHASE_4_NOTES.md`
 
 ## Repositório remoto
 
@@ -135,11 +136,11 @@ Guia da Fase 0.5:
 
 Fase atual em andamento:
 
-- **Fase 4 — Chat com documentos (RAG)**
+- **Fase 5 — Outputs estruturados**
 
 Próxima etapa natural:
 
-- começar a adicionar upload de arquivos, extração de texto, chunking e recuperação de contexto
+- começar a estruturar respostas em formatos previsíveis, como JSON e checklist, com base em esquemas mais claros
 
 ### O que já foi entregue na Fase 1
 
@@ -161,6 +162,18 @@ Próxima etapa natural:
 - metadados por mensagem com provider, modelo, perfil e temperatura
 - base pronta para comparar providers/modelos sem acoplar tudo no mesmo arquivo
 
+### O que já foi entregue na Fase 4
+
+- upload de documentos (PDF, TXT, CSV, MD, PY)
+- extração de texto por tipo de arquivo
+- chunking local com overlap
+- embeddings locais
+- armazenamento do índice em `.rag_store.json`
+- retrieval por similaridade cosseno
+- injeção de contexto recuperado no prompt
+- exibição de fontes usadas nas respostas
+- limpeza e reindexação do índice RAG
+
 ## Variáveis úteis para a Fase 3
 
 Você pode ajustar no `.env`:
@@ -181,3 +194,11 @@ Durante a Fase 1, o chat passou a salvar o histórico localmente em:
 - `.chat_history.json`
 
 Esse arquivo fica fora do Git por segurança e para evitar versionar histórico de uso.
+
+## Arquivo de índice RAG local
+
+Durante a Fase 4, o índice de documentos passou a ser salvo localmente em:
+
+- `.rag_store.json`
+
+Esse arquivo também fica fora do Git para evitar versionar dados locais do usuário.

@@ -8,5 +8,6 @@ __pycache__/
 *.sqlite3
 *.log
 .chat_history.json
+.rag_store.json
 materials_local/
 .vscode/

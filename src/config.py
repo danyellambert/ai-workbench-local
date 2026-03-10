@@ -27,6 +27,15 @@ class OpenAISettings:
     available_models_env: list[str]
 
 
+@dataclass(frozen=True)
+class RagSettings:
+    embedding_model: str
+    chunk_size: int
+    chunk_overlap: int
+    top_k: int
+    store_path: Path
+
+
 def get_ollama_settings() -> OllamaSettings:
     default_model = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
     available_models_env = [
@@ -57,4 +66,14 @@ def get_openai_settings() -> OpenAISettings:
         api_key=os.getenv("OPENAI_API_KEY"),
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         available_models_env=available_models_env,
+    )
+
+
+def get_rag_settings() -> RagSettings:
+    return RagSettings(
+        embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text"),
+        chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1200")),
+        chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "200")),
+        top_k=int(os.getenv("RAG_TOP_K", "4")),
+        store_path=BASE_DIR / ".rag_store.json",
     )
