@@ -112,12 +112,16 @@ Guia da Fase 0.5:
 
 - `docs/PUBLICATION_GUIDE.md`
 
+## Repositório remoto
+
+- GitHub (privado, por enquanto): `https://github.com/danyellambert/ai-workbench-local`
+
 ## Status atual
 
 Fase atual em andamento:
 
-- **Fase 0.5 — Git/GitHub, licença e higiene de publicação**
+- **Fase 1 — Base do produto com melhor experiência**
 
 Próxima etapa natural:
 
-- concluir a Fase 0.5 e depois iniciar a **Fase 1 — Base do produto com melhor experiência**
+- implementar melhorias de UX no chat local: streaming, sidebar, seletor de modelo e controle de histórico

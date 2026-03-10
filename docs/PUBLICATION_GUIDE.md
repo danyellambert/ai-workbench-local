@@ -83,14 +83,14 @@ Minha recomendação: tornar público **no fim da Fase 4**.
 ## Checklist da Fase 0.5
 
 - [x] Git local inicializado
-- [ ] Commit inicial limpo criado
-- [ ] Branch `dev` criada
+- [x] Commit inicial limpo criado
+- [x] Branch `dev` criada
 - [x] Licença adicionada
 - [x] Política de publicação definida
 - [x] `materials_local/` fora do versionamento
-- [ ] Repositório GitHub privado criado
-- [ ] Remote `origin` configurado
-- [ ] Push inicial realizado
+- [x] Repositório GitHub privado criado
+- [x] Remote `origin` configurado
+- [x] Push inicial realizado
 
 ---
 
@@ -102,3 +102,24 @@ Mesmo com tudo preparado localmente, a criação do repositório remoto no GitHu
 - criação manual do repositório pelo site
 
 Ou seja: a parte local pode ser totalmente automatizada; a parte de conta/remoto depende do acesso ao GitHub.
+
+---
+
+## Status atual
+
+Fase 0.5 concluída com sucesso nos itens principais:
+
+- Git inicializado
+- commit inicial criado
+- branch `dev` criada
+- repositório privado criado no GitHub
+- `origin` configurado
+- push inicial realizado
+
+Próximo passo recomendado:
+
+- iniciar a **Fase 1 — Base do produto com melhor experiência**
+
+Repositório remoto atual:
+
+- `https://github.com/danyellambert/ai-workbench-local`
