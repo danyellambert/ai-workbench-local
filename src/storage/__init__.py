@@ -1,0 +1,1 @@
+"""Camada de persistência simples do projeto."""

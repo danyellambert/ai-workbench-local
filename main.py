@@ -1,57 +1,47 @@
-import os
-
 import streamlit as st
-from dotenv import load_dotenv
-from openai import OpenAI
+from src.config import get_openai_settings
+from src.providers.openai_provider import (
+    create_openai_client,
+    create_openai_response,
+    format_openai_error,
+)
+from src.services.chat_state import append_chat_message, get_chat_messages, initialize_chat_state
 
 
-load_dotenv()
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-
-
-def criar_cliente_openai():
-    if not OPENAI_API_KEY:
-        return None
-    return OpenAI(api_key=OPENAI_API_KEY)
-
-
-modelo_ia = criar_cliente_openai()
+settings = get_openai_settings()
+modelo_ia = create_openai_client(settings)
 
 st.write("# Chatbot com IA - OpenAI")
 
-if not OPENAI_API_KEY:
+if not settings.api_key:
     st.info("Defina OPENAI_API_KEY no arquivo .env para usar esta versão com a OpenAI.")
 
-if "lista_mensagens" not in st.session_state:
-    st.session_state["lista_mensagens"] = []
+initialize_chat_state()
 
 texto_usuario = st.chat_input("Digite sua mensagem")
 arquivo = st.file_uploader("Selecione um arquivo")
 
-for mensagem in st.session_state["lista_mensagens"]:
+for mensagem in get_chat_messages():
     role = mensagem["role"]
     content = mensagem["content"]
     st.chat_message(role).write(content)
 
 if texto_usuario:
     st.chat_message("user").write(texto_usuario)
-    mensagem_usuario = {"role": "user", "content": texto_usuario}
-    st.session_state["lista_mensagens"].append(mensagem_usuario)
+    append_chat_message("user", texto_usuario)
 
     if modelo_ia is None:
         texto_resposta_ia = "Configure OPENAI_API_KEY no arquivo .env para usar o chatbot com OpenAI."
     else:
         try:
-            resposta_ia = modelo_ia.chat.completions.create(
-                messages=st.session_state["lista_mensagens"],
-                model=OPENAI_MODEL,
+            resposta_ia = create_openai_response(
+                client=modelo_ia,
+                messages=get_chat_messages(),
+                model=settings.model,
             )
             texto_resposta_ia = resposta_ia.choices[0].message.content
         except Exception as erro:
-            texto_resposta_ia = f"Erro ao chamar a OpenAI: {erro}"
+            texto_resposta_ia = format_openai_error(erro)
 
     st.chat_message("assistant").write(texto_resposta_ia)
-    mensagem_ia = {"role": "assistant", "content": texto_resposta_ia}
-    st.session_state["lista_mensagens"].append(mensagem_ia)
+    append_chat_message("assistant", texto_resposta_ia)

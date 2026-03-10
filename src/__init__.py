@@ -1,0 +1,1 @@
+"""Módulos compartilhados do projeto AI Workbench Local."""

@@ -36,6 +36,19 @@ Este projeto está sendo evoluído para se tornar um ativo forte de portfólio, 
 - `main.py` → versão configurável para OpenAI por variável de ambiente
 - `proximos_passos.md` → roadmap oficial do projeto
 
+## Estrutura atual do projeto
+
+```text
+src/
+  config.py
+  providers/
+  services/
+  storage/
+  ui/
+```
+
+Essa estrutura foi introduzida na **Fase 2** para separar configuração, providers, persistência, estado de sessão e componentes de interface.
+
 ## Como rodar localmente
 
 ### 1. Instale as dependências
