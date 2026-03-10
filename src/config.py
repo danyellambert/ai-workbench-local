@@ -15,6 +15,7 @@ class OllamaSettings:
     base_url: str
     default_model: str
     default_temperature: float
+    default_prompt_profile: str
     available_models_env: list[str]
     history_path: Path
 
@@ -23,6 +24,7 @@ class OllamaSettings:
 class OpenAISettings:
     api_key: str | None
     model: str
+    available_models_env: list[str]
 
 
 def get_ollama_settings() -> OllamaSettings:
@@ -38,13 +40,21 @@ def get_ollama_settings() -> OllamaSettings:
         base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
         default_model=default_model,
         default_temperature=float(os.getenv("OLLAMA_TEMPERATURE", "0.2")),
+        default_prompt_profile=os.getenv("DEFAULT_PROMPT_PROFILE", "neutro"),
         available_models_env=available_models_env,
         history_path=BASE_DIR / ".chat_history.json",
     )
 
 
 def get_openai_settings() -> OpenAISettings:
+    available_models_env = [
+        model.strip()
+        for model in os.getenv("OPENAI_AVAILABLE_MODELS", "").split(",")
+        if model.strip()
+    ]
+
     return OpenAISettings(
         api_key=os.getenv("OPENAI_API_KEY"),
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        available_models_env=available_models_env,
     )

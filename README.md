@@ -41,13 +41,14 @@ Este projeto está sendo evoluído para se tornar um ativo forte de portfólio, 
 ```text
 src/
   config.py
+  prompt_profiles.py
   providers/
   services/
   storage/
   ui/
 ```
 
-Essa estrutura foi introduzida na **Fase 2** para separar configuração, providers, persistência, estado de sessão e componentes de interface.
+Essa estrutura foi introduzida na **Fase 2** e expandida na **Fase 3** para separar configuração, providers, perfis de prompt, persistência, estado de sessão e componentes de interface.
 
 ## Como rodar localmente
 
@@ -124,6 +125,7 @@ O roadmap completo do projeto está em:
 Guia da Fase 0.5:
 
 - `docs/PUBLICATION_GUIDE.md`
+- `docs/PHASE_3_NOTES.md`
 
 ## Repositório remoto
 
@@ -133,11 +135,11 @@ Guia da Fase 0.5:
 
 Fase atual em andamento:
 
-- **Fase 2 — Arquitetura modular**
+- **Fase 4 — Chat com documentos (RAG)**
 
 Próxima etapa natural:
 
-- organizar melhor a estrutura do projeto para sair de um arquivo único e preparar a evolução das próximas fases
+- começar a adicionar upload de arquivos, extração de texto, chunking e recuperação de contexto
 
 ### O que já foi entregue na Fase 1
 
@@ -149,6 +151,28 @@ Próxima etapa natural:
 - histórico simples persistido em arquivo local
 - medição da latência da última resposta
 - mensagens de erro mais amigáveis
+
+### O que já foi entregue na Fase 3
+
+- arquitetura preparada para múltiplos providers
+- seleção explícita de provider na interface
+- seleção de modelo por provider
+- perfis de prompt (`neutro`, `programador`, `professor`, `resumidor`, `extrator`)
+- metadados por mensagem com provider, modelo, perfil e temperatura
+- base pronta para comparar providers/modelos sem acoplar tudo no mesmo arquivo
+
+## Variáveis úteis para a Fase 3
+
+Você pode ajustar no `.env`:
+
+```env
+OLLAMA_AVAILABLE_MODELS=qwen2.5-coder:7b,qwen2.5-coder:14b,deepseek-coder:6.7b
+DEFAULT_PROMPT_PROFILE=neutro
+OLLAMA_TEMPERATURE=0.2
+OPENAI_AVAILABLE_MODELS=gpt-4o-mini
+```
+
+Essas variáveis ajudam a controlar quais modelos aparecem por provider e qual perfil de prompt é usado por padrão.
 
 ## Arquivo de histórico local
 

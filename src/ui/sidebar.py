@@ -2,19 +2,49 @@ import streamlit as st
 
 
 def render_chat_sidebar(
-    models: list[str],
-    default_model: str,
+    provider_options: dict[str, str],
+    default_provider: str,
+    models_by_provider: dict[str, list[str]],
+    default_model_by_provider: dict[str, str],
+    prompt_profiles: dict[str, dict[str, str]],
+    default_prompt_profile: str,
     default_temperature: float,
-    base_url: str,
+    provider_details: dict[str, str],
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, float, bool]:
-    default_index = models.index(default_model) if default_model in models else 0
+) -> tuple[str, str, str, float, bool]:
+    provider_keys = list(provider_options.keys())
+    default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
 
     with st.sidebar:
         st.header("Configurações")
-        selected_model = st.selectbox("Modelo local", models, index=default_index)
+        selected_provider = st.selectbox(
+            "Provider",
+            provider_keys,
+            index=default_provider_index,
+            format_func=lambda key: provider_options[key],
+        )
+
+        provider_models = models_by_provider.get(selected_provider, [])
+        default_model = default_model_by_provider.get(selected_provider, provider_models[0] if provider_models else "")
+        default_model_index = provider_models.index(default_model) if default_model in provider_models else 0
+
+        selected_model = st.selectbox("Modelo", provider_models, index=default_model_index)
+
+        prompt_profile_keys = list(prompt_profiles.keys())
+        default_profile_index = (
+            prompt_profile_keys.index(default_prompt_profile)
+            if default_prompt_profile in prompt_profile_keys
+            else 0
+        )
+        selected_prompt_profile = st.selectbox(
+            "Perfil de prompt",
+            prompt_profile_keys,
+            index=default_profile_index,
+            format_func=lambda key: prompt_profiles[key]["label"],
+        )
+
         temperature = st.slider(
             "Temperatura",
             min_value=0.0,
@@ -30,8 +60,11 @@ def render_chat_sidebar(
         if last_latency is not None:
             st.metric("Última resposta", f"{last_latency:.2f}s")
 
-        st.caption(f"Base URL: `{base_url}`")
+        detail = provider_details.get(selected_provider)
+        if detail:
+            st.caption(detail)
         st.caption(f"Histórico local: `{history_filename}`")
+        st.caption(prompt_profiles[selected_prompt_profile]["description"])
         st.info("Chat com documentos entra na Fase 4 do roadmap.")
 
-    return selected_model, temperature, clear_requested
+    return selected_provider, selected_model, selected_prompt_profile, temperature, clear_requested

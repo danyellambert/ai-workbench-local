@@ -5,7 +5,7 @@ MESSAGES_KEY = "lista_mensagens"
 LATENCY_KEY = "ultima_latencia_s"
 
 
-def initialize_chat_state(initial_messages: list[dict[str, str]] | None = None) -> None:
+def initialize_chat_state(initial_messages: list[dict[str, object]] | None = None) -> None:
     if MESSAGES_KEY not in st.session_state:
         st.session_state[MESSAGES_KEY] = initial_messages or []
 
@@ -13,12 +13,14 @@ def initialize_chat_state(initial_messages: list[dict[str, str]] | None = None) 
         st.session_state[LATENCY_KEY] = None
 
 
-def get_chat_messages() -> list[dict[str, str]]:
+def get_chat_messages() -> list[dict[str, object]]:
     return st.session_state[MESSAGES_KEY]
 
 
-def append_chat_message(role: str, content: str) -> dict[str, str]:
-    message = {"role": role, "content": content}
+def append_chat_message(role: str, content: str, metadata: dict[str, object] | None = None) -> dict[str, object]:
+    message: dict[str, object] = {"role": role, "content": content}
+    if metadata:
+        message["metadata"] = metadata
     st.session_state[MESSAGES_KEY].append(message)
     return message
 
