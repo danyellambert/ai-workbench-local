@@ -1,0 +1,7 @@
+streamlit
+openai
+flask
+flask-socketio
+python-socketio
+simple-websocket
+python-dotenv
