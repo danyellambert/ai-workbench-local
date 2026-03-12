@@ -106,6 +106,22 @@ Essa fase deve cobrir:
 - aprendizado explícito de LangChain
 - preparação/uso de LangGraph em fluxos de retrieval mais completos
 
+## Contexto do Ollama e próxima correção arquitetural
+
+Durante a evolução da Fase 4.5, ficou claro que o controle de `num_ctx` precisa ser tratado com mais robustez do que simplesmente confiar no caminho OpenAI-compatible.
+
+Por isso, o projeto passou a caminhar para uma estratégia melhor:
+
+- manter compatibilidade OpenAI-compatible quando útil
+- usar integração **nativa do Ollama** quando quisermos garantir parâmetros avançados como `num_ctx`
+
+Isso melhora:
+
+- previsibilidade
+- debugging
+- aderência ao comportamento real do Ollama
+- narrativa técnica do projeto
+
 ## Relação com a evolução do projeto
 
 A Fase 4 foi pensada para provar o pipeline completo de RAG de forma controlada e didática.

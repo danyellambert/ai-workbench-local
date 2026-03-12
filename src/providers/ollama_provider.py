@@ -1,4 +1,6 @@
+import json
 import subprocess
+from urllib import request as urllib_request
 
 from openai import OpenAI
 
@@ -16,6 +18,14 @@ class OllamaProvider:
     def __init__(self, settings: OllamaSettings):
         self.settings = settings
         self.client = OpenAI(base_url=settings.base_url, api_key="ollama")
+        self.native_base_url = self._build_native_base_url(settings.base_url)
+
+    @staticmethod
+    def _build_native_base_url(base_url: str) -> str:
+        normalized = base_url.rstrip("/")
+        if normalized.endswith("/v1"):
+            normalized = normalized[:-3]
+        return normalized
 
     def list_available_models(self) -> list[str]:
         discovered_models: list[str] = []
@@ -54,23 +64,26 @@ class OllamaProvider:
         temperature: float,
         context_window: int | None = None,
     ):
-        # `num_ctx` precisa ir em `options` para o Ollama respeitar a janela de contexto.
-        # Mantemos também um fallback em `extra_body` por compatibilidade com clientes OpenAI-compatible.
-        request_kwargs = {
-            "messages": messages,
+        payload = {
             "model": model,
-            "temperature": temperature,
+            "messages": messages,
             "stream": True,
+            "options": {
+                "temperature": temperature,
+            },
         }
 
         if context_window:
-            ctx_value = int(context_window)
-            request_kwargs["extra_body"] = {"options": {"num_ctx": ctx_value}}
-            request_kwargs["extra_body"]["num_ctx"] = ctx_value
+            payload["options"]["num_ctx"] = int(context_window)
 
-        return self.client.chat.completions.create(
-            **request_kwargs,
+        request = urllib_request.Request(
+            url=f"{self.native_base_url}/api/chat",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
         )
+
+        return urllib_request.urlopen(request, timeout=300)
 
     def create_embeddings(self, texts: list[str], model: str) -> list[list[float]]:
         response = self.client.embeddings.create(model=model, input=texts)
@@ -78,6 +91,24 @@ class OllamaProvider:
 
     @staticmethod
     def iter_stream_text(stream):
+        if hasattr(stream, "__iter__") and not hasattr(stream, "choices"):
+            for raw_line in stream:
+                if isinstance(raw_line, bytes):
+                    line = raw_line.decode("utf-8", errors="ignore").strip()
+                    if not line:
+                        continue
+                    try:
+                        payload = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+
+                    message = payload.get("message")
+                    if isinstance(message, dict):
+                        content = message.get("content") or ""
+                        if content:
+                            yield content
+            return
+
         for chunk in stream:
             if not getattr(chunk, "choices", None):
                 continue

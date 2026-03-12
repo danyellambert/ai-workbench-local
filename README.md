@@ -190,6 +190,7 @@ Isso ajuda o projeto a mostrar não só funcionalidades, mas também **progress�
 - metadados mais ricos por documento e chunk
 - configuração explícita de janela de contexto no projeto
 - controle visível de contexto para Ollama na sidebar
+- início de integração nativa com a API do Ollama para maior controle de `num_ctx`
 
 ## Variáveis úteis para a Fase 3
 
@@ -234,3 +235,4 @@ Observação prática:
 - no caso do Ollama, esse valor é enviado como `num_ctx`
 - valores muito altos podem aumentar consumo de memória e latência
 - se o índice RAG estiver grande, vale ajustar também `RAG_CHUNK_SIZE` e `RAG_TOP_K`
+- quando quisermos garantir comportamento mais fiel do Ollama, o projeto pode usar a API nativa em vez de depender apenas da rota OpenAI-compatible
