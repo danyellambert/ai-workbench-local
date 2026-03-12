@@ -9,11 +9,12 @@ def render_chat_sidebar(
     prompt_profiles: dict[str, dict[str, str]],
     default_prompt_profile: str,
     default_temperature: float,
+    default_context_window_by_provider: dict[str, int],
     provider_details: dict[str, str],
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, bool]:
+) -> tuple[str, str, str, float, int, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
 
@@ -45,6 +46,19 @@ def render_chat_sidebar(
             format_func=lambda key: prompt_profiles[key]["label"],
         )
 
+        context_window = default_context_window_by_provider.get(selected_provider, 8192)
+        if selected_provider == "ollama":
+            context_window = int(
+                st.number_input(
+                    "Janela de contexto (num_ctx)",
+                    min_value=1024,
+                    max_value=65536,
+                    value=max(int(context_window), 1024),
+                    step=1024,
+                    help="Controla o tamanho de contexto enviado ao Ollama nesta execução.",
+                )
+            )
+
         temperature = st.slider(
             "Temperatura",
             min_value=0.0,
@@ -63,8 +77,10 @@ def render_chat_sidebar(
         detail = provider_details.get(selected_provider)
         if detail:
             st.caption(detail)
+        if selected_provider == "ollama":
+            st.caption(f"Contexto ativo no Ollama: `{context_window}`")
         st.caption(f"Histórico local: `{history_filename}`")
         st.caption(prompt_profiles[selected_prompt_profile]["description"])
         st.info("Chat com documentos entra na Fase 4 do roadmap.")
 
-    return selected_provider, selected_model, selected_prompt_profile, temperature, clear_requested
+    return selected_provider, selected_model, selected_prompt_profile, temperature, int(context_window), clear_requested

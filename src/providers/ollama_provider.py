@@ -47,12 +47,25 @@ class OllamaProvider:
 
         return ordered_models
 
-    def stream_chat_completion(self, messages: list[dict[str, str]], model: str, temperature: float):
+    def stream_chat_completion(
+        self,
+        messages: list[dict[str, str]],
+        model: str,
+        temperature: float,
+        context_window: int | None = None,
+    ):
+        request_kwargs = {
+            "messages": messages,
+            "model": model,
+            "temperature": temperature,
+            "stream": True,
+        }
+
+        if context_window:
+            request_kwargs["extra_body"] = {"options": {"num_ctx": int(context_window)}}
+
         return self.client.chat.completions.create(
-            messages=messages,
-            model=model,
-            temperature=temperature,
-            stream=True,
+            **request_kwargs,
         )
 
     def create_embeddings(self, texts: list[str], model: str) -> list[list[float]]:

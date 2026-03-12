@@ -140,7 +140,7 @@ Fase atual em andamento:
 
 Próxima etapa natural:
 
-- evoluir o RAG atual para múltiplos arquivos, vector store mais robusta, comparação de embeddings e aprendizado explícito de LangChain/LangGraph
+- concluir a primeira entrega da Fase 4.5 com catálogo multi-arquivo, filtros, remoção seletiva e melhor controle de contexto
 
 ## Evolução do roadmap
 
@@ -183,6 +183,14 @@ Isso ajuda o projeto a mostrar não só funcionalidades, mas também **progress�
 - exibição de fontes usadas nas respostas
 - limpeza e reindexação do índice RAG
 
+### O que já foi entregue na Fase 4.5
+
+- base para múltiplos documentos no índice RAG
+- filtros por documento/tipo na camada de retrieval
+- metadados mais ricos por documento e chunk
+- configuração explícita de janela de contexto no projeto
+- controle visível de contexto para Ollama na sidebar
+
 ## Variáveis úteis para a Fase 3
 
 Você pode ajustar no `.env`:
@@ -211,3 +219,12 @@ Durante a Fase 4, o índice de documentos passou a ser salvo localmente em:
 - `.rag_store.json`
 
 Esse arquivo também fica fora do Git para evitar versionar dados locais do usuário.
+
+## Configuração explícita de contexto
+
+O projeto agora também prevê configuração explícita de janela de contexto:
+
+- `OLLAMA_CONTEXT_WINDOW`
+- `OPENAI_CONTEXT_WINDOW`
+
+Além do default em `.env.example`, o app mostra ajuste visível de contexto na sidebar quando o provider selecionado for **Ollama**.

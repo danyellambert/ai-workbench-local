@@ -15,6 +15,7 @@ def render_chat_message(message: dict[str, object]) -> None:
             model = metadata.get("model")
             profile_label = metadata.get("prompt_profile_label") or metadata.get("prompt_profile")
             temperature = metadata.get("temperature")
+            context_window = metadata.get("context_window")
             latency = metadata.get("latency_s")
 
             if provider_label:
@@ -25,6 +26,8 @@ def render_chat_message(message: dict[str, object]) -> None:
                 info_parts.append(f"perfil: {profile_label}")
             if temperature is not None:
                 info_parts.append(f"temp: {temperature}")
+            if context_window is not None:
+                info_parts.append(f"ctx: {context_window}")
             if latency is not None:
                 info_parts.append(f"latência: {latency}s")
 

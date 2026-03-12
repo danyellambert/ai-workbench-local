@@ -15,7 +15,13 @@ class OpenAIProvider:
                 ordered_models.append(model)
         return ordered_models
 
-    def stream_chat_completion(self, messages: list[dict[str, str]], model: str, temperature: float):
+    def stream_chat_completion(
+        self,
+        messages: list[dict[str, str]],
+        model: str,
+        temperature: float,
+        context_window: int | None = None,
+    ):
         if self.client is None:
             raise RuntimeError("OPENAI_API_KEY não configurada")
 
