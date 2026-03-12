@@ -54,6 +54,8 @@ class OllamaProvider:
         temperature: float,
         context_window: int | None = None,
     ):
+        # `num_ctx` precisa ir em `options` para o Ollama respeitar a janela de contexto.
+        # Mantemos também um fallback em `extra_body` por compatibilidade com clientes OpenAI-compatible.
         request_kwargs = {
             "messages": messages,
             "model": model,
@@ -62,7 +64,9 @@ class OllamaProvider:
         }
 
         if context_window:
-            request_kwargs["extra_body"] = {"options": {"num_ctx": int(context_window)}}
+            ctx_value = int(context_window)
+            request_kwargs["extra_body"] = {"options": {"num_ctx": ctx_value}}
+            request_kwargs["extra_body"]["num_ctx"] = ctx_value
 
         return self.client.chat.completions.create(
             **request_kwargs,

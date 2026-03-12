@@ -6,6 +6,10 @@ from src.rag.loaders import LoadedDocument
 from src.rag.vector_store import LocalVectorStore
 
 
+def _compress_embedding(embedding: list[float]) -> list[float]:
+    return [round(float(value), 6) for value in embedding]
+
+
 def _settings_payload(settings: RagSettings) -> dict[str, object]:
     return {
         "embedding_model": settings.embedding_model,
@@ -24,10 +28,70 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
             "updated_at": None,
         }
 
+    # Formato legado intermediário: `chunks` existe, mas ainda não há catálogo em `documents`.
+    # Nesse caso, migramos agrupando por `source` para não perder o índice existente.
+    if not isinstance(rag_index.get("documents"), list) and isinstance(rag_index.get("chunks"), list):
+        legacy_chunks = [chunk for chunk in rag_index.get("chunks", []) if isinstance(chunk, dict)]
+        grouped_documents: dict[str, dict[str, object]] = {}
+        migrated_chunks: list[dict[str, object]] = []
+
+        for chunk in legacy_chunks:
+            normalized_chunk = dict(chunk)
+            embedding = normalized_chunk.get("embedding")
+            if isinstance(embedding, list):
+                normalized_chunk["embedding"] = _compress_embedding(embedding)
+
+            source_name = str(normalized_chunk.get("source") or "documento")
+            document_id = str(normalized_chunk.get("document_id") or normalized_chunk.get("file_hash") or source_name)
+            file_type = normalized_chunk.get("file_type")
+
+            grouped = grouped_documents.setdefault(
+                document_id,
+                {
+                    "document_id": document_id,
+                    "name": source_name,
+                    "file_type": file_type,
+                    "file_hash": normalized_chunk.get("file_hash"),
+                    "char_count": 0,
+                    "chunk_count": 0,
+                    "indexed_at": rag_index.get("updated_at") or rag_index.get("created_at"),
+                },
+            )
+
+            text_value = str(normalized_chunk.get("text", ""))
+            grouped["char_count"] = int(grouped.get("char_count", 0)) + len(text_value)
+            grouped["chunk_count"] = int(grouped.get("chunk_count", 0)) + 1
+
+            migrated_chunks.append(
+                {
+                    **normalized_chunk,
+                    "document_id": document_id,
+                    "source": source_name,
+                    "file_type": file_type,
+                }
+            )
+
+        return {
+            "documents": list(grouped_documents.values()),
+            "chunks": migrated_chunks,
+            "settings": rag_index.get("settings", _settings_payload(settings)),
+            "updated_at": rag_index.get("updated_at") or rag_index.get("created_at"),
+        }
+
     if isinstance(rag_index.get("documents"), list) and isinstance(rag_index.get("chunks"), list):
+        normalized_chunks: list[dict[str, object]] = []
+        for chunk in rag_index.get("chunks", []):
+            if not isinstance(chunk, dict):
+                continue
+            normalized_chunk = dict(chunk)
+            embedding = normalized_chunk.get("embedding")
+            if isinstance(embedding, list):
+                normalized_chunk["embedding"] = _compress_embedding(embedding)
+            normalized_chunks.append(normalized_chunk)
+
         return {
             "documents": rag_index.get("documents", []),
-            "chunks": rag_index.get("chunks", []),
+            "chunks": normalized_chunks,
             "settings": rag_index.get("settings", _settings_payload(settings)),
             "updated_at": rag_index.get("updated_at") or rag_index.get("created_at"),
         }
@@ -49,13 +113,17 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
         for chunk in chunks:
             if not isinstance(chunk, dict):
                 continue
+            normalized_chunk = dict(chunk)
+            embedding = normalized_chunk.get("embedding")
+            if isinstance(embedding, list):
+                normalized_chunk["embedding"] = _compress_embedding(embedding)
             migrated_chunks.append(
                 {
-                    **chunk,
+                    **normalized_chunk,
                     "document_id": document_id,
                     "file_hash": document.get("file_hash"),
                     "file_type": document.get("file_type"),
-                    "source": chunk.get("source") or document.get("name"),
+                    "source": normalized_chunk.get("source") or document.get("name"),
                 }
             )
 
@@ -131,7 +199,7 @@ def upsert_documents_in_rag_index(
             indexed_chunks.append(
                 {
                     **chunk,
-                    "embedding": embedding,
+                    "embedding": _compress_embedding(embedding),
                     "document_id": document_id,
                     "file_hash": document.file_hash,
                     "file_type": document.file_type,

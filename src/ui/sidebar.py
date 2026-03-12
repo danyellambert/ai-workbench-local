@@ -67,7 +67,7 @@ def render_chat_sidebar(
             step=0.1,
         )
 
-        clear_requested = st.button("🧹 Limpar conversa", use_container_width=True)
+        clear_requested = st.button("🧹 Limpar conversa", width="stretch")
 
         st.divider()
         st.metric("Mensagens na conversa", messages_count)

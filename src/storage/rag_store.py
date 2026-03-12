@@ -15,7 +15,10 @@ def load_rag_store(store_path: Path) -> dict[str, object] | None:
 
 
 def save_rag_store(store_path: Path, data: dict[str, object]) -> None:
-    store_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    store_path.write_text(
+        json.dumps(data, ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
 
 
 def clear_rag_store(store_path: Path) -> None:

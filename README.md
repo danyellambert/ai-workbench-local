@@ -228,3 +228,9 @@ O projeto agora também prevê configuração explícita de janela de contexto:
 - `OPENAI_CONTEXT_WINDOW`
 
 Além do default em `.env.example`, o app mostra ajuste visível de contexto na sidebar quando o provider selecionado for **Ollama**.
+
+Observação prática:
+
+- no caso do Ollama, esse valor é enviado como `num_ctx`
+- valores muito altos podem aumentar consumo de memória e latência
+- se o índice RAG estiver grande, vale ajustar também `RAG_CHUNK_SIZE` e `RAG_TOP_K`

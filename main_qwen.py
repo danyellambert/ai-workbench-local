@@ -35,8 +35,25 @@ provider_registry = build_provider_registry()
 prompt_profiles = get_prompt_profiles()
 embedding_provider = provider_registry["ollama"]["instance"]
 
-initialize_chat_state(load_chat_history(settings.history_path))
-initialize_rag_state(normalize_rag_index(load_rag_store(rag_settings.store_path), rag_settings))
+raw_rag_store = load_rag_store(rag_settings.store_path)
+normalized_rag_store = normalize_rag_index(raw_rag_store, rag_settings)
+
+if raw_rag_store and normalized_rag_store and (
+    raw_rag_store.get("document") is not None
+    or raw_rag_store.get("updated_at") is None
+    or raw_rag_store.get("documents") is None
+):
+    save_rag_store(rag_settings.store_path, normalized_rag_store)
+
+if "lista_mensagens" not in st.session_state:
+    initialize_chat_state(load_chat_history(settings.history_path))
+else:
+    initialize_chat_state()
+
+if "rag_index" not in st.session_state:
+    initialize_rag_state(normalized_rag_store)
+else:
+    initialize_rag_state()
 
 messages = get_chat_messages()
 last_latency = get_last_latency()
@@ -105,13 +122,13 @@ coluna_indexar, coluna_limpar = st.columns(2)
 with coluna_indexar:
     index_requested = st.button(
         "📚 Indexar documento",
-        use_container_width=True,
+        width="stretch",
         disabled=not uploaded_files,
     )
 with coluna_limpar:
     clear_rag_requested = st.button(
         "🗑️ Limpar índice",
-        use_container_width=True,
+        width="stretch",
         disabled=rag_index is None,
     )
 
@@ -175,7 +192,13 @@ if rag_index:
             }
         )
         if documents_table:
-            st.dataframe(documents_table, use_container_width=True)
+            st.dataframe(documents_table, width="stretch")
+
+    if len(chunks) > 300:
+        st.warning(
+            "Seu índice RAG está grande e isso pode deixar indexação e consultas mais lentas. "
+            "Se quiser melhorar desempenho, tente aumentar `RAG_CHUNK_SIZE`, reduzir `RAG_TOP_K` ou remover documentos menos importantes do índice."
+        )
 
     document_labels = {
         document.get("document_id"): f"{document.get('name')} ({document.get('file_type')})"
@@ -207,7 +230,7 @@ if rag_index:
         options=list(document_labels.keys()),
         format_func=lambda item: document_labels.get(item, item),
     )
-    if st.button("Remover documento selecionado", use_container_width=True):
+    if st.button("Remover documento selecionado", width="stretch"):
         updated_rag_index = remove_documents_from_rag_index(
             rag_index=rag_index,
             settings=rag_settings,
