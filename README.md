@@ -136,11 +136,20 @@ Guia da Fase 0.5:
 
 Fase atual em andamento:
 
-- **Fase 5 — Outputs estruturados**
+- **Fase 4.5 — RAG avançado e base documental**
 
 Próxima etapa natural:
 
-- começar a estruturar respostas em formatos previsíveis, como JSON e checklist, com base em esquemas mais claros
+- evoluir o RAG atual para múltiplos arquivos, vector store mais robusta, comparação de embeddings e aprendizado explícito de LangChain/LangGraph
+
+## Evolução do roadmap
+
+O roadmap agora destaca explicitamente duas novas etapas de maturidade técnica:
+
+- **Fase 4.5 — RAG avançado e base documental**
+- **Fase 5.5 — Evolução com LangChain e LangGraph**
+
+Isso ajuda o projeto a mostrar não só funcionalidades, mas também **progressão técnica real** ao longo das fases.
 
 ### O que já foi entregue na Fase 1
 

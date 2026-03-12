@@ -105,3 +105,21 @@ Essa fase deve cobrir:
 - comparação entre embeddings
 - aprendizado explícito de LangChain
 - preparação/uso de LangGraph em fluxos de retrieval mais completos
+
+## Relação com a evolução do projeto
+
+A Fase 4 foi pensada para provar o pipeline completo de RAG de forma controlada e didática.
+
+Já a Fase 4.5 existe para mostrar a evolução do projeto em direção a um padrão mais forte de AI Engineering, cobrindo:
+
+- múltiplos documentos
+- retrieval engineering mais sofisticado
+- comparação de embeddings
+- uso explícito de LangChain como etapa de maturidade
+- preparação concreta para LangGraph e agentes futuros
+
+Em termos de narrativa profissional, a ideia é que o projeto mostre claramente:
+
+1. entendimento dos fundamentos
+2. evolução para ferramentas do mercado
+3. preparação para workflows e agentes com valor real de negócio
