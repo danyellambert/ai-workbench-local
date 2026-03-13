@@ -93,6 +93,7 @@ default_context_window_by_provider = {
     rag_chunk_overlap,
     rag_top_k,
     clear_requested,
+    debug_retrieval,
 ) = render_chat_sidebar(
     provider_options=provider_options,
     default_provider="ollama",
@@ -360,6 +361,28 @@ if texto_usuario:
             latencia = time.perf_counter() - inicio
             set_last_latency(latencia)
             st.caption(f"Resposta em {latencia:.2f}s")
+
+            if debug_retrieval:
+                with st.expander("Debug de retrieval", expanded=False):
+                    st.write(
+                        {
+                            "chunk_size": effective_rag_settings.chunk_size,
+                            "chunk_overlap": effective_rag_settings.chunk_overlap,
+                            "top_k": effective_rag_settings.top_k,
+                            "retrieved_chunks": len(retrieved_chunks),
+                            "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
+                            "provider": selected_provider,
+                            "model": selected_model,
+                            "context_window": context_window,
+                        }
+                    )
+                    for index, chunk in enumerate(retrieved_chunks, start=1):
+                        st.markdown(
+                            f"**{index}. {chunk.get('source', 'documento')} · score={chunk.get('score')} · chunk={chunk.get('chunk_id')}**"
+                        )
+                        snippet = chunk.get("snippet") or str(chunk.get("text", ""))[:500]
+                        if snippet:
+                            st.code(snippet)
         except Exception as erro:
             set_last_latency(None)
             texto_resposta_ia = selected_provider_instance.format_error(selected_model, erro)
@@ -374,6 +397,7 @@ if texto_usuario:
         "rag_chunk_size": effective_rag_settings.chunk_size,
         "rag_chunk_overlap": effective_rag_settings.chunk_overlap,
         "rag_top_k": effective_rag_settings.top_k,
+        "debug_retrieval": debug_retrieval,
         "sources": build_source_metadata(retrieved_chunks),
     }
     append_chat_message("assistant", texto_resposta_ia, metadata=assistant_metadata)

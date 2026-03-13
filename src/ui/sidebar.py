@@ -19,7 +19,7 @@ def render_chat_sidebar(
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, int, int, int, int, bool]:
+) -> tuple[str, str, str, float, int, int, int, int, bool, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
 
@@ -104,6 +104,11 @@ def render_chat_sidebar(
                 help="Quantidade de chunks recuperados a cada pergunta.",
             )
         )
+        debug_retrieval = st.checkbox(
+            "Mostrar debug de retrieval",
+            value=False,
+            help="Exibe detalhes dos chunks recuperados, scores e parâmetros ativos do RAG.",
+        )
 
         clear_requested = st.button("🧹 Limpar conversa", width="stretch")
 
@@ -134,4 +139,5 @@ def render_chat_sidebar(
         rag_chunk_overlap,
         rag_top_k,
         clear_requested,
+        debug_retrieval,
     )

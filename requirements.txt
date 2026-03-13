@@ -6,3 +6,4 @@ python-socketio
 simple-websocket
 python-dotenv
 pypdf
+chromadb

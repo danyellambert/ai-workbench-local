@@ -36,6 +36,7 @@ class RagSettings:
     chunk_overlap: int
     top_k: int
     store_path: Path
+    chroma_path: Path
 
 
 def get_ollama_settings() -> OllamaSettings:
@@ -80,4 +81,5 @@ def get_rag_settings() -> RagSettings:
         chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "200")),
         top_k=int(os.getenv("RAG_TOP_K", "4")),
         store_path=BASE_DIR / ".rag_store.json",
+        chroma_path=BASE_DIR / ".chroma_rag",
     )
