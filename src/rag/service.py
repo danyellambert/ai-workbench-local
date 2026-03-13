@@ -3,7 +3,7 @@ import time
 from src.config import RagSettings
 from src.rag.chunking import chunk_text
 from src.rag.loaders import LoadedDocument
-from src.rag.vector_store import LocalVectorStore
+from src.rag.vector_store import ChromaVectorStore, LocalVectorStore
 
 
 def _compress_embedding(embedding: list[float]) -> list[float]:
@@ -292,8 +292,13 @@ def retrieve_relevant_chunks(
         model=settings.embedding_model,
     )[0]
 
-    store = LocalVectorStore(filtered_chunks)
-    return store.similarity_search(query_embedding, settings.top_k)
+    try:
+        chroma_store = ChromaVectorStore(settings.chroma_path)
+        chroma_store.rebuild(filtered_chunks)
+        return chroma_store.similarity_search(query_embedding, settings.top_k)
+    except Exception:
+        store = LocalVectorStore(filtered_chunks)
+        return store.similarity_search(query_embedding, settings.top_k)
 
 
 def build_source_metadata(chunks: list[dict[str, object]]) -> list[dict[str, object]]:

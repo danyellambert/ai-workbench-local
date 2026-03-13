@@ -289,6 +289,7 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - [x] controles visíveis de `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP` e `RAG_TOP_K` para testes no app
 - [x] métricas visíveis de documentos, chunks e tipos indexados
 - [x] telemetria básica de retrieval exibida no chat (`retrieval_latency`, chunks recuperados e top-k)
+- [x] debug leve de retrieval no app
 
 ### O que já está funcional hoje
 
@@ -614,7 +615,7 @@ A Fase 4.5 existe para mostrar evolução real de AI Engineering, cobrindo:
 - [ ] Limitar melhor o contexto documental enviado para geração
 - [x] Reduzir custo do pipeline com melhor tuning de `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP` e `RAG_TOP_K`
 - [x] Medir latência separadamente para retrieval e geração
-- [ ] Adicionar debug leve de retrieval no app
+- [x] Adicionar debug leve de retrieval no app
 - [ ] Validar de forma robusta se `num_ctx` está sendo aplicado
 - [ ] Criar caminho **Ollama native** para parâmetros avançados (`num_ctx` e outros)
 - [ ] Documentar claramente a diferença entre caminho OpenAI-compatible e Ollama native

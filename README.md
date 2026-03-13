@@ -194,6 +194,7 @@ Isso ajuda o projeto a mostrar não só funcionalidades, mas também **progress�
 - controles visíveis de chunk size, overlap e top-k para teste
 - métricas visíveis de documentos, chunks e tipos indexados
 - telemetria básica de retrieval no chat
+- modo opcional de debug de retrieval com scores e snippets dos chunks recuperados
 
 ## Variáveis úteis para a Fase 3
 

@@ -131,6 +131,7 @@ Na continuação da Fase 4.5, o app também passou a expor controles de teste pa
 - ajuste visível de `top_k`
 - exibição de quantidade de documentos, chunks e tipos indexados
 - exibição de latência de retrieval e quantidade de chunks recuperados no chat
+- modo opcional de debug para inspecionar chunks recuperados, scores e snippets
 
 Isso ajuda a transformar o app em um ambiente mais prático para tuning e aprendizado de retrieval.
 
