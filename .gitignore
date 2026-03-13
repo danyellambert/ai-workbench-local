@@ -12,3 +12,4 @@ __pycache__/
 .chroma_rag/
 materials_local/
 .vscode/
+scripts/

@@ -28,8 +28,6 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
             "updated_at": None,
         }
 
-    # Formato legado intermediário: `chunks` existe, mas ainda não há catálogo em `documents`.
-    # Nesse caso, migramos agrupando por `source` para não perder o índice existente.
     if not isinstance(rag_index.get("documents"), list) and isinstance(rag_index.get("chunks"), list):
         legacy_chunks = [chunk for chunk in rag_index.get("chunks", []) if isinstance(chunk, dict)]
         grouped_documents: dict[str, dict[str, object]] = {}
@@ -142,6 +140,105 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
     }
 
 
+def _normalize_chunk_filters(
+    chunks: list[dict[str, object]],
+    document_ids: list[str] | None = None,
+    file_types: list[str] | None = None,
+) -> list[dict[str, object]]:
+    filtered_chunks = [chunk for chunk in chunks if isinstance(chunk, dict)]
+
+    if document_ids is not None:
+        document_ids_set = {str(item) for item in document_ids if item}
+        filtered_chunks = [
+            chunk
+            for chunk in filtered_chunks
+            if str(chunk.get("document_id") or chunk.get("file_hash") or "") in document_ids_set
+        ]
+
+    if file_types is not None:
+        file_types_set = {str(item) for item in file_types if item}
+        filtered_chunks = [
+            chunk for chunk in filtered_chunks if str(chunk.get("file_type") or "") in file_types_set
+        ]
+
+    return filtered_chunks
+
+
+def sync_chroma_from_rag_index(
+    settings: RagSettings,
+    rag_index: dict[str, object] | None,
+) -> dict[str, object]:
+    normalized = _coerce_rag_index(rag_index, settings)
+    chunks = [chunk for chunk in normalized.get("chunks", []) if isinstance(chunk, dict)]
+
+    try:
+        chroma_store = ChromaVectorStore(settings.chroma_path)
+        if chunks:
+            chroma_store.rebuild(chunks)
+            collection_count = len(chroma_store._get_collection().get(include=[]).get("ids") or [])
+            return {
+                "ok": True,
+                "backend": "chroma",
+                "chunks_in_json": len(chunks),
+                "chunks_in_chroma": collection_count,
+                "message": f"Chroma sincronizado com {collection_count} chunk(s).",
+            }
+
+        chroma_store.clear()
+        return {
+            "ok": True,
+            "backend": "chroma",
+            "chunks_in_json": 0,
+            "chunks_in_chroma": 0,
+            "message": "Chroma limpo porque o índice local está vazio.",
+        }
+    except Exception as error:
+        print(f"[RAG] Falha ao sincronizar Chroma; mantendo fallback local: {error}")
+        return {
+            "ok": False,
+            "backend": "local_fallback",
+            "chunks_in_json": len(chunks),
+            "chunks_in_chroma": None,
+            "message": f"Falha ao sincronizar Chroma: {error}",
+        }
+
+
+def clear_persisted_rag_index(settings: RagSettings) -> dict[str, object]:
+    return sync_chroma_from_rag_index(settings, None)
+
+
+def inspect_vector_backend_status(
+    rag_index: dict[str, object] | None,
+    settings: RagSettings,
+) -> dict[str, object]:
+    normalized = _coerce_rag_index(rag_index, settings)
+    json_chunks = [chunk for chunk in normalized.get("chunks", []) if isinstance(chunk, dict)]
+    status = {
+        "json_chunks": len(json_chunks),
+        "chroma_chunks": None,
+        "backend_ready": False,
+        "status": "sem_indice" if not json_chunks else "desconhecido",
+        "message": "Nenhum índice documental carregado." if not json_chunks else "Status do backend ainda não confirmado.",
+    }
+
+    try:
+        chroma_store = ChromaVectorStore(settings.chroma_path)
+        chroma_chunks = len(chroma_store._get_collection().get(include=[]).get("ids") or [])
+        status["chroma_chunks"] = chroma_chunks
+        status["backend_ready"] = chroma_chunks == len(json_chunks)
+        status["status"] = "sincronizado" if chroma_chunks == len(json_chunks) else "dessincronizado"
+        status["message"] = (
+            "JSON canônico e Chroma persistido estão alinhados."
+            if chroma_chunks == len(json_chunks)
+            else "JSON canônico e Chroma persistido ainda não estão alinhados."
+        )
+        return status
+    except Exception as error:
+        status["status"] = "fallback_local"
+        status["message"] = f"Chroma indisponível; retrieval deve usar fallback local. Detalhes: {error}"
+        return status
+
+
 def normalize_rag_index(rag_index: dict[str, object] | None, settings: RagSettings) -> dict[str, object] | None:
     normalized = _coerce_rag_index(rag_index, settings)
     if not normalized["documents"] and not normalized["chunks"]:
@@ -160,7 +257,7 @@ def upsert_documents_in_rag_index(
     settings: RagSettings,
     embedding_provider,
     rag_index: dict[str, object] | None = None,
-) -> dict[str, object]:
+) -> tuple[dict[str, object], dict[str, object]]:
     normalized = _coerce_rag_index(rag_index, settings)
     document_ids_to_replace = {document.file_hash for document in documents}
 
@@ -217,43 +314,116 @@ def upsert_documents_in_rag_index(
         }
         existing_chunks.extend(indexed_chunks)
 
-    return {
+    updated_index = {
         "documents": list(existing_documents.values()),
         "chunks": existing_chunks,
         "settings": _settings_payload(settings),
         "updated_at": now,
     }
+    sync_status = sync_chroma_from_rag_index(settings, updated_index)
+    return updated_index, sync_status
 
 
 def remove_documents_from_rag_index(
     rag_index: dict[str, object] | None,
     settings: RagSettings,
     document_ids: list[str],
-) -> dict[str, object] | None:
+) -> tuple[dict[str, object] | None, dict[str, object]]:
     normalized = _coerce_rag_index(rag_index, settings)
-    document_ids_set = set(document_ids)
+    document_ids_set = {str(item) for item in document_ids if item}
 
     remaining_documents = [
         document
         for document in normalized.get("documents", [])
         if isinstance(document, dict)
-        and (document.get("document_id") or document.get("file_hash")) not in document_ids_set
+        and str(document.get("document_id") or document.get("file_hash") or "") not in document_ids_set
     ]
     remaining_chunks = [
         chunk
         for chunk in normalized.get("chunks", [])
         if isinstance(chunk, dict)
-        and (chunk.get("document_id") or chunk.get("file_hash")) not in document_ids_set
+        and str(chunk.get("document_id") or chunk.get("file_hash") or "") not in document_ids_set
     ]
 
     if not remaining_documents:
-        return None
+        sync_status = sync_chroma_from_rag_index(settings, None)
+        return None, sync_status
 
-    return {
+    updated_index = {
         "documents": remaining_documents,
         "chunks": remaining_chunks,
         "settings": normalized.get("settings", _settings_payload(settings)),
         "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    sync_status = sync_chroma_from_rag_index(settings, updated_index)
+    return updated_index, sync_status
+
+
+def retrieve_relevant_chunks_detailed(
+    query: str,
+    rag_index: dict[str, object] | None,
+    settings: RagSettings,
+    embedding_provider,
+    document_ids: list[str] | None = None,
+    file_types: list[str] | None = None,
+) -> dict[str, object]:
+    normalized = _coerce_rag_index(rag_index, settings)
+    all_chunks = normalized.get("chunks")
+    if not isinstance(all_chunks, list) or not all_chunks:
+        return {
+            "chunks": [],
+            "backend_used": "none",
+            "backend_message": "Índice documental vazio.",
+            "filtered_chunks_available": 0,
+            "vector_backend_status": inspect_vector_backend_status(rag_index, settings),
+        }
+
+    filtered_chunks = _normalize_chunk_filters(all_chunks, document_ids=document_ids, file_types=file_types)
+    if not filtered_chunks:
+        return {
+            "chunks": [],
+            "backend_used": "none",
+            "backend_message": "Nenhum chunk disponível após aplicar filtros.",
+            "filtered_chunks_available": 0,
+            "vector_backend_status": inspect_vector_backend_status(rag_index, settings),
+        }
+
+    query_embedding = embedding_provider.create_embeddings([query], model=settings.embedding_model)[0]
+    vector_backend_status = inspect_vector_backend_status(rag_index, settings)
+
+    try:
+        chroma_store = ChromaVectorStore(settings.chroma_path)
+        chroma_results = chroma_store.similarity_search(
+            query_embedding,
+            settings.top_k,
+            document_ids=document_ids,
+            file_types=file_types,
+        )
+        if chroma_results:
+            return {
+                "chunks": chroma_results,
+                "backend_used": "chroma",
+                "backend_message": "Retrieval servido pelo Chroma persistido sincronizado.",
+                "filtered_chunks_available": len(filtered_chunks),
+                "vector_backend_status": vector_backend_status,
+            }
+        print("[RAG] Chroma não retornou resultados; usando fallback local.")
+    except Exception as error:
+        print(f"[RAG] Chroma falhou na busca; usando fallback local: {error}")
+        vector_backend_status = {
+            **vector_backend_status,
+            "status": "fallback_local",
+            "backend_ready": False,
+            "message": f"Falha de retrieval no Chroma: {error}",
+        }
+
+    store = LocalVectorStore(filtered_chunks)
+    return {
+        "chunks": store.similarity_search(query_embedding, settings.top_k),
+        "backend_used": "local_fallback",
+        "backend_message": "Retrieval servido por fallback local a partir do JSON canônico.",
+        "filtered_chunks_available": len(filtered_chunks),
+        "vector_backend_status": vector_backend_status,
     }
 
 
@@ -265,40 +435,14 @@ def retrieve_relevant_chunks(
     document_ids: list[str] | None = None,
     file_types: list[str] | None = None,
 ) -> list[dict[str, object]]:
-    normalized = _coerce_rag_index(rag_index, settings)
-    chunks = normalized.get("chunks")
-    if not isinstance(chunks, list) or not chunks:
-        return []
-
-    filtered_chunks = [chunk for chunk in chunks if isinstance(chunk, dict)]
-
-    if document_ids is not None:
-        document_ids_set = set(document_ids)
-        filtered_chunks = [
-            chunk
-            for chunk in filtered_chunks
-            if (chunk.get("document_id") or chunk.get("file_hash")) in document_ids_set
-        ]
-
-    if file_types is not None:
-        file_types_set = set(file_types)
-        filtered_chunks = [chunk for chunk in filtered_chunks if chunk.get("file_type") in file_types_set]
-
-    if not filtered_chunks:
-        return []
-
-    query_embedding = embedding_provider.create_embeddings(
-        [query],
-        model=settings.embedding_model,
-    )[0]
-
-    try:
-        chroma_store = ChromaVectorStore(settings.chroma_path)
-        chroma_store.rebuild(filtered_chunks)
-        return chroma_store.similarity_search(query_embedding, settings.top_k)
-    except Exception:
-        store = LocalVectorStore(filtered_chunks)
-        return store.similarity_search(query_embedding, settings.top_k)
+    return retrieve_relevant_chunks_detailed(
+        query=query,
+        rag_index=rag_index,
+        settings=settings,
+        embedding_provider=embedding_provider,
+        document_ids=document_ids,
+        file_types=file_types,
+    )["chunks"]
 
 
 def build_source_metadata(chunks: list[dict[str, object]]) -> list[dict[str, object]]:

@@ -136,11 +136,15 @@ Guia da Fase 0.5:
 
 Fase atual em andamento:
 
+- **Fase 5 — Outputs estruturados**
+
+Última fase fechada na prática:
+
 - **Fase 4.5 — RAG avançado e base documental**
 
 Próxima etapa natural:
 
-- concluir a primeira entrega da Fase 4.5 com catálogo multi-arquivo, filtros, remoção seletiva e melhor controle de contexto
+- transformar a base documental já estabilizada em fluxos com saída estruturada e validada
 
 ## Evolução do roadmap
 
@@ -188,13 +192,17 @@ Isso ajuda o projeto a mostrar não só funcionalidades, mas também **progress�
 - base para múltiplos documentos no índice RAG
 - filtros por documento/tipo na camada de retrieval
 - metadados mais ricos por documento e chunk
+- JSON local (`.rag_store.json`) como índice canônico leve
+- Chroma local como backend vetorial persistido e sincronizado com o índice canônico
+- limpeza e remoção documental refletindo JSON + Chroma, sem depender só de delete incremental
+- transparência na UI sobre status do backend vetorial (`sincronizado`, `dessincronizado` ou `fallback_local`)
 - configuração explícita de janela de contexto no projeto
 - controle visível de contexto para Ollama na sidebar
-- início de integração nativa com a API do Ollama para maior controle de `num_ctx`
+- caminho nativo do Ollama para parâmetros avançados como `num_ctx`
 - controles visíveis de chunk size, overlap e top-k para teste
 - métricas visíveis de documentos, chunks e tipos indexados
 - telemetria básica de retrieval no chat
-- modo opcional de debug de retrieval com scores e snippets dos chunks recuperados
+- modo opcional de debug de retrieval com scores, backend usado e snippets dos chunks recuperados
 
 ## Variáveis úteis para a Fase 3
 
@@ -225,6 +233,13 @@ Durante a Fase 4, o índice de documentos passou a ser salvo localmente em:
 
 Esse arquivo também fica fora do Git para evitar versionar dados locais do usuário.
 
+Na Fase 4.5, a arquitetura ficou explícita:
+
+- `.rag_store.json` é o **índice canônico leve**
+- `.chroma_rag/` é o **backend vetorial persistido**
+- o app tenta manter os dois espelhados a cada indexação, remoção e limpeza do índice
+- se o Chroma falhar, a aplicação continua operando com fallback local a partir do JSON
+
 ## Configuração explícita de contexto
 
 O projeto agora também prevê configuração explícita de janela de contexto:
@@ -236,7 +251,9 @@ Além do default em `.env.example`, o app mostra ajuste visível de contexto na 
 
 Observação prática:
 
-- no caso do Ollama, esse valor é enviado como `num_ctx`
+- no caso do Ollama, esse valor é enviado como `num_ctx` pela rota nativa `/api/chat`
 - valores muito altos podem aumentar consumo de memória e latência
 - se o índice RAG estiver grande, vale ajustar também `RAG_CHUNK_SIZE` e `RAG_TOP_K`
-- quando quisermos garantir comportamento mais fiel do Ollama, o projeto pode usar a API nativa em vez de depender apenas da rota OpenAI-compatible
+- a validação atual é **técnica e operacional**, combinando rota nativa, `/api/show` e sinal auxiliar de `ollama ps`
+- isso não deve ser vendido como prova exaustiva do runtime interno, e sim como fechamento prático suficientemente forte para a Fase 4.5
+- a camada OpenAI-compatible continua útil para compatibilidade, mas o caminho nativo é o mais confiável para parâmetros avançados
