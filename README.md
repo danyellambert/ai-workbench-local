@@ -191,6 +191,9 @@ Isso ajuda o projeto a mostrar não só funcionalidades, mas também **progress�
 - configuração explícita de janela de contexto no projeto
 - controle visível de contexto para Ollama na sidebar
 - início de integração nativa com a API do Ollama para maior controle de `num_ctx`
+- controles visíveis de chunk size, overlap e top-k para teste
+- métricas visíveis de documentos, chunks e tipos indexados
+- telemetria básica de retrieval no chat
 
 ## Variáveis úteis para a Fase 3
 

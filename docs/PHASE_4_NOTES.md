@@ -122,6 +122,18 @@ Isso melhora:
 - aderência ao comportamento real do Ollama
 - narrativa técnica do projeto
 
+## Continuidade prática na Fase 4.5
+
+Na continuação da Fase 4.5, o app também passou a expor controles de teste para o RAG e telemetria básica de execução:
+
+- ajuste visível de `chunk_size`
+- ajuste visível de `chunk_overlap`
+- ajuste visível de `top_k`
+- exibição de quantidade de documentos, chunks e tipos indexados
+- exibição de latência de retrieval e quantidade de chunks recuperados no chat
+
+Isso ajuda a transformar o app em um ambiente mais prático para tuning e aprendizado de retrieval.
+
 ## Relação com a evolução do projeto
 
 A Fase 4 foi pensada para provar o pipeline completo de RAG de forma controlada e didática.

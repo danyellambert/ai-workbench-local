@@ -1,4 +1,5 @@
 import time
+from dataclasses import replace
 
 import streamlit as st
 from src.config import get_ollama_settings, get_rag_settings
@@ -58,6 +59,8 @@ else:
 messages = get_chat_messages()
 last_latency = get_last_latency()
 rag_index = get_rag_index()
+indexed_documents_preview = get_indexed_documents(rag_index, rag_settings)
+indexed_chunks_preview = len(rag_index.get("chunks", [])) if isinstance(rag_index, dict) else 0
 
 provider_options = {
     provider_key: provider_data["label"]
@@ -80,7 +83,17 @@ default_context_window_by_provider = {
     "openai": provider_registry["openai"]["instance"].settings.default_context_window if "openai" in provider_registry else 128000,
 }
 
-selected_provider, selected_model, selected_prompt_profile, temperature, context_window, clear_requested = render_chat_sidebar(
+(
+    selected_provider,
+    selected_model,
+    selected_prompt_profile,
+    temperature,
+    context_window,
+    rag_chunk_size,
+    rag_chunk_overlap,
+    rag_top_k,
+    clear_requested,
+) = render_chat_sidebar(
     provider_options=provider_options,
     default_provider="ollama",
     models_by_provider=models_by_provider,
@@ -89,15 +102,28 @@ selected_provider, selected_model, selected_prompt_profile, temperature, context
     default_prompt_profile=settings.default_prompt_profile,
     default_temperature=settings.default_temperature,
     default_context_window_by_provider=default_context_window_by_provider,
+    default_rag_chunk_size=rag_settings.chunk_size,
+    default_rag_chunk_overlap=rag_settings.chunk_overlap,
+    default_rag_top_k=rag_settings.top_k,
+    indexed_documents_count=len(indexed_documents_preview),
+    indexed_chunks_count=indexed_chunks_preview,
     provider_details=provider_details,
     history_filename=settings.history_path.name,
     messages_count=len(messages),
     last_latency=last_latency,
 )
 
+effective_rag_settings = replace(
+    rag_settings,
+    chunk_size=rag_chunk_size,
+    chunk_overlap=min(rag_chunk_overlap, rag_chunk_size // 2),
+    top_k=rag_top_k,
+)
+
 selected_provider_instance = provider_registry[selected_provider]["instance"]
 selected_provider_label = provider_registry[selected_provider]["label"]
 selected_prompt_profile_label = prompt_profiles[selected_prompt_profile]["label"]
+selected_file_types_count = 0
 
 if clear_requested:
     clear_chat_state()
@@ -107,6 +133,9 @@ if clear_requested:
 st.write(f"# {settings.project_name}")
 st.caption(
     f"Provider: `{selected_provider}` · Modelo: `{selected_model}` · Perfil: `{selected_prompt_profile}` · Temperatura: `{temperature:.1f}` · Contexto: `{context_window}`"
+)
+st.caption(
+    f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k}"
 )
 
 st.divider()
@@ -138,13 +167,17 @@ if index_requested and uploaded_files:
             loaded_documents = [load_document(uploaded_file) for uploaded_file in uploaded_files]
             built_rag_index = upsert_documents_in_rag_index(
                 documents=loaded_documents,
-                settings=rag_settings,
+                settings=effective_rag_settings,
                 embedding_provider=embedding_provider,
                 rag_index=rag_index,
             )
             set_rag_index(built_rag_index)
-            save_rag_store(rag_settings.store_path, built_rag_index)
+            save_rag_store(effective_rag_settings.store_path, built_rag_index)
         st.success(f"{len(loaded_documents)} documento(s) indexado(s) com sucesso.")
+        st.info(
+            "Os parâmetros de chunk size e overlap são aplicados na indexação. "
+            "Se você mudar esses valores, precisa reindexar os documentos para ver efeito real."
+        )
         st.rerun()
     except Exception as error:
         st.error(f"Erro ao indexar documento: {error}")
@@ -155,8 +188,8 @@ if clear_rag_requested:
     st.success("Índice RAG removido com sucesso.")
     st.rerun()
 
-rag_index = normalize_rag_index(get_rag_index(), rag_settings)
-indexed_documents = get_indexed_documents(rag_index, rag_settings)
+rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
+indexed_documents = get_indexed_documents(rag_index, effective_rag_settings)
 selected_document_ids = None
 selected_file_types = None
 
@@ -164,10 +197,22 @@ if rag_index:
     documents_count = len(indexed_documents)
     chunks = rag_index.get("chunks", []) if isinstance(rag_index, dict) else []
     rag_info = rag_index.get("settings", {}) if isinstance(rag_index, dict) else {}
+    selected_file_types_count = len(
+        {
+            str(document.get("file_type"))
+            for document in indexed_documents
+            if document.get("file_type")
+        }
+    )
 
     st.success(
         f"Base documental ativa: {documents_count} documento(s) · {len(chunks)} chunks"
     )
+    metric_col_1, metric_col_2, metric_col_3 = st.columns(3)
+    metric_col_1.metric("Documentos indexados", documents_count)
+    metric_col_2.metric("Chunks no índice", len(chunks))
+    metric_col_3.metric("Tipos de arquivo", selected_file_types_count)
+
     with st.expander("Detalhes do índice RAG"):
         documents_table = [
             {
@@ -233,7 +278,7 @@ if rag_index:
     if st.button("Remover documento selecionado", width="stretch"):
         updated_rag_index = remove_documents_from_rag_index(
             rag_index=rag_index,
-            settings=rag_settings,
+            settings=effective_rag_settings,
             document_ids=[removable_document_id],
         )
         if updated_rag_index is None:
@@ -271,17 +316,20 @@ if texto_usuario:
 
     texto_resposta_ia = ""
     retrieved_chunks = []
+    retrieval_latency = None
 
     if rag_index:
         try:
+            retrieval_started_at = time.perf_counter()
             retrieved_chunks = retrieve_relevant_chunks(
                 query=texto_usuario,
                 rag_index=rag_index,
-                settings=rag_settings,
+                settings=effective_rag_settings,
                 embedding_provider=embedding_provider,
                 document_ids=selected_document_ids,
                 file_types=selected_file_types,
             )
+            retrieval_latency = time.perf_counter() - retrieval_started_at
         except Exception as error:
             st.warning(f"Não foi possível recuperar contexto do documento. A resposta seguirá sem RAG. Detalhes: {error}")
             retrieved_chunks = []
@@ -321,6 +369,11 @@ if texto_usuario:
     assistant_metadata = {
         **user_metadata,
         "latency_s": round(get_last_latency(), 2) if get_last_latency() is not None else None,
+        "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
+        "retrieved_chunks_count": len(retrieved_chunks),
+        "rag_chunk_size": effective_rag_settings.chunk_size,
+        "rag_chunk_overlap": effective_rag_settings.chunk_overlap,
+        "rag_top_k": effective_rag_settings.top_k,
         "sources": build_source_metadata(retrieved_chunks),
     }
     append_chat_message("assistant", texto_resposta_ia, metadata=assistant_metadata)

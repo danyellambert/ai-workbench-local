@@ -10,11 +10,16 @@ def render_chat_sidebar(
     default_prompt_profile: str,
     default_temperature: float,
     default_context_window_by_provider: dict[str, int],
+    default_rag_chunk_size: int,
+    default_rag_chunk_overlap: int,
+    default_rag_top_k: int,
+    indexed_documents_count: int,
+    indexed_chunks_count: int,
     provider_details: dict[str, str],
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, int, bool]:
+) -> tuple[str, str, str, float, int, int, int, int, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
 
@@ -67,6 +72,39 @@ def render_chat_sidebar(
             step=0.1,
         )
 
+        st.divider()
+        st.subheader("RAG / Testes")
+        rag_chunk_size = int(
+            st.slider(
+                "Chunk size",
+                min_value=300,
+                max_value=4000,
+                value=max(int(default_rag_chunk_size), 300),
+                step=100,
+                help="Controla o tamanho dos chunks na próxima indexação.",
+            )
+        )
+        rag_chunk_overlap = int(
+            st.slider(
+                "Chunk overlap",
+                min_value=0,
+                max_value=max(0, rag_chunk_size // 2),
+                value=min(int(default_rag_chunk_overlap), max(0, rag_chunk_size // 2)),
+                step=50,
+                help="Controla a sobreposição entre chunks na próxima indexação.",
+            )
+        )
+        rag_top_k = int(
+            st.slider(
+                "Top-k da recuperação",
+                min_value=1,
+                max_value=12,
+                value=max(int(default_rag_top_k), 1),
+                step=1,
+                help="Quantidade de chunks recuperados a cada pergunta.",
+            )
+        )
+
         clear_requested = st.button("🧹 Limpar conversa", width="stretch")
 
         st.divider()
@@ -79,8 +117,21 @@ def render_chat_sidebar(
             st.caption(detail)
         if selected_provider == "ollama":
             st.caption(f"Contexto ativo no Ollama: `{context_window}`")
+        st.caption(
+            f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap}"
+        )
         st.caption(f"Histórico local: `{history_filename}`")
         st.caption(prompt_profiles[selected_prompt_profile]["description"])
         st.info("Chat com documentos entra na Fase 4 do roadmap.")
 
-    return selected_provider, selected_model, selected_prompt_profile, temperature, int(context_window), clear_requested
+    return (
+        selected_provider,
+        selected_model,
+        selected_prompt_profile,
+        temperature,
+        int(context_window),
+        rag_chunk_size,
+        rag_chunk_overlap,
+        rag_top_k,
+        clear_requested,
+    )

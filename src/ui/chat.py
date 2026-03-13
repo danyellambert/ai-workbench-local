@@ -17,6 +17,9 @@ def render_chat_message(message: dict[str, object]) -> None:
             temperature = metadata.get("temperature")
             context_window = metadata.get("context_window")
             latency = metadata.get("latency_s")
+            retrieval_latency = metadata.get("retrieval_latency_s")
+            retrieved_chunks_count = metadata.get("retrieved_chunks_count")
+            rag_top_k = metadata.get("rag_top_k")
 
             if provider_label:
                 info_parts.append(str(provider_label))
@@ -30,6 +33,12 @@ def render_chat_message(message: dict[str, object]) -> None:
                 info_parts.append(f"ctx: {context_window}")
             if latency is not None:
                 info_parts.append(f"latência: {latency}s")
+            if retrieval_latency is not None:
+                info_parts.append(f"retrieval: {retrieval_latency}s")
+            if retrieved_chunks_count is not None:
+                info_parts.append(f"chunks rec.: {retrieved_chunks_count}")
+            if rag_top_k is not None:
+                info_parts.append(f"top-k: {rag_top_k}")
 
             if info_parts:
                 st.caption(" · ".join(info_parts))

@@ -286,6 +286,9 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - [x] evitar reload desnecessário do índice a cada rerun
 - [x] remoção dos warnings de `use_container_width`
 - [x] melhoria parcial da performance do RAG local
+- [x] controles visíveis de `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP` e `RAG_TOP_K` para testes no app
+- [x] métricas visíveis de documentos, chunks e tipos indexados
+- [x] telemetria básica de retrieval exibida no chat (`retrieval_latency`, chunks recuperados e top-k)
 
 ### O que já está funcional hoje
 
@@ -602,15 +605,15 @@ A Fase 4.5 existe para mostrar evolução real de AI Engineering, cobrindo:
 - [x] Ajustar `OLLAMA_EMBEDDING_MODEL` para `bge-m3`
 - [x] Reduzir reload desnecessário do `.rag_store.json`
 - [x] Compactar e normalizar o store local
-- [ ] Refinar catálogo visual de documentos indexados
+- [x] Refinar catálogo visual de documentos indexados
 - [ ] Melhorar UX de remoção/reindexação seletiva
-- [ ] Mostrar claramente quantidade de documentos, chunks e tipos indexados
+- [x] Mostrar claramente quantidade de documentos, chunks e tipos indexados
 - [ ] Introduzir store vetorial mais robusta com **Chroma** ou **FAISS**
 - [ ] Comparar embeddings na prática (`bge-m3` vs alternativas)
 - [ ] Adicionar **reranking**
 - [ ] Limitar melhor o contexto documental enviado para geração
-- [ ] Reduzir custo do pipeline com melhor tuning de `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP` e `RAG_TOP_K`
-- [ ] Medir latência separadamente para retrieval e geração
+- [x] Reduzir custo do pipeline com melhor tuning de `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP` e `RAG_TOP_K`
+- [x] Medir latência separadamente para retrieval e geração
 - [ ] Adicionar debug leve de retrieval no app
 - [ ] Validar de forma robusta se `num_ctx` está sendo aplicado
 - [ ] Criar caminho **Ollama native** para parâmetros avançados (`num_ctx` e outros)
