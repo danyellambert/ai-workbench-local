@@ -39,7 +39,7 @@ class RagSettings:
 
 
 def get_ollama_settings() -> OllamaSettings:
-    default_model = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
+    default_model = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
     available_models_env = [
         model.strip()
         for model in os.getenv("OLLAMA_AVAILABLE_MODELS", "").split(",")
@@ -75,7 +75,7 @@ def get_openai_settings() -> OpenAISettings:
 
 def get_rag_settings() -> RagSettings:
     return RagSettings(
-        embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text"),
+        embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "bge-m3"),
         chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1200")),
         chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "200")),
         top_k=int(os.getenv("RAG_TOP_K", "4")),

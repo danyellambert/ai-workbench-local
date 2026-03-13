@@ -49,12 +49,12 @@ def render_chat_sidebar(
         context_window = default_context_window_by_provider.get(selected_provider, 8192)
         if selected_provider == "ollama":
             context_window = int(
-                st.number_input(
+                st.slider(
                     "Janela de contexto (num_ctx)",
-                    min_value=1024,
-                    max_value=65536,
+                    min_value=1000,
+                    max_value=256000,
                     value=max(int(context_window), 1024),
-                    step=1024,
+                    step=100,
                     help="Controla o tamanho de contexto enviado ao Ollama nesta execução.",
                 )
             )
