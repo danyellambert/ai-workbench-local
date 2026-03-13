@@ -9,10 +9,12 @@ from src.rag.loaders import load_document
 from src.rag.prompting import inject_rag_context
 from src.rag.service import (
     build_source_metadata,
+    clear_persisted_rag_index,
     get_indexed_documents,
+    inspect_vector_backend_status,
     normalize_rag_index,
     remove_documents_from_rag_index,
-    retrieve_relevant_chunks,
+    retrieve_relevant_chunks_detailed,
     upsert_documents_in_rag_index,
 )
 from src.services.chat_state import (
@@ -61,6 +63,7 @@ last_latency = get_last_latency()
 rag_index = get_rag_index()
 indexed_documents_preview = get_indexed_documents(rag_index, rag_settings)
 indexed_chunks_preview = len(rag_index.get("chunks", [])) if isinstance(rag_index, dict) else 0
+vector_backend_status_preview = inspect_vector_backend_status(rag_index, rag_settings)
 
 provider_options = {
     provider_key: provider_data["label"]
@@ -125,6 +128,8 @@ selected_provider_instance = provider_registry[selected_provider]["instance"]
 selected_provider_label = provider_registry[selected_provider]["label"]
 selected_prompt_profile_label = prompt_profiles[selected_prompt_profile]["label"]
 selected_file_types_count = 0
+estimated_rag_context_chars = effective_rag_settings.chunk_size * max(effective_rag_settings.top_k, 1)
+context_usage_ratio = estimated_rag_context_chars / max(context_window, 1)
 
 if clear_requested:
     clear_chat_state()
@@ -138,6 +143,28 @@ st.caption(
 st.caption(
     f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k}"
 )
+st.caption(
+    "Backend vetorial: "
+    f"status={vector_backend_status_preview.get('status')} · "
+    f"json_chunks={vector_backend_status_preview.get('json_chunks')} · "
+    f"chroma_chunks={vector_backend_status_preview.get('chroma_chunks')}"
+)
+if vector_backend_status_preview.get("status") == "dessincronizado":
+    st.warning(vector_backend_status_preview.get("message"))
+elif vector_backend_status_preview.get("status") == "fallback_local":
+    st.info(vector_backend_status_preview.get("message"))
+
+if selected_provider == "ollama" and hasattr(selected_provider_instance, "inspect_context_window"):
+    with st.expander("Validação de contexto do Ollama", expanded=False):
+        context_validation = selected_provider_instance.inspect_context_window(
+            model=selected_model,
+            requested_context_window=context_window,
+        )
+        st.write(context_validation)
+        st.caption(
+            "Esta validação combina rota nativa `/api/chat`, leitura de `/api/show` e `ollama ps`. "
+            "Use `ollama ps` apenas como sinal auxiliar, não como prova isolada."
+        )
 
 st.divider()
 st.subheader("Documentos (Fase 4.5 — base documental)")
@@ -148,12 +175,64 @@ uploaded_files = st.file_uploader(
     help="Formatos suportados: PDF, TXT, CSV, MD e PY.",
 )
 
+selected_uploaded_files = uploaded_files or []
+if uploaded_files:
+    indexed_document_names_preview = {
+        str(document.get("name"))
+        for document in indexed_documents_preview
+        if isinstance(document, dict) and document.get("name")
+    }
+    upload_name_options = [uploaded_file.name for uploaded_file in uploaded_files]
+    selected_upload_names = st.multiselect(
+        "Selecionar uploads para indexar/reindexar agora",
+        options=upload_name_options,
+        default=upload_name_options,
+    )
+    selected_uploaded_files = [
+        uploaded_file
+        for uploaded_file in uploaded_files
+        if uploaded_file.name in selected_upload_names
+    ]
+
+    upload_preview = []
+    for uploaded_file in uploaded_files:
+        upload_preview.append(
+            {
+                "arquivo": uploaded_file.name,
+                "tipo": uploaded_file.type or "desconhecido",
+                "tamanho_kb": round(uploaded_file.size / 1024, 1),
+                "ação": "reindexar" if uploaded_file.name in indexed_document_names_preview else "indexar",
+            }
+        )
+
+    with st.expander("Prévia dos uploads atuais", expanded=False):
+        st.dataframe(upload_preview, width="stretch")
+        st.caption(
+            "Indexar novamente os uploads atuais substitui no índice os documentos com o mesmo hash. "
+            "Use isso quando mudar chunk_size, overlap ou o embedding model."
+        )
+
+st.caption(
+    f"Orçamento estimado de contexto do RAG nesta execução: ~{estimated_rag_context_chars} caracteres "
+    f"(top-k={effective_rag_settings.top_k} × chunk_size={effective_rag_settings.chunk_size})."
+)
+if context_usage_ratio >= 0.8:
+    st.warning(
+        "O contexto potencial do RAG está alto em relação ao `num_ctx` selecionado. "
+        "Considere reduzir `top_k`, diminuir `chunk_size` ou aumentar a janela de contexto."
+    )
+elif context_usage_ratio >= 0.5:
+    st.info(
+        "O contexto documental já ocupa uma parte relevante da janela ativa. "
+        "Isso é útil para respostas com base documental, mas pode aumentar latência."
+    )
+
 coluna_indexar, coluna_limpar = st.columns(2)
 with coluna_indexar:
     index_requested = st.button(
-        "📚 Indexar documento",
+        "📚 Indexar / reindexar uploads",
         width="stretch",
-        disabled=not uploaded_files,
+        disabled=not selected_uploaded_files,
     )
 with coluna_limpar:
     clear_rag_requested = st.button(
@@ -162,11 +241,11 @@ with coluna_limpar:
         disabled=rag_index is None,
     )
 
-if index_requested and uploaded_files:
+if index_requested and selected_uploaded_files:
     try:
         with st.spinner("Extraindo texto, criando chunks e gerando embeddings..."):
-            loaded_documents = [load_document(uploaded_file) for uploaded_file in uploaded_files]
-            built_rag_index = upsert_documents_in_rag_index(
+            loaded_documents = [load_document(uploaded_file) for uploaded_file in selected_uploaded_files]
+            built_rag_index, sync_status = upsert_documents_in_rag_index(
                 documents=loaded_documents,
                 settings=effective_rag_settings,
                 embedding_provider=embedding_provider,
@@ -174,19 +253,28 @@ if index_requested and uploaded_files:
             )
             set_rag_index(built_rag_index)
             save_rag_store(effective_rag_settings.store_path, built_rag_index)
-        st.success(f"{len(loaded_documents)} documento(s) indexado(s) com sucesso.")
+        st.success(f"{len(loaded_documents)} documento(s) indexado(s) ou reindexado(s) com sucesso.")
+        if sync_status.get("ok"):
+            st.caption(sync_status.get("message"))
+        else:
+            st.warning(sync_status.get("message"))
         st.info(
             "Os parâmetros de chunk size e overlap são aplicados na indexação. "
-            "Se você mudar esses valores, precisa reindexar os documentos para ver efeito real."
+            "Se você mudar esses valores, use este mesmo fluxo para reindexar apenas os uploads desejados."
         )
         st.rerun()
     except Exception as error:
         st.error(f"Erro ao indexar documento: {error}")
 
 if clear_rag_requested:
+    sync_status = clear_persisted_rag_index(effective_rag_settings)
     clear_rag_state()
     clear_rag_store(rag_settings.store_path)
-    st.success("Índice RAG removido com sucesso.")
+    if sync_status.get("ok"):
+        st.success("Índice RAG removido com sucesso do JSON local e do Chroma persistido.")
+        st.caption(sync_status.get("message"))
+    else:
+        st.warning(f"JSON local removido, mas o Chroma reportou problema: {sync_status.get('message')}")
     st.rerun()
 
 rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
@@ -271,16 +359,36 @@ if rag_index:
         default=file_type_options,
     )
 
-    removable_document_id = st.selectbox(
-        "Remover documento do índice",
+    operation_document_ids = st.multiselect(
+        "Selecionar documentos para remover do índice",
         options=list(document_labels.keys()),
+        default=[],
         format_func=lambda item: document_labels.get(item, item),
+        help="Você pode remover vários documentos de uma vez sem limpar toda a base.",
     )
-    if st.button("Remover documento selecionado", width="stretch"):
-        updated_rag_index = remove_documents_from_rag_index(
+
+    operation_col_1, operation_col_2 = st.columns(2)
+    with operation_col_1:
+        remove_selected_requested = st.button(
+            "Remover documentos selecionados",
+            width="stretch",
+            disabled=not operation_document_ids,
+        )
+    with operation_col_2:
+        remove_filtered_requested = st.button(
+            "Remover documentos filtrados",
+            width="stretch",
+            disabled=not selected_document_ids,
+            help="Usa o filtro de documentos ativo acima como operação em lote.",
+        )
+
+    document_ids_to_remove = operation_document_ids if remove_selected_requested else selected_document_ids if remove_filtered_requested else []
+
+    if document_ids_to_remove:
+        updated_rag_index, sync_status = remove_documents_from_rag_index(
             rag_index=rag_index,
             settings=effective_rag_settings,
-            document_ids=[removable_document_id],
+            document_ids=document_ids_to_remove,
         )
         if updated_rag_index is None:
             clear_rag_state()
@@ -288,7 +396,11 @@ if rag_index:
         else:
             set_rag_index(updated_rag_index)
             save_rag_store(rag_settings.store_path, updated_rag_index)
-        st.success("Documento removido do índice com sucesso.")
+        st.success(f"{len(document_ids_to_remove)} documento(s) removido(s) do índice com sucesso.")
+        if sync_status.get("ok"):
+            st.caption(sync_status.get("message"))
+        else:
+            st.warning(sync_status.get("message"))
         st.rerun()
 else:
     st.info("Nenhum documento indexado ainda. Faça upload de um ou mais arquivos e clique em 'Indexar documento'.")
@@ -318,11 +430,15 @@ if texto_usuario:
     texto_resposta_ia = ""
     retrieved_chunks = []
     retrieval_latency = None
+    retrieval_backend_used = None
+    retrieval_backend_message = None
+    retrieval_vector_status = None
+    filtered_chunks_available = 0
 
     if rag_index:
         try:
             retrieval_started_at = time.perf_counter()
-            retrieved_chunks = retrieve_relevant_chunks(
+            retrieval_details = retrieve_relevant_chunks_detailed(
                 query=texto_usuario,
                 rag_index=rag_index,
                 settings=effective_rag_settings,
@@ -330,10 +446,19 @@ if texto_usuario:
                 document_ids=selected_document_ids,
                 file_types=selected_file_types,
             )
+            retrieved_chunks = retrieval_details.get("chunks", [])
+            retrieval_backend_used = retrieval_details.get("backend_used")
+            retrieval_backend_message = retrieval_details.get("backend_message")
+            retrieval_vector_status = retrieval_details.get("vector_backend_status")
+            filtered_chunks_available = retrieval_details.get("filtered_chunks_available")
             retrieval_latency = time.perf_counter() - retrieval_started_at
         except Exception as error:
             st.warning(f"Não foi possível recuperar contexto do documento. A resposta seguirá sem RAG. Detalhes: {error}")
             retrieved_chunks = []
+            retrieval_backend_used = "error"
+            retrieval_backend_message = str(error)
+            retrieval_vector_status = None
+            filtered_chunks_available = 0
 
     with st.chat_message("assistant"):
         placeholder = st.empty()
@@ -374,6 +499,10 @@ if texto_usuario:
                             "provider": selected_provider,
                             "model": selected_model,
                             "context_window": context_window,
+                            "vector_backend_used": retrieval_backend_used,
+                            "vector_backend_message": retrieval_backend_message,
+                            "filtered_chunks_available": filtered_chunks_available,
+                            "vector_backend_status": retrieval_vector_status,
                         }
                     )
                     for index, chunk in enumerate(retrieved_chunks, start=1):
@@ -394,6 +523,10 @@ if texto_usuario:
         "latency_s": round(get_last_latency(), 2) if get_last_latency() is not None else None,
         "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
         "retrieved_chunks_count": len(retrieved_chunks),
+        "vector_backend_used": retrieval_backend_used,
+        "vector_backend_message": retrieval_backend_message,
+        "vector_backend_status": retrieval_vector_status,
+        "filtered_chunks_available": filtered_chunks_available,
         "rag_chunk_size": effective_rag_settings.chunk_size,
         "rag_chunk_overlap": effective_rag_settings.chunk_overlap,
         "rag_top_k": effective_rag_settings.top_k,

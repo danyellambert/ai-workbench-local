@@ -127,7 +127,7 @@ def render_chat_sidebar(
         )
         st.caption(f"Histórico local: `{history_filename}`")
         st.caption(prompt_profiles[selected_prompt_profile]["description"])
-        st.info("Chat com documentos entra na Fase 4 do roadmap.")
+        st.info("RAG Avançado (Base Documental): Fase 4.5 ativa.")
 
     return (
         selected_provider,

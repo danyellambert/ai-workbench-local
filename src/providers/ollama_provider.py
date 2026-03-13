@@ -1,4 +1,5 @@
 import json
+import re
 import subprocess
 from urllib import request as urllib_request
 
@@ -56,6 +57,104 @@ class OllamaProvider:
                 ordered_models.append(model)
 
         return ordered_models
+
+
+    def _native_json_request(self, path: str, payload: dict[str, object]) -> dict[str, object]:
+        request = urllib_request.Request(
+            url=f"{self.native_base_url}{path}",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib_request.urlopen(request, timeout=60) as response:
+            return json.loads(response.read().decode("utf-8"))
+
+    @staticmethod
+    def _extract_declared_context_length(show_payload: dict[str, object]) -> int | None:
+        model_info = show_payload.get("model_info")
+        if not isinstance(model_info, dict):
+            return None
+
+        preferred_keys = [
+            "llama.context_length",
+            "qwen2.context_length",
+            "phi3.context_length",
+            "mistral.context_length",
+            "gemma.context_length",
+            "context_length",
+        ]
+        for key in preferred_keys:
+            value = model_info.get(key)
+            if isinstance(value, int):
+                return value
+            if isinstance(value, str) and value.isdigit():
+                return int(value)
+
+        for key, value in model_info.items():
+            if "context" not in str(key).lower():
+                continue
+            if isinstance(value, int):
+                return value
+            if isinstance(value, str) and value.isdigit():
+                return int(value)
+        return None
+
+    @staticmethod
+    def _read_ollama_ps_context(model: str) -> int | None:
+        try:
+            result = subprocess.run(
+                ["ollama", "ps"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except OSError:
+            return None
+
+        if result.returncode != 0:
+            return None
+
+        for line in result.stdout.splitlines()[1:]:
+            if not line.strip().startswith(model):
+                continue
+
+            columns = re.split(r"\s{2,}", line.strip())
+            if len(columns) < 5:
+                continue
+
+            context_value = columns[4]
+            digits = "".join(char for char in context_value if char.isdigit())
+            if digits:
+                return int(digits)
+        return None
+
+    def inspect_context_window(self, model: str, requested_context_window: int | None = None) -> dict[str, object]:
+        output: dict[str, object] = {
+            "api_route": f"{self.native_base_url}/api/chat",
+            "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
+            "model": model,
+        }
+
+        try:
+            show_payload = self._native_json_request("/api/show", {"model": model})
+            output["show_available"] = True
+            output["declared_context_length"] = self._extract_declared_context_length(show_payload)
+            modified_at = show_payload.get("modified_at")
+            if modified_at:
+                output["model_modified_at"] = modified_at
+        except Exception as error:
+            output["show_available"] = False
+            output["show_error"] = str(error)
+
+        ps_context = self._read_ollama_ps_context(model)
+        if ps_context is not None:
+            output["ollama_ps_context"] = ps_context
+
+        output["validation_summary"] = (
+            "Use `/api/chat` para aplicar `num_ctx`, `/api/show` para ver o contexto declarado do modelo "
+            "e `ollama ps` apenas como confirmação auxiliar de runtime."
+        )
+        return output
 
     def stream_chat_completion(
         self,

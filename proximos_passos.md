@@ -290,6 +290,9 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - [x] métricas visíveis de documentos, chunks e tipos indexados
 - [x] telemetria básica de retrieval exibida no chat (`retrieval_latency`, chunks recuperados e top-k)
 - [x] debug leve de retrieval no app
+- [x] UX refinada para indexação/reindexação seletiva dos uploads atuais
+- [x] remoção em lote com base em seleção explícita ou filtro atual
+- [x] painel de validação técnica do contexto do Ollama (`/api/chat`, `/api/show` e `ollama ps`)
 
 ### O que já está funcional hoje
 
@@ -303,16 +306,19 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 ### O que ainda não considero fechado na Fase 4.5
 
-- [ ] catálogo multi-arquivo mais refinado na UI
-- [ ] UX melhor para remoção/reindexação seletiva
-- [ ] vector store mais robusta com Chroma ou FAISS
 - [ ] comparação prática entre embeddings
-- [ ] reranking
-- [ ] limitação inteligente do contexto recuperado
-- [ ] tuning mais forte de performance (`RAG_CHUNK_SIZE`, `RAG_TOP_K`, quantidade de chunks enviados)
-- [ ] validação robusta do `num_ctx`
-- [ ] caminho **Ollama native** para parâmetros avançados
-- [ ] debug leve mostrando o `num_ctx` realmente enviado/aplicado
+- [ ] reranking mais forte do que o ranking vetorial atual
+- [ ] limitação inteligente do contexto recuperado por orçamento real de prompt
+- [ ] benchmark final de tuning (`RAG_CHUNK_SIZE`, `RAG_TOP_K`, quantidade de chunks enviados)
+
+### O que já considero fechado nesta rodada final da Fase 4.5
+
+- [x] catálogo multi-arquivo mais refinado na UI
+- [x] UX melhor para remoção/reindexação seletiva
+- [x] vector store mais robusta com Chroma local e fallback seguro
+- [x] validação técnica do `num_ctx` pelo caminho nativo
+- [x] caminho **Ollama native** para parâmetros avançados
+- [x] debug/inspeção leve mostrando o `num_ctx` pedido, contexto declarado do modelo e sinal auxiliar de runtime
 
 ### Risco técnico importante já identificado
 
@@ -607,18 +613,18 @@ A Fase 4.5 existe para mostrar evolução real de AI Engineering, cobrindo:
 - [x] Reduzir reload desnecessário do `.rag_store.json`
 - [x] Compactar e normalizar o store local
 - [x] Refinar catálogo visual de documentos indexados
-- [ ] Melhorar UX de remoção/reindexação seletiva
+- [x] Melhorar UX de remoção/reindexação seletiva
 - [x] Mostrar claramente quantidade de documentos, chunks e tipos indexados
-- [ ] Introduzir store vetorial mais robusta com **Chroma** ou **FAISS**
+- [x] Introduzir store vetorial mais robusta com **Chroma** persistido e sincronizado com fallback local
 - [ ] Comparar embeddings na prática (`bge-m3` vs alternativas)
 - [ ] Adicionar **reranking**
 - [ ] Limitar melhor o contexto documental enviado para geração
 - [x] Reduzir custo do pipeline com melhor tuning de `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP` e `RAG_TOP_K`
 - [x] Medir latência separadamente para retrieval e geração
 - [x] Adicionar debug leve de retrieval no app
-- [ ] Validar de forma robusta se `num_ctx` está sendo aplicado
-- [ ] Criar caminho **Ollama native** para parâmetros avançados (`num_ctx` e outros)
-- [ ] Documentar claramente a diferença entre caminho OpenAI-compatible e Ollama native
+- [x] Validar tecnicamente o caminho nativo de `num_ctx` e publicar fechamento prático
+- [x] Criar caminho **Ollama native** para parâmetros avançados (`num_ctx` e outros)
+- [x] Documentar claramente a diferença entre caminho OpenAI-compatible e Ollama native
 
 ### Configuração e contexto
 
@@ -632,14 +638,28 @@ Esta fase deve consolidar dois pontos de controle explícitos para contexto:
 2. **ajuste visível de execução**
    - sidebar quando provider = Ollama
 
+### Fechamento prático publicado
+
+Nesta rodada final, o fechamento prático da Fase 4.5 passou a ficar registrado em:
+
+- `docs/PHASE_4_5_VALIDATION.md`
+- `scripts/validate_phase_4_5.py`
+
+A ideia é separar claramente:
+
+- o que já foi **validado tecnicamente por script**
+- o que ainda depende de **rodada comparativa local** (principalmente embeddings e benchmark fino de retrieval)
+
 ### Observação técnica importante
 
-A implementação atual do `num_ctx` pelo caminho OpenAI-compatible deve ser tratada como **tentativa funcional**, mas ainda não como garantia final de aplicação.
+A implementação atual trata o caminho nativo do Ollama como principal para parâmetros avançados.
 
-### Melhor solução recomendada para fechar esse ponto
-- [ ] manter compatibilidade OpenAI-compatible
-- [ ] criar integração nativa com o Ollama para controle fino de parâmetros avançados
-- [ ] usar o caminho nativo quando contexto customizado ou outros parâmetros avançados forem relevantes
+### Fechamento honesto deste ponto
+- [x] manter compatibilidade OpenAI-compatible como camada de interoperabilidade
+- [x] criar integração nativa com o Ollama para controle fino de parâmetros avançados
+- [x] usar o caminho nativo quando contexto customizado ou outros parâmetros avançados forem relevantes
+
+Observação: isso configura **validação técnica operacional**, não prova exaustiva do runtime interno do modelo.
 
 ### Entregável
 - Base documental local com múltiplos arquivos, retrieval mais forte, configuração explícita de contexto e caminho claro para evolução profissional do RAG
