@@ -32,7 +32,13 @@ class OpenAIProvider:
             stream=True,
         )
 
-    def create_embeddings(self, texts: list[str], model: str) -> list[list[float]]:
+    def create_embeddings(
+        self,
+        texts: list[str],
+        model: str,
+        context_window: int | None = None,
+        truncate: bool = True,
+    ) -> list[list[float]]:
         if self.client is None:
             raise RuntimeError("OPENAI_API_KEY não configurada")
 
