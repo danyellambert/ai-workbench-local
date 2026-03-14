@@ -307,8 +307,6 @@ Ao olhar este projeto, a leitura ideal deve ser:
 ### O que ainda não considero fechado na Fase 4.5
 
 - [ ] comparação prática entre embeddings
-- [ ] reranking mais forte do que o ranking vetorial atual
-- [ ] limitação inteligente do contexto recuperado por orçamento real de prompt
 - [ ] benchmark final de tuning (`RAG_CHUNK_SIZE`, `RAG_TOP_K`, quantidade de chunks enviados)
 
 ### O que já considero fechado nesta rodada final da Fase 4.5
@@ -316,6 +314,9 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - [x] catálogo multi-arquivo mais refinado na UI
 - [x] UX melhor para remoção/reindexação seletiva
 - [x] vector store mais robusta com Chroma local e fallback seguro
+- [x] clear físico do backend persistido ao limpar o índice
+- [x] reranking híbrido leve acima do ranking vetorial bruto
+- [x] limitação inteligente do contexto recuperado por orçamento real de prompt
 - [x] validação técnica do `num_ctx` pelo caminho nativo
 - [x] caminho **Ollama native** para parâmetros avançados
 - [x] debug/inspeção leve mostrando o `num_ctx` pedido, contexto declarado do modelo e sinal auxiliar de runtime
@@ -616,9 +617,10 @@ A Fase 4.5 existe para mostrar evolução real de AI Engineering, cobrindo:
 - [x] Melhorar UX de remoção/reindexação seletiva
 - [x] Mostrar claramente quantidade de documentos, chunks e tipos indexados
 - [x] Introduzir store vetorial mais robusta com **Chroma** persistido e sincronizado com fallback local
+- [x] Garantir clear físico da pasta `.chroma_rag/` ao limpar o índice
 - [ ] Comparar embeddings na prática (`bge-m3` vs alternativas)
-- [ ] Adicionar **reranking**
-- [ ] Limitar melhor o contexto documental enviado para geração
+- [x] Adicionar **reranking**
+- [x] Limitar melhor o contexto documental enviado para geração
 - [x] Reduzir custo do pipeline com melhor tuning de `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP` e `RAG_TOP_K`
 - [x] Medir latência separadamente para retrieval e geração
 - [x] Adicionar debug leve de retrieval no app
@@ -644,6 +646,7 @@ Nesta rodada final, o fechamento prático da Fase 4.5 passou a ficar registrado 
 
 - `docs/PHASE_4_5_VALIDATION.md`
 - `scripts/validate_phase_4_5.py`
+- `scripts/compare_phase_4_5_configs.py`
 
 A ideia é separar claramente:
 

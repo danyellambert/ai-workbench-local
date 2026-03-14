@@ -1,4 +1,9 @@
+from __future__ import annotations
+
+import re
+import shutil
 import time
+from pathlib import Path
 
 from src.config import RagSettings
 from src.rag.chunking import chunk_text
@@ -6,8 +11,13 @@ from src.rag.loaders import LoadedDocument
 from src.rag.vector_store import ChromaVectorStore, LocalVectorStore
 
 
+TOKEN_PATTERN = re.compile(r"[\w\-]{3,}", re.UNICODE)
+
+
+
 def _compress_embedding(embedding: list[float]) -> list[float]:
     return [round(float(value), 6) for value in embedding]
+
 
 
 def _settings_payload(settings: RagSettings) -> dict[str, object]:
@@ -16,7 +26,11 @@ def _settings_payload(settings: RagSettings) -> dict[str, object]:
         "chunk_size": settings.chunk_size,
         "chunk_overlap": settings.chunk_overlap,
         "top_k": settings.top_k,
+        "rerank_pool_size": settings.rerank_pool_size,
+        "rerank_lexical_weight": settings.rerank_lexical_weight,
+        "context_budget_ratio": settings.context_budget_ratio,
     }
+
 
 
 def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings) -> dict[str, object]:
@@ -140,6 +154,7 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
     }
 
 
+
 def _normalize_chunk_filters(
     chunks: list[dict[str, object]],
     document_ids: list[str] | None = None,
@@ -164,6 +179,105 @@ def _normalize_chunk_filters(
     return filtered_chunks
 
 
+
+def _chunk_key(chunk: dict[str, object]) -> str:
+    return "::".join(
+        [
+            str(chunk.get("document_id") or chunk.get("file_hash") or "documento"),
+            str(chunk.get("chunk_id") or 0),
+            str(chunk.get("start_char") or 0),
+            str(chunk.get("end_char") or 0),
+        ]
+    )
+
+
+
+def _tokenize(text: str) -> set[str]:
+    return {match.group(0).lower() for match in TOKEN_PATTERN.finditer(text or "")}
+
+
+
+def _lexical_score(query: str, chunk_text: str) -> float:
+    query_terms = _tokenize(query)
+    if not query_terms:
+        return 0.0
+
+    chunk_terms = _tokenize(chunk_text)
+    if not chunk_terms:
+        return 0.0
+
+    overlap_ratio = len(query_terms & chunk_terms) / max(len(query_terms), 1)
+    phrase_bonus = 0.15 if query.strip() and query.strip().lower() in chunk_text.lower() else 0.0
+    return round(min(overlap_ratio + phrase_bonus, 1.0), 4)
+
+
+
+def _rank_chunks_lexically(query: str, chunks: list[dict[str, object]], limit: int) -> list[dict[str, object]]:
+    ranked: list[dict[str, object]] = []
+    for chunk in chunks:
+        lexical = _lexical_score(query, str(chunk.get("text", "")))
+        if lexical <= 0:
+            continue
+        ranked.append({**chunk, "lexical_score": lexical})
+
+    ranked.sort(key=lambda item: item.get("lexical_score", 0.0), reverse=True)
+    return ranked[:limit]
+
+
+
+def _hybrid_rerank_chunks(
+    query: str,
+    vector_candidates: list[dict[str, object]],
+    lexical_candidates: list[dict[str, object]],
+    settings: RagSettings,
+) -> list[dict[str, object]]:
+    merged: dict[str, dict[str, object]] = {}
+
+    for candidate in [*vector_candidates, *lexical_candidates]:
+        key = _chunk_key(candidate)
+        existing = merged.get(key, {})
+        vector_score = float(candidate.get("vector_score") or candidate.get("score") or existing.get("vector_score") or 0.0)
+        lexical_score = float(candidate.get("lexical_score") or existing.get("lexical_score") or _lexical_score(query, str(candidate.get("text", ""))))
+        merged[key] = {
+            **existing,
+            **candidate,
+            "vector_score": round(vector_score, 4),
+            "lexical_score": round(lexical_score, 4),
+        }
+
+    reranked: list[dict[str, object]] = []
+    lexical_weight = min(max(settings.rerank_lexical_weight, 0.0), 0.9)
+    vector_weight = 1.0 - lexical_weight
+    for candidate in merged.values():
+        vector_score = float(candidate.get("vector_score") or 0.0)
+        lexical_score = float(candidate.get("lexical_score") or 0.0)
+        rerank_score = round(vector_score * vector_weight + lexical_score * lexical_weight, 4)
+        reranked.append({**candidate, "score": rerank_score, "rerank_score": rerank_score})
+
+    reranked.sort(
+        key=lambda item: (
+            item.get("rerank_score", 0.0),
+            item.get("lexical_score", 0.0),
+            item.get("vector_score", 0.0),
+        ),
+        reverse=True,
+    )
+    return reranked[: settings.top_k]
+
+
+
+def _candidate_pool_size(settings: RagSettings, filtered_chunks_count: int) -> int:
+    pool = max(settings.top_k, settings.rerank_pool_size)
+    return min(max(pool, settings.top_k), max(filtered_chunks_count, settings.top_k))
+
+
+
+def _remove_chroma_persist_dir(path: Path) -> None:
+    if path.exists():
+        shutil.rmtree(path, ignore_errors=True)
+
+
+
 def sync_chroma_from_rag_index(
     settings: RagSettings,
     rag_index: dict[str, object] | None,
@@ -175,36 +289,93 @@ def sync_chroma_from_rag_index(
         chroma_store = ChromaVectorStore(settings.chroma_path)
         if chunks:
             chroma_store.rebuild(chunks)
-            collection_count = len(chroma_store._get_collection().get(include=[]).get("ids") or [])
+            collection_count = chroma_store.count_entries()
             return {
                 "ok": True,
                 "backend": "chroma",
                 "chunks_in_json": len(chunks),
                 "chunks_in_chroma": collection_count,
+                "persist_dir_exists": settings.chroma_path.exists(),
                 "message": f"Chroma sincronizado com {collection_count} chunk(s).",
             }
 
-        chroma_store.clear()
+        chroma_store.clear(remove_persist_dir=False)
         return {
             "ok": True,
             "backend": "chroma",
             "chunks_in_json": 0,
             "chunks_in_chroma": 0,
-            "message": "Chroma limpo porque o índice local está vazio.",
+            "persist_dir_exists": settings.chroma_path.exists(),
+            "message": "Chroma limpo logicamente; o diretório persistido foi mantido para evitar erro de banco readonly durante a mesma sessão.",
         }
     except Exception as error:
+        if not chunks:
+            return {
+                "ok": False,
+                "backend": "local_fallback",
+                "chunks_in_json": 0,
+                "chunks_in_chroma": None,
+                "persist_dir_exists": settings.chroma_path.exists(),
+                "message": f"Falha ao limpar logicamente o Chroma nesta sessão: {error}",
+            }
         print(f"[RAG] Falha ao sincronizar Chroma; mantendo fallback local: {error}")
         return {
             "ok": False,
             "backend": "local_fallback",
             "chunks_in_json": len(chunks),
             "chunks_in_chroma": None,
+            "persist_dir_exists": settings.chroma_path.exists(),
             "message": f"Falha ao sincronizar Chroma: {error}",
         }
 
 
+
 def clear_persisted_rag_index(settings: RagSettings) -> dict[str, object]:
-    return sync_chroma_from_rag_index(settings, None)
+    try:
+        chroma_store = ChromaVectorStore(settings.chroma_path)
+        chroma_store.clear(remove_persist_dir=False)
+        return {
+            "ok": True,
+            "backend": "chroma",
+            "persist_dir_exists": settings.chroma_path.exists(),
+            "message": "Índice lógico do Chroma limpo com sucesso. O diretório persistido foi mantido para evitar o erro de banco readonly na mesma sessão do app.",
+        }
+    except Exception as error:
+        return {
+            "ok": False,
+            "backend": "local_fallback",
+            "persist_dir_exists": settings.chroma_path.exists(),
+            "message": (
+                "Falha ao limpar logicamente o Chroma nesta sessão. "
+                f"Detalhes: {error}"
+            ),
+        }
+
+
+
+def reset_chroma_persist_directory(settings: RagSettings) -> dict[str, object]:
+    try:
+        chroma_store = ChromaVectorStore(settings.chroma_path)
+        chroma_store.clear(remove_persist_dir=True)
+        _remove_chroma_persist_dir(settings.chroma_path)
+        return {
+            "ok": True,
+            "backend": "chroma",
+            "persist_dir_exists": settings.chroma_path.exists(),
+            "message": "Persistência física do Chroma removida. Reinicie o app antes de reindexar para evitar cache/handles antigos do SQLite.",
+        }
+    except Exception as error:
+        _remove_chroma_persist_dir(settings.chroma_path)
+        return {
+            "ok": not settings.chroma_path.exists(),
+            "backend": "local_fallback",
+            "persist_dir_exists": settings.chroma_path.exists(),
+            "message": (
+                "Persistência física do Chroma removida com fallback. Reinicie o app antes de reindexar. "
+                f"Detalhes: {error}"
+            ),
+        }
+
 
 
 def inspect_vector_backend_status(
@@ -213,17 +384,30 @@ def inspect_vector_backend_status(
 ) -> dict[str, object]:
     normalized = _coerce_rag_index(rag_index, settings)
     json_chunks = [chunk for chunk in normalized.get("chunks", []) if isinstance(chunk, dict)]
+    persist_dir_exists = settings.chroma_path.exists()
     status = {
         "json_chunks": len(json_chunks),
         "chroma_chunks": None,
         "backend_ready": False,
+        "persist_dir": str(settings.chroma_path),
+        "persist_dir_exists": persist_dir_exists,
         "status": "sem_indice" if not json_chunks else "desconhecido",
         "message": "Nenhum índice documental carregado." if not json_chunks else "Status do backend ainda não confirmado.",
     }
 
+    if not json_chunks:
+        if persist_dir_exists:
+            status["message"] = "Sem índice canônico carregado; persistência local do Chroma ainda existe em disco."
+        return status
+
     try:
+        if not persist_dir_exists:
+            status["status"] = "fallback_local"
+            status["message"] = "Persistência do Chroma ausente; retrieval deve usar fallback local a partir do JSON canônico."
+            return status
+
         chroma_store = ChromaVectorStore(settings.chroma_path)
-        chroma_chunks = len(chroma_store._get_collection().get(include=[]).get("ids") or [])
+        chroma_chunks = chroma_store.count_entries()
         status["chroma_chunks"] = chroma_chunks
         status["backend_ready"] = chroma_chunks == len(json_chunks)
         status["status"] = "sincronizado" if chroma_chunks == len(json_chunks) else "dessincronizado"
@@ -239,6 +423,7 @@ def inspect_vector_backend_status(
         return status
 
 
+
 def normalize_rag_index(rag_index: dict[str, object] | None, settings: RagSettings) -> dict[str, object] | None:
     normalized = _coerce_rag_index(rag_index, settings)
     if not normalized["documents"] and not normalized["chunks"]:
@@ -246,10 +431,12 @@ def normalize_rag_index(rag_index: dict[str, object] | None, settings: RagSettin
     return normalized
 
 
+
 def get_indexed_documents(rag_index: dict[str, object] | None, settings: RagSettings) -> list[dict[str, object]]:
     normalized = _coerce_rag_index(rag_index, settings)
     documents = normalized.get("documents", [])
     return [document for document in documents if isinstance(document, dict)]
+
 
 
 def upsert_documents_in_rag_index(
@@ -324,6 +511,7 @@ def upsert_documents_in_rag_index(
     return updated_index, sync_status
 
 
+
 def remove_documents_from_rag_index(
     rag_index: dict[str, object] | None,
     settings: RagSettings,
@@ -359,6 +547,7 @@ def remove_documents_from_rag_index(
     return updated_index, sync_status
 
 
+
 def retrieve_relevant_chunks_detailed(
     query: str,
     rag_index: dict[str, object] | None,
@@ -375,6 +564,8 @@ def retrieve_relevant_chunks_detailed(
             "backend_used": "none",
             "backend_message": "Índice documental vazio.",
             "filtered_chunks_available": 0,
+            "candidate_pool_size": 0,
+            "reranking_applied": False,
             "vector_backend_status": inspect_vector_backend_status(rag_index, settings),
         }
 
@@ -385,29 +576,32 @@ def retrieve_relevant_chunks_detailed(
             "backend_used": "none",
             "backend_message": "Nenhum chunk disponível após aplicar filtros.",
             "filtered_chunks_available": 0,
+            "candidate_pool_size": 0,
+            "reranking_applied": False,
             "vector_backend_status": inspect_vector_backend_status(rag_index, settings),
         }
 
     query_embedding = embedding_provider.create_embeddings([query], model=settings.embedding_model)[0]
     vector_backend_status = inspect_vector_backend_status(rag_index, settings)
+    candidate_pool_size = _candidate_pool_size(settings, len(filtered_chunks))
+    vector_candidates: list[dict[str, object]] = []
+    backend_used = "local_fallback"
+    backend_message = "Retrieval servido por fallback local a partir do JSON canônico."
 
     try:
         chroma_store = ChromaVectorStore(settings.chroma_path)
         chroma_results = chroma_store.similarity_search(
             query_embedding,
-            settings.top_k,
+            candidate_pool_size,
             document_ids=document_ids,
             file_types=file_types,
         )
         if chroma_results:
-            return {
-                "chunks": chroma_results,
-                "backend_used": "chroma",
-                "backend_message": "Retrieval servido pelo Chroma persistido sincronizado.",
-                "filtered_chunks_available": len(filtered_chunks),
-                "vector_backend_status": vector_backend_status,
-            }
-        print("[RAG] Chroma não retornou resultados; usando fallback local.")
+            backend_used = "chroma"
+            backend_message = "Retrieval servido pelo Chroma persistido sincronizado."
+            vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in chroma_results]
+        else:
+            print("[RAG] Chroma não retornou resultados; usando fallback local.")
     except Exception as error:
         print(f"[RAG] Chroma falhou na busca; usando fallback local: {error}")
         vector_backend_status = {
@@ -417,14 +611,31 @@ def retrieve_relevant_chunks_detailed(
             "message": f"Falha de retrieval no Chroma: {error}",
         }
 
-    store = LocalVectorStore(filtered_chunks)
+    if not vector_candidates:
+        store = LocalVectorStore(filtered_chunks)
+        local_results = store.similarity_search(query_embedding, candidate_pool_size)
+        vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in local_results]
+        backend_used = "local_fallback"
+        backend_message = "Retrieval servido por fallback local a partir do JSON canônico."
+
+    lexical_candidates = _rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)
+    reranked_chunks = _hybrid_rerank_chunks(query, vector_candidates, lexical_candidates, settings)
+
     return {
-        "chunks": store.similarity_search(query_embedding, settings.top_k),
-        "backend_used": "local_fallback",
-        "backend_message": "Retrieval servido por fallback local a partir do JSON canônico.",
+        "chunks": reranked_chunks,
+        "backend_used": backend_used,
+        "backend_message": backend_message,
         "filtered_chunks_available": len(filtered_chunks),
+        "candidate_pool_size": candidate_pool_size,
+        "reranking_applied": True,
         "vector_backend_status": vector_backend_status,
+        "rerank_strategy": {
+            "type": "hybrid_vector_lexical",
+            "lexical_weight": settings.rerank_lexical_weight,
+            "candidate_pool_size": candidate_pool_size,
+        },
     }
+
 
 
 def retrieve_relevant_chunks(
@@ -445,6 +656,7 @@ def retrieve_relevant_chunks(
     )["chunks"]
 
 
+
 def build_source_metadata(chunks: list[dict[str, object]]) -> list[dict[str, object]]:
     sources: list[dict[str, object]] = []
     for chunk in chunks:
@@ -455,6 +667,8 @@ def build_source_metadata(chunks: list[dict[str, object]]) -> list[dict[str, obj
                 "file_type": chunk.get("file_type"),
                 "chunk_id": chunk.get("chunk_id"),
                 "score": chunk.get("score"),
+                "vector_score": chunk.get("vector_score"),
+                "lexical_score": chunk.get("lexical_score"),
                 "snippet": chunk.get("snippet") or str(chunk.get("text", ""))[:400],
             }
         )

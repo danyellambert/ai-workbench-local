@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 from math import sqrt
 from pathlib import Path
 from typing import Any
@@ -71,29 +72,54 @@ class ChromaVectorStore:
     def __init__(self, persist_path: Path):
         self.persist_path = Path(persist_path)
 
-    def _get_collection(self):
+    def _clear_system_cache(self) -> None:
+        try:
+            from chromadb.api.client import SharedSystemClient
+
+            SharedSystemClient.clear_system_cache()
+        except Exception:
+            pass
+
+    def _get_client(self):
         import chromadb
 
         self.persist_path.mkdir(parents=True, exist_ok=True)
-        client = chromadb.PersistentClient(path=str(self.persist_path))
+        return chromadb.PersistentClient(path=str(self.persist_path))
+
+    def _get_collection(self):
+        client = self._get_client()
         return client.get_or_create_collection(
             name=self.COLLECTION_NAME,
             metadata={"hnsw:space": "cosine"},
         )
 
-    def clear(self) -> None:
+    def count_entries(self) -> int:
+        if not self.persist_path.exists():
+            return 0
         collection = self._get_collection()
-        existing = collection.get(include=[])
-        existing_ids = existing.get("ids") or []
-        if existing_ids:
-            collection.delete(ids=existing_ids)
+        return len(collection.get(include=[]).get("ids") or [])
+
+    def clear(self, remove_persist_dir: bool = False) -> None:
+        if self.persist_path.exists():
+            try:
+                client = self._get_client()
+                client.delete_collection(name=self.COLLECTION_NAME)
+            except Exception:
+                collection = self._get_collection()
+                existing = collection.get(include=[])
+                existing_ids = existing.get("ids") or []
+                if existing_ids:
+                    collection.delete(ids=existing_ids)
+
+        if remove_persist_dir and self.persist_path.exists():
+            self._clear_system_cache()
+            shutil.rmtree(self.persist_path, ignore_errors=True)
+            self._clear_system_cache()
 
     def rebuild(self, entries: list[dict[str, object]]) -> None:
+        # Rebuild total do espelho persistido para manter JSON canônico e Chroma alinhados.
+        self.clear(remove_persist_dir=False)
         collection = self._get_collection()
-        existing = collection.get(include=[])
-        existing_ids = existing.get("ids") or []
-        if existing_ids:
-            collection.delete(ids=existing_ids)
 
         ids: list[str] = []
         embeddings: list[list[float]] = []
@@ -128,20 +154,6 @@ class ChromaVectorStore:
 
         if ids:
             collection.add(ids=ids, embeddings=embeddings, metadatas=metadatas, documents=documents)
-
-    def delete_document_ids(self, document_ids: list[str]) -> int:
-        ids_to_remove = [str(document_id) for document_id in document_ids if document_id]
-        if not ids_to_remove:
-            return 0
-
-        collection = self._get_collection()
-        existing = collection.get(where={"document_id": {"$in": ids_to_remove}}, include=[])
-        chroma_ids = existing.get("ids") or []
-        if not chroma_ids:
-            return 0
-
-        collection.delete(ids=chroma_ids)
-        return len(chroma_ids)
 
     def similarity_search(
         self,

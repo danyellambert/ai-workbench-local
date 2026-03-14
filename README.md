@@ -195,7 +195,10 @@ Isso ajuda o projeto a mostrar não só funcionalidades, mas também **progress�
 - JSON local (`.rag_store.json`) como índice canônico leve
 - Chroma local como backend vetorial persistido e sincronizado com o índice canônico
 - limpeza e remoção documental refletindo JSON + Chroma, sem depender só de delete incremental
+- clear físico da persistência `.chroma_rag/` quando o índice é zerado
 - transparência na UI sobre status do backend vetorial (`sincronizado`, `dessincronizado` ou `fallback_local`)
+- reranking híbrido leve (vetorial + lexical) antes da seleção final dos chunks
+- budget operacional do prompt para limitar o contexto documental antes da geração
 - configuração explícita de janela de contexto no projeto
 - controle visível de contexto para Ollama na sidebar
 - caminho nativo do Ollama para parâmetros avançados como `num_ctx`
@@ -237,7 +240,8 @@ Na Fase 4.5, a arquitetura ficou explícita:
 
 - `.rag_store.json` é o **índice canônico leve**
 - `.chroma_rag/` é o **backend vetorial persistido**
-- o app tenta manter os dois espelhados a cada indexação, remoção e limpeza do índice
+- o app tenta manter os dois espelhados a cada indexação e remoção
+- ao limpar o índice, o JSON é apagado e a pasta `.chroma_rag/` também é removida fisicamente
 - se o Chroma falhar, a aplicação continua operando com fallback local a partir do JSON
 
 ## Configuração explícita de contexto
@@ -253,7 +257,8 @@ Observação prática:
 
 - no caso do Ollama, esse valor é enviado como `num_ctx` pela rota nativa `/api/chat`
 - valores muito altos podem aumentar consumo de memória e latência
-- se o índice RAG estiver grande, vale ajustar também `RAG_CHUNK_SIZE` e `RAG_TOP_K`
+- se o índice RAG estiver grande, vale ajustar também `RAG_CHUNK_SIZE`, `RAG_TOP_K`, `RAG_RERANK_POOL_SIZE` e o budget do prompt
+- a aplicação agora expõe um budget operacional do prompt e pode truncar o contexto recuperado antes da geração
 - a validação atual é **técnica e operacional**, combinando rota nativa, `/api/show` e sinal auxiliar de `ollama ps`
 - isso não deve ser vendido como prova exaustiva do runtime interno, e sim como fechamento prático suficientemente forte para a Fase 4.5
 - a camada OpenAI-compatible continua útil para compatibilidade, mas o caminho nativo é o mais confiável para parâmetros avançados

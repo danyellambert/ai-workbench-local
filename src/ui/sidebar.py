@@ -125,6 +125,7 @@ def render_chat_sidebar(
         st.caption(
             f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap}"
         )
+        st.caption("Pipeline ativo: retrieval vetorial + reranking híbrido + budget de contexto no prompt.")
         st.caption(f"Histórico local: `{history_filename}`")
         st.caption(prompt_profiles[selected_prompt_profile]["description"])
         st.info("RAG Avançado (Base Documental): Fase 4.5 ativa.")
