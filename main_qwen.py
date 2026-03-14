@@ -6,10 +6,11 @@ from src.config import get_ollama_settings, get_rag_settings
 from src.prompt_profiles import build_prompt_messages, get_prompt_profiles
 from src.providers.registry import build_provider_registry
 from src.rag.loaders import load_document
-from src.rag.prompting import inject_rag_context
+from src.rag.prompting import estimate_rag_context_budget_chars, inject_rag_context
 from src.rag.service import (
     build_source_metadata,
     clear_persisted_rag_index,
+    reset_chroma_persist_directory,
     get_indexed_documents,
     inspect_vector_backend_status,
     normalize_rag_index,
@@ -129,7 +130,8 @@ selected_provider_label = provider_registry[selected_provider]["label"]
 selected_prompt_profile_label = prompt_profiles[selected_prompt_profile]["label"]
 selected_file_types_count = 0
 estimated_rag_context_chars = effective_rag_settings.chunk_size * max(effective_rag_settings.top_k, 1)
-context_usage_ratio = estimated_rag_context_chars / max(context_window, 1)
+rag_context_budget_chars = estimate_rag_context_budget_chars(context_window, effective_rag_settings)
+context_usage_ratio = estimated_rag_context_chars / max(rag_context_budget_chars, 1)
 
 if clear_requested:
     clear_chat_state()
@@ -141,13 +143,16 @@ st.caption(
     f"Provider: `{selected_provider}` · Modelo: `{selected_model}` · Perfil: `{selected_prompt_profile}` · Temperatura: `{temperature:.1f}` · Contexto: `{context_window}`"
 )
 st.caption(
-    f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k}"
+    f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k} · rerank_pool={effective_rag_settings.rerank_pool_size}"
 )
 st.caption(
     "Backend vetorial: "
     f"status={vector_backend_status_preview.get('status')} · "
     f"json_chunks={vector_backend_status_preview.get('json_chunks')} · "
     f"chroma_chunks={vector_backend_status_preview.get('chroma_chunks')}"
+)
+st.caption(
+    f"Persistência Chroma: `{vector_backend_status_preview.get('persist_dir')}` · existe_em_disco={vector_backend_status_preview.get('persist_dir_exists')}"
 )
 if vector_backend_status_preview.get("status") == "dessincronizado":
     st.warning(vector_backend_status_preview.get("message"))
@@ -213,21 +218,25 @@ if uploaded_files:
         )
 
 st.caption(
-    f"Orçamento estimado de contexto do RAG nesta execução: ~{estimated_rag_context_chars} caracteres "
+    f"Orçamento bruto do RAG nesta execução: ~{estimated_rag_context_chars} caracteres "
     f"(top-k={effective_rag_settings.top_k} × chunk_size={effective_rag_settings.chunk_size})."
 )
-if context_usage_ratio >= 0.8:
+st.caption(
+    f"Budget operacional do prompt: ~{rag_context_budget_chars} caracteres "
+    f"(ratio={effective_rag_settings.context_budget_ratio:.2f} · chars/token≈{effective_rag_settings.context_chars_per_token:.1f})."
+)
+if context_usage_ratio >= 1.0:
     st.warning(
-        "O contexto potencial do RAG está alto em relação ao `num_ctx` selecionado. "
-        "Considere reduzir `top_k`, diminuir `chunk_size` ou aumentar a janela de contexto."
+        "O contexto bruto do RAG excede o budget operacional estimado do prompt. "
+        "O app vai truncar o contexto recuperado antes da geração."
     )
-elif context_usage_ratio >= 0.5:
+elif context_usage_ratio >= 0.7:
     st.info(
-        "O contexto documental já ocupa uma parte relevante da janela ativa. "
-        "Isso é útil para respostas com base documental, mas pode aumentar latência."
+        "O contexto documental já ocupa boa parte do budget operacional do prompt. "
+        "Isso ajuda respostas ancoradas, mas pode aumentar latência."
     )
 
-coluna_indexar, coluna_limpar = st.columns(2)
+coluna_indexar, coluna_limpar, coluna_reset = st.columns(3)
 with coluna_indexar:
     index_requested = st.button(
         "📚 Indexar / reindexar uploads",
@@ -239,6 +248,13 @@ with coluna_limpar:
         "🗑️ Limpar índice",
         width="stretch",
         disabled=rag_index is None,
+        help="Limpa o índice lógico (JSON + coleção Chroma) sem remover a pasta persistida, evitando erro de banco readonly na mesma sessão.",
+    )
+with coluna_reset:
+    reset_chroma_requested = st.button(
+        "♻️ Reset físico Chroma",
+        width="stretch",
+        help="Remove fisicamente .chroma_rag. Use só com o app prestes a reiniciar; depois, feche e abra o Streamlit antes de reindexar.",
     )
 
 if index_requested and selected_uploaded_files:
@@ -271,11 +287,19 @@ if clear_rag_requested:
     clear_rag_state()
     clear_rag_store(rag_settings.store_path)
     if sync_status.get("ok"):
-        st.success("Índice RAG removido com sucesso do JSON local e do Chroma persistido.")
+        st.success("Índice RAG removido com sucesso do JSON local e do estado lógico do Chroma.")
         st.caption(sync_status.get("message"))
     else:
         st.warning(f"JSON local removido, mas o Chroma reportou problema: {sync_status.get('message')}")
     st.rerun()
+
+if reset_chroma_requested:
+    reset_status = reset_chroma_persist_directory(effective_rag_settings)
+    if reset_status.get("ok"):
+        st.success("Persistência física do Chroma removida. Reinicie o app antes de indexar novamente.")
+        st.caption(reset_status.get("message"))
+    else:
+        st.warning(reset_status.get("message"))
 
 rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
 indexed_documents = get_indexed_documents(rag_index, effective_rag_settings)
@@ -434,6 +458,17 @@ if texto_usuario:
     retrieval_backend_message = None
     retrieval_vector_status = None
     filtered_chunks_available = 0
+    retrieval_candidate_pool_size = 0
+    retrieval_rerank_strategy = None
+    prompt_context_details = {
+        "budget_chars": rag_context_budget_chars,
+        "used_chars": 0,
+        "used_chunks": 0,
+        "dropped_chunks": 0,
+        "truncated": False,
+        "context_injected": False,
+        "context_chunks": [],
+    }
 
     if rag_index:
         try:
@@ -451,6 +486,8 @@ if texto_usuario:
             retrieval_backend_message = retrieval_details.get("backend_message")
             retrieval_vector_status = retrieval_details.get("vector_backend_status")
             filtered_chunks_available = retrieval_details.get("filtered_chunks_available")
+            retrieval_candidate_pool_size = retrieval_details.get("candidate_pool_size") or 0
+            retrieval_rerank_strategy = retrieval_details.get("rerank_strategy")
             retrieval_latency = time.perf_counter() - retrieval_started_at
         except Exception as error:
             st.warning(f"Não foi possível recuperar contexto do documento. A resposta seguirá sem RAG. Detalhes: {error}")
@@ -459,14 +496,18 @@ if texto_usuario:
             retrieval_backend_message = str(error)
             retrieval_vector_status = None
             filtered_chunks_available = 0
+            retrieval_candidate_pool_size = 0
+            retrieval_rerank_strategy = None
 
     with st.chat_message("assistant"):
         placeholder = st.empty()
         try:
             inicio = time.perf_counter()
-            model_messages = inject_rag_context(
+            model_messages, prompt_context_details = inject_rag_context(
                 build_prompt_messages(selected_prompt_profile, get_chat_messages()),
                 retrieved_chunks,
+                context_window=context_window,
+                settings=effective_rag_settings,
             )
             stream = selected_provider_instance.stream_chat_completion(
                 messages=model_messages,
@@ -502,12 +543,21 @@ if texto_usuario:
                             "vector_backend_used": retrieval_backend_used,
                             "vector_backend_message": retrieval_backend_message,
                             "filtered_chunks_available": filtered_chunks_available,
+                            "candidate_pool_size": retrieval_candidate_pool_size,
+                            "rerank_strategy": retrieval_rerank_strategy,
+                            "prompt_context": {
+                                "budget_chars": prompt_context_details.get("budget_chars"),
+                                "used_chars": prompt_context_details.get("used_chars"),
+                                "used_chunks": prompt_context_details.get("used_chunks"),
+                                "dropped_chunks": prompt_context_details.get("dropped_chunks"),
+                                "truncated": prompt_context_details.get("truncated"),
+                            },
                             "vector_backend_status": retrieval_vector_status,
                         }
                     )
                     for index, chunk in enumerate(retrieved_chunks, start=1):
                         st.markdown(
-                            f"**{index}. {chunk.get('source', 'documento')} · score={chunk.get('score')} · chunk={chunk.get('chunk_id')}**"
+                            f"**{index}. {chunk.get('source', 'documento')} · score={chunk.get('score')} · vector={chunk.get('vector_score')} · lexical={chunk.get('lexical_score')} · chunk={chunk.get('chunk_id')}**"
                         )
                         snippet = chunk.get("snippet") or str(chunk.get("text", ""))[:500]
                         if snippet:
@@ -531,7 +581,16 @@ if texto_usuario:
         "rag_chunk_overlap": effective_rag_settings.chunk_overlap,
         "rag_top_k": effective_rag_settings.top_k,
         "debug_retrieval": debug_retrieval,
-        "sources": build_source_metadata(retrieved_chunks),
+        "rerank_strategy": retrieval_rerank_strategy,
+        "retrieval_candidate_pool_size": retrieval_candidate_pool_size,
+        "prompt_context": {
+            "budget_chars": prompt_context_details.get("budget_chars"),
+            "used_chars": prompt_context_details.get("used_chars"),
+            "used_chunks": prompt_context_details.get("used_chunks"),
+            "dropped_chunks": prompt_context_details.get("dropped_chunks"),
+            "truncated": prompt_context_details.get("truncated"),
+        },
+        "sources": build_source_metadata(prompt_context_details.get("context_chunks") or retrieved_chunks),
     }
     append_chat_message("assistant", texto_resposta_ia, metadata=assistant_metadata)
     save_chat_history(settings.history_path, get_chat_messages())

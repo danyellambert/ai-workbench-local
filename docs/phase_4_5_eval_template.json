@@ -1,0 +1,35 @@
+{
+  "questions": [
+    {
+      "question": "Quais são os pontos centrais do documento X?",
+      "expected_document_ids": [
+        "substitua-pelo-hash-ou-id"
+      ],
+      "notes": "Use perguntas que só um documento consiga responder."
+    }
+  ],
+  "runs": [
+    {
+      "label": "baseline-bge-m3",
+      "embedding_model": "bge-m3",
+      "chunk_size": 1200,
+      "chunk_overlap": 200,
+      "top_k": 4,
+      "rerank_pool_size": 8
+    },
+    {
+      "label": "alt-nomic",
+      "embedding_model": "nomic-embed-text",
+      "chunk_size": 1200,
+      "chunk_overlap": 200,
+      "top_k": 4,
+      "rerank_pool_size": 8
+    }
+  ],
+  "evidence_to_collect": [
+    "screenshots do app com as mesmas perguntas",
+    "latência de retrieval",
+    "fontes retornadas",
+    "qualidade percebida da resposta"
+  ]
+}
