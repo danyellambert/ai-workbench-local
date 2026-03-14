@@ -568,118 +568,92 @@ Adicionar a feature de maior valor para uso real em empresas.
 
 ---
 
-## Fase 4.5 — RAG avançado e base documental
+## Fase 4.5 — Robustez, tuning e observabilidade do RAG
 
-### Objetivo
-Transformar o RAG básico em uma **base documental local mais próxima de um caso real de empresa**, com melhor engenharia de retrieval, melhor UX operacional e melhor controle de contexto.
+Objetivo desta fase: sair de um RAG apenas funcional para um pipeline mais robusto, explicável e comparável, com melhor gestão do índice, backend vetorial persistido, observabilidade de retrieval, suporte a tuning e validação técnica da integração com Ollama.
 
-### Por que essa fase existe?
+### Já concluído
 
-Porque a Fase 4 prova o pipeline completo de RAG de forma controlada.
-A Fase 4.5 existe para mostrar evolução real de AI Engineering, cobrindo:
+- [x] Revisar o estado atual da Fase 4.5 e consolidar a direção arquitetural
+- [x] Formalizar o índice local/JSON como fonte canônica do estado RAG
+- [x] Integrar Chroma local como backend vetorial persistido com fallback seguro
+- [x] Tratar o Chroma como espelho sincronizado do índice canônico
+- [x] Corrigir IDs únicos por chunk no backend vetorial
+- [x] Melhorar a UX de indexação, reindexação e remoção seletiva de documentos
+- [x] Expor debug leve de retrieval no app
+- [x] Mostrar claramente qual backend vetorial foi usado no retrieval
+- [x] Expor status de sincronização entre JSON canônico e Chroma persistido
+- [x] Implementar reranking híbrido leve (vetorial + lexical)
+- [x] Introduzir candidate pool maior que o top-k final para reranking
+- [x] Limitar o contexto documental enviado ao prompt com budget operacional
+- [x] Expor métricas de contexto usado, truncamento e chunks descartados
+- [x] Implementar caminho funcional com provider Ollama e validação técnica operacional do uso de contexto
+- [x] Documentar a distinção entre caminho OpenAI-compatible e caminho nativo do Ollama
+- [x] Separar clear lógico do índice de reset físico do persist dir do Chroma
+- [x] Tornar o fluxo normal de limpeza seguro, evitando problemas de `readonly database`
+- [x] Criar reset físico explícito do Chroma como ação administrativa separada do clear normal
+- [x] Criar scripts e documentação de apoio para validação da Fase 4.5
+- [x] Expor escolha do modelo de embedding na UI com validação de compatibilidade do índice
+  - [x] Mostrar embedding ativo na configuração atual
+  - [x] Mostrar embedding com que o índice existente foi construído
+  - [x] Detectar incompatibilidade entre embeddings
+  - [x] Bloquear uso enganoso do índice quando houver mismatch
+  - [x] Exigir reindexação segura ao trocar de embedding model
+- [x] Expor janela de contexto do embedding na UI
+  - [x] Permitir configurar `num_ctx` do embedding separadamente do `num_ctx` do LLM
+  - [x] Usar o endpoint nativo de embedding do Ollama para enviar `options.num_ctx`
+  - [x] Tratar `embedding_context_window` como parte da compatibilidade do índice
+  - [x] Exigir reindexação segura ao trocar a janela de contexto do embedding
+- [x] Expor inspeção técnica operacional do embedding na UI
+  - [x] Mostrar modelo de embedding ativo
+  - [x] Mostrar janela de contexto do embedding ativa
+  - [x] Mostrar metadados de compatibilidade entre configuração atual e índice existente
+- [x] Impedir mistura silenciosa de espaços vetoriais incompatíveis
+  - [x] Bloquear uso de índice criado com embedding model diferente
+  - [x] Bloquear uso de índice criado com `embedding_context_window` diferente
 
-- múltiplos documentos
-- retrieval engineering mais forte
-- comparação de embeddings
-- tuning de contexto
-- preparação concreta para LangChain, LangGraph e agentes futuros
+### Feito estruturalmente, mas depende de validação prática contínua no ambiente local
 
-### O que já foi entregue
-- [x] índice preparado para múltiplos documentos
-- [x] upload múltiplo
-- [x] upsert documental
-- [x] remoção seletiva
-- [x] filtros por documento/tipo
-- [x] metadados mais ricos
-- [x] configuração explícita de contexto por provider
-- [x] contexto visível na sidebar para Ollama
-- [x] `OLLAMA_EMBEDDING_MODEL=bge-m3`
-- [x] compactação e normalização do índice local
-- [x] melhoria parcial de performance e warnings do Streamlit
+- [x] Validar tecnicamente o caminho nativo do Ollama para parâmetros avançados (`num_ctx` e afins)
+- [x] Expor sinais operacionais de contexto usado, backend empregado e estado do retrieval
+- [x] Preparar infraestrutura para comparação prática entre embeddings
+- [x] Preparar infraestrutura para benchmark fino de retrieval e tuning
+- [x] Preparar infraestrutura para comparação prática de janelas de contexto de embedding
+- [x] Tornar observável a compatibilidade entre configuração de embedding e índice persistido
 
-### Checklist para considerar a Fase 4.5 fechada
-- [x] Estruturar o índice como coleção documental e não só um arquivo
-- [x] Permitir upload de múltiplos arquivos
-- [x] Implementar `upsert_documents_in_rag_index(...)`
-- [x] Implementar `remove_documents_from_rag_index(...)`
-- [x] Permitir filtros por documento na recuperação
-- [x] Permitir filtros por tipo de arquivo na recuperação
-- [x] Enriquecer metadados por documento e por chunk
-- [x] Introduzir `OLLAMA_CONTEXT_WINDOW`
-- [x] Introduzir `OPENAI_CONTEXT_WINDOW`
-- [x] Carregar defaults de contexto em `src/config.py`
-- [x] Expor ajuste de contexto na sidebar quando provider = Ollama
-- [x] Registrar `context_window` como metadado de execução
-- [x] Ajustar `OLLAMA_EMBEDDING_MODEL` para `bge-m3`
-- [x] Reduzir reload desnecessário do `.rag_store.json`
-- [x] Compactar e normalizar o store local
-- [x] Refinar catálogo visual de documentos indexados
-- [x] Melhorar UX de remoção/reindexação seletiva
-- [x] Mostrar claramente quantidade de documentos, chunks e tipos indexados
-- [x] Introduzir store vetorial mais robusta com **Chroma** persistido e sincronizado com fallback local
-- [x] Garantir clear físico da pasta `.chroma_rag/` ao limpar o índice
-- [ ] Comparar embeddings na prática (`bge-m3` vs alternativas)
-- [x] Adicionar **reranking**
-- [x] Limitar melhor o contexto documental enviado para geração
-- [x] Reduzir custo do pipeline com melhor tuning de `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP` e `RAG_TOP_K`
-- [x] Medir latência separadamente para retrieval e geração
-- [x] Adicionar debug leve de retrieval no app
-- [x] Validar tecnicamente o caminho nativo de `num_ctx` e publicar fechamento prático
-- [x] Criar caminho **Ollama native** para parâmetros avançados (`num_ctx` e outros)
-- [x] Documentar claramente a diferença entre caminho OpenAI-compatible e Ollama native
+### Ainda pendente para fechamento experimental da Fase 4.5
 
-### Configuração e contexto
+- [ ] Comparar embeddings na prática no dataset real (ex.: `bge-m3` vs `nomic-embed-text`)
+  - [ ] Definir conjunto fixo de perguntas de teste
+  - [ ] Rodar as mesmas perguntas com embeddings diferentes
+  - [ ] Comparar qualidade das fontes recuperadas
+  - [ ] Comparar latência de retrieval
+  - [ ] Registrar screenshots/evidências do resultado
 
-Esta fase deve consolidar dois pontos de controle explícitos para contexto:
+- [ ] Comparar janelas de contexto de embedding na prática
+  - [ ] Definir pelo menos duas configurações de `embedding_context_window`
+  - [ ] Reindexar com cada configuração
+  - [ ] Comparar impacto nas fontes recuperadas
+  - [ ] Comparar impacto na latência e estabilidade operacional
+  - [ ] Registrar evidências locais do comportamento
 
-1. **default versionado**
-   - `.env.example`
-   - `.env`
-   - leitura centralizada em `src/config.py`
+- [ ] Executar benchmark prático de tuning de retrieval
+  - [ ] Comparar combinações de `chunk_size`
+  - [ ] Comparar combinações de `chunk_overlap`
+  - [ ] Comparar `top_k`
+  - [ ] Comparar `candidate_pool_size`
+  - [ ] Observar impacto do reranking híbrido
+  - [ ] Registrar configuração final recomendada
 
-2. **ajuste visível de execução**
-   - sidebar quando provider = Ollama
+### Critério de encerramento da Fase 4.5
 
-### Fechamento prático publicado
-
-Nesta rodada final, o fechamento prático da Fase 4.5 passou a ficar registrado em:
-
-- `docs/PHASE_4_5_VALIDATION.md`
-- `scripts/validate_phase_4_5.py`
-- `scripts/compare_phase_4_5_configs.py`
-
-A ideia é separar claramente:
-
-- o que já foi **validado tecnicamente por script**
-- o que ainda depende de **rodada comparativa local** (principalmente embeddings e benchmark fino de retrieval)
-
-### Observação técnica importante
-
-A implementação atual trata o caminho nativo do Ollama como principal para parâmetros avançados.
-
-### Fechamento honesto deste ponto
-- [x] manter compatibilidade OpenAI-compatible como camada de interoperabilidade
-- [x] criar integração nativa com o Ollama para controle fino de parâmetros avançados
-- [x] usar o caminho nativo quando contexto customizado ou outros parâmetros avançados forem relevantes
-
-Observação: isso configura **validação técnica operacional**, não prova exaustiva do runtime interno do modelo.
-
-### Entregável
-- Base documental local com múltiplos arquivos, retrieval mais forte, configuração explícita de contexto e caminho claro para evolução profissional do RAG
-
-### Evidência para GitHub/LinkedIn
-- GIF mostrando upload múltiplo + recuperação com fontes
-- screenshot do catálogo de documentos indexados
-- documento curto explicando a evolução de Fase 4 para Fase 4.5
-- comparação entre comportamento do RAG antes e depois da base documental
-
-### O que preciso saber defender em entrevista
-- diferença entre RAG básico e base documental mais madura
-- por que retrieval não termina em embeddings
-- por que filtros, metadados e reranking melhoram o sistema
-- como controlar custo/latência do contexto
-- por que `ollama ps` não deve ser a única prova da aplicação de `num_ctx`
-- por que, para parâmetros avançados, um caminho nativo do Ollama pode ser mais robusto que o OpenAI-compatible
+A Fase 4.5 será considerada totalmente encerrada quando:
+- o backend Chroma permanecer estável no fluxo normal de uso
+- a remoção/reindexação seguir coerente com o índice canônico
+- a UI continuar deixando claro o backend usado, o embedding ativo, a janela de contexto do embedding e o status do retrieval
+- a comparação prática entre embeddings for realizada com evidência local
+- a comparação prática entre janelas de contexto de embedding for realizada com evidência local
+- o benchmark final de tuning for executado e documentado
 
 ---
 

@@ -23,6 +23,8 @@ def _compress_embedding(embedding: list[float]) -> list[float]:
 def _settings_payload(settings: RagSettings) -> dict[str, object]:
     return {
         "embedding_model": settings.embedding_model,
+        "embedding_context_window": settings.embedding_context_window,
+        "embedding_truncate": settings.embedding_truncate,
         "chunk_size": settings.chunk_size,
         "chunk_overlap": settings.chunk_overlap,
         "top_k": settings.top_k,
@@ -424,6 +426,47 @@ def inspect_vector_backend_status(
 
 
 
+def inspect_embedding_configuration_compatibility(
+    rag_index: dict[str, object] | None,
+    settings: RagSettings,
+) -> dict[str, object]:
+    normalized = _coerce_rag_index(rag_index, settings)
+    stored_settings = normalized.get("settings", {}) if isinstance(normalized.get("settings"), dict) else {}
+    index_embedding_model = stored_settings.get("embedding_model")
+    index_embedding_context_window = stored_settings.get("embedding_context_window")
+    current_embedding_model = settings.embedding_model
+    current_embedding_context_window = settings.embedding_context_window
+
+    if not normalized.get("chunks"):
+        return {
+            "compatible": True,
+            "status": "sem_indice",
+            "message": "Nenhum índice ativo para comparar embedding.",
+            "current_embedding_model": current_embedding_model,
+            "current_embedding_context_window": current_embedding_context_window,
+            "index_embedding_model": index_embedding_model,
+            "index_embedding_context_window": index_embedding_context_window,
+        }
+
+    compatible = (
+        index_embedding_model == current_embedding_model
+        and int(index_embedding_context_window or 0) == int(current_embedding_context_window or 0)
+    )
+    return {
+        "compatible": compatible,
+        "status": "compativel" if compatible else "incompativel",
+        "message": (
+            "Embedding atual compatível com o índice carregado."
+            if compatible
+            else "O índice foi criado com outro embedding model ou outra janela de contexto do embedding. Reindexe antes de usar o RAG."
+        ),
+        "current_embedding_model": current_embedding_model,
+        "current_embedding_context_window": current_embedding_context_window,
+        "index_embedding_model": index_embedding_model,
+        "index_embedding_context_window": index_embedding_context_window,
+    }
+
+
 def normalize_rag_index(rag_index: dict[str, object] | None, settings: RagSettings) -> dict[str, object] | None:
     normalized = _coerce_rag_index(rag_index, settings)
     if not normalized["documents"] and not normalized["chunks"]:
@@ -476,6 +519,8 @@ def upsert_documents_in_rag_index(
         embeddings = embedding_provider.create_embeddings(
             [chunk["text"] for chunk in chunks],
             model=settings.embedding_model,
+            context_window=settings.embedding_context_window,
+            truncate=settings.embedding_truncate,
         )
 
         indexed_chunks: list[dict[str, object]] = []
@@ -581,7 +626,12 @@ def retrieve_relevant_chunks_detailed(
             "vector_backend_status": inspect_vector_backend_status(rag_index, settings),
         }
 
-    query_embedding = embedding_provider.create_embeddings([query], model=settings.embedding_model)[0]
+    query_embedding = embedding_provider.create_embeddings(
+        [query],
+        model=settings.embedding_model,
+        context_window=settings.embedding_context_window,
+        truncate=settings.embedding_truncate,
+    )[0]
     vector_backend_status = inspect_vector_backend_status(rag_index, settings)
     candidate_pool_size = _candidate_pool_size(settings, len(filtered_chunks))
     vector_candidates: list[dict[str, object]] = []

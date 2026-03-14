@@ -12,6 +12,7 @@ from src.rag.service import (
     clear_persisted_rag_index,
     reset_chroma_persist_directory,
     get_indexed_documents,
+    inspect_embedding_configuration_compatibility,
     inspect_vector_backend_status,
     normalize_rag_index,
     remove_documents_from_rag_index,
@@ -38,6 +39,7 @@ rag_settings = get_rag_settings()
 provider_registry = build_provider_registry()
 prompt_profiles = get_prompt_profiles()
 embedding_provider = provider_registry["ollama"]["instance"]
+embedding_model_options = embedding_provider.list_available_embedding_models()
 
 raw_rag_store = load_rag_store(rag_settings.store_path)
 normalized_rag_store = normalize_rag_index(raw_rag_store, rag_settings)
@@ -96,6 +98,8 @@ default_context_window_by_provider = {
     rag_chunk_size,
     rag_chunk_overlap,
     rag_top_k,
+    selected_embedding_model,
+    selected_embedding_context_window,
     clear_requested,
     debug_retrieval,
 ) = render_chat_sidebar(
@@ -110,6 +114,9 @@ default_context_window_by_provider = {
     default_rag_chunk_size=rag_settings.chunk_size,
     default_rag_chunk_overlap=rag_settings.chunk_overlap,
     default_rag_top_k=rag_settings.top_k,
+    embedding_model_options=embedding_model_options,
+    default_embedding_model=rag_settings.embedding_model,
+    default_embedding_context_window=rag_settings.embedding_context_window,
     indexed_documents_count=len(indexed_documents_preview),
     indexed_chunks_count=indexed_chunks_preview,
     provider_details=provider_details,
@@ -120,6 +127,8 @@ default_context_window_by_provider = {
 
 effective_rag_settings = replace(
     rag_settings,
+    embedding_model=selected_embedding_model,
+    embedding_context_window=selected_embedding_context_window,
     chunk_size=rag_chunk_size,
     chunk_overlap=min(rag_chunk_overlap, rag_chunk_size // 2),
     top_k=rag_top_k,
@@ -141,6 +150,9 @@ if clear_requested:
 st.write(f"# {settings.project_name}")
 st.caption(
     f"Provider: `{selected_provider}` · Modelo: `{selected_model}` · Perfil: `{selected_prompt_profile}` · Temperatura: `{temperature:.1f}` · Contexto: `{context_window}`"
+)
+st.caption(
+    f"Embedding: {effective_rag_settings.embedding_model} · embedding_num_ctx={effective_rag_settings.embedding_context_window} · truncate={effective_rag_settings.embedding_truncate}"
 )
 st.caption(
     f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k} · rerank_pool={effective_rag_settings.rerank_pool_size}"
@@ -169,6 +181,15 @@ if selected_provider == "ollama" and hasattr(selected_provider_instance, "inspec
         st.caption(
             "Esta validação combina rota nativa `/api/chat`, leitura de `/api/show` e `ollama ps`. "
             "Use `ollama ps` apenas como sinal auxiliar, não como prova isolada."
+        )
+    with st.expander("Validação de contexto do embedding (Ollama)", expanded=False):
+        embedding_context_validation = embedding_provider.inspect_embedding_context_window(
+            model=effective_rag_settings.embedding_model,
+            requested_context_window=effective_rag_settings.embedding_context_window,
+        )
+        st.write(embedding_context_validation)
+        st.caption(
+            "O app envia `options.num_ctx` ao endpoint nativo `/api/embed`. Trate isso como controle operacional do pipeline de embedding; a aplicação efetiva ainda depende do modelo e do runtime."
         )
 
 st.divider()
@@ -236,6 +257,8 @@ elif context_usage_ratio >= 0.7:
         "Isso ajuda respostas ancoradas, mas pode aumentar latência."
     )
 
+embedding_compatibility = inspect_embedding_configuration_compatibility(rag_index, effective_rag_settings)
+
 coluna_indexar, coluna_limpar, coluna_reset = st.columns(3)
 with coluna_indexar:
     index_requested = st.button(
@@ -261,15 +284,21 @@ if index_requested and selected_uploaded_files:
     try:
         with st.spinner("Extraindo texto, criando chunks e gerando embeddings..."):
             loaded_documents = [load_document(uploaded_file) for uploaded_file in selected_uploaded_files]
+            base_rag_index = rag_index if embedding_compatibility.get("compatible", True) else None
             built_rag_index, sync_status = upsert_documents_in_rag_index(
                 documents=loaded_documents,
                 settings=effective_rag_settings,
                 embedding_provider=embedding_provider,
-                rag_index=rag_index,
+                rag_index=base_rag_index,
             )
             set_rag_index(built_rag_index)
             save_rag_store(effective_rag_settings.store_path, built_rag_index)
-        st.success(f"{len(loaded_documents)} documento(s) indexado(s) ou reindexado(s) com sucesso.")
+        if embedding_compatibility.get("compatible", True):
+            st.success(f"{len(loaded_documents)} documento(s) indexado(s) ou reindexado(s) com sucesso.")
+        else:
+            st.success(
+                f"{len(loaded_documents)} documento(s) indexado(s) com novo embedding. O índice anterior incompatível foi descartado para evitar mistura de espaços vetoriais."
+            )
         if sync_status.get("ok"):
             st.caption(sync_status.get("message"))
         else:
@@ -302,6 +331,7 @@ if reset_chroma_requested:
         st.warning(reset_status.get("message"))
 
 rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
+embedding_compatibility = inspect_embedding_configuration_compatibility(rag_index, effective_rag_settings)
 indexed_documents = get_indexed_documents(rag_index, effective_rag_settings)
 selected_document_ids = None
 selected_file_types = None
@@ -310,6 +340,10 @@ if rag_index:
     documents_count = len(indexed_documents)
     chunks = rag_index.get("chunks", []) if isinstance(rag_index, dict) else []
     rag_info = rag_index.get("settings", {}) if isinstance(rag_index, dict) else {}
+    if not embedding_compatibility.get("compatible"):
+        st.warning(embedding_compatibility.get("message"))
+    else:
+        st.success(embedding_compatibility.get("message"))
     selected_file_types_count = len(
         {
             str(document.get("file_type"))
@@ -343,6 +377,7 @@ if rag_index:
                 "documentos": documents_count,
                 "chunks": len(chunks),
                 "embedding_model": rag_info.get("embedding_model"),
+                "embedding_context_window": rag_info.get("embedding_context_window"),
                 "chunk_size": rag_info.get("chunk_size"),
                 "chunk_overlap": rag_info.get("chunk_overlap"),
                 "top_k": rag_info.get("top_k"),
@@ -470,7 +505,7 @@ if texto_usuario:
         "context_chunks": [],
     }
 
-    if rag_index:
+    if rag_index and embedding_compatibility.get("compatible", True):
         try:
             retrieval_started_at = time.perf_counter()
             retrieval_details = retrieve_relevant_chunks_detailed(
@@ -498,6 +533,11 @@ if texto_usuario:
             filtered_chunks_available = 0
             retrieval_candidate_pool_size = 0
             retrieval_rerank_strategy = None
+    elif rag_index and not embedding_compatibility.get("compatible", True):
+        retrieval_backend_used = "disabled_incompatible_embedding"
+        retrieval_backend_message = embedding_compatibility.get("message")
+        retrieval_vector_status = inspect_vector_backend_status(rag_index, effective_rag_settings)
+        st.info("RAG desativado nesta pergunta porque o embedding ativo não é compatível com o índice carregado. Reindexe para voltar a usar a base documental.")
 
     with st.chat_message("assistant"):
         placeholder = st.empty()
@@ -535,6 +575,9 @@ if texto_usuario:
                             "chunk_size": effective_rag_settings.chunk_size,
                             "chunk_overlap": effective_rag_settings.chunk_overlap,
                             "top_k": effective_rag_settings.top_k,
+                            "embedding_model": effective_rag_settings.embedding_model,
+                            "embedding_context_window": effective_rag_settings.embedding_context_window,
+                            "embedding_index_compatibility": embedding_compatibility,
                             "retrieved_chunks": len(retrieved_chunks),
                             "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
                             "provider": selected_provider,

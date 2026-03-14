@@ -15,6 +15,14 @@ class OllamaProvider:
         "deepseek-coder:6.7b",
         "qwen3-coder:480b-cloud",
     ]
+    FALLBACK_EMBEDDING_MODELS = [
+        "bge-m3",
+        "nomic-embed-text",
+        "mxbai-embed-large",
+        "all-minilm",
+        "qwen3-embedding",
+        "embeddinggemma",
+    ]
 
     def __init__(self, settings: OllamaSettings):
         self.settings = settings
@@ -28,9 +36,8 @@ class OllamaProvider:
             normalized = normalized[:-3]
         return normalized
 
-    def list_available_models(self) -> list[str]:
+    def _discover_local_models(self) -> list[str]:
         discovered_models: list[str] = []
-
         try:
             result = subprocess.run(
                 ["ollama", "list"],
@@ -45,7 +52,15 @@ class OllamaProvider:
                         discovered_models.append(parts[0])
         except OSError:
             pass
+        return discovered_models
 
+    @staticmethod
+    def _looks_like_embedding_model(model_name: str) -> bool:
+        normalized = model_name.lower()
+        return any(token in normalized for token in ["embed", "embedding", "bge", "minilm", "e5", "nomic", "mxbai"])
+
+    def list_available_models(self) -> list[str]:
+        discovered_models = self._discover_local_models()
         ordered_models: list[str] = []
         for model in [
             self.settings.default_model,
@@ -55,9 +70,19 @@ class OllamaProvider:
         ]:
             if model and model not in ordered_models:
                 ordered_models.append(model)
-
         return ordered_models
 
+    def list_available_embedding_models(self) -> list[str]:
+        discovered_models = self._discover_local_models()
+        ordered_models: list[str] = []
+        for model in [
+            *self.settings.available_embedding_models_env,
+            *discovered_models,
+            *self.FALLBACK_EMBEDDING_MODELS,
+        ]:
+            if model and self._looks_like_embedding_model(model) and model not in ordered_models:
+                ordered_models.append(model)
+        return ordered_models or self.FALLBACK_EMBEDDING_MODELS[:]
 
     def _native_json_request(self, path: str, payload: dict[str, object]) -> dict[str, object]:
         request = urllib_request.Request(
@@ -81,6 +106,7 @@ class OllamaProvider:
             "phi3.context_length",
             "mistral.context_length",
             "gemma.context_length",
+            "bert.context_length",
             "context_length",
         ]
         for key in preferred_keys:
@@ -156,6 +182,30 @@ class OllamaProvider:
         )
         return output
 
+    def inspect_embedding_context_window(self, model: str, requested_context_window: int | None = None) -> dict[str, object]:
+        output: dict[str, object] = {
+            "api_route": f"{self.native_base_url}/api/embed",
+            "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
+            "model": model,
+            "truncate": True,
+        }
+        try:
+            show_payload = self._native_json_request("/api/show", {"model": model})
+            output["show_available"] = True
+            output["declared_context_length"] = self._extract_declared_context_length(show_payload)
+            modified_at = show_payload.get("modified_at")
+            if modified_at:
+                output["model_modified_at"] = modified_at
+        except Exception as error:
+            output["show_available"] = False
+            output["show_error"] = str(error)
+
+        output["validation_summary"] = (
+            "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional "
+            "da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+        )
+        return output
+
     def stream_chat_completion(
         self,
         messages: list[dict[str, str]],
@@ -184,9 +234,28 @@ class OllamaProvider:
 
         return urllib_request.urlopen(request, timeout=300)
 
-    def create_embeddings(self, texts: list[str], model: str) -> list[list[float]]:
-        response = self.client.embeddings.create(model=model, input=texts)
-        return [item.embedding for item in response.data]
+    def create_embeddings(
+        self,
+        texts: list[str],
+        model: str,
+        context_window: int | None = None,
+        truncate: bool = True,
+    ) -> list[list[float]]:
+        payload: dict[str, object] = {
+            "model": model,
+            "input": texts,
+            "truncate": bool(truncate),
+        }
+        options: dict[str, object] = {}
+        if context_window:
+            options["num_ctx"] = int(context_window)
+        if options:
+            payload["options"] = options
+        response = self._native_json_request("/api/embed", payload)
+        embeddings = response.get("embeddings")
+        if not isinstance(embeddings, list):
+            raise RuntimeError("Resposta inválida do endpoint /api/embed do Ollama.")
+        return embeddings
 
     @staticmethod
     def iter_stream_text(stream):

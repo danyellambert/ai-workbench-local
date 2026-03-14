@@ -18,6 +18,7 @@ class OllamaSettings:
     default_context_window: int
     default_prompt_profile: str
     available_models_env: list[str]
+    available_embedding_models_env: list[str]
     history_path: Path
 
 
@@ -32,6 +33,8 @@ class OpenAISettings:
 @dataclass(frozen=True)
 class RagSettings:
     embedding_model: str
+    embedding_context_window: int
+    embedding_truncate: bool
     chunk_size: int
     chunk_overlap: int
     top_k: int
@@ -53,6 +56,11 @@ def get_ollama_settings() -> OllamaSettings:
         for model in os.getenv("OLLAMA_AVAILABLE_MODELS", "").split(",")
         if model.strip()
     ]
+    available_embedding_models_env = [
+        model.strip()
+        for model in os.getenv("OLLAMA_AVAILABLE_EMBEDDING_MODELS", "").split(",")
+        if model.strip()
+    ]
 
     return OllamaSettings(
         project_name=os.getenv("PROJECT_NAME", "AI Workbench Local"),
@@ -62,6 +70,7 @@ def get_ollama_settings() -> OllamaSettings:
         default_context_window=int(os.getenv("OLLAMA_CONTEXT_WINDOW", "8192")),
         default_prompt_profile=os.getenv("DEFAULT_PROMPT_PROFILE", "neutro"),
         available_models_env=available_models_env,
+        available_embedding_models_env=available_embedding_models_env,
         history_path=BASE_DIR / ".chat_history.json",
     )
 
@@ -86,6 +95,8 @@ def get_openai_settings() -> OpenAISettings:
 def get_rag_settings() -> RagSettings:
     return RagSettings(
         embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "bge-m3"),
+        embedding_context_window=int(os.getenv("OLLAMA_EMBEDDING_CONTEXT_WINDOW", "8192")),
+        embedding_truncate=os.getenv("OLLAMA_EMBEDDING_TRUNCATE", "true").strip().lower() not in {"0", "false", "no"},
         chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1200")),
         chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "200")),
         top_k=int(os.getenv("RAG_TOP_K", "4")),

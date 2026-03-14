@@ -13,13 +13,16 @@ def render_chat_sidebar(
     default_rag_chunk_size: int,
     default_rag_chunk_overlap: int,
     default_rag_top_k: int,
+    embedding_model_options: list[str],
+    default_embedding_model: str,
+    default_embedding_context_window: int,
     indexed_documents_count: int,
     indexed_chunks_count: int,
     provider_details: dict[str, str],
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, int, int, int, int, bool, bool]:
+) -> tuple[str, str, str, float, int, int, int, int, str, int, bool, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
 
@@ -73,6 +76,30 @@ def render_chat_sidebar(
         )
 
         st.divider()
+        st.subheader("Embedding")
+        embedding_options = embedding_model_options or [default_embedding_model]
+        if default_embedding_model in embedding_options:
+            default_embedding_index = embedding_options.index(default_embedding_model)
+        else:
+            default_embedding_index = 0
+        selected_embedding_model = st.selectbox(
+            "Modelo de embedding",
+            embedding_options,
+            index=default_embedding_index,
+            help="Trocar o modelo de embedding exige reindexar para manter o espaço vetorial consistente.",
+        )
+        selected_embedding_context_window = int(
+            st.slider(
+                "Janela de contexto do embedding",
+                min_value=256,
+                max_value=65536,
+                value=max(int(default_embedding_context_window), 256),
+                step=256,
+                help="Valor enviado ao endpoint nativo de embeddings do Ollama via `options.num_ctx`. Se mudar, reindexe para manter o índice consistente.",
+            )
+        )
+
+        st.divider()
         st.subheader("RAG / Testes")
         rag_chunk_size = int(
             st.slider(
@@ -123,6 +150,9 @@ def render_chat_sidebar(
         if selected_provider == "ollama":
             st.caption(f"Contexto ativo no Ollama: `{context_window}`")
         st.caption(
+            f"Embedding ativo: {selected_embedding_model} · num_ctx={selected_embedding_context_window}"
+        )
+        st.caption(
             f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap}"
         )
         st.caption("Pipeline ativo: retrieval vetorial + reranking híbrido + budget de contexto no prompt.")
@@ -139,6 +169,8 @@ def render_chat_sidebar(
         rag_chunk_size,
         rag_chunk_overlap,
         rag_top_k,
+        selected_embedding_model,
+        selected_embedding_context_window,
         clear_requested,
         debug_retrieval,
     )
