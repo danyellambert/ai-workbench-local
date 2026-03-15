@@ -264,11 +264,15 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 ### Fase atual em andamento
 
-- **Fase 5 — Outputs estruturados**
+- **Fase 5 — Outputs estruturados (foundation técnica concluída; UI, renderização e casos reais ainda pendentes)**
 
 ### Fase concluída mais recentemente
 
 - **Fase 4.5 — concluída com benchmark, avaliação humana e configuração final recomendada**
+
+### Marco mais recente já iniciado na Fase 5
+
+- **Foundation de outputs estruturados criada em `src/structured/` e compilando corretamente**
 
 ### O que já foi entregue na Fase 4.5
 
@@ -699,32 +703,70 @@ A Fase 4.5 está considerada encerrada porque:
 ### Objetivo
 Mostrar que IA também pode ser usada como componente integrável de sistema.
 
-### Checklist
-- [ ] Criar modo extrator de informações
-- [ ] Criar modo resumidor em tópicos
-- [ ] Criar modo analisador de currículo
-- [ ] Criar modo gerador de checklist
+### Estado real da fase hoje
+
+A Fase 5 **já foi iniciada de forma estrutural**, mas **ainda não está concluída como feature de produto**.
+
+O projeto já possui uma foundation técnica dedicada para outputs estruturados em `src/structured/`, incluindo:
+
+- schemas base e schemas por tarefa
+- envelope de execução/resultado
+- parser/sanitizer/validator
+- validação com Pydantic
+- registry de tarefas com metadados de renderização
+- service layer dedicada
+- stubs para `extraction`, `summary`, `checklist` e `cv_analysis`
+- documentação da foundation em `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md`
+
+O que **ainda não existe de forma fechada** nesta fase:
+
+- integração visível no app (`main_qwen.py`)
+- renderer em `src/ui/` para `json` / `friendly` / `checklist`
+- modo de código/refatoração completo
+- casos reais documentados e demonstráveis
+- fluxo estruturado final operando ponta a ponta na UI
+
+### Checklist da foundation da Fase 5
+- [x] Criar módulo dedicado `src/structured/`
+- [x] Criar envelope de execução/resultado para outputs estruturados
+- [x] Criar parser/sanitizer/validator com falha controlada
+- [x] Validar saídas com Pydantic
+- [x] Gerar respostas em JSON no backend estruturado
+- [x] Definir schemas previsíveis por tarefa
+- [x] Registrar metadados de render mode por tarefa
+- [x] Documentar decisões da foundation da Fase 5
+- [x] Garantir compilação da foundation no projeto atual
+
+### Checklist funcional restante da Fase 5
+- [ ] Integrar seleção de modo estruturado na UI
+- [ ] Integrar renderização `json` no app
+- [ ] Integrar renderização `friendly` no app
+- [ ] Integrar renderização `checklist` no app
+- [ ] Fechar modo extrator de informações na UI
+- [ ] Fechar modo resumidor em tópicos na UI
+- [ ] Fechar modo analisador de currículo na UI
+- [ ] Fechar modo gerador de checklist na UI
 - [ ] Criar modo explicador/refatorador de código
-- [ ] Validar saídas com Pydantic
-- [ ] Gerar respostas em JSON
-- [ ] Gerar respostas em checklist
-- [ ] Definir schemas previsíveis por tarefa
-- [ ] Documentar padrões de uso por tipo de saída
+- [ ] Reusar o pipeline RAG atual nos modos que exigem contexto documental
+- [ ] Documentar padrões de uso por tipo de saída no nível de produto
 - [ ] Criar casos reais de extração estruturada a partir de documentos
+- [ ] Criar mini demo reprodutível da Fase 5
 
 ### Entregável
-- Módulo de análises com saída estruturada e validada
+- Módulo de análises com saída estruturada e validada, integrado à UI e com pelo menos 3 modos demonstráveis
 
 ### Evidência para GitHub/LinkedIn
 - exemplos antes/depois de saída livre vs. estruturada
 - screenshot ou tabela com JSON validado
 - mini demo mostrando transformação de documento em checklist/JSON
+- screenshot do app com seletor de modo estruturado
 
 ### O que preciso saber defender em entrevista
 - por que structured output é importante
 - como reduzir respostas inconsistentes
 - onde Pydantic ajuda confiabilidade
 - por que isso prepara o terreno para automação e agentes
+- por que a foundation foi separada da UI antes da integração final
 
 ---
 
@@ -1055,7 +1097,7 @@ Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA a
 
 ### Ordem recomendada daqui para frente
 
-1. **Fase 5 — Outputs estruturados**
+1. **Fechar a integração da Fase 5 no app (UI + renderer + 3 modos demonstráveis)**
 2. **Fase 5.5 — LangChain e LangGraph**
 3. **Fase 6 — Tools e agentes orientados a valor de negócio**
 4. **Fase 7+ — Benchmark, evals, observabilidade e engenharia profissional**
