@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import subprocess
 from urllib import request as urllib_request
@@ -91,7 +92,8 @@ class OllamaProvider:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib_request.urlopen(request, timeout=60) as response:
+        timeout_seconds = int(os.getenv("OLLAMA_HTTP_TIMEOUT_SECONDS", "300"))
+        with urllib_request.urlopen(request, timeout=timeout_seconds) as response:
             return json.loads(response.read().decode("utf-8"))
 
     @staticmethod
@@ -241,21 +243,31 @@ class OllamaProvider:
         context_window: int | None = None,
         truncate: bool = True,
     ) -> list[list[float]]:
-        payload: dict[str, object] = {
-            "model": model,
-            "input": texts,
-            "truncate": bool(truncate),
-        }
-        options: dict[str, object] = {}
-        if context_window:
-            options["num_ctx"] = int(context_window)
-        if options:
-            payload["options"] = options
-        response = self._native_json_request("/api/embed", payload)
-        embeddings = response.get("embeddings")
-        if not isinstance(embeddings, list):
-            raise RuntimeError("Resposta inválida do endpoint /api/embed do Ollama.")
-        return embeddings
+        if not texts:
+            return []
+
+        batch_size = max(1, int(os.getenv("OLLAMA_EMBED_BATCH_SIZE", "16")))
+        all_embeddings: list[list[float]] = []
+
+        for start_index in range(0, len(texts), batch_size):
+            batch = texts[start_index : start_index + batch_size]
+            payload: dict[str, object] = {
+                "model": model,
+                "input": batch,
+                "truncate": bool(truncate),
+            }
+            options: dict[str, object] = {}
+            if context_window:
+                options["num_ctx"] = int(context_window)
+            if options:
+                payload["options"] = options
+            response = self._native_json_request("/api/embed", payload)
+            embeddings = response.get("embeddings")
+            if not isinstance(embeddings, list):
+                raise RuntimeError("Resposta inválida do endpoint /api/embed do Ollama.")
+            all_embeddings.extend(embeddings)
+
+        return all_embeddings
 
     @staticmethod
     def iter_stream_text(stream):

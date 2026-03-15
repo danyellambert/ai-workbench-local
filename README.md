@@ -1,6 +1,8 @@
 # AI Workbench Local
 
-Plataforma de IA aplicada para experimentar LLMs locais e integrações opcionais free-tier, conversar com documentos, usar ferramentas e agentes, comparar modelos, avaliar respostas e monitorar desempenho.
+Plataforma de IA aplicada para experimentar **LLMs locais**, conversar com documentos, comparar estratégias de ingestão e retrieval, avaliar respostas e evoluir um pipeline de **RAG robusto, explicável e orientado a portfólio**.
+
+---
 
 ## Objetivo
 
@@ -8,15 +10,21 @@ Este projeto está sendo evoluído para se tornar um ativo forte de portfólio, 
 
 - chat com modelos locais
 - RAG com documentos
+- extração robusta de PDFs
 - outputs estruturados
-- tools e agentes
 - benchmarking, avaliação e observabilidade
+- experimentação controlada de arquitetura
+
+---
 
 ## Casos de uso principais
 
 1. **Chat com documentos (RAG)**
 2. **Assistente de código**
 3. **Extração estruturada de informação**
+4. **Benchmark de estratégias de parsing e retrieval**
+
+---
 
 ## Stack principal
 
@@ -26,15 +34,29 @@ Este projeto está sendo evoluído para se tornar um ativo forte de portfólio, 
 - OpenAI-compatible API
 - LangChain
 - LangGraph
-- Chroma ou FAISS
+- Chroma
 - SQLite
 - Pydantic
+- PyPDF
+- Docling
+- Matplotlib
+
+---
 
 ## Arquivos principais neste momento
 
-- `main_qwen.py` → versão local com Ollama
-- `main.py` → versão configurável para OpenAI por variável de ambiente
+- `main_qwen.py` → app principal local com Ollama
+- `main.py` → versão configurável para provider compatível com OpenAI
 - `proximos_passos.md` → roadmap oficial do projeto
+- `scripts/run_all_phase_4_5_benchmarks.py` → orquestrador completo dos 4 benchmarks da Fase 4.5
+- `scripts/run_phase_4_5_benchmark_suite.py` → suíte de embeddings, embedding context window e retrieval tuning
+- `scripts/run_pdf_extraction_benchmark_en.py` → benchmark automatizado dos modos de extração de PDF
+- `scripts/render_phase_4_5_charts.py` → renderização reprodutível dos gráficos da Fase 4.5
+- `docs/PHASE_4_5_BENCHMARK_RESULTS.md` → resultados completos com tabelas, gráficos e decisões
+- `docs/PHASE_4_5_VALIDATION.md` → fechamento técnico e operacional da Fase 4.5
+- `docs/BENCHMARK_PDF_EXTRACTION_en.md` → benchmark detalhado de extração de PDF
+
+---
 
 ## Estrutura atual do projeto
 
@@ -43,12 +65,35 @@ src/
   config.py
   prompt_profiles.py
   providers/
+  rag/
   services/
   storage/
   ui/
+
+scripts/
+  run_all_phase_4_5_benchmarks.py
+  run_phase_4_5_benchmark_suite.py
+  run_pdf_extraction_benchmark.py
+  run_pdf_extraction_benchmark_en.py
+  run_embedding_benchmark.py
+  render_phase_4_5_charts.py
+  compare_phase_4_5_configs.py
+  validate_phase_4_5.py
+
+docs/
+  BENCHMARK_PDF_EXTRACTION_en.md
+  PHASE_3_NOTES.md
+  PHASE_4_NOTES.md
+  PHASE_4_5_BENCHMARK_RESULTS.md
+  PHASE_4_5_VALIDATION.md
+  PUBLICATION_GUIDE.md
+  assets/
+    phase_4_5/
+  data/
+    phase_4_5_benchmark_data.json
 ```
 
-Essa estrutura foi introduzida na **Fase 2** e expandida na **Fase 3** para separar configuração, providers, perfis de prompt, persistência, estado de sessão e componentes de interface.
+---
 
 ## Como rodar localmente
 
@@ -60,7 +105,7 @@ pip install -r requirements.txt
 
 ### 2. Revise o arquivo `.env`
 
-O projeto já foi preparado para usar variáveis de ambiente. Se precisar recriar do zero:
+Se precisar recriar do zero:
 
 ```bash
 cp .env.example .env
@@ -68,9 +113,10 @@ cp .env.example .env
 
 ### 3. Garanta que o Ollama esteja disponível
 
-Exemplo de modelo local configurado por padrão:
+Exemplo de modelos locais:
 
-- `qwen2.5-coder:7b`
+- geração: `qwen2.5:7b`
+- embeddings: modelo configurado no `.env`
 
 ### 4. Execute a versão local
 
@@ -78,7 +124,7 @@ Exemplo de modelo local configurado por padrão:
 streamlit run main_qwen.py
 ```
 
-### 5. Execute a versão OpenAI (opcional)
+### 5. Execute a versão OpenAI-compatible (opcional)
 
 Preencha `OPENAI_API_KEY` no `.env` e rode:
 
@@ -86,179 +132,142 @@ Preencha `OPENAI_API_KEY` no `.env` e rode:
 streamlit run main.py
 ```
 
-## Segurança
+---
 
-- O projeto usa `.env` para configuração local
-- O arquivo `.env` está no `.gitignore`
-- Nunca publique chaves reais no repositório
-- Se uma chave já foi exposta, trate-a como comprometida e revogue-a
+## Modos de extração de PDF
 
-## Política de publicação
+O projeto possui **3 modos explícitos de extração**, selecionáveis na interface e benchmarkados na Fase 4.5.
 
-- O projeto deve permanecer em **repositório privado** até pelo menos a conclusão da **Fase 4** do roadmap
-- A pasta `materials_local/` fica fora do versionamento para evitar publicar materiais de curso e arquivos não autorais
-- O objetivo é publicar apenas o que for claramente parte do **projeto autoral**
-- A licença padrão definida para o projeto é **MIT**
+### 1. Básico
 
-## Git e GitHub
+Usa somente `pypdf`.
 
-Estratégia recomendada nesta fase:
+Melhor para:
+- PDFs textuais simples
+- ingestão rápida
+- comparação de baseline
 
-- branch principal: `main`
-- branch de integração: `dev`
-- branches futuras: `feature/...`
+### 2. Híbrido inteligente
 
-Exemplos:
+Usa `pypdf` como baseline e aplica enriquecimento seletivo em páginas suspeitas com Docling/OCR.
 
-- `feature/fase-1-streaming`
-- `feature/fase-2-arquitetura`
-- `feature/fase-4-rag`
+Melhor para:
+- apostilas
+- papers com figuras e tabelas
+- documentos mistos
 
-## Roadmap
+### 3. Completo por página
 
-O roadmap completo do projeto está em:
+Modo de cobertura máxima.
 
-- `proximos_passos.md`
+Melhor para:
+- scans
+- manuais antigos
+- PDFs image-heavy
+- testes de recall máximo
 
-## Documentação de publicação
+---
 
-Guia da Fase 0.5:
+## Fase 4.5 concluída
 
-- `docs/PUBLICATION_GUIDE.md`
-- `docs/PHASE_3_NOTES.md`
-- `docs/PHASE_4_NOTES.md`
+A Fase 4.5 foi encerrada com **quatro trilhas de benchmark** executadas no mesmo corpus local de quatro PDFs, incluindo **revisão humana** para o benchmark de extração.
 
-## Repositório remoto
+### Corpus e métricas usados
 
-- GitHub (privado, por enquanto): `https://github.com/danyellambert/ai-workbench-local`
+Corpus fixo da suíte:
 
-## Status atual
+- `2025-HB-44-20250106-Final-508.pdf`
+- `kaur-2016-ijca-911367.pdf`
+- `Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf`
+- `c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf`
 
-Fase atual em andamento:
+Métricas usadas:
 
-- **Fase 5 — Outputs estruturados**
+- **PDF extraction:** `manual_score` (0–2), tempo de extração e tempo de indexação
+- **retrieval benchmarks:** `Hit@1`, `Hit@K`, `MRR`, `avg_retrieval_seconds`, `indexing_seconds`
 
-Última fase fechada na prática:
-
-- **Fase 4.5 — RAG avançado e base documental**
-
-Próxima etapa natural:
-
-- transformar a base documental já estabilizada em fluxos com saída estruturada e validada
-
-## Evolução do roadmap
-
-O roadmap agora destaca explicitamente duas novas etapas de maturidade técnica:
-
-- **Fase 4.5 — RAG avançado e base documental**
-- **Fase 5.5 — Evolução com LangChain e LangGraph**
-
-Isso ajuda o projeto a mostrar não só funcionalidades, mas também **progressão técnica real** ao longo das fases.
-
-### O que já foi entregue na Fase 1
-
-- streaming da resposta no chat local
-- sidebar com configurações
-- seletor de modelo local
-- controle de temperatura
-- botão para limpar conversa
-- histórico simples persistido em arquivo local
-- medição da latência da última resposta
-- mensagens de erro mais amigáveis
-
-### O que já foi entregue na Fase 3
-
-- arquitetura preparada para múltiplos providers
-- seleção explícita de provider na interface
-- seleção de modelo por provider
-- perfis de prompt (`neutro`, `programador`, `professor`, `resumidor`, `extrator`)
-- metadados por mensagem com provider, modelo, perfil e temperatura
-- base pronta para comparar providers/modelos sem acoplar tudo no mesmo arquivo
-
-### O que já foi entregue na Fase 4
-
-- upload de documentos (PDF, TXT, CSV, MD, PY)
-- extração de texto por tipo de arquivo
-- chunking local com overlap
-- embeddings locais
-- armazenamento do índice em `.rag_store.json`
-- retrieval por similaridade cosseno
-- injeção de contexto recuperado no prompt
-- exibição de fontes usadas nas respostas
-- limpeza e reindexação do índice RAG
-
-### O que já foi entregue na Fase 4.5
-
-- base para múltiplos documentos no índice RAG
-- filtros por documento/tipo na camada de retrieval
-- metadados mais ricos por documento e chunk
-- JSON local (`.rag_store.json`) como índice canônico leve
-- Chroma local como backend vetorial persistido e sincronizado com o índice canônico
-- limpeza e remoção documental refletindo JSON + Chroma, sem depender só de delete incremental
-- clear físico da persistência `.chroma_rag/` quando o índice é zerado
-- transparência na UI sobre status do backend vetorial (`sincronizado`, `dessincronizado` ou `fallback_local`)
-- reranking híbrido leve (vetorial + lexical) antes da seleção final dos chunks
-- budget operacional do prompt para limitar o contexto documental antes da geração
-- configuração explícita de janela de contexto no projeto
-- controle visível de contexto para Ollama na sidebar
-- caminho nativo do Ollama para parâmetros avançados como `num_ctx`
-- controles visíveis de chunk size, overlap e top-k para teste
-- métricas visíveis de documentos, chunks e tipos indexados
-- telemetria básica de retrieval no chat
-- modo opcional de debug de retrieval com scores, backend usado e snippets dos chunks recuperados
-
-## Variáveis úteis para a Fase 3
-
-Você pode ajustar no `.env`:
+### Configuração recomendada após a Fase 4.5
 
 ```env
-OLLAMA_AVAILABLE_MODELS=qwen2.5-coder:7b,qwen2.5-coder:14b,deepseek-coder:6.7b
-DEFAULT_PROMPT_PROFILE=neutro
-OLLAMA_TEMPERATURE=0.2
-OPENAI_AVAILABLE_MODELS=gpt-4o-mini
+OLLAMA_EMBEDDING_MODEL=embeddinggemma:300m
+OLLAMA_EMBEDDING_CONTEXT_WINDOW=512
+RAG_CHUNK_SIZE=1200
+RAG_CHUNK_OVERLAP=80
+RAG_TOP_K=4
+RAG_RERANK_POOL_SIZE=8
+RAG_PDF_EXTRACTION_MODE=hybrid
 ```
 
-Essas variáveis ajudam a controlar quais modelos aparecem por provider e qual perfil de prompt é usado por padrão.
+### Benchmark highlights
 
-## Arquivo de histórico local
+#### 1) PDF extraction: quality vs extraction cost
 
-Durante a Fase 1, o chat passou a salvar o histórico localmente em:
+![PDF extraction quality vs cost](docs/assets/phase_4_5/02_pdf_extraction_aggregate_quality_vs_cost.png)
 
-- `.chat_history.json`
+`complete` obteve a melhor qualidade média agregada (**1.1094**), mas exigiu **1485.38 s** de extração média, contra **22.0248 s** de `hybrid`. A diferença de qualidade foi pequena demais para justificar esse custo como default.
 
-Esse arquivo fica fora do Git por segurança e para evitar versionar histórico de uso.
+#### 2) Embedding models: quality vs retrieval latency
 
-## Arquivo de índice RAG local
+![Embedding models quality vs latency](docs/assets/phase_4_5/09_embedding_models_quality_vs_latency.png)
 
-Durante a Fase 4, o índice de documentos passou a ser salvo localmente em:
+`embeddinggemma:300m` atingiu **MRR = 1.0** e ficou no melhor ponto de trade-off entre qualidade e latência entre os modelos perfeitos.
 
-- `.rag_store.json`
+#### 3) Embedding context window: practical optimum
 
-Esse arquivo também fica fora do Git para evitar versionar dados locais do usuário.
+![Embedding context retrieval vs window](docs/assets/phase_4_5/13_embedding_ctx_retrieval_vs_window.png)
 
-Na Fase 4.5, a arquitetura ficou explícita:
+No trilho vencedor, `embeddinggemma:300m + 512` entregou **MRR = 1.0** com a menor latência média (**0.6932 s**). O benchmark mostrou que contexto maior não foi automaticamente melhor.
 
-- `.rag_store.json` é o **índice canônico leve**
-- `.chroma_rag/` é o **backend vetorial persistido**
-- o app tenta manter os dois espelhados a cada indexação e remoção
-- ao limpar o índice, o JSON é apagado e a pasta `.chroma_rag/` também é removida fisicamente
-- se o Chroma falhar, a aplicação continua operando com fallback local a partir do JSON
+#### 4) Retrieval tuning: winner vs baseline
 
-## Configuração explícita de contexto
+![Retrieval tuning quality vs latency](docs/assets/phase_4_5/17_retrieval_tuning_quality_vs_latency.png)
 
-O projeto agora também prevê configuração explícita de janela de contexto:
+`lower_overlap` manteve **MRR = 1.0** e melhorou latência e indexação em relação ao baseline. Isso justificou a troca de `chunk_overlap=200` para `80` como default.
 
-- `OLLAMA_CONTEXT_WINDOW`
-- `OPENAI_CONTEXT_WINDOW`
+#### 5) Executive summary
 
-Além do default em `.env.example`, o app mostra ajuste visível de contexto na sidebar quando o provider selecionado for **Ollama**.
+![Phase 4.5 winner matrix](docs/assets/phase_4_5/21_phase_4_5_winner_matrix.png)
 
-Observação prática:
+A decisão final foi feita por **trade-off entre qualidade, custo e robustez**, não por score bruto isolado.
 
-- no caso do Ollama, esse valor é enviado como `num_ctx` pela rota nativa `/api/chat`
-- valores muito altos podem aumentar consumo de memória e latência
-- se o índice RAG estiver grande, vale ajustar também `RAG_CHUNK_SIZE`, `RAG_TOP_K`, `RAG_RERANK_POOL_SIZE` e o budget do prompt
-- a aplicação agora expõe um budget operacional do prompt e pode truncar o contexto recuperado antes da geração
-- a validação atual é **técnica e operacional**, combinando rota nativa, `/api/show` e sinal auxiliar de `ollama ps`
-- isso não deve ser vendido como prova exaustiva do runtime interno, e sim como fechamento prático suficientemente forte para a Fase 4.5
-- a camada OpenAI-compatible continua útil para compatibilidade, mas o caminho nativo é o mais confiável para parâmetros avançados
+### Como regenerar os gráficos da Fase 4.5
+
+```bash
+python scripts/render_phase_4_5_charts.py
+```
+
+Os dados-base versionados usados na renderização estão em:
+
+```text
+docs/data/phase_4_5_benchmark_data.json
+```
+
+Para a análise completa, veja:
+- `docs/PHASE_4_5_BENCHMARK_RESULTS.md`
+- `docs/PHASE_4_5_VALIDATION.md`
+- `docs/BENCHMARK_PDF_EXTRACTION_en.md`
+
+---
+
+## Próximo passo estratégico
+
+Com a Fase 4.5 encerrada, o roadmap oficial segue para:
+
+1. **Fase 5 — Outputs estruturados**
+2. **Fase 5.5 — Evolução com LangChain e LangGraph**
+3. **Fase 6 — Tools e agentes orientados a valor de negócio**
+
+---
+
+## Valor de portfólio
+
+Este projeto não foi fechado como “um chatbot com RAG”. A Fase 4.5 consolidou o repositório como um artefato de portfólio de **AI Engineer**, mostrando:
+
+- benchmark de ingestão com validação humana
+- benchmark de representação vetorial
+- benchmark de tuning de contexto de embedding
+- benchmark de retrieval tuning
+- defaults finais escolhidos por evidência
+- assets visuais e script reprodutível de benchmark
+
+Isso aumenta a auditabilidade do projeto e facilita defender as decisões técnicas em entrevista.

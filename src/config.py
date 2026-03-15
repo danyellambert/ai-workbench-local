@@ -46,6 +46,20 @@ class RagSettings:
     context_chars_per_token: float = 4.0
     context_budget_min_chars: int = 1800
     context_budget_max_chars: int = 16000
+    pdf_extraction_mode: str = "hybrid"
+    pdf_baseline_chars_per_page_threshold: int = 90
+    pdf_min_text_coverage_ratio: float = 0.65
+    pdf_suspicious_image_count_threshold: int = 1
+    pdf_suspicious_image_area_ratio: float = 0.18
+    pdf_suspicious_low_text_chars: int = 220
+    pdf_suspicious_page_score_threshold: float = 0.85
+    pdf_suspicious_pages_trigger_full_docling_ratio: float = 0.45
+    pdf_suspicious_pages_trigger_full_docling_min_count: int = 6
+    pdf_max_selective_docling_pages: int = 12
+    pdf_docling_enabled: bool = True
+    pdf_docling_ocr_enabled: bool = True
+    pdf_docling_force_full_page_ocr: bool = False
+    pdf_docling_picture_description: bool = False
 
 
 
@@ -94,11 +108,11 @@ def get_openai_settings() -> OpenAISettings:
 
 def get_rag_settings() -> RagSettings:
     return RagSettings(
-        embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "bge-m3"),
-        embedding_context_window=int(os.getenv("OLLAMA_EMBEDDING_CONTEXT_WINDOW", "8192")),
+        embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma:300m"),
+        embedding_context_window=int(os.getenv("OLLAMA_EMBEDDING_CONTEXT_WINDOW", "512")),
         embedding_truncate=os.getenv("OLLAMA_EMBEDDING_TRUNCATE", "true").strip().lower() not in {"0", "false", "no"},
         chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1200")),
-        chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "200")),
+        chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "80")),
         top_k=int(os.getenv("RAG_TOP_K", "4")),
         store_path=BASE_DIR / ".rag_store.json",
         chroma_path=BASE_DIR / ".chroma_rag",
@@ -108,4 +122,18 @@ def get_rag_settings() -> RagSettings:
         context_chars_per_token=float(os.getenv("RAG_CONTEXT_CHARS_PER_TOKEN", "4.0")),
         context_budget_min_chars=int(os.getenv("RAG_CONTEXT_BUDGET_MIN_CHARS", "1800")),
         context_budget_max_chars=int(os.getenv("RAG_CONTEXT_BUDGET_MAX_CHARS", "16000")),
+        pdf_extraction_mode=os.getenv("RAG_PDF_EXTRACTION_MODE", "hybrid").strip().lower(),
+        pdf_baseline_chars_per_page_threshold=int(os.getenv("RAG_PDF_BASELINE_CHARS_PER_PAGE_THRESHOLD", "90")),
+        pdf_min_text_coverage_ratio=float(os.getenv("RAG_PDF_MIN_TEXT_COVERAGE_RATIO", "0.65")),
+        pdf_suspicious_image_count_threshold=int(os.getenv("RAG_PDF_SUSPICIOUS_IMAGE_COUNT_THRESHOLD", "1")),
+        pdf_suspicious_image_area_ratio=float(os.getenv("RAG_PDF_SUSPICIOUS_IMAGE_AREA_RATIO", "0.18")),
+        pdf_suspicious_low_text_chars=int(os.getenv("RAG_PDF_SUSPICIOUS_LOW_TEXT_CHARS", "220")),
+        pdf_suspicious_page_score_threshold=float(os.getenv("RAG_PDF_SUSPICIOUS_PAGE_SCORE_THRESHOLD", "0.85")),
+        pdf_suspicious_pages_trigger_full_docling_ratio=float(os.getenv("RAG_PDF_SUSPICIOUS_PAGES_TRIGGER_FULL_DOCLING_RATIO", "0.45")),
+        pdf_suspicious_pages_trigger_full_docling_min_count=int(os.getenv("RAG_PDF_SUSPICIOUS_PAGES_TRIGGER_FULL_DOCLING_MIN_COUNT", "6")),
+        pdf_max_selective_docling_pages=int(os.getenv("RAG_PDF_MAX_SELECTIVE_DOCLING_PAGES", "12")),
+        pdf_docling_enabled=os.getenv("RAG_PDF_DOCLING_ENABLED", "true").strip().lower() not in {"0", "false", "no"},
+        pdf_docling_ocr_enabled=os.getenv("RAG_PDF_DOCLING_OCR_ENABLED", "true").strip().lower() not in {"0", "false", "no"},
+        pdf_docling_force_full_page_ocr=os.getenv("RAG_PDF_DOCLING_FORCE_FULL_PAGE_OCR", "false").strip().lower() not in {"0", "false", "no"},
+        pdf_docling_picture_description=os.getenv("RAG_PDF_DOCLING_PICTURE_DESCRIPTION", "false").strip().lower() not in {"0", "false", "no"},
     )

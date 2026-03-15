@@ -1,97 +1,157 @@
-# Fase 4.5 — validação técnica e fechamento prático
+# Phase 4.5 Validation
 
-Este documento registra o que já foi efetivamente validado na Fase 4.5 e o que ainda depende de benchmark comparativo local.
+## Objective
 
-## O que foi fechado nesta rodada
+Phase 4.5 was the transition from a merely functional RAG pipeline to a **benchmarked, explainable, and operationally defensible** baseline.
 
-- Chroma local como backend vetorial persistente sincronizado com o JSON canônico, com fallback seguro para store local
-- clear físico da pasta `.chroma_rag/` quando o índice é limpo
-- UX refinada para indexação e reindexação seletiva dos uploads atuais
-- remoção em lote de documentos indexados
-- debug leve de retrieval
-- reranking híbrido leve (vetorial + lexical) antes da seleção final dos chunks
-- budget operacional do prompt para limitar o contexto documental antes da geração
-- caminho nativo do Ollama em `/api/chat` para parâmetros avançados como `num_ctx`
-- painel de inspeção técnica do contexto do Ollama no app
-- documentação do estado real da Fase 4.5 no `README.md` e no `proximos_passos.md`
+The validation goal was not limited to “does the app answer questions?”. It explicitly covered:
 
-## Validação técnica automatizada
+- ingestion robustness
+- embedding selection
+- embedding context-window tuning
+- retrieval tuning
+- human review of extraction outputs
+- operational observability
+- reproducible benchmark documentation
 
-O projeto agora inclui o script:
+---
 
-```bash
-python scripts/validate_phase_4_5.py
+## Validation components completed
+
+### 1) PDF extraction benchmark with human review
+
+Completed:
+- benchmark execution for `basic`, `hybrid`, and `complete`
+- manual review split into 12 packets
+- 192 total manual judgments
+- aggregate and document-level consolidation
+- visual summary generated and versioned
+
+Key outcome:
+- `hybrid` selected as project default
+- `basic` retained as fast baseline
+- `complete` retained as escalation mode
+
+Reference docs:
+- `docs/BENCHMARK_PDF_EXTRACTION_en.md`
+- `docs/PHASE_4_5_BENCHMARK_RESULTS.md`
+
+Key visuals:
+- `docs/assets/phase_4_5/02_pdf_extraction_aggregate_quality_vs_cost.png`
+- `docs/assets/phase_4_5/05_pdf_extraction_doc_level_manual_score.png`
+
+---
+
+### 2) Embedding model benchmark
+
+Completed:
+- same corpus and fixed question set
+- quality comparison with `Hit@1`, `Hit@K`, `MRR`
+- retrieval latency comparison
+- indexing-cost comparison
+- visual summary generated and versioned
+
+Key outcome:
+- `embeddinggemma:300m` selected as default embedding model
+
+Key visuals:
+- `docs/assets/phase_4_5/09_embedding_models_quality_vs_latency.png`
+- `docs/assets/phase_4_5/10_embedding_models_indexing_time.png`
+
+---
+
+### 3) Embedding context window benchmark
+
+Completed:
+- explicit benchmark of `embedding_context_window`
+- validated that context size is a real tuning axis
+- compared moderate and extreme windows
+- visual summary generated and versioned
+
+Key outcome:
+- `embeddinggemma:300m + 512` selected as the practical default
+
+Key visuals:
+- `docs/assets/phase_4_5/13_embedding_ctx_retrieval_vs_window.png`
+- `docs/assets/phase_4_5/16_embedding_ctx_extreme_context_warning.png`
+
+---
+
+### 4) Retrieval tuning benchmark
+
+Completed:
+- benchmarked `chunk_size`
+- benchmarked `chunk_overlap`
+- benchmarked `top_k`
+- benchmarked `rerank_pool_size`
+- compared baseline vs tuned variants
+- visual summary generated and versioned
+
+Key outcome:
+- `lower_overlap` selected as the final retrieval configuration
+
+Key visuals:
+- `docs/assets/phase_4_5/17_retrieval_tuning_quality_vs_latency.png`
+- `docs/assets/phase_4_5/20_retrieval_tuning_quality_metrics.png`
+
+---
+
+## Final recommended configuration
+
+```env
+OLLAMA_EMBEDDING_MODEL=embeddinggemma:300m
+OLLAMA_EMBEDDING_CONTEXT_WINDOW=512
+RAG_CHUNK_SIZE=1200
+RAG_CHUNK_OVERLAP=80
+RAG_TOP_K=4
+RAG_RERANK_POOL_SIZE=8
+RAG_PDF_EXTRACTION_MODE=hybrid
 ```
 
-Esse script valida automaticamente:
+Executive visuals:
 
-1. indexação multi-arquivo
-2. filtros por documento e tipo
-3. remoção seletiva
-4. sincronização total entre JSON local e Chroma persistido
-5. clear físico do persist dir do Chroma
-6. geração de metadados de fontes
-7. reranking híbrido com candidate pool explícito
-8. limitação do contexto por budget operacional do prompt
-9. envio de `num_ctx` no payload nativo do Ollama
-10. inspeção técnica combinando `/api/chat`, `/api/show` e `ollama ps`
-11. exposição explícita do backend vetorial usado no retrieval
+![Winner matrix](assets/phase_4_5/21_phase_4_5_winner_matrix.png)
 
-## Evidência técnica mínima esperada
+![Final config card](assets/phase_4_5/22_phase_4_5_final_config_card.png)
 
-Ao rodar o script, a saída esperada deve conter algo próximo de:
+![Cost/quality decision summary](assets/phase_4_5/23_phase_4_5_cost_quality_summary.png)
+
+---
+
+## Reproducibility
+
+### Benchmark data
 
 ```text
-[ok] Fluxo RAG multi-arquivo validado com Chroma, reranking híbrido, budget de contexto e clear físico.
-[ok] Caminho nativo do Ollama validado com envio de num_ctx e inspeção técnica.
-[ok] Fase 4.5: validação técnica automatizada concluída.
+docs/data/phase_4_5_benchmark_data.json
 ```
 
-## Como fechar a validação prática local
-
-Além do script, o fechamento prático ideal desta fase deve incluir uma rodada manual no app:
+### Regenerate charts
 
 ```bash
-streamlit run main_qwen.py
+python scripts/render_phase_4_5_charts.py
 ```
 
-Checklist recomendado:
-
-- indexar 2 ou mais documentos diferentes
-- usar o filtro por documento e por tipo
-- remover documentos em lote sem limpar toda a base
-- reindexar apenas os uploads atuais ao mudar `chunk_size` ou `chunk_overlap`
-- confirmar que `Limpar índice` apaga o JSON local e remove a pasta `.chroma_rag/`
-- abrir o painel **Validação de contexto do Ollama**
-- abrir o debug de retrieval e confirmar:
-  - backend vetorial usado (`chroma` ou `local_fallback`)
-  - candidate pool do reranking
-  - budget operacional do prompt
-  - quantos chunks entraram de fato no contexto final
-
-## O que ainda continua em aberto na Fase 4.5
-
-Esses itens não devem ser marcados como completamente encerrados só por causa desta validação:
-
-- comparação prática entre embeddings (`bge-m3` vs alternativas)
-- benchmark fino de retrieval/performance com screenshots e evidência de portfólio
-
-Para ajudar nessa rodada prática, o projeto agora inclui também:
+### Validate syntax after documentation changes
 
 ```bash
-python scripts/compare_phase_4_5_configs.py --output docs/phase_4_5_eval_template.json
+python -m compileall src scripts
 ```
 
-Esse helper gera um template local para você registrar as perguntas fixas, os runs comparados e as evidências da comparação prática.
+---
 
-## Como defender essa fase em entrevista
+## Why Phase 4.5 is considered complete
 
-A narrativa mais forte agora é:
+Phase 4.5 is considered complete because the project now has all of the following simultaneously:
 
-- o projeto saiu de um RAG simples para uma base documental operacional
-- a UX já suporta operações reais de manutenção do índice
-- o retrieval deixou de depender só do ranking vetorial bruto
-- o prompt passou a ter budget operacional explícito para reduzir excesso de contexto
-- o caminho nativo do Ollama foi adotado quando o projeto passou a exigir controle fino de contexto
-- a validação publicada é técnica e operacional; ela não vende uma certeza impossível sobre o runtime interno
-- a validação não depende só de percepção visual; existe checagem técnica explícita e roteiro de evidência prática
+- a persistent and observable RAG pipeline
+- explicit embedding compatibility handling
+- explicit embedding context-window handling
+- practical retrieval tuning backed by measured evidence
+- PDF extraction benchmark with human review
+- consolidated numerical results
+- versioned chart assets
+- a chart-rendering script that reproduces the visual evidence
+- documented defaults justified by measured trade-offs
+
+That is enough to move the project from a “functional prototype” to a **benchmarked baseline** that can be defended in portfolio material and in AI Engineer interviews.

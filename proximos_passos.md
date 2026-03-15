@@ -179,9 +179,9 @@ O projeto deve ter configuração explícita e versionada para pontos críticos,
 
 Para o projeto em português e multilíngue, a direção mais forte discutida foi usar:
 
-- **`bge-m3`** como embedding model principal
+- **`embeddinggemma:300m`** como embedding model principal após a rodada de benchmark da Fase 4.5
 
-Mantendo espaço para comparar depois com alternativas como:
+Mantendo `bge-m3` como baseline forte e deixando espaço para comparações futuras com:
 
 - `nomic-embed-text`
 - `mxbai-embed-large`
@@ -264,7 +264,11 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 ### Fase atual em andamento
 
-- **Fase 4.5 — RAG avançado e base documental**
+- **Fase 5 — Outputs estruturados**
+
+### Fase concluída mais recentemente
+
+- **Fase 4.5 — concluída com benchmark, avaliação humana e configuração final recomendada**
 
 ### O que já foi entregue na Fase 4.5
 
@@ -281,7 +285,7 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - [x] leitura centralizada dessas variáveis em `src/config.py`
 - [x] controle visível de contexto na sidebar quando provider = Ollama
 - [x] registro do contexto como metadado da conversa
-- [x] escolha explícita de `OLLAMA_EMBEDDING_MODEL=bge-m3`
+- [x] escolha explícita do embedding model com benchmark comparativo e recomendação final (`embeddinggemma:300m`)
 - [x] compactação e normalização do `.rag_store.json`
 - [x] evitar reload desnecessário do índice a cada rerun
 - [x] remoção dos warnings de `use_container_width`
@@ -304,10 +308,15 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - contexto como metadado
 - compactação e migração do índice local
 
-### O que ainda não considero fechado na Fase 4.5
+### O que foi fechado experimentalmente na Fase 4.5
 
-- [ ] comparação prática entre embeddings
-- [ ] benchmark final de tuning (`RAG_CHUNK_SIZE`, `RAG_TOP_K`, quantidade de chunks enviados)
+- [x] comparação prática entre embeddings
+- [x] comparação prática entre janelas de contexto de embedding
+- [x] benchmark final de tuning (`RAG_CHUNK_SIZE`, `RAG_TOP_K`, `RAG_CHUNK_OVERLAP`, `RAG_RERANK_POOL_SIZE`)
+- [x] benchmark de extração de PDF com revisão humana (`basic`, `hybrid`, `complete`)
+- [x] documentação visual reprodutível da Fase 4.5 com gráficos versionados
+- [x] script dedicado para regenerar os gráficos da Fase 4.5 a partir de dados versionados
+- [x] configuração final recomendada do pipeline baseada em trade-off entre qualidade, custo e robustez
 
 ### O que já considero fechado nesta rodada final da Fase 4.5
 
@@ -336,10 +345,10 @@ Ou seja:
 
 A ordem mais forte continua sendo:
 
-1. **Fechar a Fase 4.5**
-2. **Fase 5 — Outputs estruturados**
-3. **Fase 5.5 — Evolução com LangChain e LangGraph**
-4. **Fase 6 — Tools e agentes orientados a valor de negócio**
+1. **Fase 5 — Outputs estruturados**
+2. **Fase 5.5 — Evolução com LangChain e LangGraph**
+3. **Fase 6 — Tools e agentes orientados a valor de negócio**
+4. **Fase 7+ — Benchmark, evals, observabilidade e engenharia profissional**
 
 ---
 
@@ -621,39 +630,67 @@ Objetivo desta fase: sair de um RAG apenas funcional para um pipeline mais robus
 - [x] Preparar infraestrutura para comparação prática de janelas de contexto de embedding
 - [x] Tornar observável a compatibilidade entre configuração de embedding e índice persistido
 
-### Ainda pendente para fechamento experimental da Fase 4.5
+### Fechamento experimental da Fase 4.5
 
-- [ ] Comparar embeddings na prática no dataset real (ex.: `bge-m3` vs `nomic-embed-text`)
-  - [ ] Definir conjunto fixo de perguntas de teste
-  - [ ] Rodar as mesmas perguntas com embeddings diferentes
-  - [ ] Comparar qualidade das fontes recuperadas
-  - [ ] Comparar latência de retrieval
-  - [ ] Registrar screenshots/evidências do resultado
+- [x] Comparar embeddings na prática no dataset real
+  - [x] Definir conjunto fixo de perguntas de teste
+  - [x] Rodar as mesmas perguntas com embeddings diferentes
+  - [x] Comparar qualidade das fontes recuperadas
+  - [x] Comparar latência de retrieval
+  - [x] Registrar evidências locais do resultado
 
-- [ ] Comparar janelas de contexto de embedding na prática
-  - [ ] Definir pelo menos duas configurações de `embedding_context_window`
-  - [ ] Reindexar com cada configuração
-  - [ ] Comparar impacto nas fontes recuperadas
-  - [ ] Comparar impacto na latência e estabilidade operacional
-  - [ ] Registrar evidências locais do comportamento
+- [x] Comparar janelas de contexto de embedding na prática
+  - [x] Definir múltiplas configurações de `embedding_context_window`
+  - [x] Reindexar com cada configuração
+  - [x] Comparar impacto nas fontes recuperadas
+  - [x] Comparar impacto na latência e estabilidade operacional
+  - [x] Registrar evidências locais do comportamento
 
-- [ ] Executar benchmark prático de tuning de retrieval
-  - [ ] Comparar combinações de `chunk_size`
-  - [ ] Comparar combinações de `chunk_overlap`
-  - [ ] Comparar `top_k`
-  - [ ] Comparar `candidate_pool_size`
-  - [ ] Observar impacto do reranking híbrido
-  - [ ] Registrar configuração final recomendada
+- [x] Executar benchmark prático de tuning de retrieval
+  - [x] Comparar combinações de `chunk_size`
+  - [x] Comparar combinações de `chunk_overlap`
+  - [x] Comparar `top_k`
+  - [x] Comparar `candidate_pool_size`
+  - [x] Observar impacto do reranking híbrido
+  - [x] Registrar configuração final recomendada
+
+- [x] Executar benchmark de extração de PDF com revisão humana
+  - [x] Consolidar revisão manual dos 12 packets
+  - [x] Comparar custo e qualidade entre `basic`, `hybrid` e `complete`
+  - [x] Registrar modo padrão recomendado para o projeto
+
+### Achados finais da Fase 4.5
+
+- **Extração de PDF padrão:** `hybrid`
+  - `avg_manual_score = 1.0625`
+  - `avg_extraction_seconds = 22.0248`
+  - decisão tomada por trade-off, já que `complete` teve `1.1094`, porém com `1485.38 s` de extração média
+- **Embedding padrão:** `embeddinggemma:300m`
+  - `Hit@1 = 1.0`
+  - `MRR = 1.0`
+  - `avg_retrieval_seconds = 0.7259`
+- **Janela de contexto do embedding:** `512`
+  - melhor run: `embeddinggemma:300m + 512`
+  - `avg_retrieval_seconds = 0.6932`
+- **Retrieval recomendado:** `chunk_size=1200`, `chunk_overlap=80`, `top_k=4`, `rerank_pool_size=8`
+  - melhor run: `lower_overlap`
+  - `avg_retrieval_seconds = 0.8449`
+  - melhor do que o baseline (`0.9102`) sem perder qualidade
+- **Justificativa:** melhor equilíbrio entre qualidade de recuperação, robustez documental e custo operacional
+- **Documentação de apoio:** `docs/PHASE_4_5_BENCHMARK_RESULTS.md`, `docs/PHASE_4_5_VALIDATION.md`, `docs/BENCHMARK_PDF_EXTRACTION_en.md`
+- **Assets visuais versionados:** `docs/assets/phase_4_5/`
+- **Renderização reprodutível dos gráficos:** `scripts/render_phase_4_5_charts.py` + `docs/data/phase_4_5_benchmark_data.json`
 
 ### Critério de encerramento da Fase 4.5
 
-A Fase 4.5 será considerada totalmente encerrada quando:
-- o backend Chroma permanecer estável no fluxo normal de uso
-- a remoção/reindexação seguir coerente com o índice canônico
-- a UI continuar deixando claro o backend usado, o embedding ativo, a janela de contexto do embedding e o status do retrieval
-- a comparação prática entre embeddings for realizada com evidência local
-- a comparação prática entre janelas de contexto de embedding for realizada com evidência local
-- o benchmark final de tuning for executado e documentado
+A Fase 4.5 está considerada encerrada porque:
+- o backend Chroma permaneceu estável no fluxo normal de uso
+- a remoção/reindexação segue coerente com o índice canônico
+- a UI deixa claro o backend usado, o embedding ativo, a janela de contexto do embedding e o status do retrieval
+- a comparação prática entre embeddings foi realizada com evidência local
+- a comparação prática entre janelas de contexto de embedding foi realizada com evidência local
+- o benchmark final de tuning foi executado e documentado
+- o benchmark de extração foi executado com revisão humana consolidada
 
 ---
 
@@ -1018,11 +1055,11 @@ Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA a
 
 ### Ordem recomendada daqui para frente
 
-1. **Fechar Fase 4.5**
-2. **Fase 5 — Outputs estruturados**
-3. **Fase 5.5 — LangChain e LangGraph**
-4. **Fase 6 — Tools e agentes orientados a valor de negócio**
-5. **Fase 7+ — Benchmark, evals, observabilidade e engenharia profissional**
+1. **Fase 5 — Outputs estruturados**
+2. **Fase 5.5 — LangChain e LangGraph**
+3. **Fase 6 — Tools e agentes orientados a valor de negócio**
+4. **Fase 7+ — Benchmark, evals, observabilidade e engenharia profissional**
+5. **Fase 11 — Pacote final de portfólio**
 
 ### Métrica de sucesso do roadmap
 
