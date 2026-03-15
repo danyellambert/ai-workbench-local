@@ -1,6 +1,10 @@
 from src.config import get_ollama_settings, get_openai_settings
 from src.providers.ollama_provider import OllamaProvider
-from src.providers.openai_provider import OpenAIProvider
+
+try:
+    from src.providers.openai_provider import OpenAIProvider
+except Exception:  # optional dependency
+    OpenAIProvider = None
 
 
 def build_provider_registry() -> dict[str, dict[str, object]]:
@@ -14,7 +18,7 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
     }
 
     openai_settings = get_openai_settings()
-    if openai_settings.api_key:
+    if openai_settings.api_key and OpenAIProvider is not None:
         registry["openai"] = {
             "label": "OpenAI",
             "detail": "Provider cloud opcional configurado por variável de ambiente",
