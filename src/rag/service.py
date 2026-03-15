@@ -31,6 +31,11 @@ def _settings_payload(settings: RagSettings) -> dict[str, object]:
         "rerank_pool_size": settings.rerank_pool_size,
         "rerank_lexical_weight": settings.rerank_lexical_weight,
         "context_budget_ratio": settings.context_budget_ratio,
+        "pdf_extraction_mode": settings.pdf_extraction_mode,
+        "pdf_docling_enabled": settings.pdf_docling_enabled,
+        "pdf_docling_ocr_enabled": settings.pdf_docling_ocr_enabled,
+        "pdf_docling_force_full_page_ocr": settings.pdf_docling_force_full_page_ocr,
+        "pdf_docling_picture_description": settings.pdf_docling_picture_description,
     }
 
 
@@ -69,6 +74,7 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
                     "char_count": 0,
                     "chunk_count": 0,
                     "indexed_at": rag_index.get("updated_at") or rag_index.get("created_at"),
+                    "loader_metadata": normalized_chunk.get("loader_metadata") or {},
                 },
             )
 
@@ -122,6 +128,7 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
             "char_count": document.get("char_count"),
             "chunk_count": len(chunks),
             "indexed_at": rag_index.get("created_at"),
+            "loader_metadata": document.get("loader_metadata") or {},
         }
         migrated_chunks: list[dict[str, object]] = []
         for chunk in chunks:
@@ -138,6 +145,7 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
                     "file_hash": document.get("file_hash"),
                     "file_type": document.get("file_type"),
                     "source": normalized_chunk.get("source") or document.get("name"),
+                    "loader_metadata": normalized_chunk.get("loader_metadata") or document.get("loader_metadata") or {},
                 }
             )
 
@@ -532,6 +540,7 @@ def upsert_documents_in_rag_index(
                     "document_id": document_id,
                     "file_hash": document.file_hash,
                     "file_type": document.file_type,
+                    "loader_metadata": document.metadata,
                 }
             )
 
@@ -543,6 +552,7 @@ def upsert_documents_in_rag_index(
             "char_count": len(document.text),
             "chunk_count": len(indexed_chunks),
             "indexed_at": now,
+            "loader_metadata": document.metadata,
         }
         existing_chunks.extend(indexed_chunks)
 

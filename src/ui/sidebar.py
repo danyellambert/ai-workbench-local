@@ -13,6 +13,7 @@ def render_chat_sidebar(
     default_rag_chunk_size: int,
     default_rag_chunk_overlap: int,
     default_rag_top_k: int,
+    default_pdf_extraction_mode: str,
     embedding_model_options: list[str],
     default_embedding_model: str,
     default_embedding_context_window: int,
@@ -22,9 +23,16 @@ def render_chat_sidebar(
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, int, int, int, int, str, int, bool, bool]:
+) -> tuple[str, str, str, float, int, int, int, int, str, int, str, bool, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
+    pdf_mode_options = ["basic", "hybrid", "complete"]
+    pdf_mode_labels = {
+        "basic": "Básico · pypdf apenas · mais rápido",
+        "hybrid": "Híbrido inteligente · melhor equilíbrio",
+        "complete": "Completo por página · máxima cobertura",
+    }
+    default_pdf_mode = default_pdf_extraction_mode if default_pdf_extraction_mode in pdf_mode_options else "hybrid"
 
     with st.sidebar:
         st.header("Configurações")
@@ -131,6 +139,13 @@ def render_chat_sidebar(
                 help="Quantidade de chunks recuperados a cada pergunta.",
             )
         )
+        selected_pdf_extraction_mode = st.selectbox(
+            "Extração de PDFs",
+            pdf_mode_options,
+            index=pdf_mode_options.index(default_pdf_mode),
+            format_func=lambda key: pdf_mode_labels[key],
+            help="Básico = pypdf. Híbrido = rápido com enriquecimento seletivo. Completo = Docling/OCR página a página com cobertura máxima e custo maior.",
+        )
         debug_retrieval = st.checkbox(
             "Mostrar debug de retrieval",
             value=False,
@@ -149,12 +164,11 @@ def render_chat_sidebar(
             st.caption(detail)
         if selected_provider == "ollama":
             st.caption(f"Contexto ativo no Ollama: `{context_window}`")
-        st.caption(
-            f"Embedding ativo: {selected_embedding_model} · num_ctx={selected_embedding_context_window}"
-        )
+        st.caption(f"Embedding ativo: {selected_embedding_model} · num_ctx={selected_embedding_context_window}")
         st.caption(
             f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap}"
         )
+        st.caption(f"Extração PDF ativa: {pdf_mode_labels[selected_pdf_extraction_mode]}")
         st.caption("Pipeline ativo: retrieval vetorial + reranking híbrido + budget de contexto no prompt.")
         st.caption(f"Histórico local: `{history_filename}`")
         st.caption(prompt_profiles[selected_prompt_profile]["description"])
@@ -171,6 +185,7 @@ def render_chat_sidebar(
         rag_top_k,
         selected_embedding_model,
         selected_embedding_context_window,
+        selected_pdf_extraction_mode,
         clear_requested,
         debug_retrieval,
     )

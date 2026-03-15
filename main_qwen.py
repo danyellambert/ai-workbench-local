@@ -6,6 +6,7 @@ from src.config import get_ollama_settings, get_rag_settings
 from src.prompt_profiles import build_prompt_messages, get_prompt_profiles
 from src.providers.registry import build_provider_registry
 from src.rag.loaders import load_document
+from src.rag.pdf_extraction import describe_pdf_extraction_mode, normalize_pdf_extraction_mode
 from src.rag.prompting import estimate_rag_context_budget_chars, inject_rag_context
 from src.rag.service import (
     build_source_metadata,
@@ -100,6 +101,7 @@ default_context_window_by_provider = {
     rag_top_k,
     selected_embedding_model,
     selected_embedding_context_window,
+    selected_pdf_extraction_mode,
     clear_requested,
     debug_retrieval,
 ) = render_chat_sidebar(
@@ -114,6 +116,7 @@ default_context_window_by_provider = {
     default_rag_chunk_size=rag_settings.chunk_size,
     default_rag_chunk_overlap=rag_settings.chunk_overlap,
     default_rag_top_k=rag_settings.top_k,
+    default_pdf_extraction_mode=normalize_pdf_extraction_mode(rag_settings.pdf_extraction_mode),
     embedding_model_options=embedding_model_options,
     default_embedding_model=rag_settings.embedding_model,
     default_embedding_context_window=rag_settings.embedding_context_window,
@@ -132,6 +135,7 @@ effective_rag_settings = replace(
     chunk_size=rag_chunk_size,
     chunk_overlap=min(rag_chunk_overlap, rag_chunk_size // 2),
     top_k=rag_top_k,
+    pdf_extraction_mode=normalize_pdf_extraction_mode(selected_pdf_extraction_mode),
 )
 
 selected_provider_instance = provider_registry[selected_provider]["instance"]
@@ -157,6 +161,7 @@ st.caption(
 st.caption(
     f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k} · rerank_pool={effective_rag_settings.rerank_pool_size}"
 )
+st.caption(f"Extração PDF nesta execução: {describe_pdf_extraction_mode(effective_rag_settings.pdf_extraction_mode)}")
 st.caption(
     "Backend vetorial: "
     f"status={vector_backend_status_preview.get('status')} · "
@@ -283,7 +288,7 @@ with coluna_reset:
 if index_requested and selected_uploaded_files:
     try:
         with st.spinner("Extraindo texto, criando chunks e gerando embeddings..."):
-            loaded_documents = [load_document(uploaded_file) for uploaded_file in selected_uploaded_files]
+            loaded_documents = [load_document(uploaded_file, effective_rag_settings) for uploaded_file in selected_uploaded_files]
             base_rag_index = rag_index if embedding_compatibility.get("compatible", True) else None
             built_rag_index, sync_status = upsert_documents_in_rag_index(
                 documents=loaded_documents,
@@ -361,17 +366,23 @@ if rag_index:
     metric_col_3.metric("Tipos de arquivo", selected_file_types_count)
 
     with st.expander("Detalhes do índice RAG"):
-        documents_table = [
-            {
-                "document_id": document.get("document_id"),
-                "arquivo": document.get("name"),
-                "tipo": document.get("file_type"),
-                "caracteres": document.get("char_count"),
-                "chunks": document.get("chunk_count"),
-                "indexado_em": document.get("indexed_at"),
-            }
-            for document in indexed_documents
-        ]
+        documents_table = []
+        for document in indexed_documents:
+            loader_metadata = document.get("loader_metadata") or {}
+            documents_table.append(
+                {
+                    "document_id": document.get("document_id"),
+                    "arquivo": document.get("name"),
+                    "tipo": document.get("file_type"),
+                    "caracteres": document.get("char_count"),
+                    "chunks": document.get("chunk_count"),
+                    "extração_pdf": loader_metadata.get("strategy_label") if document.get("file_type") == "pdf" else None,
+                    "paginas_suspeitas": loader_metadata.get("suspicious_pages") if document.get("file_type") == "pdf" else None,
+                    "paginas_docling": ", ".join(str(page) for page in loader_metadata.get("docling_pages_used", [])) if document.get("file_type") == "pdf" else None,
+                    "modo_docling": loader_metadata.get("docling_mode") if document.get("file_type") == "pdf" else None,
+                    "indexado_em": document.get("indexed_at"),
+                }
+            )
         st.write(
             {
                 "documentos": documents_count,
@@ -381,6 +392,10 @@ if rag_index:
                 "chunk_size": rag_info.get("chunk_size"),
                 "chunk_overlap": rag_info.get("chunk_overlap"),
                 "top_k": rag_info.get("top_k"),
+                "pdf_extraction_mode": describe_pdf_extraction_mode(rag_info.get("pdf_extraction_mode")),
+                "pdf_docling_enabled": rag_info.get("pdf_docling_enabled"),
+                "pdf_docling_ocr_enabled": rag_info.get("pdf_docling_ocr_enabled"),
+                "pdf_docling_picture_description": rag_info.get("pdf_docling_picture_description"),
                 "atualizado_em": rag_index.get("updated_at") or rag_index.get("created_at"),
             }
         )

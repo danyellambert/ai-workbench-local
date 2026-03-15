@@ -1,0 +1,43 @@
+{
+  "embedding_models": [
+    "bge-m3:latest",
+    "nomic-embed-text-v2-moe:latest",
+    "embeddinggemma:300m",
+    "qwen3-embedding:0.6b",
+    "qwen3-embedding:4b"
+  ],
+  "questions": [
+    {
+      "question": "Which document discusses OCR for text inside natural scene images using a hierarchical centroid shape descriptor and reports 97.87% accuracy with SVM?",
+      "expected_document_names": ["kaur-2016-ijca-911367.pdf"]
+    },
+    {
+      "question": "Which document presents a method for extracting virtual baselines from scene text using curvilinear projection and emphasizes robustness to blur, noise, and non-text objects?",
+      "expected_document_names": ["Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"]
+    },
+    {
+      "question": "Which document explains the distinction between retroactive and nonretroactive requirements for weighing and measuring devices?",
+      "expected_document_names": ["2025-HB-44-20250106-Final-508.pdf"]
+    },
+    {
+      "question": "Which document includes instructions about battery handling, USB base connection, and proper disposal precautions for a handheld scanner?",
+      "expected_document_names": ["c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"]
+    },
+    {
+      "question": "In which document would you find discussion of Support Vector Machine and K-Nearest Neighbor as classifiers used after OCR feature extraction?",
+      "expected_document_names": ["kaur-2016-ijca-911367.pdf"]
+    },
+    {
+      "question": "In which document would you find discussion of curved text detection and the relationship between text boundaries and text center lines?",
+      "expected_document_names": ["Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"]
+    },
+    {
+      "question": "Which document would you consult for requirements covering commercial weighing and measuring equipment used in regulation or trade?",
+      "expected_document_names": ["2025-HB-44-20250106-Final-508.pdf"]
+    },
+    {
+      "question": "Which document should be used to check safety instructions before charging, using, or discarding the scanner battery?",
+      "expected_document_names": ["c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"]
+    }
+  ]
+}
