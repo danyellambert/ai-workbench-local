@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import io
+import logging
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import IndirectObject
+
+
+logging.getLogger("pypdf").setLevel(logging.ERROR)
+logging.getLogger("pypdf._reader").setLevel(logging.ERROR)
 
 
 BASIC_EXTRACTION_MODES = {"basic", "baseline", "fast", "pypdf", "simple"}
@@ -262,7 +267,7 @@ def _safe_extract_page_text(page) -> tuple[str, str | None]:
         return '', f"{error.__class__.__name__}: {error}"
 
 def _extract_single_page_pdf(file_bytes: bytes, page_index: int) -> bytes:
-    reader = PdfReader(io.BytesIO(file_bytes))
+    reader = PdfReader(io.BytesIO(file_bytes), strict=False)
     writer = PdfWriter()
     writer.add_page(reader.pages[page_index])
     buffer = io.BytesIO()
@@ -327,7 +332,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
     resolved_mode = normalize_pdf_extraction_mode(settings.extraction_mode)
     effective_settings = _build_complete_docling_settings(settings) if resolved_mode == "complete" else settings
 
-    reader = PdfReader(io.BytesIO(file_bytes))
+    reader = PdfReader(io.BytesIO(file_bytes), strict=False)
     page_analyses: list[PdfPageAnalysis] = []
     baseline_pages: list[tuple[int, str]] = []
 

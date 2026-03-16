@@ -115,7 +115,7 @@ def build_structured_task_registry() -> StructuredTaskRegistry:
         name="cv_analysis",
         description="Analyze and structure CV/resume information",
         payload_schema=CVAnalysisPayload,
-        requires_rag=False,
+        requires_rag=True,
         default_temperature=0.1,
         render_modes=("json", "friendly"),
         primary_render_mode="friendly",

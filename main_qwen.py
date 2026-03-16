@@ -31,16 +31,24 @@ from src.services.chat_state import (
 from src.storage.chat_history import clear_chat_history, load_chat_history, save_chat_history
 from src.storage.rag_store import clear_rag_store, load_rag_store, save_rag_store
 from src.services.rag_state import clear_rag_state, get_rag_index, initialize_rag_state, set_rag_index
+from src.structured.envelope import StructuredResult, TaskExecutionRequest
+from src.structured.registry import build_structured_task_registry
+from src.structured.service import structured_service
 from src.ui.chat import render_chat_message
 from src.ui.sidebar import render_chat_sidebar
+from src.ui.structured_outputs import render_structured_result
 
 
 settings = get_ollama_settings()
 rag_settings = get_rag_settings()
 provider_registry = build_provider_registry()
 prompt_profiles = get_prompt_profiles()
+structured_task_registry = build_structured_task_registry()
 embedding_provider = provider_registry["ollama"]["instance"]
 embedding_model_options = embedding_provider.list_available_embedding_models()
+
+STRUCTURED_RESULT_STATE_KEY = "phase5_structured_result"
+STRUCTURED_RENDER_MODE_STATE_KEY = "phase5_structured_render_mode"
 
 raw_rag_store = load_rag_store(rag_settings.store_path)
 normalized_rag_store = normalize_rag_index(raw_rag_store, rag_settings)
@@ -481,6 +489,116 @@ else:
 
 if selected_provider == "openai":
     st.info("Provider cloud habilitado por configuração local. Benchmark real com cloud continua sendo foco principal da Fase 7.")
+
+st.divider()
+st.subheader("Structured outputs (Fase 5)")
+st.caption(
+    "Use este painel para gerar saídas estruturadas validadas com a foundation da Fase 5, sem quebrar o fluxo normal de chat."
+)
+
+structured_task_definitions = structured_task_registry.list_tasks()
+structured_task_options = list(structured_task_definitions.keys())
+structured_task_descriptions = structured_task_registry.get_available_tasks()
+default_structured_task = "summary" if rag_index else "extraction"
+if default_structured_task not in structured_task_options:
+    default_structured_task = structured_task_options[0]
+
+all_indexed_document_ids = [
+    document.get("document_id")
+    for document in indexed_documents
+    if document.get("document_id")
+]
+active_structured_document_ids = selected_document_ids or all_indexed_document_ids
+
+with st.form("phase5_structured_form", clear_on_submit=False):
+    selected_structured_task = st.selectbox(
+        "Structured task",
+        structured_task_options,
+        index=structured_task_options.index(default_structured_task),
+        format_func=lambda item: f"{item} · {structured_task_descriptions.get(item, item)}",
+    )
+    selected_structured_definition = structured_task_definitions[selected_structured_task]
+    if selected_structured_task == "cv_analysis":
+        st.caption("For CV analysis, prefer enabling document context (RAG) with the uploaded resume selected, or paste the resume text directly.")
+    elif selected_structured_task == "checklist":
+        st.caption("Checklist mode works best with requirements, procedures, or document context that describes concrete actions.")
+    structured_input_text = st.text_area(
+        "Input text for structured analysis",
+        value=st.session_state.get("phase5_structured_input", ""),
+        height=180,
+        placeholder="Cole aqui um texto, requisito, resumo de documento ou currículo para gerar saída estruturada.",
+    )
+    structured_use_rag = st.checkbox(
+        "Use current document context (RAG)",
+        value=bool(selected_structured_definition.requires_rag and active_structured_document_ids),
+        disabled=not bool(active_structured_document_ids),
+        help="Quando habilitado, a task usa os documentos atualmente filtrados na base documental como contexto adicional.",
+    )
+    if active_structured_document_ids:
+        st.caption(f"Document context available: {len(active_structured_document_ids)} documento(s) selecionado(s).")
+    else:
+        st.caption("Nenhum documento filtrado/disponível para contexto RAG nesta execução estruturada.")
+    can_run_structured = bool(structured_input_text.strip()) or bool(
+        structured_use_rag and active_structured_document_ids
+    )
+    if not can_run_structured:
+        st.caption(
+            "Forneça texto de entrada ou habilite contexto documental para executar a análise estruturada."
+        )
+    structured_submit = st.form_submit_button(
+        "Run structured analysis",
+        width="stretch",
+        disabled=not can_run_structured,
+    )
+
+if structured_submit:
+    st.session_state["phase5_structured_input"] = structured_input_text
+    with st.spinner("Generating structured output..."):
+        structured_request = TaskExecutionRequest(
+            task_type=selected_structured_task,
+            input_text=structured_input_text,
+            use_rag_context=bool(structured_use_rag and active_structured_document_ids),
+            source_document_ids=list(active_structured_document_ids if structured_use_rag else []),
+            provider=selected_provider,
+            model=selected_model,
+            temperature=temperature,
+            context_window=context_window,
+        )
+        structured_result = structured_service.execute_task(structured_request)
+        st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
+        default_mode = structured_result.primary_render_mode or "json"
+        st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode
+
+stored_structured_result = st.session_state.get(STRUCTURED_RESULT_STATE_KEY)
+if stored_structured_result:
+    structured_result = StructuredResult.model_validate(stored_structured_result)
+    available_modes = sorted(
+        [mode for mode in structured_result.available_render_modes if mode.available],
+        key=lambda mode: mode.priority,
+    )
+    if available_modes:
+        selected_render_mode = st.radio(
+            "Structured render mode",
+            options=[mode.mode for mode in available_modes],
+            index=next(
+                (
+                    index
+                    for index, mode in enumerate(available_modes)
+                    if mode.mode == st.session_state.get(STRUCTURED_RENDER_MODE_STATE_KEY, structured_result.primary_render_mode)
+                ),
+                0,
+            ),
+            format_func=lambda mode_key: next(
+                (mode.label for mode in available_modes if mode.mode == mode_key),
+                mode_key,
+            ),
+            horizontal=True,
+            key="phase5_structured_render_mode_selector",
+        )
+    else:
+        selected_render_mode = structured_result.primary_render_mode or "json"
+    st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = selected_render_mode
+    render_structured_result(structured_result, requested_mode=selected_render_mode)
 
 for mensagem in messages:
     render_chat_message(mensagem)
