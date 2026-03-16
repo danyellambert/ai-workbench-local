@@ -1,0 +1,3 @@
+Prepare a new project release candidate.
+You must verify the changelog, run automated tests, update environment examples, validate Streamlit startup, check structured output tasks, and tag the release in git.
+Any blocking issue must be documented before the release is approved.

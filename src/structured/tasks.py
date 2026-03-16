@@ -5,7 +5,7 @@ from typing import Optional
 
 from .base import ChecklistPayload, CVAnalysisPayload, ExtractionPayload, SummaryPayload
 from .envelope import TaskExecutionRequest, StructuredResult
-from .parsers import attempt_controlled_failure, parse_structured_response
+from .parsers import parse_structured_response
 
 
 class TaskHandler:
@@ -39,26 +39,42 @@ class TaskHandler:
 
         from ..config import get_rag_settings
         from ..providers.registry import build_provider_registry
-        from ..rag.service import retrieve_relevant_chunks
         from ..services.rag_state import get_rag_index
 
         rag_index = get_rag_index()
         if not rag_index:
             return ""
 
-        provider_registry = build_provider_registry()
-        embedding_provider = provider_registry.get(request.provider, provider_registry.get("ollama"))["instance"]
-        chunks = retrieve_relevant_chunks(
-            query=request.input_text,
-            rag_index=rag_index,
-            settings=get_rag_settings(),
-            embedding_provider=embedding_provider,
-            document_ids=request.source_document_ids,
-        )
+        chunks = [chunk for chunk in rag_index.get("chunks", []) if isinstance(chunk, dict)]
+        chunks = [
+            chunk for chunk in chunks
+            if str(chunk.get("document_id") or chunk.get("file_hash") or "") in set(request.source_document_ids)
+        ]
+        if not chunks:
+            return ""
+
+        if request.input_text.strip():
+            from ..rag.service import retrieve_relevant_chunks
+
+            provider_registry = build_provider_registry()
+            embedding_provider = provider_registry.get(request.provider, provider_registry.get("ollama"))["instance"]
+            retrieved = retrieve_relevant_chunks(
+                query=request.input_text,
+                rag_index=rag_index,
+                settings=get_rag_settings(),
+                embedding_provider=embedding_provider,
+                document_ids=request.source_document_ids,
+            )
+            if retrieved:
+                chunks = retrieved
+
+        selected_chunks = chunks[:6]
         context_parts = []
-        for chunk in chunks:
+        for chunk in selected_chunks:
             source = chunk.get("source", "document")
             snippet = chunk.get("snippet") or str(chunk.get("text", ""))
+            if not snippet.strip():
+                continue
             context_parts.append(f"[Source: {source}]\n{snippet}")
         return "\n\n".join(context_parts)
 
@@ -77,7 +93,10 @@ class ExtractionTaskHandler(TaskHandler):
     def _build_extraction_prompt(self, text: str, context_text: str) -> str:
         context_block = f"\nSupplementary context:\n{context_text}\n" if context_text else ""
         return f"""
-You are a precise information extractor. Return only valid JSON matching the requested schema.
+You are a precise information extractor.
+Return only valid JSON.
+Do not invent information and do not copy example placeholder values.
+If something is missing, return an empty list instead of making it up.
 
 Text to analyze:
 {text}
@@ -87,29 +106,29 @@ Return this JSON structure:
   "task_type": "extraction",
   "entities": [
     {{
-      "type": "entity_type",
-      "value": "entity_value",
+      "type": "organization",
+      "value": "OpenAI",
       "confidence": 0.95,
-      "source_text": "supporting span",
+      "source_text": "OpenAI announced...",
       "position_start": 0,
-      "position_end": 10
+      "position_end": 6
     }}
   ],
-  "categories": ["category"],
+  "categories": ["company announcement"],
   "relationships": [
     {{
-      "from_entity": "entity_a",
-      "to_entity": "entity_b",
-      "relationship": "relationship_type",
+      "from_entity": "OpenAI",
+      "to_entity": "GPT-4",
+      "relationship": "announced",
       "confidence": 0.8,
-      "evidence": "supporting evidence"
+      "evidence": "OpenAI announced GPT-4"
     }}
   ],
   "extracted_fields": [
     {{
-      "name": "field_name",
-      "value": "field_value",
-      "evidence": "supporting evidence"
+      "name": "announcement_date",
+      "value": "2025-03-01",
+      "evidence": "announced on March 1, 2025"
     }}
   ]
 }}
@@ -127,7 +146,10 @@ class SummaryTaskHandler(TaskHandler):
     def _build_summary_prompt(self, text: str, context_text: str) -> str:
         context_block = f"\nRetrieved context:\n{context_text}\n" if context_text else ""
         return f"""
-You are a structured summarization assistant. Return only valid JSON.
+You are a structured summarization assistant.
+Return only valid JSON.
+Use only the information present in the input/context.
+Do not invent facts and do not copy the example values literally.
 
 Text to summarize:
 {text}
@@ -137,13 +159,13 @@ Return this JSON structure:
   "task_type": "summary",
   "topics": [
     {{
-      "title": "topic title",
-      "key_points": ["point 1", "point 2"],
+      "title": "Main topic",
+      "key_points": ["point A", "point B"],
       "relevance_score": 0.9,
-      "supporting_evidence": ["evidence"]
+      "supporting_evidence": ["short quote or snippet"]
     }}
   ],
-  "executive_summary": "short executive summary",
+  "executive_summary": "A concise, factual executive summary.",
   "key_insights": ["insight 1", "insight 2"],
   "reading_time_minutes": 2,
   "completeness_score": 0.85
@@ -162,7 +184,9 @@ class ChecklistTaskHandler(TaskHandler):
     def _build_checklist_prompt(self, text: str, context_text: str) -> str:
         context_block = f"\nRetrieved context:\n{context_text}\n" if context_text else ""
         return f"""
-You are a checklist generator. Convert the input into an operational checklist and return only valid JSON.
+You are a checklist generator.
+Convert the input into an operational checklist and return only valid JSON.
+Use the actual instructions provided. Do not copy example placeholder values.
 
 Requirements or instructions:
 {text}
@@ -170,14 +194,14 @@ Requirements or instructions:
 Return this JSON structure:
 {{
   "task_type": "checklist",
-  "title": "Checklist title",
-  "description": "Checklist purpose",
+  "title": "Checklist title based on the input",
+  "description": "Checklist purpose based on the input",
   "items": [
     {{
       "id": "item-1",
-      "title": "Task title",
-      "description": "Detailed description",
-      "category": "category",
+      "title": "Real action item",
+      "description": "Specific action derived from the input",
+      "category": "preparation",
       "priority": "high",
       "status": "pending",
       "dependencies": [],
@@ -194,39 +218,56 @@ Return this JSON structure:
 class CVAnalysisTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         provider = self._resolve_provider(request)
-        prompt = self._build_cv_analysis_prompt(request.input_text)
+        context_text = self._build_optional_rag_context(request)
+        prompt = self._build_cv_analysis_prompt(request.input_text, context_text)
         response_text = self._collect_response_text(provider, request, prompt)
         return parse_structured_response(response_text, CVAnalysisPayload)
 
-    def _build_cv_analysis_prompt(self, text: str) -> str:
+    def _build_cv_analysis_prompt(self, text: str, context_text: str) -> str:
+        context_block = f"\nResume/document context:\n{context_text}\n" if context_text else ""
         return f"""
-You are a CV analysis assistant. Extract and structure the resume information below. Return only valid JSON.
+You are a CV analysis assistant.
+Your job is to extract and structure the actual information present in the resume/context below.
+Return only valid JSON.
+Do not invent information.
+Do not use placeholder values like "Full Name", "name@example.com", "skill 1", or similar.
+If a value is missing, use null, 0, or an empty list depending on the field.
 
-Resume text:
+Input text:
 {text}
+{context_block}
 
 Return this JSON structure:
 {{
   "task_type": "cv_analysis",
   "personal_info": {{
-    "full_name": "Full Name",
-    "email": "name@example.com",
-    "phone": "+55 11 99999-9999",
-    "location": "City, Country",
-    "links": ["https://linkedin.com/in/example"]
+    "full_name": null,
+    "email": null,
+    "phone": null,
+    "location": null,
+    "links": []
   }},
   "sections": [
     {{
       "section_type": "experience",
       "title": "Professional Experience",
-      "content": ["item 1", "item 2"],
+      "content": [
+        {{
+          "text": "Software Engineer at Company X (2023-2024)",
+          "details": {{
+            "role": "Software Engineer",
+            "organization": "Company X",
+            "duration": "2023-2024"
+          }}
+        }}
+      ],
       "confidence": 0.9
     }}
   ],
-  "skills": ["skill 1", "skill 2"],
-  "experience_years": 3.0,
-  "strengths": ["strength 1"],
-  "improvement_areas": ["improvement 1"]
+  "skills": [],
+  "experience_years": 0.0,
+  "strengths": [],
+  "improvement_areas": []
 }}
 """
 

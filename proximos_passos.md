@@ -132,6 +132,26 @@ Usar apenas como extensão opcional, sem depender disso para o projeto funcionar
 - **Hugging Face Inference**, se fizer sentido em testes, reranking ou benchmarking
 - **Langfuse** self-hosted ou free-tier, se compensar
 
+### Camada experimental recomendada
+
+Além da stack principal, o projeto deve abrir espaço para uma trilha de experimentação técnica com **Hugging Face** quando isso gerar valor claro.
+
+Essa camada não substitui o runtime local principal do produto. Ela existe para ampliar o nível de engenharia do projeto em temas como:
+
+- comparação entre modelos open-source fora do catálogo principal do Ollama
+- experimentação com **Transformers**
+- comparação entre quantizações
+- testes com modelos de embedding e reranking
+- fine-tuning leve com **PEFT/LoRA**
+- avaliação de alternativas de serving ou exportação futura
+
+### Regra prática de posicionamento
+
+A leitura arquitetural mais forte para o projeto é:
+
+- **Ollama** como runtime principal do app local
+- **Hugging Face** como trilha de experimentação, adaptação e comparação técnica
+
 ### Regra de arquitetura
 
 O sistema deve continuar funcionando **mesmo se todas as integrações cloud forem removidas**.
@@ -147,6 +167,21 @@ Ou seja:
 
 - não virar refém de framework
 - não reinventar tudo sem necessidade
+
+### Regra adicional de desacoplamento por provider
+
+As próximas fases devem preservar uma separação explícita entre:
+
+- camada de geração
+- camada de embeddings
+- camada de reranking
+- camada de experimentação offline / benchmarking
+
+Isso é importante para que o projeto consiga evoluir mantendo:
+
+- **Ollama** como runtime principal simples e demonstrável
+- **OpenAI-compatible** como compatibilidade operacional quando fizer sentido
+- **Hugging Face** como trilha de experimentação para modelos, quantizações e adaptação futura
 
 ### Configurações importantes do projeto
 
@@ -171,6 +206,9 @@ O projeto deve ter configuração explícita e versionada para pontos críticos,
 - `OPENAI_MODEL`
 - `OPENAI_CONTEXT_WINDOW`
 - `OPENAI_AVAILABLE_MODELS`
+- `HUGGINGFACE_MODEL` (opcional em fase posterior)
+- `HUGGINGFACE_AVAILABLE_MODELS` (opcional em fase posterior)
+- `HUGGINGFACE_CONTEXT_WINDOW` (opcional em fase posterior)
 - `RAG_CHUNK_SIZE`
 - `RAG_CHUNK_OVERLAP`
 - `RAG_TOP_K`
@@ -215,6 +253,16 @@ O roadmap deve mostrar progressão clara:
 - retrieval mais sofisticado depois
 - framework de mercado depois
 - agente empresarial depois
+
+### Princípio 5.5 — Runtime e experimentação não são a mesma coisa
+O projeto fica mais forte quando separa claramente:
+
+- **runtime principal do produto**
+- **camada experimental de modelos**
+- **camada de benchmark/evals**
+- **camada de adaptação de modelos**
+
+Isso evita trocar a stack principal cedo demais e permite incorporar Hugging Face sem perder a narrativa local-first do projeto.
 
 ### Princípio 6 — Agente com valor real de negócio
 Evitar agente “show-off” sem foco. Priorizar:
@@ -264,15 +312,11 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 ### Fase atual em andamento
 
-- **Fase 5 — Outputs estruturados (foundation técnica concluída; UI, renderização e casos reais ainda pendentes)**
+- **Fase 5 — Outputs estruturados**
 
 ### Fase concluída mais recentemente
 
 - **Fase 4.5 — concluída com benchmark, avaliação humana e configuração final recomendada**
-
-### Marco mais recente já iniciado na Fase 5
-
-- **Foundation de outputs estruturados criada em `src/structured/` e compilando corretamente**
 
 ### O que já foi entregue na Fase 4.5
 
@@ -334,25 +378,48 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - [x] caminho **Ollama native** para parâmetros avançados
 - [x] debug/inspeção leve mostrando o `num_ctx` pedido, contexto declarado do modelo e sinal auxiliar de runtime
 
+### O que já foi entregue na Fase 5
+
+- [x] foundation de outputs estruturados em `src/structured/`
+- [x] payload schemas por tarefa e envelope de execução separado
+- [x] registry de tasks com metadata de renderização (`json`, `friendly`, `checklist`)
+- [x] parser/sanitizer/validator com validação Pydantic e falha controlada
+- [x] documentação técnica inicial da foundation de structured outputs
+- [x] painel de structured outputs no app (`main_qwen.py`)
+- [x] renderer base para JSON / friendly view / checklist
+- [x] execução inicial de `extraction`, `summary`, `checklist` e `cv_analysis`
+- [x] uso opcional do contexto documental atual na UI da Fase 5
+- [x] smoke eval automatizado local com `scripts/run_phase5_structured_eval.py`
+
+### Resultado mais recente da smoke eval da Fase 5
+
+- [x] `summary` — **PASS**
+- [x] `checklist` — **PASS**
+- [x] `cv_analysis` — **PASS**
+- [ ] `extraction` — ainda em **WARN**, com pouca estrutura secundária e baixo nível de detalhe
+
 ### Risco técnico importante já identificado
 
-A UI de contexto foi implementada, mas a aplicação do `num_ctx` pelo caminho **OpenAI-compatible** do Ollama ainda não deve ser tratada como 100% validada.
+A Fase 5 já está funcional, mas ainda não deve ser tratada como encerrada.
 
-Ou seja:
+Os principais pontos ainda em aberto são:
 
-- a UI muda
-- o código tenta enviar o valor
-- mas isso ainda precisa de validação técnica mais forte
-- `ollama ps` não deve ser tratado sozinho como prova final de que a janela customizada foi aplicada corretamente
+- `extraction` ainda precisa de enriquecimento semântico para sair de `WARN` para `PASS`
+- `code_analysis` ainda não foi implementado como task oficial da Fase 5
+- faltam exemplos reais versionados e evidências mais fortes da fase para portfólio
+- a qualidade final ainda depende do modelo local e do grounding por documento
 
 ### Próximo passo estratégico recomendado
 
-A ordem mais forte continua sendo:
+A ordem mais forte agora passa a ser:
 
-1. **Fase 5 — Outputs estruturados**
+1. **Fechar a Fase 5**, priorizando enriquecimento do `extraction`, implementação de `code_analysis` e evidências reais
 2. **Fase 5.5 — Evolução com LangChain e LangGraph**
 3. **Fase 6 — Tools e agentes orientados a valor de negócio**
-4. **Fase 7+ — Benchmark, evals, observabilidade e engenharia profissional**
+4. **Fase 7 — Benchmark e comparação entre modelos**
+5. **Fase 8 — Evals**
+6. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
+7. **Fase 9+ — Observabilidade e engenharia profissional**
 
 ---
 
@@ -373,6 +440,8 @@ A melhor história é:
 8. mostrei maturidade com LangChain/LangGraph
 9. criei um agente empresarial de verdade
 10. medi tudo com benchmark, evals e observabilidade
+11. só então explorei adaptação de modelos, quantizações e fine-tuning leve com critério
+11. só então explorei adaptação de modelos com critério técnico
 
 ---
 
@@ -703,70 +772,68 @@ A Fase 4.5 está considerada encerrada porque:
 ### Objetivo
 Mostrar que IA também pode ser usada como componente integrável de sistema.
 
-### Estado real da fase hoje
+### Status atual da fase
 
-A Fase 5 **já foi iniciada de forma estrutural**, mas **ainda não está concluída como feature de produto**.
+A Fase 5 **já foi iniciada de verdade** e não está mais só em nível de arquitetura.
 
-O projeto já possui uma foundation técnica dedicada para outputs estruturados em `src/structured/`, incluindo:
+Hoje o projeto já tem:
 
-- schemas base e schemas por tarefa
-- envelope de execução/resultado
-- parser/sanitizer/validator
-- validação com Pydantic
-- registry de tarefas com metadados de renderização
-- service layer dedicada
-- stubs para `extraction`, `summary`, `checklist` e `cv_analysis`
-- documentação da foundation em `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md`
+- foundation técnica de structured outputs
+- UI base para execução de tasks estruturadas
+- renderização em múltiplos formatos
+- smoke eval automatizado
+- `summary`, `checklist` e `cv_analysis` em estado funcional para smoke test
 
-O que **ainda não existe de forma fechada** nesta fase:
+Mas a fase **ainda não está concluída**, porque faltam:
 
-- integração visível no app (`main_qwen.py`)
-- renderer em `src/ui/` para `json` / `friendly` / `checklist`
-- modo de código/refatoração completo
-- casos reais documentados e demonstráveis
-- fluxo estruturado final operando ponta a ponta na UI
+- enriquecer `extraction`
+- implementar `code_analysis`
+- criar exemplos reais versionados
+- fortalecer a evidência profissional da fase
 
-### Checklist da foundation da Fase 5
-- [x] Criar módulo dedicado `src/structured/`
-- [x] Criar envelope de execução/resultado para outputs estruturados
-- [x] Criar parser/sanitizer/validator com falha controlada
+### Checklist
+
+#### Foundation e infraestrutura
+- [x] Criar foundation de structured outputs em módulo dedicado
 - [x] Validar saídas com Pydantic
-- [x] Gerar respostas em JSON no backend estruturado
+- [x] Gerar respostas em JSON
 - [x] Definir schemas previsíveis por tarefa
-- [x] Registrar metadados de render mode por tarefa
-- [x] Documentar decisões da foundation da Fase 5
-- [x] Garantir compilação da foundation no projeto atual
+- [x] Garantir que os schemas e validadores sejam independentes do provider
+- [x] Preparar a camada de saída estruturada para reutilização futura com Ollama e Hugging Face
 
-### Checklist funcional restante da Fase 5
-- [ ] Integrar seleção de modo estruturado na UI
-- [ ] Integrar renderização `json` no app
-- [ ] Integrar renderização `friendly` no app
-- [ ] Integrar renderização `checklist` no app
-- [ ] Fechar modo extrator de informações na UI
-- [ ] Fechar modo resumidor em tópicos na UI
-- [ ] Fechar modo analisador de currículo na UI
-- [ ] Fechar modo gerador de checklist na UI
+#### UI e renderização
+- [x] Gerar respostas em checklist
+- [x] Integrar painel de structured outputs na UI
+- [x] Adicionar renderer base para `json`, `friendly` e `checklist`
+
+#### Tasks já implementadas
+- [x] Criar modo resumidor em tópicos
+- [x] Criar modo analisador de currículo
+- [x] Criar modo gerador de checklist
+- [~] Criar modo extrator de informações — funcional, mas ainda precisa enriquecer a estrutura e a qualidade semântica
+
+#### Itens ainda pendentes para fechar a fase
 - [ ] Criar modo explicador/refatorador de código
-- [ ] Reusar o pipeline RAG atual nos modos que exigem contexto documental
-- [ ] Documentar padrões de uso por tipo de saída no nível de produto
+- [ ] Documentar padrões de uso por tipo de saída
 - [ ] Criar casos reais de extração estruturada a partir de documentos
-- [ ] Criar mini demo reprodutível da Fase 5
+- [ ] Registrar evidências fortes da fase (screenshots, exemplos comparativos e mini demo)
+- [ ] Levar `extraction` de `WARN` para `PASS` no smoke eval automatizado
 
 ### Entregável
-- Módulo de análises com saída estruturada e validada, integrado à UI e com pelo menos 3 modos demonstráveis
+- Módulo de análises com saída estruturada e validada, integrado à UI e com smoke eval local
 
 ### Evidência para GitHub/LinkedIn
 - exemplos antes/depois de saída livre vs. estruturada
 - screenshot ou tabela com JSON validado
 - mini demo mostrando transformação de documento em checklist/JSON
-- screenshot do app com seletor de modo estruturado
+- relatório local de smoke eval da Fase 5
 
 ### O que preciso saber defender em entrevista
 - por que structured output é importante
 - como reduzir respostas inconsistentes
 - onde Pydantic ajuda confiabilidade
 - por que isso prepara o terreno para automação e agentes
-- por que a foundation foi separada da UI antes da integração final
+- por que smoke eval local ajuda a sair do “parece funcionar” para “tenho uma verificação mínima reproduzível”
 
 ---
 
@@ -787,8 +854,14 @@ Agora ele precisa provar também que eu sei usar o ecossistema profissional sem 
 - [ ] Integrar vector store via LangChain
 - [ ] Criar primeiro workflow com LangGraph
 - [ ] Modelar estados e transições de um fluxo real
+- [ ] Fortalecer a abstração de provider para suportar runtimes além de Ollama/OpenAI-compatible
+- [ ] Separar explicitamente geração, embeddings, reranking e experimentação offline na arquitetura
+- [ ] Preparar caminho para backend local alternativo via ecossistema Hugging Face sem quebrar a UX atual
 - [ ] Documentar como e por que a arquitetura evoluiu
 - [ ] Deixar a comparação explícita para entrevista e portfólio
+- [ ] Fortalecer a abstração de provider para suportar runtimes diferentes além de Ollama/OpenAI-compatible
+- [ ] Separar claramente camada de geração, embeddings, reranking e experimentação offline
+- [ ] Preparar a arquitetura para incorporar fluxos locais do ecossistema Hugging Face sem acoplá-los cedo demais ao app principal
 
 ### Entregável
 - Pipeline evoluído com LangChain e primeiro workflow controlado com LangGraph
@@ -916,6 +989,10 @@ Mostrar critério técnico, não apenas acúmulo de features.
 - [ ] Salvar resultados de benchmark
 - [ ] Comparar local vs cloud opcional
 - [ ] Comparar embeddings e estratégias de retrieval
+- [ ] Comparar modelos servidos via Ollama vs modelos experimentados pelo ecossistema Hugging Face
+- [ ] Comparar quantizações quando isso fizer diferença real no hardware local
+- [ ] Comparar stacks por caso de uso, e não só por benchmark genérico
+- [ ] Documentar quando Ollama é melhor como runtime e quando Hugging Face é melhor como ambiente de experimentação
 
 ### Métricas recomendadas
 - [ ] Tempo de resposta
@@ -925,6 +1002,11 @@ Mostrar critério técnico, não apenas acúmulo de features.
 - [ ] Groundedness no caso de RAG
 - [ ] Precisão de extração estruturada
 - [ ] Qualidade percebida por caso de uso
+- [ ] Tempo de inicialização/carregamento do modelo
+- [ ] Consumo de RAM/VRAM
+- [ ] Flexibilidade para testar quantizações
+- [ ] Facilidade de serving local
+- [ ] Facilidade de futura adaptação/fine-tuning
 
 ### Entregável
 - Módulo de benchmarking com evidência comparativa
@@ -937,6 +1019,7 @@ Mostrar critério técnico, não apenas acúmulo de features.
 ### O que preciso saber defender em entrevista
 - como escolhi o melhor modelo para cada caso
 - quais métricas usei e por quê
+- como diferenciei benchmark de produto vs benchmark de experimentação
 - por que benchmark sem contexto de uso pode ser enganoso
 
 ---
@@ -962,6 +1045,10 @@ Criar uma camada de qualidade e repetibilidade.
 - [ ] Avaliar tempo de resposta
 - [ ] Salvar resultados em SQLite
 - [ ] Considerar integração com DeepEval depois da base própria pronta
+- [ ] Definir critérios objetivos para decidir se fine-tuning é realmente necessário
+- [ ] Medir falhas persistentes por tarefa mesmo após ajustes de prompt, retrieval e schema
+- [ ] Identificar tarefas candidatas a adaptação de modelo: extração estruturada, classificação, reranking ou embeddings
+- [ ] Registrar explicitamente quando prompt + RAG + reranking já são suficientes e quando não são
 
 ### Entregável
 - Módulo de avaliação contínua e reproduzível
@@ -974,7 +1061,134 @@ Criar uma camada de qualidade e repetibilidade.
 ### O que preciso saber defender em entrevista
 - como validar qualidade de IA em um time real
 - diferença entre avaliar manualmente e medir com critérios repetíveis
+- como usei evals para decidir se valia ou não adaptar modelos
 - por que evals precisam estar ligados a casos de uso reais
+
+---
+
+## Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve
+
+### Objetivo
+Explorar de forma controlada quando vale adaptar modelos ou usar o ecossistema Hugging Face para ir além do runtime padrão do projeto.
+
+### Por que essa fase existe?
+
+Porque o projeto já terá benchmark, evals e casos de uso mais claros.
+Assim, adaptação de modelo deixa de ser “feature por moda” e passa a ser uma decisão técnica justificável.
+
+### Direção recomendada
+
+A prioridade desta fase deve ser:
+
+1. comparação de variantes e quantizações locais
+2. experimentação com embeddings e rerankers
+3. fine-tuning leve com LoRA/PEFT em tarefa específica
+4. documentação honesta de custo, ganho e complexidade
+
+### O que priorizar
+- [ ] Testar modelos do ecossistema Hugging Face fora do catálogo principal do Ollama
+- [ ] Comparar quantizações relevantes para o hardware local
+- [ ] Avaliar modelos menores especializados para tarefas estruturadas
+- [ ] Testar adaptação leve com LoRA/PEFT em tarefa específica
+- [ ] Comparar baseline vs prompt engineering vs RAG vs RAG + reranker vs modelo adaptado
+- [ ] Documentar custo operacional, complexidade e ganho real
+- [ ] Avaliar se embeddings ou rerankers ajustados geram mais valor do que ajustar o LLM inteiro
+- [ ] Registrar claramente quando **não** vale adotar a adaptação
+
+### O que evitar nesta fase
+- [ ] Evitar full fine-tuning grande de LLM como foco principal do projeto
+- [ ] Evitar abrir uma frente pesada sem evidência dos evals
+- [ ] Evitar treinar “por treinar” sem hipótese e sem métrica de sucesso
+
+### Candidatos mais inteligentes para adaptação
+- [ ] Extração estruturada
+- [ ] Classificação de intenção
+- [ ] Reranking
+- [ ] Embeddings
+- [ ] Formatação rígida de saída
+
+### Entregável
+- Relatório técnico mostrando quando Hugging Face, quantização e fine-tuning leve geram ganho real e quando não compensam
+
+### Evidência para GitHub/LinkedIn
+- gráfico comparando baseline vs modelo adaptado
+- tabela de trade-offs entre qualidade, custo e complexidade
+- write-up explicando por que a adaptação foi ou não foi adotada
+
+### O que preciso saber defender em entrevista
+- por que não comecei com fine-tuning
+- como decidi que valia adaptar
+- por que LoRA/PEFT fez mais sentido do que treino completo
+- quando Hugging Face agrega mais do que Ollama
+- como medi custo vs ganho
+
+---
+
+## Fase 8.5 — Hugging Face, quantização e fine-tuning leve
+
+### Objetivo
+Explorar de forma controlada quando vale usar o ecossistema Hugging Face para ampliar a capacidade experimental do projeto, sem substituir prematuramente o runtime principal nem abrir uma frente pesada sem evidência.
+
+### Princípio desta fase
+
+Esta fase só deve avançar **depois** que benchmark e evals estiverem maduros o suficiente para responder, com dados, se:
+
+- prompting + RAG + reranking já resolvem bem o caso
+- existe gargalo real que justifique adaptação de modelo
+- existe ganho potencial suficiente para compensar a complexidade extra
+
+### Direção recomendada
+
+Priorizar a seguinte ordem:
+
+1. **comparação de modelos e quantizações**
+2. **experimentos com embeddings e rerankers**
+3. **adaptação leve com LoRA/PEFT**
+4. só muito depois considerar algo mais pesado
+
+### O que esta fase deve provar
+
+- que eu sei usar o ecossistema Hugging Face como trilha de model engineering
+- que eu sei separar runtime operacional de ambiente de experimentação
+- que eu não faço fine-tuning “por moda”, mas apenas quando benchmark e evals apontam necessidade real
+
+### Checklist
+- [ ] Testar modelos do ecossistema Hugging Face fora do catálogo principal já usado no Ollama
+- [ ] Comparar variantes e quantizações relevantes para o hardware local
+- [ ] Avaliar modelos menores especializados para tarefas estruturadas
+- [ ] Avaliar embeddings e/ou rerankers adicionais via ecossistema open-source
+- [ ] Testar adaptação leve com LoRA/PEFT em tarefa específica e bem delimitada
+- [ ] Comparar baseline vs prompt engineering vs RAG vs modelo adaptado
+- [ ] Medir custo, latência, memória e ganho real de qualidade
+- [ ] Documentar claramente quando a adaptação compensa e quando não compensa
+
+### O que **não** fazer nesta fase
+- [ ] evitar full fine-tuning pesado como foco principal do projeto
+- [ ] evitar abrir frente de treinamento grande sem benchmark/evals confiáveis
+- [ ] evitar treinar o “chat inteiro” sem tarefa específica e métrica clara
+- [ ] evitar substituir Ollama como runtime principal sem uma justificativa arquitetural forte
+
+### Candidatos mais inteligentes para adaptação
+- [ ] extração estruturada
+- [ ] classificação de intenção / routing
+- [ ] reranking
+- [ ] embeddings
+- [ ] saída altamente formatada e previsível
+
+### Entregável
+- Relatório técnico comparando baseline vs alternativas com Hugging Face, quantização e possível adaptação leve orientada por evidência
+
+### Evidência para GitHub/LinkedIn
+- gráfico comparando baseline vs modelo/quantização/adaptação
+- tabela de trade-offs entre qualidade, custo e complexidade
+- write-up explicando por que a adaptação foi ou não foi adotada
+
+### O que preciso saber defender em entrevista
+- por que Ollama continuou como runtime principal
+- por que Hugging Face entrou como camada experimental
+- por que não comecei com fine-tuning
+- quando LoRA/PEFT faz mais sentido do que treino completo
+- como medi custo, complexidade e ganho real
 
 ---
 
@@ -1093,18 +1307,22 @@ Maximizar impacto em GitHub, LinkedIn, currículo e entrevista.
 
 ### Em uma frase
 
-Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA aplicada com base documental, outputs estruturados, workflows controlados e agente empresarial orientado a valor real de negócio**.
+Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA aplicada com base documental, outputs estruturados, workflows controlados, agente empresarial orientado a valor real de negócio e trilha experimental madura para comparação/adaptação de modelos quando isso for justificado por evidência**.
 
 ### Ordem recomendada daqui para frente
 
-1. **Fechar a integração da Fase 5 no app (UI + renderer + 3 modos demonstráveis)**
+1. **Fase 5 — Outputs estruturados**
 2. **Fase 5.5 — LangChain e LangGraph**
 3. **Fase 6 — Tools e agentes orientados a valor de negócio**
-4. **Fase 7+ — Benchmark, evals, observabilidade e engenharia profissional**
-5. **Fase 11 — Pacote final de portfólio**
+4. **Fase 7 — Benchmark e comparação entre modelos**
+5. **Fase 8 — Evals**
+6. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
+7. **Fase 9 — Observabilidade**
+8. **Fase 10 — Engenharia profissional**
+9. **Fase 11 — Pacote final de portfólio**
 
 ### Métrica de sucesso do roadmap
 
 O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 
-> Construí uma aplicação de IA que começou com fundamentos locais, evoluiu para RAG real com base documental, passou a produzir saídas estruturadas, foi instrumentada com benchmarking/evals/observabilidade e culminou em um agente documental com utilidade empresarial concreta.
+> Construí uma aplicação de IA que começou com fundamentos locais, evoluiu para RAG real com base documental, passou a produzir saídas estruturadas, foi instrumentada com benchmarking/evals/observabilidade e, só quando isso fez sentido, explorou Hugging Face, quantização e fine-tuning leve de forma orientada por evidência.

@@ -121,3 +121,17 @@ The safest next step is **UI wiring + first real render layer**, not more schema
 2. add a renderer for JSON and friendly view
 3. wire one real task end-to-end (recommended: extraction or summary)
 4. only then add the remaining modes
+
+
+## Follow-up improvements completed after the foundation
+
+After the initial foundation slice, the project also received a first practical integration pass:
+
+- a Phase 5 panel was added to `main_qwen.py`
+- renderers were added in `src/ui/structured_outputs.py`
+- task prompts were upgraded to reduce placeholder-copying behavior
+- CV analysis now supports document-grounded execution via the current RAG selection
+- a lightweight quality heuristic was added to warn when a payload is structurally valid but semantically suspicious
+- PDF parsing noise from malformed CV PDFs was reduced by using `strict=False` and quieter `pypdf` logging
+
+This means the project is no longer at the “foundation only” stage. It now has a usable but still evolving first structured-output workflow in the UI.

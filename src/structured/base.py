@@ -1,10 +1,10 @@
 """Base schemas and types for structured outputs."""
 from __future__ import annotations
 
-from typing import List, Optional, Literal, Union
+from typing import Any, Dict, List, Optional, Literal, Union
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class BaseTaskPayload(BaseModel):
@@ -108,13 +108,65 @@ class ContactInfo(BaseModel):
     links: List[str] = Field(default_factory=list, description="Relevant links such as LinkedIn or portfolio")
 
 
+class CVSectionContentItem(BaseModel):
+    """Flexible content item inside a CV section."""
+
+    text: Optional[str] = Field(default=None, description="Human-readable text for this item")
+    details: Dict[str, Any] = Field(default_factory=dict, description="Structured details when available")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_item(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return {"text": value, "details": {}}
+
+        if isinstance(value, dict):
+            if "text" in value:
+                details = dict(value.get("details") or {})
+                for key, item_value in value.items():
+                    if key not in {"text", "details"}:
+                        details[key] = item_value
+                return {
+                    "text": value.get("text"),
+                    "details": details,
+                }
+
+            compact_parts = []
+            for key, item_value in value.items():
+                if item_value in (None, "", [], {}):
+                    continue
+                compact_parts.append(f"{key}: {item_value}")
+
+            return {
+                "text": " · ".join(compact_parts) if compact_parts else None,
+                "details": value,
+            }
+
+        return value
+
+
 class CVSection(BaseModel):
     """Section of a CV/resume."""
 
     section_type: str = Field(description="Type of section (experience, education, skills, projects, etc.)")
-    title: str = Field(description="Section title")
-    content: List[str] = Field(default_factory=list, description="Content items in this section")
+    title: Optional[str] = Field(default=None, description="Section title")
+    content: List[CVSectionContentItem] = Field(default_factory=list, description="Content items in this section")
     confidence: float = Field(ge=0.0, le=1.0, description="Confidence in this section")
+
+    @field_validator("content", mode="before")
+    @classmethod
+    def normalize_content(cls, value: Any) -> Any:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return value
+        return [value]
+
+    @model_validator(mode="after")
+    def fill_missing_title(self) -> "CVSection":
+        if not self.title:
+            self.title = self.section_type.replace("_", " ").title()
+        return self
 
 
 class CVAnalysisPayload(BaseTaskPayload):
@@ -124,7 +176,7 @@ class CVAnalysisPayload(BaseTaskPayload):
     personal_info: Optional[ContactInfo] = Field(default=None, description="Personal information extracted")
     sections: List[CVSection] = Field(default_factory=list, description="Structured CV sections")
     skills: List[str] = Field(default_factory=list, description="Skills identified")
-    experience_years: float = Field(ge=0.0, description="Years of experience")
+    experience_years: float = Field(default=0.0, ge=0.0, description="Years of experience")
     strengths: List[str] = Field(default_factory=list, description="Strengths identified")
     improvement_areas: List[str] = Field(default_factory=list, description="Areas for improvement")
 
