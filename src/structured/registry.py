@@ -8,6 +8,7 @@ from .base import (
     BaseTaskPayload,
     ChecklistPayload,
     CVAnalysisPayload,
+    CodeAnalysisPayload,
     ExtractionPayload,
     SummaryPayload,
 )
@@ -56,7 +57,6 @@ class StructuredTaskRegistry:
         )
 
     def list_tasks(self) -> Dict[str, TaskDefinition]:
-        """Return all registered task definitions."""
         return dict(self._tasks)
 
     def get_task(self, name: str) -> Optional[TaskDefinition]:
@@ -69,24 +69,12 @@ class StructuredTaskRegistry:
         task = self.get_task(name)
         return task.payload_schema if task else None
 
-    def requires_rag(self, name: str) -> bool:
-        task = self.get_task(name)
-        return task.requires_rag if task else False
-
-    def get_default_model(self, name: str) -> Optional[str]:
-        task = self.get_task(name)
-        return task.default_model if task else None
-
-    def get_default_temperature(self, name: str) -> float:
-        task = self.get_task(name)
-        return task.default_temperature if task else 0.1
-
 
 def build_structured_task_registry() -> StructuredTaskRegistry:
     registry = StructuredTaskRegistry()
     registry.register_task(
         name="extraction",
-        description="Extract structured information from text",
+        description="Extract structured information from text or document context",
         payload_schema=ExtractionPayload,
         requires_rag=False,
         default_temperature=0.1,
@@ -115,7 +103,16 @@ def build_structured_task_registry() -> StructuredTaskRegistry:
         name="cv_analysis",
         description="Analyze and structure CV/resume information",
         payload_schema=CVAnalysisPayload,
-        requires_rag=True,
+        requires_rag=False,
+        default_temperature=0.1,
+        render_modes=("json", "friendly"),
+        primary_render_mode="friendly",
+    )
+    registry.register_task(
+        name="code_analysis",
+        description="Explain code and propose structured refactor guidance",
+        payload_schema=CodeAnalysisPayload,
+        requires_rag=False,
         default_temperature=0.1,
         render_modes=("json", "friendly"),
         primary_render_mode="friendly",

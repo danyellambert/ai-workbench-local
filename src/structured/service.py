@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..config import get_ollama_settings
-from .base import ChecklistPayload, CVAnalysisPayload
+from .base import ActionItem, ChecklistPayload, CVAnalysisPayload, CodeAnalysisPayload, ExtractionPayload, RiskItem
 from .envelope import StructuredResult, TaskExecutionRequest
 from .registry import task_registry
 from .tasks import get_task_handler
@@ -21,6 +21,7 @@ _PLACEHOLDER_MARKERS = {
     "item 1",
     "item 2",
     "https://linkedin.com/in/example",
+    "company x",
 }
 
 
@@ -32,7 +33,6 @@ class StructuredOutputService:
         self.ollama_settings = get_ollama_settings()
 
     def execute_task(self, request: TaskExecutionRequest) -> StructuredResult:
-        """Execute a structured task with the given request."""
         task_definition = self.task_registry.get_task(request.task_type)
         if not task_definition:
             return self._create_error_result(
@@ -63,7 +63,7 @@ class StructuredOutputService:
 
         try:
             result = handler.execute(execution_request)
-            result.context_used = execution_request.use_rag_context and bool(execution_request.source_document_ids)
+            result.context_used = (execution_request.use_document_context or execution_request.use_rag_context) and bool(execution_request.source_document_ids)
             result.source_documents = list(execution_request.source_document_ids)
             if result.primary_render_mode is None:
                 result.primary_render_mode = task_definition.primary_render_mode
@@ -111,6 +111,58 @@ class StructuredOutputService:
                 }
             )
 
+        if isinstance(result.validated_output, ExtractionPayload):
+            payload = result.validated_output
+            normalized_categories = list(dict.fromkeys(item.strip() for item in payload.categories if item and item.strip()))
+            normalized_dates = list(dict.fromkeys(item.strip() for item in payload.important_dates if item and item.strip()))
+            normalized_numbers = list(dict.fromkeys(item.strip() for item in payload.important_numbers if item and item.strip()))
+            normalized_missing = list(dict.fromkeys(item.strip() for item in payload.missing_information if item and item.strip()))
+
+            normalized_risks = []
+            seen_risks = set()
+            for item in payload.risks:
+                description = item.description.strip() if item.description else ""
+                if not description or description in seen_risks:
+                    continue
+                seen_risks.add(description)
+                normalized_risks.append(
+                    item.model_copy(update={"description": description}) if isinstance(item, RiskItem) else item
+                )
+
+            normalized_actions = []
+            seen_actions = set()
+            for item in payload.action_items:
+                description = item.description.strip() if item.description else ""
+                if not description or description in seen_actions:
+                    continue
+                seen_actions.add(description)
+                normalized_actions.append(
+                    item.model_copy(update={"description": description}) if isinstance(item, ActionItem) else item
+                )
+
+            result.validated_output = payload.model_copy(
+                update={
+                    "categories": normalized_categories,
+                    "important_dates": normalized_dates,
+                    "important_numbers": normalized_numbers,
+                    "risks": normalized_risks,
+                    "action_items": normalized_actions,
+                    "missing_information": normalized_missing,
+                }
+            )
+
+        if isinstance(result.validated_output, CodeAnalysisPayload):
+            payload = result.validated_output
+            result.validated_output = payload.model_copy(
+                update={
+                    "readability_improvements": list(dict.fromkeys(item.strip() for item in payload.readability_improvements if item and item.strip())),
+                    "maintainability_improvements": list(dict.fromkeys(item.strip() for item in payload.maintainability_improvements if item and item.strip())),
+                    "refactor_plan": list(dict.fromkeys(item.strip() for item in payload.refactor_plan if item and item.strip())),
+                    "test_suggestions": list(dict.fromkeys(item.strip() for item in payload.test_suggestions if item and item.strip())),
+                    "risk_notes": list(dict.fromkeys(item.strip() for item in payload.risk_notes if item and item.strip())),
+                }
+            )
+
     def _collect_string_values(self, value: Any) -> list[str]:
         if value is None:
             return []
@@ -142,6 +194,10 @@ class StructuredOutputService:
             score -= 0.55
         if request.task_type == "cv_analysis" and result.context_used:
             score += 0.03
+        if request.task_type == "extraction" and result.context_used:
+            score += 0.03
+        if request.task_type == "code_analysis" and not request.input_text.strip() and not result.context_used:
+            score -= 0.45
 
         score -= min(placeholder_hits * 0.22, 0.66)
         score -= min(example_hits * 0.12, 0.24)
@@ -159,6 +215,24 @@ class StructuredOutputService:
             payload = result.validated_output
             if not payload.items:
                 score -= 0.2
+
+        if isinstance(result.validated_output, ExtractionPayload):
+            payload = result.validated_output
+            if len(payload.entities) + len(payload.extracted_fields) < 2:
+                score -= 0.15
+            if not (payload.important_dates or payload.important_numbers or payload.action_items or payload.risks):
+                score -= 0.12
+            if not payload.main_subject:
+                score -= 0.05
+
+        if isinstance(result.validated_output, CodeAnalysisPayload):
+            payload = result.validated_output
+            if not payload.detected_issues:
+                score -= 0.18
+            if not payload.refactor_plan:
+                score -= 0.12
+            if not payload.test_suggestions:
+                score -= 0.1
 
         if result.repair_applied:
             score -= 0.05

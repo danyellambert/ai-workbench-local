@@ -5,6 +5,8 @@ from .base import (
     Entity,
     Relationship,
     ExtractedField,
+    RiskItem,
+    ActionItem,
     ExtractionPayload,
     Topic,
     SummaryPayload,
@@ -14,6 +16,8 @@ from .base import (
     CVSectionContentItem,
     CVSection,
     CVAnalysisPayload,
+    CodeIssue,
+    CodeAnalysisPayload,
     TaskPayload,
 )
 
@@ -22,6 +26,8 @@ __all__ = [
     "Entity",
     "Relationship",
     "ExtractedField",
+    "RiskItem",
+    "ActionItem",
     "ExtractionPayload",
     "Topic",
     "SummaryPayload",
@@ -31,5 +37,7 @@ __all__ = [
     "CVSectionContentItem",
     "CVSection",
     "CVAnalysisPayload",
+    "CodeIssue",
+    "CodeAnalysisPayload",
     "TaskPayload",
 ]

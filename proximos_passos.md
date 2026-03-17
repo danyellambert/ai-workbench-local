@@ -393,19 +393,20 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 ### Resultado mais recente da smoke eval da Fase 5
 
+- [x] `extraction` — **PASS**
 - [x] `summary` — **PASS**
 - [x] `checklist` — **PASS**
 - [x] `cv_analysis` — **PASS**
-- [ ] `extraction` — ainda em **WARN**, com pouca estrutura secundária e baixo nível de detalhe
+- [x] `code_analysis` — **PASS**
 
 ### Risco técnico importante já identificado
 
-A Fase 5 já está funcional, mas ainda não deve ser tratada como encerrada.
+A Fase 5 já está funcional em smoke eval automatizado, mas ainda não deve ser tratada como encerrada.
 
 Os principais pontos ainda em aberto são:
 
-- `extraction` ainda precisa de enriquecimento semântico para sair de `WARN` para `PASS`
-- `code_analysis` ainda não foi implementado como task oficial da Fase 5
+- falta polir a UI/UX da análise estruturada
+- falta validar a fase com documentos reais além dos fixtures de smoke eval
 - faltam exemplos reais versionados e evidências mais fortes da fase para portfólio
 - a qualidade final ainda depende do modelo local e do grounding por documento
 
@@ -413,13 +414,15 @@ Os principais pontos ainda em aberto são:
 
 A ordem mais forte agora passa a ser:
 
-1. **Fechar a Fase 5**, priorizando enriquecimento do `extraction`, implementação de `code_analysis` e evidências reais
-2. **Fase 5.5 — Evolução com LangChain e LangGraph**
-3. **Fase 6 — Tools e agentes orientados a valor de negócio**
-4. **Fase 7 — Benchmark e comparação entre modelos**
-5. **Fase 8 — Evals**
-6. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
-7. **Fase 9+ — Observabilidade e engenharia profissional**
+1. **Polir a UI/UX da Fase 5**
+2. **Validar a Fase 5 com documentos reais**
+3. **Fechar formalmente a Fase 5 com evidências**
+4. **Fase 5.5 — Evolução com LangChain e LangGraph**
+5. **Fase 6 — Tools e agentes orientados a valor de negócio**
+6. **Fase 7 — Benchmark e comparação entre modelos**
+7. **Fase 8 — Evals**
+8. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
+9. **Fase 9+ — Observabilidade e engenharia profissional**
 
 ---
 
@@ -769,55 +772,30 @@ A Fase 4.5 está considerada encerrada porque:
 
 ## Fase 5 — Outputs estruturados
 
-### Objetivo
-Mostrar que IA também pode ser usada como componente integrável de sistema.
+Objetivo desta fase: mostrar que IA também pode ser usada como componente integrável de sistema, com saídas previsíveis, validadas e reutilizáveis além do chat livre.
 
-### Status atual da fase
+### Já concluído
 
-A Fase 5 **já foi iniciada de verdade** e não está mais só em nível de arquitetura.
+- [x] Criar foundation de structured outputs com schemas, parsing, validação e execution envelope
+- [x] Implementar task registry e serviço estruturado
+- [x] Criar UI base para análise estruturada
+- [x] Separar os fluxos de chat com RAG e análise estruturada, mantendo a base documental compartilhada
+- [x] Implementar os modos:
+  - [x] extraction
+  - [x] summary
+  - [x] checklist
+  - [x] cv_analysis
+  - [x] code_analysis
+- [x] Implementar smoke eval automatizado para structured outputs
+- [x] Validar smoke eval local com PASS nas tasks principais
 
-Hoje o projeto já tem:
+### Próximos passos da fase
 
-- foundation técnica de structured outputs
-- UI base para execução de tasks estruturadas
-- renderização em múltiplos formatos
-- smoke eval automatizado
-- `summary`, `checklist` e `cv_analysis` em estado funcional para smoke test
-
-Mas a fase **ainda não está concluída**, porque faltam:
-
-- enriquecer `extraction`
-- implementar `code_analysis`
-- criar exemplos reais versionados
-- fortalecer a evidência profissional da fase
-
-### Checklist
-
-#### Foundation e infraestrutura
-- [x] Criar foundation de structured outputs em módulo dedicado
-- [x] Validar saídas com Pydantic
-- [x] Gerar respostas em JSON
-- [x] Definir schemas previsíveis por tarefa
-- [x] Garantir que os schemas e validadores sejam independentes do provider
-- [x] Preparar a camada de saída estruturada para reutilização futura com Ollama e Hugging Face
-
-#### UI e renderização
-- [x] Gerar respostas em checklist
-- [x] Integrar painel de structured outputs na UI
-- [x] Adicionar renderer base para `json`, `friendly` e `checklist`
-
-#### Tasks já implementadas
-- [x] Criar modo resumidor em tópicos
-- [x] Criar modo analisador de currículo
-- [x] Criar modo gerador de checklist
-- [~] Criar modo extrator de informações — funcional, mas ainda precisa enriquecer a estrutura e a qualidade semântica
-
-#### Itens ainda pendentes para fechar a fase
-- [ ] Criar modo explicador/refatorador de código
-- [ ] Documentar padrões de uso por tipo de saída
-- [ ] Criar casos reais de extração estruturada a partir de documentos
-- [ ] Registrar evidências fortes da fase (screenshots, exemplos comparativos e mini demo)
-- [ ] Levar `extraction` de `WARN` para `PASS` no smoke eval automatizado
+- [ ] Fazer polish de UI/UX da aba de análise estruturada
+- [ ] Validar a fase com documentos reais além dos fixtures de smoke eval
+- [ ] Refinar prompts, contexto e renderização com base nos testes reais
+- [ ] Registrar evidências da fase (screenshots, exemplos de saída, mini demo)
+- [ ] Fechar formalmente a Fase 5 no roadmap após validação com casos reais
 
 ### Entregável
 - Módulo de análises com saída estruturada e validada, integrado à UI e com smoke eval local

@@ -1,36 +1,58 @@
-# Phase 5 automated smoke evaluation
+# Phase 5 Automated Smoke Eval
 
-This project now includes a lightweight automated evaluation harness for Phase 5 structured outputs.
+## Purpose
 
-## Goal
-Provide a single command that runs the current structured-output tasks on controlled fixtures and reports whether the outputs look acceptable.
+This local smoke eval helps answer a simple question: are the structured-output tasks producing output that is not only valid JSON, but also minimally useful and grounded?
 
-## Scope
-This is a **smoke eval**, not a full benchmark.
-
-It checks:
-- whether each structured task runs successfully
-- whether the validated payload is non-empty enough to be useful
-- whether outputs contain obvious prompt placeholders
-- whether the task returns the expected task type
-
-It does **not** replace:
-- end-to-end UI testing
-- RAG integration testing through Streamlit state
-- human review for semantic quality on business documents
+It is not a benchmark and it does not replace manual review, but it gives the project a reproducible local check.
 
 ## Command
-Run all smoke evals:
+
+Run all structured tasks covered by the smoke eval:
 
 ```bash
-python scripts/run_phase5_structured_eval.py --task all
+PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task all
 ```
 
-Run only CV analysis with a PDF:
+Run a single task:
 
 ```bash
-python scripts/run_phase5_structured_eval.py --task cv_analysis --cv-pdf /path/to/resume.pdf
+PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task extraction
+PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task code_analysis
 ```
 
-## Output
-The script prints a PASS / WARN / FAIL summary and writes a JSON report under `phase5_eval/reports/`.
+Use a real PDF for CV analysis:
+
+```bash
+PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task cv_analysis --cv-pdf "/path/to/cv.pdf"
+```
+
+## Covered tasks
+
+- `extraction`
+- `summary`
+- `checklist`
+- `cv_analysis`
+- `code_analysis`
+
+## Fixtures
+
+Default fixtures live in:
+
+- `phase5_eval/fixtures/01_extraction_input.txt`
+- `phase5_eval/fixtures/02_summary_input.txt`
+- `phase5_eval/fixtures/03_checklist_input.txt`
+- `phase5_eval/fixtures/04_cv_sample.txt`
+- `phase5_eval/fixtures/05_code_sample.py`
+
+## PASS / WARN / FAIL semantics
+
+- `PASS`: valid and semantically healthy enough for a smoke test
+- `WARN`: valid, but too shallow, too generic, or missing useful secondary structure
+- `FAIL`: invalid or clearly unusable for the intended task
+
+## Notes
+
+- `summary`, `checklist`, `cv_analysis`, and `code_analysis` are already expected to be functional in smoke tests.
+- `extraction` should also pass now, but it remains the task most sensitive to prompt/model quality.
+- This eval is intentionally lightweight and local; it is meant to support iteration during Phase 5, not replace the later benchmark work planned for later phases.

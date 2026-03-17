@@ -1,15 +1,15 @@
-"""Task handlers and stubs for structured outputs."""
+"""Task handlers for structured outputs."""
 from __future__ import annotations
 
 from typing import Optional
 
-from .base import ChecklistPayload, CVAnalysisPayload, ExtractionPayload, SummaryPayload
+from .base import ChecklistPayload, CVAnalysisPayload, CodeAnalysisPayload, ExtractionPayload, SummaryPayload
 from .envelope import TaskExecutionRequest, StructuredResult
 from .parsers import parse_structured_response
 
 
 class TaskHandler:
-    """Base class for task handlers."""
+    """Base class for structured task handlers."""
 
     def _get_provider_registry(self):
         from ..providers.registry import build_provider_registry
@@ -33,50 +33,42 @@ class TaskHandler:
         )
         return "".join(provider.iter_stream_text(stream))
 
-    def _build_optional_rag_context(self, request: TaskExecutionRequest) -> str:
-        if not request.use_rag_context or not request.source_document_ids:
+    def _build_optional_document_context(
+        self,
+        request: TaskExecutionRequest,
+        *,
+        strategy: str | None = None,
+        max_chunks: int | None = None,
+        max_chars: int | None = None,
+    ) -> str:
+        use_context = request.use_document_context or request.use_rag_context
+        if not use_context or not request.source_document_ids:
             return ""
 
-        from ..config import get_rag_settings
-        from ..providers.registry import build_provider_registry
-        from ..services.rag_state import get_rag_index
+        from ..services.document_context import build_structured_document_context
 
-        rag_index = get_rag_index()
-        if not rag_index:
-            return ""
+        return build_structured_document_context(
+            query=request.input_text,
+            document_ids=request.source_document_ids,
+            strategy=(strategy or request.context_strategy or "document_scan"),
+            max_chunks=max_chunks,
+            max_chars=max_chars,
+        )
 
-        chunks = [chunk for chunk in rag_index.get("chunks", []) if isinstance(chunk, dict)]
-        chunks = [
-            chunk for chunk in chunks
-            if str(chunk.get("document_id") or chunk.get("file_hash") or "") in set(request.source_document_ids)
-        ]
-        if not chunks:
-            return ""
-
-        if request.input_text.strip():
-            from ..rag.service import retrieve_relevant_chunks
-
-            provider_registry = build_provider_registry()
-            embedding_provider = provider_registry.get(request.provider, provider_registry.get("ollama"))["instance"]
-            retrieved = retrieve_relevant_chunks(
-                query=request.input_text,
-                rag_index=rag_index,
-                settings=get_rag_settings(),
-                embedding_provider=embedding_provider,
-                document_ids=request.source_document_ids,
-            )
-            if retrieved:
-                chunks = retrieved
-
-        selected_chunks = chunks[:6]
-        context_parts = []
-        for chunk in selected_chunks:
-            source = chunk.get("source", "document")
-            snippet = chunk.get("snippet") or str(chunk.get("text", ""))
-            if not snippet.strip():
-                continue
-            context_parts.append(f"[Source: {source}]\n{snippet}")
-        return "\n\n".join(context_parts)
+    def _build_optional_rag_context(
+        self,
+        request: TaskExecutionRequest,
+        mode: str | None = None,
+        max_chunks: int | None = None,
+        max_chars: int | None = None,
+    ) -> str:
+        """Backward-compatible wrapper used by earlier Phase 5 code."""
+        return self._build_optional_document_context(
+            request,
+            strategy=mode,
+            max_chunks=max_chunks,
+            max_chars=max_chars,
+        )
 
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         raise NotImplementedError
@@ -85,18 +77,21 @@ class TaskHandler:
 class ExtractionTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         provider = self._resolve_provider(request)
-        context_text = self._build_optional_rag_context(request)
+        context_text = self._build_optional_document_context(request, strategy="document_scan", max_chunks=12)
         prompt = self._build_extraction_prompt(request.input_text, context_text)
         response_text = self._collect_response_text(provider, request, prompt)
         return parse_structured_response(response_text, ExtractionPayload)
 
     def _build_extraction_prompt(self, text: str, context_text: str) -> str:
-        context_block = f"\nSupplementary context:\n{context_text}\n" if context_text else ""
+        context_block = f"\nDocument context:\n{context_text}\n" if context_text else ""
         return f"""
 You are a precise information extractor.
 Return only valid JSON.
+Use only the information present in the input/context.
 Do not invent information and do not copy example placeholder values.
-If something is missing, return an empty list instead of making it up.
+If something is missing, return null or an empty list instead of making it up.
+When risks or actions are present, return them as structured objects with description plus any available owner, due date, impact, or status.
+Try to extract entities, main subject, important dates/numbers, risks, action items, and missing information when they are present.
 
 Text to analyze:
 {text}
@@ -104,6 +99,7 @@ Text to analyze:
 Return this JSON structure:
 {{
   "task_type": "extraction",
+  "main_subject": "short main subject derived from the source",
   "entities": [
     {{
       "type": "organization",
@@ -130,7 +126,26 @@ Return this JSON structure:
       "value": "2025-03-01",
       "evidence": "announced on March 1, 2025"
     }}
-  ]
+  ],
+  "important_dates": ["2025-03-01"],
+  "important_numbers": ["30%", "$2.4M"],
+  "risks": [
+    {{
+      "description": "Potential rollout delay due to vendor dependency",
+      "impact": "Delivery may slip by two weeks",
+      "owner": null,
+      "due_date": null
+    }}
+  ],
+  "action_items": [
+    {{
+      "description": "Finalize integration plan",
+      "owner": "Platform team",
+      "due_date": "Friday",
+      "status": "pending"
+    }}
+  ],
+  "missing_information": ["No owner is named for the migration task"]
 }}
 """
 
@@ -138,13 +153,14 @@ Return this JSON structure:
 class SummaryTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         provider = self._resolve_provider(request)
-        context_text = self._build_optional_rag_context(request)
+        strategy = request.context_strategy or "retrieval"
+        context_text = self._build_optional_document_context(request, strategy=strategy, max_chunks=8)
         prompt = self._build_summary_prompt(request.input_text, context_text)
         response_text = self._collect_response_text(provider, request, prompt)
         return parse_structured_response(response_text, SummaryPayload)
 
     def _build_summary_prompt(self, text: str, context_text: str) -> str:
-        context_block = f"\nRetrieved context:\n{context_text}\n" if context_text else ""
+        context_block = f"\nContext:\n{context_text}\n" if context_text else ""
         return f"""
 You are a structured summarization assistant.
 Return only valid JSON.
@@ -176,13 +192,13 @@ Return this JSON structure:
 class ChecklistTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         provider = self._resolve_provider(request)
-        context_text = self._build_optional_rag_context(request)
+        context_text = self._build_optional_document_context(request, strategy="document_scan", max_chunks=10)
         prompt = self._build_checklist_prompt(request.input_text, context_text)
         response_text = self._collect_response_text(provider, request, prompt)
         return parse_structured_response(response_text, ChecklistPayload)
 
     def _build_checklist_prompt(self, text: str, context_text: str) -> str:
-        context_block = f"\nRetrieved context:\n{context_text}\n" if context_text else ""
+        context_block = f"\nContext:\n{context_text}\n" if context_text else ""
         return f"""
 You are a checklist generator.
 Convert the input into an operational checklist and return only valid JSON.
@@ -218,7 +234,7 @@ Return this JSON structure:
 class CVAnalysisTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         provider = self._resolve_provider(request)
-        context_text = self._build_optional_rag_context(request)
+        context_text = self._build_optional_document_context(request, strategy="document_scan", max_chunks=16)
         prompt = self._build_cv_analysis_prompt(request.input_text, context_text)
         response_text = self._collect_response_text(provider, request, prompt)
         return parse_structured_response(response_text, CVAnalysisPayload)
@@ -272,14 +288,55 @@ Return this JSON structure:
 """
 
 
-TASK_HANDLERS = {
-    "extraction": ExtractionTaskHandler,
-    "summary": SummaryTaskHandler,
-    "checklist": ChecklistTaskHandler,
-    "cv_analysis": CVAnalysisTaskHandler,
-}
+class CodeAnalysisTaskHandler(TaskHandler):
+    def execute(self, request: TaskExecutionRequest) -> StructuredResult:
+        provider = self._resolve_provider(request)
+        context_text = self._build_optional_document_context(request, strategy="document_scan", max_chunks=12)
+        prompt = self._build_code_analysis_prompt(request.input_text, context_text)
+        response_text = self._collect_response_text(provider, request, prompt)
+        return parse_structured_response(response_text, CodeAnalysisPayload)
+
+    def _build_code_analysis_prompt(self, text: str, context_text: str) -> str:
+        context_block = f"\nCode/document context:\n{context_text}\n" if context_text else ""
+        return f"""
+You are a code analysis assistant.
+Return only valid JSON.
+Use only the code/content provided.
+Do not invent bugs or features that are not grounded in the code.
+
+Code or technical text to analyze:
+{text}
+{context_block}
+Return this JSON structure:
+{{
+  "task_type": "code_analysis",
+  "snippet_summary": "Short summary of the code snippet",
+  "main_purpose": "Main purpose of the code",
+  "detected_issues": [
+    {{
+      "severity": "medium",
+      "category": "maintainability",
+      "title": "Duplicated logic",
+      "description": "Similar logic appears in multiple places.",
+      "evidence": "Repeated conditional branches in two methods.",
+      "recommendation": "Extract a helper function."
+    }}
+  ],
+  "readability_improvements": ["Rename unclear variables"],
+  "maintainability_improvements": ["Extract shared logic"],
+  "refactor_plan": ["Step 1", "Step 2"],
+  "test_suggestions": ["Add unit test for edge case X"],
+  "risk_notes": ["May fail on malformed input"]
+}}
+"""
 
 
 def get_task_handler(task_type: str) -> Optional[TaskHandler]:
-    handler_class = TASK_HANDLERS.get(task_type)
-    return handler_class() if handler_class else None
+    mapping: dict[str, TaskHandler] = {
+        "extraction": ExtractionTaskHandler(),
+        "summary": SummaryTaskHandler(),
+        "checklist": ChecklistTaskHandler(),
+        "cv_analysis": CVAnalysisTaskHandler(),
+        "code_analysis": CodeAnalysisTaskHandler(),
+    }
+    return mapping.get(task_type)

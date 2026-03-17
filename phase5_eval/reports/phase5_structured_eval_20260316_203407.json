@@ -1,0 +1,258 @@
+{
+  "generated_at": "2026-03-16T20:34:07.538236",
+  "provider": "ollama",
+  "model": null,
+  "tasks": [
+    {
+      "task": "extraction",
+      "status": "FAIL",
+      "score": 0,
+      "max_score": 5,
+      "reasons": [
+        "task execution did not succeed"
+      ],
+      "success": false,
+      "error": {
+        "error_type": "validation_error",
+        "message": "Validation failed for ExtractionPayload: 2 validation errors for ExtractionPayload\nrisks.0\n  Input should be a valid string [type=string_type, input_value={'description': 'delayed ...lacement transformers.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/string_type\naction_items.0\n  Input should be a valid string [type=string_type, input_value={'description': 'Schedule...due_date': '2026-04-15'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/string_type",
+        "details": null,
+        "timestamp": "2026-03-16T20:32:49.506238"
+      },
+      "validation_error": "Validation failed for ExtractionPayload: 2 validation errors for ExtractionPayload\nrisks.0\n  Input should be a valid string [type=string_type, input_value={'description': 'delayed ...lacement transformers.'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/string_type\naction_items.0\n  Input should be a valid string [type=string_type, input_value={'description': 'Schedule...due_date': '2026-04-15'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/string_type",
+      "parsing_error": null,
+      "payload": null
+    },
+    {
+      "task": "summary",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "Main topic",
+            "key_points": [
+              "structured outputs foundation implemented",
+              "UI panel added for Streamlit app"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "The structured outputs foundation has been implemented with task schemas, a registry, JSON parsing, and validation.",
+              "A first UI panel was added to the Streamlit app so users can run extraction, summary, checklist, and CV analysis."
+            ]
+          }
+        ],
+        "executive_summary": "Phase 5 progress includes implementing a structured outputs foundation and adding a UI panel for running various analyses in a Streamlit app. However, prompt quality is uneven, and priority lies in improving output quality.",
+        "key_insights": [
+          "prompt quality issues",
+          "focus on grounding and document-context usage"
+        ],
+        "reading_time_minutes": 2,
+        "completeness_score": 0.85
+      }
+    },
+    {
+      "task": "checklist",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "checklist",
+        "schema_version": "1.0",
+        "title": "Project Release Candidate Preparation Checklist",
+        "description": "A comprehensive checklist to ensure all necessary steps are completed before approving a new project release candidate.",
+        "items": [
+          {
+            "id": "item-1",
+            "title": "Verify Changelog",
+            "description": "Ensure the changelog is up-to-date and accurate for the current version.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [],
+            "estimated_time_minutes": 10
+          },
+          {
+            "id": "item-2",
+            "title": "Run Automated Tests",
+            "description": "Execute all automated tests to ensure the project functions as expected.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-1"
+            ],
+            "estimated_time_minutes": 30
+          },
+          {
+            "id": "item-3",
+            "title": "Update Environment Examples",
+            "description": "Review and update any environment examples to reflect the latest changes.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-2"
+            ],
+            "estimated_time_minutes": 15
+          },
+          {
+            "id": "item-4",
+            "title": "Validate Streamlit Startup",
+            "description": "Ensure the application starts correctly and all components are functioning.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-3"
+            ],
+            "estimated_time_minutes": 20
+          },
+          {
+            "id": "item-5",
+            "title": "Check Structured Output Tasks",
+            "description": "Verify that all structured output tasks are correctly implemented and tested.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-4"
+            ],
+            "estimated_time_minutes": 25
+          },
+          {
+            "id": "item-6",
+            "title": "Tag Release in Git",
+            "description": "Create and tag the release in git to mark this version as a candidate for release.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-5"
+            ],
+            "estimated_time_minutes": 10
+          }
+        ],
+        "total_items": 6,
+        "completed_items": 0,
+        "progress_percentage": 0.0
+      }
+    },
+    {
+      "task": "cv_analysis",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "cv_analysis",
+        "schema_version": "1.0",
+        "personal_info": {
+          "full_name": "Ana Ribeiro",
+          "email": "ana.ribeiro@example.com",
+          "phone": "+55 11 98888-7777",
+          "location": "São Paulo, Brazil",
+          "links": [
+            "https://www.linkedin.com/in/anaribeiro"
+          ]
+        },
+        "sections": [
+          {
+            "section_type": "experience",
+            "title": "Professional Experience",
+            "content": [
+              {
+                "text": "AI Engineer at Orion Labs (Jan 2024 to Present)",
+                "details": {
+                  "role": "AI Engineer",
+                  "organization": "Orion Labs",
+                  "duration": "Jan 2024 to Present"
+                }
+              },
+              {
+                "text": "Data Science Intern at Vento Analytics (Jul 2023 to Dec 2023)",
+                "details": {
+                  "role": "Data Science Intern",
+                  "organization": "Vento Analytics",
+                  "duration": "Jul 2023 to Dec 2023"
+                }
+              }
+            ],
+            "confidence": 0.9
+          }
+        ],
+        "skills": [
+          "Python",
+          "Streamlit",
+          "Ollama",
+          "Chroma",
+          "Pydantic",
+          "SQL",
+          "Git"
+        ],
+        "experience_years": 0.5,
+        "strengths": [
+          "AI engineer focused on retrieval-augmented generation, document intelligence, and local LLM applications"
+        ],
+        "improvement_areas": []
+      }
+    },
+    {
+      "task": "code_analysis",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "code_analysis",
+        "schema_version": "1.0",
+        "snippet_summary": "The code processes and normalizes scores from a list of items, then calculates the average score.",
+        "main_purpose": "To normalize scores within a specified range and compute their average.",
+        "detected_issues": [
+          {
+            "severity": "medium",
+            "category": "maintainability",
+            "title": "Too much logic in one function",
+            "description": "The `normalize_scores` function mixes input validation, retrieval, and rendering in a single block of code.",
+            "evidence": "Function `normalize_scores` handles parsing, validation, and UI output together.",
+            "recommendation": "Split orchestration and rendering into separate helpers."
+          }
+        ],
+        "readability_improvements": [
+          "Use more explicit variable names for score normalization"
+        ],
+        "maintainability_improvements": [],
+        "refactor_plan": [
+          "Extract validation logic from `normalize_scores` into a separate helper",
+          "Add schema-level tests to ensure data integrity"
+        ],
+        "test_suggestions": [
+          "Add a unit test for malformed JSON responses in the `process` function"
+        ],
+        "risk_notes": [
+          "Provider failures currently propagate as generic runtime errors, which may hide specific issues."
+        ]
+      }
+    }
+  ]
+}

@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+from pathlib import Path
+import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import argparse
 import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 from pypdf import PdfReader
@@ -13,11 +19,9 @@ from pypdf import PdfReader
 from src.structured.envelope import TaskExecutionRequest, StructuredResult
 from src.structured.service import structured_service
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FIXTURES_DIR = PROJECT_ROOT / "phase5_eval" / "fixtures"
 REPORTS_DIR = PROJECT_ROOT / "phase5_eval" / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-
 
 PLACEHOLDER_PATTERNS = [
     r"\bfull name\b",
@@ -55,8 +59,6 @@ def _read_pdf_text(path: Path) -> str:
         except Exception:
             continue
     return "\n".join(pages).strip()
-
-
 def _stringify(value: Any) -> str:
     if value is None:
         return ""
@@ -109,10 +111,10 @@ def _evaluate_result(task: str, result: StructuredResult) -> EvalOutcome:
         else:
             reasons.append("extraction returned too little structured content")
 
-        if dumped.get("categories") or dumped.get("relationships") or fields:
+        if dumped.get("main_subject") and (dumped.get("important_dates") or dumped.get("important_numbers") or dumped.get("action_items") or dumped.get("risks")):
             score += 1
         else:
-            reasons.append("extraction missing useful secondary structure")
+            reasons.append("extraction missing main subject or useful secondary structure")
 
     elif task == "summary":
         topics = dumped.get("topics", [])
@@ -156,6 +158,19 @@ def _evaluate_result(task: str, result: StructuredResult) -> EvalOutcome:
         else:
             reasons.append("cv analysis returned too little resume structure")
 
+    elif task == "code_analysis":
+        issues = dumped.get("detected_issues", [])
+        summary = dumped.get("snippet_summary", "")
+        if summary.strip() and len(issues) >= 1:
+            score += 1
+        else:
+            reasons.append("code analysis missing summary or issues")
+
+        if dumped.get("refactor_plan") and dumped.get("test_suggestions"):
+            score += 1
+        else:
+            reasons.append("code analysis missing refactor plan or test suggestions")
+
     status = "PASS" if score >= 5 else "WARN" if score >= 3 else "FAIL"
     return EvalOutcome(task, status, score, max_score, reasons)
 
@@ -177,6 +192,7 @@ def _default_input_for_task(task: str) -> str:
         "summary": FIXTURES_DIR / "02_summary_input.txt",
         "checklist": FIXTURES_DIR / "03_checklist_input.txt",
         "cv_analysis": FIXTURES_DIR / "04_cv_sample.txt",
+        "code_analysis": FIXTURES_DIR / "05_code_sample.py",
     }
     return _read_text(mapping[task])
 
@@ -238,13 +254,13 @@ def run_tasks(tasks: list[str], provider: str, model: str | None, cv_pdf: str | 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run automated smoke evals for Phase 5 structured outputs.")
-    parser.add_argument("--task", default="all", choices=["all", "extraction", "summary", "checklist", "cv_analysis"])
+    parser.add_argument("--task", default="all", choices=["all", "extraction", "summary", "checklist", "cv_analysis", "code_analysis"])
     parser.add_argument("--provider", default="ollama")
     parser.add_argument("--model", default=None)
     parser.add_argument("--cv-pdf", default=None, help="Optional PDF path for cv_analysis instead of the default text fixture")
     args = parser.parse_args()
 
-    tasks = [args.task] if args.task != "all" else ["extraction", "summary", "checklist", "cv_analysis"]
+    tasks = [args.task] if args.task != "all" else ["extraction", "summary", "checklist", "cv_analysis", "code_analysis"]
     return run_tasks(tasks, provider=args.provider, model=args.model, cv_pdf=args.cv_pdf)
 
 
