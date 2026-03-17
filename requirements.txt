@@ -10,3 +10,4 @@ chromadb
 docling
 cryptography>=3.1
 matplotlib
+reportlab

@@ -393,20 +393,20 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 ### Resultado mais recente da smoke eval da Fase 5
 
-- [x] `extraction` — **PASS**
 - [x] `summary` — **PASS**
 - [x] `checklist` — **PASS**
 - [x] `cv_analysis` — **PASS**
-- [x] `code_analysis` — **PASS**
+- [ ] `extraction` — estava em **WARN** no último smoke eval consolidado; após este patch, precisa de revalidação
+- [ ] `code_analysis` — implementado neste patch, mas ainda precisa de validação no smoke eval
 
 ### Risco técnico importante já identificado
 
-A Fase 5 já está funcional em smoke eval automatizado, mas ainda não deve ser tratada como encerrada.
+A Fase 5 já está funcional, mas ainda não deve ser tratada como encerrada.
 
 Os principais pontos ainda em aberto são:
 
-- falta polir a UI/UX da análise estruturada
-- falta validar a fase com documentos reais além dos fixtures de smoke eval
+- `extraction` foi enriquecido, mas ainda precisa de revalidação para comprovar PASS no smoke eval
+- `code_analysis` foi implementado, mas ainda precisa de validação em smoke eval e exemplos reais
 - faltam exemplos reais versionados e evidências mais fortes da fase para portfólio
 - a qualidade final ainda depende do modelo local e do grounding por documento
 
@@ -414,15 +414,13 @@ Os principais pontos ainda em aberto são:
 
 A ordem mais forte agora passa a ser:
 
-1. **Polir a UI/UX da Fase 5**
-2. **Validar a Fase 5 com documentos reais**
-3. **Fechar formalmente a Fase 5 com evidências**
-4. **Fase 5.5 — Evolução com LangChain e LangGraph**
-5. **Fase 6 — Tools e agentes orientados a valor de negócio**
-6. **Fase 7 — Benchmark e comparação entre modelos**
-7. **Fase 8 — Evals**
-8. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
-9. **Fase 9+ — Observabilidade e engenharia profissional**
+1. **Fechar a Fase 5**, priorizando revalidação do `extraction`, validação do `code_analysis` e evidências reais
+2. **Fase 5.5 — Evolução com LangChain e LangGraph**
+3. **Fase 6 — Tools e agentes orientados a valor de negócio**
+4. **Fase 7 — Benchmark e comparação entre modelos**
+5. **Fase 8 — Evals**
+6. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
+7. **Fase 9+ — Observabilidade e engenharia profissional**
 
 ---
 
@@ -772,46 +770,98 @@ A Fase 4.5 está considerada encerrada porque:
 
 ## Fase 5 — Outputs estruturados
 
-Objetivo desta fase: mostrar que IA também pode ser usada como componente integrável de sistema, com saídas previsíveis, validadas e reutilizáveis além do chat livre.
+### Objetivo
+Mostrar que IA também pode ser usada como componente integrável de sistema, com saídas previsíveis, validadas e reutilizáveis além do chat livre.
 
-### Já concluído
+### Status atual da fase
 
-- [x] Criar foundation de structured outputs com schemas, parsing, validação e execution envelope
-- [x] Implementar task registry e serviço estruturado
-- [x] Criar UI base para análise estruturada
-- [x] Separar os fluxos de chat com RAG e análise estruturada, mantendo a base documental compartilhada
-- [x] Implementar os modos:
-  - [x] extraction
-  - [x] summary
-  - [x] checklist
-  - [x] cv_analysis
-  - [x] code_analysis
+A Fase 5 **já foi implementada de forma funcional em nível de foundation, UI base e eval local**, e não está mais só em nível de arquitetura.
+
+Hoje o projeto já tem:
+
+- foundation técnica de structured outputs
+- schemas, parsing, validação e execution envelope
+- task registry e serviço estruturado
+- UI base para execução de tasks estruturadas
+- renderização em múltiplos formatos
+- separação entre **chat com RAG** e **análise estruturada**, mantendo a base documental compartilhada
+- smoke eval automatizado da Fase 5
+- benchmark sintético inicial para `cv_analysis` com múltiplos layouts
+- modos implementados:
+  - `extraction`
+  - `summary`
+  - `checklist`
+  - `cv_analysis`
+  - `code_analysis`
+
+Além disso, o smoke eval automatizado da fase já passou localmente nas tasks principais.
+
+A fase **ainda não está concluída**, porque os próximos ganhos relevantes agora estão concentrados em:
+
+- polish de UI/UX da aba de análise estruturada
+- validação com documentos reais além dos fixtures e do smoke eval
+- refinamento específico do `cv_analysis` com base no benchmark sintético
+- registro de evidências fortes da fase para GitHub/LinkedIn
+
+### Checklist
+
+#### Foundation e infraestrutura
+- [x] Criar foundation de structured outputs em módulo dedicado
+- [x] Validar saídas com Pydantic
+- [x] Gerar respostas em JSON
+- [x] Definir schemas previsíveis por tarefa
+- [x] Garantir que os schemas e validadores sejam independentes do provider
+- [x] Preparar a camada de saída estruturada para reutilização futura com Ollama e Hugging Face
+
+#### UI e renderização
+- [x] Gerar respostas em checklist
+- [x] Integrar painel de structured outputs na UI
+- [x] Adicionar renderer base para `json`, `friendly` e `checklist`
+- [x] Separar a experiência de **chat com RAG** e **documento estruturado** na UI
+
+#### Tasks já implementadas
+- [x] Criar modo resumidor em tópicos
+- [x] Criar modo analisador de currículo
+- [x] Criar modo gerador de checklist
+- [x] Criar modo extrator de informações
+- [x] Criar modo explicador/refatorador de código
+
+#### Evals e benchmark já executados
 - [x] Implementar smoke eval automatizado para structured outputs
 - [x] Validar smoke eval local com PASS nas tasks principais
+- [x] Criar benchmark sintético inicial de `cv_analysis` com PDFs e ground truth gerados
+- [x] Validar benchmark sintético inicial e identificar gargalos principais de `cv_analysis`
 
-### Próximos passos da fase
-
+#### Próximos passos para fechar a fase
 - [ ] Fazer polish de UI/UX da aba de análise estruturada
 - [ ] Validar a fase com documentos reais além dos fixtures de smoke eval
 - [ ] Refinar prompts, contexto e renderização com base nos testes reais
-- [ ] Registrar evidências da fase (screenshots, exemplos de saída, mini demo)
+- [ ] Melhorar `cv_analysis` com foco em robustez estrutural:
+  - [ ] Promover `languages`, `education` e `experience entries` a campos explícitos do schema
+  - [ ] Separar extração factual de análise/recomendação em duas etapas lógicas
+  - [ ] Adicionar normalização pós-modelo para consolidar dados vindos de `sections`
+  - [ ] Tratar layouts `scan_like` como casos `ocr_needed`, e não como falhas normais da task textual
+- [ ] Registrar evidências da fase (screenshots, exemplos de saída, benchmark sintético, mini demo)
 - [ ] Fechar formalmente a Fase 5 no roadmap após validação com casos reais
 
 ### Entregável
-- Módulo de análises com saída estruturada e validada, integrado à UI e com smoke eval local
+- Módulo de análises com saída estruturada e validada, integrado à UI, separado do fluxo conversacional, com smoke eval local e benchmark sintético inicial
 
 ### Evidência para GitHub/LinkedIn
 - exemplos antes/depois de saída livre vs. estruturada
 - screenshot ou tabela com JSON validado
 - mini demo mostrando transformação de documento em checklist/JSON
 - relatório local de smoke eval da Fase 5
+- benchmark sintético de `cv_analysis` com comparação entre layouts
 
 ### O que preciso saber defender em entrevista
 - por que structured output é importante
+- como separar experiência conversacional de pipeline orientado a tarefa
 - como reduzir respostas inconsistentes
 - onde Pydantic ajuda confiabilidade
 - por que isso prepara o terreno para automação e agentes
 - por que smoke eval local ajuda a sair do “parece funcionar” para “tenho uma verificação mínima reproduzível”
+- como benchmark sintético ajuda a encontrar gargalos reais de parsing e estrutura antes de usar documentos privados
 
 ---
 
@@ -1304,3 +1354,9 @@ Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA a
 O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 
 > Construí uma aplicação de IA que começou com fundamentos locais, evoluiu para RAG real com base documental, passou a produzir saídas estruturadas, foi instrumentada com benchmarking/evals/observabilidade e, só quando isso fez sentido, explorou Hugging Face, quantização e fine-tuning leve de forma orientada por evidência.
+
+
+### Atualização local recente
+- [x] Robustecer `extraction` para aceitar riscos e ações estruturadas sem falhar na validação
+- [x] Simplificar a UI da análise estruturada para reduzir atrito de uso
+- [ ] Revalidar comportamento com documentos reais no app após o ajuste de UX
