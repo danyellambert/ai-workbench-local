@@ -9,6 +9,7 @@ The project now has a usable Phase 5 structured-output flow with:
 - JSON, friendly view, and checklist view render modes
 - optional document grounding via the current RAG document selection
 - basic quality heuristics to warn when the output looks placeholder-like or poorly grounded
+- automated smoke eval coverage for `extraction`, `summary`, `checklist`, `cv_analysis`, and `code_analysis`
 
 ## Recommended usage by task
 
@@ -27,10 +28,12 @@ Recommended input:
 ### 2. `extraction`
 Best for:
 - extracting entities, categories, relationships, and named fields from a document or pasted text
+- surfacing important dates, numbers, risks, action items, and missing information from operational text
 
 Recommended input:
 - use pasted text for short factual extraction tasks
 - use RAG when the source is an indexed document and you want evidence-backed extraction
+- this mode works best on meeting notes, briefs, internal emails, and project memos rather than highly narrative text
 
 ### 3. `checklist`
 Best for:
@@ -52,6 +55,16 @@ Recommended input:
 Important note:
 - this mode is grounded better than the first stub version, but it is still not a hiring decision engine
 - it should be treated as a structured analysis helper, not an objective evaluation system
+
+### 5. `code_analysis`
+Best for:
+- explaining a code snippet or small file in structured form
+- surfacing issues, refactor opportunities, and test suggestions for an implementation
+
+Recommended input:
+- paste the code snippet directly for the cleanest result
+- use a short lead-in such as `analyze this function for maintainability`
+- when grounding on indexed documents, filter the relevant code-oriented file before enabling RAG
 
 ## Good operating patterns
 
@@ -75,11 +88,17 @@ For the best CV results:
 4. enable **Use current document context (RAG)**
 5. optionally add a short note in the input field, such as `analyze this resume for structure and skills`
 
+### Best practice for code analysis
+For the best code-analysis results:
+1. paste a self-contained function or short module
+2. mention the concern if you have one (`review this for bugs and test gaps`)
+3. use the friendly view first, then inspect the JSON if you want to reuse the result elsewhere
+
 ## Current limitations
 
 - the task layer is already useful, but prompt tuning can still be improved further
-- `code_analysis` is not implemented yet
-- real benchmark/eval coverage for structured outputs is still pending
+- `code_analysis` is now implemented, but still needs stronger real-world examples and evidence
+- real benchmark/eval coverage for structured outputs is still lightweight and local
 - results can still vary depending on provider/model quality
 
 ## What to look for in the UI

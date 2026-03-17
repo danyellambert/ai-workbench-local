@@ -1,0 +1,343 @@
+{
+  "generated_at": "2026-03-16T21:34:40.180285",
+  "provider": "ollama",
+  "model": null,
+  "tasks": [
+    {
+      "task": "extraction",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "extraction",
+        "schema_version": "1.0",
+        "main_subject": "Maintenance Agreement Signed by Acme Energia",
+        "entities": [
+          {
+            "type": "organization",
+            "value": "Acme Energia",
+            "confidence": 0.95,
+            "source_text": "Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation.",
+            "position_start": 0,
+            "position_end": 12
+          },
+          {
+            "type": "organization",
+            "value": "NovaGrid Solutions",
+            "confidence": 0.95,
+            "source_text": "Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation.",
+            "position_start": 26,
+            "position_end": 41
+          },
+          {
+            "type": "location",
+            "value": "Porto Alegre substation",
+            "confidence": 0.95,
+            "source_text": "Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation.",
+            "position_start": 42,
+            "position_end": 61
+          }
+        ],
+        "categories": [
+          "contract signing"
+        ],
+        "relationships": [],
+        "extracted_fields": [
+          {
+            "name": "agreement_date",
+            "value": "2026-03-12",
+            "evidence": "On March 12, 2026, Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation."
+          },
+          {
+            "name": "contract_value",
+            "value": "R$ 480,000",
+            "evidence": "The contract value is R$ 480,000 for a 12-month period starting April 1, 2026."
+          },
+          {
+            "name": "contract_period",
+            "value": "12 months",
+            "evidence": "The contract value is R$ 480,000 for a 12-month period starting April 1, 2026."
+          },
+          {
+            "name": "start_date",
+            "value": "2026-04-01",
+            "evidence": "The contract value is R$ 480,000 for a 12-month period starting April 1, 2026."
+          },
+          {
+            "name": "project_manager",
+            "value": "Mariana Costa",
+            "evidence": "Project manager: Mariana Costa."
+          },
+          {
+            "name": "technical_lead",
+            "value": "Lucas Pereira",
+            "evidence": "Technical lead: Lucas Pereira."
+          }
+        ],
+        "important_dates": [
+          "2026-03-12",
+          "2026-04-01",
+          "2026-04-15"
+        ],
+        "important_numbers": [],
+        "risks": [
+          {
+            "description": "Delayed delivery of replacement transformers",
+            "impact": null,
+            "owner": null,
+            "due_date": null
+          }
+        ],
+        "action_items": [
+          {
+            "description": "Next review meeting scheduled for April 15, 2026",
+            "owner": null,
+            "due_date": "2026-04-15",
+            "status": null
+          }
+        ],
+        "missing_information": []
+      }
+    },
+    {
+      "task": "summary",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "Phase 5 Progress Update",
+            "key_points": [
+              "structured outputs foundation implemented",
+              "first UI panel added to Streamlit app",
+              "prompt quality uneven, some tasks return placeholder-like content"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "The structured outputs foundation has been implemented with task schemas, a registry, JSON parsing, and validation.",
+              "A first UI panel was added to the Streamlit app so users can run extraction, summary, checklist, and CV analysis."
+            ]
+          }
+        ],
+        "executive_summary": "Phase 5 progress includes implementing a structured output foundation and adding a UI panel in the Streamlit app. However, prompt quality remains uneven with some tasks producing placeholder content.",
+        "key_insights": [
+          "need to improve grounding, document-context usage, and output quality",
+          "next milestone is to add an automated evaluation harness and complete code-analysis mode"
+        ],
+        "reading_time_minutes": 2,
+        "completeness_score": 0.85
+      }
+    },
+    {
+      "task": "checklist",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "checklist",
+        "schema_version": "1.0",
+        "title": "Project Release Candidate Preparation Checklist",
+        "description": "A comprehensive checklist to ensure all necessary steps are completed before approving a new project release candidate.",
+        "items": [
+          {
+            "id": "item-1",
+            "title": "Verify Changelog",
+            "description": "Ensure the changelog is up-to-date and accurate for the current release candidate.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [],
+            "estimated_time_minutes": 10
+          },
+          {
+            "id": "item-2",
+            "title": "Run Automated Tests",
+            "description": "Execute all automated tests to ensure the release candidate meets quality standards.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-1"
+            ],
+            "estimated_time_minutes": 30
+          },
+          {
+            "id": "item-3",
+            "title": "Update Environment Examples",
+            "description": "Review and update any environment examples to reflect the latest changes in the release candidate.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-2"
+            ],
+            "estimated_time_minutes": 15
+          },
+          {
+            "id": "item-4",
+            "title": "Validate Streamlit Startup",
+            "description": "Ensure the Streamlit application starts without errors and all components are functioning as expected.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-3"
+            ],
+            "estimated_time_minutes": 20
+          },
+          {
+            "id": "item-5",
+            "title": "Check Structured Output Tasks",
+            "description": "Verify that all structured output tasks are correctly implemented and tested.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-4"
+            ],
+            "estimated_time_minutes": 15
+          },
+          {
+            "id": "item-6",
+            "title": "Tag Release in Git",
+            "description": "Create and tag the release in git to mark this version as a candidate for deployment.",
+            "category": "preparation",
+            "priority": "high",
+            "status": "pending",
+            "dependencies": [
+              "item-5"
+            ],
+            "estimated_time_minutes": 10
+          }
+        ],
+        "total_items": 6,
+        "completed_items": 0,
+        "progress_percentage": 0.0
+      }
+    },
+    {
+      "task": "cv_analysis",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "cv_analysis",
+        "schema_version": "1.0",
+        "personal_info": {
+          "full_name": "Ana Ribeiro",
+          "email": "ana.ribeiro@example.com",
+          "phone": "+55 11 98888-7777",
+          "location": "São Paulo, Brazil",
+          "links": [
+            "https://www.linkedin.com/in/anaribeiro"
+          ]
+        },
+        "sections": [
+          {
+            "section_type": "experience",
+            "title": "Professional Experience",
+            "content": [
+              {
+                "text": "AI Engineer at Orion Labs (Jan 2024 to Present)",
+                "details": {
+                  "role": "AI Engineer",
+                  "organization": "Orion Labs",
+                  "duration": "Jan 2024 to Present"
+                }
+              },
+              {
+                "text": "Data Science Intern at Vento Analytics (Jul 2023 to Dec 2023)",
+                "details": {
+                  "role": "Data Science Intern",
+                  "organization": "Vento Analytics",
+                  "duration": "Jul 2023 to Dec 2023"
+                }
+              }
+            ],
+            "confidence": 0.9
+          }
+        ],
+        "skills": [
+          "Python",
+          "Streamlit",
+          "Ollama",
+          "Chroma",
+          "Pydantic",
+          "SQL",
+          "Git"
+        ],
+        "experience_years": 0.5,
+        "strengths": [
+          "AI engineer focused on retrieval-augmented generation, document intelligence, and local LLM applications"
+        ],
+        "improvement_areas": []
+      }
+    },
+    {
+      "task": "code_analysis",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "code_analysis",
+        "schema_version": "1.0",
+        "snippet_summary": "The code snippet includes two functions: `normalize_scores` and `process`. The `normalize_scores` function adjusts scores to a range between 0 and 100, while the `process` function calculates the average score of processed items.",
+        "main_purpose": "To normalize scores within a specific range and calculate their average.",
+        "detected_issues": [
+          {
+            "severity": "medium",
+            "category": "maintainability",
+            "title": "Duplicated logic",
+            "description": "Similar logic appears in multiple places.",
+            "evidence": "Repeated conditional branches in two methods.",
+            "recommendation": "Extract a helper function."
+          }
+        ],
+        "readability_improvements": [
+          "Rename unclear variables"
+        ],
+        "maintainability_improvements": [
+          "Extract shared logic"
+        ],
+        "refactor_plan": [
+          "Step 1: Extract the score normalization logic into a separate helper function.",
+          "Step 2: Update `normalize_scores` and `process` to use this new helper."
+        ],
+        "test_suggestions": [
+          "Add unit test for edge case X (malformed input)"
+        ],
+        "risk_notes": [
+          "May fail on malformed input"
+        ]
+      }
+    }
+  ]
+}

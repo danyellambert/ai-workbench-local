@@ -43,14 +43,62 @@ class ExtractedField(BaseModel):
     evidence: Optional[str] = Field(default=None, description="Optional evidence supporting this field")
 
 
+class RiskItem(BaseModel):
+    """A structured risk identified in the source."""
+
+    description: str = Field(description="Risk description")
+    impact: Optional[str] = Field(default=None, description="Potential impact of the risk")
+    owner: Optional[str] = Field(default=None, description="Risk owner if mentioned")
+    due_date: Optional[str] = Field(default=None, description="Due date if mentioned")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_item(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return {"description": value}
+        if isinstance(value, dict) and "description" not in value:
+            text = value.get("text") or value.get("risk") or value.get("title")
+            if text:
+                value = dict(value)
+                value["description"] = text
+        return value
+
+
+class ActionItem(BaseModel):
+    """A structured action item identified in the source."""
+
+    description: str = Field(description="Action description")
+    owner: Optional[str] = Field(default=None, description="Assigned owner if mentioned")
+    due_date: Optional[str] = Field(default=None, description="Due date if mentioned")
+    status: Optional[str] = Field(default=None, description="Optional action status")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_item(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return {"description": value}
+        if isinstance(value, dict) and "description" not in value:
+            text = value.get("text") or value.get("action") or value.get("title")
+            if text:
+                value = dict(value)
+                value["description"] = text
+        return value
+
+
 class ExtractionPayload(BaseTaskPayload):
     """Payload for information extraction tasks."""
 
     task_type: Literal["extraction"] = "extraction"
+    main_subject: Optional[str] = Field(default=None, description="Main subject or topic of the source")
     entities: List[Entity] = Field(default_factory=list, description="Extracted entities")
     categories: List[str] = Field(default_factory=list, description="Identified categories")
     relationships: List[Relationship] = Field(default_factory=list, description="Entity relationships")
     extracted_fields: List[ExtractedField] = Field(default_factory=list, description="Named fields extracted")
+    important_dates: List[str] = Field(default_factory=list, description="Important dates explicitly found in the text")
+    important_numbers: List[str] = Field(default_factory=list, description="Important numeric values, budgets, counts or percentages")
+    risks: List[RiskItem] = Field(default_factory=list, description="Risks or concerns explicitly mentioned")
+    action_items: List[ActionItem] = Field(default_factory=list, description="Concrete actions or next steps found in the source")
+    missing_information: List[str] = Field(default_factory=list, description="Notable gaps or ambiguities in the source")
 
 
 class Topic(BaseModel):
@@ -181,4 +229,29 @@ class CVAnalysisPayload(BaseTaskPayload):
     improvement_areas: List[str] = Field(default_factory=list, description="Areas for improvement")
 
 
-TaskPayload = Union[ExtractionPayload, SummaryPayload, ChecklistPayload, CVAnalysisPayload]
+class CodeIssue(BaseModel):
+    """A structured issue found in a code snippet or file."""
+
+    severity: Literal["high", "medium", "low"] = Field(description="Issue severity")
+    category: str = Field(description="Issue category, such as bug, readability, performance or maintainability")
+    title: str = Field(description="Short issue title")
+    description: str = Field(description="Detailed issue description")
+    evidence: Optional[str] = Field(default=None, description="Code evidence or line hint supporting the issue")
+    recommendation: Optional[str] = Field(default=None, description="Recommended fix or mitigation")
+
+
+class CodeAnalysisPayload(BaseTaskPayload):
+    """Payload for code explanation and refactor-advice tasks."""
+
+    task_type: Literal["code_analysis"] = "code_analysis"
+    snippet_summary: str = Field(description="Short summary of the snippet or file")
+    main_purpose: str = Field(description="Main purpose of the code")
+    detected_issues: List[CodeIssue] = Field(default_factory=list, description="Issues detected in the code")
+    readability_improvements: List[str] = Field(default_factory=list, description="Suggestions to improve readability")
+    maintainability_improvements: List[str] = Field(default_factory=list, description="Suggestions to improve maintainability")
+    refactor_plan: List[str] = Field(default_factory=list, description="Step-by-step refactor plan")
+    test_suggestions: List[str] = Field(default_factory=list, description="Tests that should be added or improved")
+    risk_notes: List[str] = Field(default_factory=list, description="Operational or correctness risks to highlight")
+
+
+TaskPayload = Union[ExtractionPayload, SummaryPayload, ChecklistPayload, CVAnalysisPayload, CodeAnalysisPayload]

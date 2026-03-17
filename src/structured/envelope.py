@@ -62,8 +62,10 @@ class TaskExecutionRequest(BaseModel):
 
     task_type: str = Field(description="Type of task to execute")
     input_text: str = Field(description="Input text to process")
-    use_rag_context: bool = Field(default=False, description="Whether to use RAG context")
-    source_document_ids: List[str] = Field(default_factory=list, description="Document IDs for RAG context")
+    use_rag_context: bool = Field(default=False, description="Legacy compatibility flag for document context")
+    use_document_context: bool = Field(default=False, description="Whether to use the structured document-context pipeline")
+    source_document_ids: List[str] = Field(default_factory=list, description="Document IDs available to the structured document-context pipeline")
+    context_strategy: str = Field(default="document_scan", description="Context strategy for structured tasks: document_scan or retrieval")
     provider: str = Field(default="ollama", description="Provider to use")
     model: Optional[str] = Field(default=None, description="Model to use; falls back to task/app default when omitted")
     temperature: Optional[float] = Field(default=None, description="Temperature setting")

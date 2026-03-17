@@ -9,7 +9,7 @@ import streamlit as st
 from ..structured.base import (
     ChecklistPayload,
     CVAnalysisPayload,
-    CVSectionContentItem,
+    CodeAnalysisPayload,
     ExtractionPayload,
     SummaryPayload,
 )
@@ -27,27 +27,49 @@ def _payload_to_json(payload: Any) -> dict[str, Any] | list[Any] | None:
 def _render_result_header(result: StructuredResult) -> None:
     status_label = "Validated" if result.success else "Failed"
     status_kind = "success" if result.success else "error"
-    context_label = "with RAG" if result.context_used else "without RAG"
+    context_label = "with document context" if result.context_used else "without document context"
     repair_label = "repair applied" if result.repair_applied else "no repair"
     st.caption(
         f"Task: `{result.task_type}` · Execution: `{result.execution_id[:8]}` · {status_label} · {context_label} · {repair_label}"
     )
     if status_kind == "success":
         st.success("Structured output generated and validated.")
+        if result.quality_score is not None and result.quality_score < 0.65:
+            st.warning(
+                f"This payload validated structurally, but its estimated quality is low ({result.quality_score:.0%}). Review grounding and placeholders before trusting it."
+            )
     else:
         error_message = result.validation_error or result.parsing_error or (result.error.message if result.error else "Unknown error")
         st.error(error_message)
 
 
 def _render_extraction(payload: ExtractionPayload) -> None:
-    metric_1, metric_2, metric_3 = st.columns(3)
+    metric_1, metric_2, metric_3, metric_4 = st.columns(4)
     metric_1.metric("Entities", len(payload.entities))
-    metric_2.metric("Categories", len(payload.categories))
-    metric_3.metric("Relationships", len(payload.relationships))
+    metric_2.metric("Fields", len(payload.extracted_fields))
+    metric_3.metric("Risks", len(payload.risks))
+    metric_4.metric("Actions", len(payload.action_items))
+
+    if payload.main_subject:
+        st.write("**Main subject**")
+        st.info(payload.main_subject)
 
     if payload.categories:
         st.write("**Categories**")
         st.write(", ".join(payload.categories))
+
+    if payload.important_dates or payload.important_numbers:
+        cols = st.columns(2)
+        with cols[0]:
+            if payload.important_dates:
+                st.write("**Important dates**")
+                for item in payload.important_dates:
+                    st.write(f"- {item}")
+        with cols[1]:
+            if payload.important_numbers:
+                st.write("**Important numbers**")
+                for item in payload.important_numbers:
+                    st.write(f"- {item}")
 
     if payload.entities:
         entities_table = [
@@ -88,6 +110,43 @@ def _render_extraction(payload: ExtractionPayload) -> None:
             ],
             width="stretch",
         )
+
+    if payload.risks:
+        st.write("**Risks**")
+        for item in payload.risks:
+            if getattr(item, "impact", None) or getattr(item, "owner", None) or getattr(item, "due_date", None):
+                with st.expander(item.description, expanded=False):
+                    if item.impact:
+                        st.write(f"Impact: {item.impact}")
+                    meta = []
+                    if item.owner:
+                        meta.append(f"owner={item.owner}")
+                    if item.due_date:
+                        meta.append(f"due={item.due_date}")
+                    if meta:
+                        st.caption(" · ".join(meta))
+            else:
+                st.write(f"- {item.description}")
+
+    if payload.action_items:
+        st.write("**Action items**")
+        for item in payload.action_items:
+            line = item.description
+            meta = []
+            if item.owner:
+                meta.append(f"owner={item.owner}")
+            if item.due_date:
+                meta.append(f"due={item.due_date}")
+            if item.status:
+                meta.append(f"status={item.status}")
+            if meta:
+                line += f" ({' · '.join(meta)})"
+            st.write(f"- {line}")
+
+    if payload.missing_information:
+        st.write("**Missing information / ambiguities**")
+        for item in payload.missing_information:
+            st.write(f"- {item}")
 
 
 def _render_summary(payload: SummaryPayload) -> None:
@@ -193,6 +252,40 @@ def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
                         st.json(item.details)
 
 
+def _render_code_analysis(payload: CodeAnalysisPayload) -> None:
+    metric_1, metric_2, metric_3 = st.columns(3)
+    metric_1.metric("Issues", len(payload.detected_issues))
+    metric_2.metric("Refactor steps", len(payload.refactor_plan))
+    metric_3.metric("Test suggestions", len(payload.test_suggestions))
+
+    st.write("**Snippet summary**")
+    st.info(payload.snippet_summary)
+    st.write("**Main purpose**")
+    st.write(payload.main_purpose)
+
+    if payload.detected_issues:
+        st.write("**Detected issues**")
+        for issue in payload.detected_issues:
+            with st.expander(f"{issue.severity.upper()} · {issue.category} · {issue.title}", expanded=False):
+                st.write(issue.description)
+                if issue.evidence:
+                    st.caption(f"Evidence: {issue.evidence}")
+                if issue.recommendation:
+                    st.write(f"Recommendation: {issue.recommendation}")
+
+    for heading, items in [
+        ("Readability improvements", payload.readability_improvements),
+        ("Maintainability improvements", payload.maintainability_improvements),
+        ("Refactor plan", payload.refactor_plan),
+        ("Test suggestions", payload.test_suggestions),
+        ("Risk notes", payload.risk_notes),
+    ]:
+        if items:
+            st.write(f"**{heading}**")
+            for item in items:
+                st.write(f"- {item}")
+
+
 def _render_friendly_payload(payload: Any) -> None:
     if isinstance(payload, ExtractionPayload):
         _render_extraction(payload)
@@ -202,6 +295,8 @@ def _render_friendly_payload(payload: Any) -> None:
         _render_checklist_friendly(payload)
     elif isinstance(payload, CVAnalysisPayload):
         _render_cv_analysis(payload)
+    elif isinstance(payload, CodeAnalysisPayload):
+        _render_code_analysis(payload)
     else:
         st.json(_payload_to_json(payload))
 

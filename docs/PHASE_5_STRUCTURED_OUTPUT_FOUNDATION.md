@@ -135,3 +135,16 @@ After the initial foundation slice, the project also received a first practical 
 - PDF parsing noise from malformed CV PDFs was reduced by using `strict=False` and quieter `pypdf` logging
 
 This means the project is no longer at the “foundation only” stage. It now has a usable but still evolving first structured-output workflow in the UI.
+
+
+## Current task coverage
+
+The structured-output layer now includes the following task types:
+
+- `extraction`
+- `summary`
+- `checklist`
+- `cv_analysis`
+- `code_analysis`
+
+`code_analysis` was added as the next roadmap step after the initial Phase 5 foundation and UI integration.

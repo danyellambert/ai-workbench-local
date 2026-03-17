@@ -1,0 +1,102 @@
+{
+  "generated_at": "2026-03-16T20:59:03.525516",
+  "provider": "ollama",
+  "model": null,
+  "tasks": [
+    {
+      "task": "extraction",
+      "status": "FAIL",
+      "score": 0,
+      "max_score": 5,
+      "reasons": [
+        "task execution did not succeed"
+      ],
+      "success": false,
+      "error": {
+        "error_type": "execution_error",
+        "message": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+        "details": null,
+        "timestamp": "2026-03-16T20:59:03.511506"
+      },
+      "validation_error": null,
+      "parsing_error": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+      "payload": null
+    },
+    {
+      "task": "summary",
+      "status": "FAIL",
+      "score": 0,
+      "max_score": 5,
+      "reasons": [
+        "task execution did not succeed"
+      ],
+      "success": false,
+      "error": {
+        "error_type": "execution_error",
+        "message": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+        "details": null,
+        "timestamp": "2026-03-16T20:59:03.515040"
+      },
+      "validation_error": null,
+      "parsing_error": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+      "payload": null
+    },
+    {
+      "task": "checklist",
+      "status": "FAIL",
+      "score": 0,
+      "max_score": 5,
+      "reasons": [
+        "task execution did not succeed"
+      ],
+      "success": false,
+      "error": {
+        "error_type": "execution_error",
+        "message": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+        "details": null,
+        "timestamp": "2026-03-16T20:59:03.518737"
+      },
+      "validation_error": null,
+      "parsing_error": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+      "payload": null
+    },
+    {
+      "task": "cv_analysis",
+      "status": "FAIL",
+      "score": 0,
+      "max_score": 5,
+      "reasons": [
+        "task execution did not succeed"
+      ],
+      "success": false,
+      "error": {
+        "error_type": "execution_error",
+        "message": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+        "details": null,
+        "timestamp": "2026-03-16T20:59:03.521927"
+      },
+      "validation_error": null,
+      "parsing_error": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+      "payload": null
+    },
+    {
+      "task": "code_analysis",
+      "status": "FAIL",
+      "score": 0,
+      "max_score": 5,
+      "reasons": [
+        "task execution did not succeed"
+      ],
+      "success": false,
+      "error": {
+        "error_type": "execution_error",
+        "message": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+        "details": null,
+        "timestamp": "2026-03-16T20:59:03.525293"
+      },
+      "validation_error": null,
+      "parsing_error": "Execution failed: TaskHandler._build_optional_rag_context() got an unexpected keyword argument 'mode'",
+      "payload": null
+    }
+  ]
+}
