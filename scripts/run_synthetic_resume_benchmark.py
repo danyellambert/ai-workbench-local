@@ -71,8 +71,11 @@ def extract_pdf_text(pdf_path: Path) -> str:
 
 
 def flatten_education(gt: dict[str, Any]) -> list[str]:
-    education = gt.get("education", [])
-    return [str(x) for x in education if str(x).strip()]
+    return [str(x) for x in gt.get("education", []) if str(x).strip()]
+
+
+def flatten_languages(gt: dict[str, Any]) -> list[str]:
+    return [str(x) for x in gt.get("languages", []) if str(x).strip()]
 
 
 def flatten_experience_titles(gt: dict[str, Any]) -> list[str]:
@@ -109,24 +112,14 @@ class ResumeEvalResult:
 def evaluate_one(pdf_path: Path, json_path: Path, model: str | None, temperature: float) -> ResumeEvalResult:
     gt = json.loads(json_path.read_text(encoding="utf-8"))
     text = extract_pdf_text(pdf_path)
-    try:
-        request = TaskExecutionRequest(
-            task_type="cv_analysis",
-            input_text=f"analyze this resume\n\n{text}" if text.strip() else "",
-            model=model,
-            temperature=temperature,
-            use_document_context=False,
-            context_strategy="document_scan",
-        )
-    except Exception:
-        request = TaskExecutionRequest(
-            task_name="cv_analysis",
-            input_text=f"analyze this resume\n\n{text}" if text.strip() else "",
-            model=model,
-            temperature=temperature,
-            use_document_context=False,
-            context_strategy="document_scan",
-        )
+    request = TaskExecutionRequest(
+        task_type="cv_analysis",
+        input_text=f"analyze this resume\n\n{text}" if text.strip() else "",
+        model=model,
+        temperature=temperature,
+        use_document_context=False,
+        context_strategy="document_scan",
+    )
     result = structured_service.execute_task(request)
 
     layout_type = gt.get("layout_type", "unknown")
@@ -136,6 +129,7 @@ def evaluate_one(pdf_path: Path, json_path: Path, model: str | None, temperature
 
     if not result.success or result.validated_output is None:
         notes = result.validation_error or result.parsing_error or "task execution failed"
+        status = "OCR_REQUIRED" if layout_type == "scan_like_image_pdf" and extracted_chars == 0 else "FAIL"
         return ResumeEvalResult(
             pdf_file=pdf_path.name,
             json_file=json_path.name,
@@ -145,7 +139,7 @@ def evaluate_one(pdf_path: Path, json_path: Path, model: str | None, temperature
             extracted_chars=extracted_chars,
             task_success=False,
             overall_score=0.0,
-            status="FAIL",
+            status=status,
             full_name_score=0.0,
             email_score=0.0,
             location_score=0.0,
@@ -169,40 +163,37 @@ def evaluate_one(pdf_path: Path, json_path: Path, model: str | None, temperature
     location_score = similarity(pred_location, gt.get("location"))
 
     skills_score = list_similarity(payload.get("skills", []), gt.get("skills", []))
-    languages_score = list_similarity(payload.get("languages", []), gt.get("languages", []))
+    languages_score = list_similarity(payload.get("languages", []), flatten_languages(gt))
     education_score = list_similarity(
-        [item.get("text") if isinstance(item, dict) else str(item) for sec in payload.get("sections", []) if (sec.get("section_type") == "education" or (sec.get("title") or "").lower().startswith("education")) for item in sec.get("content", [])],
+        [item.get("description") or " | ".join(filter(None, [item.get("degree"), item.get("institution"), item.get("date_range")])) for item in payload.get("education_entries", []) if isinstance(item, dict)],
         flatten_education(gt),
     )
     experience_titles_score = list_similarity(
-        [sec.get("title", "") for sec in payload.get("sections", []) if sec.get("section_type") == "experience"] +
-        [item.get("details", {}).get("title", "") for sec in payload.get("sections", []) for item in sec.get("content", []) if isinstance(item, dict)],
+        [item.get("title", "") for item in payload.get("experience_entries", []) if isinstance(item, dict)],
         flatten_experience_titles(gt),
     )
 
-    # OCR-like layouts should not be penalized as harshly on semantic extraction if no text is extractable.
     if extracted_chars == 0 and not text_extractable_gt:
-        base_weights = [0.10, 0.05, 0.05, 0.20, 0.20, 0.20, 0.20]
+        status = "OCR_REQUIRED"
+        overall = 0.0
     else:
-        base_weights = [0.18, 0.12, 0.10, 0.18, 0.12, 0.15, 0.15]
-
-    scores = [
-        full_name_score,
-        email_score,
-        location_score,
-        skills_score,
-        languages_score,
-        education_score,
-        experience_titles_score,
-    ]
-    overall = sum(w * s for w, s in zip(base_weights, scores))
-
-    if overall >= 0.75:
-        status = "PASS"
-    elif overall >= 0.45:
-        status = "WARN"
-    else:
-        status = "FAIL"
+        base_weights = [0.18, 0.12, 0.10, 0.18, 0.14, 0.14, 0.14]
+        scores = [
+            full_name_score,
+            email_score,
+            location_score,
+            skills_score,
+            languages_score,
+            education_score,
+            experience_titles_score,
+        ]
+        overall = sum(w * s for w, s in zip(base_weights, scores))
+        if overall >= 0.75:
+            status = "PASS"
+        elif overall >= 0.45:
+            status = "WARN"
+        else:
+            status = "FAIL"
 
     notes_parts = []
     if extracted_chars == 0:
@@ -213,6 +204,10 @@ def evaluate_one(pdf_path: Path, json_path: Path, model: str | None, temperature
         notes_parts.append("weak full_name match")
     if skills_score < 0.4:
         notes_parts.append("weak skills match")
+    if languages_score == 0.0 and extracted_chars > 0:
+        notes_parts.append("languages not captured")
+    if education_score == 0.0 and extracted_chars > 0:
+        notes_parts.append("education not captured")
 
     return ResumeEvalResult(
         pdf_file=pdf_path.name,
@@ -265,7 +260,6 @@ def main() -> int:
         results.append(evaluate_one(pdf_path, json_path, args.model, args.temperature))
 
     args.outdir.mkdir(parents=True, exist_ok=True)
-
     csv_path = args.outdir / "resume_benchmark_results.csv"
     json_path = args.outdir / "resume_benchmark_results.json"
     summary_path = args.outdir / "resume_benchmark_summary.json"
@@ -289,7 +283,7 @@ def main() -> int:
     by_layout: dict[str, dict[str, int]] = {}
     for r in results:
         by_status[r.status] = by_status.get(r.status, 0) + 1
-        by_layout.setdefault(r.layout_type, {"PASS": 0, "WARN": 0, "FAIL": 0})
+        by_layout.setdefault(r.layout_type, {"PASS": 0, "WARN": 0, "FAIL": 0, "OCR_REQUIRED": 0})
         by_layout[r.layout_type][r.status] += 1
 
     summary = {
@@ -301,15 +295,13 @@ def main() -> int:
     }
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    print()
-    print("Benchmark complete.")
+    print("\nBenchmark complete.")
     print(f"CSV results:     {csv_path}")
     print(f"JSON results:    {json_path}")
     print(f"Summary:         {summary_path}")
     print(f"Status counts:   {by_status}")
     if missing_pairs:
         print(f"Missing pairs:   {len(missing_pairs)}")
-
     return 0
 
 

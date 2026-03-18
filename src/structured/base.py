@@ -156,6 +156,84 @@ class ContactInfo(BaseModel):
     links: List[str] = Field(default_factory=list, description="Relevant links such as LinkedIn or portfolio")
 
 
+class EducationEntry(BaseModel):
+    """Structured education entry extracted from a resume."""
+
+    degree: Optional[str] = Field(default=None, description="Degree or program name")
+    institution: Optional[str] = Field(default=None, description="Institution or school")
+    location: Optional[str] = Field(default=None, description="Location if mentioned")
+    date_range: Optional[str] = Field(default=None, description="Date range if mentioned")
+    description: Optional[str] = Field(default=None, description="Free-form human-readable description")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_item(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return {"description": value}
+        if isinstance(value, dict):
+            data = dict(value)
+            if "degree" not in data:
+                data["degree"] = data.get("program") or data.get("title")
+            if "institution" not in data:
+                data["institution"] = data.get("school") or data.get("organization")
+            if "date_range" not in data:
+                data["date_range"] = data.get("duration") or data.get("dates")
+            if "description" not in data:
+                parts = [
+                    str(data.get("degree") or "").strip(),
+                    str(data.get("institution") or "").strip(),
+                    str(data.get("location") or "").strip(),
+                    str(data.get("date_range") or "").strip(),
+                ]
+                parts = [p for p in parts if p]
+                if parts:
+                    data["description"] = " | ".join(parts)
+            return data
+        return value
+
+
+class ExperienceEntry(BaseModel):
+    """Structured experience entry extracted from a resume."""
+
+    title: Optional[str] = Field(default=None, description="Role title")
+    organization: Optional[str] = Field(default=None, description="Company or organization")
+    location: Optional[str] = Field(default=None, description="Location if mentioned")
+    date_range: Optional[str] = Field(default=None, description="Date range if mentioned")
+    bullets: List[str] = Field(default_factory=list, description="Bullet points or responsibilities")
+    description: Optional[str] = Field(default=None, description="Free-form human-readable description")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_item(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return {"description": value}
+        if isinstance(value, dict):
+            data = dict(value)
+            if "title" not in data:
+                data["title"] = data.get("role") or data.get("position")
+            if "organization" not in data:
+                data["organization"] = data.get("company") or data.get("institution") or data.get("organization")
+            if "date_range" not in data:
+                data["date_range"] = data.get("duration") or data.get("dates")
+            bullets = data.get("bullets")
+            if isinstance(bullets, str):
+                data["bullets"] = [x.strip() for x in bullets.replace("\n", ";").split(";") if x.strip()]
+            elif bullets is None:
+                data["bullets"] = []
+            if "description" not in data:
+                parts = [
+                    str(data.get("title") or "").strip(),
+                    str(data.get("organization") or "").strip(),
+                    str(data.get("location") or "").strip(),
+                    str(data.get("date_range") or "").strip(),
+                ]
+                parts = [p for p in parts if p]
+                if parts:
+                    data["description"] = " | ".join(parts)
+            return data
+        return value
+
+
 class CVSectionContentItem(BaseModel):
     """Flexible content item inside a CV section."""
 
@@ -224,9 +302,61 @@ class CVAnalysisPayload(BaseTaskPayload):
     personal_info: Optional[ContactInfo] = Field(default=None, description="Personal information extracted")
     sections: List[CVSection] = Field(default_factory=list, description="Structured CV sections")
     skills: List[str] = Field(default_factory=list, description="Skills identified")
+    languages: List[str] = Field(default_factory=list, description="Languages identified")
+    education_entries: List[EducationEntry] = Field(default_factory=list, description="Structured education entries")
+    experience_entries: List[ExperienceEntry] = Field(default_factory=list, description="Structured experience entries")
     experience_years: float = Field(default=0.0, ge=0.0, description="Years of experience")
     strengths: List[str] = Field(default_factory=list, description="Strengths identified")
     improvement_areas: List[str] = Field(default_factory=list, description="Areas for improvement")
+
+    @field_validator("skills", mode="before")
+    @classmethod
+    def normalize_skills(cls, value: Any) -> Any:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            return [x.strip() for x in value.replace("\n", ",").split(",") if x.strip()]
+        if isinstance(value, list):
+            normalized = []
+            for item in value:
+                if isinstance(item, str):
+                    normalized.extend([x.strip() for x in item.replace("\n", ",").split(",") if x.strip()])
+                elif isinstance(item, dict):
+                    text = item.get("text") or item.get("skill") or item.get("name") or item.get("value")
+                    if isinstance(text, str) and text.strip():
+                        normalized.extend([x.strip() for x in text.replace("\n", ",").split(",") if x.strip()])
+                    else:
+                        for v in item.values():
+                            if isinstance(v, str) and v.strip():
+                                normalized.extend([x.strip() for x in v.replace("\n", ",").split(",") if x.strip()])
+                else:
+                    normalized.append(str(item))
+            return normalized
+        return value
+
+    @field_validator("languages", mode="before")
+    @classmethod
+    def normalize_languages(cls, value: Any) -> Any:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            return [x.strip() for x in value.replace("\n", ",").split(",") if x.strip()]
+        if isinstance(value, list):
+            normalized = []
+            for item in value:
+                if isinstance(item, str):
+                    normalized.extend([x.strip() for x in item.replace("\n", ",").split(",") if x.strip()])
+                elif isinstance(item, dict):
+                    language = item.get("language") or item.get("name") or item.get("text")
+                    level = item.get("level")
+                    if language and level:
+                        normalized.append(f"{language} ({level})")
+                    elif language:
+                        normalized.append(str(language).strip())
+                else:
+                    normalized.append(str(item))
+            return normalized
+        return value
 
 
 class CodeIssue(BaseModel):

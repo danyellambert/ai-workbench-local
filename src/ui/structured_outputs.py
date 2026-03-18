@@ -228,6 +228,29 @@ def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
         st.write("**Skills**")
         st.write(", ".join(payload.skills))
 
+    if payload.languages:
+        st.write("**Languages**")
+        st.write(", ".join(payload.languages))
+
+    if payload.education_entries:
+        st.write("**Education**")
+        for entry in payload.education_entries:
+            line = entry.description or " | ".join(
+                part for part in [entry.degree, entry.institution, entry.location, entry.date_range] if part
+            )
+            if line:
+                st.write(f"- {line}")
+
+    if payload.experience_entries:
+        st.write("**Experience entries**")
+        for entry in payload.experience_entries:
+            title_line = " | ".join(part for part in [entry.title, entry.organization, entry.location, entry.date_range] if part)
+            if title_line:
+                st.write(f"- {title_line}")
+            if entry.bullets:
+                for bullet in entry.bullets:
+                    st.caption(f"• {bullet}")
+
     if payload.strengths:
         st.write("**Strengths**")
         for item in payload.strengths:
