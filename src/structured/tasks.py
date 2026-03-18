@@ -280,11 +280,37 @@ Return this JSON structure:
       "confidence": 0.9
     }}
   ],
-  "skills": [],
+  "skills": ["Python", "SQL"],
+  "languages": ["Portuguese (Native)", "English (Professional)"],
+  "education_entries": [
+    {{
+      "degree": "B.Sc. in Computer Science",
+      "institution": "University X",
+      "location": "City, Country",
+      "date_range": "2018-2022",
+      "description": "B.Sc. in Computer Science | University X | 2018-2022"
+    }}
+  ],
+  "experience_entries": [
+    {{
+      "title": "Software Engineer",
+      "organization": "Company X",
+      "location": "City, Country",
+      "date_range": "2023-2024",
+      "bullets": ["Built APIs", "Improved automation"],
+      "description": "Software Engineer | Company X | 2023-2024"
+    }}
+  ],
   "experience_years": 0.0,
   "strengths": [],
   "improvement_areas": []
 }}
+Important rules:
+- Extract languages explicitly to the top-level "languages" field.
+- Extract education explicitly to the top-level "education_entries" field.
+- Extract role titles and organizations explicitly to the top-level "experience_entries" field.
+- "skills" must be a list of strings only.
+- You may also repeat the same information inside sections for flexibility, but top-level fields must be populated whenever information is present.
 """
 
 

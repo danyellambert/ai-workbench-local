@@ -497,7 +497,8 @@ with documents_tab:
 
 
 with structured_tab:
-    st.caption("Pipeline separado do chat: use este modo para gerar JSON validado, checklist, análise de CV e análise de código a partir de texto e/ou documentos selecionados.")
+    st.caption("Pipeline separado do chat: use este modo para gerar saídas estruturadas validadas a partir de texto e/ou documentos selecionados.")
+    st.info("Fluxo recomendado: 1) escolha a task, 2) selecione um ou mais documentos, 3) rode a análise e revise o resultado em JSON ou visualização friendly.")
 
     structured_task_definitions = structured_task_registry.list_tasks()
     structured_task_options = list(structured_task_definitions.keys())
@@ -524,6 +525,7 @@ with structured_tab:
     with st.form("phase5_structured_form", clear_on_submit=False):
         input_col, config_col = st.columns([2, 1])
         with input_col:
+            st.markdown("**1. Entrada**")
             selected_structured_task = st.selectbox(
                 "Task",
                 structured_task_options,
@@ -532,14 +534,14 @@ with structured_tab:
             )
             st.caption(task_help.get(selected_structured_task, ""))
             structured_input_text = st.text_area(
-                "Input text",
+                "Input text (optional when using documents)",
                 value=st.session_state.get("phase5_structured_input", ""),
                 height=220,
-                placeholder="Cole o texto aqui. Você também pode deixar este campo curto e usar os documentos selecionados como contexto principal.",
+                placeholder="Cole o texto aqui. Para CV analysis e extraction, você também pode usar só os documentos selecionados.",
             )
 
         with config_col:
-            st.markdown("**Contexto documental**")
+            st.markdown("**2. Contexto documental**")
             structured_use_documents = st.checkbox(
                 "Use selected documents",
                 value=bool(active_structured_document_ids),
@@ -547,26 +549,31 @@ with structured_tab:
                 help="Usa os documentos selecionados/indexados como contexto para a task estruturada.",
             )
             if active_structured_document_ids:
-                st.caption(f"{len(active_structured_document_ids)} documento(s) disponível(is)")
+                st.caption(f"{len(active_structured_document_ids)} documento(s) selecionado(s)")
             else:
                 st.caption("Nenhum documento selecionado")
 
             recommended_strategy = "document_scan" if selected_structured_task in {"cv_analysis", "extraction", "checklist", "code_analysis"} else "retrieval"
             strategy_options = ["document_scan", "retrieval"]
-            structured_context_strategy = st.radio(
-                "Context strategy",
-                options=strategy_options,
-                index=strategy_options.index(recommended_strategy),
-                horizontal=False,
-                help="document_scan lê os documentos selecionados em ordem; retrieval busca trechos por query dentro da pipeline estruturada.",
-            )
-            if selected_structured_task in {"cv_analysis", "extraction", "code_analysis"}:
-                st.caption("Recomendado: document_scan")
+            if structured_use_documents:
+                structured_context_strategy = st.radio(
+                    "Context strategy",
+                    options=strategy_options,
+                    index=strategy_options.index(recommended_strategy),
+                    horizontal=False,
+                    help="document_scan lê os documentos em ordem; retrieval busca trechos por query dentro da pipeline estruturada.",
+                )
+                if selected_structured_task in {"cv_analysis", "extraction", "code_analysis"}:
+                    st.caption("Recomendado: document_scan")
+            else:
+                structured_context_strategy = recommended_strategy
+                st.caption("Estratégia oculta porque nenhum documento será usado nesta execução.")
 
             can_run_structured = bool(structured_input_text.strip()) or bool(structured_use_documents and active_structured_document_ids)
             if not can_run_structured:
                 st.caption("Forneça texto de entrada ou habilite documentos selecionados para executar.")
 
+        st.markdown("**3. Execução**")
         structured_submit = st.form_submit_button(
             "Run structured analysis",
             width="stretch",
@@ -596,7 +603,7 @@ with structured_tab:
     stored_structured_result = st.session_state.get(STRUCTURED_RESULT_STATE_KEY)
     if stored_structured_result:
         structured_result = StructuredResult.model_validate(stored_structured_result)
-        st.markdown("**Structured output**")
+        st.markdown("**3. Structured output**")
         available_modes = sorted(
             [mode for mode in structured_result.available_render_modes if mode.available],
             key=lambda mode: mode.priority,

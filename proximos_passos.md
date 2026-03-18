@@ -313,6 +313,8 @@ Ao olhar este projeto, a leitura ideal deve ser:
 ### Fase atual em andamento
 
 - **Fase 5 — Outputs estruturados**
+  - base funcional concluída
+  - fase em polish final, validação com documentos reais e fechamento de evidências
 
 ### Fase concluída mais recentemente
 
@@ -775,33 +777,25 @@ Mostrar que IA também pode ser usada como componente integrável de sistema, co
 
 ### Status atual da fase
 
-A Fase 5 **já foi implementada de forma funcional em nível de foundation, UI base e eval local**, e não está mais só em nível de arquitetura.
+A Fase 5 já está funcional e validada em múltiplas camadas.
 
 Hoje o projeto já tem:
 
-- foundation técnica de structured outputs
-- schemas, parsing, validação e execution envelope
-- task registry e serviço estruturado
-- UI base para execução de tasks estruturadas
+- foundation técnica de structured outputs em `src/structured/`
+- UI separada de chat com RAG e documento estruturado, mantendo base documental compartilhada
 - renderização em múltiplos formatos
-- separação entre **chat com RAG** e **análise estruturada**, mantendo a base documental compartilhada
-- smoke eval automatizado da Fase 5
-- benchmark sintético inicial para `cv_analysis` com múltiplos layouts
-- modos implementados:
-  - `extraction`
-  - `summary`
-  - `checklist`
-  - `cv_analysis`
-  - `code_analysis`
+- smoke eval automatizado
+- benchmark sintético multilayout para `cv_analysis`
+- `summary`, `checklist`, `extraction`, `cv_analysis` e `code_analysis` validados no smoke eval local
+- `cv_analysis` validado em layouts textuais sintéticos
+- layouts `scan_like_image_pdf` tratados explicitamente como `OCR_REQUIRED` sem OCR
 
-Além disso, o smoke eval automatizado da fase já passou localmente nas tasks principais.
+A fase ainda não deve ser tratada como encerrada porque faltam:
 
-A fase **ainda não está concluída**, porque os próximos ganhos relevantes agora estão concentrados em:
-
-- polish de UI/UX da aba de análise estruturada
-- validação com documentos reais além dos fixtures e do smoke eval
-- refinamento específico do `cv_analysis` com base no benchmark sintético
-- registro de evidências fortes da fase para GitHub/LinkedIn
+- polish final de UI/UX
+- validação com documentos reais além dos fixtures e resumes sintéticos
+- registro de evidências fortes da fase para portfólio
+- separar melhor, na documentação e na narrativa, o que já é robusto sem OCR e o que depende de OCR
 
 ### Checklist
 
@@ -816,8 +810,9 @@ A fase **ainda não está concluída**, porque os próximos ganhos relevantes ag
 #### UI e renderização
 - [x] Gerar respostas em checklist
 - [x] Integrar painel de structured outputs na UI
+- [x] Separar explicitamente os fluxos de chat com RAG e análise estruturada
 - [x] Adicionar renderer base para `json`, `friendly` e `checklist`
-- [x] Separar a experiência de **chat com RAG** e **documento estruturado** na UI
+- [x] Fazer polish inicial da UI/UX da aba de análise estruturada
 
 #### Tasks já implementadas
 - [x] Criar modo resumidor em tópicos
@@ -826,44 +821,39 @@ A fase **ainda não está concluída**, porque os próximos ganhos relevantes ag
 - [x] Criar modo extrator de informações
 - [x] Criar modo explicador/refatorador de código
 
-#### Evals e benchmark já executados
-- [x] Implementar smoke eval automatizado para structured outputs
-- [x] Validar smoke eval local com PASS nas tasks principais
-- [x] Criar benchmark sintético inicial de `cv_analysis` com PDFs e ground truth gerados
-- [x] Validar benchmark sintético inicial e identificar gargalos principais de `cv_analysis`
+#### Robustez já implementada na fase
+- [x] Revalidar `extraction` com PASS no smoke eval automatizado
+- [x] Validar `code_analysis` com PASS no smoke eval automatizado
+- [x] Promover `languages`, `education` e `experience entries` a campos explícitos do schema de CV
+- [x] Adicionar normalização pós-modelo para consolidar dados vindos de `sections`
+- [x] Tratar layouts `scan_like` como `OCR_REQUIRED`, e não como falhas normais da task textual
+- [x] Criar benchmark sintético multilayout para `cv_analysis`
 
-#### Próximos passos para fechar a fase
-- [ ] Fazer polish de UI/UX da aba de análise estruturada
-- [ ] Validar a fase com documentos reais além dos fixtures de smoke eval
-- [ ] Refinar prompts, contexto e renderização com base nos testes reais
-- [ ] Melhorar `cv_analysis` com foco em robustez estrutural:
-  - [ ] Promover `languages`, `education` e `experience entries` a campos explícitos do schema
-  - [ ] Separar extração factual de análise/recomendação em duas etapas lógicas
-  - [ ] Adicionar normalização pós-modelo para consolidar dados vindos de `sections`
-  - [ ] Tratar layouts `scan_like` como casos `ocr_needed`, e não como falhas normais da task textual
-- [ ] Registrar evidências da fase (screenshots, exemplos de saída, benchmark sintético, mini demo)
-- [ ] Fechar formalmente a Fase 5 no roadmap após validação com casos reais
+#### Itens ainda pendentes para fechar a fase
+- [ ] Validar a fase com documentos reais além dos fixtures e do benchmark sintético
+- [ ] Refinar prompts, contexto e renderização com base nesses testes reais
+- [ ] Registrar evidências fortes da fase (screenshots, exemplos comparativos e mini demo)
+- [ ] Separar de forma ainda mais explícita, na documentação, o suporte textual atual vs. a trilha futura de OCR
 
 ### Entregável
-- Módulo de análises com saída estruturada e validada, integrado à UI, separado do fluxo conversacional, com smoke eval local e benchmark sintético inicial
+- Módulo de análises com saída estruturada e validada, integrado à UI, com smoke eval local e benchmark sintético de CVs multilayout
 
 ### Evidência para GitHub/LinkedIn
 - exemplos antes/depois de saída livre vs. estruturada
 - screenshot ou tabela com JSON validado
 - mini demo mostrando transformação de documento em checklist/JSON
 - relatório local de smoke eval da Fase 5
-- benchmark sintético de `cv_analysis` com comparação entre layouts
+- benchmark sintético mostrando `cv_analysis` robusto em layouts textuais e `OCR_REQUIRED` para scan-like sem OCR
 
 ### O que preciso saber defender em entrevista
 - por que structured output é importante
-- como separar experiência conversacional de pipeline orientado a tarefa
 - como reduzir respostas inconsistentes
 - onde Pydantic ajuda confiabilidade
 - por que isso prepara o terreno para automação e agentes
 - por que smoke eval local ajuda a sair do “parece funcionar” para “tenho uma verificação mínima reproduzível”
-- como benchmark sintético ajuda a encontrar gargalos reais de parsing e estrutura antes de usar documentos privados
+- por que benchmark sintético multilayout ajuda a testar robustez estrutural de CVs
+- por que `OCR_REQUIRED` é uma limitação conhecida e não um erro silencioso do sistema
 
----
 
 ## Fase 5.5 — Evolução com LangChain e LangGraph
 
@@ -1357,6 +1347,8 @@ O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 
 
 ### Atualização local recente
-- [x] Robustecer `extraction` para aceitar riscos e ações estruturadas sem falhar na validação
-- [x] Simplificar a UI da análise estruturada para reduzir atrito de uso
-- [ ] Revalidar comportamento com documentos reais no app após o ajuste de UX
+- [x] Robustecer `cv_analysis` com campos explícitos para `languages`, `education_entries` e `experience_entries`
+- [x] Separar `scan_like_image_pdf` como `OCR_REQUIRED` no benchmark sintético
+- [x] Validar smoke eval da Fase 5 com PASS em `extraction`, `summary`, `checklist`, `cv_analysis` e `code_analysis`
+- [x] Validar benchmark sintético multilayout com PASS nos layouts textuais e `OCR_REQUIRED` nos layouts scan-like
+- [ ] Fechar a Fase 5 com evidências reais, screenshots e mini demo
