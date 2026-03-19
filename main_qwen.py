@@ -393,6 +393,9 @@ with documents_tab:
                         "paginas_suspeitas": loader_metadata.get("suspicious_pages") if document.get("file_type") == "pdf" else None,
                         "paginas_docling": ", ".join(str(page) for page in loader_metadata.get("docling_pages_used", [])) if document.get("file_type") == "pdf" else None,
                         "modo_docling": loader_metadata.get("docling_mode") if document.get("file_type") == "pdf" else None,
+                        "ocr_fallback": "sim" if loader_metadata.get("ocr_fallback_applied") else ("tentado" if loader_metadata.get("ocr_fallback_attempted") else None) if document.get("file_type") == "pdf" else None,
+                        "ocr_backend": loader_metadata.get("ocr_backend") if document.get("file_type") == "pdf" else None,
+                        "ocr_motivo": loader_metadata.get("ocr_fallback_reason") if document.get("file_type") == "pdf" else None,
                         "indexado_em": document.get("indexed_at"),
                     }
                 )
@@ -409,6 +412,8 @@ with documents_tab:
                     "pdf_docling_enabled": rag_info.get("pdf_docling_enabled"),
                     "pdf_docling_ocr_enabled": rag_info.get("pdf_docling_ocr_enabled"),
                     "pdf_docling_picture_description": rag_info.get("pdf_docling_picture_description"),
+                    "pdf_ocr_fallback_enabled": rag_info.get("pdf_ocr_fallback_enabled"),
+                    "pdf_ocr_fallback_languages": rag_info.get("pdf_ocr_fallback_languages"),
                     "atualizado_em": rag_index.get("updated_at") or rag_index.get("created_at"),
                 }
             )

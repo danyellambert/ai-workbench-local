@@ -10,12 +10,13 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Iterable
 
-from pypdf import PdfReader
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.config import get_rag_settings  # noqa: E402
+from src.rag.loaders import _extract_pdf_text  # noqa: E402
 from src.structured.envelope import TaskExecutionRequest  # noqa: E402
 from src.structured.service import structured_service  # noqa: E402
 
@@ -56,18 +57,12 @@ def list_similarity(pred: Iterable[str], gt: Iterable[str]) -> float:
     return 2 * precision * recall / (precision + recall)
 
 
-def extract_pdf_text(pdf_path: Path) -> str:
+def extract_pdf_text(pdf_path: Path) -> tuple[str, dict[str, Any]]:
     try:
-        reader = PdfReader(str(pdf_path), strict=False)
-        parts = []
-        for page in reader.pages:
-            try:
-                parts.append(page.extract_text() or "")
-            except Exception:
-                parts.append("")
-        return "\n".join(parts)
-    except Exception:
-        return ""
+        text, metadata = _extract_pdf_text(pdf_path.read_bytes(), get_rag_settings())
+        return text, metadata
+    except Exception as error:
+        return "", {"ocr_fallback_error": str(error)}
 
 
 def flatten_education(gt: dict[str, Any]) -> list[str]:
@@ -111,7 +106,7 @@ class ResumeEvalResult:
 
 def evaluate_one(pdf_path: Path, json_path: Path, model: str | None, temperature: float) -> ResumeEvalResult:
     gt = json.loads(json_path.read_text(encoding="utf-8"))
-    text = extract_pdf_text(pdf_path)
+    text, extraction_metadata = extract_pdf_text(pdf_path)
     request = TaskExecutionRequest(
         task_type="cv_analysis",
         input_text=f"analyze this resume\n\n{text}" if text.strip() else "",
@@ -126,6 +121,7 @@ def evaluate_one(pdf_path: Path, json_path: Path, model: str | None, temperature
     difficulty = gt.get("difficulty", "unknown")
     text_extractable_gt = bool(gt.get("text_extractable", True))
     extracted_chars = len(text)
+    ocr_applied = bool(extraction_metadata.get("ocr_fallback_applied"))
 
     if not result.success or result.validated_output is None:
         notes = result.validation_error or result.parsing_error or "task execution failed"
@@ -198,6 +194,8 @@ def evaluate_one(pdf_path: Path, json_path: Path, model: str | None, temperature
     notes_parts = []
     if extracted_chars == 0:
         notes_parts.append("no extractable PDF text")
+    if ocr_applied:
+        notes_parts.append("ocr fallback applied")
     if layout_type == "scan_like_image_pdf":
         notes_parts.append("scan-like layout")
     if full_name_score < 0.5:

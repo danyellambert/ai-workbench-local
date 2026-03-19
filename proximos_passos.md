@@ -314,7 +314,9 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 - **Fase 5 — Outputs estruturados**
   - base funcional concluída
-  - fase em polish final, validação com documentos reais e fechamento de evidências
+  - benchmark sintético textual robusto
+  - OCR fallback inicial integrado
+  - fase em fechamento com documentos reais e evidências
 
 ### Fase concluída mais recentemente
 
@@ -788,14 +790,15 @@ Hoje o projeto já tem:
 - benchmark sintético multilayout para `cv_analysis`
 - `summary`, `checklist`, `extraction`, `cv_analysis` e `code_analysis` validados no smoke eval local
 - `cv_analysis` validado em layouts textuais sintéticos
-- layouts `scan_like_image_pdf` tratados explicitamente como `OCR_REQUIRED` sem OCR
+- fallback OCR opcional para documentos com texto insuficiente
+- benchmark completo pós-OCR mostrando layouts textuais robustos e melhoria parcial em casos scan-like
 
 A fase ainda não deve ser tratada como encerrada porque faltam:
 
 - polish final de UI/UX
 - validação com documentos reais além dos fixtures e resumes sintéticos
 - registro de evidências fortes da fase para portfólio
-- separar melhor, na documentação e na narrativa, o que já é robusto sem OCR e o que depende de OCR
+- documentação final do limite atual do OCR fallback
 
 ### Checklist
 
@@ -826,24 +829,26 @@ A fase ainda não deve ser tratada como encerrada porque faltam:
 - [x] Validar `code_analysis` com PASS no smoke eval automatizado
 - [x] Promover `languages`, `education` e `experience entries` a campos explícitos do schema de CV
 - [x] Adicionar normalização pós-modelo para consolidar dados vindos de `sections`
-- [x] Tratar layouts `scan_like` como `OCR_REQUIRED`, e não como falhas normais da task textual
 - [x] Criar benchmark sintético multilayout para `cv_analysis`
+- [x] Implementar fallback OCR opcional para PDFs com texto insuficiente quando `ocrmypdf` estiver disponível localmente
+- [x] Confirmar benchmark completo pós-OCR com layouts textuais robustos e melhoria parcial em casos scan-like
 
 #### Itens ainda pendentes para fechar a fase
 - [ ] Validar a fase com documentos reais além dos fixtures e do benchmark sintético
 - [ ] Refinar prompts, contexto e renderização com base nesses testes reais
 - [ ] Registrar evidências fortes da fase (screenshots, exemplos comparativos e mini demo)
-- [ ] Separar de forma ainda mais explícita, na documentação, o suporte textual atual vs. a trilha futura de OCR
+- [ ] Documentar de forma final os limites atuais do OCR fallback e o que ainda exigiria uma trilha OCR mais forte
 
 ### Entregável
-- Módulo de análises com saída estruturada e validada, integrado à UI, com smoke eval local e benchmark sintético de CVs multilayout
+- Módulo de análises com saída estruturada e validada, integrado à UI, com smoke eval local, benchmark sintético multilayout e suporte inicial a OCR fallback
 
 ### Evidência para GitHub/LinkedIn
 - exemplos antes/depois de saída livre vs. estruturada
 - screenshot ou tabela com JSON validado
 - mini demo mostrando transformação de documento em checklist/JSON
 - relatório local de smoke eval da Fase 5
-- benchmark sintético mostrando `cv_analysis` robusto em layouts textuais e `OCR_REQUIRED` para scan-like sem OCR
+- benchmark sintético mostrando `cv_analysis` robusto em layouts textuais
+- exemplo de documento scan-like melhorado via OCR fallback
 
 ### O que preciso saber defender em entrevista
 - por que structured output é importante
@@ -852,7 +857,8 @@ A fase ainda não deve ser tratada como encerrada porque faltam:
 - por que isso prepara o terreno para automação e agentes
 - por que smoke eval local ajuda a sair do “parece funcionar” para “tenho uma verificação mínima reproduzível”
 - por que benchmark sintético multilayout ajuda a testar robustez estrutural de CVs
-- por que `OCR_REQUIRED` é uma limitação conhecida e não um erro silencioso do sistema
+- por que o fallback OCR é útil em documentos image-based
+- por que OCR fallback melhora parte dos casos, mas ainda não resolve todos os scans difíceis
 
 
 ## Fase 5.5 — Evolução com LangChain e LangGraph
@@ -1348,7 +1354,8 @@ O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 
 ### Atualização local recente
 - [x] Robustecer `cv_analysis` com campos explícitos para `languages`, `education_entries` e `experience_entries`
-- [x] Separar `scan_like_image_pdf` como `OCR_REQUIRED` no benchmark sintético
+- [x] Implementar fallback OCR opcional para PDFs com texto insuficiente
 - [x] Validar smoke eval da Fase 5 com PASS em `extraction`, `summary`, `checklist`, `cv_analysis` e `code_analysis`
-- [x] Validar benchmark sintético multilayout com PASS nos layouts textuais e `OCR_REQUIRED` nos layouts scan-like
+- [x] Validar benchmark sintético multilayout com PASS nos layouts textuais
+- [x] Validar benchmark completo pós-OCR com melhoria parcial em casos scan-like
 - [ ] Fechar a Fase 5 com evidências reais, screenshots e mini demo

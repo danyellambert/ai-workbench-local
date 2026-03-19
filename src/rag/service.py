@@ -36,6 +36,8 @@ def _settings_payload(settings: RagSettings) -> dict[str, object]:
         "pdf_docling_ocr_enabled": settings.pdf_docling_ocr_enabled,
         "pdf_docling_force_full_page_ocr": settings.pdf_docling_force_full_page_ocr,
         "pdf_docling_picture_description": settings.pdf_docling_picture_description,
+        "pdf_ocr_fallback_enabled": settings.pdf_ocr_fallback_enabled,
+        "pdf_ocr_fallback_languages": settings.pdf_ocr_fallback_languages,
     }
 
 

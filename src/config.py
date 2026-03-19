@@ -60,6 +60,11 @@ class RagSettings:
     pdf_docling_ocr_enabled: bool = True
     pdf_docling_force_full_page_ocr: bool = False
     pdf_docling_picture_description: bool = False
+    pdf_ocr_fallback_enabled: bool = True
+    pdf_ocr_fallback_min_chars: int = 120
+    pdf_ocr_fallback_min_chars_per_page: int = 90
+    pdf_ocr_fallback_languages: str = "eng+por"
+    pdf_ocr_fallback_timeout_seconds: int = 180
 
 
 
@@ -136,4 +141,9 @@ def get_rag_settings() -> RagSettings:
         pdf_docling_ocr_enabled=os.getenv("RAG_PDF_DOCLING_OCR_ENABLED", "true").strip().lower() not in {"0", "false", "no"},
         pdf_docling_force_full_page_ocr=os.getenv("RAG_PDF_DOCLING_FORCE_FULL_PAGE_OCR", "false").strip().lower() not in {"0", "false", "no"},
         pdf_docling_picture_description=os.getenv("RAG_PDF_DOCLING_PICTURE_DESCRIPTION", "false").strip().lower() not in {"0", "false", "no"},
+        pdf_ocr_fallback_enabled=os.getenv("RAG_PDF_OCR_FALLBACK_ENABLED", "true").strip().lower() not in {"0", "false", "no"},
+        pdf_ocr_fallback_min_chars=int(os.getenv("RAG_PDF_OCR_FALLBACK_MIN_CHARS", "120")),
+        pdf_ocr_fallback_min_chars_per_page=int(os.getenv("RAG_PDF_OCR_FALLBACK_MIN_CHARS_PER_PAGE", "90")),
+        pdf_ocr_fallback_languages=os.getenv("RAG_PDF_OCR_FALLBACK_LANGUAGES", "eng+por").strip() or "eng+por",
+        pdf_ocr_fallback_timeout_seconds=int(os.getenv("RAG_PDF_OCR_FALLBACK_TIMEOUT_SECONDS", "180")),
     )
