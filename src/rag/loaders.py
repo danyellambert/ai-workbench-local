@@ -32,6 +32,11 @@ def _extract_pdf_text(file_bytes: bytes, rag_settings: RagSettings | None = None
         docling_ocr_enabled=(rag_settings.pdf_docling_ocr_enabled if rag_settings else True),
         docling_force_full_page_ocr=(rag_settings.pdf_docling_force_full_page_ocr if rag_settings else False),
         docling_picture_description=(rag_settings.pdf_docling_picture_description if rag_settings else False),
+        ocr_fallback_enabled=(rag_settings.pdf_ocr_fallback_enabled if rag_settings else True),
+        ocr_fallback_min_chars=(rag_settings.pdf_ocr_fallback_min_chars if rag_settings else 120),
+        ocr_fallback_min_chars_per_page=(rag_settings.pdf_ocr_fallback_min_chars_per_page if rag_settings else 90),
+        ocr_fallback_languages=(rag_settings.pdf_ocr_fallback_languages if rag_settings else "eng+por"),
+        ocr_fallback_timeout_seconds=(rag_settings.pdf_ocr_fallback_timeout_seconds if rag_settings else 180),
     )
     result = extract_pdf_text_hybrid(file_bytes, settings)
     return result.text, result.metadata

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import io
 import logging
+import shutil
+import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,6 +38,11 @@ class PdfHybridSettings:
     docling_ocr_enabled: bool = True
     docling_force_full_page_ocr: bool = False
     docling_picture_description: bool = False
+    ocr_fallback_enabled: bool = True
+    ocr_fallback_min_chars: int = 120
+    ocr_fallback_min_chars_per_page: int = 90
+    ocr_fallback_languages: str = "eng+por"
+    ocr_fallback_timeout_seconds: int = 180
 
 
 @dataclass
@@ -325,8 +332,91 @@ def _build_complete_docling_settings(settings: PdfHybridSettings) -> PdfHybridSe
         docling_ocr_enabled=True,
         docling_force_full_page_ocr=True,
         docling_picture_description=True,
+        ocr_fallback_enabled=settings.ocr_fallback_enabled,
+        ocr_fallback_min_chars=settings.ocr_fallback_min_chars,
+        ocr_fallback_min_chars_per_page=settings.ocr_fallback_min_chars_per_page,
+        ocr_fallback_languages=settings.ocr_fallback_languages,
+        ocr_fallback_timeout_seconds=settings.ocr_fallback_timeout_seconds,
     )
 
+
+
+
+def _should_run_ocr_fallback(current_text: str, page_analyses: list[PdfPageAnalysis], settings: PdfHybridSettings) -> tuple[bool, str]:
+    normalized = _normalize_page_text(current_text)
+    total_chars = len(normalized)
+    page_count = max(len(page_analyses), 1)
+    chars_per_page = total_chars / page_count
+    if total_chars == 0:
+        return True, "no_text_extracted"
+    if total_chars < settings.ocr_fallback_min_chars:
+        return True, "low_total_text"
+    if chars_per_page < settings.ocr_fallback_min_chars_per_page:
+        return True, "low_chars_per_page"
+    suspicious_pages = sum(1 for page in page_analyses if page.suspicious_score >= settings.suspicious_page_score_threshold)
+    if suspicious_pages == len(page_analyses) and page_count > 0:
+        return True, "all_pages_suspicious"
+    return False, ""
+
+
+def _ocrmypdf_available() -> bool:
+    return shutil.which("ocrmypdf") is not None
+
+
+def _extract_pdf_text_with_pypdf(file_bytes: bytes) -> str:
+    try:
+        reader = PdfReader(io.BytesIO(file_bytes), strict=False)
+        texts: list[str] = []
+        for page in reader.pages:
+            text, _ = _safe_extract_page_text(page)
+            texts.append(text)
+        return _join_pages([(idx + 1, text) for idx, text in enumerate(texts)])
+    except Exception:
+        return ""
+
+
+def _ocrmypdf_extract_pdf_text(file_bytes: bytes, settings: PdfHybridSettings) -> tuple[str, str | None]:
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as input_pdf:
+        input_pdf.write(file_bytes)
+        input_path = Path(input_pdf.name)
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as output_pdf:
+        output_path = Path(output_pdf.name)
+
+    try:
+        command = [
+            "ocrmypdf",
+            "--force-ocr",
+            "--skip-big",
+            "50",
+            "--output-type",
+            "pdf",
+            "--language",
+            settings.ocr_fallback_languages,
+            str(input_path),
+            str(output_path),
+        ]
+        subprocess.run(
+            command,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=settings.ocr_fallback_timeout_seconds,
+        )
+        processed_bytes = output_path.read_bytes()
+        return _extract_pdf_text_with_pypdf(processed_bytes), None
+    except FileNotFoundError as error:
+        return "", f"ocrmypdf indisponível: {error}"
+    except subprocess.TimeoutExpired as error:
+        return "", f"ocrmypdf timeout: {error}"
+    except subprocess.CalledProcessError as error:
+        stderr = error.stderr.decode("utf-8", errors="ignore") if error.stderr else ""
+        return "", f"ocrmypdf failed ({error.returncode}): {stderr.strip()}"
+    except Exception as error:
+        return "", str(error)
+    finally:
+        input_path.unlink(missing_ok=True)
+        output_path.unlink(missing_ok=True)
 
 def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> PdfExtractionResult:
     resolved_mode = normalize_pdf_extraction_mode(settings.extraction_mode)
@@ -420,6 +510,29 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
         except Exception as error:
             docling_error = str(error)
             docling_mode = f"fallback::{docling_mode or 'unknown'}"
+
+    ocr_fallback_attempted = False
+    ocr_fallback_applied = False
+    ocr_fallback_reason = None
+    ocr_fallback_error = None
+    ocr_backend = None
+
+    should_ocr, ocr_reason = _should_run_ocr_fallback(baseline_text, page_analyses, effective_settings)
+    if effective_settings.ocr_fallback_enabled and should_ocr:
+        ocr_fallback_attempted = True
+        ocr_fallback_reason = ocr_reason
+        if _ocrmypdf_available():
+            ocr_backend = "ocrmypdf"
+            ocr_text, ocr_error = _ocrmypdf_extract_pdf_text(file_bytes, effective_settings)
+            ocr_fallback_error = ocr_error
+            normalized_ocr = _normalize_page_text(ocr_text)
+            normalized_base = _normalize_page_text(baseline_text)
+            if len(normalized_ocr) > len(normalized_base):
+                baseline_text = normalized_ocr
+                ocr_fallback_applied = True
+        else:
+            ocr_backend = "ocrmypdf_unavailable"
+            ocr_fallback_error = "ocrmypdf command not found"
 
     metadata = {
         "extractor": "pdf_hybrid",
