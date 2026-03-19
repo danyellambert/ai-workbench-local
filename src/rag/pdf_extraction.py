@@ -10,6 +10,7 @@ from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import IndirectObject
+from PIL import Image
 
 
 logging.getLogger("pypdf").setLevel(logging.ERROR)
@@ -43,6 +44,10 @@ class PdfHybridSettings:
     ocr_fallback_min_chars_per_page: int = 90
     ocr_fallback_languages: str = "eng+por"
     ocr_fallback_timeout_seconds: int = 180
+    scan_image_ocr_enabled: bool = True
+    scan_image_ocr_min_suspicious_ratio: float = 0.8
+    scan_image_ocr_min_suspicious_count: int = 2
+    scan_image_ocr_oversample_dpi: int = 300
 
 
 @dataclass
@@ -418,6 +423,123 @@ def _ocrmypdf_extract_pdf_text(file_bytes: bytes, settings: PdfHybridSettings) -
         input_path.unlink(missing_ok=True)
         output_path.unlink(missing_ok=True)
 
+
+def _should_use_image_first_ocr(page_analyses: list[PdfPageAnalysis], settings: PdfHybridSettings) -> tuple[bool, str]:
+    if not settings.scan_image_ocr_enabled or not page_analyses:
+        return False, ""
+
+    suspicious_pages = [
+        page for page in page_analyses if page.suspicious_score >= settings.suspicious_page_score_threshold
+    ]
+    suspicious_ratio = len(suspicious_pages) / max(len(page_analyses), 1)
+
+    if len(suspicious_pages) >= settings.scan_image_ocr_min_suspicious_count and suspicious_ratio >= settings.scan_image_ocr_min_suspicious_ratio:
+        return True, "strong_scan_like_profile"
+    return False, ""
+
+
+def _rasterize_pdf_with_ghostscript(file_bytes: bytes, settings: PdfHybridSettings) -> tuple[list[bytes], str | None]:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir_path = Path(temp_dir)
+        input_path = temp_dir_path / "input.pdf"
+        output_prefix = temp_dir_path / "page"
+        input_path.write_bytes(file_bytes)
+
+        command = [
+            "gs",
+            "-dNOPAUSE",
+            "-dBATCH",
+            "-sDEVICE=png16m",
+            f"-r{settings.scan_image_ocr_oversample_dpi}",
+            f"-sOutputFile={output_prefix}-%04d.png",
+            str(input_path),
+        ]
+        try:
+            subprocess.run(
+                command,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=settings.ocr_fallback_timeout_seconds,
+            )
+        except FileNotFoundError as error:
+            return [], f"ghostscript indisponível: {error}"
+        except subprocess.TimeoutExpired as error:
+            return [], f"ghostscript timeout: {error}"
+        except subprocess.CalledProcessError as error:
+            stderr = error.stderr.decode("utf-8", errors="ignore") if error.stderr else ""
+            return [], f"ghostscript failed ({error.returncode}): {stderr.strip()}"
+        except Exception as error:
+            return [], str(error)
+
+        image_paths = sorted(temp_dir_path.glob("page-*.png"))
+        image_bytes: list[bytes] = []
+        for image_path in image_paths:
+            try:
+                with Image.open(image_path) as image:
+                    output = io.BytesIO()
+                    image.convert("L").save(output, format="PNG")
+                    image_bytes.append(output.getvalue())
+            except Exception:
+                continue
+
+        if not image_bytes:
+            return [], "ghostscript não gerou páginas rasterizadas"
+        return image_bytes, None
+
+
+def _ocrmypdf_extract_images_text(image_bytes_list: list[bytes], settings: PdfHybridSettings) -> tuple[str, str | None]:
+    if not image_bytes_list:
+        return "", "nenhuma imagem disponível para OCR"
+
+    pages: list[str] = []
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir_path = Path(temp_dir)
+        for index, image_bytes in enumerate(image_bytes_list, start=1):
+            image_path = temp_dir_path / f"page_{index:04d}.png"
+            image_path.write_bytes(image_bytes)
+            output_pdf_path = temp_dir_path / f"page_{index:04d}.pdf"
+            sidecar_path = temp_dir_path / f"page_{index:04d}.txt"
+
+            command = [
+                "ocrmypdf",
+                "--force-ocr",
+                "--skip-big",
+                "50",
+                "--output-type",
+                "pdf",
+                "--language",
+                settings.ocr_fallback_languages,
+                "--image-dpi",
+                str(settings.scan_image_ocr_oversample_dpi),
+                "--sidecar",
+                str(sidecar_path),
+                str(image_path),
+                str(output_pdf_path),
+            ]
+            try:
+                subprocess.run(
+                    command,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    timeout=settings.ocr_fallback_timeout_seconds,
+                )
+                page_text = sidecar_path.read_text(encoding="utf-8", errors="ignore").strip() if sidecar_path.exists() else ""
+                pages.append((_build_page_heading(index) + "\n" + page_text).strip() if page_text else "")
+            except FileNotFoundError as error:
+                return "", f"ocrmypdf indisponível: {error}"
+            except subprocess.TimeoutExpired as error:
+                return "", f"ocrmypdf timeout: {error}"
+            except subprocess.CalledProcessError as error:
+                stderr = error.stderr.decode("utf-8", errors="ignore") if error.stderr else ""
+                return "", f"ocrmypdf image-first failed ({error.returncode}): {stderr.strip()}"
+            except Exception as error:
+                return "", str(error)
+
+    joined = "\n\n".join(page for page in pages if page).strip()
+    return joined, None
+
 def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> PdfExtractionResult:
     resolved_mode = normalize_pdf_extraction_mode(settings.extraction_mode)
     effective_settings = _build_complete_docling_settings(settings) if resolved_mode == "complete" else settings
@@ -516,12 +638,34 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
     ocr_fallback_reason = None
     ocr_fallback_error = None
     ocr_backend = None
+    image_first_ocr_attempted = False
+    image_first_ocr_applied = False
+    image_first_ocr_reason = None
+    image_first_ocr_error = None
 
     should_ocr, ocr_reason = _should_run_ocr_fallback(baseline_text, page_analyses, effective_settings)
     if effective_settings.ocr_fallback_enabled and should_ocr:
         ocr_fallback_attempted = True
         ocr_fallback_reason = ocr_reason
-        if _ocrmypdf_available():
+        use_image_first, image_first_reason = _should_use_image_first_ocr(page_analyses, effective_settings)
+        if use_image_first:
+            image_first_ocr_attempted = True
+            image_first_ocr_reason = image_first_reason
+            ocr_backend = "ocrmypdf_image_first"
+            rasterized_images, raster_error = _rasterize_pdf_with_ghostscript(file_bytes, effective_settings)
+            if raster_error:
+                image_first_ocr_error = raster_error
+            else:
+                ocr_text, ocr_error = _ocrmypdf_extract_images_text(rasterized_images, effective_settings)
+                image_first_ocr_error = ocr_error
+                normalized_ocr = _normalize_page_text(ocr_text)
+                normalized_base = _normalize_page_text(baseline_text)
+                if len(normalized_ocr) > len(normalized_base):
+                    baseline_text = normalized_ocr
+                    ocr_fallback_applied = True
+                    image_first_ocr_applied = True
+
+        if not ocr_fallback_applied and _ocrmypdf_available():
             ocr_backend = "ocrmypdf"
             ocr_text, ocr_error = _ocrmypdf_extract_pdf_text(file_bytes, effective_settings)
             ocr_fallback_error = ocr_error
@@ -553,6 +697,11 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
         "baseline_page_error_count": len(baseline_page_errors),
         "docling_force_full_page_ocr": effective_settings.docling_force_full_page_ocr,
         "docling_picture_description": effective_settings.docling_picture_description,
+        "image_first_ocr_enabled": effective_settings.scan_image_ocr_enabled,
+        "image_first_ocr_attempted": image_first_ocr_attempted,
+        "image_first_ocr_applied": image_first_ocr_applied,
+        "image_first_ocr_reason": image_first_ocr_reason,
+        "image_first_ocr_error": image_first_ocr_error,
         "pages_analysis": [
             {
                 "page_number": page.page_number,

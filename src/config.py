@@ -65,6 +65,10 @@ class RagSettings:
     pdf_ocr_fallback_min_chars_per_page: int = 90
     pdf_ocr_fallback_languages: str = "eng+por"
     pdf_ocr_fallback_timeout_seconds: int = 180
+    pdf_scan_image_ocr_enabled: bool = True
+    pdf_scan_image_ocr_min_suspicious_ratio: float = 0.8
+    pdf_scan_image_ocr_min_suspicious_count: int = 2
+    pdf_scan_image_ocr_oversample_dpi: int = 300
 
 
 
@@ -146,4 +150,8 @@ def get_rag_settings() -> RagSettings:
         pdf_ocr_fallback_min_chars_per_page=int(os.getenv("RAG_PDF_OCR_FALLBACK_MIN_CHARS_PER_PAGE", "90")),
         pdf_ocr_fallback_languages=os.getenv("RAG_PDF_OCR_FALLBACK_LANGUAGES", "eng+por").strip() or "eng+por",
         pdf_ocr_fallback_timeout_seconds=int(os.getenv("RAG_PDF_OCR_FALLBACK_TIMEOUT_SECONDS", "180")),
+        pdf_scan_image_ocr_enabled=os.getenv("RAG_PDF_SCAN_IMAGE_OCR_ENABLED", "true").strip().lower() not in {"0", "false", "no"},
+        pdf_scan_image_ocr_min_suspicious_ratio=float(os.getenv("RAG_PDF_SCAN_IMAGE_OCR_MIN_SUSPICIOUS_RATIO", "0.8")),
+        pdf_scan_image_ocr_min_suspicious_count=int(os.getenv("RAG_PDF_SCAN_IMAGE_OCR_MIN_SUSPICIOUS_COUNT", "2")),
+        pdf_scan_image_ocr_oversample_dpi=int(os.getenv("RAG_PDF_SCAN_IMAGE_OCR_OVERSAMPLE_DPI", "300")),
     )
