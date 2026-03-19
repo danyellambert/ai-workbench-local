@@ -37,6 +37,10 @@ def _extract_pdf_text(file_bytes: bytes, rag_settings: RagSettings | None = None
         ocr_fallback_min_chars_per_page=(rag_settings.pdf_ocr_fallback_min_chars_per_page if rag_settings else 90),
         ocr_fallback_languages=(rag_settings.pdf_ocr_fallback_languages if rag_settings else "eng+por"),
         ocr_fallback_timeout_seconds=(rag_settings.pdf_ocr_fallback_timeout_seconds if rag_settings else 180),
+        scan_image_ocr_enabled=(rag_settings.pdf_scan_image_ocr_enabled if rag_settings else True),
+        scan_image_ocr_min_suspicious_ratio=(rag_settings.pdf_scan_image_ocr_min_suspicious_ratio if rag_settings else 0.8),
+        scan_image_ocr_min_suspicious_count=(rag_settings.pdf_scan_image_ocr_min_suspicious_count if rag_settings else 2),
+        scan_image_ocr_oversample_dpi=(rag_settings.pdf_scan_image_ocr_oversample_dpi if rag_settings else 300),
     )
     result = extract_pdf_text_hybrid(file_bytes, settings)
     return result.text, result.metadata

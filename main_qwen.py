@@ -30,6 +30,7 @@ from src.services.chat_state import (
 )
 from src.storage.chat_history import clear_chat_history, load_chat_history, save_chat_history
 from src.storage.rag_store import clear_rag_store, load_rag_store, save_rag_store
+from src.services.document_context import build_structured_document_context
 from src.services.rag_state import clear_rag_state, get_rag_index, initialize_rag_state, set_rag_index
 from src.structured.envelope import StructuredResult, TaskExecutionRequest
 from src.structured.registry import build_structured_task_registry
@@ -49,6 +50,67 @@ embedding_model_options = embedding_provider.list_available_embedding_models()
 
 STRUCTURED_RESULT_STATE_KEY = "phase5_structured_result"
 STRUCTURED_RENDER_MODE_STATE_KEY = "phase5_structured_render_mode"
+CHAT_DOCUMENT_SELECTION_STATE_KEY = "phase5_chat_document_ids"
+STRUCTURED_DOCUMENT_SELECTION_STATE_KEY = "phase5_structured_document_ids"
+
+
+def _normalize_document_selection(
+    available_document_ids: list[str],
+    requested_document_ids: list[str] | None,
+    *,
+    default_to_all: bool = True,
+) -> list[str]:
+    available = [str(item) for item in available_document_ids if item]
+    if not available:
+        return []
+
+    available_set = set(available)
+    normalized_requested = [
+        str(item) for item in (requested_document_ids or []) if str(item) in available_set
+    ]
+    if normalized_requested:
+        return normalized_requested
+    return list(available) if default_to_all else []
+
+
+def _build_document_preview_map(
+    rag_index: dict[str, object] | None,
+    indexed_documents: list[dict[str, object]],
+) -> dict[str, dict[str, object]]:
+    preview_map: dict[str, dict[str, object]] = {}
+    document_by_id = {
+        str(document.get("document_id")): document
+        for document in indexed_documents
+        if document.get("document_id")
+    }
+    chunks = rag_index.get("chunks", []) if isinstance(rag_index, dict) else []
+
+    for document_id, document in document_by_id.items():
+        related_chunks = [
+            chunk
+            for chunk in chunks
+            if isinstance(chunk, dict) and str(chunk.get("document_id") or "") == document_id
+        ]
+        related_chunks = sorted(
+            related_chunks,
+            key=lambda chunk: (
+                int(chunk.get("chunk_id") or 0),
+                int(chunk.get("start_char") or 0),
+            ),
+        )
+        snippet_samples = []
+        for chunk in related_chunks[:3]:
+            snippet = str(chunk.get("snippet") or chunk.get("text") or "").strip()
+            if snippet:
+                snippet_samples.append(snippet[:600])
+
+        preview_map[document_id] = {
+            "document": document,
+            "snippets": snippet_samples,
+            "chunks_count": len(related_chunks),
+        }
+
+    return preview_map
 
 raw_rag_store = load_rag_store(rag_settings.store_path)
 normalized_rag_store = normalize_rag_index(raw_rag_store, rag_settings)
@@ -206,10 +268,14 @@ if selected_provider == "ollama" and hasattr(selected_provider_instance, "inspec
         )
 
 st.divider()
-chat_tab, structured_tab, documents_tab = st.tabs(["💬 Chat com RAG", "🧱 Documento estruturado", "📚 Documentos"])
+documents_tab, chat_tab, structured_tab = st.tabs(["📚 Documentos", "💬 Chat com RAG", "🧱 Documento estruturado"])
 
 with documents_tab:
-    st.caption("Base documental compartilhada entre o chat e a análise estruturada.")
+    st.caption("1. Carga, indexação e manutenção da base documental compartilhada entre Chat com RAG e Documento estruturado.")
+    st.info(
+        "O processamento de PDF, OCR e fallback para documentos escaneados acontece na etapa de indexação. "
+        "Depois disso, as outras guias trabalham apenas sobre os documentos já indexados e selecionados pelo usuário, evitando conflito entre leitura OCR e uso do RAG em tempo de consulta."
+    )
     st.divider()
     st.subheader("Documentos (Fase 4.5 — base documental)")
     uploaded_files = st.file_uploader(
@@ -351,8 +417,6 @@ with documents_tab:
     rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
     embedding_compatibility = inspect_embedding_configuration_compatibility(rag_index, effective_rag_settings)
     indexed_documents = get_indexed_documents(rag_index, effective_rag_settings)
-    selected_document_ids = None
-    selected_file_types = None
 
     if rag_index:
         documents_count = len(indexed_documents)
@@ -427,33 +491,18 @@ with documents_tab:
             )
 
         document_labels = {
-            document.get("document_id"): f"{document.get('name')} ({document.get('file_type')})"
+            str(document.get("document_id")): f"{document.get('name')} ({document.get('file_type')})"
             for document in indexed_documents
             if document.get("document_id")
         }
-        selected_document_ids = st.multiselect(
-            "Filtrar recuperação por documento",
-            options=list(document_labels.keys()),
-            default=list(document_labels.keys()),
-            format_func=lambda item: document_labels.get(item, item),
-        )
-
-        file_type_options = sorted(
-            {
-                str(document.get("file_type"))
-                for document in indexed_documents
-                if document.get("file_type")
-            }
-        )
-        selected_file_types = st.multiselect(
-            "Filtrar recuperação por tipo",
-            options=file_type_options,
-            default=file_type_options,
+        indexed_document_ids = list(document_labels.keys())
+        st.caption(
+            "Esses documentos ficam disponíveis para seleção independente nas guias de Chat com RAG e Documento estruturado."
         )
 
         operation_document_ids = st.multiselect(
             "Selecionar documentos para remover do índice",
-            options=list(document_labels.keys()),
+            options=indexed_document_ids,
             default=[],
             format_func=lambda item: document_labels.get(item, item),
             help="Você pode remover vários documentos de uma vez sem limpar toda a base.",
@@ -468,13 +517,17 @@ with documents_tab:
             )
         with operation_col_2:
             remove_filtered_requested = st.button(
-                "Remover documentos filtrados",
+                "Remover todos os documentos indexados",
                 width="stretch",
-                disabled=not selected_document_ids,
-                help="Usa o filtro de documentos ativo acima como operação em lote.",
+                disabled=not indexed_document_ids,
+                help="Remove em lote todos os documentos atualmente indexados.",
             )
 
-        document_ids_to_remove = operation_document_ids if remove_selected_requested else selected_document_ids if remove_filtered_requested else []
+        document_ids_to_remove = (
+            operation_document_ids
+            if remove_selected_requested
+            else indexed_document_ids if remove_filtered_requested else []
+        )
 
         if document_ids_to_remove:
             updated_rag_index, sync_status = remove_documents_from_rag_index(
@@ -501,145 +554,51 @@ with documents_tab:
         st.info("Provider cloud habilitado por configuração local. Benchmark real com cloud continua sendo foco principal da Fase 7.")
 
 
-with structured_tab:
-    st.caption("Pipeline separado do chat: use este modo para gerar saídas estruturadas validadas a partir de texto e/ou documentos selecionados.")
-    st.info("Fluxo recomendado: 1) escolha a task, 2) selecione um ou mais documentos, 3) rode a análise e revise o resultado em JSON ou visualização friendly.")
-
-    structured_task_definitions = structured_task_registry.list_tasks()
-    structured_task_options = list(structured_task_definitions.keys())
-    structured_task_descriptions = structured_task_registry.get_available_tasks()
-    default_structured_task = "summary" if rag_index else "extraction"
-    if default_structured_task not in structured_task_options:
-        default_structured_task = structured_task_options[0]
-
-    all_indexed_document_ids = [
-        document.get("document_id")
-        for document in indexed_documents
-        if document.get("document_id")
-    ]
-    active_structured_document_ids = selected_document_ids or all_indexed_document_ids
-
-    task_help = {
-        "extraction": "Extrai entidades, datas, números, riscos e ações a partir de um documento.",
-        "summary": "Resume notas de reunião, briefs e textos técnicos em formato estruturado.",
-        "checklist": "Transforma instruções e procedimentos em checklist operacional.",
-        "cv_analysis": "Analisa um currículo com base no documento selecionado. Melhor usar 1 CV por vez.",
-        "code_analysis": "Analisa código ou texto técnico com foco em propósito, problemas e plano de refatoração.",
-    }
-
-    with st.form("phase5_structured_form", clear_on_submit=False):
-        input_col, config_col = st.columns([2, 1])
-        with input_col:
-            st.markdown("**1. Entrada**")
-            selected_structured_task = st.selectbox(
-                "Task",
-                structured_task_options,
-                index=structured_task_options.index(default_structured_task),
-                format_func=lambda item: f"{item} · {structured_task_descriptions.get(item, item)}",
-            )
-            st.caption(task_help.get(selected_structured_task, ""))
-            structured_input_text = st.text_area(
-                "Input text (optional when using documents)",
-                value=st.session_state.get("phase5_structured_input", ""),
-                height=220,
-                placeholder="Cole o texto aqui. Para CV analysis e extraction, você também pode usar só os documentos selecionados.",
-            )
-
-        with config_col:
-            st.markdown("**2. Contexto documental**")
-            structured_use_documents = st.checkbox(
-                "Use selected documents",
-                value=bool(active_structured_document_ids),
-                disabled=not bool(active_structured_document_ids),
-                help="Usa os documentos selecionados/indexados como contexto para a task estruturada.",
-            )
-            if active_structured_document_ids:
-                st.caption(f"{len(active_structured_document_ids)} documento(s) selecionado(s)")
-            else:
-                st.caption("Nenhum documento selecionado")
-
-            recommended_strategy = "document_scan" if selected_structured_task in {"cv_analysis", "extraction", "checklist", "code_analysis"} else "retrieval"
-            strategy_options = ["document_scan", "retrieval"]
-            if structured_use_documents:
-                structured_context_strategy = st.radio(
-                    "Context strategy",
-                    options=strategy_options,
-                    index=strategy_options.index(recommended_strategy),
-                    horizontal=False,
-                    help="document_scan lê os documentos em ordem; retrieval busca trechos por query dentro da pipeline estruturada.",
-                )
-                if selected_structured_task in {"cv_analysis", "extraction", "code_analysis"}:
-                    st.caption("Recomendado: document_scan")
-            else:
-                structured_context_strategy = recommended_strategy
-                st.caption("Estratégia oculta porque nenhum documento será usado nesta execução.")
-
-            can_run_structured = bool(structured_input_text.strip()) or bool(structured_use_documents and active_structured_document_ids)
-            if not can_run_structured:
-                st.caption("Forneça texto de entrada ou habilite documentos selecionados para executar.")
-
-        st.markdown("**3. Execução**")
-        structured_submit = st.form_submit_button(
-            "Run structured analysis",
-            width="stretch",
-            disabled=not can_run_structured,
-        )
-
-    if structured_submit:
-        st.session_state["phase5_structured_input"] = structured_input_text
-        with st.spinner("Generating structured output..."):
-            structured_request = TaskExecutionRequest(
-                task_type=selected_structured_task,
-                input_text=structured_input_text,
-                use_rag_context=False,
-                use_document_context=bool(structured_use_documents and active_structured_document_ids),
-                source_document_ids=list(active_structured_document_ids if structured_use_documents else []),
-                context_strategy=structured_context_strategy,
-                provider=selected_provider,
-                model=selected_model,
-                temperature=temperature,
-                context_window=context_window,
-            )
-            structured_result = structured_service.execute_task(structured_request)
-            st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
-            default_mode = structured_result.primary_render_mode or "json"
-            st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode
-
-    stored_structured_result = st.session_state.get(STRUCTURED_RESULT_STATE_KEY)
-    if stored_structured_result:
-        structured_result = StructuredResult.model_validate(stored_structured_result)
-        st.markdown("**3. Structured output**")
-        available_modes = sorted(
-            [mode for mode in structured_result.available_render_modes if mode.available],
-            key=lambda mode: mode.priority,
-        )
-        if available_modes:
-            selected_render_mode = st.radio(
-                "Render mode",
-                options=[mode.mode for mode in available_modes],
-                index=next(
-                    (
-                        index
-                        for index, mode in enumerate(available_modes)
-                        if mode.mode == st.session_state.get(STRUCTURED_RENDER_MODE_STATE_KEY, structured_result.primary_render_mode)
-                    ),
-                    0,
-                ),
-                format_func=lambda mode_key: next(
-                    (mode.label for mode in available_modes if mode.mode == mode_key),
-                    mode_key,
-                ),
-                horizontal=True,
-                key="phase5_structured_render_mode_selector",
-            )
-        else:
-            selected_render_mode = structured_result.primary_render_mode or "json"
-        st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = selected_render_mode
-        render_structured_result(structured_result, requested_mode=selected_render_mode)
+rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
+embedding_compatibility = inspect_embedding_configuration_compatibility(rag_index, effective_rag_settings)
+indexed_documents = get_indexed_documents(rag_index, effective_rag_settings)
+all_indexed_document_ids = [
+    str(document.get("document_id"))
+    for document in indexed_documents
+    if document.get("document_id")
+]
+document_labels = {
+    str(document.get("document_id")): f"{document.get('name')} ({document.get('file_type')})"
+    for document in indexed_documents
+    if document.get("document_id")
+}
+document_preview_map = _build_document_preview_map(rag_index, indexed_documents)
 
 
 with chat_tab:
-    st.caption("Modo conversacional com RAG. Use para perguntas abertas, exploração e follow-up sobre os documentos.")
+    st.caption("2. Converse com o RAG usando um ou mais documentos do repositório já indexado na etapa anterior.")
+    st.info(
+        "O chat usa apenas os documentos selecionados abaixo. PDFs escaneados já entram processados pela etapa de indexação, então não há disputa entre OCR e recuperação em tempo de conversa."
+    )
+
+    chat_document_ids_default = _normalize_document_selection(
+        all_indexed_document_ids,
+        st.session_state.get(CHAT_DOCUMENT_SELECTION_STATE_KEY),
+        default_to_all=True,
+    )
+
+    if all_indexed_document_ids:
+        chat_selected_document_ids = st.multiselect(
+            "Documentos que o chat pode usar",
+            options=all_indexed_document_ids,
+            default=chat_document_ids_default,
+            format_func=lambda item: document_labels.get(item, item),
+            key="phase5_chat_document_selector",
+            help="Selecione um ou vários documentos já indexados para limitar o contexto do RAG nesta conversa.",
+        )
+        st.session_state[CHAT_DOCUMENT_SELECTION_STATE_KEY] = chat_selected_document_ids
+        st.caption(f"{len(chat_selected_document_ids)} documento(s) selecionado(s) para o chat.")
+    else:
+        chat_selected_document_ids = []
+        st.session_state[CHAT_DOCUMENT_SELECTION_STATE_KEY] = []
+        st.info("Nenhum documento indexado ainda. Primeiro use a guia Documentos para carregar e indexar arquivos.")
+
+    st.caption("Modo conversacional com RAG. Use para perguntas abertas, exploração e follow-up sobre os documentos selecionados.")
     for mensagem in messages:
         render_chat_message(mensagem)
 
@@ -655,6 +614,7 @@ with chat_tab:
             "prompt_profile_label": selected_prompt_profile_label,
             "temperature": round(temperature, 1),
             "context_window": context_window,
+            "source_document_ids": list(chat_selected_document_ids),
         }
         append_chat_message("user", texto_usuario, metadata=user_metadata)
         save_chat_history(settings.history_path, get_chat_messages())
@@ -678,7 +638,7 @@ with chat_tab:
             "context_chunks": [],
         }
 
-        if rag_index and embedding_compatibility.get("compatible", True):
+        if rag_index and chat_selected_document_ids and embedding_compatibility.get("compatible", True):
             try:
                 retrieval_started_at = time.perf_counter()
                 retrieval_details = retrieve_relevant_chunks_detailed(
@@ -686,8 +646,8 @@ with chat_tab:
                     rag_index=rag_index,
                     settings=effective_rag_settings,
                     embedding_provider=embedding_provider,
-                    document_ids=selected_document_ids,
-                    file_types=selected_file_types,
+                    document_ids=chat_selected_document_ids,
+                    file_types=None,
                 )
                 retrieved_chunks = retrieval_details.get("chunks", [])
                 retrieval_backend_used = retrieval_details.get("backend_used")
@@ -711,6 +671,9 @@ with chat_tab:
             retrieval_backend_message = embedding_compatibility.get("message")
             retrieval_vector_status = inspect_vector_backend_status(rag_index, effective_rag_settings)
             st.info("RAG desativado nesta pergunta porque o embedding ativo não é compatível com o índice carregado. Reindexe para voltar a usar a base documental.")
+        elif rag_index and not chat_selected_document_ids:
+            retrieval_backend_used = "disabled_no_documents_selected"
+            retrieval_backend_message = "Nenhum documento foi selecionado para esta conversa."
 
         with st.chat_message("assistant"):
             placeholder = st.empty()
@@ -751,6 +714,7 @@ with chat_tab:
                                 "embedding_model": effective_rag_settings.embedding_model,
                                 "embedding_context_window": effective_rag_settings.embedding_context_window,
                                 "embedding_index_compatibility": embedding_compatibility,
+                                "selected_document_ids": chat_selected_document_ids,
                                 "retrieved_chunks": len(retrieved_chunks),
                                 "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
                                 "provider": selected_provider,
@@ -810,3 +774,228 @@ with chat_tab:
         }
         append_chat_message("assistant", texto_resposta_ia, metadata=assistant_metadata)
         save_chat_history(settings.history_path, get_chat_messages())
+
+
+with structured_tab:
+    st.caption("3. Gere saídas estruturadas usando um ou mais documentos do repertório já indexado na etapa 1.")
+    st.info(
+        "Fluxo recomendado: 1) escolha a task, 2) selecione um ou mais documentos indexados, 3) rode a análise e revise o resultado em JSON ou visualização friendly."
+    )
+
+    structured_task_definitions = structured_task_registry.list_tasks()
+    structured_task_options = list(structured_task_definitions.keys())
+    structured_task_descriptions = structured_task_registry.get_available_tasks()
+    default_structured_task = "summary" if rag_index else "extraction"
+    if default_structured_task not in structured_task_options:
+        default_structured_task = structured_task_options[0]
+
+    structured_document_ids_default = _normalize_document_selection(
+        all_indexed_document_ids,
+        st.session_state.get(STRUCTURED_DOCUMENT_SELECTION_STATE_KEY),
+        default_to_all=True,
+    )
+
+    task_help = {
+        "extraction": "Extrai entidades, datas, números, riscos e ações a partir de um documento.",
+        "summary": "Resume notas de reunião, briefs e textos técnicos em formato estruturado.",
+        "checklist": "Transforma instruções e procedimentos em checklist operacional.",
+        "cv_analysis": "Analisa um currículo com base no documento selecionado. Melhor usar 1 CV por vez.",
+        "code_analysis": "Analisa código ou texto técnico com foco em propósito, problemas e plano de refatoração.",
+    }
+
+    active_structured_document_ids: list[str] = []
+    structured_use_documents = False
+    structured_context_strategy = "document_scan"
+    structured_input_text = st.session_state.get("phase5_structured_input", "")
+    effective_structured_context_preview = ""
+    effective_structured_context_chars = 0
+    effective_structured_context_blocks = 0
+
+    # Calculate effective context outside the form to enable reactive updates
+    if all_indexed_document_ids:
+        active_structured_document_ids = st.multiselect(
+            "Documentos para a análise estruturada",
+            options=all_indexed_document_ids,
+            default=structured_document_ids_default,
+            format_func=lambda item: document_labels.get(item, item),
+            key="phase5_structured_document_selector_main",
+            help="Selecione um ou vários documentos já indexados para usar nesta task estruturada.",
+        )
+        st.session_state[STRUCTURED_DOCUMENT_SELECTION_STATE_KEY] = active_structured_document_ids
+    else:
+        active_structured_document_ids = []
+        st.session_state[STRUCTURED_DOCUMENT_SELECTION_STATE_KEY] = []
+        st.caption("Nenhum documento indexado disponível.")
+
+    selected_structured_task = st.selectbox(
+        "Task",
+        structured_task_options,
+        index=structured_task_options.index(default_structured_task),
+        format_func=lambda item: f"{item} · {structured_task_descriptions.get(item, item)}",
+        key="phase5_structured_task_selector",
+    )
+    st.caption(task_help.get(selected_structured_task, ""))
+
+    structured_input_text = st.text_area(
+        "Input text (opcional quando usar documentos)",
+        value=st.session_state.get("phase5_structured_input", ""),
+        height=220,
+        placeholder="Cole o texto aqui. Para CV analysis e extraction, você também pode usar só os documentos selecionados.",
+        key="phase5_structured_input_text",
+    )
+
+    structured_use_documents = st.checkbox(
+        "Usar documentos selecionados",
+        value=bool(active_structured_document_ids),
+        disabled=not bool(active_structured_document_ids),
+        help="Usa os documentos selecionados/indexados como contexto para a task estruturada.",
+        key="phase5_structured_use_documents",
+    )
+    if active_structured_document_ids:
+        st.caption(f"{len(active_structured_document_ids)} documento(s) selecionado(s)")
+        st.caption(
+            "Esses documentos já foram processados na etapa de indexação, incluindo PDF/OCR quando necessário; a task estruturada usa o índice consolidado em vez de disputar com o leitor de PDF em tempo real."
+        )
+    else:
+        st.caption("Nenhum documento selecionado")
+
+    recommended_strategy = "document_scan" if selected_structured_task in {"cv_analysis", "extraction", "checklist", "code_analysis"} else "retrieval"
+    strategy_options = ["document_scan", "retrieval"]
+    if structured_use_documents:
+        structured_context_strategy = st.radio(
+            "Estratégia de contexto",
+            options=strategy_options,
+            index=strategy_options.index(recommended_strategy),
+            horizontal=False,
+            help="document_scan lê os documentos do índice em ordem; retrieval busca trechos por query dentro da pipeline estruturada. Nenhuma das estratégias reabre o PDF bruto em tempo real.",
+            key="phase5_structured_context_strategy",
+        )
+        if selected_structured_task in {"cv_analysis", "extraction", "code_analysis"}:
+            st.caption("Recomendado: document_scan")
+        if selected_structured_task == "cv_analysis" and len(active_structured_document_ids) > 1:
+            st.warning("Para `cv_analysis`, o ideal é selecionar 1 currículo por vez para evitar mistura de perfis.")
+    else:
+        structured_context_strategy = recommended_strategy
+        st.caption("Estratégia oculta porque nenhum documento será usado nesta execução.")
+
+    # Calculate effective context outside the form for reactive updates
+    if structured_use_documents and active_structured_document_ids:
+        effective_structured_context_preview = build_structured_document_context(
+            query=structured_input_text,
+            document_ids=active_structured_document_ids,
+            strategy=structured_context_strategy,
+        )
+        effective_structured_context_chars = len(effective_structured_context_preview)
+        effective_structured_context_blocks = effective_structured_context_preview.count("[Source:")
+    else:
+        effective_structured_context_preview = ""
+        effective_structured_context_chars = 0
+        effective_structured_context_blocks = 0
+
+    can_run_structured = bool(structured_input_text.strip()) or bool(structured_use_documents and active_structured_document_ids)
+
+    # Show context preview outside the form
+    with st.container(border=True):
+        st.markdown("### Contexto final enviado para a IA")
+        if active_structured_document_ids:
+            st.caption("Este painel mostra o contexto montado pela pipeline estruturada com base na seleção atual.")
+            metric_col_a, metric_col_b = st.columns(2)
+            metric_col_a.metric("Docs selecionados", len(active_structured_document_ids))
+            metric_col_b.metric("Chars do contexto", effective_structured_context_chars)
+            st.caption(
+                f"Estratégia: {structured_context_strategy} · blocos de origem: {effective_structured_context_blocks}"
+            )
+
+            if effective_structured_context_preview:
+                st.text_area(
+                    "Contexto que será enviado ao modelo",
+                    value=effective_structured_context_preview,
+                    height=520,
+                    disabled=True,
+                    key="phase5_structured_effective_context_preview",
+                )
+            else:
+                st.warning("Nenhum contexto textual foi montado com a seleção atual.")
+        else:
+            st.info("Selecione um ou mais documentos para ver o contexto final que será enviado para a IA.")
+
+    # Form for execution only
+    with st.form("phase5_structured_form", clear_on_submit=False):
+        st.markdown("### Executar análise estruturada")
+        structured_submit = st.form_submit_button(
+            "Run structured analysis",
+            width="stretch",
+            disabled=not can_run_structured,
+        )
+
+        if structured_submit:
+            st.session_state["phase5_structured_input"] = structured_input_text
+            with st.spinner("Generating structured output..."):
+                structured_request = TaskExecutionRequest(
+                    task_type=selected_structured_task,
+                    input_text=structured_input_text,
+                    use_rag_context=False,
+                    use_document_context=bool(structured_use_documents and active_structured_document_ids),
+                    source_document_ids=list(active_structured_document_ids if structured_use_documents else []),
+                    context_strategy=structured_context_strategy,
+                    provider=selected_provider,
+                    model=selected_model,
+                    temperature=temperature,
+                    context_window=context_window,
+                )
+                structured_result = structured_service.execute_task(structured_request)
+                st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
+                default_mode = structured_result.primary_render_mode or "json"
+                st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode
+
+    if structured_submit:
+        st.session_state["phase5_structured_input"] = structured_input_text
+        with st.spinner("Generating structured output..."):
+            structured_request = TaskExecutionRequest(
+                task_type=selected_structured_task,
+                input_text=structured_input_text,
+                use_rag_context=False,
+                use_document_context=bool(structured_use_documents and active_structured_document_ids),
+                source_document_ids=list(active_structured_document_ids if structured_use_documents else []),
+                context_strategy=structured_context_strategy,
+                provider=selected_provider,
+                model=selected_model,
+                temperature=temperature,
+                context_window=context_window,
+            )
+            structured_result = structured_service.execute_task(structured_request)
+            st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
+            default_mode = structured_result.primary_render_mode or "json"
+            st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode
+
+    stored_structured_result = st.session_state.get(STRUCTURED_RESULT_STATE_KEY)
+    if stored_structured_result:
+        structured_result = StructuredResult.model_validate(stored_structured_result)
+        st.markdown("**3. Structured output**")
+        available_modes = sorted(
+            [mode for mode in structured_result.available_render_modes if mode.available],
+            key=lambda mode: mode.priority,
+        )
+        if available_modes:
+            selected_render_mode = st.radio(
+                "Render mode",
+                options=[mode.mode for mode in available_modes],
+                index=next(
+                    (
+                        index
+                        for index, mode in enumerate(available_modes)
+                        if mode.mode == st.session_state.get(STRUCTURED_RENDER_MODE_STATE_KEY, structured_result.primary_render_mode)
+                    ),
+                    0,
+                ),
+                format_func=lambda mode_key: next(
+                    (mode.label for mode in available_modes if mode.mode == mode_key),
+                    mode_key,
+                ),
+                horizontal=True,
+                key="phase5_structured_render_mode_selector",
+            )
+        else:
+            selected_render_mode = structured_result.primary_render_mode or "json"
+        st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = selected_render_mode
+        render_structured_result(structured_result, requested_mode=selected_render_mode)
