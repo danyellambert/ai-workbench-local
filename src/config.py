@@ -69,6 +69,10 @@ class RagSettings:
     pdf_scan_image_ocr_min_suspicious_ratio: float = 0.8
     pdf_scan_image_ocr_min_suspicious_count: int = 2
     pdf_scan_image_ocr_oversample_dpi: int = 300
+    pdf_evidence_pipeline_enabled: bool = False
+    pdf_evidence_pipeline_use_for_cv_like: bool = True
+    pdf_evidence_pipeline_use_for_strong_scan_like: bool = True
+    pdf_evidence_pipeline_min_scan_suspicious_ratio: float = 0.8
 
 
 
@@ -154,4 +158,8 @@ def get_rag_settings() -> RagSettings:
         pdf_scan_image_ocr_min_suspicious_ratio=float(os.getenv("RAG_PDF_SCAN_IMAGE_OCR_MIN_SUSPICIOUS_RATIO", "0.8")),
         pdf_scan_image_ocr_min_suspicious_count=int(os.getenv("RAG_PDF_SCAN_IMAGE_OCR_MIN_SUSPICIOUS_COUNT", "2")),
         pdf_scan_image_ocr_oversample_dpi=int(os.getenv("RAG_PDF_SCAN_IMAGE_OCR_OVERSAMPLE_DPI", "300")),
+        pdf_evidence_pipeline_enabled=os.getenv("RAG_PDF_EVIDENCE_PIPELINE_ENABLED", "false").strip().lower() not in {"0", "false", "no"},
+        pdf_evidence_pipeline_use_for_cv_like=os.getenv("RAG_PDF_EVIDENCE_PIPELINE_USE_FOR_CV_LIKE", "true").strip().lower() not in {"0", "false", "no"},
+        pdf_evidence_pipeline_use_for_strong_scan_like=os.getenv("RAG_PDF_EVIDENCE_PIPELINE_USE_FOR_STRONG_SCAN_LIKE", "true").strip().lower() not in {"0", "false", "no"},
+        pdf_evidence_pipeline_min_scan_suspicious_ratio=float(os.getenv("RAG_PDF_EVIDENCE_PIPELINE_MIN_SCAN_SUSPICIOUS_RATIO", "0.8")),
     )

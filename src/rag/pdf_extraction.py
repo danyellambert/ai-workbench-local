@@ -342,6 +342,10 @@ def _build_complete_docling_settings(settings: PdfHybridSettings) -> PdfHybridSe
         ocr_fallback_min_chars_per_page=settings.ocr_fallback_min_chars_per_page,
         ocr_fallback_languages=settings.ocr_fallback_languages,
         ocr_fallback_timeout_seconds=settings.ocr_fallback_timeout_seconds,
+        scan_image_ocr_enabled=settings.scan_image_ocr_enabled,
+        scan_image_ocr_min_suspicious_ratio=settings.scan_image_ocr_min_suspicious_ratio,
+        scan_image_ocr_min_suspicious_count=settings.scan_image_ocr_min_suspicious_count,
+        scan_image_ocr_oversample_dpi=settings.scan_image_ocr_oversample_dpi,
     )
 
 
@@ -674,7 +678,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
             if len(normalized_ocr) > len(normalized_base):
                 baseline_text = normalized_ocr
                 ocr_fallback_applied = True
-        else:
+        elif not ocr_fallback_applied:
             ocr_backend = "ocrmypdf_unavailable"
             ocr_fallback_error = "ocrmypdf command not found"
 
