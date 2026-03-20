@@ -4,6 +4,8 @@ import io
 from dataclasses import dataclass, field
 
 from src.config import RagSettings
+from src.evidence_cv.config import build_evidence_config_from_rag_settings
+from src.evidence_cv.pipeline.runner import run_cv_pipeline_from_bytes
 from src.rag.pdf_extraction import PdfHybridSettings, extract_pdf_text_hybrid, normalize_pdf_extraction_mode
 
 
@@ -14,6 +16,85 @@ class LoadedDocument:
     file_hash: str
     text: str
     metadata: dict[str, object] = field(default_factory=dict)
+
+
+def _looks_like_cv_filename(filename: str) -> bool:
+    lowered = filename.lower()
+    return any(token in lowered for token in ["cv", "resume", "curriculo", "currículo"])
+
+
+def _should_use_evidence_pipeline(file_bytes: bytes, filename: str, rag_settings: RagSettings | None) -> bool:
+    if rag_settings is None or not getattr(rag_settings, "pdf_evidence_pipeline_enabled", False):
+        return False
+
+    if getattr(rag_settings, "pdf_evidence_pipeline_use_for_cv_like", True) and _looks_like_cv_filename(filename):
+        return True
+
+    if getattr(rag_settings, "pdf_evidence_pipeline_use_for_strong_scan_like", True):
+        settings = PdfHybridSettings(
+            extraction_mode=normalize_pdf_extraction_mode(rag_settings.pdf_extraction_mode),
+            baseline_chars_per_page_threshold=rag_settings.pdf_baseline_chars_per_page_threshold,
+            min_text_coverage_ratio=rag_settings.pdf_min_text_coverage_ratio,
+            suspicious_image_count_threshold=rag_settings.pdf_suspicious_image_count_threshold,
+            suspicious_image_area_ratio=rag_settings.pdf_suspicious_image_area_ratio,
+            suspicious_low_text_chars=rag_settings.pdf_suspicious_low_text_chars,
+            suspicious_page_score_threshold=rag_settings.pdf_suspicious_page_score_threshold,
+            suspicious_pages_trigger_full_docling_ratio=rag_settings.pdf_suspicious_pages_trigger_full_docling_ratio,
+            suspicious_pages_trigger_full_docling_min_count=rag_settings.pdf_suspicious_pages_trigger_full_docling_min_count,
+            max_selective_docling_pages=rag_settings.pdf_max_selective_docling_pages,
+            docling_enabled=rag_settings.pdf_docling_enabled,
+            docling_ocr_enabled=rag_settings.pdf_docling_ocr_enabled,
+            docling_force_full_page_ocr=rag_settings.pdf_docling_force_full_page_ocr,
+            docling_picture_description=rag_settings.pdf_docling_picture_description,
+            ocr_fallback_enabled=rag_settings.pdf_ocr_fallback_enabled,
+            ocr_fallback_min_chars=rag_settings.pdf_ocr_fallback_min_chars,
+            ocr_fallback_min_chars_per_page=rag_settings.pdf_ocr_fallback_min_chars_per_page,
+            ocr_fallback_languages=rag_settings.pdf_ocr_fallback_languages,
+            ocr_fallback_timeout_seconds=rag_settings.pdf_ocr_fallback_timeout_seconds,
+            scan_image_ocr_enabled=rag_settings.pdf_scan_image_ocr_enabled,
+            scan_image_ocr_min_suspicious_ratio=rag_settings.pdf_scan_image_ocr_min_suspicious_ratio,
+            scan_image_ocr_min_suspicious_count=rag_settings.pdf_scan_image_ocr_min_suspicious_count,
+            scan_image_ocr_oversample_dpi=rag_settings.pdf_scan_image_ocr_oversample_dpi,
+        )
+        result = extract_pdf_text_hybrid(file_bytes, settings)
+        suspicious_pages = int(result.metadata.get("suspicious_pages") or 0)
+        page_count = int(result.metadata.get("page_count") or 1)
+        suspicious_ratio = suspicious_pages / max(page_count, 1)
+        return suspicious_ratio >= float(getattr(rag_settings, "pdf_evidence_pipeline_min_scan_suspicious_ratio", 0.8))
+
+    return False
+
+
+def _extract_pdf_text_with_evidence_pipeline(file_bytes: bytes, filename: str, rag_settings: RagSettings) -> tuple[str, dict[str, object]]:
+    config = build_evidence_config_from_rag_settings(rag_settings)
+    result = run_cv_pipeline_from_bytes(file_bytes, ".pdf", config)
+    evidence_summary = {
+        "document_id": result.document_id,
+        "source_type": result.source_type,
+        "warnings": result.warnings,
+        "emails_found": len(result.resume.emails),
+        "phones_found": len(result.resume.phones),
+        "name_status": result.resume.name.status,
+        "location_status": result.resume.location.status,
+        "name_value": result.resume.name.value,
+        "location_value": result.resume.location.value,
+        "emails": [item.value for item in result.resume.emails if item.value],
+        "phones": [item.value for item in result.resume.phones if item.value],
+    }
+    page_texts = [page.native_text or page.ocr_text or "" for page in result.pages]
+    text = "\n\n".join(item.strip() for item in page_texts if item and item.strip())
+    metadata = {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "strategy_label": "Evidence CV pipeline",
+        "evidence_pipeline_used": True,
+        "evidence_summary": evidence_summary,
+        "source_type": result.source_type,
+        "warnings": result.warnings,
+        "page_count": len(result.pages),
+        "product_consumption": result.product_consumption,
+    }
+    return text, metadata
 
 
 def _extract_pdf_text(file_bytes: bytes, rag_settings: RagSettings | None = None) -> tuple[str, dict[str, object]]:
@@ -63,7 +144,16 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
     metadata: dict[str, object] = {}
 
     if suffix == "pdf":
-        text, metadata = _extract_pdf_text(file_bytes, rag_settings)
+        if _should_use_evidence_pipeline(file_bytes, uploaded_file.name, rag_settings):
+            try:
+                text, metadata = _extract_pdf_text_with_evidence_pipeline(file_bytes, uploaded_file.name, rag_settings)
+                metadata["fallback_available"] = True
+            except Exception as error:
+                text, metadata = _extract_pdf_text(file_bytes, rag_settings)
+                metadata["evidence_pipeline_error"] = str(error)
+                metadata["evidence_pipeline_fallback_used"] = True
+        else:
+            text, metadata = _extract_pdf_text(file_bytes, rag_settings)
         file_type = "pdf"
     elif suffix == "csv":
         text = _extract_csv_text(file_bytes)
