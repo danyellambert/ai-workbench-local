@@ -186,6 +186,7 @@ class StructuredOutputService:
                     "improvement_areas": unique_improvements,
                 }
             )
+            self._apply_cv_grounding_guardrail(result)
         if isinstance(result.validated_output, ExtractionPayload):
             payload = result.validated_output
             normalized_categories = list(dict.fromkeys(item.strip() for item in payload.categories if item and item.strip()))
@@ -249,6 +250,26 @@ class StructuredOutputService:
                 strings.extend(self._collect_string_values(item))
             return strings
         return []
+    def _apply_cv_grounding_guardrail(self, result: StructuredResult) -> None:
+        payload = result.validated_output
+        if not isinstance(payload, CVAnalysisPayload):
+            return
+        payload_json = payload.model_dump(mode="json")
+        flattened = [item.strip().lower() for item in self._collect_string_values(payload_json) if item and item.strip()]
+        placeholder_hits = sum(1 for item in flattened if item in _PLACEHOLDER_MARKERS or "company x" in item)
+        suspicious_experience = any(
+            ((entry.organization or "").strip().lower() == "company x") or ((entry.title or "").strip().lower() == "software engineer")
+            for entry in payload.experience_entries
+        )
+        low_information = len(flattened) <= 12 or (not payload.personal_info and not payload.skills and not payload.sections)
+        if placeholder_hits > 0 or (suspicious_experience and low_information):
+            result.success = False
+            result.validated_output = None
+            result.parsing_error = (
+                "Low grounding: CV structured extraction was rejected because the output contained placeholder or invented resume content."
+            )
+            result.validation_error = result.parsing_error
+            return
     def _estimate_quality_score(self, result: StructuredResult, request: TaskExecutionRequest) -> float | None:
         if not result.success or result.validated_output is None:
             return 0.0

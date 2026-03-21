@@ -14,7 +14,7 @@ from ..ocr.docling_backend import DoclingBackend
 from ..ocr.ocrmypdf_backend import OCRMyPDFBackend
 from ..reconcile import reconcile_pages
 from ..schemas import CVExtractionResult, EvidenceRef, PageExtraction
-from ..vision.ollama_vl import OllamaVLBackend
+from ..vision.ollama_vl import OllamaVLBackend, VLInspectionError
 
 
 EMAIL_RE = re.compile(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", re.I)
@@ -27,6 +27,15 @@ REGION_PRIORITY = {
     "top_right": 0.85,
     "sidebar": 0.72,
 }
+
+REGION_ORDER = [
+    "header_top_block",
+    "contact_block",
+    "top_center",
+    "top_left",
+    "top_right",
+    "sidebar",
+]
 
 
 def _detect_source_type(pdf_path: Path) -> str:
@@ -93,6 +102,81 @@ def _generate_priority_crops(page_images: list[Path], config: EvidencePipelineCo
     return crops
 
 
+def _build_vl_router_metadata(source_type: str, pages: list[PageExtraction], result: CVExtractionResult, config: EvidencePipelineConfig) -> dict[str, object]:
+    combined_text_lengths = [len((page.native_text or page.ocr_text or "").strip()) for page in pages]
+    low_text_pages = sum(1 for value in combined_text_lengths if value < config.vl_router_low_text_threshold)
+    contacts_found = len(result.resume.emails) + len(result.resume.phones)
+    name_missing = result.resume.name.status == "not_found"
+    location_missing = result.resume.location.status == "not_found"
+    header_missing = name_missing or location_missing
+    top_page_text = (pages[0].native_text or pages[0].ocr_text or "") if pages else ""
+    top_lines = [line.strip() for line in top_page_text.splitlines() if line.strip()][:12]
+    short_top_lines = sum(1 for line in top_lines if len(line) <= 24)
+    top_fragmented = len(top_lines) >= 6 and short_top_lines >= 4
+    header_contact_hits = sum(1 for line in top_lines if "@" in line or re.search(r"\+?\d[\d\s().-]{7,}\d", line))
+    strong_header_structure_problem = bool(name_missing and location_missing and top_fragmented and header_contact_hits == 0)
+    hard_layout_signal = source_type in {"mixed_pdf", "scanned_pdf"}
+    reasons: list[str] = []
+    skipped_because: list[str] = []
+
+    if source_type == "scanned_pdf":
+        reasons.append("scanned_pdf")
+    if source_type == "mixed_pdf":
+        reasons.append("mixed_pdf")
+    if low_text_pages >= config.vl_scan_like_min_pages:
+        reasons.append("low_text_coverage")
+    if contacts_found < config.vl_router_min_contact_count:
+        reasons.append("missing_contacts_after_ocr")
+    if source_type in {"scanned_pdf", "mixed_pdf"} and header_missing:
+        reasons.append("header_fields_missing")
+    elif source_type == "digital_pdf" and contacts_found < config.vl_router_min_contact_count:
+        reasons.append("missing_contacts_after_ocr")
+    elif source_type == "digital_pdf" and strong_header_structure_problem:
+        reasons.append("strong_header_structure_problem")
+    if source_type == "digital_pdf" and False:
+        reasons.append("layout_difficult")
+
+    enabled = bool(config.enable_vl and config.vl_router_enabled and reasons)
+    if not enabled:
+        skipped_because.append("digital_pdf_with_good_ocr_skip_vl")
+
+    if source_type == "scanned_pdf":
+        region_count = config.vl_router_force_regions_for_scan_like
+    elif reasons:
+        region_count = config.vl_router_default_regions_for_partial_docs
+    else:
+        region_count = 0
+
+    regions_selected = REGION_ORDER[:region_count]
+    decision = "call_vl" if enabled else "skip_vl"
+
+    return {
+        "enabled": enabled,
+        "decision": decision,
+        "reasons": reasons,
+        "document_signals": {
+            "source_type": source_type,
+            "low_text_pages": low_text_pages,
+            "contacts_found_after_ocr": contacts_found,
+            "name_missing": name_missing,
+            "location_missing": location_missing,
+            "header_missing": header_missing,
+            "top_fragmented": top_fragmented,
+            "header_contact_hits": header_contact_hits,
+            "strong_header_structure_problem": strong_header_structure_problem,
+        },
+        "regions_selected": regions_selected,
+        "skipped_because": skipped_because,
+    }
+
+
+def _filter_region_crops(region_crops: list[tuple[int, str, Path]], selected_regions: list[str]) -> list[tuple[int, str, Path]]:
+    if not selected_regions:
+        return []
+    selected = set(selected_regions)
+    return [item for item in region_crops if item[1] in selected]
+
+
 def _looks_like_scan_or_layout_hard(source_type: str, pages: list[PageExtraction], config: EvidencePipelineConfig) -> bool:
     if source_type == "scanned_pdf":
         return True
@@ -115,6 +199,8 @@ def _secondary_verify_literal(candidate: str | None, pages: list[PageExtraction]
 
 def _normalize_email_candidate(value: object) -> str | None:
     text = str(value or "").strip().strip(",;|")
+    if text.lower().endswith(".co"):
+        return None
     return text if EMAIL_RE.match(text) else None
 
 
@@ -123,22 +209,36 @@ def _normalize_phone_candidate(value: object) -> str | None:
     digits = re.sub(r"\D", "", text)
     if len(digits) < 8 or len(digits) > 15:
         return None
+    if len(set(digits)) <= 2:
+        return None
     return text if PHONE_RE.match(text) else None
 
 
 def _normalize_name_candidate(value: object) -> str | None:
     text = " ".join(str(value or "").strip().split())
+    blocked = {"present", "remote", "hybrid", "onsite", "current"}
+    lowered = text.lower()
     if len(text) < 4 or "@" in text or any(ch.isdigit() for ch in text):
+        return None
+    if lowered in blocked:
+        return None
+    if any(token in lowered for token in ["engineer", "developer", "manager", "analyst"]):
         return None
     return text
 
 
 def _normalize_location_candidate(value: object) -> str | None:
-    text = " ".join(str(value or "").strip().split())
+    raw = str(value or "").strip()
+    if raw.startswith("[") and raw.endswith("]"):
+        raw = raw.strip("[]").strip().strip("'").strip('"')
+    text = " ".join(raw.split())
     if len(text) < 2 or "@" in text or any(ch.isdigit() for ch in text):
         return None
     blocked = {"email", "phone", "linkedin", "github", "resume", "curriculum vitae"}
+    blocked_location = {"remote", "hybrid", "onsite", "present"}
     if text.lower() in blocked:
+        return None
+    if text.lower() in blocked_location:
         return None
     return text
 
@@ -195,9 +295,23 @@ def _build_product_consumption(result: CVExtractionResult, config: EvidencePipel
     }
 
 
-def _apply_vl_contact_enrichment(result: CVExtractionResult, region_crops: list[tuple[int, str, Path]], config: EvidencePipelineConfig) -> CVExtractionResult:
+def _init_vl_runtime(config: EvidencePipelineConfig) -> dict[str, object]:
+    return {
+        "enabled": bool(config.enable_vl),
+        "model": config.vl_model,
+        "regions_attempted": 0,
+        "regions_succeeded": 0,
+        "regions_failed": 0,
+        "timeouts": 0,
+        "fallback_used": False,
+        "warnings": [],
+    }
+
+
+def _apply_vl_contact_enrichment(result: CVExtractionResult, region_crops: list[tuple[int, str, Path]], config: EvidencePipelineConfig) -> tuple[CVExtractionResult, dict[str, object]]:
+    vl_runtime = _init_vl_runtime(config)
     if not config.enable_vl or not region_crops:
-        return result
+        return result, vl_runtime
 
     vl = OllamaVLBackend(config)
     name_candidates: list[EvidenceRef] = []
@@ -206,7 +320,22 @@ def _apply_vl_contact_enrichment(result: CVExtractionResult, region_crops: list[
     phone_candidates: list[EvidenceRef] = list(result.resume.phones)
 
     for index, region_label, image_path in region_crops:
-        candidates = vl.extract_contact_candidates_from_region(image_path, region_label)
+        vl_runtime["regions_attempted"] += 1
+        try:
+            candidates = vl.extract_contact_candidates_from_region(image_path, region_label)
+            vl_runtime["regions_succeeded"] += 1
+        except VLInspectionError as error:
+            vl_runtime["regions_failed"] += 1
+            if error.error_type in {"timeout_error", "socket_timeout"}:
+                vl_runtime["timeouts"] += 1
+            vl_runtime["fallback_used"] = True
+            vl_runtime["warnings"].append(f"{region_label}: {error.message}")
+            continue
+        except Exception as error:
+            vl_runtime["regions_failed"] += 1
+            vl_runtime["fallback_used"] = True
+            vl_runtime["warnings"].append(f"{region_label}: unexpected VL failure: {error}")
+            continue
 
         if candidates.get("name"):
             name_value = _normalize_name_candidate(candidates.get("name"))
@@ -289,7 +418,7 @@ def _apply_vl_contact_enrichment(result: CVExtractionResult, region_crops: list[
     if best_location.value:
         result.resume.location = best_location
 
-    return result
+    return result, vl_runtime
 
 
 def run_cv_pipeline(pdf_path: str | Path, config: EvidencePipelineConfig) -> CVExtractionResult:
@@ -320,15 +449,22 @@ def run_cv_pipeline(pdf_path: str | Path, config: EvidencePipelineConfig) -> CVE
 
     document_id = hashlib.sha256(path.read_bytes()).hexdigest()
     result = reconcile_pages(merged_pages, document_id=document_id, source_type=source_type)
-    if not config.vl_use_for_scan_like_only or _looks_like_scan_or_layout_hard(source_type, merged_pages, config):
+    vl_runtime = _init_vl_runtime(config)
+    vl_router = _build_vl_router_metadata(source_type, merged_pages, result, config)
+    if vl_router["enabled"]:
         page_images = _render_pdf_pages(path, config)
         region_crops = _generate_priority_crops(page_images, config)
-        result = _apply_vl_contact_enrichment(result, region_crops, config)
+        region_crops = _filter_region_crops(region_crops, vl_router.get("regions_selected", []))
+        result, vl_runtime = _apply_vl_contact_enrichment(result, region_crops, config)
         if any(item.status == "visual_candidate" for item in [result.resume.name, result.resume.location]):
             result.warnings.append("VL selective added visual candidates that still need review")
         elif result.resume.name.status == "confirmed" or result.resume.location.status == "confirmed":
             result.warnings.append("VL selective helped confirm header/contact information")
+        if vl_runtime.get("warnings"):
+            result.warnings.extend(vl_runtime["warnings"])
     result.product_consumption = _build_product_consumption(result, config)
+    result.product_consumption["vl_runtime"] = vl_runtime
+    result.runtime_metadata["vl_router"] = vl_router
     return result
 
 

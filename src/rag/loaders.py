@@ -1,12 +1,21 @@
 import csv
 import hashlib
 import io
+import re
 from dataclasses import dataclass, field
 
 from src.config import RagSettings
 from src.evidence_cv.config import build_evidence_config_from_rag_settings
 from src.evidence_cv.pipeline.runner import run_cv_pipeline_from_bytes
 from src.rag.pdf_extraction import PdfHybridSettings, extract_pdf_text_hybrid, normalize_pdf_extraction_mode
+
+
+CV_SECTION_HINTS = ["experience", "education", "skills", "languages", "profile", "summary"]
+DATE_RANGE_RE = re.compile(
+    r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4}|(?:19|20)\d{2}\s*[-–/]\s*(?:present|current|(?:19|20)\d{2})",
+    re.I,
+)
+CONTACT_RE = re.compile(r"(?:@|linkedin|github|\+?\d[\d\s().-]{7,}\d)", re.I)
 
 
 @dataclass(frozen=True)
@@ -18,17 +27,279 @@ class LoadedDocument:
     metadata: dict[str, object] = field(default_factory=dict)
 
 
+def _normalize_index_text(value: str | None) -> str:
+    return " ".join((value or "").replace("\n", " ").split()).strip()
+
+
+def _looks_like_bad_index_field(value: str | None) -> bool:
+    text = _normalize_index_text(value)
+    if not text:
+        return True
+    upper = text.upper()
+    if len(text) > 120:
+        return True
+    if text.count("|") >= 3:
+        return True
+    if text.count(" - ") >= 3:
+        return True
+    if sum(1 for marker in ("SUMMARY", "SKILLS", "EDUCATION", "LANGUAGES", "EXPERIENCE") if marker in upper) >= 2:
+        return True
+    if text.startswith("{") or text.startswith("["):
+        return True
+    return False
+
+
+def _usable_index_field(value: str | None) -> str | None:
+    text = _normalize_index_text(value)
+    if not text or _looks_like_bad_index_field(text):
+        return None
+    return text
+
+
+def _build_cv_indexable_text(indexing_payload: dict[str, object]) -> tuple[str, dict[str, object]]:
+    confirmed = indexing_payload.get("confirmed_fields") or {}
+    structured = indexing_payload.get("structured") or {}
+    raw_text = _normalize_index_text(str(indexing_payload.get("raw_text") or ""))
+
+    parts: list[str] = []
+    included_sections: list[str] = []
+    dropped_sections: list[str] = []
+    dropped_reasons: list[str] = []
+
+    confirmed_lines: list[str] = []
+    name = _usable_index_field(confirmed.get("name"))
+    location = _usable_index_field(confirmed.get("location"))
+    if name:
+        confirmed_lines.append(f"Name: {name}")
+    elif confirmed.get("name"):
+        dropped_reasons.append("confirmed_fields.name: noisy_or_implausible_value")
+    if location:
+        confirmed_lines.append(f"Location: {location}")
+    elif confirmed.get("location"):
+        dropped_reasons.append("confirmed_fields.location: noisy_or_implausible_value")
+    emails = [_normalize_index_text(item) for item in confirmed.get("emails", []) if _normalize_index_text(item)]
+    phones = [_normalize_index_text(item) for item in confirmed.get("phones", []) if _normalize_index_text(item)]
+    if emails:
+        confirmed_lines.append(f"Emails: {', '.join(emails)}")
+    if phones:
+        confirmed_lines.append(f"Phones: {', '.join(phones)}")
+    if confirmed_lines:
+        parts.append("[CV CONFIRMED FIELDS]\n" + "\n".join(confirmed_lines))
+        included_sections.append("confirmed_fields")
+    elif confirmed:
+        dropped_sections.append("confirmed_fields")
+
+    experience_entries = structured.get("experience") or []
+    if experience_entries:
+        exp_lines: list[str] = []
+        for index, entry in enumerate(experience_entries, start=1):
+            company = _usable_index_field((entry.get("company") or {}).get("value") or "")
+            title = _usable_index_field((entry.get("title") or {}).get("value") or "")
+            date_range = _usable_index_field((entry.get("date_range") or {}).get("value") or "")
+            location = _usable_index_field((entry.get("location") or {}).get("value") or "")
+            bullets = [
+                _usable_index_field(item.get("value") or "")
+                for item in (entry.get("description_or_bullets") or [])
+                if item.get("status") == "confirmed"
+            ]
+            bullets = [item for item in bullets if item]
+            if not any([company, title, date_range, location, bullets]):
+                dropped_reasons.append(f"experience[{index}]: all_fields_noisy_or_empty")
+                continue
+            header = " | ".join(item for item in [title, company, date_range, location] if item)
+            if header:
+                exp_lines.append(f"- {header}")
+            for bullet in bullets:
+                exp_lines.append(f"  • {bullet}")
+        if exp_lines:
+            parts.append("[CV EXPERIENCE]\n" + "\n".join(exp_lines))
+            included_sections.append("experience")
+        else:
+            dropped_sections.append("experience")
+
+    education_entries = structured.get("education") or []
+    if education_entries:
+        edu_lines: list[str] = []
+        for index, entry in enumerate(education_entries, start=1):
+            institution = _usable_index_field((entry.get("institution") or {}).get("value") or "")
+            degree = _usable_index_field((entry.get("degree") or {}).get("value") or "")
+            date_range = _usable_index_field((entry.get("date_range") or {}).get("value") or "")
+            location = _usable_index_field((entry.get("location") or {}).get("value") or "")
+            notes = [
+                _usable_index_field(item.get("value") or "")
+                for item in (entry.get("notes") or [])
+                if item.get("status") == "confirmed"
+            ]
+            notes = [item for item in notes if item]
+            if not any([institution, degree, date_range, location, notes]):
+                dropped_reasons.append(f"education[{index}]: all_fields_noisy_or_empty")
+                continue
+            header = " | ".join(item for item in [degree, institution, date_range, location] if item)
+            if header:
+                edu_lines.append(f"- {header}")
+            for note in notes:
+                edu_lines.append(f"  • {note}")
+        if edu_lines:
+            parts.append("[CV EDUCATION]\n" + "\n".join(edu_lines))
+            included_sections.append("education")
+        else:
+            dropped_sections.append("education")
+
+    skills = [
+        _usable_index_field(item.get("value") or "")
+        for item in (structured.get("skills") or [])
+        if item.get("status") == "confirmed"
+    ]
+    skills = [item for item in skills if item]
+    if skills:
+        parts.append("[CV SKILLS]\n" + "\n".join(f"- {item}" for item in skills))
+        included_sections.append("skills")
+    elif structured.get("skills"):
+        dropped_sections.append("skills")
+        dropped_reasons.append("skills: all_values_noisy_or_empty")
+
+    languages = []
+    for index, item in enumerate((structured.get("languages") or []), start=1):
+        language = _usable_index_field((item.get("language") or {}).get("value") or "")
+        proficiency = _usable_index_field((item.get("proficiency") or {}).get("value") or "")
+        if language:
+            languages.append(f"- {language}" + (f" ({proficiency})" if proficiency else ""))
+        else:
+            dropped_reasons.append(f"languages[{index}]: noisy_or_empty_language")
+    if languages:
+        parts.append("[CV LANGUAGES]\n" + "\n".join(languages))
+        included_sections.append("languages")
+    elif structured.get("languages"):
+        dropped_sections.append("languages")
+
+    if raw_text:
+        parts.append("[CV RAW TEXT]\n" + raw_text)
+    payload_quality = {
+        "confirmed_fields_usable": bool(confirmed_lines),
+        "included_structured_sections": included_sections,
+        "dropped_structured_sections": list(dict.fromkeys(dropped_sections)),
+        "dropped_section_reasons": dropped_reasons,
+        "raw_text_present": bool(raw_text),
+        "structured_payload_usable": bool(confirmed_lines or any(section in included_sections for section in ("experience", "education", "skills", "languages"))),
+    }
+    return "\n\n".join(parts).strip(), payload_quality
+
+
+def _merge_contact_lists(legacy_values: list[str], evidence_values: list[str]) -> tuple[list[str], dict[str, int]]:
+    legacy = [item for item in legacy_values if item]
+    evidence = [item for item in evidence_values if item]
+    merged = list(legacy)
+    complements = 0
+    conflicts = 0
+    for item in evidence:
+        if item in legacy:
+            continue
+        if legacy:
+            conflicts += 1
+            continue
+        merged.append(item)
+        complements += 1
+    return merged, {"complements": complements, "conflicts": conflicts}
+
+
+def _build_shadow_rollout_report(legacy_metadata: dict[str, object], evidence_metadata: dict[str, object]) -> dict[str, object]:
+    legacy_summary = legacy_metadata.get("evidence_summary") or {}
+    evidence_summary = evidence_metadata.get("evidence_summary") or {}
+
+    legacy_emails = [item for item in legacy_summary.get("emails", []) if item]
+    legacy_phones = [item for item in legacy_summary.get("phones", []) if item]
+    evidence_emails = [item for item in evidence_summary.get("emails", []) if item]
+    evidence_phones = [item for item in evidence_summary.get("phones", []) if item]
+
+    _, email_stats = _merge_contact_lists(legacy_emails, evidence_emails)
+    _, phone_stats = _merge_contact_lists(legacy_phones, evidence_phones)
+
+    agreements = 0
+    if set(legacy_emails) == set(evidence_emails):
+        agreements += 1
+    if set(legacy_phones) == set(evidence_phones):
+        agreements += 1
+
+    return {
+        "agreements": agreements,
+        "email_complements": email_stats["complements"],
+        "phone_complements": phone_stats["complements"],
+        "email_conflicts": email_stats["conflicts"],
+        "phone_conflicts": phone_stats["conflicts"],
+    }
+
+
+def _apply_hybrid_contact_policy(legacy_metadata: dict[str, object], evidence_metadata: dict[str, object]) -> dict[str, object]:
+    legacy_summary = legacy_metadata.get("evidence_summary") or {}
+    evidence_summary = evidence_metadata.get("evidence_summary") or {}
+
+    merged_emails, email_stats = _merge_contact_lists(
+        legacy_summary.get("emails", []),
+        evidence_summary.get("emails", []),
+    )
+    merged_phones, phone_stats = _merge_contact_lists(
+        legacy_summary.get("phones", []),
+        evidence_summary.get("phones", []),
+    )
+
+    return {
+        "emails": merged_emails,
+        "phones": merged_phones,
+        "name": evidence_summary.get("name_value") if evidence_summary.get("name_status") == "confirmed" else None,
+        "location": evidence_summary.get("location_value") if evidence_summary.get("location_status") == "confirmed" else None,
+        "policy": {
+            "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+            "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+            "name": "use_evidence_confirmed_only",
+            "location": "use_evidence_confirmed_only",
+        },
+        "stats": {
+            "email_complements": email_stats["complements"],
+            "phone_complements": phone_stats["complements"],
+            "email_conflicts": email_stats["conflicts"],
+            "phone_conflicts": phone_stats["conflicts"],
+        },
+    }
+
+
 def _looks_like_cv_filename(filename: str) -> bool:
     lowered = filename.lower()
     return any(token in lowered for token in ["cv", "resume", "curriculo", "currículo"])
+
+
+def _detect_cv_like_content(file_bytes: bytes, rag_settings: RagSettings) -> tuple[bool, list[str]]:
+    text, metadata = _extract_pdf_text(file_bytes, rag_settings)
+    normalized = text.lower()
+    top_text = "\n".join(text.splitlines()[:20])
+    reasons: list[str] = []
+
+    if CONTACT_RE.search(top_text):
+        reasons.append("top_contact_profile_structure")
+
+    section_hits = [term for term in CV_SECTION_HINTS if term in normalized]
+    if len(section_hits) >= 2:
+        reasons.append("cv_like_sections_detected")
+
+    if len(DATE_RANGE_RE.findall(normalized)) >= 2:
+        reasons.append("resume_like_date_ranges")
+
+    if metadata.get("page_count") and len(normalized.split()) > 120:
+        reasons.append("sufficient_resume_like_content")
+
+    return (len(reasons) >= 2), reasons
 
 
 def _should_use_evidence_pipeline(file_bytes: bytes, filename: str, rag_settings: RagSettings | None) -> bool:
     if rag_settings is None or not getattr(rag_settings, "pdf_evidence_pipeline_enabled", False):
         return False
 
-    if getattr(rag_settings, "pdf_evidence_pipeline_use_for_cv_like", True) and _looks_like_cv_filename(filename):
-        return True
+    if getattr(rag_settings, "pdf_evidence_pipeline_use_for_cv_like", True):
+        filename_hint = _looks_like_cv_filename(filename)
+        cv_like_content, _ = _detect_cv_like_content(file_bytes, rag_settings)
+        if cv_like_content:
+            return True
+        if filename_hint and cv_like_content:
+            return True
 
     if getattr(rag_settings, "pdf_evidence_pipeline_use_for_strong_scan_like", True):
         settings = PdfHybridSettings(
@@ -68,6 +339,8 @@ def _should_use_evidence_pipeline(file_bytes: bytes, filename: str, rag_settings
 def _extract_pdf_text_with_evidence_pipeline(file_bytes: bytes, filename: str, rag_settings: RagSettings) -> tuple[str, dict[str, object]]:
     config = build_evidence_config_from_rag_settings(rag_settings)
     result = run_cv_pipeline_from_bytes(file_bytes, ".pdf", config)
+    filename_hint = _looks_like_cv_filename(filename)
+    cv_like_content, cv_like_reasons = _detect_cv_like_content(file_bytes, rag_settings)
     evidence_summary = {
         "document_id": result.document_id,
         "source_type": result.source_type,
@@ -81,8 +354,25 @@ def _extract_pdf_text_with_evidence_pipeline(file_bytes: bytes, filename: str, r
         "emails": [item.value for item in result.resume.emails if item.value],
         "phones": [item.value for item in result.resume.phones if item.value],
     }
+    indexing_payload = result.runtime_metadata.get("indexing_payload", {}) if isinstance(result.runtime_metadata, dict) else {}
+    structured_index_text, payload_quality = _build_cv_indexable_text(indexing_payload) if indexing_payload else ("", {})
     page_texts = [page.native_text or page.ocr_text or "" for page in result.pages]
-    text = "\n\n".join(item.strip() for item in page_texts if item and item.strip())
+    raw_page_text = "\n\n".join(item.strip() for item in page_texts if item and item.strip())
+    use_structured_payload = bool(payload_quality.get("structured_payload_usable") and structured_index_text)
+    if use_structured_payload:
+        text = structured_index_text
+        indexing_text_strategy = "structured_payload"
+    elif payload_quality.get("confirmed_fields_usable") and raw_page_text:
+        confirmed_only_text, _ = _build_cv_indexable_text({
+            "confirmed_fields": indexing_payload.get("confirmed_fields") or {},
+            "structured": {},
+            "raw_text": raw_page_text,
+        })
+        text = confirmed_only_text or raw_page_text
+        indexing_text_strategy = "raw_text_plus_confirmed_fields"
+    else:
+        text = raw_page_text
+        indexing_text_strategy = "raw_text_only"
     metadata = {
         "extractor": "evidence_cv_pipeline",
         "strategy": "evidence_parallel",
@@ -93,6 +383,22 @@ def _extract_pdf_text_with_evidence_pipeline(file_bytes: bytes, filename: str, r
         "warnings": result.warnings,
         "page_count": len(result.pages),
         "product_consumption": result.product_consumption,
+        "vl_runtime": result.product_consumption.get("vl_runtime", {}),
+        "vl_router": result.runtime_metadata.get("vl_router", {}),
+        "indexing_payload": indexing_payload,
+        "indexing_text_strategy": indexing_text_strategy,
+        "indexing_payload_quality": payload_quality,
+        "included_structured_sections": payload_quality.get("included_structured_sections", []),
+        "dropped_structured_sections": payload_quality.get("dropped_structured_sections", []),
+        "dropped_section_reasons": payload_quality.get("dropped_section_reasons", []),
+        "routing_diagnostics": {
+            "feature_flag_enabled": bool(getattr(rag_settings, "pdf_evidence_pipeline_enabled", False)),
+            "filename_hint": filename_hint,
+            "cv_like_content_detected": cv_like_content,
+            "cv_like_reasons": cv_like_reasons,
+            "strong_scan_like": result.source_type == "scanned_pdf",
+            "decision": "evidence_path",
+        },
     }
     return text, metadata
 
@@ -124,7 +430,14 @@ def _extract_pdf_text(file_bytes: bytes, rag_settings: RagSettings | None = None
         scan_image_ocr_oversample_dpi=(rag_settings.pdf_scan_image_ocr_oversample_dpi if rag_settings else 300),
     )
     result = extract_pdf_text_hybrid(file_bytes, settings)
-    return result.text, result.metadata
+    metadata = result.metadata or {}
+    metadata.setdefault("evidence_summary", {
+        "emails": [],
+        "phones": [],
+        "name_value": None,
+        "location_value": None,
+    })
+    return result.text, metadata
 
 
 def _extract_csv_text(file_bytes: bytes) -> str:
@@ -146,14 +459,33 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
     if suffix == "pdf":
         if _should_use_evidence_pipeline(file_bytes, uploaded_file.name, rag_settings):
             try:
+                legacy_text, legacy_metadata = _extract_pdf_text(file_bytes, rag_settings)
                 text, metadata = _extract_pdf_text_with_evidence_pipeline(file_bytes, uploaded_file.name, rag_settings)
+                metadata["hybrid_contact_policy"] = _apply_hybrid_contact_policy(legacy_metadata, metadata)
+                metadata["shadow_rollout"] = _build_shadow_rollout_report(legacy_metadata, metadata)
+                metadata["legacy_shadow_reference"] = {
+                    "extractor": legacy_metadata.get("extractor"),
+                    "strategy": legacy_metadata.get("strategy"),
+                }
+                if not text.strip():
+                    text = legacy_text
                 metadata["fallback_available"] = True
             except Exception as error:
                 text, metadata = _extract_pdf_text(file_bytes, rag_settings)
                 metadata["evidence_pipeline_error"] = str(error)
                 metadata["evidence_pipeline_fallback_used"] = True
+                metadata["routing_diagnostics"] = {
+                    "feature_flag_enabled": bool(getattr(rag_settings, "pdf_evidence_pipeline_enabled", False)) if rag_settings else False,
+                    "decision": "legacy_path",
+                    "reason": "evidence_pipeline_runtime_error",
+                }
         else:
             text, metadata = _extract_pdf_text(file_bytes, rag_settings)
+            metadata["routing_diagnostics"] = {
+                "feature_flag_enabled": bool(getattr(rag_settings, "pdf_evidence_pipeline_enabled", False)) if rag_settings else False,
+                "decision": "legacy_path",
+                "reason": "generic_pdf_legacy_path" if rag_settings and getattr(rag_settings, "pdf_evidence_pipeline_enabled", False) else "feature_flag_disabled",
+            }
         file_type = "pdf"
     elif suffix == "csv":
         text = _extract_csv_text(file_bytes)

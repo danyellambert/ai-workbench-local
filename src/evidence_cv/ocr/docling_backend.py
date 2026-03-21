@@ -27,4 +27,5 @@ class DoclingBackend:
         result = converter.convert(str(pdf_path))
         document = getattr(result, "document", result)
         text = document.export_to_markdown() if hasattr(document, "export_to_markdown") else str(document)
-        return [PageExtraction(page=1, ocr_text=text)]
+        normalized_text = text.replace("\r\n", "\n").replace("\r", "\n")
+        return [PageExtraction(page=1, ocr_text=normalized_text)]

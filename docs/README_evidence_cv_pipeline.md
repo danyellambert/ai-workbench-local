@@ -118,6 +118,62 @@ Nesta fase de hardening, os crops passam por uma hierarquia simples:
 
 Essa ordem influencia o ranking dos candidatos quando há conflito entre regiões.
 
+## Roteador OCR-first / VL-on-demand
+
+Nesta fase, o pipeline passa a decidir de forma explícita quando chamar VL.
+
+### Heurísticas principais do roteador
+- `scanned_pdf`
+- `mixed_pdf`
+- `low_text_coverage`
+- `missing_contacts_after_ocr`
+- `header_fields_missing`
+
+### Metadata do roteador
+O resultado agora inclui `runtime_metadata.vl_router` com:
+- `enabled`
+- `decision`
+- `reasons`
+- `document_signals`
+- `regions_selected`
+- `skipped_because`
+
+### Seleção seletiva por região
+As regiões continuam dentro do conjunto:
+- `header_top_block`
+- `contact_block`
+- `top_center`
+- `top_left`
+- `top_right`
+- `sidebar`
+
+Mas o roteador pode selecionar apenas um subconjunto, dependendo dos sinais do documento.
+
+## Benchmark multilayout do roteador
+
+Script:
+- `scripts/benchmark_vl_router_multilayout.py`
+
+Corpus principal:
+- `data/synthetic/resumes_multilayout/pdf`
+
+Exemplo de execução completa:
+
+```bash
+python scripts/benchmark_vl_router_multilayout.py \
+  --pdf-dir data/synthetic/resumes_multilayout/pdf \
+  --out phase5_eval/reports/evidence_cv_multilayout_router_benchmark.json
+```
+
+Smoke test pequeno:
+
+```bash
+python scripts/benchmark_vl_router_multilayout.py \
+  --pdf-dir data/synthetic/resumes_multilayout/pdf \
+  --limit 3 \
+  --out phase5_eval/reports/evidence_cv_multilayout_router_benchmark_smoke.json
+```
+
 ## Regras de hardening atuais
 
 ### Deduplicação
@@ -253,3 +309,80 @@ Esta primeira versão é um MVP paralelo:
 - OCR + native text + reconciliação básica
 - estrutura pronta para backend VL e verificação secundária
 - integração com app principal ainda não realizada
+
+## Full CV structured extraction foundation
+
+Esta fase adiciona a fundação para parsing estruturado do CV inteiro dentro do próprio `evidence_cv`.
+
+### Representação intermediária
+Agora o pipeline cria `evidence_blocks`, uma representação intermediária por bloco com:
+- `text`
+- `page`
+- `bbox`
+- `source_type`
+- `probable_section`
+- `confidence`
+- `notes`
+
+### Seções atualmente suportadas
+- `header`
+- `summary`
+- `experience`
+- `education`
+- `skills`
+- `languages`
+- `certifications`
+- `projects`
+- `other`
+
+### Extração estruturada inicial suportada
+- `experience`
+  - `company`
+  - `title`
+  - `date_range`
+  - `location`
+  - `description_or_bullets`
+- `education`
+  - `institution`
+  - `degree`
+  - `date_range`
+  - `location`
+  - `notes`
+- `skills`
+  - skills explícitas
+- `languages`
+  - `language`
+  - `proficiency` quando explícita
+
+### Serializer para futura indexação
+O pipeline agora também produz uma serialização-base em `runtime_metadata.indexing_payload` com:
+- `raw_text`
+- campos confirmados
+- entradas estruturadas de `experience`, `education`, `skills`, `languages`
+
+## Real CV indexing flow
+
+No fluxo real de indexação, quando `indexing_payload` estiver disponível, o texto indexável do CV passa a ser montado a partir de:
+- `[CV CONFIRMED FIELDS]`
+- `[CV EXPERIENCE]`
+- `[CV EDUCATION]`
+- `[CV SKILLS]`
+- `[CV LANGUAGES]`
+- `[CV RAW TEXT]`
+
+Somente conteúdo confirmado/estruturado entra nas seções principais do texto indexável.
+Conteúdo fraco, `visual_candidate` ou não confirmado permanece fora do corpo principal indexado e continua disponível apenas em metadata.
+
+### Por que isso é melhor que raw-text-only indexing
+- melhora legibilidade semântica do conteúdo indexado
+- prioriza campos e entradas mais confiáveis
+- preserva o raw text completo como fallback contextual
+- mantém compatibilidade com o fallback legado
+
+### Como reindexar CVs existentes
+Reenvie os PDFs pelo fluxo atual do app com o `evidence_cv` habilitado, ou reindexe o corpus de CVs usando o mesmo caminho de upload/indexação já existente. O texto salvo no índice passará a usar a montagem estruturada automaticamente quando `indexing_payload` estiver presente.
+
+### Limitações atuais desta fundação
+- agrupamento ainda é heurístico e de primeira passada
+- não busca perfeição de schema final
+- preserva evidência e honestidade de status para evolução futura

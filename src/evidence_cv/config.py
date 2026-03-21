@@ -23,11 +23,16 @@ class EvidencePipelineConfig:
     min_visual_candidate_confidence: float = 0.55
     product_consume_visual_candidates: bool = False
     product_consume_needs_review: bool = False
+    vl_router_enabled: bool = True
+    vl_router_low_text_threshold: int = 120
+    vl_router_min_contact_count: int = 1
+    vl_router_force_regions_for_scan_like: int = 4
+    vl_router_default_regions_for_partial_docs: int = 2
 
 
 def build_evidence_config_from_rag_settings(rag_settings) -> EvidencePipelineConfig:
     return EvidencePipelineConfig(
         ollama_base_url="http://localhost:11434",
-        ocr_backend="docling" if getattr(rag_settings, "pdf_docling_enabled", True) else "ocrmypdf",
+        ocr_backend="ocrmypdf",
         image_dpi=getattr(rag_settings, "pdf_scan_image_ocr_oversample_dpi", 300),
     )

@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 
 from .schemas import CVExtractionResult, EvidenceRef, PageExtraction
+from .structure import build_evidence_blocks, detect_sections, populate_structured_resume, serialize_for_indexing
 
 
 EMAIL_RE = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.I)
@@ -34,6 +35,10 @@ def reconcile_pages(pages: list[PageExtraction], document_id: str, source_type: 
     result = CVExtractionResult(document_id=document_id, source_type=source_type, pages=pages)
     result.resume.emails = emails
     result.resume.phones = phones
+    result.evidence_blocks = build_evidence_blocks(result)
+    result.sections = detect_sections(result.evidence_blocks)
+    result = populate_structured_resume(result)
+    result.runtime_metadata["indexing_payload"] = serialize_for_indexing(result)
     if not emails:
         result.warnings.append("No confirmed email found")
     if not phones:
