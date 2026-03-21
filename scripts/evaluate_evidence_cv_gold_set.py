@@ -15,12 +15,29 @@ from src.evidence_cv.pipeline.runner import run_cv_pipeline_from_bytes
 from src.rag.loaders import _extract_pdf_text, _extract_pdf_text_with_evidence_pipeline
 
 
+EMAIL_PATTERN = __import__("re").compile(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", __import__("re").I)
+
+
 def _normalize_phone(value: str) -> str:
-    return "".join(ch for ch in value if ch.isdigit())
+    digits = "".join(ch for ch in value if ch.isdigit())
+    if len(digits) < 8 or len(digits) > 15:
+        return ""
+    if digits.startswith("55") and len(digits) > 11:
+        return digits
+    return digits
 
 
 def _normalize_email(value: str) -> str:
-    return value.strip().lower()
+    normalized = value.strip().lower()
+    return normalized if EMAIL_PATTERN.match(normalized) else ""
+
+
+def _normalize_email_list(values: list[str]) -> list[str]:
+    return sorted({item for item in (_normalize_email(value) for value in values) if item})
+
+
+def _normalize_phone_list(values: list[str]) -> list[str]:
+    return sorted({item for item in (_normalize_phone(value) for value in values) if item})
 
 
 def _extract_legacy_contacts(file_bytes: bytes) -> dict[str, object]:
@@ -33,8 +50,8 @@ def _extract_legacy_contacts(file_bytes: bytes) -> dict[str, object]:
     return {
         "name": None,
         "location": None,
-        "emails": sorted({_normalize_email(item) for item in emails}),
-        "phones": sorted({_normalize_phone(item) for item in phones if _normalize_phone(item)}),
+        "emails": _normalize_email_list(emails),
+        "phones": _normalize_phone_list(phones),
         "name_status": "not_found",
         "location_status": "not_found",
     }
@@ -43,13 +60,14 @@ def _extract_legacy_contacts(file_bytes: bytes) -> dict[str, object]:
 def _extract_evidence_no_vl(file_bytes: bytes) -> dict[str, object]:
     rag = get_rag_settings()
     config = build_evidence_config_from_rag_settings(rag)
+    config = config.__class__(**{**config.__dict__, "ocr_backend": "ocrmypdf"})
     config = config.__class__(**{**config.__dict__, "enable_vl": False})
     result = run_cv_pipeline_from_bytes(file_bytes, ".pdf", config)
     return {
         "name": result.resume.name.value,
         "location": result.resume.location.value,
-        "emails": sorted({_normalize_email(item.value) for item in result.resume.emails if item.value}),
-        "phones": sorted({_normalize_phone(item.value) for item in result.resume.phones if item.value and _normalize_phone(item.value)}),
+        "emails": _normalize_email_list([item.value for item in result.resume.emails if item.value]),
+        "phones": _normalize_phone_list([item.value for item in result.resume.phones if item.value]),
         "name_status": result.resume.name.status,
         "location_status": result.resume.location.status,
     }
@@ -62,8 +80,8 @@ def _extract_evidence_with_vl(file_bytes: bytes, filename: str) -> dict[str, obj
     return {
         "name": summary.get("name_value"),
         "location": summary.get("location_value"),
-        "emails": sorted({_normalize_email(item) for item in summary.get("emails", [])}),
-        "phones": sorted({_normalize_phone(item) for item in summary.get("phones", []) if _normalize_phone(item)}),
+        "emails": _normalize_email_list(summary.get("emails", [])),
+        "phones": _normalize_phone_list(summary.get("phones", [])),
         "name_status": summary.get("name_status", "not_found"),
         "location_status": summary.get("location_status", "not_found"),
     }
@@ -77,7 +95,18 @@ def _score_list(predicted: list[str], expected: list[str]) -> dict[str, float | 
     fn = len(gold - pred)
     precision = tp / (tp + fp) if tp + fp else 1.0
     recall = tp / (tp + fn) if tp + fn else 1.0
-    return {"tp": tp, "fp": fp, "fn": fn, "precision": round(precision, 4), "recall": round(recall, 4)}
+    return {
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "predicted_total": len(pred),
+        "gold_total": len(gold),
+        "true_positives": sorted(pred & gold),
+        "false_positives": sorted(pred - gold),
+        "false_negatives": sorted(gold - pred),
+        "precision": round(precision, 4),
+        "recall": round(recall, 4),
+    }
 
 
 def _score_single(predicted: str | None, expected: str | None, status: str) -> dict[str, object]:
@@ -109,9 +138,9 @@ def main() -> int:
     gold_payload = json.loads(Path(args.gold_set).read_text(encoding="utf-8"))
     per_file: list[dict[str, object]] = []
     aggregate = {
-        "legacy": {"emails": {"tp": 0, "fp": 0, "fn": 0}, "phones": {"tp": 0, "fp": 0, "fn": 0}, "name": {"tp": 0, "fp": 0, "fn": 0}, "location": {"tp": 0, "fp": 0, "fn": 0}},
-        "evidence_no_vl": {"emails": {"tp": 0, "fp": 0, "fn": 0}, "phones": {"tp": 0, "fp": 0, "fn": 0}, "name": {"tp": 0, "fp": 0, "fn": 0}, "location": {"tp": 0, "fp": 0, "fn": 0}},
-        "evidence_with_vl": {"emails": {"tp": 0, "fp": 0, "fn": 0}, "phones": {"tp": 0, "fp": 0, "fn": 0}, "name": {"tp": 0, "fp": 0, "fn": 0}, "location": {"tp": 0, "fp": 0, "fn": 0}},
+        "legacy": {"emails": {"tp": 0, "fp": 0, "fn": 0, "predicted_total": 0, "gold_total": 0}, "phones": {"tp": 0, "fp": 0, "fn": 0, "predicted_total": 0, "gold_total": 0}, "name": {"tp": 0, "fp": 0, "fn": 0}, "location": {"tp": 0, "fp": 0, "fn": 0}},
+        "evidence_no_vl": {"emails": {"tp": 0, "fp": 0, "fn": 0, "predicted_total": 0, "gold_total": 0}, "phones": {"tp": 0, "fp": 0, "fn": 0, "predicted_total": 0, "gold_total": 0}, "name": {"tp": 0, "fp": 0, "fn": 0}, "location": {"tp": 0, "fp": 0, "fn": 0}},
+        "evidence_with_vl": {"emails": {"tp": 0, "fp": 0, "fn": 0, "predicted_total": 0, "gold_total": 0}, "phones": {"tp": 0, "fp": 0, "fn": 0, "predicted_total": 0, "gold_total": 0}, "name": {"tp": 0, "fp": 0, "fn": 0}, "location": {"tp": 0, "fp": 0, "fn": 0}},
     }
 
     for document in gold_payload.get("documents", []):
@@ -123,20 +152,20 @@ def main() -> int:
 
         scores = {
             "legacy": {
-                "emails": _score_list(legacy["emails"], [_normalize_email(item) for item in document.get("emails", [])]),
-                "phones": _score_list(legacy["phones"], [_normalize_phone(item) for item in document.get("phones", [])]),
+                "emails": _score_list(legacy["emails"], _normalize_email_list(document.get("emails", []))),
+                "phones": _score_list(legacy["phones"], _normalize_phone_list(document.get("phones", []))),
                 "name": _score_single(legacy["name"], document.get("name"), legacy["name_status"]),
                 "location": _score_single(legacy["location"], document.get("location"), legacy["location_status"]),
             },
             "evidence_no_vl": {
-                "emails": _score_list(no_vl["emails"], [_normalize_email(item) for item in document.get("emails", [])]),
-                "phones": _score_list(no_vl["phones"], [_normalize_phone(item) for item in document.get("phones", [])]),
+                "emails": _score_list(no_vl["emails"], _normalize_email_list(document.get("emails", []))),
+                "phones": _score_list(no_vl["phones"], _normalize_phone_list(document.get("phones", []))),
                 "name": _score_single(no_vl["name"], document.get("name"), no_vl["name_status"]),
                 "location": _score_single(no_vl["location"], document.get("location"), no_vl["location_status"]),
             },
             "evidence_with_vl": {
-                "emails": _score_list(with_vl["emails"], [_normalize_email(item) for item in document.get("emails", [])]),
-                "phones": _score_list(with_vl["phones"], [_normalize_phone(item) for item in document.get("phones", [])]),
+                "emails": _score_list(with_vl["emails"], _normalize_email_list(document.get("emails", []))),
+                "phones": _score_list(with_vl["phones"], _normalize_phone_list(document.get("phones", []))),
                 "name": _score_single(with_vl["name"], document.get("name"), with_vl["name_status"]),
                 "location": _score_single(with_vl["location"], document.get("location"), with_vl["location_status"]),
             },
@@ -144,10 +173,25 @@ def main() -> int:
 
         for variant, fields in scores.items():
             for field_name, field_score in fields.items():
-                for metric in ("tp", "fp", "fn"):
+                for metric in ("tp", "fp", "fn", "predicted_total", "gold_total"):
+                    if metric not in field_score:
+                        continue
                     aggregate[variant][field_name][metric] += int(field_score[metric])
 
-        per_file.append({"file": document["file"], "gold": document, "scores": scores})
+        per_file.append({
+            "file": document["file"],
+            "gold": {
+                **document,
+                "emails_normalized": _normalize_email_list(document.get("emails", [])),
+                "phones_normalized": _normalize_phone_list(document.get("phones", [])),
+            },
+            "predictions": {
+                "legacy": legacy,
+                "evidence_no_vl": no_vl,
+                "evidence_with_vl": with_vl,
+            },
+            "scores": scores,
+        })
 
     for variant, fields in aggregate.items():
         for field_name, counts in fields.items():

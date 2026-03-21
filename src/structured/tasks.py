@@ -234,13 +234,72 @@ Return this JSON structure:
 class CVAnalysisTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         provider = self._resolve_provider(request)
-        context_text = self._build_optional_document_context(request, strategy="document_scan", max_chunks=16)
-        prompt = self._build_cv_analysis_prompt(request.input_text, context_text)
+        from ..services.document_context import (
+            build_retrieval_context,
+            get_document_grounding_profile,
+        )
+        from .parsers import attempt_controlled_failure
+
+        grounding = get_document_grounding_profile(request.source_document_ids)
+        use_full_cv_grounding = bool(grounding.get("single_cv_document"))
+        primary_context = ""
+        secondary_context = ""
+
+        if use_full_cv_grounding:
+            primary_context = str(grounding.get("full_cv_context") or "").strip()
+            secondary_context = build_retrieval_context(
+                query=request.input_text,
+                document_ids=request.source_document_ids,
+                max_chunks=4,
+                max_chars=6000,
+            ).strip()
+        else:
+            primary_context = self._build_optional_document_context(request, strategy="document_scan", max_chunks=16)
+
+        if use_full_cv_grounding and self._is_low_grounding_cv_context(primary_context):
+            return attempt_controlled_failure(
+                raw_response="",
+                task_type="cv_analysis",
+                error_message="Low grounding: insufficient CV context. Full CV context is too short or structurally incomplete, so placeholder resume output was blocked.",
+            )
+
+        prompt = self._build_cv_analysis_prompt(
+            request.input_text,
+            primary_context,
+            secondary_context=secondary_context,
+            use_full_cv_grounding=use_full_cv_grounding,
+        )
         response_text = self._collect_response_text(provider, request, prompt)
         return parse_structured_response(response_text, CVAnalysisPayload)
 
-    def _build_cv_analysis_prompt(self, text: str, context_text: str) -> str:
-        context_block = f"\nResume/document context:\n{context_text}\n" if context_text else ""
+    def _is_low_grounding_cv_context(self, context_text: str) -> bool:
+        cleaned = (context_text or "").strip()
+        if len(cleaned) < 220:
+            return True
+        uppercase = cleaned.upper()
+        structural_hits = sum(
+            1 for marker in ("EXPERIENCE", "EDUCATION", "SKILLS", "LANGUAGES", "SUMMARY", "[CV ") if marker in uppercase
+        )
+        return structural_hits < 2
+
+    def _build_cv_analysis_prompt(
+        self,
+        text: str,
+        context_text: str,
+        *,
+        secondary_context: str = "",
+        use_full_cv_grounding: bool = False,
+    ) -> str:
+        primary_label = "Full CV grounding context" if use_full_cv_grounding else "Resume/document context"
+        context_block = f"\n{primary_label}:\n{context_text}\n" if context_text else ""
+        secondary_block = f"\nSecondary retrieval support (use only to supplement the primary CV context, never to override it):\n{secondary_context}\n" if secondary_context else ""
+        grounding_rules = """
+Grounding rules:
+- If a full CV grounding context is present, use it as the primary source of truth.
+- Treat retrieval snippets only as secondary support.
+- Do not fabricate employers, schools, dates, or placeholder labels like Company X.
+- If grounding is weak, incomplete, or ambiguous, leave fields null/empty instead of guessing.
+""" if use_full_cv_grounding else ""
         return f"""
 You are a CV analysis assistant.
 Your job is to extract and structure the actual information present in the resume/context below.
@@ -248,10 +307,12 @@ Return only valid JSON.
 Do not invent information.
 Do not use placeholder values like "Full Name", "name@example.com", "skill 1", or similar.
 If a value is missing, use null, 0, or an empty list depending on the field.
+{grounding_rules}
 
 Input text:
 {text}
 {context_block}
+{secondary_block}
 
 Return this JSON structure:
 {{
@@ -263,44 +324,11 @@ Return this JSON structure:
     "location": null,
     "links": []
   }},
-  "sections": [
-    {{
-      "section_type": "experience",
-      "title": "Professional Experience",
-      "content": [
-        {{
-          "text": "Software Engineer at Company X (2023-2024)",
-          "details": {{
-            "role": "Software Engineer",
-            "organization": "Company X",
-            "duration": "2023-2024"
-          }}
-        }}
-      ],
-      "confidence": 0.9
-    }}
-  ],
-  "skills": ["Python", "SQL"],
-  "languages": ["Portuguese (Native)", "English (Professional)"],
-  "education_entries": [
-    {{
-      "degree": "B.Sc. in Computer Science",
-      "institution": "University X",
-      "location": "City, Country",
-      "date_range": "2018-2022",
-      "description": "B.Sc. in Computer Science | University X | 2018-2022"
-    }}
-  ],
-  "experience_entries": [
-    {{
-      "title": "Software Engineer",
-      "organization": "Company X",
-      "location": "City, Country",
-      "date_range": "2023-2024",
-      "bullets": ["Built APIs", "Improved automation"],
-      "description": "Software Engineer | Company X | 2023-2024"
-    }}
-  ],
+  "sections": [],
+  "skills": [],
+  "languages": [],
+  "education_entries": [],
+  "experience_entries": [],
   "experience_years": 0.0,
   "strengths": [],
   "improvement_areas": []
@@ -311,6 +339,8 @@ Important rules:
 - Extract role titles and organizations explicitly to the top-level "experience_entries" field.
 - "skills" must be a list of strings only.
 - You may also repeat the same information inside sections for flexibility, but top-level fields must be populated whenever information is present.
+- Never output invented sample employers, schools, cities, or date ranges.
+- If the only possible value would be a guessed placeholder, return null or [] instead.
 """
 
 
