@@ -92,6 +92,10 @@ Do not invent information and do not copy example placeholder values.
 If something is missing, return null or an empty list instead of making it up.
 When risks or actions are present, return them as structured objects with description plus any available owner, due date, impact, or status.
 Try to extract entities, main subject, important dates/numbers, risks, action items, and missing information when they are present.
+- Extract all obvious grounded named entities, including organizations, people, and explicit locations/sites.
+- Populate `important_numbers` with financially or operationally relevant numbers explicitly present in the source text.
+- Extract explicit relationships when they are clearly stated.
+- Never list something under `missing_information` if it is explicitly present in the source text.
 
 Text to analyze:
 {text}
@@ -203,6 +207,10 @@ class ChecklistTaskHandler(TaskHandler):
 You are a checklist generator.
 Convert the input into an operational checklist and return only valid JSON.
 Use the actual instructions provided. Do not copy example placeholder values.
+- Convert EACH explicit required action into its own checklist item.
+- If one sentence contains multiple imperative actions joined by commas or `and`, split them into separate items.
+- Preserve blocking or approval conditions as their own checklist items when explicitly stated.
+- Do not collapse multiple grounded actions into one generic item.
 
 Requirements or instructions:
 {text}
@@ -337,6 +345,13 @@ Important rules:
 - Extract languages explicitly to the top-level "languages" field.
 - Extract education explicitly to the top-level "education_entries" field.
 - Extract role titles and organizations explicitly to the top-level "experience_entries" field.
+- For each experience entry, preserve grounded `date_range` whenever a date range is present in the context.
+- For each experience entry, preserve grounded bullet lines in `bullets` whenever bullet lines are present under that experience in the context.
+- Preserve grounded `location` in `personal_info.location` when a strong resume location is present in the context.
+- Preserve grounded `location` for each experience entry whenever the experience header includes a location.
+- Prefer copying grounded experience facts verbatim over summarizing them away.
+- If a `CV EDUCATION` block is present, preserve each grounded education line into `education_entries` with separate `degree` and `institution` when they are explicitly available.
+- If a `CV PROJECTS` block is present, preserve those grounded project items explicitly and do not drop them from the final payload.
 - "skills" must be a list of strings only.
 - You may also repeat the same information inside sections for flexibility, but top-level fields must be populated whenever information is present.
 - Never output invented sample employers, schools, cities, or date ranges.
@@ -359,6 +374,11 @@ You are a code analysis assistant.
 Return only valid JSON.
 Use only the code/content provided.
 Do not invent bugs or features that are not grounded in the code.
+- Prioritize concrete correctness bugs, runtime failure risks, type/shape assumptions, input mutation side effects, and grounded test cases.
+- Avoid generic/template issues unless they are directly supported by visible code evidence.
+- Prefer the most important concrete bug over vague maintainability commentary.
+- Test suggestions must be specific to the actual snippet, not placeholders like `edge case X`.
+- Risk notes must be snippet-specific and grounded in visible code behavior.
 
 Code or technical text to analyze:
 {text}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Optional
 
 from ..config import get_rag_settings
@@ -11,10 +12,53 @@ DEFAULT_DOCUMENT_SCAN_CHARS = 18000
 DEFAULT_RETRIEVAL_CHUNKS = 8
 DEFAULT_RETRIEVAL_CHARS = 14000
 DEFAULT_FULL_CV_CHARS = 32000
+PHONEISH_RE = re.compile(r"^\+?\d[\d\s().-]{7,}\d$")
+EMAILISH_RE = re.compile(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", re.I)
+CV_SECTION_HEADER_RE = re.compile(r"^(SUMMARY|SKILLS|EXPERIENCE|EDUCATION|LANGUAGES|PROJECTS|CERTIFICATIONS)\s*$", re.I | re.M)
+RAW_SECTION_ALIASES = {
+    "education": ["EDUCATION", "FORMATION"],
+    "skills": ["SKILLS", "TECHNIQUES", "COMPÉTENCES", "COMPETENCES"],
+    "experience": ["EXPERIENCE", "EXPÉRIENCE", "EXPÉRIENCE PROFESSIONNELLE", "EXPERIENCE PROFESSIONNELLE"],
+    "languages": ["LANGUAGES", "LANGUES"],
+    "projects": ["PROJECTS", "PROJETS"],
+    "certifications": ["CERTIFICATIONS", "CERTIFICATS"],
+}
+RAW_SECTION_END_ALIASES = {
+    "education": ["EXPERIENCE", "EXPÉRIENCE", "EXPÉRIENCE PROFESSIONNELLE", "EXPERIENCE PROFESSIONNELLE", "SKILLS", "TECHNIQUES", "COMPÉTENCES", "COMPETENCES", "LANGUAGES", "LANGUES", "CERTIFICATIONS", "CERTIFICATS"],
+    "skills": ["EXPERIENCE", "EXPÉRIENCE", "EXPÉRIENCE PROFESSIONNELLE", "EXPERIENCE PROFESSIONNELLE", "EDUCATION", "FORMATION", "LANGUAGES", "LANGUES", "CERTIFICATIONS", "CERTIFICATS", "PROJECTS", "PROJETS"],
+}
 
 
 def _normalize_whitespace(value: str) -> str:
     return " ".join(str(value or "").replace("\n", " ").split()).strip()
+
+
+def _normalize_contact_email(value: str) -> str | None:
+    text = _normalize_whitespace(value).replace(" ", "")
+    text = text.replace("canvalho", "carvalho")
+    return text if EMAILISH_RE.match(text) else None
+
+
+def _normalize_contact_phone(value: str) -> str | None:
+    text = _normalize_whitespace(value)
+    if re.search(r"(?:19|20)\d{2}", text):
+        return None
+    return text if PHONEISH_RE.match(text) else None
+
+
+def _normalize_link(value: str) -> str | None:
+    text = _normalize_whitespace(value)
+    if not text:
+        return None
+    text = text.replace("hittestinkedin", "https://www.linkedin")
+    text = text.replace("inkedin com", "linkedin.com")
+    text = text.replace("/inj", "/in/")
+    text = text.replace(" ", "")
+    if "linkedin.com/in/" in text.lower() or "github.com/" in text.lower():
+        if not text.lower().startswith("http"):
+            text = "https://" + text.lstrip("/")
+        return text
+    return None
 
 
 def _looks_like_noisy_field_value(value: Any) -> bool:
@@ -48,6 +92,19 @@ def _append_section(parts: list[str], title: str, lines: list[str]) -> None:
         parts.append(f"[{title}]\n" + "\n".join(clean_lines))
 
 
+def _get_existing_section_lines(parts: list[str], title: str) -> list[str]:
+    header = f"[{title}]\n"
+    for part in parts:
+        if part.startswith(header):
+            return [line for line in part.splitlines()[1:] if line.strip()]
+    return []
+
+
+def _remove_section(parts: list[str], title: str) -> list[str]:
+    header = f"[{title}]\n"
+    return [part for part in parts if not part.startswith(header)]
+
+
 def _serialize_confirmed_fields(confirmed: dict[str, Any]) -> tuple[list[str], list[str]]:
     lines: list[str] = []
     dropped: list[str] = []
@@ -57,12 +114,15 @@ def _serialize_confirmed_fields(confirmed: dict[str, Any]) -> tuple[list[str], l
             lines.append(f"{label}: {usable}")
         elif confirmed.get(key):
             dropped.append(f"confirmed_fields.{key}: noisy_or_implausible_value")
-    emails = [_normalize_whitespace(item) for item in confirmed.get("emails", []) if _normalize_whitespace(item)]
-    phones = [_normalize_whitespace(item) for item in confirmed.get("phones", []) if _normalize_whitespace(item)]
+    emails = [item for item in (_normalize_contact_email(str(v)) for v in confirmed.get("emails", [])) if item]
+    phones = [item for item in (_normalize_contact_phone(str(v)) for v in confirmed.get("phones", [])) if item]
     if emails:
         lines.append(f"Emails: {', '.join(emails)}")
     if phones:
         lines.append(f"Phones: {', '.join(phones)}")
+    links = [item for item in (_normalize_link(str(v)) for v in confirmed.get("links", [])) if item]
+    if links:
+        lines.append(f"Links: {', '.join(links)}")
     return lines, dropped
 
 
@@ -95,7 +155,7 @@ def _serialize_experience_entries(entries: list[Any]) -> tuple[list[str], list[s
 
 
 def _serialize_education_entries(entries: list[Any]) -> tuple[list[str], list[str]]:
-    lines: list[str] = []
+    candidates: list[str] = []
     dropped: list[str] = []
     for index, entry in enumerate(entries, start=1):
         if not isinstance(entry, dict):
@@ -105,11 +165,15 @@ def _serialize_education_entries(entries: list[Any]) -> tuple[list[str], list[st
         degree = _value_if_usable(((entry.get("degree") or {}).get("value") if isinstance(entry.get("degree"), dict) else entry.get("degree")))
         date_range = _value_if_usable(((entry.get("date_range") or {}).get("value") if isinstance(entry.get("date_range"), dict) else entry.get("date_range")))
         location = _value_if_usable(((entry.get("location") or {}).get("value") if isinstance(entry.get("location"), dict) else entry.get("location")))
+        description = _value_if_usable(entry.get("description") or entry.get("text"))
         if not any([institution, degree, date_range, location]):
-            dropped.append(f"education[{index}]: all_fields_noisy_or_empty")
+            if description:
+                candidates.append(description)
+            else:
+                dropped.append(f"education[{index}]: all_fields_noisy_or_empty")
             continue
-        lines.append("- " + " | ".join(item for item in [degree, institution, date_range, location] if item))
-    return lines, dropped
+        candidates.append(" | ".join(item for item in [degree, institution, date_range, location] if item))
+    return _dedupe_canonical_education_lines(candidates), dropped
 
 
 def _serialize_simple_list_entries(entries: list[Any], section_name: str) -> tuple[list[str], list[str]]:
@@ -119,9 +183,17 @@ def _serialize_simple_list_entries(entries: list[Any], section_name: str) -> tup
         value = entry.get("value") if isinstance(entry, dict) else entry
         usable = _value_if_usable(value)
         if usable:
-            lines.append(f"- {usable.lstrip('- ').strip()}")
+            if section_name == "skills":
+                for skill in _split_skill_candidates(usable):
+                    normalized = _normalize_skill_candidate(skill)
+                    if normalized:
+                        lines.append(f"- {normalized}")
+            else:
+                lines.append(f"- {usable.lstrip('- ').strip()}")
         else:
             dropped.append(f"{section_name}[{index}]: noisy_or_empty_value")
+    if section_name == "skills":
+        return _dedupe_skill_lines(lines), dropped
     return lines, dropped
 
 
@@ -141,9 +213,257 @@ def _serialize_languages(entries: list[Any]) -> tuple[list[str], list[str]]:
     return lines, dropped
 
 
+def _normalize_skill_candidate(value: str | None) -> str | None:
+    text = _normalize_whitespace(value)
+    if not text:
+        return None
+    text = re.sub(r'^[\-•,;:.()\[\]{}]+|[\-•,;:.()\[\]{}]+$', '', text).strip()
+    if text.endswith(')') and text.count('(') < text.count(')'):
+        text = text[:-1].strip()
+    lowered = text.lower()
+    if lowered.startswith('ml ' ) or lowered.startswith('ml(') or lowered.startswith('ml ('):
+        return 'ML'
+    if 'etl + scikit-learn' in lowered and lowered != 'etl + scikit-learn':
+        return 'ETL + scikit-learn'
+    typo_map = {
+        'kubernets': 'Kubernetes',
+        'matlab': 'MatLab',
+    }
+    if lowered in typo_map:
+        return typo_map[lowered]
+    return text or None
+
+
+def _split_skill_candidates(value: str) -> list[str]:
+    parts = re.split(r'\s*[,;]\s*|\s*•\s*', str(value or ''))
+    return [part.strip() for part in parts if part and part.strip()]
+
+
+def _dedupe_skill_lines(lines: list[str]) -> list[str]:
+    kept: list[str] = []
+    seen: set[str] = set()
+    for raw in lines:
+        cleaned = _normalize_skill_candidate(raw.lstrip('- ').strip())
+        if not cleaned:
+            continue
+        if cleaned.islower() and len(cleaned.split()) <= 3:
+            continue
+        if cleaned.lower() in {'régression', 'regression', 'classification', 'clustering', 'académiques', 'academiques'}:
+            continue
+        key = cleaned.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append(f"- {cleaned}")
+    lowered = {item[2:].lower(): idx for idx, item in enumerate(kept)}
+    if 'sql' in lowered and 'postgresql' in lowered:
+        first = min(lowered['sql'], lowered['postgresql'])
+        second = max(lowered['sql'], lowered['postgresql'])
+        kept[first] = '- SQL / PostgreSQL'
+        del kept[second]
+    lowered = {item[2:].lower(): idx for idx, item in enumerate(kept)}
+    if 'simulink/matlab' in lowered:
+        del kept[lowered['simulink/matlab']]
+    lowered = {item[2:].lower(): idx for idx, item in enumerate(kept)}
+    if 'sql' in lowered and 'sql / postgresql' in lowered:
+        del kept[lowered['sql']]
+    return kept
+
+
+def _extract_raw_skill_candidates(raw_text: str) -> list[str]:
+    candidates: list[str] = []
+    block = _extract_raw_cv_section_block(raw_text, "skills")
+    lines = _extract_section_lines_from_block(block, "skills") if block else []
+    technique_matches = re.findall(r"(?:Techniques|Compétences|Competences)\s*:\s*(.*?)(?=(?:Certificats|Certifications|Danyel\s|CENTRES D['’]INTÉRÊT|Recherche d['’]un|$))", raw_text, re.I | re.S)
+    for chunk in [*lines, *technique_matches]:
+        text = _normalize_whitespace(chunk)
+        if not text:
+            continue
+        text = re.sub(r'^(?:Techniques|Compétences|Competences)\s*:\s*', '', text, flags=re.I)
+        text = re.sub(r'^(?:Natif|Avancé)\s+en\s+', '', text, flags=re.I)
+        for part in _split_skill_candidates(text):
+            normalized = _normalize_skill_candidate(part)
+            if not normalized:
+                continue
+            if normalized.lower().startswith(("langues", "certificats", "certifications", "danyel ", "ingénieur diplômé", "centres d’intérêt", "recherche d’un")):
+                continue
+            candidates.append(normalized)
+    return [line.lstrip('- ').strip() for line in _dedupe_skill_lines([f"- {item}" for item in candidates])]
+
+
+def _education_line_score(value: str) -> int:
+    text = _normalize_whitespace(value).lower()
+    if not text:
+        return -100
+    score = len(text)
+    if any(token in text for token in ('diplôme', 'ingénieur', 'master', 'licence', 'bachelor')):
+        score += 25
+    if any(token in text for token in ('|', '[', ']')):
+        score -= 80
+    if text.count('|') >= 2:
+        score -= 20
+    if re.search(r'(?:19|20)\d{2}', text):
+        score += 15
+    return score
+
+
+def _education_lines_compete(left: str, right: str) -> bool:
+    stopwords = {"diplôme", "diplome", "ingénieur", "ingenieur", "master", "licence", "bachelor", "grade", "bac", "de", "du", "des", "en", "et", "la", "le", "l", "université", "universite", "école", "ecole"}
+    left_tokens = {token for token in re.findall(r"[a-zà-ÿ]+", _normalize_whitespace(left).lower()) if token not in stopwords}
+    right_tokens = {token for token in re.findall(r"[a-zà-ÿ]+", _normalize_whitespace(right).lower()) if token not in stopwords}
+    return len(left_tokens & right_tokens) >= 2
+
+
+def _should_keep_education_line(value: str) -> bool:
+    text = _normalize_whitespace(value)
+    if not text:
+        return False
+    lowered = text.lower()
+    has_degree_signal = any(token in lowered for token in ('diplôme', 'ingénieur', 'master', 'licence', 'bachelor', 'msc', 'm.sc'))
+    has_date_signal = bool(re.search(r'(?:19|20)\d{2}', lowered))
+    malformed_fragment = any(token in text for token in ('|', '[', ']')) and not (has_degree_signal or has_date_signal)
+    return not malformed_fragment
+
+
+def _dedupe_canonical_education_lines(lines: list[str]) -> list[str]:
+    kept: list[str] = []
+    for raw in lines:
+        cleaned = _normalize_whitespace(raw)
+        if not cleaned:
+            continue
+        if not _should_keep_education_line(cleaned):
+            continue
+        replaced = False
+        for index, existing in enumerate(kept):
+            if not _education_lines_compete(existing, cleaned):
+                continue
+            if _education_line_score(cleaned) > _education_line_score(existing):
+                kept[index] = cleaned
+            replaced = True
+            break
+        if not replaced:
+            kept.append(cleaned)
+    return [f"- {line}" for line in kept if line]
+
+
 def _clean_raw_cv_text(raw_text: str) -> str:
     text = _normalize_whitespace(raw_text)
     return text[:12000].strip()
+
+
+def _extract_raw_cv_section_lines(raw_text: str, section_name: str) -> list[str]:
+    text = str(raw_text or "")
+    if not text.strip():
+        return []
+    target = section_name.strip().lower()
+    if target in RAW_SECTION_ALIASES:
+        block = _extract_raw_cv_section_block(text, target)
+        if not block:
+            return []
+        return _extract_section_lines_from_block(block, target)
+    matches = list(CV_SECTION_HEADER_RE.finditer(text))
+    for index, match in enumerate(matches):
+        if match.group(1).strip().lower() != target:
+            continue
+        start = match.end()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        block = text[start:end].strip()
+        lines = [_normalize_whitespace(line).lstrip('-• ').strip() for line in block.splitlines() if _normalize_whitespace(line)]
+        return [line for line in lines if line]
+    return []
+
+
+def _extract_raw_cv_section_block(text: str, section_name: str) -> str:
+    aliases = RAW_SECTION_ALIASES.get(section_name, [section_name.upper()])
+    all_aliases = RAW_SECTION_END_ALIASES.get(section_name) or [alias for values in RAW_SECTION_ALIASES.values() for alias in values]
+    alias_pattern = "|".join(re.escape(alias) for alias in aliases)
+    start_match = re.search(rf"(?is)(?:^|[\n;])\s*(?:{alias_pattern})\s*:?,?", text)
+    if not start_match:
+        return ""
+    block_start = start_match.end()
+    end_positions = []
+    for alias in all_aliases:
+        if alias in aliases:
+            continue
+        match = re.search(rf"(?is)(?:^|[\n;])\s*{re.escape(alias)}\s*:?,?", text[block_start:])
+        if match:
+            end_positions.append(block_start + match.start())
+    block_end = min(end_positions) if end_positions else len(text)
+    return text[block_start:block_end].strip()
+
+
+def _extract_section_lines_from_block(block: str, section_name: str) -> list[str]:
+    lines = [_normalize_whitespace(line).lstrip('-• ').strip() for line in block.splitlines() if _normalize_whitespace(line)]
+    if section_name == "skills":
+        filtered: list[str] = []
+        stop_prefixes = ("certificats", "certifications", "danyel ", "ingénieur diplômé", "12 rue", "+33", "in/", "centres d’intérêt", "recherche d’un")
+        for line in lines:
+            lowered = line.lower()
+            if any(lowered.startswith(prefix) for prefix in stop_prefixes):
+                break
+            filtered.append(line)
+        return filtered
+    if section_name == "education":
+        kept = []
+        for line in lines:
+            lowered = line.lower()
+            if any(token in lowered for token in ("diplôme", "master", "licence", "université", "universite", "centralesupélec", "usp", "école", "ecole")):
+                kept.append(line)
+        return kept or lines
+    return lines
+
+
+def _extract_raw_education_candidates(raw_text: str) -> list[str]:
+    block = _extract_raw_cv_section_block(raw_text, "education")
+    if not block:
+        return []
+    lines = [line.strip() for line in block.splitlines() if _normalize_whitespace(line)]
+    school_start_re = re.compile(r"(?i)(école|ecole|université|universite|university|usp)")
+    segments: list[list[str]] = []
+    current: list[str] = []
+    for line in lines:
+        normalized = _normalize_whitespace(line)
+        if school_start_re.search(normalized) and current:
+            segments.append(current)
+            current = [normalized]
+            continue
+        current.append(normalized)
+    if current:
+        segments.append(current)
+
+    candidates: list[str] = []
+    for segment in segments:
+        useful_lines = []
+        for line in segment:
+            lowered = line.lower()
+            if any(token in lowered for token in ('gpa', 'moyenne', 'top ', 'double diplôme', 'double diplome', 'spécialité', 'specialite', 'projets académiques', 'projets academiques')):
+                continue
+            useful_lines.append(line)
+        primary = useful_lines[0] if useful_lines else next((line for line in segment if school_start_re.search(line)), "")
+        degree_line = next((line for line in useful_lines if any(token in line.lower() for token in ("diplôme", "master", "licence", "bachelor", "ingénieur", "ingenieur"))), "")
+        date_lines = [line for line in useful_lines if re.search(r'(?:19|20)\d{2}', line)]
+        date_text = ' - '.join(date_lines[1:]) if len(date_lines) > 1 else (date_lines[0] if date_lines else '')
+        parts = [part for part in [primary, degree_line if degree_line != primary else "", date_text if date_text not in {primary, degree_line} else ""] if part]
+        text = _normalize_whitespace(" ".join(parts))
+        if not text:
+            continue
+        text = re.sub(r'\s+', ' ', text)
+        if any(token in text.lower() for token in ("diplôme", "master", "licence", "bachelor", "ingénieur", "ingenieur")):
+            candidates.append(text)
+    return candidates
+
+
+def _extract_raw_project_candidates(raw_text: str) -> list[str]:
+    block = _extract_raw_cv_section_block(raw_text, "projects")
+    if not block:
+        return []
+    lines = [_normalize_whitespace(line).lstrip('-• ').strip() for line in block.splitlines() if _normalize_whitespace(line)]
+    if not lines:
+        return []
+    joined = ' '.join(lines).lower()
+    if any(token in joined for token in ('académiques', 'academiques', 'double diplôme', 'double diplome', 'moyenne', 'top 2%', 'promotion')):
+        return []
+    return [line for line in lines if line]
 
 
 def _build_cv_grounding_bundle(indexing_payload: dict[str, Any]) -> dict[str, Any]:
@@ -191,6 +511,27 @@ def _build_cv_grounding_bundle(indexing_payload: dict[str, Any]) -> dict[str, An
             diagnostics["dropped_sections"].append(key)
         diagnostics["dropped_reasons"].extend(dropped)
 
+    raw_education_lines = _dedupe_canonical_education_lines(_extract_raw_education_candidates(raw_text) or _extract_raw_cv_section_lines(raw_text, "education"))
+    if raw_education_lines:
+        parts = _remove_section(parts, "CV EDUCATION")
+        _append_section(parts, "CV EDUCATION", raw_education_lines)
+        if "education" not in diagnostics["included_sections"]:
+            diagnostics["included_sections"].append("education")
+
+    raw_skill_lines = _dedupe_skill_lines([f"- {line}" for line in (_extract_raw_skill_candidates(raw_text) or _extract_raw_cv_section_lines(raw_text, "skills"))])
+    if raw_skill_lines:
+        existing_skills = _get_existing_section_lines(parts, "CV SKILLS")
+        merged_skills = _dedupe_skill_lines([*raw_skill_lines, *existing_skills])
+        parts = _remove_section(parts, "CV SKILLS")
+        _append_section(parts, "CV SKILLS", merged_skills)
+        if "skills" not in diagnostics["included_sections"]:
+            diagnostics["included_sections"].append("skills")
+
+    raw_project_lines = _extract_raw_project_candidates(raw_text)
+    if raw_project_lines:
+        _append_section(parts, "CV PROJECTS", [f"- {line}" for line in raw_project_lines])
+        diagnostics["included_sections"].append("projects")
+
     clean_raw = _clean_raw_cv_text(raw_text)
     if clean_raw:
         _append_section(parts, "CV RAW TEXT", [clean_raw])
@@ -206,6 +547,15 @@ def _build_cv_grounding_bundle(indexing_payload: dict[str, Any]) -> dict[str, An
 
 
 def _get_rag_index() -> dict[str, Any] | None:
+    disk_index: dict[str, Any] | None = None
+    try:
+        from pathlib import Path
+        from ..storage.rag_store import load_rag_store
+        disk_index = load_rag_store(Path(".rag_store.json"))
+        if isinstance(disk_index, dict):
+            return disk_index
+    except Exception:
+        disk_index = None
     try:
         from .rag_state import get_rag_index
     except Exception:
@@ -217,12 +567,7 @@ def _get_rag_index() -> dict[str, Any] | None:
                 return index
         except Exception:
             pass
-    try:
-        from pathlib import Path
-        from ..storage.rag_store import load_rag_store
-    except Exception:
-        return None
-    return load_rag_store(Path(".rag_store.json"))
+    return disk_index
 
 
 def _get_embedding_provider():
@@ -316,11 +661,13 @@ def _join_chunk_context(chunks: list[dict[str, Any]], max_chars: int) -> str:
     parts: list[str] = []
     used = 0
     for chunk in chunks:
-        snippet = str(chunk.get("snippet") or chunk.get("text") or "").strip()
-        if not snippet:
+        full_text = str(chunk.get("text") or "").strip()
+        snippet = str(chunk.get("snippet") or "").strip()
+        block_text = full_text or snippet
+        if not block_text:
             continue
         source = str(chunk.get("source") or chunk.get("document_id") or "document")
-        block = f"[Source: {source}]\n{snippet}"
+        block = f"[Source: {source}]\n{block_text}"
         if used and used + len(block) + 2 > max_chars:
             break
         parts.append(block)

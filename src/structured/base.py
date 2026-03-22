@@ -1,6 +1,7 @@
 """Base schemas and types for structured outputs."""
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Optional, Literal, Union
 from uuid import uuid4
 
@@ -127,11 +128,11 @@ class ChecklistItem(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()), description="Unique item ID")
     title: str = Field(description="Item title")
     description: str = Field(description="Detailed description")
-    category: str = Field(description="Category of the item")
-    priority: Literal["high", "medium", "low"] = Field(description="Priority level")
+    category: Optional[str] = Field(default=None, description="Category of the item when explicitly grounded")
+    priority: Optional[Literal["high", "medium", "low"]] = Field(default=None, description="Priority level when explicitly grounded")
     status: Literal["pending", "completed", "skipped"] = Field(default="pending", description="Current status")
     dependencies: List[str] = Field(default_factory=list, description="IDs of dependent items")
-    estimated_time_minutes: int = Field(ge=0, description="Estimated time in minutes")
+    estimated_time_minutes: Optional[int] = Field(default=None, ge=0, description="Estimated time in minutes when explicitly grounded")
 
 
 class ChecklistPayload(BaseTaskPayload):
@@ -155,6 +156,18 @@ class ContactInfo(BaseModel):
     location: Optional[str] = Field(default=None, description="Location")
     links: List[str] = Field(default_factory=list, description="Relevant links such as LinkedIn or portfolio")
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_contact_info(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+        data = dict(value)
+        email_value = data.get("email")
+        if isinstance(email_value, list):
+            picked = next((str(item).strip() for item in email_value if isinstance(item, str) and re.match(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", item.strip(), re.I)), None)
+            data["email"] = picked
+        return data
+
 
 class EducationEntry(BaseModel):
     """Structured education entry extracted from a resume."""
@@ -172,6 +185,12 @@ class EducationEntry(BaseModel):
             return {"description": value}
         if isinstance(value, dict):
             data = dict(value)
+            raw_description = str(data.get("description") or data.get("text") or "").strip()
+            if raw_description and "," in raw_description and not data.get("degree"):
+                left, right = [part.strip() for part in raw_description.split(",", 1)]
+                if left and right:
+                    data.setdefault("degree", left)
+                    data.setdefault("institution", right)
             if "degree" not in data:
                 data["degree"] = data.get("program") or data.get("title")
             if "institution" not in data:
@@ -188,6 +207,9 @@ class EducationEntry(BaseModel):
                 parts = [p for p in parts if p]
                 if parts:
                     data["description"] = " | ".join(parts)
+            for key in ("degree", "institution", "location", "date_range", "description"):
+                if isinstance(data.get(key), str):
+                    data[key] = data[key].strip()
             return data
         return value
 
@@ -202,15 +224,117 @@ class ExperienceEntry(BaseModel):
     bullets: List[str] = Field(default_factory=list, description="Bullet points or responsibilities")
     description: Optional[str] = Field(default=None, description="Free-form human-readable description")
 
+    @staticmethod
+    def _looks_like_date_range(text: str | None) -> bool:
+        cleaned = str(text or "").strip()
+        return bool(re.search(r"(?:19|20)\d{2}|present|current", cleaned, re.I))
+
+    @staticmethod
+    def _looks_like_fragment_line(text: str | None) -> bool:
+        cleaned = str(text or "").strip().lower()
+        if not cleaned:
+            return True
+        fragment_starts = ("and ", "or ", "with ", "for ", "to ", "of ")
+        return cleaned.endswith(".") and (cleaned.startswith(fragment_starts) or len(cleaned.split()) <= 3)
+
+    @staticmethod
+    def _split_org_location(text: str | None) -> tuple[Optional[str], Optional[str]]:
+        cleaned = str(text or "").strip()
+        if "|" not in cleaned:
+            return (cleaned or None, None)
+        parts = [part.strip() for part in cleaned.split("|") if part.strip()]
+        if not parts:
+            return None, None
+        organization = parts[0]
+        location = " | ".join(parts[1:]) if len(parts) > 1 else None
+        return organization or None, location or None
+
+    @staticmethod
+    def _parse_multiline_experience(text: str) -> dict[str, Any]:
+        lines = [line.strip("•- ").strip() for line in str(text or "").splitlines() if line.strip()]
+        if len(lines) < 3:
+            return {"description": text}
+        first, second, third = lines[0], lines[1], lines[2]
+        details: dict[str, Any] = {"description": text}
+
+        if "|" in first and "|" not in second:
+            organization, location = ExperienceEntry._split_org_location(first)
+            title = second
+        else:
+            title = first
+            organization, location = ExperienceEntry._split_org_location(second)
+
+        if title and not ExperienceEntry._looks_like_fragment_line(title):
+            details["title"] = title
+        if organization and not ExperienceEntry._looks_like_fragment_line(organization):
+            details["organization"] = organization
+        if location and not ExperienceEntry._looks_like_fragment_line(location):
+            details["location"] = location
+        if ExperienceEntry._looks_like_date_range(third):
+            details["date_range"] = third
+        else:
+            return {"description": text}
+
+        if not details.get("title") or not details.get("organization"):
+            return {"description": text}
+
+        bullets = [line for line in lines[3:] if line]
+        if bullets:
+            details["bullets"] = [line for line in bullets if not ExperienceEntry._looks_like_fragment_line(line)]
+        return details
+
+    @staticmethod
+    def _recover_date_and_bullets_from_description(data: dict[str, Any]) -> dict[str, Any]:
+        description = str(data.get("description") or data.get("text") or "").strip()
+        if not description:
+            return data
+        lines = [line.strip() for line in description.splitlines() if line.strip()]
+        header = lines[0] if lines else description
+        if not data.get("date_range") and "|" in header:
+            parts = [part.strip() for part in header.split("|") if part.strip()]
+            for part in parts:
+                if ExperienceEntry._looks_like_date_range(part):
+                    data["date_range"] = part
+                    break
+        if not data.get("bullets"):
+            bullet_lines = [
+                line.strip("•- ").strip()
+                for line in lines[1:]
+                if line.strip() and not ExperienceEntry._looks_like_fragment_line(line)
+            ]
+            if bullet_lines:
+                data["bullets"] = bullet_lines
+        return data
+
     @model_validator(mode="before")
     @classmethod
     def normalize_item(cls, value: Any) -> Any:
         if isinstance(value, str):
-            return {"description": value}
+            return cls._parse_multiline_experience(value)
         if isinstance(value, dict):
             data = dict(value)
             if "title" not in data:
-                data["title"] = data.get("role") or data.get("position")
+                data["title"] = data.get("role_title") or data.get("role") or data.get("position")
+            raw_date_range = data.get("date_range")
+            if isinstance(raw_date_range, dict):
+                start_year = raw_date_range.get("start_year")
+                start_month = raw_date_range.get("start_month")
+                end_year = raw_date_range.get("end_year")
+                end_month = raw_date_range.get("end_month")
+                start = None
+                end = None
+                if start_year:
+                    start = f"{int(start_year):04d}" + (f"-{int(start_month):02d}" if start_month else "")
+                if end_year:
+                    end = f"{int(end_year):04d}" + (f"-{int(end_month):02d}" if end_month else "")
+                elif raw_date_range.get("is_current"):
+                    end = "Present"
+                data["date_range"] = f"{start} to {end}" if start and end else (start or end)
+            multiline_source = data.get("description") or data.get("text")
+            if isinstance(multiline_source, str) and "\n" in multiline_source and not any(data.get(key) for key in ("title", "organization", "date_range", "bullets")):
+                parsed = cls._parse_multiline_experience(multiline_source)
+                for key, item in parsed.items():
+                    data.setdefault(key, item)
             if "organization" not in data:
                 data["organization"] = data.get("company") or data.get("institution") or data.get("organization")
             if "date_range" not in data:
@@ -220,6 +344,7 @@ class ExperienceEntry(BaseModel):
                 data["bullets"] = [x.strip() for x in bullets.replace("\n", ";").split(";") if x.strip()]
             elif bullets is None:
                 data["bullets"] = []
+            data = cls._recover_date_and_bullets_from_description(data)
             if "description" not in data:
                 parts = [
                     str(data.get("title") or "").strip(),
@@ -308,6 +433,7 @@ class CVAnalysisPayload(BaseTaskPayload):
     experience_years: float = Field(default=0.0, ge=0.0, description="Years of experience")
     strengths: List[str] = Field(default_factory=list, description="Strengths identified")
     improvement_areas: List[str] = Field(default_factory=list, description="Areas for improvement")
+    projects: List[str] = Field(default_factory=list, description="Project items identified")
 
     @field_validator("skills", mode="before")
     @classmethod
@@ -348,7 +474,12 @@ class CVAnalysisPayload(BaseTaskPayload):
                     normalized.extend([x.strip() for x in item.replace("\n", ",").split(",") if x.strip()])
                 elif isinstance(item, dict):
                     language = item.get("language") or item.get("name") or item.get("text")
-                    level = item.get("level")
+                    level = item.get("level") or item.get("proficiency")
+                    if not level and isinstance(language, str):
+                        match = re.match(r"^(.*?)\s*\(([^)]+)\)$", language)
+                        if match:
+                            language = match.group(1).strip()
+                            level = match.group(2).strip()
                     if language and level:
                         normalized.append(f"{language} ({level})")
                     elif language:
