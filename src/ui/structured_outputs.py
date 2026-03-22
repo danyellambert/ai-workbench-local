@@ -221,8 +221,15 @@ def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
     metric_3.metric("Experience", f"{payload.experience_years:.1f} years")
 
     if payload.personal_info:
-        st.write("**Personal info**")
-        st.json(payload.personal_info.model_dump(mode="json"))
+        info = payload.personal_info
+        st.write("**Profile**")
+        if info.full_name:
+            st.subheader(info.full_name)
+        meta_parts = [part for part in [info.location, info.email, info.phone] if part]
+        if meta_parts:
+            st.caption(" · ".join(meta_parts))
+        if info.links:
+            st.write("Links: " + " · ".join(info.links))
 
     if payload.skills:
         st.write("**Skills**")

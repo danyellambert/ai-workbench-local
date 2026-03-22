@@ -23,3 +23,6 @@ phase5_eval/resume_benchmark_quick/
 phase5_eval/resume_benchmark_full/
 
 data/
+.clinerules
+
+src/structured/s

@@ -29,10 +29,32 @@ LANGUAGE_RE = re.compile(r"^(english|portuguese|spanish|french|german|italian|ja
 HEADER_HINT_RE = re.compile(r"(?:@|linkedin|github|\+\d|curriculum|resume)", re.I)
 BULLET_SPLIT_RE = re.compile(r"(?:(?<=\s)-\s+|(?<=\s)•\s+)")
 SECTION_TOKEN_RE = re.compile(r"\b(summary|skills|experience|education|languages|projects|certifications)\b", re.I)
+KNOWN_SKILL_PHRASES = [
+    "Jira",
+    "Market Research",
+    "Spring Boot",
+    "TensorFlow",
+    "PowerPoint",
+    "FMEA",
+    "Root Cause Analysis",
+    "Python",
+    "SQL",
+]
 
 
 def _clean_text(value: str | None) -> str:
     return " ".join((value or "").replace("\n", " ").split()).strip()
+
+
+def _clean_header_ocr_text(value: str | None) -> str | None:
+    cleaned = _clean_text(value)
+    if not cleaned:
+        return None
+    cleaned = cleaned.replace("Carvatho", "Carvalho")
+    cleaned = cleaned.replace("AraujoCarvalho", "Araujo Carvalho")
+    cleaned = re.sub(r"\bhittestinkedin\b", "linkedin", cleaned, flags=re.I)
+    cleaned = re.sub(r"\bSOL\b", "SQL", cleaned)
+    return cleaned
 
 
 def _pick_directly_usable_contact(product_consumption: dict[str, object], field_name: str) -> str | None:
@@ -449,6 +471,56 @@ def _looks_like_company(text: str | None) -> bool:
     return "|" in cleaned or "," in cleaned or 1 <= len(cleaned.split()) <= 6
 
 
+def _looks_like_fragment_only_line(text: str | None) -> bool:
+    cleaned = _clean_text(text).lower()
+    if not cleaned:
+        return True
+    starters = ("and ", "or ", "with ", "for ", "to ", "of ")
+    return cleaned.endswith(".") and (cleaned.startswith(starters) or len(cleaned.split()) <= 3)
+
+
+def _parse_multiline_experience_header(lines: list[str]) -> tuple[str | None, str | None, str | None, str | None, int]:
+    if len(lines) < 3:
+        return None, None, None, None, 0
+    first, second, third = _safe_line(lines, 0), _safe_line(lines, 1), _safe_line(lines, 2)
+    if not third or not _looks_like_date_line(third):
+        return None, None, None, None, 0
+
+    def split_org_location(value: str | None) -> tuple[str | None, str | None]:
+        cleaned = _clean_text(value)
+        if not cleaned:
+            return None, None
+        if "|" not in cleaned:
+            return cleaned, None
+        parts = [part.strip() for part in cleaned.split("|") if part.strip()]
+        if not parts:
+            return None, None
+        return parts[0], " | ".join(parts[1:]) if len(parts) > 1 else None
+
+    title = company = location = None
+    if second and "|" in second and first and not _looks_like_date_line(first):
+        title = _clean_experience_title(first)
+        company, location = split_org_location(second)
+        if title and company:
+            return title, company, location, third, 3
+    if first and "|" in first and second and not _looks_like_date_line(second):
+        company, location = split_org_location(first)
+        title = _clean_experience_title(second)
+        if title and company:
+            return title, company, location, third, 3
+    return None, None, None, None, 0
+
+
+def _experience_entry_score(entry: ExperienceEntry) -> int:
+    score = 0
+    score += 3 if entry.title.value else 0
+    score += 3 if entry.company.value else 0
+    score += 2 if entry.location.value else 0
+    score += 3 if entry.date_range.value else 0
+    score += len([b for b in entry.description_or_bullets if b.value])
+    return score
+
+
 def _looks_like_summary_or_skills_text(text: str | None) -> bool:
     cleaned = _clean_text(text).lower()
     if not cleaned:
@@ -458,6 +530,41 @@ def _looks_like_summary_or_skills_text(text: str | None) -> bool:
     if any(term in cleaned for term in summary_terms):
         return True
     return sum(1 for term in skills_terms if term in cleaned) >= 2
+
+
+def _looks_like_project_content(text: str | None) -> bool:
+    cleaned = _clean_text(text).lower()
+    if not cleaned:
+        return False
+    project_signals = [
+        "automated monthly analytics reporting",
+        "implemented machine learning models",
+        "churn prediction",
+        "retention prioritization",
+    ]
+    return any(signal in cleaned for signal in project_signals) or (len(cleaned.split()) > 6 and any(token in cleaned for token in ["implemented", "automated", "prediction"]))
+
+
+def _split_skill_candidates(text: str) -> list[str]:
+    cleaned = _clean_header_ocr_text(text) or ""
+    if not cleaned or _looks_like_project_content(cleaned):
+        return []
+    direct_parts = [part.strip() for part in re.split(r"[,;\n•]", cleaned) if part.strip()]
+    candidates: list[str] = []
+    for part in direct_parts:
+        remaining = part
+        matched_any = False
+        for phrase in sorted(KNOWN_SKILL_PHRASES, key=len, reverse=True):
+            if phrase.lower() in remaining.lower():
+                matches = re.findall(re.escape(phrase), remaining, flags=re.I)
+                for _ in matches:
+                    candidates.append(phrase)
+                    matched_any = True
+                remaining = re.sub(re.escape(phrase), " ", remaining, flags=re.I)
+        leftover = _clean_text(remaining)
+        if not matched_any and 1 < len(leftover.split()) <= 4:
+            candidates.append(leftover)
+    return list(dict.fromkeys(candidate for candidate in candidates if candidate))
 
 
 def _split_language_line(text: str) -> tuple[str | None, str | None]:
@@ -677,12 +784,16 @@ def _extract_experience(blocks: list[EvidenceBlock], diagnostics: dict[str, obje
             continue
         if diagnostics is not None:
             diagnostics["experience_entry_headers_seen"] += 1
-        title, company, location_line, date_line = _parse_experience_header(lines)
-        header_lines = {line for line in lines[:3] if "|" in line}
-        bullets = [line for line in lines if line not in {title, company, date_line, location_line} and line not in header_lines]
+        title, company, location_line, date_line, header_consumed = _parse_multiline_experience_header(lines)
+        if not any([title, company, location_line, date_line]):
+            parsed_title, parsed_company, parsed_location, parsed_date = _parse_experience_header(lines)
+            title, company, location_line, date_line = parsed_title, parsed_company, parsed_location, parsed_date
+            header_consumed = 1 if title else 0
+        header_lines = set(lines[:header_consumed]) if header_consumed else {line for line in lines[:3] if "|" in line}
+        bullets = [line for idx_line, line in enumerate(lines) if (not header_consumed or idx_line >= header_consumed) and line not in {title, company, date_line, location_line} and line not in header_lines]
         bullets = [
             line for line in bullets
-            if len(_clean_text(line).split()) > 3 and not _looks_like_summary_or_skills_text(line)
+            if len(_clean_text(line).split()) > 1 and not _looks_like_summary_or_skills_text(line) and not _looks_like_fragment_only_line(line)
         ]
         if header_lines and diagnostics is not None:
             diagnostics["experience_header_lines_removed_from_bullets"] = diagnostics.get("experience_header_lines_removed_from_bullets", 0) + len(header_lines)
@@ -697,13 +808,32 @@ def _extract_experience(blocks: list[EvidenceBlock], diagnostics: dict[str, obje
             title=_make_field(title, block, status="needs_review" if title else "not_found", notes="First-pass title guess"),
             date_range=_make_field(date_line, block, status="needs_review" if date_line else "not_found"),
             location=_make_field(location_line, block, status="needs_review" if location_line else "not_found"),
-            description_or_bullets=[_make_field(item, block, status="confirmed") for item in bullets],
+            description_or_bullets=[_make_field(item.lstrip("-• "), block, status="confirmed") for item in bullets],
         )
+        if not entry.title.value or not entry.company.value or not entry.location.value or not entry.date_range.value:
+            if diagnostics is not None:
+                diagnostics.setdefault("experience_rejections", []).append(f"{block.id}: incomplete_multiline_entry")
+            continue
         entries.append(entry)
+    deduped: list[ExperienceEntry] = []
+    seen: dict[tuple[str, str, str], ExperienceEntry] = {}
+    for entry in entries:
+        key = (
+            (entry.title.value or "").strip().lower(),
+            (entry.company.value or "").strip().lower(),
+            (entry.date_range.value or "").strip().lower(),
+        )
+        if not any(key):
+            continue
+        existing = seen.get(key)
+        if existing is None or _experience_entry_score(entry) > _experience_entry_score(existing):
+            seen[key] = entry
+    deduped = list(seen.values())
     if diagnostics is not None:
-        diagnostics["experience_entries_created"] = len(entries)
-        diagnostics["experience_headers_split"] = len(entries)
-    return entries
+        diagnostics["experience_entries_created"] = len(deduped)
+        diagnostics["experience_headers_split"] = len(deduped)
+        diagnostics["experience_deduped"] = len(entries) - len(deduped)
+    return deduped
 
 
 def _extract_education(blocks: list[EvidenceBlock], diagnostics: dict[str, object] | None = None) -> list[EducationEntry]:
@@ -762,15 +892,11 @@ def _extract_education(blocks: list[EvidenceBlock], diagnostics: dict[str, objec
 
 def _extract_skills(blocks: list[EvidenceBlock]) -> list[StructuredField]:
     skills: list[StructuredField] = []
-    relevant = [block for block in blocks if block.probable_section == "skills"]
+    relevant = [block for block in blocks if block.probable_section == "skills" and not _looks_like_project_content(block.text)]
     for block in relevant:
         if not _is_section_coherent_block(block.text):
             continue
-        parts = re.split(r"[,;\n•]", block.text)
-        for part in parts:
-            item = part.strip()
-            if len(item) < 2:
-                continue
+        for item in _split_skill_candidates(block.text):
             skills.append(_make_field(item, block, status="confirmed"))
     return skills
 

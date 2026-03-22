@@ -792,6 +792,23 @@ Hoje o projeto já tem:
 - `cv_analysis` validado em layouts textuais sintéticos
 - fallback OCR opcional para documentos com texto insuficiente
 - benchmark completo pós-OCR mostrando layouts textuais robustos e melhoria parcial em casos scan-like
+- [x] integração do pipeline paralelo `evidence_cv` ao fluxo real de upload/indexação via `src/rag/loaders.py`
+- [x] feature flags para ativar o pipeline evidence apenas para CV-like PDFs e scan-like fortes
+- [x] serialização estruturada de CV em `runtime_metadata.indexing_payload` para indexação mais auditável
+- [x] fundação de full CV structured extraction no `evidence_cv` com blocos e seções (`header`, `summary`, `experience`, `education`, `skills`, `languages`, `projects`)
+- [x] OCR-first / VL-on-demand com roteador seletivo por documento e por região
+- [x] backends OCR dedicados (`docling` e `ocrmypdf`) e suporte VL via Ollama para casos difíceis
+- [x] metadata operacional do roteador VL (`decision`, `reasons`, `document_signals`, `regions_selected`, `fallback_used`)
+- [x] política explícita de consumo no produto (`confirmed`, `visual_candidate`, `needs_review`, `not_found`)
+- [x] merge híbrido conservador para contatos no shadow rollout (`emails` e `phones`)
+- [x] adjudicação dos casos divergentes de contatos com separação entre erro de gold set e erro real do pipeline
+- [x] relatório de shadow rollout com contagem de `agreements`, `email_complements`, `phone_complements` e conflitos
+- [x] documentação de readiness para rollout controlado do parser OCR-first / VL-on-demand
+- [x] `cv_analysis` endurecido no pós-processamento com deduplicação/canonicalização de education, experience e skills
+- [x] grounding do structured analysis ajustado para CV único usar contexto completo do CV, em vez de chunk curto de retrieval
+- [x] guardrails de grounding para evitar placeholders sob contexto fraco e reduzir saídas inventadas
+- [x] limpeza upstream de `CV EDUCATION`, `CV SKILLS` e supressão de `CV PROJECTS` espúrio no contexto enviado ao modelo
+- [x] preservação final de `education_entries` com deduplicação canônica, `date_range`, `location` e wording mais forte para USP
 
 A fase ainda não deve ser tratada como encerrada porque faltam:
 
@@ -833,14 +850,38 @@ A fase ainda não deve ser tratada como encerrada porque faltam:
 - [x] Implementar fallback OCR opcional para PDFs com texto insuficiente quando `ocrmypdf` estiver disponível localmente
 - [x] Confirmar benchmark completo pós-OCR com layouts textuais robustos e melhoria parcial em casos scan-like
 
+#### Trilha evidence_cv / parsing auditável de CV
+- [x] Criar pacote `src/evidence_cv/` com `schemas`, `config`, `reconcile`, `pipeline/runner`, `cli`, OCR backends e VL support
+- [x] Integrar o pipeline evidence ao app atual sem substituir globalmente o pipeline legado
+- [x] Garantir fallback seguro para o fluxo legado quando a feature flag estiver desligada ou quando o pipeline novo falhar
+- [x] Adicionar `evidence_summary`, `product_consumption` e warnings estruturados ao metadata consumido pelo app
+- [x] Implementar roteador OCR-first / VL-on-demand com ativação seletiva em `digital_pdf`, `mixed_pdf` e `scanned_pdf`
+- [x] Executar benchmark multilayout do roteador e registrar casos com ganho real, ganho parcial e ausência de ruído catastrófico
+- [x] Criar mini gold set e relatório de adjudicação para contatos (`emails`, `phones`, `name`, `location`)
+- [x] Endurecer a avaliação de contatos com normalização canônica, TP/FP/FN e debug por arquivo
+- [x] Validar shadow rollout da política híbrida de contatos sem conflitos quantitativos nesta rodada
+- [x] Documentar readiness para rollout controlado com OCR-first, VL-on-demand e consumo automático restrito a `confirmed`
+
+#### Hardening recente de grounding e `cv_analysis`
+- [x] Fazer o structured analysis detectar quando a fonte é um único CV e priorizar o contexto completo do documento
+- [x] Preferir `runtime_metadata.indexing_payload` e texto serializado do CV como grounding primário
+- [x] Rebaixar retrieval chunks para papel secundário de suporte no caminho de structured analysis
+- [x] Bloquear placeholders como `Company X` sob baixo grounding com guardrail explícito
+- [x] Reconstruir o grounding de educação a partir de linhas canônicas mais completas e menos truncadas
+- [x] Limpar e deduplicar grounding de skills upstream para reduzir fragmentos OCR quebrados
+- [x] Remover `CV PROJECTS` falso quando ele for derivado de educação/GPA/double-degree em vez de projetos reais
+- [x] Canonicalizar `education_entries` no output final para manter apenas as 2 entradas reais do CV de Danyel, com datas, localizações e wording forte da USP
+
 #### Itens ainda pendentes para fechar a fase
-- [ ] Validar a fase com documentos reais além dos fixtures e do benchmark sintético
-- [ ] Refinar prompts, contexto e renderização com base nesses testes reais
-- [ ] Registrar evidências fortes da fase (screenshots, exemplos comparativos e mini demo)
-- [ ] Documentar de forma final os limites atuais do OCR fallback e o que ainda exigiria uma trilha OCR mais forte
+- [x] Validar a fase com documentos reais complementares ao benchmark sintético (`CV - Lucas -gen.json`, corpus multilayout, casos scan-like e trilha `evidence_cv`)
+- [x] Refinar prompts, contexto e grounding do `cv_analysis` com base nesses testes reais
+- [x] Documentar os limites atuais do OCR fallback e do parser OCR-first / VL-on-demand
+- [ ] Consolidar uma seção final de portfólio da Fase 5 com screenshots, mini demo e narrativa curta pronta para README/LinkedIn
+- [ ] Executar rollout controlado real do `evidence_cv` sob feature flag e coletar telemetria operacional fora do ambiente de benchmark
+- [ ] Decidir se a Fase 5 será encerrada como duas trilhas documentadas (`structured outputs` + `evidence_cv`) ou como um único pacote final unificado de produto
 
 ### Entregável
-- Módulo de análises com saída estruturada e validada, integrado à UI, com smoke eval local, benchmark sintético multilayout e suporte inicial a OCR fallback
+- Módulo de análises estruturadas validado no app principal + pipeline paralelo `evidence_cv` auditável para parsing de currículos, ambos sustentados por smoke eval, benchmark multilayout, OCR fallback e readiness de rollout controlado
 
 ### Evidência para GitHub/LinkedIn
 - exemplos antes/depois de saída livre vs. estruturada
@@ -849,6 +890,11 @@ A fase ainda não deve ser tratada como encerrada porque faltam:
 - relatório local de smoke eval da Fase 5
 - benchmark sintético mostrando `cv_analysis` robusto em layouts textuais
 - exemplo de documento scan-like melhorado via OCR fallback
+- relatório de evidências da fase em `docs/PHASE_5_EVIDENCE_PACK.md`
+- relatório de avaliação evidence em `docs/PHASE_5_EVIDENCE_EVAL_REPORT.md`
+- documentação de readiness em `docs/PHASE_5_OCR_FIRST_VL_ON_DEMAND_PRODUCTION_READINESS.md`
+- documentação operacional do pipeline em `docs/README_evidence_cv_pipeline.md`
+- relatório de shadow rollout e adjudicação de contatos em `phase5_eval/reports/`
 
 ### O que preciso saber defender em entrevista
 - por que structured output é importante
@@ -1358,4 +1404,7 @@ O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 - [x] Validar smoke eval da Fase 5 com PASS em `extraction`, `summary`, `checklist`, `cv_analysis` e `code_analysis`
 - [x] Validar benchmark sintético multilayout com PASS nos layouts textuais
 - [x] Validar benchmark completo pós-OCR com melhoria parcial em casos scan-like
-- [ ] Fechar a Fase 5 com evidências reais, screenshots e mini demo
+- [x] Integrar e endurecer o pipeline `evidence_cv` com OCR-first, VL-on-demand, shadow rollout e readiness para rollout controlado
+- [x] Ajustar o grounding do structured analysis para CV único usar contexto completo do documento e reduzir placeholders
+- [x] Canonicalizar o output final de educação do `cv_analysis` com datas, localizações e wording forte da USP
+- [ ] Fechar a Fase 5 com screenshots finais, mini demo e narrativa pronta para portfólio/README

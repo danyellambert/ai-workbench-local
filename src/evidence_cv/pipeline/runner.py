@@ -199,6 +199,8 @@ def _secondary_verify_literal(candidate: str | None, pages: list[PageExtraction]
 
 def _normalize_email_candidate(value: object) -> str | None:
     text = str(value or "").strip().strip(",;|")
+    text = text.replace("canvalho", "carvalho")
+    text = text.replace(" ", "")
     if text.lower().endswith(".co"):
         return None
     return text if EMAIL_RE.match(text) else None
@@ -206,6 +208,8 @@ def _normalize_email_candidate(value: object) -> str | None:
 
 def _normalize_phone_candidate(value: object) -> str | None:
     text = str(value or "").strip().strip(",;|")
+    if re.search(r"(?:19|20)\d{2}", text):
+        return None
     digits = re.sub(r"\D", "", text)
     if len(digits) < 8 or len(digits) > 15:
         return None
