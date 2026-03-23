@@ -178,6 +178,21 @@ class EducationEntry(BaseModel):
     date_range: Optional[str] = Field(default=None, description="Date range if mentioned")
     description: Optional[str] = Field(default=None, description="Free-form human-readable description")
 
+    @staticmethod
+    def _normalize_date_range(value: Any) -> Optional[str]:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            cleaned = value.strip()
+            return cleaned or None
+        if isinstance(value, dict):
+            start = str(value.get("start_date") or value.get("start") or value.get("start_year") or "").strip()
+            end = str(value.get("end_date") or value.get("end") or value.get("end_year") or "").strip()
+            if start and end:
+                return f"{start} - {end}"
+            return start or end or None
+        return str(value).strip() or None
+
     @model_validator(mode="before")
     @classmethod
     def normalize_item(cls, value: Any) -> Any:
@@ -185,6 +200,7 @@ class EducationEntry(BaseModel):
             return {"description": value}
         if isinstance(value, dict):
             data = dict(value)
+            data["date_range"] = cls._normalize_date_range(data.get("date_range"))
             raw_description = str(data.get("description") or data.get("text") or "").strip()
             if raw_description and "," in raw_description and not data.get("degree"):
                 left, right = [part.strip() for part in raw_description.split(",", 1)]
@@ -196,7 +212,7 @@ class EducationEntry(BaseModel):
             if "institution" not in data:
                 data["institution"] = data.get("school") or data.get("organization")
             if "date_range" not in data:
-                data["date_range"] = data.get("duration") or data.get("dates")
+                data["date_range"] = cls._normalize_date_range(data.get("duration") or data.get("dates"))
             if "description" not in data:
                 parts = [
                     str(data.get("degree") or "").strip(),

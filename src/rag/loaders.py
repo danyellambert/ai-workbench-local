@@ -267,6 +267,11 @@ def _looks_like_cv_filename(filename: str) -> bool:
     return any(token in lowered for token in ["cv", "resume", "curriculo", "currículo"])
 
 
+def _compute_evidence_rollout_bucket(file_bytes: bytes, filename: str) -> int:
+    digest = hashlib.sha256(filename.encode("utf-8", errors="ignore") + b"\0" + file_bytes).hexdigest()
+    return int(digest[:8], 16) % 100
+
+
 def _detect_cv_like_content(file_bytes: bytes, rag_settings: RagSettings) -> tuple[bool, list[str]]:
     text, metadata = _extract_pdf_text(file_bytes, rag_settings)
     normalized = text.lower()
@@ -289,17 +294,63 @@ def _detect_cv_like_content(file_bytes: bytes, rag_settings: RagSettings) -> tup
     return (len(reasons) >= 2), reasons
 
 
-def _should_use_evidence_pipeline(file_bytes: bytes, filename: str, rag_settings: RagSettings | None) -> bool:
+def _build_evidence_routing_diagnostics(
+    file_bytes: bytes,
+    filename: str,
+    rag_settings: RagSettings | None,
+) -> tuple[bool, dict[str, object]]:
+    filename_hint = _looks_like_cv_filename(filename)
+    diagnostics: dict[str, object] = {
+        "feature_flag_enabled": bool(getattr(rag_settings, "pdf_evidence_pipeline_enabled", False)) if rag_settings else False,
+        "filename_hint": filename_hint,
+        "cv_like_content_detected": False,
+        "cv_like_reasons": [],
+        "strong_scan_like": False,
+    }
+
     if rag_settings is None or not getattr(rag_settings, "pdf_evidence_pipeline_enabled", False):
-        return False
+        diagnostics.update(
+            {
+                "rollout_percentage": 0,
+                "rollout_selected": False,
+                "decision": "legacy_path",
+                "reason": "feature_flag_disabled",
+            }
+        )
+        return False, diagnostics
+
+    rollout_percentage = int(getattr(rag_settings, "pdf_evidence_pipeline_rollout_percentage", 100))
+    rollout_bucket = _compute_evidence_rollout_bucket(file_bytes, filename)
+    rollout_selected = rollout_bucket < rollout_percentage
+    diagnostics.update(
+        {
+            "rollout_percentage": rollout_percentage,
+            "rollout_bucket": rollout_bucket,
+            "rollout_selected": rollout_selected,
+        }
+    )
+
+    if not rollout_selected:
+        diagnostics.update(
+            {
+                "decision": "legacy_path",
+                "reason": "rollout_percentage_filtered",
+            }
+        )
+        return False, diagnostics
 
     if getattr(rag_settings, "pdf_evidence_pipeline_use_for_cv_like", True):
-        filename_hint = _looks_like_cv_filename(filename)
-        cv_like_content, _ = _detect_cv_like_content(file_bytes, rag_settings)
+        cv_like_content, cv_like_reasons = _detect_cv_like_content(file_bytes, rag_settings)
+        diagnostics["cv_like_content_detected"] = cv_like_content
+        diagnostics["cv_like_reasons"] = cv_like_reasons
         if cv_like_content:
-            return True
-        if filename_hint and cv_like_content:
-            return True
+            diagnostics.update(
+                {
+                    "decision": "evidence_path",
+                    "reason": "cv_like_match",
+                }
+            )
+            return True, diagnostics
 
     if getattr(rag_settings, "pdf_evidence_pipeline_use_for_strong_scan_like", True):
         settings = PdfHybridSettings(
@@ -331,16 +382,41 @@ def _should_use_evidence_pipeline(file_bytes: bytes, filename: str, rag_settings
         suspicious_pages = int(result.metadata.get("suspicious_pages") or 0)
         page_count = int(result.metadata.get("page_count") or 1)
         suspicious_ratio = suspicious_pages / max(page_count, 1)
-        return suspicious_ratio >= float(getattr(rag_settings, "pdf_evidence_pipeline_min_scan_suspicious_ratio", 0.8))
+        suspicious_ratio_threshold = float(getattr(rag_settings, "pdf_evidence_pipeline_min_scan_suspicious_ratio", 0.8))
+        strong_scan_like = suspicious_ratio >= suspicious_ratio_threshold
+        diagnostics.update(
+            {
+                "strong_scan_like": strong_scan_like,
+                "scan_suspicious_ratio": suspicious_ratio,
+                "scan_suspicious_ratio_threshold": suspicious_ratio_threshold,
+            }
+        )
+        if strong_scan_like:
+            diagnostics.update(
+                {
+                    "decision": "evidence_path",
+                    "reason": "strong_scan_like_match",
+                }
+            )
+            return True, diagnostics
 
-    return False
+    diagnostics.update(
+        {
+            "decision": "legacy_path",
+            "reason": "generic_pdf_legacy_path",
+        }
+    )
+    return False, diagnostics
 
 
-def _extract_pdf_text_with_evidence_pipeline(file_bytes: bytes, filename: str, rag_settings: RagSettings) -> tuple[str, dict[str, object]]:
+def _extract_pdf_text_with_evidence_pipeline(
+    file_bytes: bytes,
+    filename: str,
+    rag_settings: RagSettings,
+    routing_diagnostics: dict[str, object] | None = None,
+) -> tuple[str, dict[str, object]]:
     config = build_evidence_config_from_rag_settings(rag_settings)
     result = run_cv_pipeline_from_bytes(file_bytes, ".pdf", config)
-    filename_hint = _looks_like_cv_filename(filename)
-    cv_like_content, cv_like_reasons = _detect_cv_like_content(file_bytes, rag_settings)
     evidence_summary = {
         "document_id": result.document_id,
         "source_type": result.source_type,
@@ -373,6 +449,14 @@ def _extract_pdf_text_with_evidence_pipeline(file_bytes: bytes, filename: str, r
     else:
         text = raw_page_text
         indexing_text_strategy = "raw_text_only"
+    routing_info = dict(routing_diagnostics or {})
+    routing_info.setdefault("feature_flag_enabled", bool(getattr(rag_settings, "pdf_evidence_pipeline_enabled", False)))
+    routing_info.setdefault("filename_hint", _looks_like_cv_filename(filename))
+    routing_info.setdefault("cv_like_content_detected", False)
+    routing_info.setdefault("cv_like_reasons", [])
+    routing_info.setdefault("strong_scan_like", result.source_type == "scanned_pdf")
+    routing_info["decision"] = "evidence_path"
+    routing_info.setdefault("reason", "evidence_path_selected")
     metadata = {
         "extractor": "evidence_cv_pipeline",
         "strategy": "evidence_parallel",
@@ -391,14 +475,7 @@ def _extract_pdf_text_with_evidence_pipeline(file_bytes: bytes, filename: str, r
         "included_structured_sections": payload_quality.get("included_structured_sections", []),
         "dropped_structured_sections": payload_quality.get("dropped_structured_sections", []),
         "dropped_section_reasons": payload_quality.get("dropped_section_reasons", []),
-        "routing_diagnostics": {
-            "feature_flag_enabled": bool(getattr(rag_settings, "pdf_evidence_pipeline_enabled", False)),
-            "filename_hint": filename_hint,
-            "cv_like_content_detected": cv_like_content,
-            "cv_like_reasons": cv_like_reasons,
-            "strong_scan_like": result.source_type == "scanned_pdf",
-            "decision": "evidence_path",
-        },
+        "routing_diagnostics": routing_info,
     }
     return text, metadata
 
@@ -457,10 +534,16 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
     metadata: dict[str, object] = {}
 
     if suffix == "pdf":
-        if _should_use_evidence_pipeline(file_bytes, uploaded_file.name, rag_settings):
+        use_evidence_pipeline, routing_diagnostics = _build_evidence_routing_diagnostics(file_bytes, uploaded_file.name, rag_settings)
+        if use_evidence_pipeline:
             try:
                 legacy_text, legacy_metadata = _extract_pdf_text(file_bytes, rag_settings)
-                text, metadata = _extract_pdf_text_with_evidence_pipeline(file_bytes, uploaded_file.name, rag_settings)
+                text, metadata = _extract_pdf_text_with_evidence_pipeline(
+                    file_bytes,
+                    uploaded_file.name,
+                    rag_settings,
+                    routing_diagnostics=routing_diagnostics,
+                )
                 metadata["hybrid_contact_policy"] = _apply_hybrid_contact_policy(legacy_metadata, metadata)
                 metadata["shadow_rollout"] = _build_shadow_rollout_report(legacy_metadata, metadata)
                 metadata["legacy_shadow_reference"] = {
@@ -475,17 +558,13 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
                 metadata["evidence_pipeline_error"] = str(error)
                 metadata["evidence_pipeline_fallback_used"] = True
                 metadata["routing_diagnostics"] = {
-                    "feature_flag_enabled": bool(getattr(rag_settings, "pdf_evidence_pipeline_enabled", False)) if rag_settings else False,
+                    **routing_diagnostics,
                     "decision": "legacy_path",
                     "reason": "evidence_pipeline_runtime_error",
                 }
         else:
             text, metadata = _extract_pdf_text(file_bytes, rag_settings)
-            metadata["routing_diagnostics"] = {
-                "feature_flag_enabled": bool(getattr(rag_settings, "pdf_evidence_pipeline_enabled", False)) if rag_settings else False,
-                "decision": "legacy_path",
-                "reason": "generic_pdf_legacy_path" if rag_settings and getattr(rag_settings, "pdf_evidence_pipeline_enabled", False) else "feature_flag_disabled",
-            }
+            metadata["routing_diagnostics"] = routing_diagnostics
         file_type = "pdf"
     elif suffix == "csv":
         text = _extract_csv_text(file_bytes)

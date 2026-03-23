@@ -8,6 +8,7 @@ import streamlit as st
 
 from ..structured.base import (
     ChecklistPayload,
+    CVSection,
     CVAnalysisPayload,
     CodeAnalysisPayload,
     ExtractionPayload,
@@ -214,9 +215,103 @@ def _render_checklist_view(payload: ChecklistPayload) -> None:
             st.caption(f"depends on: {', '.join(item.dependencies)}")
 
 
+def _build_cv_display_sections(payload: CVAnalysisPayload) -> tuple[list[CVSection], bool]:
+    if payload.sections:
+        return list(payload.sections), False
+
+    derived_sections: list[CVSection] = []
+
+    if payload.experience_entries:
+        derived_sections.append(
+            CVSection(
+                section_type="experience",
+                title="Experience",
+                content=[
+                    {
+                        "text": entry.description or " | ".join(
+                            part for part in [entry.title, entry.organization, entry.location, entry.date_range] if part
+                        ),
+                        "details": {
+                            "title": entry.title,
+                            "organization": entry.organization,
+                            "location": entry.location,
+                            "date_range": entry.date_range,
+                            "bullets": entry.bullets,
+                        },
+                    }
+                    for entry in payload.experience_entries
+                ],
+                confidence=0.9,
+            )
+        )
+
+    if payload.education_entries:
+        derived_sections.append(
+            CVSection(
+                section_type="education",
+                title="Education",
+                content=[
+                    {
+                        "text": entry.description or " | ".join(
+                            part for part in [entry.degree, entry.institution, entry.location, entry.date_range] if part
+                        )
+                    }
+                    for entry in payload.education_entries
+                ],
+                confidence=0.9,
+            )
+        )
+
+    if payload.skills:
+        derived_sections.append(
+            CVSection(
+                section_type="skills",
+                title="Skills",
+                content=[{"text": item} for item in payload.skills],
+                confidence=0.9,
+            )
+        )
+
+    if payload.languages:
+        derived_sections.append(
+            CVSection(
+                section_type="languages",
+                title="Languages",
+                content=[{"text": item} for item in payload.languages],
+                confidence=0.9,
+            )
+        )
+
+    return derived_sections, True
+
+
+def _format_cv_section_item_text(item: Any) -> str | None:
+    if getattr(item, "text", None):
+        return str(item.text)
+
+    details = getattr(item, "details", None) or {}
+    if not isinstance(details, dict):
+        return None
+
+    ordered_values = [
+        details.get("title"),
+        details.get("organization"),
+        details.get("institution"),
+        details.get("degree"),
+        details.get("location"),
+        details.get("date_range"),
+    ]
+    parts = [str(value).strip() for value in ordered_values if value]
+    if parts:
+        return " | ".join(parts)
+
+    return None
+
+
 def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
+    display_sections, sections_are_derived = _build_cv_display_sections(payload)
     metric_1, metric_2, metric_3 = st.columns(3)
-    metric_1.metric("Sections", len(payload.sections))
+    metric_1.metric("Sections", len(display_sections))
     metric_2.metric("Skills", len(payload.skills))
     metric_3.metric("Experience", f"{payload.experience_years:.1f} years")
 
@@ -268,18 +363,20 @@ def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
         for item in payload.improvement_areas:
             st.write(f"- {item}")
 
-    if payload.sections:
+    if display_sections:
         st.write("**Sections**")
-        for section in payload.sections:
+        for section in display_sections:
+            label = f"{section.title} · {section.section_type}"
+            if not sections_are_derived:
+                label += f" · confidence {section.confidence:.0%}"
             with st.expander(
-                f"{section.title} · {section.section_type} · confidence {section.confidence:.0%}",
+                label,
                 expanded=False,
             ):
                 for item in section.content:
-                    if item.text:
-                        st.write(f"- {item.text}")
-                    if item.details:
-                        st.json(item.details)
+                    item_text = _format_cv_section_item_text(item)
+                    if item_text:
+                        st.write(f"- {item_text}")
 
 
 def _render_code_analysis(payload: CodeAnalysisPayload) -> None:

@@ -124,6 +124,24 @@ Ou seja: um sistema que trabalha em cima de documentos da empresa e consegue:
 - **pypdf**
 - **pandas**
 
+
+### Camada de evolução de interface
+
+Para a camada de interface, a leitura mais forte do projeto deve ser progressiva:
+
+- **Streamlit** como UI principal de prototipagem e iteração rápida
+- **Gradio** como camada intermediária de demo AI-first para fluxos mais fortes do produto
+- **Frontend web real + backend/API** como direção de produto antes do deploy público na Oracle
+
+### Regra prática para UI
+
+A interface não deve ficar acoplada à lógica principal do produto.
+A narrativa arquitetural mais forte é:
+
+- começar com **Streamlit** para aprender, validar e iterar rápido
+- migrar alguns fluxos para **Gradio** quando fizer sentido melhorar a demo AI-first
+- evoluir depois para um **app/website real** antes do deploy público
+
 ### Camada opcional free-tier
 
 Usar apenas como extensão opcional, sem depender disso para o projeto funcionar:
@@ -424,7 +442,11 @@ A ordem mais forte agora passa a ser:
 4. **Fase 7 — Benchmark e comparação entre modelos**
 5. **Fase 8 — Evals**
 6. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
-7. **Fase 9+ — Observabilidade e engenharia profissional**
+7. **Fase 9 — Observabilidade**
+8. **Fase 10 — Engenharia profissional**
+9. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+10. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
+11. **Fase 11 — Pacote final de portfólio**
 
 ---
 
@@ -445,8 +467,10 @@ A melhor história é:
 8. mostrei maturidade com LangChain/LangGraph
 9. criei um agente empresarial de verdade
 10. medi tudo com benchmark, evals e observabilidade
-11. só então explorei adaptação de modelos, quantizações e fine-tuning leve com critério
-11. só então explorei adaptação de modelos com critério técnico
+11. endureci a engenharia e a confiabilidade do app
+12. evoluí a interface de protótipo para demo AI-first e depois para uma camada web mais sólida
+13. publiquei uma demo híbrida tecnicamente defendível
+14. só então empacotei tudo para portfólio final
 
 ---
 
@@ -1331,6 +1355,147 @@ Transformar o projeto em algo tecnicamente defendível.
 
 ---
 
+
+## Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web
+
+### Objetivo
+Evoluir a interface do projeto de uma UI de prototipagem para uma UI de demo AI-first e, depois, para uma aplicação web mais próxima de produto real antes do deploy na Oracle.
+
+### Tese desta fase
+Esta fase existe para provar maturidade de produto e de arquitetura de interface.
+A ideia não é migrar cedo demais, e sim mostrar uma progressão defendível:
+
+- **Streamlit** para velocidade de iteração
+- **Gradio** para demo AI-first mais clara
+- **app/website real** para uma camada de produto mais sólida antes do deploy público
+
+### Quando executar
+Executar apenas quando:
+
+- a Fase 10 já estiver concluída ou suficientemente madura
+- os fluxos principais do produto já estiverem estáveis
+- structured outputs, benchmark, evals e observabilidade já estiverem defensáveis
+
+### Checklist
+- [ ] Garantir que a lógica de negócio esteja desacoplada da UI Streamlit atual
+- [ ] Identificar os fluxos principais que precisam existir na interface intermediária
+- [ ] Criar uma primeira UI em Gradio para os fluxos mais fortes do produto
+- [ ] Comparar Streamlit vs Gradio em velocidade de iteração, clareza da demo e aderência ao caso de uso
+- [ ] Documentar por que Gradio entrou e o que melhorou
+- [ ] Extrair backend HTTP claro para suportar frontend desacoplado
+- [ ] Definir contratos explícitos entre frontend e backend
+- [ ] Criar frontend web mais próximo de produto real
+- [ ] Desacoplar estado de sessão, autenticação futura e chamadas de inferência da UI original
+- [ ] Preparar o sistema para deploy com separação clara entre frontend, backend e bridge de inferência local
+
+### Entregável
+- versão Gradio funcional para demo AI-first
+- versão web mais próxima de produto real preparada para deploy
+- documentação da evolução da interface
+
+### Evidência para GitHub/LinkedIn
+- screenshot comparando Streamlit e Gradio
+- vídeo curto mostrando a evolução da UI
+- screenshot do app/web final antes do deploy
+- diagrama da evolução da arquitetura de interface
+
+### O que preciso saber defender em entrevista
+- por que comecei com Streamlit
+- por que Gradio fez sentido como etapa intermediária
+- por que um app/web real foi necessário antes do deploy público
+- como mantive a lógica de negócio desacoplada da camada de interface
+
+---
+
+## Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)
+
+### Objetivo
+Criar uma implantação pública opcional, tecnicamente defensável e boa para demo, mantendo o app hospedado na Oracle e a inferência dos modelos locais no próprio computador via Ollama.
+
+### Tese desta fase
+Esta fase não existe para transformar o projeto em produção real 24/7.
+Ela existe para provar capacidade de arquitetura de sistema, deploy, segurança básica de borda e integração entre runtime local e app público.
+
+### Quando executar
+Executar apenas quando o app já estiver estável do ponto de vista de produto, engenharia e avaliação.
+
+A ordem recomendada é:
+- Fase 9 concluída ou suficientemente madura
+- Fase 10 concluída ou quase concluída
+- principais fluxos do app já demonstráveis
+- evidências de benchmark/evals já prontas
+
+### Arquitetura-alvo
+Fluxo desejado:
+
+```text
+Usuário
+  ↓
+Frontend (Oracle)
+  ↓
+Backend/API (Oracle)
+  ↓ HTTPS
+Cloudflare Tunnel
+  ↓
+Bridge local no Mac
+  ↓
+Ollama API (localhost:11434)
+```
+
+### Por que essa fase fortalece o projeto
+- adiciona uma história forte de deploy e arquitetura híbrida
+- cria link público demonstrável sem abandonar o runtime local-first
+- mostra preocupação com segurança, isolamento e desacoplamento
+- prepara uma demo mais convincente para entrevistas e portfólio
+
+### Checklist
+- [ ] Definir a arquitetura oficial de deploy híbrido em `docs/DEPLOYMENT_ARCHITECTURE.md`
+- [ ] Criar backend preparado para chamar um `OLLAMA_BRIDGE_URL` externo
+- [ ] Isolar a chamada a modelo atrás de interface/configuração explícita
+- [ ] Adicionar variáveis de ambiente para bridge remoto e segredos associados
+- [ ] Implementar bridge local intermediário para o Ollama
+- [ ] Proteger o bridge com autenticação por chave e allowlist de modelos
+- [ ] Adicionar timeout, validação de payload, limite de tamanho e logs básicos no bridge
+- [ ] Preparar execução local do bridge com FastAPI ou equivalente
+- [ ] Configurar Cloudflare Tunnel para publicar apenas o bridge local
+- [ ] Garantir que o Ollama permaneça acessível apenas localmente
+- [ ] Subir frontend e backend do app em VM Oracle Always Free
+- [ ] Garantir que o deploy Oracle use a UI evoluída (Gradio ou app web final), e não apenas a interface de prototipagem original
+- [ ] Colocar Nginx ou Caddy na frente do app público
+- [ ] Configurar domínio e HTTPS para a aplicação principal
+- [ ] Criar endpoint simples de healthcheck fim a fim para testar Oracle → bridge → Ollama
+- [ ] Documentar ordem oficial de testes: local, bridge, tunnel, backend Oracle e UI completa
+- [ ] Documentar claramente a diferença entre UI de desenvolvimento, UI de demo e UI de deploy público
+- [ ] Automatizar restart mínimo dos serviços críticos no reboot
+- [ ] Registrar limitações explícitas da arquitetura: dependência do notebook, latência e baixa concorrência
+
+### Variáveis/configurações que passam a importar
+- [ ] `OLLAMA_BRIDGE_URL`
+- [ ] `OLLAMA_BRIDGE_API_KEY`
+- [ ] `OLLAMA_BRIDGE_ALLOWED_MODELS`
+- [ ] `APP_BASE_URL`
+- [ ] `PUBLIC_DEMO_MODE`
+
+### Entregável
+- deploy híbrido opcional funcionando com link público de demonstração
+- documentação de arquitetura e operação
+- checklist reproduzível de implantação
+
+### Evidência para GitHub/LinkedIn
+- screenshot da aplicação pública no domínio
+- diagrama da arquitetura Oracle + Tunnel + Mac + Ollama
+- pequeno vídeo mostrando uma pergunta percorrendo o fluxo fim a fim
+- write-up explicando por que essa solução é boa para demo, mas não é produção de alta disponibilidade
+
+### O que preciso saber defender em entrevista
+- por que separar app público de inferência local
+- por que usar bridge intermediário em vez de expor o Ollama cru
+- trade-offs entre custo, latência, disponibilidade e simplicidade
+- por que essa arquitetura é boa para demo técnica e MVP, mas limitada para multiusuário e 24/7
+- como eu evoluiria isso depois para uma arquitetura mais próxima de produção
+
+---
+
 ## Fase 11 — Pacote final de portfólio
 
 ### Objetivo
@@ -1339,6 +1504,7 @@ Maximizar impacto em GitHub, LinkedIn, currículo e entrevista.
 ### Checklist
 - [ ] Escrever `README.md` forte
 - [ ] Adicionar screenshots
+- [ ] Mostrar a evolução da interface (Streamlit -> Gradio -> app/web final)
 - [ ] Criar GIF ou vídeo curto de demonstração
 - [ ] Criar diagrama de arquitetura
 - [ ] Documentar features principais
@@ -1363,6 +1529,7 @@ Maximizar impacto em GitHub, LinkedIn, currículo e entrevista.
 
 ### Evidência para GitHub/LinkedIn
 - post com demo
+- comparação visual entre Streamlit, Gradio e app/web final
 - repositório com documentação forte
 - release publicada
 
@@ -1389,13 +1556,15 @@ Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA a
 6. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
 7. **Fase 9 — Observabilidade**
 8. **Fase 10 — Engenharia profissional**
-9. **Fase 11 — Pacote final de portfólio**
+9. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+10. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
+11. **Fase 11 — Pacote final de portfólio**
 
 ### Métrica de sucesso do roadmap
 
 O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 
-> Construí uma aplicação de IA que começou com fundamentos locais, evoluiu para RAG real com base documental, passou a produzir saídas estruturadas, foi instrumentada com benchmarking/evals/observabilidade e, só quando isso fez sentido, explorou Hugging Face, quantização e fine-tuning leve de forma orientada por evidência.
+> Construí uma aplicação de IA que começou com fundamentos locais, evoluiu para RAG real com base documental, passou a produzir saídas estruturadas, foi instrumentada com benchmarking/evals/observabilidade e, só quando isso fez sentido, explorou Hugging Face, quantização e fine-tuning leve de forma orientada por evidência. Também evoluí a interface de prototipagem para demo AI-first e depois para uma camada web mais próxima de produto antes do deploy público.
 
 
 ### Atualização local recente
