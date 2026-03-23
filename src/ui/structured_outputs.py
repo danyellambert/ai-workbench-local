@@ -43,6 +43,53 @@ def _render_result_header(result: StructuredResult) -> None:
         error_message = result.validation_error or result.parsing_error or (result.error.message if result.error else "Unknown error")
         st.error(error_message)
 
+    metadata = result.execution_metadata if isinstance(result.execution_metadata, dict) else {}
+    if result.task_type == "summary" and metadata:
+        summary_mode = metadata.get("summary_mode")
+        if summary_mode == "full_document_map_reduce":
+            st.info(
+                "Summary mode: full-document map-reduce · o modelo recebeu o documento inteiro em várias partes, depois fez uma síntese final."
+            )
+            cols = st.columns(3)
+            cols[0].metric("Document chars", metadata.get("full_document_chars", 0))
+            cols[1].metric("Parts", metadata.get("document_parts", 0))
+            cols[2].metric("Partial summaries", metadata.get("partial_summaries_generated", 0))
+        elif summary_mode == "single_pass_context":
+            st.info("Summary mode: single-pass context · o modelo resumiu usando apenas o contexto recortado mostrado nesta estratégia.")
+            cols = st.columns(3)
+            cols[0].metric("Document chars", metadata.get("full_document_chars", 0))
+            cols[1].metric("Context chars sent", metadata.get("context_chars_sent", 0))
+            cols[2].metric("Strategy", str(metadata.get("context_strategy", "-")))
+        if metadata.get("context_note"):
+            st.caption(str(metadata.get("context_note")))
+        stages = metadata.get("stages") if isinstance(metadata.get("stages"), list) else []
+        if stages:
+            st.write("**What was sent to the AI**")
+            for stage in stages:
+                if not isinstance(stage, dict):
+                    continue
+                label = str(stage.get("label") or stage.get("stage_type") or "Stage")
+                chars_sent = stage.get("chars_sent")
+                duration_s = stage.get("duration_s")
+                success = stage.get("success")
+                meta_parts = []
+                if chars_sent is not None:
+                    meta_parts.append(f"chars={chars_sent}")
+                if duration_s is not None:
+                    meta_parts.append(f"time={duration_s}s")
+                if success is not None:
+                    meta_parts.append("ok" if success else "failed")
+                title = label + (f" · {' · '.join(meta_parts)}" if meta_parts else "")
+                with st.expander(title, expanded=False):
+                    context_preview = stage.get("context_preview")
+                    prompt_preview = stage.get("prompt_preview")
+                    if context_preview:
+                        st.caption("Context preview")
+                        st.code(str(context_preview))
+                    if prompt_preview and prompt_preview != context_preview:
+                        st.caption("Prompt preview")
+                        st.code(str(prompt_preview))
+
 
 def _render_extraction(payload: ExtractionPayload) -> None:
     metric_1, metric_2, metric_3, metric_4 = st.columns(4)

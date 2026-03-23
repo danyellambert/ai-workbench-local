@@ -23,7 +23,7 @@ def render_chat_sidebar(
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, int, int, int, int, str, int, str, bool, bool]:
+) -> tuple[str, str, str, float, str, int, int, int, int, str, int, str, bool, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
     pdf_mode_options = ["basic", "hybrid", "complete"]
@@ -63,17 +63,26 @@ def render_chat_sidebar(
         )
 
         context_window = default_context_window_by_provider.get(selected_provider, 8192)
+        context_window_mode = "manual"
         if selected_provider == "ollama":
-            context_window = int(
-                st.slider(
-                    "Janela de contexto (num_ctx)",
-                    min_value=1000,
-                    max_value=256000,
-                    value=max(int(context_window), 1024),
-                    step=100,
-                    help="Controla o tamanho de contexto enviado ao Ollama nesta execução.",
-                )
+            context_window_mode = st.radio(
+                "Modo da janela de contexto",
+                options=["auto", "manual"],
+                index=0,
+                format_func=lambda value: "Automático" if value == "auto" else "Manual",
+                help="No modo automático, o app escolhe o `num_ctx` conforme a task e o tamanho do documento. No manual, usa o valor do slider.",
             )
+            if context_window_mode == "manual":
+                context_window = int(
+                    st.slider(
+                        "Janela de contexto (num_ctx)",
+                        min_value=1000,
+                        max_value=256000,
+                        value=max(int(context_window), 1024),
+                        step=100,
+                        help="Controla o tamanho de contexto enviado ao Ollama nesta execução.",
+                    )
+                )
 
         temperature = st.slider(
             "Temperatura",
@@ -163,7 +172,10 @@ def render_chat_sidebar(
         if detail:
             st.caption(detail)
         if selected_provider == "ollama":
-            st.caption(f"Contexto ativo no Ollama: `{context_window}`")
+            if context_window_mode == "auto":
+                st.caption("Contexto ativo no Ollama: `auto`")
+            else:
+                st.caption(f"Contexto ativo no Ollama: `{context_window}`")
         st.caption(f"Embedding ativo: {selected_embedding_model} · num_ctx={selected_embedding_context_window}")
         st.caption(
             f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap}"
@@ -179,6 +191,7 @@ def render_chat_sidebar(
         selected_model,
         selected_prompt_profile,
         temperature,
+        context_window_mode,
         int(context_window),
         rag_chunk_size,
         rag_chunk_overlap,

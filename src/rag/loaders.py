@@ -11,6 +11,20 @@ from src.rag.pdf_extraction import PdfHybridSettings, extract_pdf_text_hybrid, n
 
 
 CV_SECTION_HINTS = ["experience", "education", "skills", "languages", "profile", "summary"]
+CV_PRIMARY_SECTION_HINTS = ["experience", "education", "skills", "languages"]
+NON_CV_DOCUMENT_HINTS = [
+    "financial report",
+    "agency financial report",
+    "fiscal year",
+    "annual report",
+    "statement of",
+    "appendix",
+    "table of contents",
+    "management discussion",
+    "independent auditor",
+    "performance data",
+    "notes to the financial statements",
+]
 DATE_RANGE_RE = re.compile(
     r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4}|(?:19|20)\d{2}\s*[-–/]\s*(?:present|current|(?:19|20)\d{2})",
     re.I,
@@ -272,17 +286,24 @@ def _compute_evidence_rollout_bucket(file_bytes: bytes, filename: str) -> int:
     return int(digest[:8], 16) % 100
 
 
-def _detect_cv_like_content(file_bytes: bytes, rag_settings: RagSettings) -> tuple[bool, list[str]]:
+def _detect_cv_like_content(file_bytes: bytes, filename: str, rag_settings: RagSettings) -> tuple[bool, list[str]]:
     text, metadata = _extract_pdf_text(file_bytes, rag_settings)
     normalized = text.lower()
-    top_text = "\n".join(text.splitlines()[:20])
+    top_text = "\n".join(text.splitlines()[:30])
     reasons: list[str] = []
+    filename_hint = _looks_like_cv_filename(filename)
+
+    negative_hits = [hint for hint in NON_CV_DOCUMENT_HINTS if hint in normalized]
+    if len(negative_hits) >= 2 and not filename_hint:
+        reasons.append("report_like_document_detected")
+        return False, reasons
 
     if CONTACT_RE.search(top_text):
         reasons.append("top_contact_profile_structure")
 
     section_hits = [term for term in CV_SECTION_HINTS if term in normalized]
-    if len(section_hits) >= 2:
+    primary_section_hits = [term for term in CV_PRIMARY_SECTION_HINTS if term in normalized]
+    if len(primary_section_hits) >= 2:
         reasons.append("cv_like_sections_detected")
 
     if len(DATE_RANGE_RE.findall(normalized)) >= 2:
@@ -291,7 +312,17 @@ def _detect_cv_like_content(file_bytes: bytes, rag_settings: RagSettings) -> tup
     if metadata.get("page_count") and len(normalized.split()) > 120:
         reasons.append("sufficient_resume_like_content")
 
-    return (len(reasons) >= 2), reasons
+    contact_detected = "top_contact_profile_structure" in reasons
+    sections_detected = "cv_like_sections_detected" in reasons
+    dates_detected = "resume_like_date_ranges" in reasons
+
+    if filename_hint and (contact_detected or sections_detected):
+        return True, reasons
+
+    if contact_detected and sections_detected and dates_detected:
+        return True, reasons
+
+    return False, reasons
 
 
 def _build_evidence_routing_diagnostics(
@@ -340,7 +371,7 @@ def _build_evidence_routing_diagnostics(
         return False, diagnostics
 
     if getattr(rag_settings, "pdf_evidence_pipeline_use_for_cv_like", True):
-        cv_like_content, cv_like_reasons = _detect_cv_like_content(file_bytes, rag_settings)
+        cv_like_content, cv_like_reasons = _detect_cv_like_content(file_bytes, filename, rag_settings)
         diagnostics["cv_like_content_detected"] = cv_like_content
         diagnostics["cv_like_reasons"] = cv_like_reasons
         if cv_like_content:

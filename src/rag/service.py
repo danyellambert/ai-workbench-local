@@ -205,22 +205,29 @@ def _chunk_key(chunk: dict[str, object]) -> str:
 
 
 def _tokenize(text: str) -> set[str]:
-    return {match.group(0).lower() for match in TOKEN_PATTERN.finditer(text or "")}
+    normalized = (text or "").replace("’", "'").replace("`", "'")
+    return {match.group(0).lower() for match in TOKEN_PATTERN.finditer(normalized)}
 
 
 
 def _lexical_score(query: str, chunk_text: str) -> float:
-    query_terms = _tokenize(query)
+    normalized_query = (query or "").strip().replace("’", "'").replace("`", "'")
+    normalized_chunk = (chunk_text or "").replace("’", "'").replace("`", "'")
+    query_terms = _tokenize(normalized_query)
     if not query_terms:
         return 0.0
 
-    chunk_terms = _tokenize(chunk_text)
+    chunk_terms = _tokenize(normalized_chunk)
     if not chunk_terms:
         return 0.0
 
     overlap_ratio = len(query_terms & chunk_terms) / max(len(query_terms), 1)
-    phrase_bonus = 0.15 if query.strip() and query.strip().lower() in chunk_text.lower() else 0.0
-    return round(min(overlap_ratio + phrase_bonus, 1.0), 4)
+    exact_phrase_bonus = 0.45 if normalized_query and normalized_query.lower() in normalized_chunk.lower() else 0.0
+    partial_phrase_bonus = 0.2 if len(normalized_query.split()) >= 4 and any(
+        fragment in normalized_chunk.lower()
+        for fragment in [normalized_query.lower()[: max(len(normalized_query) // 2, 12)]]
+    ) else 0.0
+    return round(min(overlap_ratio + exact_phrase_bonus + partial_phrase_bonus, 1.0), 4)
 
 
 
