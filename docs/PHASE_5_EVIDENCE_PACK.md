@@ -122,6 +122,48 @@ Limitações honestas observáveis nesse JSON real:
 
 Isso é bom para portfólio porque permite demonstrar **funcionamento + honestidade técnica**, exatamente como o roadmap pede.
 
+### 3.4.1 Rollout reforçado do `evidence_cv` com gate semântico
+
+Além do smoke eval textual, a fase agora também possui evidência de rollout reforçado do parser `evidence_cv` com:
+
+- guardrails operacionais
+- promoção automática por etapas
+- semantic gate com CVs mais próximos de casos reais em `data/materials_demo/cv_analysis`
+
+Arquivos-evidência principais:
+
+- `phase5_eval/reports/evidence_cv_auto_rollout_decision.json`
+- `phase5_eval/reports/evidence_cv_auto_rollout.log`
+
+Leitura atual mais importante:
+
+- o rollout reforçado terminou sem falhas operacionais críticas
+- o gate semântico passou com `3/3` amostras reais/demo contendo nome confirmado
+- a correção de nome resolveu os casos `Francis B. Taylor` e `Nathaly Ortiz`, que antes apareciam como `not_found`
+
+Isso fortalece a narrativa da Fase 5 porque o rollout deixa de validar só estabilidade operacional e passa a exigir uma checagem semântica mínima antes de considerar a ativação automática saudável.
+
+### 3.4.2 Nota sobre `sections` vazio em `cv_analysis`
+
+Durante a investigação do rollout reforçado, apareceu um comportamento importante no payload de `cv_analysis`: em alguns casos, `education_entries`, `experience_entries`, `skills` e `languages` vinham preenchidos, mas `sections` podia ficar vazio.
+
+Isso não significava necessariamente ausência de conteúdo útil. O pipeline já conseguia estruturar dados no topo do payload, mas nem sempre o modelo devolvia `sections` preenchido.
+
+Após o hardening recente, a camada de renderização da UI passa a sintetizar seções derivadas de:
+
+- `experience`
+- `education`
+- `skills`
+- `languages`
+
+quando esses blocos existirem no payload mesmo que o modelo não tenha preenchido `sections` diretamente.
+
+Na prática, isso melhora a coerência entre:
+
+- métricas da UI (`Sections`)
+- expansores de seção
+- campos top-level como `experience_entries` e `education_entries`
+
 ### 3.5 Code analysis
 
 `code_analysis` passou com `5/5` e retornou:

@@ -73,6 +73,7 @@ class RagSettings:
     pdf_evidence_pipeline_use_for_cv_like: bool = True
     pdf_evidence_pipeline_use_for_strong_scan_like: bool = True
     pdf_evidence_pipeline_min_scan_suspicious_ratio: float = 0.8
+    pdf_evidence_pipeline_rollout_percentage: int = 100
 
 
 
@@ -162,4 +163,5 @@ def get_rag_settings() -> RagSettings:
         pdf_evidence_pipeline_use_for_cv_like=os.getenv("RAG_PDF_EVIDENCE_PIPELINE_USE_FOR_CV_LIKE", "true").strip().lower() not in {"0", "false", "no"},
         pdf_evidence_pipeline_use_for_strong_scan_like=os.getenv("RAG_PDF_EVIDENCE_PIPELINE_USE_FOR_STRONG_SCAN_LIKE", "true").strip().lower() not in {"0", "false", "no"},
         pdf_evidence_pipeline_min_scan_suspicious_ratio=float(os.getenv("RAG_PDF_EVIDENCE_PIPELINE_MIN_SCAN_SUSPICIOUS_RATIO", "0.8")),
+        pdf_evidence_pipeline_rollout_percentage=max(0, min(100, int(os.getenv("RAG_PDF_EVIDENCE_PIPELINE_ROLLOUT_PERCENTAGE", "100")))),
     )

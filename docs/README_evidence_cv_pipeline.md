@@ -41,6 +41,128 @@ E, além disso, quando ao menos uma das condições abaixo for verdadeira:
    - controlado por `RAG_PDF_EVIDENCE_PIPELINE_USE_FOR_STRONG_SCAN_LIKE`
    - usando o threshold `RAG_PDF_EVIDENCE_PIPELINE_MIN_SCAN_SUSPICIOUS_RATIO`
 
+### Rollout controlado por percentual
+
+Agora o fluxo também pode ser liberado de forma gradual com:
+
+- `RAG_PDF_EVIDENCE_PIPELINE_ROLLOUT_PERCENTAGE`
+
+Funcionamento:
+
+- `0` → desliga o rollout prático mesmo com a feature flag ativa
+- `10` → seleciona deterministicamente ~10% dos PDFs
+- `100` → mantém o comportamento atual para todos os PDFs elegíveis
+
+O bucket é determinístico por arquivo, então o mesmo PDF tende a cair sempre na mesma decisão de rollout.
+
+### Automação simples do rollout
+
+Também existe um script para automatizar promoção, hold ou rollback do percentual com base no shadow rollout:
+
+```bash
+python scripts/auto_rollout_evidence_cv.py caminho1.pdf caminho2.pdf --out phase5_eval/reports/evidence_cv_auto_rollout_decision.json
+```
+
+Se quiser aplicar a decisão diretamente no `.env`:
+
+```bash
+python scripts/auto_rollout_evidence_cv.py caminho1.pdf caminho2.pdf --apply
+```
+
+Comportamento inicial da automação:
+
+- ladder fixa: `0 -> 10 -> 25 -> 50 -> 100`
+- promove quando os guardrails passam
+- segura quando não há evidência suficiente para subir
+- faz rollback quando há falhas/conflitos acima dos thresholds
+
+Guardrails default:
+
+- `files_failed = 0`
+- `email_conflicts = 0`
+- `phone_conflicts = 0`
+- `vl_timeouts = 0`
+- `vl_regions_failed = 0`
+
+### Modo totalmente automático com a pasta multilayout
+
+Como o projeto já tem a pasta:
+
+- `data/synthetic/resumes_multilayout/pdf`
+
+o script agora consegue rodar sozinho por diretório e por lotes.
+
+Exemplo para deixar rodando automaticamente e atualizando o `.env`:
+
+```bash
+python scripts/auto_rollout_evidence_cv.py --auto --apply
+```
+
+Esse modo:
+
+- lê todos os PDFs do diretório padrão multilayout
+- usa lotes (`batch_size=10` por default)
+- roda uma rodada por lote
+- promove o rollout em sequência (`0 -> 10 -> 25 -> 50 -> 100`) enquanto os guardrails passarem
+- para sozinho quando precisar `hold` ou `rollback`
+- salva um relatório final e também relatórios por rodada
+
+Exemplo com batch customizado:
+
+```bash
+python scripts/auto_rollout_evidence_cv.py --auto --apply --batch-size 15
+```
+
+Saídas geradas:
+
+- `phase5_eval/reports/evidence_cv_auto_rollout_decision.json`
+- `phase5_eval/reports/evidence_cv_auto_rollout_decision_round_01.json`
+- `phase5_eval/reports/evidence_cv_auto_rollout_decision_round_02.json`
+- etc.
+
+### Gate semântico mínimo com samples mais próximos de CV real
+
+O auto rollout agora também pode usar um **semantic gate** complementar antes de promover o percentual.
+
+Diretório default:
+
+- `data/materials_demo/cv_analysis`
+
+Pattern default:
+
+- `Sample-Resume-*.pdf`
+
+O gate roda nesses samples em toda rodada e checa sinais mínimos como:
+
+- presença de email válido
+- presença de nome no output
+- taxa mínima de `name_status = confirmed`
+- erros de amostra
+
+Se o gate semântico não passar, o rollout não promove automaticamente, mesmo que os guardrails operacionais tenham passado.
+
+Exemplo de uso completo:
+
+```bash
+python scripts/auto_rollout_evidence_cv.py --auto --apply
+```
+
+Campos adicionais no relatório por rodada:
+
+- `operational_decision`
+- `semantic_gate`
+- `decision`
+
+Thresholds configuráveis:
+
+```bash
+python scripts/auto_rollout_evidence_cv.py \
+  --auto --apply \
+  --semantic-min-valid-email-rate 1.0 \
+  --semantic-min-name-presence-rate 1.0 \
+  --semantic-min-confirmed-name-rate 0.67
+```
+
 ### Quando cai para fallback
 O app volta para o pipeline legado quando:
 - a feature flag está desligada
@@ -137,6 +259,15 @@ O resultado agora inclui `runtime_metadata.vl_router` com:
 - `document_signals`
 - `regions_selected`
 - `skipped_because`
+
+No metadata do documento indexado, o app agora também registra em `routing_diagnostics`:
+- `rollout_percentage`
+- `rollout_bucket`
+- `rollout_selected`
+- `decision`
+- `reason`
+
+Isso facilita shadow rollout e auditoria de por que um PDF foi para `evidence_path` ou ficou no `legacy_path`.
 
 ### Seleção seletiva por região
 As regiões continuam dentro do conjunto:

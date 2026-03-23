@@ -424,6 +424,7 @@ class StructuredOutputService:
                 ]}))
                 continue
             synchronized.append(section)
+
         return synchronized
     def _extract_grounding_block_lines(self, request: TaskExecutionRequest | None, block_name: str) -> list[str]:
         if request is None or not request.source_document_ids:
