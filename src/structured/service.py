@@ -1,6 +1,7 @@
 """Service layer for structured outputs."""
 from __future__ import annotations
 import re
+from math import ceil
 from typing import Any
 from ..config import get_ollama_settings
 from .base import ActionItem, ChecklistPayload, CVAnalysisPayload, CodeAnalysisPayload, ExtractionPayload, RiskItem, EducationEntry, ExperienceEntry, CVSection, Entity, Relationship, CodeIssue
@@ -42,7 +43,8 @@ class StructuredOutputService:
             )
         model = request.model or task_definition.default_model or self.ollama_settings.default_model
         temperature = request.temperature if request.temperature is not None else task_definition.default_temperature
-        context_window = request.context_window or self.ollama_settings.default_context_window
+        context_window_cap = request.context_window or self.ollama_settings.default_context_window
+        context_window = self.resolve_context_window(request, max_context_window=context_window_cap)
         execution_request = request.model_copy(
             update={
                 "model": model,
@@ -54,6 +56,12 @@ class StructuredOutputService:
             result = handler.execute(execution_request)
             result.context_used = (execution_request.use_document_context or execution_request.use_rag_context) and bool(execution_request.source_document_ids)
             result.source_documents = list(execution_request.source_document_ids)
+            result.execution_metadata = {
+                **(result.execution_metadata if isinstance(result.execution_metadata, dict) else {}),
+                "resolved_context_window": context_window,
+                "context_window_cap": context_window_cap,
+                "document_chars_estimate": self._estimate_document_chars(request),
+            }
             if result.primary_render_mode is None:
                 result.primary_render_mode = task_definition.primary_render_mode
             self._normalize_result_payload(result, execution_request)
@@ -67,6 +75,63 @@ class StructuredOutputService:
                 f"Execution failed: {exc}",
                 request.input_text,
             )
+    def resolve_context_window(self, request: TaskExecutionRequest, *, max_context_window: int | None = None) -> int:
+        cap = int(max_context_window or self.ollama_settings.default_context_window)
+        doc_chars = self._estimate_document_chars(request)
+        base_by_task = {
+            "summary": 32768,
+            "extraction": 16384,
+            "cv_analysis": 24576,
+            "checklist": 8192,
+            "code_analysis": 12288,
+        }
+        base = base_by_task.get(request.task_type, 12288)
+
+        if request.task_type == "summary":
+            if doc_chars >= 180000:
+                base = 49152
+            elif doc_chars >= 80000:
+                base = 32768
+            elif doc_chars >= 25000:
+                base = 24576
+        elif request.task_type == "cv_analysis":
+            if doc_chars >= 60000:
+                base = 32768
+            elif doc_chars >= 20000:
+                base = 24576
+        elif request.task_type == "extraction":
+            if doc_chars >= 100000:
+                base = 24576
+            elif doc_chars >= 30000:
+                base = 16384
+        elif request.task_type == "code_analysis":
+            if len((request.input_text or "")) >= 12000 or doc_chars >= 20000:
+                base = 16384
+
+        strategy = (request.context_strategy or "").lower().strip()
+        if strategy == "retrieval":
+            base = min(base, 16384 if request.task_type != "summary" else 24576)
+        elif strategy == "document_scan" and request.task_type in {"summary", "cv_analysis", "extraction"}:
+            base = max(base, 16384)
+
+        resolved = min(base, cap)
+        resolved = max(4096, resolved)
+        return int(resolved)
+
+    def _estimate_document_chars(self, request: TaskExecutionRequest) -> int:
+        input_chars = len((request.input_text or "").strip())
+        if not request.source_document_ids:
+            return input_chars
+        try:
+            from ..services.document_context import _filtered_chunks, _get_rag_index, _ordered_chunks
+        except Exception:
+            return input_chars
+        rag_index = _get_rag_index()
+        if not isinstance(rag_index, dict):
+            return input_chars
+        chunks = _ordered_chunks(_filtered_chunks(rag_index, request.source_document_ids))
+        text_chars = sum(len(str(chunk.get("text") or "")) for chunk in chunks if isinstance(chunk, dict))
+        return max(text_chars, input_chars)
     def _normalize_result_payload(self, result: StructuredResult, request: TaskExecutionRequest | None = None) -> None:
         payload = result.validated_output
         if payload is None:

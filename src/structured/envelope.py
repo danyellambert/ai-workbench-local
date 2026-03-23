@@ -47,6 +47,7 @@ class StructuredResult(BaseModel):
 
     source_documents: List[str] = Field(default_factory=list, description="Source documents used")
     context_used: bool = Field(default=False, description="Whether RAG context was used")
+    execution_metadata: Dict[str, Any] = Field(default_factory=dict, description="Optional execution metadata for UI/debug")
 
     available_render_modes: List[RenderMode] = Field(default_factory=list, description="Available render modes")
     primary_render_mode: Optional[str] = Field(default=None, description="Primary render mode to use")
@@ -70,5 +71,6 @@ class TaskExecutionRequest(BaseModel):
     model: Optional[str] = Field(default=None, description="Model to use; falls back to task/app default when omitted")
     temperature: Optional[float] = Field(default=None, description="Temperature setting")
     context_window: Optional[int] = Field(default=None, description="Context window size")
+    progress_callback: Any = Field(default=None, description="Optional callback for UI progress updates during execution")
 
     model_config = {"arbitrary_types_allowed": True}

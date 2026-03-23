@@ -7,14 +7,19 @@ from ..config import get_rag_settings
 from ..rag.service import retrieve_relevant_chunks_detailed
 
 
-DEFAULT_DOCUMENT_SCAN_CHUNKS = 10
-DEFAULT_DOCUMENT_SCAN_CHARS = 18000
-DEFAULT_RETRIEVAL_CHUNKS = 8
-DEFAULT_RETRIEVAL_CHARS = 14000
+DEFAULT_DOCUMENT_SCAN_CHUNKS = 14
+DEFAULT_DOCUMENT_SCAN_CHARS = 24000
+DEFAULT_RETRIEVAL_CHUNKS = 12
+DEFAULT_RETRIEVAL_CHARS = 22000
 DEFAULT_FULL_CV_CHARS = 32000
 PHONEISH_RE = re.compile(r"^\+?\d[\d\s().-]{7,}\d$")
 EMAILISH_RE = re.compile(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", re.I)
 CV_SECTION_HEADER_RE = re.compile(r"^(SUMMARY|SKILLS|EXPERIENCE|EDUCATION|LANGUAGES|PROJECTS|CERTIFICATIONS)\s*$", re.I | re.M)
+REPORT_BOILERPLATE_LINE_RE = re.compile(
+    r"^(?:fy\s*20\d{2}\s+agency financial report|national aeronautics and|space administration|photo credit|\[página\s*\d+\]|\d+\s*fy\s*20\d{2}\s+agency financial report|<!--\s*image\s*-->)$",
+    re.I,
+)
+TOC_LINE_RE = re.compile(r"^[A-Za-z][A-Za-z\s&'’.-]{3,}\s+\d{1,3}$")
 RAW_SECTION_ALIASES = {
     "education": ["EDUCATION", "FORMATION"],
     "skills": ["SKILLS", "TECHNIQUES", "COMPÉTENCES", "COMPETENCES"],
@@ -31,6 +36,49 @@ RAW_SECTION_END_ALIASES = {
 
 def _normalize_whitespace(value: str) -> str:
     return " ".join(str(value or "").replace("\n", " ").split()).strip()
+
+
+def _is_boilerplate_line(value: str) -> bool:
+    text = _normalize_whitespace(value)
+    if not text:
+        return True
+    if REPORT_BOILERPLATE_LINE_RE.match(text):
+        return True
+    lowered = text.lower()
+    if lowered in {"table of contents", "management's discussion and analysis", "management’s discussion & analysis"}:
+        return True
+    if lowered.startswith("fy 20") and "agency financial report" in lowered:
+        return True
+    return False
+
+
+def _looks_like_toc_block(lines: list[str]) -> bool:
+    if not lines:
+        return False
+    lowered_lines = [line.lower() for line in lines]
+    if any("table of contents" in line for line in lowered_lines):
+        return True
+    toc_like = sum(1 for line in lines if TOC_LINE_RE.match(_normalize_whitespace(line)))
+    return toc_like >= 4
+
+
+def _clean_context_block_text(block_text: str) -> str:
+    raw_lines = [line.strip() for line in str(block_text or "").splitlines() if line.strip()]
+    filtered_lines: list[str] = []
+    seen_lines: set[str] = set()
+    for line in raw_lines:
+        normalized = _normalize_whitespace(line)
+        if not normalized:
+            continue
+        if _is_boilerplate_line(normalized):
+            continue
+        if normalized.lower() in seen_lines:
+            continue
+        seen_lines.add(normalized.lower())
+        filtered_lines.append(normalized)
+    if _looks_like_toc_block(filtered_lines):
+        return ""
+    return "\n".join(filtered_lines).strip()
 
 
 def _normalize_contact_email(value: str) -> str | None:
@@ -660,12 +708,17 @@ def _ordered_chunks(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _join_chunk_context(chunks: list[dict[str, Any]], max_chars: int) -> str:
     parts: list[str] = []
     used = 0
+    seen_blocks: set[str] = set()
     for chunk in chunks:
         full_text = str(chunk.get("text") or "").strip()
         snippet = str(chunk.get("snippet") or "").strip()
-        block_text = full_text or snippet
+        block_text = _clean_context_block_text(full_text or snippet)
         if not block_text:
             continue
+        normalized_block = _normalize_whitespace(block_text)
+        if not normalized_block or normalized_block in seen_blocks:
+            continue
+        seen_blocks.add(normalized_block)
         source = str(chunk.get("source") or chunk.get("document_id") or "document")
         block = f"[Source: {source}]\n{block_text}"
         if used and used + len(block) + 2 > max_chars:
@@ -792,3 +845,27 @@ def _filter_secondary_retrieval_support(retrieval_support: str, full_cv_context:
             continue
         kept.append(block)
     return "\n\n".join(kept).strip()
+
+
+def _has_plausible_cv_grounding(grounding: dict[str, Any]) -> bool:
+    diagnostics = grounding.get("grounding_diagnostics") or {}
+    full_cv_context = str(grounding.get("full_cv_context") or "")
+    included_sections = diagnostics.get("included_sections") or []
+    confirmed_fields_present = "confirmed_fields" in included_sections
+    structured_sections = {
+        section for section in included_sections if section in {"experience", "education", "skills", "languages"}
+    }
+
+    if diagnostics.get("fallback_mostly_raw_text"):
+        return False
+
+    if not full_cv_context.strip():
+        return False
+
+    if not confirmed_fields_present:
+        return False
+
+    if not structured_sections:
+        return False
+
+    return True

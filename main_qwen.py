@@ -35,6 +35,11 @@ from src.services.rag_state import clear_rag_state, get_rag_index, initialize_ra
 from src.structured.envelope import StructuredResult, TaskExecutionRequest
 from src.structured.registry import build_structured_task_registry
 from src.structured.service import structured_service
+from src.structured.tasks import (
+    SUMMARY_FULL_DOCUMENT_TRIGGER_CHARS,
+    SUMMARY_PART_CHUNK_SIZE,
+    SUMMARY_PART_OVERLAP,
+)
 from src.ui.chat import render_chat_message
 from src.ui.sidebar import render_chat_sidebar
 from src.ui.structured_outputs import render_structured_result
@@ -52,6 +57,63 @@ STRUCTURED_RESULT_STATE_KEY = "phase5_structured_result"
 STRUCTURED_RENDER_MODE_STATE_KEY = "phase5_structured_render_mode"
 CHAT_DOCUMENT_SELECTION_STATE_KEY = "phase5_chat_document_ids"
 STRUCTURED_DOCUMENT_SELECTION_STATE_KEY = "phase5_structured_document_ids"
+
+AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER = {
+    "ollama": 256000,
+    "openai": 128000,
+}
+
+
+def _estimate_selected_document_chars(
+    rag_index: dict[str, object] | None,
+    document_ids: list[str],
+    *,
+    input_text: str = "",
+) -> int:
+    full_document_text = _build_full_document_text_from_selection(rag_index, document_ids)
+    return max(len(full_document_text or ""), len((input_text or "").strip()))
+
+
+def _resolve_auto_context_window_cap(provider: str, fallback: int) -> int:
+    configured = AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER.get(provider)
+    if configured is None:
+        return int(fallback)
+    return max(int(fallback), int(configured))
+
+
+def _resolve_chat_context_window(
+    *,
+    provider: str,
+    mode: str,
+    manual_context_window: int,
+    document_ids: list[str],
+    input_text: str,
+    rag_index: dict[str, object] | None,
+) -> tuple[int, int]:
+    if mode != "auto":
+        return int(manual_context_window), int(manual_context_window)
+
+    cap = _resolve_auto_context_window_cap(provider, manual_context_window)
+    document_chars = _estimate_selected_document_chars(rag_index, document_ids, input_text=input_text)
+    prompt_chars = len((input_text or "").strip())
+
+    desired = 12288
+    if document_chars >= 180000:
+        desired = 49152
+    elif document_chars >= 80000:
+        desired = 32768
+    elif document_chars >= 25000:
+        desired = 24576
+    elif document_chars >= 6000:
+        desired = 16384
+
+    if prompt_chars >= 4000:
+        desired = max(desired, 24576)
+    elif prompt_chars >= 1500:
+        desired = max(desired, 16384)
+
+    resolved = max(4096, min(desired, cap))
+    return int(resolved), int(cap)
 
 
 def _normalize_document_selection(
@@ -112,6 +174,117 @@ def _build_document_preview_map(
 
     return preview_map
 
+
+def _build_full_document_text_from_selection(
+    rag_index: dict[str, object] | None,
+    document_ids: list[str],
+) -> str:
+    if not isinstance(rag_index, dict) or not document_ids:
+        return ""
+    allowed = {str(item) for item in document_ids if item}
+    chunks = [
+        chunk
+        for chunk in rag_index.get("chunks", [])
+        if isinstance(chunk, dict)
+        and str(chunk.get("document_id") or chunk.get("file_hash") or "") in allowed
+    ]
+    ordered_chunks = sorted(
+        chunks,
+        key=lambda chunk: (
+            str(chunk.get("document_id") or chunk.get("file_hash") or "document"),
+            int(chunk.get("chunk_id") or 0),
+            int(chunk.get("start_char") or 0),
+        ),
+    )
+    parts = [str(chunk.get("text") or "").strip() for chunk in ordered_chunks if str(chunk.get("text") or "").strip()]
+    return "\n\n".join(parts).strip()
+
+
+def _split_text_for_summary_preview(
+    text: str,
+    chunk_size: int = SUMMARY_PART_CHUNK_SIZE,
+    overlap: int = SUMMARY_PART_OVERLAP,
+) -> list[str]:
+    cleaned = (text or "").strip()
+    if not cleaned:
+        return []
+    chunks: list[str] = []
+    start = 0
+    step = max(chunk_size - overlap, 1)
+    while start < len(cleaned):
+        end = min(start + chunk_size, len(cleaned))
+        chunk = cleaned[start:end].strip()
+        if chunk:
+            chunks.append(chunk)
+        if end >= len(cleaned):
+            break
+        start += step
+    return chunks
+
+
+def _estimate_summary_next_execution_preview(
+    *,
+    rag_index: dict[str, object] | None,
+    document_ids: list[str],
+    input_text: str,
+    context_strategy: str,
+) -> dict[str, object]:
+    full_document_text = _build_full_document_text_from_selection(rag_index, document_ids)
+    if full_document_text and len(full_document_text) > SUMMARY_FULL_DOCUMENT_TRIGGER_CHARS:
+        parts = _split_text_for_summary_preview(full_document_text)
+        stages = [
+            {
+                "stage_type": "map",
+                "label": f"Part {index} of {len(parts)}",
+                "chars_sent": len(part),
+                "context_preview": part[:6000],
+                "prompt_preview": (
+                    f"User intent / task:\n{input_text}\n\nDocument part:\n{part[:5000]}"
+                ),
+            }
+            for index, part in enumerate(parts, start=1)
+        ]
+        reduce_preview = "\n\n".join(
+            f"[PARTIAL SUMMARY {index}]\nExecutive summary: ...\nKey insights: ...\nTopics: ..."
+            for index in range(1, len(parts) + 1)
+        )[:6000]
+        stages.append(
+            {
+                "stage_type": "reduce",
+                "label": "Final synthesis",
+                "chars_sent": len(reduce_preview),
+                "context_preview": reduce_preview,
+                "prompt_preview": f"User intent / task:\n{input_text}\n\nPartial summaries from the full document:\n{reduce_preview}",
+            }
+        )
+        return {
+            "summary_mode": "full_document_map_reduce",
+            "full_document_chars": len(full_document_text),
+            "document_parts": len(parts),
+            "stages": stages,
+        }
+
+    preview_context = build_structured_document_context(
+        query=input_text,
+        document_ids=document_ids,
+        strategy=context_strategy,
+    )
+    return {
+        "summary_mode": "single_pass_context",
+        "full_document_chars": len(full_document_text or ""),
+        "context_chars_sent": len(preview_context),
+        "context_strategy": context_strategy,
+        "stages": [
+            {
+                "stage_type": "single_pass",
+                "label": f"Single-pass summary ({context_strategy})",
+                "chars_sent": len(preview_context),
+                "context_preview": preview_context[:6000],
+                "prompt_preview": f"Text to summarize:\n{input_text}\n\nContext:\n{preview_context[:5000]}",
+            }
+        ],
+    }
+
 raw_rag_store = load_rag_store(rag_settings.store_path)
 normalized_rag_store = normalize_rag_index(raw_rag_store, rag_settings)
 
@@ -165,6 +338,7 @@ default_context_window_by_provider = {
     selected_model,
     selected_prompt_profile,
     temperature,
+    context_window_mode,
     context_window,
     rag_chunk_size,
     rag_chunk_overlap,
@@ -223,7 +397,7 @@ if clear_requested:
 
 st.write(f"# {settings.project_name}")
 st.caption(
-    f"Provider: `{selected_provider}` · Modelo: `{selected_model}` · Perfil: `{selected_prompt_profile}` · Temperatura: `{temperature:.1f}` · Contexto: `{context_window}`"
+    f"Provider: `{selected_provider}` · Modelo: `{selected_model}` · Perfil: `{selected_prompt_profile}` · Temperatura: `{temperature:.1f}` · Contexto ({context_window_mode}): `{context_window}`"
 )
 st.caption(
     f"Embedding: {effective_rag_settings.embedding_model} · embedding_num_ctx={effective_rag_settings.embedding_context_window} · truncate={effective_rag_settings.embedding_truncate}"
@@ -366,17 +540,38 @@ with documents_tab:
 
     if index_requested and selected_uploaded_files:
         try:
-            with st.spinner("Extraindo texto, criando chunks e gerando embeddings..."):
-                loaded_documents = [load_document(uploaded_file, effective_rag_settings) for uploaded_file in selected_uploaded_files]
-                base_rag_index = rag_index if embedding_compatibility.get("compatible", True) else None
-                built_rag_index, sync_status = upsert_documents_in_rag_index(
-                    documents=loaded_documents,
-                    settings=effective_rag_settings,
-                    embedding_provider=embedding_provider,
-                    rag_index=base_rag_index,
+            index_progress_placeholder = st.empty()
+            index_progress_bar = st.progress(0)
+
+            total_files = len(selected_uploaded_files)
+            loaded_documents = []
+            for index, uploaded_file in enumerate(selected_uploaded_files, start=1):
+                progress_start = (index - 1) / max(total_files + 1, 1)
+                index_progress_bar.progress(int(progress_start * 100))
+                index_progress_placeholder.caption(
+                    f"Indexing progress: {index}/{total_files} · extraindo `{uploaded_file.name}`"
                 )
-                set_rag_index(built_rag_index)
-                save_rag_store(effective_rag_settings.store_path, built_rag_index)
+                loaded_documents.append(load_document(uploaded_file, effective_rag_settings))
+                progress_end = index / max(total_files + 1, 1)
+                index_progress_bar.progress(int(progress_end * 100))
+                index_progress_placeholder.caption(
+                    f"Indexing progress: {index}/{total_files} · arquivo processado `{uploaded_file.name}`"
+                )
+
+            index_progress_bar.progress(int((total_files / max(total_files + 1, 1)) * 100))
+            index_progress_placeholder.caption("Indexing progress: gerando chunks, embeddings e sincronizando índice")
+
+            base_rag_index = rag_index if embedding_compatibility.get("compatible", True) else None
+            built_rag_index, sync_status = upsert_documents_in_rag_index(
+                documents=loaded_documents,
+                settings=effective_rag_settings,
+                embedding_provider=embedding_provider,
+                rag_index=base_rag_index,
+            )
+            set_rag_index(built_rag_index)
+            save_rag_store(effective_rag_settings.store_path, built_rag_index)
+            index_progress_bar.progress(100)
+            index_progress_placeholder.caption("Indexing progress: 100% · indexação finalizada")
             if embedding_compatibility.get("compatible", True):
                 st.success(f"{len(loaded_documents)} documento(s) indexado(s) ou reindexado(s) com sucesso.")
             else:
@@ -605,6 +800,14 @@ with chat_tab:
     texto_usuario = st.chat_input("Digite sua mensagem")
 
     if texto_usuario:
+        chat_effective_context_window, chat_context_window_cap = _resolve_chat_context_window(
+            provider=selected_provider,
+            mode=context_window_mode,
+            manual_context_window=context_window,
+            document_ids=chat_selected_document_ids,
+            input_text=texto_usuario,
+            rag_index=rag_index,
+        )
         st.chat_message("user").write(texto_usuario)
         user_metadata = {
             "provider": selected_provider,
@@ -613,7 +816,9 @@ with chat_tab:
             "prompt_profile": selected_prompt_profile,
             "prompt_profile_label": selected_prompt_profile_label,
             "temperature": round(temperature, 1),
-            "context_window": context_window,
+            "context_window": chat_effective_context_window,
+            "context_window_mode": context_window_mode,
+            "context_window_cap": chat_context_window_cap,
             "source_document_ids": list(chat_selected_document_ids),
         }
         append_chat_message("user", texto_usuario, metadata=user_metadata)
@@ -682,14 +887,14 @@ with chat_tab:
                 model_messages, prompt_context_details = inject_rag_context(
                     build_prompt_messages(selected_prompt_profile, get_chat_messages()),
                     retrieved_chunks,
-                    context_window=context_window,
+                    context_window=chat_effective_context_window,
                     settings=effective_rag_settings,
                 )
                 stream = selected_provider_instance.stream_chat_completion(
                     messages=model_messages,
                     model=selected_model,
                     temperature=temperature,
-                    context_window=context_window,
+                    context_window=chat_effective_context_window,
                 )
 
                 partes = []
@@ -703,6 +908,9 @@ with chat_tab:
                 latencia = time.perf_counter() - inicio
                 set_last_latency(latencia)
                 st.caption(f"Resposta em {latencia:.2f}s")
+                st.caption(
+                    f"Contexto do chat nesta execução: modo `{context_window_mode}` · resolvido em `{chat_effective_context_window}` · cap `{chat_context_window_cap}`"
+                )
 
                 if debug_retrieval:
                     with st.expander("Debug de retrieval", expanded=False):
@@ -719,7 +927,9 @@ with chat_tab:
                                 "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
                                 "provider": selected_provider,
                                 "model": selected_model,
-                                "context_window": context_window,
+                                "context_window": chat_effective_context_window,
+                                "context_window_mode": context_window_mode,
+                                "context_window_cap": chat_context_window_cap,
                                 "vector_backend_used": retrieval_backend_used,
                                 "vector_backend_message": retrieval_backend_message,
                                 "filtered_chunks_available": filtered_chunks_available,
@@ -892,12 +1102,105 @@ with structured_tab:
         effective_structured_context_chars = 0
         effective_structured_context_blocks = 0
 
+    estimated_structured_document_chars = _estimate_selected_document_chars(
+        rag_index,
+        active_structured_document_ids if structured_use_documents else [],
+        input_text=structured_input_text,
+    )
+    structured_context_window_cap = (
+        context_window
+        if context_window_mode == "manual"
+        else _resolve_auto_context_window_cap(
+            selected_provider,
+            default_context_window_by_provider.get(selected_provider, context_window),
+        )
+    )
+    structured_context_window_resolved = structured_service.resolve_context_window(
+        TaskExecutionRequest(
+            task_type=selected_structured_task,
+            input_text=structured_input_text,
+            use_rag_context=False,
+            use_document_context=bool(structured_use_documents and active_structured_document_ids),
+            source_document_ids=list(active_structured_document_ids if structured_use_documents else []),
+            context_strategy=structured_context_strategy,
+            provider=selected_provider,
+            model=selected_model,
+            temperature=temperature,
+            context_window=None if context_window_mode == "auto" else structured_context_window_cap,
+        ),
+        max_context_window=structured_context_window_cap,
+    )
+
     can_run_structured = bool(structured_input_text.strip()) or bool(structured_use_documents and active_structured_document_ids)
+
+    stored_structured_result_preview = st.session_state.get(STRUCTURED_RESULT_STATE_KEY)
+    rendered_result_preview = (
+        StructuredResult.model_validate(stored_structured_result_preview)
+        if stored_structured_result_preview
+        else None
+    )
+
+    next_execution_summary_preview = {}
+    if selected_structured_task == "summary" and structured_use_documents and active_structured_document_ids:
+        next_execution_summary_preview = _estimate_summary_next_execution_preview(
+            rag_index=rag_index,
+            document_ids=active_structured_document_ids,
+            input_text=structured_input_text,
+            context_strategy=structured_context_strategy,
+        )
 
     # Show context preview outside the form
     with st.container(border=True):
         st.markdown("### Contexto final enviado para a IA")
-        if active_structured_document_ids:
+        st.caption(
+            f"Context window desta execução: modo `{context_window_mode}` · resolvido em `{structured_context_window_resolved}` (cap usado: `{structured_context_window_cap}` · chars estimados do documento: `{estimated_structured_document_chars}`)."
+        )
+        summary_metadata = (
+            rendered_result_preview.execution_metadata
+            if rendered_result_preview is not None
+            and rendered_result_preview.task_type == "summary"
+            and isinstance(rendered_result_preview.execution_metadata, dict)
+            else {}
+        )
+        summary_stages = summary_metadata.get("stages") if isinstance(summary_metadata.get("stages"), list) else []
+
+        if selected_structured_task == "summary" and next_execution_summary_preview:
+            st.markdown("#### Preview da próxima execução")
+            preview_mode = str(next_execution_summary_preview.get("summary_mode") or "unknown")
+            preview_stages = next_execution_summary_preview.get("stages") if isinstance(next_execution_summary_preview.get("stages"), list) else []
+            metric_col_a, metric_col_b, metric_col_c = st.columns(3)
+            metric_col_a.metric("Modo previsto", preview_mode)
+            metric_col_b.metric("Documento chars", next_execution_summary_preview.get("full_document_chars", 0))
+            metric_col_c.metric("Etapas previstas", len(preview_stages))
+            for index, stage in enumerate(preview_stages, start=1):
+                if not isinstance(stage, dict):
+                    continue
+                label = str(stage.get("label") or f"Stage {index}")
+                chars_sent = stage.get("chars_sent")
+                expander_title = label + (f" · chars={chars_sent}" if chars_sent is not None else "")
+                with st.expander(expander_title, expanded=False):
+                    context_preview = str(stage.get("context_preview") or "")
+                    prompt_preview = str(stage.get("prompt_preview") or "")
+                    if context_preview:
+                        st.caption("Contexto que seria enviado")
+                        st.text_area(
+                            f"Preview contexto etapa {index}",
+                            value=context_preview,
+                            height=220,
+                            disabled=True,
+                            key=f"phase5_structured_next_stage_context_{index}",
+                        )
+                    if prompt_preview and prompt_preview != context_preview:
+                        st.caption("Prompt estimado da etapa")
+                        st.text_area(
+                            f"Preview prompt etapa {index}",
+                            value=prompt_preview,
+                            height=180,
+                            disabled=True,
+                            key=f"phase5_structured_next_stage_prompt_{index}",
+                        )
+
+        if active_structured_document_ids and not next_execution_summary_preview:
             st.caption("Este painel mostra o contexto montado pela pipeline estruturada com base na seleção atual.")
             metric_col_a, metric_col_b = st.columns(2)
             metric_col_a.metric("Docs selecionados", len(active_structured_document_ids))
@@ -930,27 +1233,15 @@ with structured_tab:
 
         if structured_submit:
             st.session_state["phase5_structured_input"] = structured_input_text
-            with st.spinner("Generating structured output..."):
-                structured_request = TaskExecutionRequest(
-                    task_type=selected_structured_task,
-                    input_text=structured_input_text,
-                    use_rag_context=False,
-                    use_document_context=bool(structured_use_documents and active_structured_document_ids),
-                    source_document_ids=list(active_structured_document_ids if structured_use_documents else []),
-                    context_strategy=structured_context_strategy,
-                    provider=selected_provider,
-                    model=selected_model,
-                    temperature=temperature,
-                    context_window=context_window,
-                )
-                structured_result = structured_service.execute_task(structured_request)
-                st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
-                default_mode = structured_result.primary_render_mode or "json"
-                st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode
+            progress_placeholder = st.empty()
+            progress_bar = st.progress(0)
 
-    if structured_submit:
-        st.session_state["phase5_structured_input"] = structured_input_text
-        with st.spinner("Generating structured output..."):
+            def _structured_progress_callback(*, step: str, progress: float, detail: str = "") -> None:
+                normalized = max(0.0, min(float(progress), 1.0))
+                progress_bar.progress(int(normalized * 100))
+                label = detail or step.replace("_", " ")
+                progress_placeholder.caption(f"Progress: {int(normalized * 100)}% · {label}")
+
             structured_request = TaskExecutionRequest(
                 task_type=selected_structured_task,
                 input_text=structured_input_text,
@@ -961,9 +1252,12 @@ with structured_tab:
                 provider=selected_provider,
                 model=selected_model,
                 temperature=temperature,
-                context_window=context_window,
+                context_window=None if context_window_mode == "auto" else structured_context_window_cap,
+                progress_callback=_structured_progress_callback,
             )
             structured_result = structured_service.execute_task(structured_request)
+            progress_bar.progress(100)
+            progress_placeholder.caption("Progress: 100% · finalizado")
             st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
             default_mode = structured_result.primary_render_mode or "json"
             st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode

@@ -40,7 +40,7 @@ class RagSettings:
     top_k: int
     store_path: Path
     chroma_path: Path
-    rerank_pool_size: int = 8
+    rerank_pool_size: int = 16
     rerank_lexical_weight: float = 0.35
     context_budget_ratio: float = 0.45
     context_chars_per_token: float = 4.0
@@ -127,10 +127,10 @@ def get_rag_settings() -> RagSettings:
         embedding_truncate=os.getenv("OLLAMA_EMBEDDING_TRUNCATE", "true").strip().lower() not in {"0", "false", "no"},
         chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1200")),
         chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "80")),
-        top_k=int(os.getenv("RAG_TOP_K", "4")),
+        top_k=int(os.getenv("RAG_TOP_K", "6")),
         store_path=BASE_DIR / ".rag_store.json",
         chroma_path=BASE_DIR / ".chroma_rag",
-        rerank_pool_size=int(os.getenv("RAG_RERANK_POOL_SIZE", "8")),
+        rerank_pool_size=int(os.getenv("RAG_RERANK_POOL_SIZE", "16")),
         rerank_lexical_weight=float(os.getenv("RAG_RERANK_LEXICAL_WEIGHT", "0.35")),
         context_budget_ratio=float(os.getenv("RAG_CONTEXT_BUDGET_RATIO", "0.45")),
         context_chars_per_token=float(os.getenv("RAG_CONTEXT_CHARS_PER_TOKEN", "4.0")),

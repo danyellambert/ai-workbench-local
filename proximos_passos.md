@@ -1576,4 +1576,17 @@ O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 - [x] Integrar e endurecer o pipeline `evidence_cv` com OCR-first, VL-on-demand, shadow rollout e readiness para rollout controlado
 - [x] Ajustar o grounding do structured analysis para CV único usar contexto completo do documento e reduzir placeholders
 - [x] Canonicalizar o output final de educação do `cv_analysis` com datas, localizações e wording forte da USP
+- [x] Melhorar o pós-processamento de `summary` para reduzir casos de tópico único gigante
+- [x] Reestruturar summaries colapsados via LLM, evitando categorias fixas hardcoded como solução final
+- [x] Recalibrar `reading_time_minutes` para refletir o esforço de leitura do summary, não do documento inteiro
+- [x] Recalibrar `completeness_score` para ficar menos otimista em documentos longos
+- [x] Refinar prompts e pós-processamento de `summary` para reduzir títulos genéricos e melhorar a legibilidade executiva
+- [x] Adicionar barra de progresso e status textual durante a indexação de documentos no app
+- [x] Implementar resolução automática de `context_window` para structured outputs conforme task, estratégia e tamanho do documento
+- [x] Expor na UI da aba estruturada o `context_window` resolvido, o cap aplicado e a estimativa de chars do documento
+- [x] Criar modo `auto` vs `manual` para `context_window` na sidebar do app
+- [x] Corrigir o modo `auto` para não ficar preso ao default baixo de `OLLAMA_CONTEXT_WINDOW=8192`
+- [x] Definir caps automáticos por provider para o `context_window` (incluindo Ollama)
+- [x] Estender a lógica de `context_window` automático também para o fluxo de chat com RAG
+- [x] Expor no chat o `context_window` efetivo/resolvido para dar transparência operacional ao usuário
 - [ ] Fechar a Fase 5 com screenshots finais, mini demo e narrativa pronta para portfólio/README
