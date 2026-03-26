@@ -43,6 +43,57 @@ class ExtractedField(BaseModel):
     value: str = Field(description="Field value")
     evidence: Optional[str] = Field(default=None, description="Optional evidence supporting this field")
 
+    @staticmethod
+    def _stringify_value(value: Any) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            return value.strip()
+        if isinstance(value, (int, float, bool)):
+            return str(value)
+        if isinstance(value, list):
+            seen: set[str] = set()
+            parts: list[str] = []
+            for item in value:
+                cleaned = ExtractedField._stringify_value(item)
+                if not cleaned:
+                    continue
+                key = cleaned.casefold()
+                if key in seen:
+                    continue
+                seen.add(key)
+                parts.append(cleaned)
+            return "; ".join(parts)
+        if isinstance(value, dict):
+            if "value" in value and len(value) == 1:
+                return ExtractedField._stringify_value(value.get("value"))
+            parts = []
+            for key, item_value in value.items():
+                cleaned = ExtractedField._stringify_value(item_value)
+                if cleaned:
+                    parts.append(f"{key}: {cleaned}")
+            return "; ".join(parts)
+        return str(value).strip()
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_item(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return {"name": "field", "value": value}
+        if isinstance(value, dict):
+            data = dict(value)
+            if "name" not in data:
+                data["name"] = data.get("field") or data.get("label") or "field"
+            if "value" not in data:
+                fallback = data.get("text") or data.get("content")
+                if fallback is not None:
+                    data["value"] = fallback
+            data["value"] = cls._stringify_value(data.get("value"))
+            evidence = cls._stringify_value(data.get("evidence"))
+            data["evidence"] = evidence or None
+            return data
+        return value
+
 
 class RiskItem(BaseModel):
     """A structured risk identified in the source."""
@@ -51,6 +102,7 @@ class RiskItem(BaseModel):
     impact: Optional[str] = Field(default=None, description="Potential impact of the risk")
     owner: Optional[str] = Field(default=None, description="Risk owner if mentioned")
     due_date: Optional[str] = Field(default=None, description="Due date if mentioned")
+    evidence: Optional[str] = Field(default=None, description="Short grounded snippet supporting the risk")
 
     @model_validator(mode="before")
     @classmethod
@@ -72,6 +124,7 @@ class ActionItem(BaseModel):
     owner: Optional[str] = Field(default=None, description="Assigned owner if mentioned")
     due_date: Optional[str] = Field(default=None, description="Due date if mentioned")
     status: Optional[str] = Field(default=None, description="Optional action status")
+    evidence: Optional[str] = Field(default=None, description="Short grounded snippet supporting the action item")
 
     @model_validator(mode="before")
     @classmethod
@@ -128,6 +181,8 @@ class ChecklistItem(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()), description="Unique item ID")
     title: str = Field(description="Item title")
     description: str = Field(description="Detailed description")
+    source_text: Optional[str] = Field(default=None, description="Closest grounded source text supporting this item")
+    evidence: Optional[str] = Field(default=None, description="Short evidence snippet quoted or copied from the source")
     category: Optional[str] = Field(default=None, description="Category of the item when explicitly grounded")
     priority: Optional[Literal["high", "medium", "low"]] = Field(default=None, description="Priority level when explicitly grounded")
     status: Literal["pending", "completed", "skipped"] = Field(default="pending", description="Current status")
