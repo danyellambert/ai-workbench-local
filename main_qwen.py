@@ -3,6 +3,7 @@ from dataclasses import replace
 
 import streamlit as st
 from src.config import get_ollama_settings, get_rag_settings
+from src.evidence_cv.config import build_evidence_config_from_rag_settings
 from src.prompt_profiles import build_prompt_messages, get_prompt_profiles
 from src.providers.registry import build_provider_registry
 from src.rag.loaders import load_document
@@ -39,14 +40,17 @@ from src.structured.tasks import (
     SUMMARY_FULL_DOCUMENT_TRIGGER_CHARS,
     SUMMARY_PART_CHUNK_SIZE,
     SUMMARY_PART_OVERLAP,
+    build_extraction_execution_preview,
+    build_checklist_execution_preview,
 )
 from src.ui.chat import render_chat_message
-from src.ui.sidebar import render_chat_sidebar
+from src.ui.sidebar import render_chat_sidebar, render_runtime_sidebar_panel
 from src.ui.structured_outputs import render_structured_result
 
 
 settings = get_ollama_settings()
 rag_settings = get_rag_settings()
+evidence_config = build_evidence_config_from_rag_settings(rag_settings)
 provider_registry = build_provider_registry()
 prompt_profiles = get_prompt_profiles()
 structured_task_registry = build_structured_task_registry()
@@ -62,6 +66,9 @@ AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER = {
     "ollama": 256000,
     "openai": 128000,
 }
+
+STRUCTURED_PROGRESS_STEP_DELAY_S = 0.018
+STRUCTURED_PROGRESS_FINALIZE_DELAY_S = 0.012
 
 
 def _estimate_selected_document_chars(
@@ -283,6 +290,247 @@ def _estimate_summary_next_execution_preview(
                 "prompt_preview": f"Text to summarize:\n{input_text}\n\nContext:\n{preview_context[:5000]}",
             }
         ],
+    }
+
+
+def _resolve_structured_context_strategy(
+    *,
+    task_type: str,
+    input_text: str,
+    use_documents: bool,
+    selected_document_ids: list[str],
+) -> tuple[str, str]:
+    """Choose document_scan vs retrieval automatically based on task and user input."""
+    if not use_documents or not selected_document_ids:
+        return "document_scan", "Sem documentos selecionados; estratégia interna padrão aplicada."
+
+    normalized_input = (input_text or "").strip()
+    has_meaningful_query = len(normalized_input) >= 24
+
+    coverage_first_tasks = {"checklist", "extraction", "cv_analysis", "code_analysis"}
+    mixed_tasks = {"summary"}
+
+    if task_type in coverage_first_tasks:
+        if has_meaningful_query and task_type == "code_analysis":
+            return "retrieval", "Estratégia automática: retrieval, porque há instrução textual específica para análise de código."
+        return "document_scan", "Estratégia automática: document_scan, porque esta task prioriza cobertura estrutural do documento."
+
+    if task_type in mixed_tasks:
+        if has_meaningful_query:
+            return "retrieval", "Estratégia automática: retrieval, porque há texto suficiente para orientar a busca dos trechos mais relevantes."
+        return "document_scan", "Estratégia automática: document_scan, porque não há consulta forte no campo de texto e a task precisa cobrir melhor o documento."
+
+    return "document_scan", "Estratégia automática padrão: document_scan."
+
+
+def _format_structured_progress_label(task_type: str, step: str, detail: str) -> str:
+    if detail:
+        return detail
+
+    labels_by_task = {
+        "checklist": {
+            "initializing": "Iniciando checklist",
+            "loading_document": "Carregando documento",
+            "document_ready": "Preparando texto operacional",
+            "preparing_document": "Preparando documento completo",
+            "map_reduce_setup": "Dividindo checklist em partes",
+            "map": "Processando parte do checklist",
+            "reduce_prep": "Preparando consolidação final",
+            "reduce": "Consolidando checklist",
+            "building_context": "Montando contexto",
+            "prompt_ready": "Montando prompt do checklist",
+            "model_inference": "Gerando checklist no modelo",
+            "parsing": "Validando checklist",
+            "done": "Checklist finalizado",
+        },
+        "summary": {
+            "initializing": "Iniciando resumo",
+            "preparing_document": "Preparando documento",
+            "provider_ready": "Provider pronto",
+            "map_reduce_setup": "Dividindo documento em partes",
+            "map": "Processando parte do resumo",
+            "reduce": "Consolidando resumo",
+            "building_context": "Montando contexto",
+            "model_inference": "Gerando resumo no modelo",
+            "parsing": "Validando resumo",
+            "done": "Resumo finalizado",
+        },
+        "extraction": {
+            "initializing": "Iniciando extração",
+            "building_context": "Montando contexto",
+            "provider_ready": "Provider pronto",
+            "prompt_ready": "Montando prompt da extração",
+            "model_inference": "Executando extração",
+            "parsing": "Validando extração",
+            "done": "Extração finalizada",
+        },
+        "cv_analysis": {
+            "initializing": "Iniciando análise de CV",
+            "grounding": "Preparando grounding",
+            "provider_ready": "Provider pronto",
+            "prompt_ready": "Montando prompt da análise",
+            "model_inference": "Executando análise de CV",
+            "parsing": "Validando análise de CV",
+            "done": "Análise de CV finalizada",
+        },
+        "code_analysis": {
+            "initializing": "Iniciando análise de código",
+            "building_context": "Montando contexto",
+            "provider_ready": "Provider pronto",
+            "prompt_ready": "Montando prompt da análise",
+            "model_inference": "Executando análise de código",
+            "parsing": "Validando análise",
+            "done": "Análise de código finalizada",
+        },
+    }
+
+    return labels_by_task.get(task_type, {}).get(step, step.replace("_", " ").capitalize())
+
+
+def _extract_last_assistant_metadata(messages: list[dict[str, object]]) -> dict[str, object]:
+    for message in reversed(messages):
+        if message.get("role") != "assistant":
+            continue
+        metadata = message.get("metadata")
+        if isinstance(metadata, dict):
+            return metadata
+    return {}
+
+
+def _summarize_provider_path(provider: str, provider_label: str, ollama_base_url: str | None) -> tuple[str, str]:
+    if provider == "ollama":
+        base_url = str(ollama_base_url or "").strip()
+        route = f"{provider_label} -> {base_url or 'endpoint não configurado'}"
+        if any(token in base_url.lower() for token in ["localhost", "127.0.0.1"]):
+            dependency = "Dependência local: app + servidor Ollama rodam na sua máquina."
+        else:
+            dependency = "Dependência local parcial: app local, inferência via endpoint remoto compatível com Ollama."
+        return route, dependency
+    if provider == "openai":
+        return f"{provider_label} -> API cloud direta", "Dependência local: app local; inferência remota."
+    return provider_label, "Dependência local não classificada."
+
+
+def _build_document_runtime_rows(
+    document_ids: list[str],
+    document_preview_map: dict[str, dict[str, object]],
+    *,
+    default_vl_model: str,
+    default_ocr_backend: str,
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for document_id in document_ids:
+        preview = document_preview_map.get(str(document_id)) or {}
+        document = preview.get("document") if isinstance(preview, dict) else {}
+        if not isinstance(document, dict):
+            continue
+        loader_metadata = document.get("loader_metadata") if isinstance(document.get("loader_metadata"), dict) else {}
+        vl_runtime = loader_metadata.get("vl_runtime") if isinstance(loader_metadata.get("vl_runtime"), dict) else {}
+        rows.append(
+            {
+                "documento": document.get("name"),
+                "tipo": document.get("file_type"),
+                "chunks": preview.get("chunks_count"),
+                "extração_pdf": loader_metadata.get("strategy_label") or loader_metadata.get("strategy"),
+                "source_type": loader_metadata.get("source_type"),
+                "ocr_backend": loader_metadata.get("ocr_backend") or default_ocr_backend,
+                "evidence_pipeline": bool(loader_metadata.get("evidence_pipeline_used")),
+                "vl_model": vl_runtime.get("model") or default_vl_model,
+            }
+        )
+    return rows
+
+
+def _build_runtime_snapshot(
+    *,
+    selected_provider: str,
+    selected_provider_label: str,
+    selected_model: str,
+    selected_embedding_model: str,
+    selected_pdf_extraction_mode: str,
+    chat_selected_document_ids: list[str],
+    structured_selected_document_ids: list[str],
+    selected_structured_task: str,
+    messages: list[dict[str, object]],
+    structured_result: StructuredResult | None,
+    structured_task_registry,
+    document_preview_map: dict[str, dict[str, object]],
+    indexed_documents_count: int,
+    ollama_base_url: str,
+    default_vl_model: str,
+    default_ocr_backend: str,
+) -> dict[str, object]:
+    provider_path, local_dependency = _summarize_provider_path(
+        selected_provider,
+        selected_provider_label,
+        ollama_base_url,
+    )
+    last_chat_metadata = _extract_last_assistant_metadata(messages)
+    structured_metadata = structured_result.execution_metadata if structured_result and isinstance(structured_result.execution_metadata, dict) else {}
+    structured_telemetry = structured_metadata.get("telemetry") if isinstance(structured_metadata.get("telemetry"), dict) else {}
+    structured_timings = structured_telemetry.get("timings_s") if isinstance(structured_telemetry.get("timings_s"), dict) else {}
+    last_pre_model_prep_s = None
+    if isinstance(structured_timings, dict):
+        component_values = [
+            structured_timings.get("document_load_s"),
+            structured_timings.get("sanitize_s"),
+            structured_timings.get("context_build_s"),
+        ]
+        numeric_values = [float(value) for value in component_values if isinstance(value, (int, float))]
+        if numeric_values:
+            last_pre_model_prep_s = round(sum(numeric_values), 4)
+
+    task_model_map = {
+        task_name: (task_definition.default_model or selected_model)
+        for task_name, task_definition in structured_task_registry.list_tasks().items()
+    }
+
+    return {
+        "provider_path": provider_path,
+        "local_dependency": local_dependency,
+        "chat": {
+            "provider": last_chat_metadata.get("provider") or selected_provider,
+            "model": last_chat_metadata.get("model") or selected_model,
+            "embedding_model": selected_embedding_model,
+            "selected_documents": len(chat_selected_document_ids),
+            "retrieval_backend": last_chat_metadata.get("vector_backend_used"),
+            "last_total_s": last_chat_metadata.get("latency_s"),
+            "last_generation_s": last_chat_metadata.get("generation_latency_s"),
+            "last_retrieval_s": last_chat_metadata.get("retrieval_latency_s"),
+            "last_prompt_build_s": last_chat_metadata.get("prompt_build_latency_s"),
+        },
+        "structured": {
+            "current_task": selected_structured_task,
+            "provider": structured_metadata.get("provider") or selected_provider,
+            "model": structured_metadata.get("model") or selected_model,
+            "selected_documents": len(structured_selected_document_ids),
+            "last_total_s": (structured_timings.get("total_s") if isinstance(structured_timings, dict) else None),
+            "last_provider_s": (structured_timings.get("provider_total_s") if isinstance(structured_timings, dict) else None),
+            "last_pre_model_prep_s": last_pre_model_prep_s,
+            "last_document_load_s": (structured_timings.get("document_load_s") if isinstance(structured_timings, dict) else None),
+            "last_sanitize_s": (structured_timings.get("sanitize_s") if isinstance(structured_timings, dict) else None),
+            "last_context_s": (structured_timings.get("context_build_s") if isinstance(structured_timings, dict) else None),
+            "last_parsing_s": (structured_timings.get("parsing_s") if isinstance(structured_timings, dict) else None),
+            "task_model_map": task_model_map,
+        },
+        "documents": {
+            "pdf_extraction_mode": selected_pdf_extraction_mode,
+            "ocr_backend_default": default_ocr_backend,
+            "vl_model_default": default_vl_model,
+            "indexed_documents": indexed_documents_count,
+            "chat_selected_docs": _build_document_runtime_rows(
+                chat_selected_document_ids,
+                document_preview_map,
+                default_vl_model=default_vl_model,
+                default_ocr_backend=default_ocr_backend,
+            ),
+            "structured_selected_docs": _build_document_runtime_rows(
+                structured_selected_document_ids,
+                document_preview_map,
+                default_vl_model=default_vl_model,
+                default_ocr_backend=default_ocr_backend,
+            ),
+        },
     }
 
 raw_rag_store = load_rag_store(rag_settings.store_path)
@@ -800,6 +1048,7 @@ with chat_tab:
     texto_usuario = st.chat_input("Digite sua mensagem")
 
     if texto_usuario:
+        chat_total_started_at = time.perf_counter()
         chat_effective_context_window, chat_context_window_cap = _resolve_chat_context_window(
             provider=selected_provider,
             mode=context_window_mode,
@@ -842,6 +1091,9 @@ with chat_tab:
             "context_injected": False,
             "context_chunks": [],
         }
+        prompt_build_latency = None
+        generation_latency = None
+        total_latency = None
 
         if rag_index and chat_selected_document_ids and embedding_compatibility.get("compatible", True):
             try:
@@ -883,13 +1135,15 @@ with chat_tab:
         with st.chat_message("assistant"):
             placeholder = st.empty()
             try:
-                inicio = time.perf_counter()
+                prompt_build_started_at = time.perf_counter()
                 model_messages, prompt_context_details = inject_rag_context(
                     build_prompt_messages(selected_prompt_profile, get_chat_messages()),
                     retrieved_chunks,
                     context_window=chat_effective_context_window,
                     settings=effective_rag_settings,
                 )
+                prompt_build_latency = time.perf_counter() - prompt_build_started_at
+                generation_started_at = time.perf_counter()
                 stream = selected_provider_instance.stream_chat_completion(
                     messages=model_messages,
                     model=selected_model,
@@ -905,9 +1159,19 @@ with chat_tab:
                 texto_resposta_ia = "".join(partes).strip() or "A resposta veio vazia."
                 placeholder.markdown(texto_resposta_ia)
 
-                latencia = time.perf_counter() - inicio
-                set_last_latency(latencia)
-                st.caption(f"Resposta em {latencia:.2f}s")
+                generation_latency = time.perf_counter() - generation_started_at
+                total_latency = time.perf_counter() - chat_total_started_at
+                set_last_latency(total_latency)
+                st.caption(f"Resposta total em {total_latency:.2f}s")
+                timing_parts = []
+                if retrieval_latency is not None:
+                    timing_parts.append(f"retrieval={retrieval_latency:.2f}s")
+                if prompt_build_latency is not None:
+                    timing_parts.append(f"prompt={prompt_build_latency:.2f}s")
+                if generation_latency is not None:
+                    timing_parts.append(f"geração={generation_latency:.2f}s")
+                if timing_parts:
+                    st.caption(" · ".join(timing_parts))
                 st.caption(
                     f"Contexto do chat nesta execução: modo `{context_window_mode}` · resolvido em `{chat_effective_context_window}` · cap `{chat_context_window_cap}`"
                 )
@@ -925,6 +1189,9 @@ with chat_tab:
                                 "selected_document_ids": chat_selected_document_ids,
                                 "retrieved_chunks": len(retrieved_chunks),
                                 "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
+                                "prompt_build_latency_s": round(prompt_build_latency, 2) if prompt_build_latency is not None else None,
+                                "generation_latency_s": round(generation_latency, 2) if generation_latency is not None else None,
+                                "total_latency_s": round(total_latency, 2) if total_latency is not None else None,
                                 "provider": selected_provider,
                                 "model": selected_model,
                                 "context_window": chat_effective_context_window,
@@ -962,6 +1229,8 @@ with chat_tab:
             **user_metadata,
             "latency_s": round(get_last_latency(), 2) if get_last_latency() is not None else None,
             "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
+            "prompt_build_latency_s": round(prompt_build_latency, 2) if prompt_build_latency is not None else None,
+            "generation_latency_s": round(generation_latency, 2) if generation_latency is not None else None,
             "retrieved_chunks_count": len(retrieved_chunks),
             "vector_backend_used": retrieval_backend_used,
             "vector_backend_message": retrieval_backend_message,
@@ -1069,24 +1338,19 @@ with structured_tab:
     else:
         st.caption("Nenhum documento selecionado")
 
-    recommended_strategy = "document_scan" if selected_structured_task in {"cv_analysis", "extraction", "checklist", "code_analysis"} else "retrieval"
-    strategy_options = ["document_scan", "retrieval"]
+    structured_context_strategy, structured_context_strategy_reason = _resolve_structured_context_strategy(
+        task_type=selected_structured_task,
+        input_text=structured_input_text,
+        use_documents=structured_use_documents,
+        selected_document_ids=active_structured_document_ids,
+    )
     if structured_use_documents:
-        structured_context_strategy = st.radio(
-            "Estratégia de contexto",
-            options=strategy_options,
-            index=strategy_options.index(recommended_strategy),
-            horizontal=False,
-            help="document_scan lê os documentos do índice em ordem; retrieval busca trechos por query dentro da pipeline estruturada. Nenhuma das estratégias reabre o PDF bruto em tempo real.",
-            key="phase5_structured_context_strategy",
-        )
-        if selected_structured_task in {"cv_analysis", "extraction", "code_analysis"}:
-            st.caption("Recomendado: document_scan")
+        st.caption(f"Estratégia automática: `{structured_context_strategy}`")
+        st.caption(structured_context_strategy_reason)
         if selected_structured_task == "cv_analysis" and len(active_structured_document_ids) > 1:
             st.warning("Para `cv_analysis`, o ideal é selecionar 1 currículo por vez para evitar mistura de perfis.")
     else:
-        structured_context_strategy = recommended_strategy
-        st.caption("Estratégia oculta porque nenhum documento será usado nesta execução.")
+        st.caption("Estratégia automática pronta, mas nenhum documento será usado nesta execução.")
 
     # Calculate effective context outside the form for reactive updates
     if structured_use_documents and active_structured_document_ids:
@@ -1141,6 +1405,8 @@ with structured_tab:
     )
 
     next_execution_summary_preview = {}
+    next_execution_extraction_preview = {}
+    next_execution_checklist_preview = {}
     if selected_structured_task == "summary" and structured_use_documents and active_structured_document_ids:
         next_execution_summary_preview = _estimate_summary_next_execution_preview(
             rag_index=rag_index,
@@ -1148,10 +1414,31 @@ with structured_tab:
             input_text=structured_input_text,
             context_strategy=structured_context_strategy,
         )
+    elif selected_structured_task == "extraction" and structured_use_documents and active_structured_document_ids:
+        full_document_text_for_extraction = _build_full_document_text_from_selection(rag_index, active_structured_document_ids)
+        next_execution_extraction_preview = build_extraction_execution_preview(
+            input_text=structured_input_text,
+            document_text=full_document_text_for_extraction,
+            context_text_from_scan=effective_structured_context_preview,
+        )
+    elif selected_structured_task == "checklist" and structured_use_documents and active_structured_document_ids:
+        full_document_text_for_checklist = _build_full_document_text_from_selection(rag_index, active_structured_document_ids)
+        next_execution_checklist_preview = build_checklist_execution_preview(
+            input_text=structured_input_text,
+            document_text=full_document_text_for_checklist,
+            context_text_from_scan=effective_structured_context_preview,
+        )
 
     # Show context preview outside the form
     with st.container(border=True):
-        st.markdown("### Contexto final enviado para a IA")
+        context_panel_title = "### Contexto final enviado para a IA"
+        if selected_structured_task == "checklist":
+            context_panel_title = "### Prévia do contexto para gerar o checklist"
+        elif selected_structured_task == "summary":
+            context_panel_title = "### Prévia do contexto para gerar o resumo"
+        elif selected_structured_task == "extraction":
+            context_panel_title = "### Prévia do contexto para gerar a extração"
+        st.markdown(context_panel_title)
         st.caption(
             f"Context window desta execução: modo `{context_window_mode}` · resolvido em `{structured_context_window_resolved}` (cap usado: `{structured_context_window_cap}` · chars estimados do documento: `{estimated_structured_document_chars}`)."
         )
@@ -1200,8 +1487,54 @@ with structured_tab:
                             key=f"phase5_structured_next_stage_prompt_{index}",
                         )
 
-        if active_structured_document_ids and not next_execution_summary_preview:
-            st.caption("Este painel mostra o contexto montado pela pipeline estruturada com base na seleção atual.")
+        if selected_structured_task == "extraction" and next_execution_extraction_preview:
+            st.markdown("#### Preview da próxima execução")
+            metric_col_a, metric_col_b, metric_col_c = st.columns(3)
+            metric_col_a.metric("Modo previsto", next_execution_extraction_preview.get("extraction_mode", "-"))
+            metric_col_b.metric("Documento chars", next_execution_extraction_preview.get("full_document_chars", 0))
+            metric_col_c.metric("Chars reais enviados", next_execution_extraction_preview.get("context_chars_sent", 0))
+            context_preview_value = str(next_execution_extraction_preview.get("context_preview") or "")
+            if context_preview_value:
+                st.text_area(
+                    "Texto real previsto para envio ao modelo",
+                    value=context_preview_value,
+                    height=520,
+                    disabled=True,
+                    key="phase5_structured_extraction_real_execution_preview",
+                )
+            prompt_preview_value = str(next_execution_extraction_preview.get("prompt_preview") or "")
+            if prompt_preview_value and prompt_preview_value != context_preview_value:
+                with st.expander("Prompt completo previsto", expanded=False):
+                    st.text_area(
+                        "Prompt previsto da extração",
+                        value=prompt_preview_value,
+                        height=320,
+                        disabled=True,
+                        key="phase5_structured_extraction_prompt_preview",
+                    )
+        elif selected_structured_task == "checklist" and next_execution_checklist_preview:
+            st.markdown("#### Preview da próxima execução")
+            metric_col_a, metric_col_b, metric_col_c = st.columns(3)
+            metric_col_a.metric("Modo previsto", next_execution_checklist_preview.get("checklist_mode", "-"))
+            metric_col_b.metric("Documento chars", next_execution_checklist_preview.get("full_document_chars", 0))
+            metric_col_c.metric("Chars reais enviados", next_execution_checklist_preview.get("context_chars_sent", 0))
+            context_preview_value = str(next_execution_checklist_preview.get("context_preview") or "")
+            if context_preview_value:
+                st.text_area(
+                    "Texto real previsto para envio ao modelo",
+                    value=context_preview_value,
+                    height=520,
+                    disabled=True,
+                    key="phase5_structured_checklist_real_execution_preview",
+                )
+            else:
+                st.warning("Não foi possível estimar o texto real que será enviado ao modelo para o checklist.")
+
+        elif active_structured_document_ids and not next_execution_summary_preview and not next_execution_extraction_preview:
+            if selected_structured_task == "checklist":
+                st.caption("Este é o contexto-base que será usado para montar o checklist antes da geração. Assim você consegue revisar o material de origem antes de rodar a análise.")
+            else:
+                st.caption("Este painel mostra o contexto montado pela pipeline estruturada com base na seleção atual.")
             metric_col_a, metric_col_b = st.columns(2)
             metric_col_a.metric("Docs selecionados", len(active_structured_document_ids))
             metric_col_b.metric("Chars do contexto", effective_structured_context_chars)
@@ -1235,12 +1568,23 @@ with structured_tab:
             st.session_state["phase5_structured_input"] = structured_input_text
             progress_placeholder = st.empty()
             progress_bar = st.progress(0)
+            displayed_progress = {"value": 0}
 
             def _structured_progress_callback(*, step: str, progress: float, detail: str = "") -> None:
                 normalized = max(0.0, min(float(progress), 1.0))
-                progress_bar.progress(int(normalized * 100))
-                label = detail or step.replace("_", " ")
-                progress_placeholder.caption(f"Progress: {int(normalized * 100)}% · {label}")
+                target_progress = int(normalized * 100)
+                label = _format_structured_progress_label(selected_structured_task, step, detail)
+                current_progress = displayed_progress["value"]
+
+                if target_progress <= current_progress:
+                    progress_placeholder.markdown(f"**{current_progress}%** · {label}")
+                    return
+
+                for next_progress in range(current_progress + 1, target_progress + 1):
+                    displayed_progress["value"] = next_progress
+                    progress_placeholder.markdown(f"**{next_progress}%** · {label}")
+                    progress_bar.progress(next_progress)
+                    time.sleep(STRUCTURED_PROGRESS_STEP_DELAY_S)
 
             structured_request = TaskExecutionRequest(
                 task_type=selected_structured_task,
@@ -1254,10 +1598,17 @@ with structured_tab:
                 temperature=temperature,
                 context_window=None if context_window_mode == "auto" else structured_context_window_cap,
                 progress_callback=_structured_progress_callback,
+                telemetry={"current_stage": "structured_request_initialized"},
             )
             structured_result = structured_service.execute_task(structured_request)
+            if displayed_progress["value"] < 100:
+                for next_progress in range(displayed_progress["value"] + 1, 101):
+                    displayed_progress["value"] = next_progress
+                    progress_placeholder.markdown(f"**{next_progress}%** · Finalizando")
+                    progress_bar.progress(next_progress)
+                    time.sleep(STRUCTURED_PROGRESS_FINALIZE_DELAY_S)
             progress_bar.progress(100)
-            progress_placeholder.caption("Progress: 100% · finalizado")
+            progress_placeholder.markdown("**100%** · Finalizado")
             st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
             default_mode = structured_result.primary_render_mode or "json"
             st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode
@@ -1293,3 +1644,23 @@ with structured_tab:
             selected_render_mode = structured_result.primary_render_mode or "json"
         st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = selected_render_mode
         render_structured_result(structured_result, requested_mode=selected_render_mode)
+
+runtime_snapshot = _build_runtime_snapshot(
+    selected_provider=selected_provider,
+    selected_provider_label=selected_provider_label,
+    selected_model=selected_model,
+    selected_embedding_model=selected_embedding_model,
+    selected_pdf_extraction_mode=selected_pdf_extraction_mode,
+    chat_selected_document_ids=chat_selected_document_ids if 'chat_selected_document_ids' in locals() else [],
+    structured_selected_document_ids=active_structured_document_ids if 'active_structured_document_ids' in locals() else [],
+    selected_structured_task=selected_structured_task if 'selected_structured_task' in locals() else "",
+    messages=get_chat_messages(),
+    structured_result=structured_result if 'structured_result' in locals() else None,
+    structured_task_registry=structured_task_registry,
+    document_preview_map=document_preview_map,
+    indexed_documents_count=len(indexed_documents),
+    ollama_base_url=settings.base_url,
+    default_vl_model=evidence_config.vl_model,
+    default_ocr_backend=evidence_config.ocr_backend,
+)
+render_runtime_sidebar_panel(runtime_snapshot)

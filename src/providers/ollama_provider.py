@@ -13,6 +13,7 @@ class OllamaProvider:
     FALLBACK_MODELS = [
         "qwen2.5-coder:7b",
         "qwen2.5-coder:14b",
+        "qwen3.5:397b-cloud",
         "deepseek-coder:6.7b",
         "qwen3-coder:480b-cloud",
     ]
