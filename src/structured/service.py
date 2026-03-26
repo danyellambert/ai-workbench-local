@@ -21,6 +21,11 @@ _PLACEHOLDER_MARKERS = {
     "https://linkedin.com/in/example",
     "company x",
 }
+_AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER = {
+    "ollama": 256000,
+    "openai": 128000,
+}
+
 class StructuredOutputService:
     """Service for executing structured output tasks."""
     def __init__(self) -> None:
@@ -56,11 +61,15 @@ class StructuredOutputService:
             result = handler.execute(execution_request)
             result.context_used = (execution_request.use_document_context or execution_request.use_rag_context) and bool(execution_request.source_document_ids)
             result.source_documents = list(execution_request.source_document_ids)
+            telemetry = execution_request.telemetry if isinstance(execution_request.telemetry, dict) else {}
             result.execution_metadata = {
                 **(result.execution_metadata if isinstance(result.execution_metadata, dict) else {}),
+                "provider": execution_request.provider,
+                "model": execution_request.model,
                 "resolved_context_window": context_window,
                 "context_window_cap": context_window_cap,
                 "document_chars_estimate": self._estimate_document_chars(request),
+                **({"telemetry": telemetry} if telemetry else {}),
             }
             if result.primary_render_mode is None:
                 result.primary_render_mode = task_definition.primary_render_mode
@@ -76,13 +85,15 @@ class StructuredOutputService:
                 request.input_text,
             )
     def resolve_context_window(self, request: TaskExecutionRequest, *, max_context_window: int | None = None) -> int:
-        cap = int(max_context_window or self.ollama_settings.default_context_window)
+        fallback_cap = int(max_context_window or self.ollama_settings.default_context_window)
+        configured_provider_cap = _AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER.get(request.provider or "", fallback_cap)
+        cap = max(fallback_cap, int(configured_provider_cap))
         doc_chars = self._estimate_document_chars(request)
         base_by_task = {
             "summary": 32768,
             "extraction": 16384,
             "cv_analysis": 24576,
-            "checklist": 8192,
+            "checklist": 16384,
             "code_analysis": 12288,
         }
         base = base_by_task.get(request.task_type, 12288)
@@ -104,6 +115,13 @@ class StructuredOutputService:
                 base = 24576
             elif doc_chars >= 30000:
                 base = 16384
+        elif request.task_type == "checklist":
+            if doc_chars >= 80000:
+                base = 32768
+            elif doc_chars >= 30000:
+                base = 24576
+            elif doc_chars >= 12000:
+                base = 16384
         elif request.task_type == "code_analysis":
             if len((request.input_text or "")) >= 12000 or doc_chars >= 20000:
                 base = 16384
@@ -111,7 +129,7 @@ class StructuredOutputService:
         strategy = (request.context_strategy or "").lower().strip()
         if strategy == "retrieval":
             base = min(base, 16384 if request.task_type != "summary" else 24576)
-        elif strategy == "document_scan" and request.task_type in {"summary", "cv_analysis", "extraction"}:
+        elif strategy == "document_scan" and request.task_type in {"summary", "cv_analysis", "extraction", "checklist"}:
             base = max(base, 16384)
 
         resolved = min(base, cap)
@@ -138,6 +156,7 @@ class StructuredOutputService:
             return
         original_serialized = result.validated_output.model_dump(mode="json") if hasattr(result.validated_output, "model_dump") else None
         if isinstance(payload, ChecklistPayload):
+            payload = self._improve_checklist_payload(payload)
             total_items = len(payload.items)
             completed_items = sum(1 for item in payload.items if item.status == "completed")
             progress_percentage = round((completed_items / total_items) * 100.0, 1) if total_items else 0.0
@@ -150,9 +169,9 @@ class StructuredOutputService:
             repeated_duration = len(set(durations)) == 1 and len(durations) == len(payload.items)
             for item in payload.items:
                 normalized_items.append(item.model_copy(update={
-                    'category': None if repeated_category and item.category == categories[0] else item.category,
+                    'category': item.category,
                     'priority': None if repeated_priority and item.priority == priorities[0] else item.priority,
-                    'estimated_time_minutes': None if repeated_duration and item.estimated_time_minutes == durations[0] else item.estimated_time_minutes,
+                    'estimated_time_minutes': None,
                     'status': item.status or 'pending',
                     'dependencies': item.dependencies or [],
                 }))
@@ -421,6 +440,220 @@ class StructuredOutputService:
             result.parsed_json = normalized_serialized
             if original_serialized is not None and normalized_serialized != original_serialized:
                 result.repair_applied = True
+
+    def _improve_checklist_payload(self, payload: ChecklistPayload) -> ChecklistPayload:
+        generic_categories = {"preparation", "general", "checklist", "phase", "procedure"}
+        non_grounded_evidence_markers = {
+            "not explicitly stated in the checklist, but implied as part of the overall safety checks.",
+            "implied as part of the overall safety checks.",
+            "not explicitly stated",
+        }
+
+        def infer_category(existing_category: str | None, source_text: str | None, description: str | None) -> str | None:
+            normalized_existing = normalize_literal_text(existing_category)
+            if normalized_existing and normalized_existing.lower() not in generic_categories:
+                return normalized_existing
+
+            for candidate_text in [source_text, description]:
+                normalized_candidate = normalize_literal_text(candidate_text)
+                if not normalized_candidate:
+                    continue
+                match = re.match(r'^([A-Z][A-Za-z0-9 /&()_-]{2,40}):\s+', normalized_candidate)
+                if not match:
+                    continue
+                candidate_category = normalize_literal_text(match.group(1))
+                if candidate_category and 1 <= len(candidate_category.split()) <= 6:
+                    return candidate_category
+
+            return None
+
+        def normalize_literal_text(text: str | None) -> str:
+            cleaned = " ".join(str(text or "").split()).strip()
+            cleaned = cleaned.replace(" ,", ",").replace(" .", ".")
+            return cleaned
+
+        def is_answer_only_text(text: str | None) -> bool:
+            normalized = normalize_literal_text(text).strip(" .!?;:-")
+            lowered = normalized.lower()
+            if not lowered or '?' in lowered:
+                return False
+            if lowered in {"yes", "no", "not applicable", "n/a"}:
+                return True
+            if lowered.startswith("yes,") or lowered.startswith("no,"):
+                return True
+            if lowered.startswith("yes and ") or lowered.startswith("no and "):
+                return True
+            return False
+
+        def strip_list_marker(text: str | None) -> str:
+            normalized = normalize_literal_text(text)
+            return re.sub(r'^[-•]\s+', '', normalized).strip()
+
+        def strip_answer_suffix(text: str | None) -> str:
+            normalized = strip_list_marker(text)
+            if not normalized:
+                return ""
+            if is_answer_only_text(normalized):
+                return ""
+            if '?' in normalized:
+                question_part, suffix = normalized.split('?', 1)
+                if is_answer_only_text(suffix):
+                    return f"{question_part.strip()}?"
+            return normalized
+
+        def make_evidence(source_text: str | None, evidence: str | None) -> str | None:
+            source = strip_answer_suffix(source_text)
+            snippet = strip_answer_suffix(evidence)
+            if snippet and snippet.lower() in non_grounded_evidence_markers:
+                snippet = ""
+            if snippet:
+                return snippet
+            return source or None
+
+        def title_from_source(source_text: str | None, fallback: str | None) -> str:
+            source = strip_answer_suffix(source_text)
+            fallback_text = strip_answer_suffix(fallback)
+            if not source:
+                return fallback_text
+            title = re.sub(r'\s+', ' ', source).strip()
+            title = title.rstrip('?').rstrip('.').strip()
+            if not title:
+                return fallback_text
+            return title
+
+        def strip_category_prefix_from_title(title: str, category: str | None) -> str:
+            normalized_title = normalize_literal_text(title)
+            normalized_category = normalize_literal_text(category)
+            if not normalized_title or not normalized_category:
+                return normalized_title
+            prefix_patterns = [
+                rf'^{re.escape(normalized_category)}\s*:\s*',
+                rf'^{re.escape(normalized_category)}\s*[\-–—]\s*',
+            ]
+            stripped = normalized_title
+            for pattern in prefix_patterns:
+                stripped = re.sub(pattern, '', stripped, flags=re.I).strip()
+            if stripped and stripped != normalized_title:
+                return stripped
+            return normalized_title
+
+        def description_from_source(source_text: str | None, evidence: str | None, fallback: str | None) -> str:
+            source = strip_answer_suffix(source_text)
+            snippet = strip_answer_suffix(evidence)
+            fallback_text = strip_answer_suffix(fallback)
+            return source or snippet or fallback_text
+
+        def should_drop_item(title: str, description: str) -> bool:
+            normalized_title = normalize_literal_text(title).lower()
+            normalized_description = normalize_literal_text(description).lower()
+            if not normalized_title and not normalized_description:
+                return True
+            placeholder_markers = {
+                "real action item",
+                "operational action item",
+                "checklist part title",
+                "category=-",
+            }
+            if normalized_title in placeholder_markers or normalized_description in placeholder_markers:
+                return True
+            if normalized_title.startswith("category=") or normalized_description.startswith("category="):
+                return True
+            return False
+
+        def dedupe_key(title: str, source_text: str, category: str | None) -> tuple[str, str, str]:
+            normalized_title = normalize_literal_text(title).lower()
+            normalized_source = normalize_literal_text(source_text).lower()
+            normalized_category = normalize_literal_text(category).lower()
+            return (normalized_title, normalized_source, normalized_category)
+
+        def split_by_question_marks(text: str) -> list[str]:
+            normalized = normalize_literal_text(text)
+            if not normalized:
+                return []
+            if normalized.count('?') <= 1:
+                return [normalized]
+            parts = [normalize_literal_text(item) for item in re.findall(r'[^?]+\?', normalized)]
+            remainder = normalize_literal_text(re.sub(r'(?:[^?]+\?)+', '', normalized))
+            if remainder:
+                parts.append(remainder)
+            return [item for item in parts if item]
+
+        def split_by_delimiters(text: str) -> list[str]:
+            normalized = normalize_literal_text(text)
+            if not normalized:
+                return []
+            if normalized.count('?') > 1:
+                return split_by_question_marks(normalized)
+            for delimiter in [' | ', '; ']:
+                if delimiter not in normalized:
+                    continue
+                parts = [normalize_literal_text(part) for part in normalized.split(delimiter)]
+                parts = [part for part in parts if part]
+                if len(parts) > 1:
+                    return parts
+            return [normalized]
+
+        def split_atomic_item(source_text: str | None, evidence: str | None) -> list[tuple[str, str | None]]:
+            normalized_source = normalize_literal_text(source_text)
+            normalized_evidence = normalize_literal_text(evidence)
+            source_segments = split_by_delimiters(normalized_source)
+            if not source_segments:
+                return []
+
+            if not normalized_evidence or normalized_evidence == normalized_source:
+                evidence_segments = source_segments
+            else:
+                evidence_segments = split_by_delimiters(normalized_evidence)
+                if len(evidence_segments) != len(source_segments):
+                    short_evidence = len(normalized_evidence.split()) <= 6
+                    if short_evidence:
+                        evidence_segments = [normalized_evidence] * len(source_segments)
+                    else:
+                        evidence_segments = source_segments
+
+            return list(zip(source_segments, evidence_segments))
+
+        updated_items = []
+        seen_keys: set[tuple[str, str, str]] = set()
+        for index, item in enumerate(payload.items, start=1):
+            atomic_segments = split_atomic_item(item.source_text, item.evidence)
+            if not atomic_segments:
+                atomic_segments = [(strip_list_marker(item.source_text), strip_list_marker(item.evidence))]
+
+            for atomic_source_text, atomic_evidence_candidate in atomic_segments:
+                atomic_source_text = strip_answer_suffix(atomic_source_text)
+                atomic_evidence_candidate = strip_answer_suffix(atomic_evidence_candidate)
+                evidence = make_evidence(atomic_source_text, atomic_evidence_candidate)
+                if not evidence:
+                    continue
+                new_title = title_from_source(atomic_source_text, item.title)
+                new_description = description_from_source(atomic_source_text, atomic_evidence_candidate, item.description)
+                if should_drop_item(new_title, new_description):
+                    continue
+                category = infer_category(item.category, atomic_source_text, new_description)
+                new_title = strip_category_prefix_from_title(new_title, category)
+                if (
+                    len(new_title.split()) > 24
+                    and '?' not in (atomic_source_text or '')
+                    and category is None
+                ):
+                    continue
+                key = dedupe_key(new_title, atomic_source_text or new_description, category)
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
+                updated_items.append(item.model_copy(update={
+                    "id": f"item-{len(updated_items) + 1}",
+                    "title": new_title,
+                    "description": new_description,
+                    "source_text": strip_list_marker(atomic_source_text or new_description),
+                    "evidence": evidence,
+                    "category": category,
+                    "dependencies": [],
+                }))
+
+        return payload.model_copy(update={"items": updated_items})
+
     def _collect_string_values(self, value: Any) -> list[str]:
         if value is None:
             return []

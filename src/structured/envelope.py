@@ -72,5 +72,6 @@ class TaskExecutionRequest(BaseModel):
     temperature: Optional[float] = Field(default=None, description="Temperature setting")
     context_window: Optional[int] = Field(default=None, description="Context window size")
     progress_callback: Any = Field(default=None, description="Optional callback for UI progress updates during execution")
+    telemetry: Dict[str, Any] = Field(default_factory=dict, description="Mutable telemetry collected during execution")
 
     model_config = {"arbitrary_types_allowed": True}
