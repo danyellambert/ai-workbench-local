@@ -30,6 +30,12 @@ from src.services.chat_state import (
     set_last_latency,
 )
 from src.storage.chat_history import clear_chat_history, load_chat_history, save_chat_history
+from src.storage.phase55_shadow_log import (
+    append_shadow_log_entry,
+    clear_shadow_log,
+    load_shadow_log,
+    summarize_shadow_log,
+)
 from src.storage.rag_store import clear_rag_store, load_rag_store, save_rag_store
 from src.services.document_context import build_structured_document_context
 from src.services.rag_state import clear_rag_state, get_rag_index, initialize_rag_state, set_rag_index
@@ -61,6 +67,7 @@ STRUCTURED_RESULT_STATE_KEY = "phase5_structured_result"
 STRUCTURED_RENDER_MODE_STATE_KEY = "phase5_structured_render_mode"
 CHAT_DOCUMENT_SELECTION_STATE_KEY = "phase5_chat_document_ids"
 STRUCTURED_DOCUMENT_SELECTION_STATE_KEY = "phase5_structured_document_ids"
+PHASE55_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langchain_shadow_log.json"
 
 AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER = {
     "ollama": 256000,
@@ -234,6 +241,24 @@ def _build_retrieval_shadow_summary(
         "alternate_top_1": _chunk_label(alternate_chunks[0]) if alternate_chunks else None,
         "alternate_backend_message": alternate_details.get("backend_message"),
         "alternate_fallback_reason": alternate_details.get("retrieval_strategy_fallback_reason"),
+    }
+
+
+def _build_shadow_log_entry(
+    *,
+    query: str,
+    provider: str,
+    model: str,
+    document_ids: list[str],
+    shadow_summary: dict[str, object],
+) -> dict[str, object]:
+    return {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "query": (query or "").strip()[:400],
+        "provider": provider,
+        "model": model,
+        "document_ids": list(document_ids),
+        **shadow_summary,
     }
 
 
@@ -620,6 +645,8 @@ rag_index = get_rag_index()
 indexed_documents_preview = get_indexed_documents(rag_index, rag_settings)
 indexed_chunks_preview = len(rag_index.get("chunks", [])) if isinstance(rag_index, dict) else 0
 vector_backend_status_preview = inspect_vector_backend_status(rag_index, rag_settings)
+phase55_shadow_log_entries = load_shadow_log(PHASE55_SHADOW_LOG_PATH)
+phase55_shadow_log_summary = summarize_shadow_log(phase55_shadow_log_entries)
 
 provider_options = {
     provider_key: provider_data["label"]
@@ -1114,6 +1141,32 @@ with chat_tab:
         st.session_state[CHAT_DOCUMENT_SELECTION_STATE_KEY] = []
         st.info("Nenhum documento indexado ainda. Primeiro use a guia Documentos para carregar e indexar arquivos.")
 
+    with st.expander("Fase 5.5 · histórico de comparação manual vs LangChain", expanded=False):
+        st.caption(f"Log local: `{PHASE55_SHADOW_LOG_PATH.name}`")
+        st.write(phase55_shadow_log_summary)
+        if phase55_shadow_log_entries:
+            recent_entries = list(reversed(phase55_shadow_log_entries[-10:]))
+            st.dataframe(
+                [
+                    {
+                        "timestamp": entry.get("timestamp"),
+                        "primary": entry.get("primary_strategy"),
+                        "alternate": entry.get("alternate_strategy"),
+                        "overlap_ratio": entry.get("overlap_ratio"),
+                        "same_top_1": entry.get("same_top_1"),
+                        "same_top_3": entry.get("same_top_3_order"),
+                        "query": entry.get("query"),
+                    }
+                    for entry in recent_entries
+                ],
+                width="stretch",
+            )
+            if st.button("Limpar histórico da Fase 5.5", key="phase55_clear_shadow_log"):
+                clear_shadow_log(PHASE55_SHADOW_LOG_PATH)
+                st.rerun()
+        else:
+            st.caption("Nenhuma comparação shadow registrada ainda.")
+
     st.caption("Modo conversacional com RAG. Use para perguntas abertas, exploração e follow-up sobre os documentos selecionados.")
     for mensagem in messages:
         render_chat_message(mensagem)
@@ -1217,6 +1270,18 @@ with chat_tab:
                         retrieval_details,
                         alternate_retrieval_details,
                     )
+                    if retrieval_shadow_summary:
+                        phase55_shadow_log_entries = append_shadow_log_entry(
+                            PHASE55_SHADOW_LOG_PATH,
+                            _build_shadow_log_entry(
+                                query=texto_usuario,
+                                provider=selected_provider,
+                                model=selected_model,
+                                document_ids=chat_selected_document_ids,
+                                shadow_summary=retrieval_shadow_summary,
+                            ),
+                        )
+                        phase55_shadow_log_summary = summarize_shadow_log(phase55_shadow_log_entries)
             except Exception as error:
                 st.warning(f"Não foi possível recuperar contexto do documento. A resposta seguirá sem RAG. Detalhes: {error}")
                 retrieved_chunks = []
