@@ -7,6 +7,11 @@ from pathlib import Path
 
 from src.config import RagSettings
 from src.rag.chunking import chunk_text, describe_chunking_strategy
+from src.rag.langchain_adapter import (
+    describe_retrieval_strategy,
+    resolve_retrieval_strategy,
+    similarity_search_with_langchain_chroma,
+)
 from src.rag.loaders import LoadedDocument
 from src.rag.vector_store import ChromaVectorStore, LocalVectorStore
 
@@ -23,6 +28,7 @@ def _compress_embedding(embedding: list[float]) -> list[float]:
 def _settings_payload(settings: RagSettings) -> dict[str, object]:
     return {
         "chunking_strategy": settings.chunking_strategy,
+        "retrieval_strategy": settings.retrieval_strategy,
         "embedding_model": settings.embedding_model,
         "embedding_context_window": settings.embedding_context_window,
         "embedding_truncate": settings.embedding_truncate,
@@ -663,40 +669,61 @@ def retrieve_relevant_chunks_detailed(
             "vector_backend_status": inspect_vector_backend_status(rag_index, settings),
         }
 
-    query_embedding = embedding_provider.create_embeddings(
-        [query],
-        model=settings.embedding_model,
-        context_window=settings.embedding_context_window,
-        truncate=settings.embedding_truncate,
-    )[0]
     vector_backend_status = inspect_vector_backend_status(rag_index, settings)
     candidate_pool_size = _candidate_pool_size(settings, len(filtered_chunks))
     vector_candidates: list[dict[str, object]] = []
     backend_used = "local_fallback"
     backend_message = "Retrieval servido por fallback local a partir do JSON canônico."
+    requested_retrieval_strategy, effective_retrieval_strategy, retrieval_strategy_fallback_reason = resolve_retrieval_strategy(settings.retrieval_strategy)
 
-    try:
-        chroma_store = ChromaVectorStore(settings.chroma_path)
-        chroma_results = chroma_store.similarity_search(
-            query_embedding,
-            candidate_pool_size,
+    if effective_retrieval_strategy == "langchain_chroma":
+        langchain_results, langchain_error = similarity_search_with_langchain_chroma(
+            query=query,
+            settings=settings,
+            embedding_provider=embedding_provider,
+            top_k=candidate_pool_size,
             document_ids=document_ids,
             file_types=file_types,
         )
-        if chroma_results:
-            backend_used = "chroma"
-            backend_message = "Retrieval servido pelo Chroma persistido sincronizado."
-            vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in chroma_results]
+        if langchain_results:
+            backend_used = "langchain_chroma"
+            backend_message = "Retrieval servido pelo adaptador experimental LangChain + Chroma."
+            vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in langchain_results]
         else:
-            print("[RAG] Chroma não retornou resultados; usando fallback local.")
-    except Exception as error:
-        print(f"[RAG] Chroma falhou na busca; usando fallback local: {error}")
-        vector_backend_status = {
-            **vector_backend_status,
-            "status": "fallback_local",
-            "backend_ready": False,
-            "message": f"Falha de retrieval no Chroma: {error}",
-        }
+            retrieval_strategy_fallback_reason = langchain_error or "langchain_returned_no_results"
+
+    query_embedding = None
+    if not vector_candidates:
+        query_embedding = embedding_provider.create_embeddings(
+            [query],
+            model=settings.embedding_model,
+            context_window=settings.embedding_context_window,
+            truncate=settings.embedding_truncate,
+        )[0]
+
+        try:
+            chroma_store = ChromaVectorStore(settings.chroma_path)
+            chroma_results = chroma_store.similarity_search(
+                query_embedding,
+                candidate_pool_size,
+                document_ids=document_ids,
+                file_types=file_types,
+            )
+            if chroma_results:
+                backend_used = "chroma"
+                backend_message = "Retrieval servido pelo Chroma persistido sincronizado."
+                vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in chroma_results]
+                effective_retrieval_strategy = "manual_hybrid"
+            else:
+                print("[RAG] Chroma não retornou resultados; usando fallback local.")
+        except Exception as error:
+            print(f"[RAG] Chroma falhou na busca; usando fallback local: {error}")
+            vector_backend_status = {
+                **vector_backend_status,
+                "status": "fallback_local",
+                "backend_ready": False,
+                "message": f"Falha de retrieval no Chroma: {error}",
+            }
 
     if not vector_candidates:
         store = LocalVectorStore(filtered_chunks)
@@ -704,6 +731,7 @@ def retrieve_relevant_chunks_detailed(
         vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in local_results]
         backend_used = "local_fallback"
         backend_message = "Retrieval servido por fallback local a partir do JSON canônico."
+        effective_retrieval_strategy = "manual_hybrid"
 
     lexical_candidates = _rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)
     reranked_chunks = _hybrid_rerank_chunks(query, vector_candidates, lexical_candidates, settings)
@@ -716,6 +744,10 @@ def retrieve_relevant_chunks_detailed(
         "candidate_pool_size": candidate_pool_size,
         "reranking_applied": True,
         "vector_backend_status": vector_backend_status,
+        "retrieval_strategy_requested": requested_retrieval_strategy,
+        "retrieval_strategy_used": effective_retrieval_strategy,
+        "retrieval_strategy_label": describe_retrieval_strategy(effective_retrieval_strategy),
+        "retrieval_strategy_fallback_reason": retrieval_strategy_fallback_reason,
         "rerank_strategy": {
             "type": "hybrid_vector_lexical",
             "lexical_weight": settings.rerank_lexical_weight,

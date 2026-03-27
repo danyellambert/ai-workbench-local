@@ -182,6 +182,61 @@ def _build_document_preview_map(
     return preview_map
 
 
+def _retrieval_chunk_signature(chunk: dict[str, object]) -> tuple[str, int, int, int]:
+    return (
+        str(chunk.get("document_id") or chunk.get("file_hash") or chunk.get("source") or "documento"),
+        int(chunk.get("chunk_id") or 0),
+        int(chunk.get("start_char") or 0),
+        int(chunk.get("end_char") or 0),
+    )
+
+
+def _build_retrieval_shadow_summary(
+    primary_details: dict[str, object] | None,
+    alternate_details: dict[str, object] | None,
+) -> dict[str, object] | None:
+    if not isinstance(primary_details, dict) or not isinstance(alternate_details, dict):
+        return None
+
+    primary_chunks = [
+        chunk for chunk in (primary_details.get("chunks") or []) if isinstance(chunk, dict)
+    ]
+    alternate_chunks = [
+        chunk for chunk in (alternate_details.get("chunks") or []) if isinstance(chunk, dict)
+    ]
+    if not primary_chunks and not alternate_chunks:
+        return None
+
+    primary_signatures = [_retrieval_chunk_signature(chunk) for chunk in primary_chunks]
+    alternate_signatures = [_retrieval_chunk_signature(chunk) for chunk in alternate_chunks]
+    primary_set = set(primary_signatures)
+    alternate_set = set(alternate_signatures)
+    overlap_count = len(primary_set & alternate_set)
+
+    def _chunk_label(chunk: dict[str, object] | None) -> str | None:
+        if not isinstance(chunk, dict):
+            return None
+        source = str(chunk.get("source") or "documento")
+        chunk_id = int(chunk.get("chunk_id") or 0)
+        score = chunk.get("score")
+        return f"{source}#{chunk_id} (score={score})"
+
+    return {
+        "primary_strategy": primary_details.get("retrieval_strategy_used") or primary_details.get("retrieval_strategy_requested"),
+        "alternate_strategy": alternate_details.get("retrieval_strategy_used") or alternate_details.get("retrieval_strategy_requested"),
+        "primary_count": len(primary_chunks),
+        "alternate_count": len(alternate_chunks),
+        "overlap_count": overlap_count,
+        "overlap_ratio": round(overlap_count / max(len(primary_set), 1), 3) if primary_set else 0.0,
+        "same_top_1": bool(primary_signatures and alternate_signatures and primary_signatures[0] == alternate_signatures[0]),
+        "same_top_3_order": primary_signatures[:3] == alternate_signatures[:3] if primary_signatures and alternate_signatures else False,
+        "primary_top_1": _chunk_label(primary_chunks[0]) if primary_chunks else None,
+        "alternate_top_1": _chunk_label(alternate_chunks[0]) if alternate_chunks else None,
+        "alternate_backend_message": alternate_details.get("backend_message"),
+        "alternate_fallback_reason": alternate_details.get("retrieval_strategy_fallback_reason"),
+    }
+
+
 def _build_full_document_text_from_selection(
     rag_index: dict[str, object] | None,
     document_ids: list[str],
@@ -448,6 +503,7 @@ def _build_runtime_snapshot(
     selected_model: str,
     selected_embedding_model: str,
     selected_chunking_strategy: str,
+    selected_retrieval_strategy: str,
     selected_pdf_extraction_mode: str,
     chat_selected_document_ids: list[str],
     structured_selected_document_ids: list[str],
@@ -495,6 +551,8 @@ def _build_runtime_snapshot(
             "embedding_model": selected_embedding_model,
             "selected_documents": len(chat_selected_document_ids),
             "retrieval_backend": last_chat_metadata.get("vector_backend_used"),
+            "retrieval_strategy": last_chat_metadata.get("retrieval_strategy_used") or last_chat_metadata.get("retrieval_strategy_requested"),
+            "retrieval_shadow_summary": last_chat_metadata.get("retrieval_shadow_summary"),
             "last_total_s": last_chat_metadata.get("latency_s"),
             "last_generation_s": last_chat_metadata.get("generation_latency_s"),
             "last_retrieval_s": last_chat_metadata.get("retrieval_latency_s"),
@@ -516,6 +574,7 @@ def _build_runtime_snapshot(
         },
         "documents": {
             "chunking_strategy": selected_chunking_strategy,
+            "retrieval_strategy": selected_retrieval_strategy,
             "pdf_extraction_mode": selected_pdf_extraction_mode,
             "ocr_backend_default": default_ocr_backend,
             "vl_model_default": default_vl_model,
@@ -596,6 +655,7 @@ default_context_window_by_provider = {
     selected_embedding_model,
     selected_embedding_context_window,
     selected_chunking_strategy,
+    selected_retrieval_strategy,
     selected_pdf_extraction_mode,
     clear_requested,
     debug_retrieval,
@@ -612,6 +672,7 @@ default_context_window_by_provider = {
     default_rag_chunk_overlap=rag_settings.chunk_overlap,
     default_rag_top_k=rag_settings.top_k,
     default_rag_chunking_strategy=rag_settings.chunking_strategy,
+    default_rag_retrieval_strategy=rag_settings.retrieval_strategy,
     default_pdf_extraction_mode=normalize_pdf_extraction_mode(rag_settings.pdf_extraction_mode),
     embedding_model_options=embedding_model_options,
     default_embedding_model=rag_settings.embedding_model,
@@ -632,6 +693,7 @@ effective_rag_settings = replace(
     chunk_overlap=min(rag_chunk_overlap, rag_chunk_size // 2),
     top_k=rag_top_k,
     chunking_strategy=selected_chunking_strategy,
+    retrieval_strategy=selected_retrieval_strategy,
     pdf_extraction_mode=normalize_pdf_extraction_mode(selected_pdf_extraction_mode),
 )
 
@@ -659,6 +721,7 @@ st.caption(
     f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k} · rerank_pool={effective_rag_settings.rerank_pool_size}"
 )
 st.caption(f"Chunking nesta execução: {selected_chunking_strategy}")
+st.caption(f"Retrieval nesta execução: {selected_retrieval_strategy}")
 st.caption(f"Extração PDF nesta execução: {describe_pdf_extraction_mode(effective_rag_settings.pdf_extraction_mode)}")
 st.caption(
     "Backend vetorial: "
@@ -919,6 +982,7 @@ with documents_tab:
                     "documentos": documents_count,
                     "chunks": len(chunks),
                     "chunking_strategy": rag_info.get("chunking_strategy"),
+                    "retrieval_strategy": rag_info.get("retrieval_strategy"),
                     "embedding_model": rag_info.get("embedding_model"),
                     "embedding_context_window": rag_info.get("embedding_context_window"),
                     "chunk_size": rag_info.get("chunk_size"),
@@ -1058,6 +1122,7 @@ with chat_tab:
 
     if texto_usuario:
         chat_total_started_at = time.perf_counter()
+        retrieval_details: dict[str, object] = {}
         chat_effective_context_window, chat_context_window_cap = _resolve_chat_context_window(
             provider=selected_provider,
             mode=context_window_mode,
@@ -1091,6 +1156,8 @@ with chat_tab:
         filtered_chunks_available = 0
         retrieval_candidate_pool_size = 0
         retrieval_rerank_strategy = None
+        alternate_retrieval_details: dict[str, object] | None = None
+        retrieval_shadow_summary: dict[str, object] | None = None
         prompt_context_details = {
             "budget_chars": rag_context_budget_chars,
             "used_chars": 0,
@@ -1123,6 +1190,33 @@ with chat_tab:
                 retrieval_candidate_pool_size = retrieval_details.get("candidate_pool_size") or 0
                 retrieval_rerank_strategy = retrieval_details.get("rerank_strategy")
                 retrieval_latency = time.perf_counter() - retrieval_started_at
+
+                if debug_retrieval:
+                    alternate_strategy = (
+                        "manual_hybrid"
+                        if selected_retrieval_strategy == "langchain_chroma"
+                        else "langchain_chroma"
+                    )
+                    try:
+                        alternate_retrieval_details = retrieve_relevant_chunks_detailed(
+                            query=texto_usuario,
+                            rag_index=rag_index,
+                            settings=replace(effective_rag_settings, retrieval_strategy=alternate_strategy),
+                            embedding_provider=embedding_provider,
+                            document_ids=chat_selected_document_ids,
+                            file_types=None,
+                        )
+                    except Exception as shadow_error:
+                        alternate_retrieval_details = {
+                            "retrieval_strategy_requested": alternate_strategy,
+                            "retrieval_strategy_used": "error",
+                            "backend_message": str(shadow_error),
+                            "chunks": [],
+                        }
+                    retrieval_shadow_summary = _build_retrieval_shadow_summary(
+                        retrieval_details,
+                        alternate_retrieval_details,
+                    )
             except Exception as error:
                 st.warning(f"Não foi possível recuperar contexto do documento. A resposta seguirá sem RAG. Detalhes: {error}")
                 retrieved_chunks = []
@@ -1208,6 +1302,9 @@ with chat_tab:
                                 "context_window_cap": chat_context_window_cap,
                                 "vector_backend_used": retrieval_backend_used,
                                 "vector_backend_message": retrieval_backend_message,
+                                "retrieval_strategy_requested": retrieval_details.get("retrieval_strategy_requested") if isinstance(retrieval_details, dict) else None,
+                                "retrieval_strategy_used": retrieval_details.get("retrieval_strategy_used") if isinstance(retrieval_details, dict) else None,
+                                "retrieval_strategy_fallback_reason": retrieval_details.get("retrieval_strategy_fallback_reason") if isinstance(retrieval_details, dict) else None,
                                 "filtered_chunks_available": filtered_chunks_available,
                                 "candidate_pool_size": retrieval_candidate_pool_size,
                                 "rerank_strategy": retrieval_rerank_strategy,
@@ -1228,6 +1325,30 @@ with chat_tab:
                             snippet = chunk.get("snippet") or str(chunk.get("text", ""))[:500]
                             if snippet:
                                 st.code(snippet)
+                        if isinstance(alternate_retrieval_details, dict):
+                            st.markdown("---")
+                            st.caption("Comparação shadow · estratégia alternativa")
+                            st.write(
+                                {
+                                    "retrieval_strategy_requested": alternate_retrieval_details.get("retrieval_strategy_requested"),
+                                    "retrieval_strategy_used": alternate_retrieval_details.get("retrieval_strategy_used"),
+                                    "retrieval_strategy_fallback_reason": alternate_retrieval_details.get("retrieval_strategy_fallback_reason"),
+                                    "backend_used": alternate_retrieval_details.get("backend_used"),
+                                    "backend_message": alternate_retrieval_details.get("backend_message"),
+                                    "candidate_pool_size": alternate_retrieval_details.get("candidate_pool_size"),
+                                    "retrieved_chunks": len(alternate_retrieval_details.get("chunks") or []),
+                                }
+                            )
+                            if retrieval_shadow_summary:
+                                st.caption("Resumo comparativo")
+                                st.write(retrieval_shadow_summary)
+                            for shadow_index, shadow_chunk in enumerate(alternate_retrieval_details.get("chunks") or [], start=1):
+                                st.markdown(
+                                    f"**alt {shadow_index}. {shadow_chunk.get('source', 'documento')} · score={shadow_chunk.get('score')} · vector={shadow_chunk.get('vector_score')} · lexical={shadow_chunk.get('lexical_score')} · chunk={shadow_chunk.get('chunk_id')}**"
+                                )
+                                shadow_snippet = shadow_chunk.get("snippet") or str(shadow_chunk.get("text", ""))[:500]
+                                if shadow_snippet:
+                                    st.code(shadow_snippet)
             except Exception as erro:
                 set_last_latency(None)
                 texto_resposta_ia = selected_provider_instance.format_error(selected_model, erro)
@@ -1244,6 +1365,9 @@ with chat_tab:
             "vector_backend_used": retrieval_backend_used,
             "vector_backend_message": retrieval_backend_message,
             "vector_backend_status": retrieval_vector_status,
+            "retrieval_strategy_requested": retrieval_details.get("retrieval_strategy_requested") if 'retrieval_details' in locals() and isinstance(retrieval_details, dict) else None,
+            "retrieval_strategy_used": retrieval_details.get("retrieval_strategy_used") if 'retrieval_details' in locals() and isinstance(retrieval_details, dict) else None,
+            "retrieval_strategy_fallback_reason": retrieval_details.get("retrieval_strategy_fallback_reason") if 'retrieval_details' in locals() and isinstance(retrieval_details, dict) else None,
             "filtered_chunks_available": filtered_chunks_available,
             "rag_chunk_size": effective_rag_settings.chunk_size,
             "rag_chunk_overlap": effective_rag_settings.chunk_overlap,
@@ -1251,6 +1375,7 @@ with chat_tab:
             "debug_retrieval": debug_retrieval,
             "rerank_strategy": retrieval_rerank_strategy,
             "retrieval_candidate_pool_size": retrieval_candidate_pool_size,
+            "retrieval_shadow_summary": retrieval_shadow_summary,
             "prompt_context": {
                 "budget_chars": prompt_context_details.get("budget_chars"),
                 "used_chars": prompt_context_details.get("used_chars"),
@@ -1660,6 +1785,7 @@ runtime_snapshot = _build_runtime_snapshot(
     selected_model=selected_model,
     selected_embedding_model=selected_embedding_model,
     selected_chunking_strategy=selected_chunking_strategy,
+    selected_retrieval_strategy=selected_retrieval_strategy,
     selected_pdf_extraction_mode=selected_pdf_extraction_mode,
     chat_selected_document_ids=chat_selected_document_ids if 'chat_selected_document_ids' in locals() else [],
     structured_selected_document_ids=active_structured_document_ids if 'active_structured_document_ids' in locals() else [],

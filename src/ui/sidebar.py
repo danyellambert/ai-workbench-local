@@ -14,6 +14,7 @@ def render_chat_sidebar(
     default_rag_chunk_overlap: int,
     default_rag_top_k: int,
     default_rag_chunking_strategy: str,
+    default_rag_retrieval_strategy: str,
     default_pdf_extraction_mode: str,
     embedding_model_options: list[str],
     default_embedding_model: str,
@@ -24,7 +25,7 @@ def render_chat_sidebar(
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, str, int, int, int, int, str, int, str, str, bool, bool]:
+) -> tuple[str, str, str, float, str, int, int, int, int, str, int, str, str, str, bool, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
     pdf_mode_options = ["basic", "hybrid", "complete"]
@@ -190,6 +191,24 @@ def render_chat_sidebar(
             format_func=lambda key: chunking_strategy_labels[key],
             help="Primeiro slice da Fase 5.5: permite testar chunking manual vs splitter compatível com LangChain quando o pacote opcional estiver disponível.",
         )
+        retrieval_strategy_options = ["manual_hybrid", "langchain_chroma"]
+        retrieval_strategy_labels = {
+            "manual_hybrid": "Manual híbrido",
+            "langchain_chroma": "LangChain + Chroma (experimental)",
+        }
+        default_retrieval_strategy = (
+            default_rag_retrieval_strategy
+            if default_rag_retrieval_strategy in retrieval_strategy_options
+            else "manual_hybrid"
+        )
+        selected_retrieval_strategy = st.selectbox(
+            "Estratégia de retrieval",
+            retrieval_strategy_options,
+            index=retrieval_strategy_options.index(default_retrieval_strategy),
+            key="phase5_sidebar_retrieval_strategy",
+            format_func=lambda key: retrieval_strategy_labels[key],
+            help="Segundo slice da Fase 5.5: permite comparar o retrieval manual atual com um caminho experimental via LangChain + Chroma.",
+        )
         selected_pdf_extraction_mode = st.selectbox(
             "Extração de PDFs",
             pdf_mode_options,
@@ -202,7 +221,7 @@ def render_chat_sidebar(
             "Mostrar debug de retrieval",
             value=False,
             key="phase5_sidebar_debug_retrieval",
-            help="Exibe detalhes dos chunks recuperados, scores e parâmetros ativos do RAG.",
+            help="Exibe detalhes dos chunks recuperados, scores, parâmetros ativos do RAG e uma comparação shadow com a estratégia alternativa de retrieval.",
         )
 
         clear_requested = st.button("🧹 Limpar conversa", width="stretch")
@@ -225,6 +244,7 @@ def render_chat_sidebar(
             f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap}"
         )
         st.caption(f"Chunking ativo: {chunking_strategy_labels[selected_chunking_strategy]}")
+        st.caption(f"Retrieval ativo: {retrieval_strategy_labels[selected_retrieval_strategy]}")
         st.caption(f"Extração PDF ativa: {pdf_mode_labels[selected_pdf_extraction_mode]}")
         st.caption("Pipeline ativo: retrieval vetorial + reranking híbrido + budget de contexto no prompt.")
         st.caption(f"Histórico local: `{history_filename}`")
@@ -244,6 +264,7 @@ def render_chat_sidebar(
         selected_embedding_model,
         selected_embedding_context_window,
         selected_chunking_strategy,
+        selected_retrieval_strategy,
         selected_pdf_extraction_mode,
         clear_requested,
         debug_retrieval,
@@ -275,6 +296,8 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                         "embedding_model": chat.get("embedding_model"),
                         "selected_documents": chat.get("selected_documents"),
                         "retrieval_backend": chat.get("retrieval_backend"),
+                        "retrieval_strategy": chat.get("retrieval_strategy"),
+                        "retrieval_shadow_summary": chat.get("retrieval_shadow_summary"),
                         "last_total_s": chat.get("last_total_s"),
                         "last_generation_s": chat.get("last_generation_s"),
                         "last_retrieval_s": chat.get("last_retrieval_s"),
@@ -317,6 +340,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                 st.write(
                     {
                         "chunking_strategy": documents.get("chunking_strategy"),
+                        "retrieval_strategy": documents.get("retrieval_strategy"),
                         "pdf_extraction_mode": documents.get("pdf_extraction_mode"),
                         "ocr_backend_default": documents.get("ocr_backend_default"),
                         "vl_model_default": documents.get("vl_model_default"),

@@ -33,6 +33,7 @@ class OpenAISettings:
 @dataclass(frozen=True)
 class RagSettings:
     chunking_strategy: str
+    retrieval_strategy: str
     embedding_model: str
     embedding_context_window: int
     embedding_truncate: bool
@@ -124,6 +125,7 @@ def get_openai_settings() -> OpenAISettings:
 def get_rag_settings() -> RagSettings:
     return RagSettings(
         chunking_strategy=os.getenv("RAG_CHUNKING_STRATEGY", "manual").strip().lower() or "manual",
+        retrieval_strategy=os.getenv("RAG_RETRIEVAL_STRATEGY", "manual_hybrid").strip().lower() or "manual_hybrid",
         embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma:300m"),
         embedding_context_window=int(os.getenv("OLLAMA_EMBEDDING_CONTEXT_WINDOW", "512")),
         embedding_truncate=os.getenv("OLLAMA_EMBEDDING_TRUNCATE", "true").strip().lower() not in {"0", "false", "no"},

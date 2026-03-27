@@ -7,6 +7,7 @@ simple-websocket
 python-dotenv
 pypdf
 chromadb
+langchain-chroma
 langchain-text-splitters
 docling
 cryptography>=3.1
