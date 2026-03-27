@@ -447,6 +447,7 @@ def _build_runtime_snapshot(
     selected_provider_label: str,
     selected_model: str,
     selected_embedding_model: str,
+    selected_chunking_strategy: str,
     selected_pdf_extraction_mode: str,
     chat_selected_document_ids: list[str],
     structured_selected_document_ids: list[str],
@@ -514,6 +515,7 @@ def _build_runtime_snapshot(
             "task_model_map": task_model_map,
         },
         "documents": {
+            "chunking_strategy": selected_chunking_strategy,
             "pdf_extraction_mode": selected_pdf_extraction_mode,
             "ocr_backend_default": default_ocr_backend,
             "vl_model_default": default_vl_model,
@@ -593,6 +595,7 @@ default_context_window_by_provider = {
     rag_top_k,
     selected_embedding_model,
     selected_embedding_context_window,
+    selected_chunking_strategy,
     selected_pdf_extraction_mode,
     clear_requested,
     debug_retrieval,
@@ -608,6 +611,7 @@ default_context_window_by_provider = {
     default_rag_chunk_size=rag_settings.chunk_size,
     default_rag_chunk_overlap=rag_settings.chunk_overlap,
     default_rag_top_k=rag_settings.top_k,
+    default_rag_chunking_strategy=rag_settings.chunking_strategy,
     default_pdf_extraction_mode=normalize_pdf_extraction_mode(rag_settings.pdf_extraction_mode),
     embedding_model_options=embedding_model_options,
     default_embedding_model=rag_settings.embedding_model,
@@ -627,6 +631,7 @@ effective_rag_settings = replace(
     chunk_size=rag_chunk_size,
     chunk_overlap=min(rag_chunk_overlap, rag_chunk_size // 2),
     top_k=rag_top_k,
+    chunking_strategy=selected_chunking_strategy,
     pdf_extraction_mode=normalize_pdf_extraction_mode(selected_pdf_extraction_mode),
 )
 
@@ -653,6 +658,7 @@ st.caption(
 st.caption(
     f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k} · rerank_pool={effective_rag_settings.rerank_pool_size}"
 )
+st.caption(f"Chunking nesta execução: {selected_chunking_strategy}")
 st.caption(f"Extração PDF nesta execução: {describe_pdf_extraction_mode(effective_rag_settings.pdf_extraction_mode)}")
 st.caption(
     "Backend vetorial: "
@@ -896,6 +902,8 @@ with documents_tab:
                         "tipo": document.get("file_type"),
                         "caracteres": document.get("char_count"),
                         "chunks": document.get("chunk_count"),
+                        "chunking": loader_metadata.get("chunking_strategy_label") or loader_metadata.get("chunking_strategy_used"),
+                        "chunking_fallback": loader_metadata.get("chunking_strategy_fallback_reason"),
                         "extração_pdf": loader_metadata.get("strategy_label") if document.get("file_type") == "pdf" else None,
                         "paginas_suspeitas": loader_metadata.get("suspicious_pages") if document.get("file_type") == "pdf" else None,
                         "paginas_docling": ", ".join(str(page) for page in loader_metadata.get("docling_pages_used", [])) if document.get("file_type") == "pdf" else None,
@@ -910,6 +918,7 @@ with documents_tab:
                 {
                     "documentos": documents_count,
                     "chunks": len(chunks),
+                    "chunking_strategy": rag_info.get("chunking_strategy"),
                     "embedding_model": rag_info.get("embedding_model"),
                     "embedding_context_window": rag_info.get("embedding_context_window"),
                     "chunk_size": rag_info.get("chunk_size"),
@@ -1650,6 +1659,7 @@ runtime_snapshot = _build_runtime_snapshot(
     selected_provider_label=selected_provider_label,
     selected_model=selected_model,
     selected_embedding_model=selected_embedding_model,
+    selected_chunking_strategy=selected_chunking_strategy,
     selected_pdf_extraction_mode=selected_pdf_extraction_mode,
     chat_selected_document_ids=chat_selected_document_ids if 'chat_selected_document_ids' in locals() else [],
     structured_selected_document_ids=active_structured_document_ids if 'active_structured_document_ids' in locals() else [],

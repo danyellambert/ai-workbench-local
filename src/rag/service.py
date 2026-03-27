@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 from src.config import RagSettings
-from src.rag.chunking import chunk_text
+from src.rag.chunking import chunk_text, describe_chunking_strategy
 from src.rag.loaders import LoadedDocument
 from src.rag.vector_store import ChromaVectorStore, LocalVectorStore
 
@@ -22,6 +22,7 @@ def _compress_embedding(embedding: list[float]) -> list[float]:
 
 def _settings_payload(settings: RagSettings) -> dict[str, object]:
     return {
+        "chunking_strategy": settings.chunking_strategy,
         "embedding_model": settings.embedding_model,
         "embedding_context_window": settings.embedding_context_window,
         "embedding_truncate": settings.embedding_truncate,
@@ -528,6 +529,7 @@ def upsert_documents_in_rag_index(
             chunk_size=settings.chunk_size,
             chunk_overlap=settings.chunk_overlap,
             source_name=document.name,
+            strategy=settings.chunking_strategy,
         )
 
         if not chunks:
@@ -540,6 +542,22 @@ def upsert_documents_in_rag_index(
             truncate=settings.embedding_truncate,
         )
 
+        chunking_strategy_used = next(
+            (str(chunk.get("chunking_strategy_used") or "") for chunk in chunks if chunk.get("chunking_strategy_used")),
+            settings.chunking_strategy,
+        )
+        chunking_fallback_reason = next(
+            (str(chunk.get("chunking_strategy_fallback_reason") or "") for chunk in chunks if chunk.get("chunking_strategy_fallback_reason")),
+            "",
+        ) or None
+        document_metadata = {
+            **(document.metadata or {}),
+            "chunking_strategy_requested": settings.chunking_strategy,
+            "chunking_strategy_used": chunking_strategy_used,
+            "chunking_strategy_label": describe_chunking_strategy(chunking_strategy_used),
+            **({"chunking_strategy_fallback_reason": chunking_fallback_reason} if chunking_fallback_reason else {}),
+        }
+
         indexed_chunks: list[dict[str, object]] = []
         for chunk, embedding in zip(chunks, embeddings):
             indexed_chunks.append(
@@ -549,7 +567,7 @@ def upsert_documents_in_rag_index(
                     "document_id": document_id,
                     "file_hash": document.file_hash,
                     "file_type": document.file_type,
-                    "loader_metadata": document.metadata,
+                    "loader_metadata": document_metadata,
                 }
             )
 
@@ -561,7 +579,7 @@ def upsert_documents_in_rag_index(
             "char_count": len(document.text),
             "chunk_count": len(indexed_chunks),
             "indexed_at": now,
-            "loader_metadata": document.metadata,
+            "loader_metadata": document_metadata,
         }
         existing_chunks.extend(indexed_chunks)
 
