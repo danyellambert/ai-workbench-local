@@ -13,6 +13,7 @@ def render_chat_sidebar(
     default_rag_chunk_size: int,
     default_rag_chunk_overlap: int,
     default_rag_top_k: int,
+    default_rag_chunking_strategy: str,
     default_pdf_extraction_mode: str,
     embedding_model_options: list[str],
     default_embedding_model: str,
@@ -23,7 +24,7 @@ def render_chat_sidebar(
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, str, int, int, int, int, str, int, str, bool, bool]:
+) -> tuple[str, str, str, float, str, int, int, int, int, str, int, str, str, bool, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
     pdf_mode_options = ["basic", "hybrid", "complete"]
@@ -171,6 +172,24 @@ def render_chat_sidebar(
                 help="Quantidade de chunks recuperados a cada pergunta.",
             )
         )
+        chunking_strategy_options = ["manual", "langchain_recursive"]
+        chunking_strategy_labels = {
+            "manual": "Manual local",
+            "langchain_recursive": "LangChain Recursive (experimental)",
+        }
+        default_chunking_strategy = (
+            default_rag_chunking_strategy
+            if default_rag_chunking_strategy in chunking_strategy_options
+            else "manual"
+        )
+        selected_chunking_strategy = st.selectbox(
+            "Estratégia de chunking",
+            chunking_strategy_options,
+            index=chunking_strategy_options.index(default_chunking_strategy),
+            key="phase5_sidebar_chunking_strategy",
+            format_func=lambda key: chunking_strategy_labels[key],
+            help="Primeiro slice da Fase 5.5: permite testar chunking manual vs splitter compatível com LangChain quando o pacote opcional estiver disponível.",
+        )
         selected_pdf_extraction_mode = st.selectbox(
             "Extração de PDFs",
             pdf_mode_options,
@@ -205,6 +224,7 @@ def render_chat_sidebar(
         st.caption(
             f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap}"
         )
+        st.caption(f"Chunking ativo: {chunking_strategy_labels[selected_chunking_strategy]}")
         st.caption(f"Extração PDF ativa: {pdf_mode_labels[selected_pdf_extraction_mode]}")
         st.caption("Pipeline ativo: retrieval vetorial + reranking híbrido + budget de contexto no prompt.")
         st.caption(f"Histórico local: `{history_filename}`")
@@ -223,6 +243,7 @@ def render_chat_sidebar(
         rag_top_k,
         selected_embedding_model,
         selected_embedding_context_window,
+        selected_chunking_strategy,
         selected_pdf_extraction_mode,
         clear_requested,
         debug_retrieval,
@@ -295,6 +316,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
             with st.expander("Documentos / PDF / OCR / VL", expanded=False):
                 st.write(
                     {
+                        "chunking_strategy": documents.get("chunking_strategy"),
                         "pdf_extraction_mode": documents.get("pdf_extraction_mode"),
                         "ocr_backend_default": documents.get("ocr_backend_default"),
                         "vl_model_default": documents.get("vl_model_default"),
