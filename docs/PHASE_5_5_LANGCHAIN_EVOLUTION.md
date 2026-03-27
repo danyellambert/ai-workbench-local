@@ -53,6 +53,21 @@ Isso permite observar, para a mesma pergunta:
 
 Essa comparação foi feita para tornar a evolução manual → framework explícita e auditável, sem trocar o pipeline principal cedo demais.
 
+### 4. Histórico agregado das comparações
+
+As comparações shadow agora também podem ser persistidas em um log local:
+
+- `.phase55_langchain_shadow_log.json`
+
+Esse histórico agrega rodadas de comparação e permite acompanhar, ao longo do uso:
+
+- taxa de concordância no top-1
+- taxa de concordância no top-3
+- overlap médio entre os conjuntos recuperados
+- frequência de fallback da estratégia experimental
+
+Isso ajuda a transformar a comparação manual vs LangChain em evidência acumulada, e não apenas em inspeção pontual por pergunta.
+
 ## Como usar
 
 Na sidebar do app:
@@ -61,6 +76,11 @@ Na sidebar do app:
 2. escolha a estratégia de retrieval
 3. indexe ou reindexe documentos quando mudar o chunking
 4. habilite `Mostrar debug de retrieval` para ver a comparação shadow
+5. gere um relatório agregado com:
+
+```bash
+python /Users/danyellambert/Downloads/Aula\ 4\ -\ Criacao\ de\ Chatbot\ com\ IA\ em\ Tempo\ Real/scripts/report_phase55_langchain_shadow_log.py
+```
 
 ## Dependências adicionadas
 
@@ -74,6 +94,25 @@ Este slice já demonstra três pontos importantes:
 1. o projeto continua provando que a base manual existe e funciona
 2. a evolução para framework acontece por comparação controlada, e não por substituição cega
 3. a arquitetura começa a separar melhor baseline operacional de trilhas experimentais
+
+## Comparação inicial: manual vs LangChain
+
+| Dimensão | Pipeline manual atual | Caminhos experimentais LangChain | Leitura atual |
+|---|---|---|---|
+| Clareza operacional | Mais explícito e previsível no código principal | Mais conciso nos pontos integrados ao ecossistema | Manual ainda é melhor para explicar o fluxo base em entrevista |
+| Produtividade | Exige mais código próprio para cada evolução | Acelera experimentos de splitter e retriever | LangChain já reduz esforço para testar alternativas |
+| Extensibilidade | Alta, mas com custo maior de manutenção manual | Alta para integrar componentes do ecossistema | Híbrido faz mais sentido do que migração total imediata |
+| Risco de acoplamento | Menor | Maior se virar dependência cedo demais | Por isso os caminhos LangChain seguem opcionais e auditáveis |
+| Valor atual para o portfólio | Prova domínio dos fundamentos | Prova maturidade de stack e critério de adoção | A combinação das duas histórias é a leitura mais forte |
+
+### Conclusão provisória
+
+Neste momento, o melhor posicionamento do projeto é:
+
+- **manual como baseline oficial**
+- **LangChain como trilha experimental comparável**
+
+Isso permite defender, com honestidade técnica, que a evolução para framework está acontecendo por evidência e controle arquitetural, e não por modismo.
 
 ## O que ainda falta nesta fase
 

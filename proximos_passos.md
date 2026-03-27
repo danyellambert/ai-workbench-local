@@ -959,7 +959,7 @@ Agora ele precisa provar também que eu sei usar o ecossistema profissional sem 
 
 ### Checklist
 - [x] Reimplementar partes-chave do RAG usando LangChain
-- [ ] Comparar pipeline manual vs LangChain em clareza, produtividade e extensibilidade
+- [x] Comparar pipeline manual vs LangChain em clareza, produtividade e extensibilidade
 - [ ] Usar loaders/splitters/retrievers do LangChain quando fizer sentido
 - [x] Integrar vector store via LangChain
 - [ ] Criar primeiro workflow com LangGraph
@@ -979,6 +979,8 @@ Agora ele precisa provar também que eu sei usar o ecossistema profissional sem 
 - [x] Adicionar `RAG_RETRIEVAL_STRATEGY` com caminho experimental `langchain_chroma` e fallback seguro para `manual_hybrid`
 - [x] Expor na UI a seleção de chunking e retrieval experimental para comparar a evolução do pipeline manual
 - [x] Expor shadow comparison no debug do chat para comparar recuperação manual vs recuperação via LangChain + Chroma na mesma pergunta
+- [x] Persistir histórico local das comparações shadow com resumo agregado para apoiar a comparação manual vs LangChain
+- [x] Adicionar script de relatório do shadow log para transformar a comparação local em evidência reaproveitável
 - [x] Documentar o slice atual em `docs/PHASE_5_5_LANGCHAIN_EVOLUTION.md`
 
 ### Entregável
