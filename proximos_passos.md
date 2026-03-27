@@ -327,18 +327,18 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - **Fase 2 — Arquitetura modular**
 - **Fase 3 — Multi-modelo e perfis de prompt**
 - **Fase 4 — Chat com documentos (RAG)**
+- **Fase 4.5 — Robustez, tuning e observabilidade do RAG**
+- **Fase 5 — Outputs estruturados + trilha `evidence_cv`**
 
 ### Fase atual em andamento
 
-- **Fase 5 — Outputs estruturados**
-  - base funcional concluída
-  - benchmark sintético textual robusto
-  - OCR fallback inicial integrado
-  - fase em fechamento com documentos reais e evidências
+- **Fase 5.5 — Evolução com LangChain e LangGraph**
+  - início da evolução arquitetural do pipeline manual para uma camada compatível com frameworks de mercado
+  - foco inicial em desacoplamento da camada de retrieval/contexto e preparação para workflows controlados
 
 ### Fase concluída mais recentemente
 
-- **Fase 4.5 — concluída com benchmark, avaliação humana e configuração final recomendada**
+- **Fase 5 — concluída tecnicamente com smoke eval PASS, trilha `evidence_cv` integrada e rollout controlado local sob feature flag**
 
 ### O que já foi entregue na Fase 4.5
 
@@ -418,35 +418,40 @@ Ao olhar este projeto, a leitura ideal deve ser:
 - [x] `summary` — **PASS**
 - [x] `checklist` — **PASS**
 - [x] `cv_analysis` — **PASS**
-- [ ] `extraction` — estava em **WARN** no último smoke eval consolidado; após este patch, precisa de revalidação
-- [ ] `code_analysis` — implementado neste patch, mas ainda precisa de validação no smoke eval
+- [x] `extraction` — **PASS**
+- [x] `code_analysis` — **PASS**
 
-### Risco técnico importante já identificado
+### Observação de encerramento da Fase 5
 
-A Fase 5 já está funcional, mas ainda não deve ser tratada como encerrada.
+A Fase 5 pode ser tratada como concluída do ponto de vista técnico/local.
 
-Os principais pontos ainda em aberto são:
+Critérios já cumpridos:
 
-- `extraction` foi enriquecido, mas ainda precisa de revalidação para comprovar PASS no smoke eval
-- `code_analysis` foi implementado, mas ainda precisa de validação em smoke eval e exemplos reais
-- faltam exemplos reais versionados e evidências mais fortes da fase para portfólio
-- a qualidade final ainda depende do modelo local e do grounding por documento
+- smoke eval com `PASS` em `extraction`, `summary`, `checklist`, `cv_analysis` e `code_analysis`
+- trilha `evidence_cv` integrada ao fluxo real de upload/indexação
+- rollout controlado local sob feature flag com auto-rollout, semantic gate e telemetria operacional versionada
+- decisão documental adotada: a Fase 5 fica encerrada como **pacote unificado de produto**, com `structured outputs` e `evidence_cv` como subtrilhas da mesma fase
+
+O que fica para fases posteriores, sem bloquear o encerramento da Fase 5:
+
+- screenshots finais, mini demo e narrativa de portfólio/README/LinkedIn → **Fase 11**, depois da evolução para app web e do deploy público
+- deploy público do app/web sem levar os modelos locais para a Oracle Always Free → **Fases 10.25 e 10.5**
+- observabilidade contínua em ambiente público → **Fases 9 e 10.5**
 
 ### Próximo passo estratégico recomendado
 
 A ordem mais forte agora passa a ser:
 
-1. **Fechar a Fase 5**, priorizando revalidação do `extraction`, validação do `code_analysis` e evidências reais
-2. **Fase 5.5 — Evolução com LangChain e LangGraph**
-3. **Fase 6 — Tools e agentes orientados a valor de negócio**
-4. **Fase 7 — Benchmark e comparação entre modelos**
-5. **Fase 8 — Evals**
-6. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
-7. **Fase 9 — Observabilidade**
-8. **Fase 10 — Engenharia profissional**
-9. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
-10. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
-11. **Fase 11 — Pacote final de portfólio**
+1. **Fase 5.5 — Evolução com LangChain e LangGraph**
+2. **Fase 6 — Tools e agentes orientados a valor de negócio**
+3. **Fase 7 — Benchmark e comparação entre modelos**
+4. **Fase 8 — Evals**
+5. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
+6. **Fase 9 — Observabilidade**
+7. **Fase 10 — Engenharia profissional**
+8. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+9. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
+10. **Fase 11 — Pacote final de portfólio**
 
 ---
 
@@ -623,7 +628,7 @@ Transformar o projeto em um laboratório de experimentação.
 - [x] `qwen2.5-coder:7b`
 - [x] `qwen2.5-coder:14b`
 - [x] `deepseek-coder:6.7b`
-- [ ] Comparar também modelos cloud opcionais quando fizer sentido
+- [x] Deixar a comparação prática local vs cloud explicitamente reposicionada para a **Fase 7**, depois da base multi-provider ficar pronta
 
 ### Entregável
 - Plataforma multi-modelo com perfis reutilizáveis
@@ -661,8 +666,8 @@ Adicionar a feature de maior valor para uso real em empresas.
 
 ### Ferramentas sugeridas
 - [x] Embeddings locais via Ollama ou modelo open-source
-- [ ] LangChain como reimplementação explícita em fase posterior
-- [ ] Chroma ou FAISS como store vetorial mais robusta na Fase 4.5
+- [x] Reimplementação explícita com LangChain reposicionada para a **Fase 5.5**, e não mais tratada como pendência da Fase 4
+- [x] Chroma local como store vetorial mais robusta foi consolidado na **Fase 4.5**
 
 ### Entregável
 - Módulo de RAG funcional e demonstrável
@@ -834,12 +839,20 @@ Hoje o projeto já tem:
 - [x] limpeza upstream de `CV EDUCATION`, `CV SKILLS` e supressão de `CV PROJECTS` espúrio no contexto enviado ao modelo
 - [x] preservação final de `education_entries` com deduplicação canônica, `date_range`, `location` e wording mais forte para USP
 
-A fase ainda não deve ser tratada como encerrada porque faltam:
+A Fase 5 está encerrada do ponto de vista técnico/local.
 
-- polish final de UI/UX
-- validação com documentos reais além dos fixtures e resumes sintéticos
-- registro de evidências fortes da fase para portfólio
-- documentação final do limite atual do OCR fallback
+Critérios já cumpridos:
+
+- smoke eval com `PASS` em `extraction`, `summary`, `checklist`, `cv_analysis` e `code_analysis`
+- trilha `evidence_cv` integrada ao fluxo real de upload/indexação
+- rollout controlado local sob feature flag com auto-rollout, semantic gate e telemetria operacional versionada
+- encerramento documental definido como **pacote unificado de produto**, com `structured outputs` e `evidence_cv` como subtrilhas da mesma fase
+
+O que sobe para fases posteriores, sem bloquear o encerramento da Fase 5:
+
+- screenshots finais, mini demo e narrativa de portfólio/README/LinkedIn → **Fase 11**, depois da evolução para app web e do deploy público
+- deploy público do app/web sem levar os modelos locais para a Oracle Always Free → **Fases 10.25 e 10.5**
+- observabilidade contínua em ambiente público → **Fases 9 e 10.5**
 
 ### Checklist
 
@@ -857,6 +870,8 @@ A fase ainda não deve ser tratada como encerrada porque faltam:
 - [x] Separar explicitamente os fluxos de chat com RAG e análise estruturada
 - [x] Adicionar renderer base para `json`, `friendly` e `checklist`
 - [x] Fazer polish inicial da UI/UX da aba de análise estruturada
+- [x] Tornar o checklist interativo com persistência local em sessão e botão de reset
+- [x] Restaurar a distinção entre `friendly view` e modo `checklist` interativo
 
 #### Tasks já implementadas
 - [x] Criar modo resumidor em tópicos
@@ -868,6 +883,8 @@ A fase ainda não deve ser tratada como encerrada porque faltam:
 #### Robustez já implementada na fase
 - [x] Revalidar `extraction` com PASS no smoke eval automatizado
 - [x] Validar `code_analysis` com PASS no smoke eval automatizado
+- [x] Implementar auto-recovery estruturado com `repair_json`, `retry_generation` e telemetria de parse recovery
+- [x] Fazer hardening e polish de `code_analysis` com UI em PT-BR, ordenação por severidade, categorias estáveis (`input_mutation`, `shared_reference`, `type_validation`) e recomendações coerentes
 - [x] Promover `languages`, `education` e `experience entries` a campos explícitos do schema de CV
 - [x] Adicionar normalização pós-modelo para consolidar dados vindos de `sections`
 - [x] Criar benchmark sintético multilayout para `cv_analysis`
@@ -896,21 +913,18 @@ A fase ainda não deve ser tratada como encerrada porque faltam:
 - [x] Remover `CV PROJECTS` falso quando ele for derivado de educação/GPA/double-degree em vez de projetos reais
 - [x] Canonicalizar `education_entries` no output final para manter apenas as 2 entradas reais do CV de Danyel, com datas, localizações e wording forte da USP
 
-#### Itens ainda pendentes para fechar a fase
+#### Fechamento da fase
 - [x] Validar a fase com documentos reais complementares ao benchmark sintético (`CV - Lucas -gen.json`, corpus multilayout, casos scan-like e trilha `evidence_cv`)
 - [x] Refinar prompts, contexto e grounding do `cv_analysis` com base nesses testes reais
 - [x] Documentar os limites atuais do OCR fallback e do parser OCR-first / VL-on-demand
-- [ ] Consolidar uma seção final de portfólio da Fase 5 com screenshots, mini demo e narrativa curta pronta para README/LinkedIn
-- [ ] Executar rollout controlado real do `evidence_cv` sob feature flag e coletar telemetria operacional fora do ambiente de benchmark
-- [ ] Decidir se a Fase 5 será encerrada como duas trilhas documentadas (`structured outputs` + `evidence_cv`) ou como um único pacote final unificado de produto
+- [x] Executar rollout controlado local do `evidence_cv` sob feature flag, com auto-rollout, semantic gate e telemetria operacional versionada no fluxo real de upload/indexação
+- [x] Encerrar a Fase 5 como pacote unificado de produto, com `structured outputs` + `evidence_cv` documentados na mesma fase
+- [x] Reposicionar screenshots finais, mini demo e narrativa curta de portfólio para a **Fase 11**, após app web + deploy público
 
 ### Entregável
 - Módulo de análises estruturadas validado no app principal + pipeline paralelo `evidence_cv` auditável para parsing de currículos, ambos sustentados por smoke eval, benchmark multilayout, OCR fallback e readiness de rollout controlado
 
-### Evidência para GitHub/LinkedIn
-- exemplos antes/depois de saída livre vs. estruturada
-- screenshot ou tabela com JSON validado
-- mini demo mostrando transformação de documento em checklist/JSON
+### Evidência técnica já disponível
 - relatório local de smoke eval da Fase 5
 - benchmark sintético mostrando `cv_analysis` robusto em layouts textuais
 - exemplo de documento scan-like melhorado via OCR fallback
@@ -919,6 +933,8 @@ A fase ainda não deve ser tratada como encerrada porque faltam:
 - documentação de readiness em `docs/PHASE_5_OCR_FIRST_VL_ON_DEMAND_PRODUCTION_READINESS.md`
 - documentação operacional do pipeline em `docs/README_evidence_cv_pipeline.md`
 - relatório de shadow rollout e adjudicação de contatos em `phase5_eval/reports/`
+
+O pacote visual final para README/LinkedIn/demo pública fica propositalmente para a **Fase 11**, depois da evolução para app web e deploy público.
 
 ### O que preciso saber defender em entrevista
 - por que structured output é importante
@@ -1218,74 +1234,6 @@ A prioridade desta fase deve ser:
 
 ---
 
-## Fase 8.5 — Hugging Face, quantização e fine-tuning leve
-
-### Objetivo
-Explorar de forma controlada quando vale usar o ecossistema Hugging Face para ampliar a capacidade experimental do projeto, sem substituir prematuramente o runtime principal nem abrir uma frente pesada sem evidência.
-
-### Princípio desta fase
-
-Esta fase só deve avançar **depois** que benchmark e evals estiverem maduros o suficiente para responder, com dados, se:
-
-- prompting + RAG + reranking já resolvem bem o caso
-- existe gargalo real que justifique adaptação de modelo
-- existe ganho potencial suficiente para compensar a complexidade extra
-
-### Direção recomendada
-
-Priorizar a seguinte ordem:
-
-1. **comparação de modelos e quantizações**
-2. **experimentos com embeddings e rerankers**
-3. **adaptação leve com LoRA/PEFT**
-4. só muito depois considerar algo mais pesado
-
-### O que esta fase deve provar
-
-- que eu sei usar o ecossistema Hugging Face como trilha de model engineering
-- que eu sei separar runtime operacional de ambiente de experimentação
-- que eu não faço fine-tuning “por moda”, mas apenas quando benchmark e evals apontam necessidade real
-
-### Checklist
-- [ ] Testar modelos do ecossistema Hugging Face fora do catálogo principal já usado no Ollama
-- [ ] Comparar variantes e quantizações relevantes para o hardware local
-- [ ] Avaliar modelos menores especializados para tarefas estruturadas
-- [ ] Avaliar embeddings e/ou rerankers adicionais via ecossistema open-source
-- [ ] Testar adaptação leve com LoRA/PEFT em tarefa específica e bem delimitada
-- [ ] Comparar baseline vs prompt engineering vs RAG vs modelo adaptado
-- [ ] Medir custo, latência, memória e ganho real de qualidade
-- [ ] Documentar claramente quando a adaptação compensa e quando não compensa
-
-### O que **não** fazer nesta fase
-- [ ] evitar full fine-tuning pesado como foco principal do projeto
-- [ ] evitar abrir frente de treinamento grande sem benchmark/evals confiáveis
-- [ ] evitar treinar o “chat inteiro” sem tarefa específica e métrica clara
-- [ ] evitar substituir Ollama como runtime principal sem uma justificativa arquitetural forte
-
-### Candidatos mais inteligentes para adaptação
-- [ ] extração estruturada
-- [ ] classificação de intenção / routing
-- [ ] reranking
-- [ ] embeddings
-- [ ] saída altamente formatada e previsível
-
-### Entregável
-- Relatório técnico comparando baseline vs alternativas com Hugging Face, quantização e possível adaptação leve orientada por evidência
-
-### Evidência para GitHub/LinkedIn
-- gráfico comparando baseline vs modelo/quantização/adaptação
-- tabela de trade-offs entre qualidade, custo e complexidade
-- write-up explicando por que a adaptação foi ou não foi adotada
-
-### O que preciso saber defender em entrevista
-- por que Ollama continuou como runtime principal
-- por que Hugging Face entrou como camada experimental
-- por que não comecei com fine-tuning
-- quando LoRA/PEFT faz mais sentido do que treino completo
-- como medi custo, complexidade e ganho real
-
----
-
 ## Fase 9 — Observabilidade
 
 ### Objetivo
@@ -1503,9 +1451,9 @@ Maximizar impacto em GitHub, LinkedIn, currículo e entrevista.
 
 ### Checklist
 - [ ] Escrever `README.md` forte
-- [ ] Adicionar screenshots
+- [ ] Adicionar screenshots da aplicação já na interface web/deploy público, e não só da UI local de prototipagem
 - [ ] Mostrar a evolução da interface (Streamlit -> Gradio -> app/web final)
-- [ ] Criar GIF ou vídeo curto de demonstração
+- [ ] Criar GIF ou vídeo curto da aplicação já no fluxo web/deploy público
 - [ ] Criar diagrama de arquitetura
 - [ ] Documentar features principais
 - [ ] Documentar casos de uso
@@ -1513,6 +1461,7 @@ Maximizar impacto em GitHub, LinkedIn, currículo e entrevista.
 - [ ] Documentar limitações conhecidas
 - [ ] Documentar próximos passos
 - [ ] Escrever instruções de instalação
+- [ ] Escrever narrativa curta pronta para README/LinkedIn baseada na aplicação web e no deploy demonstrável
 - [ ] Criar release `v1.0.0`
 
 ### Arquivos de documentação recomendados
@@ -1548,17 +1497,16 @@ Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA a
 
 ### Ordem recomendada daqui para frente
 
-1. **Fase 5 — Outputs estruturados**
-2. **Fase 5.5 — LangChain e LangGraph**
-3. **Fase 6 — Tools e agentes orientados a valor de negócio**
-4. **Fase 7 — Benchmark e comparação entre modelos**
-5. **Fase 8 — Evals**
-6. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
-7. **Fase 9 — Observabilidade**
-8. **Fase 10 — Engenharia profissional**
-9. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
-10. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
-11. **Fase 11 — Pacote final de portfólio**
+1. **Fase 5.5 — LangChain e LangGraph**
+2. **Fase 6 — Tools e agentes orientados a valor de negócio**
+3. **Fase 7 — Benchmark e comparação entre modelos**
+4. **Fase 8 — Evals**
+5. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
+6. **Fase 9 — Observabilidade**
+7. **Fase 10 — Engenharia profissional**
+8. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+9. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
+10. **Fase 11 — Pacote final de portfólio**
 
 ### Métrica de sucesso do roadmap
 
@@ -1589,4 +1537,7 @@ O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 - [x] Definir caps automáticos por provider para o `context_window` (incluindo Ollama)
 - [x] Estender a lógica de `context_window` automático também para o fluxo de chat com RAG
 - [x] Expor no chat o `context_window` efetivo/resolvido para dar transparência operacional ao usuário
-- [ ] Fechar a Fase 5 com screenshots finais, mini demo e narrativa pronta para portfólio/README
+- [x] Tornar o checklist interativo com persistência local em sessão e botão de reset
+- [x] Fazer polish da UI e do pós-processamento de `code_analysis`, com categorias estáveis (`input_mutation`, `shared_reference`, `type_validation`) e recomendações coerentes
+- [x] Implementar auto-recovery estruturado com `repair_json`, `retry_generation` e telemetria de parse recovery
+- [x] Encerrar tecnicamente a Fase 5 como pacote unificado (`structured outputs` + `evidence_cv`) e mover o pacote visual final para a Fase 11, após app web + deploy
