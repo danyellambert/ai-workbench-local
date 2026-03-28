@@ -618,13 +618,32 @@ def _get_rag_index() -> dict[str, Any] | None:
     return disk_index
 
 
+def _get_effective_rag_settings():
+    try:
+        from .rag_state import get_rag_runtime_settings
+
+        runtime_settings = get_rag_runtime_settings()
+        if runtime_settings is not None:
+            return runtime_settings
+    except Exception:
+        pass
+    return get_rag_settings()
+
+
 def _get_embedding_provider():
     try:
-        from ..providers.registry import build_provider_registry
+        from ..providers.registry import build_provider_registry, resolve_provider_runtime_profile
     except Exception:
         return None
     registry = build_provider_registry()
-    return registry.get("ollama", {}).get("instance")
+    rag_settings = _get_effective_rag_settings()
+    runtime_profile = resolve_provider_runtime_profile(
+        registry,
+        rag_settings.embedding_provider,
+        capability="embeddings",
+        fallback_provider="ollama",
+    )
+    return runtime_profile.get("provider_instance")
 
 
 def _filtered_chunks(rag_index: dict[str, Any], document_ids: list[str] | None = None) -> list[dict[str, Any]]:
@@ -748,6 +767,7 @@ def build_retrieval_context(
     max_chunks: int = DEFAULT_RETRIEVAL_CHUNKS,
     max_chars: int = DEFAULT_RETRIEVAL_CHARS,
 ) -> str:
+    rag_settings = _get_effective_rag_settings()
     rag_index = _get_rag_index()
     if not isinstance(rag_index, dict):
         return ""
@@ -762,7 +782,7 @@ def build_retrieval_context(
     retrieval = retrieve_relevant_chunks_detailed(
         query=cleaned_query,
         rag_index=rag_index,
-        settings=get_rag_settings(),
+        settings=rag_settings,
         embedding_provider=embedding_provider,
         document_ids=document_ids,
     )

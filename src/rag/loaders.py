@@ -3,6 +3,8 @@ import hashlib
 import io
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from src.config import RagSettings
 from src.evidence_cv.config import build_evidence_config_from_rag_settings
@@ -39,6 +41,67 @@ class LoadedDocument:
     file_hash: str
     text: str
     metadata: dict[str, object] = field(default_factory=dict)
+
+
+SUPPORTED_LOADER_STRATEGIES = ("manual", "langchain_basic")
+
+
+def describe_loader_strategy(strategy: str) -> str:
+    labels = {
+        "manual": "Manual local",
+        "langchain_basic": "LangChain loaders (experimental)",
+    }
+    return labels.get((strategy or "").strip().lower(), strategy or "manual")
+
+
+def resolve_loader_strategy(strategy: str | None, suffix: str) -> tuple[str, str, str | None]:
+    requested = (strategy or "manual").strip().lower() or "manual"
+    normalized_suffix = (suffix or "").strip().lower()
+
+    if requested == "manual":
+        return requested, "manual", None
+
+    if requested == "langchain_basic":
+        if normalized_suffix == "pdf":
+            return requested, "manual", "pdf_kept_custom_pipeline"
+        if normalized_suffix not in {"txt", "md", "py", "csv"}:
+            return requested, "manual", "unsupported_file_type"
+        try:
+            from langchain_community.document_loaders import CSVLoader, TextLoader  # noqa: F401
+        except Exception:
+            return requested, "manual", "langchain_community_not_installed"
+        return requested, "langchain_basic", None
+
+    return requested, "manual", "unknown_strategy"
+
+
+def _load_with_langchain_basic(file_bytes: bytes, suffix: str) -> tuple[str, dict[str, object]]:
+    from langchain_community.document_loaders import CSVLoader, TextLoader
+
+    temp_path: Path | None = None
+    try:
+        with NamedTemporaryFile(delete=False, suffix=f".{suffix}") as temp_file:
+            temp_file.write(file_bytes)
+            temp_path = Path(temp_file.name)
+
+        if suffix == "csv":
+            loader = CSVLoader(file_path=str(temp_path), encoding="utf-8")
+        else:
+            loader = TextLoader(file_path=str(temp_path), encoding="utf-8", autodetect_encoding=True)
+
+        documents = loader.load()
+        text = "\n\n".join(
+            str(getattr(document, "page_content", "") or "").strip()
+            for document in documents
+            if str(getattr(document, "page_content", "") or "").strip()
+        ).strip()
+        return text, {
+            "loader_impl": loader.__class__.__name__,
+            "loader_documents_count": len(documents),
+        }
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
 
 
 def _normalize_index_text(value: str | None) -> str:
@@ -563,6 +626,10 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
     suffix = uploaded_file.name.lower().rsplit(".", 1)[-1] if "." in uploaded_file.name else ""
 
     metadata: dict[str, object] = {}
+    loader_strategy_requested, loader_strategy_used, loader_strategy_fallback_reason = resolve_loader_strategy(
+        getattr(rag_settings, "loader_strategy", "manual") if rag_settings else "manual",
+        suffix,
+    )
 
     if suffix == "pdf":
         use_evidence_pipeline, routing_diagnostics = _build_evidence_routing_diagnostics(file_bytes, uploaded_file.name, rag_settings)
@@ -598,13 +665,31 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
             metadata["routing_diagnostics"] = routing_diagnostics
         file_type = "pdf"
     elif suffix == "csv":
-        text = _extract_csv_text(file_bytes)
+        if loader_strategy_used == "langchain_basic":
+            text, metadata = _load_with_langchain_basic(file_bytes, suffix)
+        else:
+            text = _extract_csv_text(file_bytes)
         file_type = "csv"
     elif suffix in {"txt", "md", "py"}:
-        text = _extract_txt_text(file_bytes)
+        if loader_strategy_used == "langchain_basic":
+            text, metadata = _load_with_langchain_basic(file_bytes, suffix)
+        else:
+            text = _extract_txt_text(file_bytes)
         file_type = suffix
     else:
         raise RuntimeError("Formato não suportado. Use PDF, TXT, CSV, MD ou PY.")
+
+    metadata = {
+        **metadata,
+        "loader_strategy_requested": loader_strategy_requested,
+        "loader_strategy_used": loader_strategy_used,
+        "loader_strategy_label": describe_loader_strategy(loader_strategy_used),
+        **(
+            {"loader_strategy_fallback_reason": loader_strategy_fallback_reason}
+            if loader_strategy_fallback_reason
+            else {}
+        ),
+    }
 
     cleaned_text = text.strip()
     if not cleaned_text:
