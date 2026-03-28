@@ -249,13 +249,42 @@ Para a análise completa, veja:
 
 ---
 
+## Fase 5.5 concluída tecnicamente
+
+A Fase 5.5 consolidou a transição do projeto de um pipeline puramente manual para uma arquitetura híbrida, auditável e mais próxima da stack de mercado.
+
+### O que foi entregue na prática
+
+- estratégias experimentais de **loader**, **chunking** e **retrieval** com fallback seguro
+- comparação shadow entre retrieval manual e LangChain + Chroma
+- workflow experimental **LangGraph** para execução estruturada com retry de contexto e guardrails
+- comparação shadow entre `direct` e `langgraph_context_retry`
+- separação explícita entre **provider de geração** e **provider de embeddings**
+- provider local experimental **`huggingface_local`**
+- helpers compartilhados para resolução de runtime multi-provider
+- snapshot operacional consolidado para tornar a UI menos acoplada ao detalhe do runtime
+
+### Leitura arquitetural da fase
+
+O projeto agora deixa mais explícita a separação entre:
+
+- geração
+- embeddings
+- reranking
+- workflows estruturados
+- runtime experimental local
+
+Na prática, isso fecha a Fase 5.5 como uma fase de **evolução arquitetural controlada**, sem abandonar a baseline manual que dá sustentação à narrativa técnica do projeto.
+
+---
+
 ## Próximo passo estratégico
 
-Com a Fase 4.5 encerrada, o roadmap oficial segue para:
+Com a Fase 5.5 encerrada tecnicamente, o roadmap oficial segue para:
 
-1. **Fase 5 — Outputs estruturados**
-2. **Fase 5.5 — Evolução com LangChain e LangGraph**
-3. **Fase 6 — Tools e agentes orientados a valor de negócio**
+1. **Fase 6 — Tools e agentes orientados a valor de negócio**
+2. **Fase 7 — Benchmark e comparação entre modelos**
+3. **Fase 8 — Evals**
 
 ---
 
