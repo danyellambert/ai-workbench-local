@@ -12,16 +12,12 @@ from src.config import OllamaSettings
 class OllamaProvider:
     FALLBACK_MODELS = [
         "qwen2.5-coder:7b",
-        "qwen2.5-coder:14b",
         "qwen3.5:397b-cloud",
-        "deepseek-coder:6.7b",
         "qwen3-coder:480b-cloud",
     ]
     FALLBACK_EMBEDDING_MODELS = [
         "bge-m3",
         "nomic-embed-text",
-        "mxbai-embed-large",
-        "all-minilm",
         "qwen3-embedding",
         "embeddinggemma",
     ]

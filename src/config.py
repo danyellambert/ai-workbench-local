@@ -26,14 +26,29 @@ class OllamaSettings:
 class OpenAISettings:
     api_key: str | None
     model: str
+    embedding_model: str
     default_context_window: int
     available_models_env: list[str]
+    available_embedding_models_env: list[str]
+
+
+@dataclass(frozen=True)
+class HuggingFaceSettings:
+    model: str
+    embedding_model: str
+    default_context_window: int
+    available_models_env: list[str]
+    available_embedding_models_env: list[str]
+    generation_task: str
+    max_new_tokens: int
 
 
 @dataclass(frozen=True)
 class RagSettings:
+    loader_strategy: str
     chunking_strategy: str
     retrieval_strategy: str
+    embedding_provider: str
     embedding_model: str
     embedding_context_window: int
     embedding_truncate: bool
@@ -112,23 +127,73 @@ def get_openai_settings() -> OpenAISettings:
         for model in os.getenv("OPENAI_AVAILABLE_MODELS", "").split(",")
         if model.strip()
     ]
+    available_embedding_models_env = [
+        model.strip()
+        for model in os.getenv("OPENAI_AVAILABLE_EMBEDDING_MODELS", "").split(",")
+        if model.strip()
+    ]
 
     return OpenAISettings(
         api_key=os.getenv("OPENAI_API_KEY"),
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        embedding_model=os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
         default_context_window=int(os.getenv("OPENAI_CONTEXT_WINDOW", "128000")),
         available_models_env=available_models_env,
+        available_embedding_models_env=available_embedding_models_env,
+    )
+
+
+def get_huggingface_settings() -> HuggingFaceSettings:
+    available_models_env = [
+        model.strip()
+        for model in os.getenv("HUGGINGFACE_AVAILABLE_MODELS", "").split(",")
+        if model.strip()
+    ]
+    available_embedding_models_env = [
+        model.strip()
+        for model in os.getenv("HUGGINGFACE_AVAILABLE_EMBEDDING_MODELS", "").split(",")
+        if model.strip()
+    ]
+
+    return HuggingFaceSettings(
+        model=os.getenv("HUGGINGFACE_MODEL", "").strip(),
+        embedding_model=os.getenv("HUGGINGFACE_EMBEDDING_MODEL", "").strip(),
+        default_context_window=int(os.getenv("HUGGINGFACE_CONTEXT_WINDOW", "8192")),
+        available_models_env=available_models_env,
+        available_embedding_models_env=available_embedding_models_env,
+        generation_task=os.getenv("HUGGINGFACE_GENERATION_TASK", "text-generation").strip() or "text-generation",
+        max_new_tokens=int(os.getenv("HUGGINGFACE_MAX_NEW_TOKENS", "512")),
     )
 
 
 
 def get_rag_settings() -> RagSettings:
+    embedding_provider = os.getenv("RAG_EMBEDDING_PROVIDER", "ollama").strip().lower() or "ollama"
+    provider_default_embedding_model = (
+        os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+        if embedding_provider == "openai"
+        else os.getenv("HUGGINGFACE_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+        if embedding_provider == "huggingface_local"
+        else os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma:300m")
+    )
+    embedding_context_window = int(
+        os.getenv(
+            "RAG_EMBEDDING_CONTEXT_WINDOW",
+            os.getenv("OLLAMA_EMBEDDING_CONTEXT_WINDOW", "512"),
+        )
+    )
+    embedding_truncate = os.getenv(
+        "RAG_EMBEDDING_TRUNCATE",
+        os.getenv("OLLAMA_EMBEDDING_TRUNCATE", "true"),
+    ).strip().lower() not in {"0", "false", "no"}
     return RagSettings(
+        loader_strategy=os.getenv("RAG_LOADER_STRATEGY", "manual").strip().lower() or "manual",
         chunking_strategy=os.getenv("RAG_CHUNKING_STRATEGY", "manual").strip().lower() or "manual",
         retrieval_strategy=os.getenv("RAG_RETRIEVAL_STRATEGY", "manual_hybrid").strip().lower() or "manual_hybrid",
-        embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma:300m"),
-        embedding_context_window=int(os.getenv("OLLAMA_EMBEDDING_CONTEXT_WINDOW", "512")),
-        embedding_truncate=os.getenv("OLLAMA_EMBEDDING_TRUNCATE", "true").strip().lower() not in {"0", "false", "no"},
+        embedding_provider=embedding_provider,
+        embedding_model=(os.getenv("RAG_EMBEDDING_MODEL", "").strip() or provider_default_embedding_model),
+        embedding_context_window=embedding_context_window,
+        embedding_truncate=embedding_truncate,
         chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1200")),
         chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "80")),
         top_k=int(os.getenv("RAG_TOP_K", "6")),
