@@ -332,13 +332,13 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 ### Fase atual em andamento
 
-- **Fase 5.5 — Evolução com LangChain e LangGraph**
-  - início da evolução arquitetural do pipeline manual para uma camada compatível com frameworks de mercado
-  - foco inicial em desacoplamento da camada de retrieval/contexto e preparação para workflows controlados
+- **Fase 6 — Tools e agentes orientados a valor de negócio**
+  - próxima fase estratégica após o fechamento técnico/local da evolução arquitetural da Fase 5.5
+  - foco em transformar a base atual em um agente documental com valor empresarial claro
 
 ### Fase concluída mais recentemente
 
-- **Fase 5 — concluída tecnicamente com smoke eval PASS, trilha `evidence_cv` integrada e rollout controlado local sob feature flag**
+- **Fase 5.5 — concluída tecnicamente/localmente com LangChain/LangGraph auditáveis, separação geração vs embeddings, runtime multi-provider mais forte e trilha `huggingface_local` preparada**
 
 ### O que já foi entregue na Fase 4.5
 
@@ -442,16 +442,15 @@ O que fica para fases posteriores, sem bloquear o encerramento da Fase 5:
 
 A ordem mais forte agora passa a ser:
 
-1. **Fase 5.5 — Evolução com LangChain e LangGraph**
-2. **Fase 6 — Tools e agentes orientados a valor de negócio**
-3. **Fase 7 — Benchmark e comparação entre modelos**
-4. **Fase 8 — Evals**
-5. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
-6. **Fase 9 — Observabilidade**
-7. **Fase 10 — Engenharia profissional**
-8. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
-9. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
-10. **Fase 11 — Pacote final de portfólio**
+1. **Fase 6 — Tools e agentes orientados a valor de negócio**
+2. **Fase 7 — Benchmark e comparação entre modelos**
+3. **Fase 8 — Evals**
+4. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
+5. **Fase 9 — Observabilidade**
+6. **Fase 10 — Engenharia profissional**
+7. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+8. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
+9. **Fase 11 — Pacote final de portfólio**
 
 ---
 
@@ -960,23 +959,43 @@ Agora ele precisa provar também que eu sei usar o ecossistema profissional sem 
 ### Checklist
 - [x] Reimplementar partes-chave do RAG usando LangChain
 - [x] Comparar pipeline manual vs LangChain em clareza, produtividade e extensibilidade
-- [ ] Usar loaders/splitters/retrievers do LangChain quando fizer sentido
+- [x] Usar loaders/splitters/retrievers do LangChain quando fizer sentido
 - [x] Integrar vector store via LangChain
-- [ ] Criar primeiro workflow com LangGraph
-- [ ] Modelar estados e transições de um fluxo real
-- [ ] Fortalecer a abstração de provider para suportar runtimes além de Ollama/OpenAI-compatible
-- [ ] Separar explicitamente geração, embeddings, reranking e experimentação offline na arquitetura
-- [ ] Preparar caminho para backend local alternativo via ecossistema Hugging Face sem quebrar a UX atual
-- [ ] Documentar como e por que a arquitetura evoluiu
-- [ ] Deixar a comparação explícita para entrevista e portfólio
-- [ ] Fortalecer a abstração de provider para suportar runtimes diferentes além de Ollama/OpenAI-compatible
-- [ ] Separar claramente camada de geração, embeddings, reranking e experimentação offline
-- [ ] Preparar a arquitetura para incorporar fluxos locais do ecossistema Hugging Face sem acoplá-los cedo demais ao app principal
+- [x] Criar primeiro workflow com LangGraph
+- [x] Modelar estados e transições de um fluxo real
+- [x] Expandir o workflow LangGraph de retry de contexto para roteamento explícito de estratégias e guardrails
+- [x] Comparar execução direta vs workflow LangGraph em robustez, latência e previsibilidade operacional
+- [x] Fortalecer a abstração de provider para suportar runtimes além de Ollama/OpenAI-compatible
+- [x] Separar explicitamente geração, embeddings, reranking e experimentação offline na arquitetura
+- [x] Preparar caminho para backend local alternativo via ecossistema Hugging Face sem quebrar a UX atual
+- [x] Documentar como e por que a arquitetura evoluiu
+- [x] Deixar a comparação explícita para entrevista e portfólio
+- [x] Avaliar chains auxiliares do LangChain para tasks estruturadas quando houver ganho claro
+- [x] Adicionar tracing/telemetria explícita para fluxos LangChain/LangGraph
+- [x] Fortalecer a abstração de provider para suportar runtimes diferentes além de Ollama/OpenAI-compatible
+- [x] Separar claramente camada de geração, embeddings, reranking e experimentação offline
+- [x] Preparar a arquitetura para incorporar fluxos locais do ecossistema Hugging Face sem acoplá-los cedo demais ao app principal
 
 ### Progresso local já entregue
 
+- [x] Adicionar `RAG_LOADER_STRATEGY` com caminho experimental `langchain_basic` e fallback seguro para `manual` em `TXT`/`CSV`/`MD`/`PY`, preservando `PDF` no pipeline customizado
 - [x] Adicionar `RAG_CHUNKING_STRATEGY` com caminho experimental `langchain_recursive` e fallback seguro para `manual`
 - [x] Adicionar `RAG_RETRIEVAL_STRATEGY` com caminho experimental `langchain_chroma` e fallback seguro para `manual_hybrid`
+- [x] Adicionar estratégia experimental `langgraph_context_retry` para orquestrar tasks estruturadas com retry controlado de contexto
+- [x] Registrar `workflow_attempts`, `workflow_context_strategies` e `workflow_trace` para tornar o fluxo LangGraph auditável no runtime da execução estruturada
+- [x] Adicionar roteamento explícito de estratégia inicial, decisão de guardrail e marcação de `needs_review` no workflow LangGraph
+- [x] Expor comparação shadow `direct` vs `langgraph_context_retry` com log local e relatório agregado para medir robustez, latência e qualidade
+- [x] Separar resolução de provider de geração vs provider de embeddings com capability explícita e fallback seguro
+- [x] Fazer a compatibilidade do índice considerar também o provider de embeddings, além do modelo e da janela de contexto
+- [x] Extrair a lógica de reranking híbrido para módulo dedicado, separando melhor retrieval bruto da camada de reranking
+- [x] Adicionar testes unitários em `unittest` para reranking e resolução de provider, reduzindo dependência de `pytest` para validar esse slice
+- [x] Preparar provider local experimental `huggingface_local` para reduzir acoplamento ao runtime principal e abrir trilha para testes via Transformers
+- [x] Endurecer a resolução de provider das tasks estruturadas com capability explícita e telemetria de fallback
+- [x] Alinhar `document_context` e retrieval estruturado às configurações efetivas de RAG/embedding da sessão, evitando divergência entre UI e runtime interno
+- [x] Expor na UI a seleção explícita do provider de embedding, fechando melhor a separação geração vs embeddings
+- [x] Reduzir hardcodes remanescentes na camada estruturada, usando provider/context window efetivos em vez de defaults implícitos do Ollama
+- [x] Centralizar a resolução de runtime multi-provider em helpers compartilhados do registry, reduzindo duplicação entre app, `document_context` e camada estruturada
+- [x] Extrair a montagem do snapshot operacional da UI para serviço dedicado, reduzindo acoplamento do `main_qwen.py`
 - [x] Expor na UI a seleção de chunking e retrieval experimental para comparar a evolução do pipeline manual
 - [x] Expor shadow comparison no debug do chat para comparar recuperação manual vs recuperação via LangChain + Chroma na mesma pergunta
 - [x] Persistir histórico local das comparações shadow com resumo agregado para apoiar a comparação manual vs LangChain
@@ -1007,6 +1026,17 @@ Introduzir tools e agentes de forma coerente com o projeto atual, focando em val
 ### Direção recomendada
 
 Em vez de um agente genérico, priorizar algo que recrutador consiga mapear para uso real em empresa.
+
+### Papel recomendado do LangGraph nesta fase
+
+Nesta fase, o LangGraph deve ser o orquestrador preferencial dos fluxos com estado explícito, especialmente para:
+
+- roteamento de intenção
+- seleção de tools
+- fallback quando o contexto vier fraco
+- guardrails antes da resposta final
+- estados de `needs_review` / `human_in_the_loop`
+- trilha auditável de decisões do agente
 
 ### Agente-alvo recomendado
 
@@ -1069,6 +1099,9 @@ Um agente que:
 - [ ] Criar tool para comparação entre documentos
 - [ ] Criar tool para gerar checklist operacional
 - [ ] Criar workflow com LangGraph para orquestração do agente
+- [ ] Modelar no LangGraph os estados do agente documental: intenção, recuperação, decisão de tool, validação e resposta final
+- [ ] Adicionar nós de guardrail e fallback no LangGraph para grounding fraco, falha de tool e saída inválida
+- [ ] Adicionar estado explícito de revisão humana (`needs_review`) no workflow do agente
 - [ ] Implementar roteador de intenção
 - [ ] Registrar logs de decisão do agente
 - [ ] Explicar limitações e guardrails
@@ -1109,6 +1142,7 @@ Mostrar critério técnico, não apenas acúmulo de features.
 - [ ] Salvar resultados de benchmark
 - [ ] Comparar local vs cloud opcional
 - [ ] Comparar embeddings e estratégias de retrieval
+- [ ] Comparar fluxo direto vs workflow LangGraph em latência, taxa de sucesso e previsibilidade operacional
 - [ ] Comparar modelos servidos via Ollama vs modelos experimentados pelo ecossistema Hugging Face
 - [ ] Comparar quantizações quando isso fizer diferença real no hardware local
 - [ ] Comparar stacks por caso de uso, e não só por benchmark genérico
@@ -1162,6 +1196,8 @@ Criar uma camada de qualidade e repetibilidade.
 - [ ] Avaliar groundedness em RAG
 - [ ] Avaliar precisão de citações/fontes
 - [ ] Avaliar acurácia do roteamento de intenção
+- [ ] Avaliar acurácia das transições e decisões do workflow LangGraph
+- [ ] Avaliar taxa de retries úteis vs retries desnecessários nos fluxos LangGraph
 - [ ] Avaliar tempo de resposta
 - [ ] Salvar resultados em SQLite
 - [ ] Considerar integração com DeepEval depois da base própria pronta
@@ -1260,6 +1296,7 @@ Monitorar o comportamento do sistema de IA.
 - [ ] Registrar tool usada
 - [ ] Registrar tempo de retrieval
 - [ ] Registrar tempo de geração
+- [ ] Registrar `workflow_id`, nós percorridos, transições, retries e fallback reasons dos fluxos LangGraph
 - [ ] Registrar resultado da avaliação
 - [ ] Registrar erros
 - [ ] Criar dashboard local com métricas
@@ -1290,6 +1327,8 @@ Transformar o projeto em algo tecnicamente defendível.
 - [ ] Criar testes dos fluxos de RAG
 - [ ] Criar testes dos schemas estruturados
 - [ ] Criar testes do roteador de intenção
+- [x] Criar testes dos grafos LangGraph e das transições críticas de estado
+- [x] Criar testes dos caminhos de retry, fallback e revisão humana nos workflows LangGraph
 - [ ] Adicionar `Dockerfile`
 - [ ] Criar GitHub Actions para checks/testes
 - [ ] Padronizar tratamento de falhas
@@ -1507,16 +1546,15 @@ Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA a
 
 ### Ordem recomendada daqui para frente
 
-1. **Fase 5.5 — LangChain e LangGraph**
-2. **Fase 6 — Tools e agentes orientados a valor de negócio**
-3. **Fase 7 — Benchmark e comparação entre modelos**
-4. **Fase 8 — Evals**
-5. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
-6. **Fase 9 — Observabilidade**
-7. **Fase 10 — Engenharia profissional**
-8. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
-9. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
-10. **Fase 11 — Pacote final de portfólio**
+1. **Fase 6 — Tools e agentes orientados a valor de negócio**
+2. **Fase 7 — Benchmark e comparação entre modelos**
+3. **Fase 8 — Evals**
+4. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
+5. **Fase 9 — Observabilidade**
+6. **Fase 10 — Engenharia profissional**
+7. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+8. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
+9. **Fase 11 — Pacote final de portfólio**
 
 ### Métrica de sucesso do roadmap
 
@@ -1551,3 +1589,5 @@ O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 - [x] Fazer polish da UI e do pós-processamento de `code_analysis`, com categorias estáveis (`input_mutation`, `shared_reference`, `type_validation`) e recomendações coerentes
 - [x] Implementar auto-recovery estruturado com `repair_json`, `retry_generation` e telemetria de parse recovery
 - [x] Encerrar tecnicamente a Fase 5 como pacote unificado (`structured outputs` + `evidence_cv`) e mover o pacote visual final para a Fase 11, após app web + deploy
+- [x] Adicionar comparação shadow `direct` vs `langgraph_context_retry` com log local, relatório agregado e sinais visuais na UI estruturada
+- [x] Adicionar testes focados para roteamento, guardrails, retry, fallback e revisão humana do workflow LangGraph
