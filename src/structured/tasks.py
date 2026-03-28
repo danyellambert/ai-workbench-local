@@ -128,10 +128,27 @@ class TaskHandler:
         return build_provider_registry()
 
     def _resolve_provider(self, request: TaskExecutionRequest):
+        from ..providers.registry import resolve_provider_runtime_profile
+
         registry = self._get_provider_registry()
-        provider_entry = registry.get(request.provider)
+        runtime_profile = resolve_provider_runtime_profile(
+            registry,
+            request.provider,
+            capability="chat",
+            fallback_provider="ollama",
+        )
+        requested_provider = str(runtime_profile.get("requested_provider") or request.provider or "ollama")
+        provider_key = runtime_profile.get("effective_provider")
+        provider_entry = runtime_profile.get("provider_entry") if isinstance(runtime_profile.get("provider_entry"), dict) else None
+        fallback_reason = runtime_profile.get("fallback_reason")
         if provider_entry is None:
-            raise RuntimeError(f"Provider '{request.provider}' is not available in the current environment.")
+            raise RuntimeError(f"Provider '{requested_provider}' is not available in the current environment.")
+
+        telemetry = self._telemetry_dict(request)
+        telemetry["provider_requested"] = requested_provider
+        telemetry["provider_effective"] = provider_key
+        if fallback_reason:
+            telemetry["provider_fallback_reason"] = fallback_reason
         return provider_entry["instance"]
 
     def _collect_response_text(self, provider, request: TaskExecutionRequest, prompt: str) -> str:
@@ -160,7 +177,8 @@ class TaskHandler:
                 provider_calls.append(
                     {
                         "stage": stage_name,
-                        "provider": request.provider,
+                        "provider": telemetry.get("provider_effective") or request.provider,
+                        "provider_requested": telemetry.get("provider_requested") or request.provider,
                         "model": request.model,
                         "duration_s": duration_s,
                         "prompt_chars": len(prompt or ""),
@@ -422,14 +440,14 @@ class ExtractionTaskHandler(TaskHandler):
             "full_document_chars": len(full_document_text or ""),
             "context_chars_sent": len(context_text or ""),
             "context_note": (
-                "Extraction gerada com o documento inteiro porque o tamanho ainda é seguro para envio direto."
+                "Extração gerada com o documento inteiro porque o tamanho ainda é seguro para envio direto."
                 if extraction_mode == "full_document_direct"
-                else "Extraction gerada com contexto recortado do document scan."
+                else "Extração gerada com contexto recortado do document scan."
             ),
             "stages": [
                 {
                     "stage_type": extraction_mode,
-                    "label": "Extraction generation input",
+                    "label": "Entrada de geração da extração",
                     "chars_sent": len(context_text or ""),
                     "context_preview": context_text or "",
                     "prompt_preview": prompt,
@@ -575,6 +593,62 @@ Return this JSON structure:
     def _clean_extraction_text(self, value: object) -> str:
         return " ".join(str(value or "").split()).strip()
 
+    def _extract_due_date_phrase(self, text: str | None) -> str | None:
+        cleaned = self._clean_extraction_text(text)
+        if not cleaned:
+            return None
+
+        patterns = [
+            r"until the earlier of[^.;]{0,180}",
+            r"within[^.;]{0,120}\b(?:day|days|month|months|year|years)\b[^.;]{0,80}",
+            r"at least[^.;]{0,120}\b(?:day|days|month|months|year|years)\b[^.;]{0,80}",
+            r"for a period of[^.;]{0,120}\b(?:day|days|month|months|year|years)\b[^.;]{0,80}",
+            r"concurrently with[^.;]{0,140}",
+            r"effective as of[^.;]{0,140}",
+            r"beginning on or after[^.;]{0,140}",
+            r"before[^.;]{0,120}\b(?:day|days|month|months|year|years|closing|execution)\b[^.;]{0,80}",
+            r"after[^.;]{0,120}\b(?:day|days|month|months|year|years|closing|execution)\b[^.;]{0,80}",
+            r"\b(?:19|20)\d{2}-\d{2}-\d{2}\b",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, cleaned, re.I)
+            if match:
+                return match.group(0).strip(" .;:-")
+
+        short_deadline_keywords = (
+            "day",
+            "days",
+            "month",
+            "months",
+            "year",
+            "years",
+            "thereafter",
+            "prior notice",
+            "ongoing",
+            "effective",
+            "immediately",
+            "execution",
+            "closing",
+        )
+        lowered = cleaned.lower()
+        if len(cleaned) <= 80 and any(keyword in lowered for keyword in short_deadline_keywords):
+            return cleaned
+
+        return None
+
+    def _normalize_due_date_text(
+        self,
+        raw_due_date: str | None,
+        *,
+        evidence: str | None = None,
+        description: str | None = None,
+    ) -> str | None:
+        for candidate in (raw_due_date, evidence, description):
+            extracted = self._extract_due_date_phrase(candidate)
+            if extracted:
+                return extracted
+        return None
+
     def _unique_extraction_strings(self, values: list[object]) -> list[str]:
         seen: set[str] = set()
         result: list[str] = []
@@ -664,7 +738,11 @@ Return this JSON structure:
             evidence = self._clean_extraction_text(item.evidence) or None
             impact = self._clean_extraction_text(item.impact) or None
             owner = self._clean_extraction_text(item.owner) or None
-            due_date = self._clean_extraction_text(item.due_date) or None
+            due_date = self._normalize_due_date_text(
+                self._clean_extraction_text(item.due_date) or None,
+                evidence=evidence,
+                description=description,
+            )
             if legal_view and not evidence:
                 continue
             key = description.casefold()
@@ -692,9 +770,13 @@ Return this JSON structure:
             if not description:
                 continue
             owner = self._clean_extraction_text(item.owner) or None
-            due_date = self._clean_extraction_text(item.due_date) or None
-            status = self._clean_extraction_text(item.status) or None
             evidence = self._clean_extraction_text(item.evidence) or None
+            due_date = self._normalize_due_date_text(
+                self._clean_extraction_text(item.due_date) or None,
+                evidence=evidence,
+                description=description,
+            )
+            status = self._clean_extraction_text(item.status) or None
             if legal_view and not (evidence or owner):
                 continue
             key = (description.casefold(), (owner or "").casefold())
@@ -794,7 +876,7 @@ class SummaryTaskHandler(TaskHandler):
                     *map_stage_details,
                     {
                         "stage_type": "reduce",
-                        "label": "Final synthesis",
+                        "label": "Síntese final",
                         "chars_sent": len(prompt),
                         "duration_s": reduce_duration_s,
                         "prompt_preview": prompt[:6000],
@@ -849,7 +931,7 @@ class SummaryTaskHandler(TaskHandler):
             "stages": [
                 {
                     "stage_type": "single_pass",
-                    "label": f"Single-pass summary ({strategy})",
+                    "label": f"Resumo em passo único ({strategy})",
                     "chars_sent": len(context_text or ""),
                     "duration_s": single_pass_duration_s,
                     "context_preview": (context_text or "")[:6000],
@@ -931,7 +1013,7 @@ class SummaryTaskHandler(TaskHandler):
             stage_details.append(
                 {
                     "stage_type": "map",
-                    "label": f"Part {index} of {total_chunks}",
+                    "label": f"Parte {index} de {total_chunks}",
                     "chars_sent": len(chunk),
                     "duration_s": duration_s,
                     "context_preview": chunk[:6000],
@@ -1231,7 +1313,7 @@ class ChecklistTaskHandler(TaskHandler):
                     *map_stage_details,
                     {
                         "stage_type": "reduce",
-                        "label": "Final checklist synthesis",
+                        "label": "Síntese final do checklist",
                         "chars_sent": len(prompt),
                         "context_preview": prompt[:6000],
                         "prompt_preview": prompt[:6000],
@@ -1278,7 +1360,7 @@ class ChecklistTaskHandler(TaskHandler):
             "stages": [
                 {
                     "stage_type": context_mode,
-                    "label": "Checklist generation input",
+                    "label": "Entrada de geração do checklist",
                     "chars_sent": len(context_text or ""),
                     "context_preview": (context_text or "")[:6000],
                     "prompt_preview": prompt[:6000],
@@ -1492,7 +1574,7 @@ class ChecklistTaskHandler(TaskHandler):
             stage_details.append(
                 {
                     "stage_type": "map",
-                    "label": f"Checklist part {index} of {total_parts}",
+                    "label": f"Parte do checklist {index} de {total_parts}",
                     "chars_sent": len(part),
                     "context_preview": part[:6000],
                     "prompt_preview": prompt[:6000],
@@ -1937,9 +2019,18 @@ You are a code analysis assistant.
 Return only valid JSON.
 Use only the code/content provided.
 Do not invent bugs or features that are not grounded in the code.
-- Prioritize concrete correctness bugs, runtime failure risks, type/shape assumptions, input mutation side effects, and grounded test cases.
+- Write natural-language fields in Brazilian Portuguese unless the user explicitly asks for another language.
+- Keep code identifiers, exception names, and evidence snippets exactly as they appear in the source.
+- Prioritize concrete correctness bugs, runtime failure risks, type/shape assumptions, explicit side effects, and grounded test cases.
 - Avoid generic/template issues unless they are directly supported by visible code evidence.
 - Prefer the most important concrete bug over vague maintainability commentary.
+- Only report a missing-key issue when the code really dereferences a key without a guard. If the code first checks something like `if "score" in item`, do not claim `KeyError`; describe the real remaining risk instead.
+- Use `input_mutation` only when the code mutates caller-provided objects in place. If the function merely reuses or returns the original object reference unchanged, prefer `shared_reference` instead and keep severity proportional.
+- Do not present ambiguous alternatives such as "return 0.0 or raise an error". Choose one concrete recommendation and keep the refactor plan and tests consistent with that choice.
+- When an empty-input average would otherwise fail, prefer one concrete remediation and default to `0.0` if the snippet does not show a conflicting business rule.
+- Do not recommend deep copy by default for simple dict/list normalization. Prefer shallow copy (`copy()`) or building a new object unless nested mutation explicitly requires deep copy.
+- Use concise stable categories from this set whenever possible: `runtime_failure`, `correctness`, `type_validation`, `shared_reference`, `input_mutation`, `error_handling`, `performance`, `readability`, `maintainability`, `api_contract`.
+- Use `high` severity only for issues that can realistically break execution, corrupt data, or produce obviously wrong results in normal use.
 - Test suggestions must be specific to the actual snippet, not placeholders like `edge case X`.
 - Risk notes must be snippet-specific and grounded in visible code behavior.
 
@@ -1949,23 +2040,23 @@ Code or technical text to analyze:
 Return this JSON structure:
 {{
   "task_type": "code_analysis",
-  "snippet_summary": "Short summary of the code snippet",
-  "main_purpose": "Main purpose of the code",
+  "snippet_summary": "Resumo curto do trecho de código",
+  "main_purpose": "Objetivo principal do código",
   "detected_issues": [
     {{
       "severity": "medium",
       "category": "maintainability",
-      "title": "Duplicated logic",
-      "description": "Similar logic appears in multiple places.",
+      "title": "Lógica duplicada",
+      "description": "Uma mesma regra aparece repetida em mais de um ponto do código.",
       "evidence": "Repeated conditional branches in two methods.",
-      "recommendation": "Extract a helper function."
+      "recommendation": "Extraia a lógica comum para uma função auxiliar."
     }}
   ],
-  "readability_improvements": ["Rename unclear variables"],
-  "maintainability_improvements": ["Extract shared logic"],
-  "refactor_plan": ["Step 1", "Step 2"],
-  "test_suggestions": ["Add unit test for edge case X"],
-  "risk_notes": ["May fail on malformed input"]
+  "readability_improvements": ["Renomear variáveis pouco claras"],
+  "maintainability_improvements": ["Extrair lógica compartilhada"],
+  "refactor_plan": ["Passo 1", "Passo 2"],
+  "test_suggestions": ["Adicionar teste unitário específico para o caso crítico identificado"],
+  "risk_notes": ["Risco concreto observado no comportamento atual"]
 }}
 """
 
