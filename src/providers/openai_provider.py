@@ -15,6 +15,24 @@ class OpenAIProvider:
                 ordered_models.append(model)
         return ordered_models
 
+    def list_available_embedding_models(self) -> list[str]:
+        ordered_models: list[str] = []
+        for model in [self.settings.embedding_model, *self.settings.available_embedding_models_env]:
+            if model and model not in ordered_models:
+                ordered_models.append(model)
+        return ordered_models
+
+    def inspect_embedding_context_window(self, model: str, requested_context_window: int | None = None) -> dict[str, object]:
+        return {
+            "api_route": "https://api.openai.com/v1/embeddings",
+            "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
+            "model": model,
+            "validation_summary": (
+                "OpenAI embeddings não expõem um controle equivalente a `num_ctx` do Ollama. "
+                "O valor configurado no app fica registrado como metadado operacional, mas não é aplicado como janela de contexto explícita no provider OpenAI."
+            ),
+        }
+
     def stream_chat_completion(
         self,
         messages: list[dict[str, str]],
