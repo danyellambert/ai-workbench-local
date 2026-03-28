@@ -13,10 +13,8 @@ from src.rag.langchain_adapter import (
     similarity_search_with_langchain_chroma,
 )
 from src.rag.loaders import LoadedDocument
+from src.rag.reranking import build_candidate_pool_size, hybrid_rerank_chunks, rank_chunks_lexically
 from src.rag.vector_store import ChromaVectorStore, LocalVectorStore
-
-
-TOKEN_PATTERN = re.compile(r"[\w\-]{3,}", re.UNICODE)
 
 
 
@@ -27,8 +25,10 @@ def _compress_embedding(embedding: list[float]) -> list[float]:
 
 def _settings_payload(settings: RagSettings) -> dict[str, object]:
     return {
+        "loader_strategy": settings.loader_strategy,
         "chunking_strategy": settings.chunking_strategy,
         "retrieval_strategy": settings.retrieval_strategy,
+        "embedding_provider": settings.embedding_provider,
         "embedding_model": settings.embedding_model,
         "embedding_context_window": settings.embedding_context_window,
         "embedding_truncate": settings.embedding_truncate,
@@ -199,105 +199,6 @@ def _normalize_chunk_filters(
 
 
 
-def _chunk_key(chunk: dict[str, object]) -> str:
-    return "::".join(
-        [
-            str(chunk.get("document_id") or chunk.get("file_hash") or "documento"),
-            str(chunk.get("chunk_id") or 0),
-            str(chunk.get("start_char") or 0),
-            str(chunk.get("end_char") or 0),
-        ]
-    )
-
-
-
-def _tokenize(text: str) -> set[str]:
-    normalized = (text or "").replace("’", "'").replace("`", "'")
-    return {match.group(0).lower() for match in TOKEN_PATTERN.finditer(normalized)}
-
-
-
-def _lexical_score(query: str, chunk_text: str) -> float:
-    normalized_query = (query or "").strip().replace("’", "'").replace("`", "'")
-    normalized_chunk = (chunk_text or "").replace("’", "'").replace("`", "'")
-    query_terms = _tokenize(normalized_query)
-    if not query_terms:
-        return 0.0
-
-    chunk_terms = _tokenize(normalized_chunk)
-    if not chunk_terms:
-        return 0.0
-
-    overlap_ratio = len(query_terms & chunk_terms) / max(len(query_terms), 1)
-    exact_phrase_bonus = 0.45 if normalized_query and normalized_query.lower() in normalized_chunk.lower() else 0.0
-    partial_phrase_bonus = 0.2 if len(normalized_query.split()) >= 4 and any(
-        fragment in normalized_chunk.lower()
-        for fragment in [normalized_query.lower()[: max(len(normalized_query) // 2, 12)]]
-    ) else 0.0
-    return round(min(overlap_ratio + exact_phrase_bonus + partial_phrase_bonus, 1.0), 4)
-
-
-
-def _rank_chunks_lexically(query: str, chunks: list[dict[str, object]], limit: int) -> list[dict[str, object]]:
-    ranked: list[dict[str, object]] = []
-    for chunk in chunks:
-        lexical = _lexical_score(query, str(chunk.get("text", "")))
-        if lexical <= 0:
-            continue
-        ranked.append({**chunk, "lexical_score": lexical})
-
-    ranked.sort(key=lambda item: item.get("lexical_score", 0.0), reverse=True)
-    return ranked[:limit]
-
-
-
-def _hybrid_rerank_chunks(
-    query: str,
-    vector_candidates: list[dict[str, object]],
-    lexical_candidates: list[dict[str, object]],
-    settings: RagSettings,
-) -> list[dict[str, object]]:
-    merged: dict[str, dict[str, object]] = {}
-
-    for candidate in [*vector_candidates, *lexical_candidates]:
-        key = _chunk_key(candidate)
-        existing = merged.get(key, {})
-        vector_score = float(candidate.get("vector_score") or candidate.get("score") or existing.get("vector_score") or 0.0)
-        lexical_score = float(candidate.get("lexical_score") or existing.get("lexical_score") or _lexical_score(query, str(candidate.get("text", ""))))
-        merged[key] = {
-            **existing,
-            **candidate,
-            "vector_score": round(vector_score, 4),
-            "lexical_score": round(lexical_score, 4),
-        }
-
-    reranked: list[dict[str, object]] = []
-    lexical_weight = min(max(settings.rerank_lexical_weight, 0.0), 0.9)
-    vector_weight = 1.0 - lexical_weight
-    for candidate in merged.values():
-        vector_score = float(candidate.get("vector_score") or 0.0)
-        lexical_score = float(candidate.get("lexical_score") or 0.0)
-        rerank_score = round(vector_score * vector_weight + lexical_score * lexical_weight, 4)
-        reranked.append({**candidate, "score": rerank_score, "rerank_score": rerank_score})
-
-    reranked.sort(
-        key=lambda item: (
-            item.get("rerank_score", 0.0),
-            item.get("lexical_score", 0.0),
-            item.get("vector_score", 0.0),
-        ),
-        reverse=True,
-    )
-    return reranked[: settings.top_k]
-
-
-
-def _candidate_pool_size(settings: RagSettings, filtered_chunks_count: int) -> int:
-    pool = max(settings.top_k, settings.rerank_pool_size)
-    return min(max(pool, settings.top_k), max(filtered_chunks_count, settings.top_k))
-
-
-
 def _remove_chroma_persist_dir(path: Path) -> None:
     if path.exists():
         shutil.rmtree(path, ignore_errors=True)
@@ -456,8 +357,10 @@ def inspect_embedding_configuration_compatibility(
 ) -> dict[str, object]:
     normalized = _coerce_rag_index(rag_index, settings)
     stored_settings = normalized.get("settings", {}) if isinstance(normalized.get("settings"), dict) else {}
+    index_embedding_provider = stored_settings.get("embedding_provider")
     index_embedding_model = stored_settings.get("embedding_model")
     index_embedding_context_window = stored_settings.get("embedding_context_window")
+    current_embedding_provider = settings.embedding_provider
     current_embedding_model = settings.embedding_model
     current_embedding_context_window = settings.embedding_context_window
 
@@ -466,13 +369,17 @@ def inspect_embedding_configuration_compatibility(
             "compatible": True,
             "status": "sem_indice",
             "message": "Nenhum índice ativo para comparar embedding.",
+            "current_embedding_provider": current_embedding_provider,
             "current_embedding_model": current_embedding_model,
             "current_embedding_context_window": current_embedding_context_window,
+            "index_embedding_provider": index_embedding_provider,
             "index_embedding_model": index_embedding_model,
             "index_embedding_context_window": index_embedding_context_window,
         }
 
     compatible = (
+        (index_embedding_provider or "ollama") == current_embedding_provider
+        and 
         index_embedding_model == current_embedding_model
         and int(index_embedding_context_window or 0) == int(current_embedding_context_window or 0)
     )
@@ -482,10 +389,12 @@ def inspect_embedding_configuration_compatibility(
         "message": (
             "Embedding atual compatível com o índice carregado."
             if compatible
-            else "O índice foi criado com outro embedding model ou outra janela de contexto do embedding. Reindexe antes de usar o RAG."
+            else "O índice foi criado com outro provider/modelo de embedding ou outra janela de contexto do embedding. Reindexe antes de usar o RAG."
         ),
+        "current_embedding_provider": current_embedding_provider,
         "current_embedding_model": current_embedding_model,
         "current_embedding_context_window": current_embedding_context_window,
+        "index_embedding_provider": index_embedding_provider,
         "index_embedding_model": index_embedding_model,
         "index_embedding_context_window": index_embedding_context_window,
     }
@@ -670,7 +579,11 @@ def retrieve_relevant_chunks_detailed(
         }
 
     vector_backend_status = inspect_vector_backend_status(rag_index, settings)
-    candidate_pool_size = _candidate_pool_size(settings, len(filtered_chunks))
+    candidate_pool_size = build_candidate_pool_size(
+        top_k=settings.top_k,
+        rerank_pool_size=settings.rerank_pool_size,
+        filtered_chunks_count=len(filtered_chunks),
+    )
     vector_candidates: list[dict[str, object]] = []
     backend_used = "local_fallback"
     backend_message = "Retrieval servido por fallback local a partir do JSON canônico."
@@ -733,8 +646,14 @@ def retrieve_relevant_chunks_detailed(
         backend_message = "Retrieval servido por fallback local a partir do JSON canônico."
         effective_retrieval_strategy = "manual_hybrid"
 
-    lexical_candidates = _rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)
-    reranked_chunks = _hybrid_rerank_chunks(query, vector_candidates, lexical_candidates, settings)
+    lexical_candidates = rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)
+    reranked_chunks = hybrid_rerank_chunks(
+        query,
+        vector_candidates,
+        lexical_candidates,
+        top_k=settings.top_k,
+        lexical_weight=settings.rerank_lexical_weight,
+    )
 
     return {
         "chunks": reranked_chunks,
