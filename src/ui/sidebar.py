@@ -13,11 +13,14 @@ def render_chat_sidebar(
     default_rag_chunk_size: int,
     default_rag_chunk_overlap: int,
     default_rag_top_k: int,
+    default_rag_loader_strategy: str,
     default_rag_chunking_strategy: str,
     default_rag_retrieval_strategy: str,
     default_pdf_extraction_mode: str,
-    embedding_model_options: list[str],
-    default_embedding_model: str,
+    embedding_provider_options: dict[str, str],
+    default_embedding_provider: str,
+    embedding_models_by_provider: dict[str, list[str]],
+    default_embedding_model_by_provider: dict[str, str],
     default_embedding_context_window: int,
     indexed_documents_count: int,
     indexed_chunks_count: int,
@@ -25,7 +28,7 @@ def render_chat_sidebar(
     history_filename: str,
     messages_count: int,
     last_latency: float | None,
-) -> tuple[str, str, str, float, str, int, int, int, int, str, int, str, str, str, bool, bool]:
+) -> tuple[str, str, str, float, str, int, int, int, int, str, str, int, str, str, str, str, bool, bool]:
     provider_keys = list(provider_options.keys())
     default_provider_index = provider_keys.index(default_provider) if default_provider in provider_keys else 0
     pdf_mode_options = ["basic", "hybrid", "complete"]
@@ -114,16 +117,48 @@ def render_chat_sidebar(
 
         st.divider()
         st.subheader("Embedding")
-        embedding_options = embedding_model_options or [default_embedding_model]
-        if default_embedding_model in embedding_options:
-            default_embedding_index = embedding_options.index(default_embedding_model)
-        else:
-            default_embedding_index = 0
+        embedding_provider_keys = list(embedding_provider_options.keys())
+        default_embedding_provider_index = (
+            embedding_provider_keys.index(default_embedding_provider)
+            if default_embedding_provider in embedding_provider_keys
+            else 0
+        )
+        embedding_provider_state_key = "phase5_sidebar_embedding_provider"
+        embedding_provider_current = st.session_state.get(embedding_provider_state_key, default_embedding_provider)
+        if embedding_provider_current not in embedding_provider_keys:
+            embedding_provider_current = (
+                embedding_provider_keys[default_embedding_provider_index]
+                if embedding_provider_keys
+                else default_embedding_provider
+            )
+        selected_embedding_provider = st.selectbox(
+            "Provider de embedding",
+            embedding_provider_keys,
+            index=(
+                embedding_provider_keys.index(embedding_provider_current)
+                if embedding_provider_current in embedding_provider_keys
+                else default_embedding_provider_index
+            ),
+            key=embedding_provider_state_key,
+            format_func=lambda key: embedding_provider_options[key],
+            help="Permite separar o provider de geração do provider usado para embeddings e retrieval.",
+        )
+
+        embedding_options = embedding_models_by_provider.get(selected_embedding_provider, [])
+        default_embedding_model = default_embedding_model_by_provider.get(
+            selected_embedding_provider,
+            embedding_options[0] if embedding_options else "",
+        )
+        default_embedding_index = embedding_options.index(default_embedding_model) if default_embedding_model in embedding_options else 0
+        embedding_model_state_key = "phase5_sidebar_embedding_model"
+        embedding_model_current = st.session_state.get(embedding_model_state_key, default_embedding_model)
+        if embedding_model_current not in embedding_options:
+            embedding_model_current = default_embedding_model if default_embedding_model in embedding_options else (embedding_options[0] if embedding_options else "")
         selected_embedding_model = st.selectbox(
             "Modelo de embedding",
             embedding_options,
-            index=default_embedding_index,
-            key="phase5_sidebar_embedding_model",
+            index=embedding_options.index(embedding_model_current) if embedding_model_current in embedding_options else default_embedding_index,
+            key=embedding_model_state_key,
             help="Trocar o modelo de embedding exige reindexar para manter o espaço vetorial consistente.",
         )
         selected_embedding_context_window = int(
@@ -172,6 +207,24 @@ def render_chat_sidebar(
                 key="phase5_sidebar_rag_top_k",
                 help="Quantidade de chunks recuperados a cada pergunta.",
             )
+        )
+        loader_strategy_options = ["manual", "langchain_basic"]
+        loader_strategy_labels = {
+            "manual": "Manual local",
+            "langchain_basic": "LangChain loaders (experimental)",
+        }
+        default_loader_strategy = (
+            default_rag_loader_strategy
+            if default_rag_loader_strategy in loader_strategy_options
+            else "manual"
+        )
+        selected_loader_strategy = st.selectbox(
+            "Estratégia de loader",
+            loader_strategy_options,
+            index=loader_strategy_options.index(default_loader_strategy),
+            key="phase5_sidebar_loader_strategy",
+            format_func=lambda key: loader_strategy_labels[key],
+            help="Micro-slice da Fase 5.5: usa loaders básicos do ecossistema LangChain para TXT/CSV/MD/PY quando o pacote opcional estiver disponível. PDFs continuam no pipeline customizado do projeto.",
         )
         chunking_strategy_options = ["manual", "langchain_recursive"]
         chunking_strategy_labels = {
@@ -239,10 +292,13 @@ def render_chat_sidebar(
                 st.caption("Contexto ativo no Ollama: `auto`")
             else:
                 st.caption(f"Contexto ativo no Ollama: `{context_window}`")
-        st.caption(f"Embedding ativo: {selected_embedding_model} · num_ctx={selected_embedding_context_window}")
+        st.caption(
+            f"Embedding ativo: {embedding_provider_options.get(selected_embedding_provider, selected_embedding_provider)} · {selected_embedding_model} · num_ctx={selected_embedding_context_window}"
+        )
         st.caption(
             f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap}"
         )
+        st.caption(f"Loader ativo: {loader_strategy_labels[selected_loader_strategy]}")
         st.caption(f"Chunking ativo: {chunking_strategy_labels[selected_chunking_strategy]}")
         st.caption(f"Retrieval ativo: {retrieval_strategy_labels[selected_retrieval_strategy]}")
         st.caption(f"Extração PDF ativa: {pdf_mode_labels[selected_pdf_extraction_mode]}")
@@ -261,8 +317,10 @@ def render_chat_sidebar(
         rag_chunk_size,
         rag_chunk_overlap,
         rag_top_k,
+        selected_embedding_provider,
         selected_embedding_model,
         selected_embedding_context_window,
+        selected_loader_strategy,
         selected_chunking_strategy,
         selected_retrieval_strategy,
         selected_pdf_extraction_mode,
@@ -293,6 +351,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     {
                         "provider": chat.get("provider"),
                         "model": chat.get("model"),
+                        "embedding_provider": chat.get("embedding_provider"),
                         "embedding_model": chat.get("embedding_model"),
                         "selected_documents": chat.get("selected_documents"),
                         "retrieval_backend": chat.get("retrieval_backend"),
@@ -311,9 +370,12 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                 st.write(
                     {
                         "current_task": structured.get("current_task"),
+                        "execution_strategy": structured.get("execution_strategy"),
                         "provider": structured.get("provider"),
                         "model": structured.get("model"),
                         "selected_documents": structured.get("selected_documents"),
+                        "workflow_attempts": structured.get("workflow_attempts"),
+                        "workflow_context_strategies": structured.get("workflow_context_strategies"),
                         "last_total_s": structured.get("last_total_s"),
                         "last_provider_s": structured.get("last_provider_s"),
                         "last_pre_model_prep_s": structured.get("last_pre_model_prep_s"),
@@ -339,6 +401,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
             with st.expander("Documentos / PDF / OCR / VL", expanded=False):
                 st.write(
                     {
+                        "loader_strategy": documents.get("loader_strategy"),
                         "chunking_strategy": documents.get("chunking_strategy"),
                         "retrieval_strategy": documents.get("retrieval_strategy"),
                         "pdf_extraction_mode": documents.get("pdf_extraction_mode"),

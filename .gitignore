@@ -10,6 +10,7 @@ __pycache__/
 .chat_history.json
 .rag_store.json
 .phase55_langchain_shadow_log.json
+.phase55_langgraph_shadow_log.json
 .chroma_rag/
 materials_local/
 .vscode/

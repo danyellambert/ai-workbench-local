@@ -1,13 +1,16 @@
 """Service layer for structured outputs."""
 from __future__ import annotations
+
 import re
 from math import ceil
 from typing import Any
+
 from ..config import get_ollama_settings
 from .base import ActionItem, ChecklistPayload, CVAnalysisPayload, CodeAnalysisPayload, ExtractionPayload, RiskItem, EducationEntry, ExperienceEntry, CVSection, Entity, Relationship, CodeIssue
 from .envelope import StructuredResult, TaskExecutionRequest
 from .registry import task_registry
 from .tasks import get_task_handler
+
 _PLACEHOLDER_MARKERS = {
     "full name",
     "name@example.com",
@@ -24,13 +27,38 @@ _PLACEHOLDER_MARKERS = {
 _AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER = {
     "ollama": 256000,
     "openai": 128000,
+    "huggingface_local": 32768,
 }
+
 
 class StructuredOutputService:
     """Service for executing structured output tasks."""
+
     def __init__(self) -> None:
         self.task_registry = task_registry
         self.ollama_settings = get_ollama_settings()
+
+    def _get_provider_registry(self):
+        from ..providers.registry import build_provider_registry
+
+        return build_provider_registry()
+
+    def _resolve_provider_runtime_profile(self, provider_name: str | None) -> dict[str, Any]:
+        from ..providers.registry import resolve_provider_runtime_profile
+
+        registry = self._get_provider_registry()
+        return resolve_provider_runtime_profile(
+            registry,
+            provider_name,
+            capability="chat",
+            fallback_provider="ollama",
+        )
+
+    def _resolve_context_window_cap(self, fallback_cap: int, *, effective_provider: str | None = None) -> int:
+        provider_key = (effective_provider or "").strip().lower()
+        configured_provider_cap = _AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER.get(provider_key, int(fallback_cap))
+        return max(int(fallback_cap), int(configured_provider_cap))
+
     def execute_task(self, request: TaskExecutionRequest) -> StructuredResult:
         task_definition = self.task_registry.get_task(request.task_type)
         if not task_definition:
@@ -46,12 +74,30 @@ class StructuredOutputService:
                 f"No handler available for task type '{request.task_type}'",
                 request.input_text,
             )
-        model = request.model or task_definition.default_model or self.ollama_settings.default_model
+        provider_runtime = self._resolve_provider_runtime_profile(request.provider)
+        requested_provider = str(provider_runtime.get("requested_provider") or request.provider or "ollama")
+        effective_provider = str(provider_runtime.get("effective_provider") or requested_provider)
+        provider_entry = provider_runtime.get("provider_entry") if isinstance(provider_runtime.get("provider_entry"), dict) else {}
+        provider_default_model = str(provider_entry.get("default_model") or "")
+        provider_default_context_window = int(
+            provider_entry.get("default_context_window") or self.ollama_settings.default_context_window
+        )
+
+        model = request.model or task_definition.default_model or provider_default_model or self.ollama_settings.default_model
         temperature = request.temperature if request.temperature is not None else task_definition.default_temperature
-        context_window_cap = request.context_window or self.ollama_settings.default_context_window
-        context_window = self.resolve_context_window(request, max_context_window=context_window_cap)
+        configured_context_window_cap = request.context_window or provider_default_context_window
+        context_window_cap = self._resolve_context_window_cap(
+            int(configured_context_window_cap),
+            effective_provider=effective_provider,
+        )
+        context_window = self.resolve_context_window(
+            request,
+            max_context_window=configured_context_window_cap,
+            effective_provider=effective_provider,
+        )
         execution_request = request.model_copy(
             update={
+                "provider": requested_provider,
                 "model": model,
                 "temperature": temperature,
                 "context_window": context_window,
@@ -62,13 +108,19 @@ class StructuredOutputService:
             result.context_used = (execution_request.use_document_context or execution_request.use_rag_context) and bool(execution_request.source_document_ids)
             result.source_documents = list(execution_request.source_document_ids)
             telemetry = execution_request.telemetry if isinstance(execution_request.telemetry, dict) else {}
+            provider_requested = str(telemetry.get("provider_requested") or requested_provider)
+            provider_effective = str(telemetry.get("provider_effective") or effective_provider)
+            provider_fallback_reason = telemetry.get("provider_fallback_reason") or provider_runtime.get("fallback_reason")
             result.execution_metadata = {
                 **(result.execution_metadata if isinstance(result.execution_metadata, dict) else {}),
-                "provider": execution_request.provider,
+                "provider": provider_effective,
+                "provider_requested": provider_requested,
+                "provider_effective": provider_effective,
                 "model": execution_request.model,
                 "resolved_context_window": context_window,
                 "context_window_cap": context_window_cap,
                 "document_chars_estimate": self._estimate_document_chars(request),
+                **({"provider_fallback_reason": provider_fallback_reason} if provider_fallback_reason else {}),
                 **({"telemetry": telemetry} if telemetry else {}),
             }
             if result.primary_render_mode is None:
@@ -84,10 +136,16 @@ class StructuredOutputService:
                 f"Execution failed: {exc}",
                 request.input_text,
             )
-    def resolve_context_window(self, request: TaskExecutionRequest, *, max_context_window: int | None = None) -> int:
+
+    def resolve_context_window(
+        self,
+        request: TaskExecutionRequest,
+        *,
+        max_context_window: int | None = None,
+        effective_provider: str | None = None,
+    ) -> int:
         fallback_cap = int(max_context_window or self.ollama_settings.default_context_window)
-        configured_provider_cap = _AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER.get(request.provider or "", fallback_cap)
-        cap = max(fallback_cap, int(configured_provider_cap))
+        cap = self._resolve_context_window_cap(fallback_cap, effective_provider=effective_provider or request.provider)
         doc_chars = self._estimate_document_chars(request)
         base_by_task = {
             "summary": 32768,
@@ -150,13 +208,40 @@ class StructuredOutputService:
         chunks = _ordered_chunks(_filtered_chunks(rag_index, request.source_document_ids))
         text_chars = sum(len(str(chunk.get("text") or "")) for chunk in chunks if isinstance(chunk, dict))
         return max(text_chars, input_chars)
+
+    def _build_request_source_text(self, request: TaskExecutionRequest | None) -> str:
+        if request is None:
+            return ""
+
+        input_text = (request.input_text or "").strip()
+        if not request.source_document_ids:
+            return input_text
+
+        try:
+            from ..services.document_context import _filtered_chunks, _get_rag_index, _ordered_chunks
+        except Exception:
+            return input_text
+
+        rag_index = _get_rag_index()
+        if not isinstance(rag_index, dict):
+            return input_text
+
+        chunks = _ordered_chunks(_filtered_chunks(rag_index, request.source_document_ids))
+        parts = [
+            str(chunk.get("text") or "").strip()
+            for chunk in chunks
+            if isinstance(chunk, dict) and str(chunk.get("text") or "").strip()
+        ]
+        full_text = "\n\n".join(parts).strip()
+        return full_text or input_text
+
     def _normalize_result_payload(self, result: StructuredResult, request: TaskExecutionRequest | None = None) -> None:
         payload = result.validated_output
         if payload is None:
             return
         original_serialized = result.validated_output.model_dump(mode="json") if hasattr(result.validated_output, "model_dump") else None
         if isinstance(payload, ChecklistPayload):
-            payload = self._improve_checklist_payload(payload)
+            payload = self._improve_checklist_payload(payload, request=request)
             total_items = len(payload.items)
             completed_items = sum(1 for item in payload.items if item.status == "completed")
             progress_percentage = round((completed_items / total_items) * 100.0, 1) if total_items else 0.0
@@ -441,7 +526,7 @@ class StructuredOutputService:
             if original_serialized is not None and normalized_serialized != original_serialized:
                 result.repair_applied = True
 
-    def _improve_checklist_payload(self, payload: ChecklistPayload) -> ChecklistPayload:
+    def _improve_checklist_payload(self, payload: ChecklistPayload, request: TaskExecutionRequest | None = None) -> ChecklistPayload:
         generic_categories = {"preparation", "general", "checklist", "phase", "procedure"}
         non_grounded_evidence_markers = {
             "not explicitly stated in the checklist, but implied as part of the overall safety checks.",
@@ -471,6 +556,21 @@ class StructuredOutputService:
             cleaned = " ".join(str(text or "").split()).strip()
             cleaned = cleaned.replace(" ,", ",").replace(" .", ".")
             return cleaned
+
+        def is_noisy_category(text: str | None) -> bool:
+            normalized = normalize_literal_text(text)
+            lowered = normalized.lower()
+            if not normalized:
+                return True
+            if '?' in normalized:
+                return True
+            if lowered in generic_categories:
+                return True
+            if len(normalized) > 70 or len(normalized.split()) > 8:
+                return True
+            if re.match(r'^(is|are|was|were|does|do|did|has|have|had|can|could|should|would|will|may|must)\b', lowered):
+                return True
+            return False
 
         def is_answer_only_text(text: str | None) -> bool:
             normalized = normalize_literal_text(text).strip(" .!?;:-")
@@ -651,6 +751,70 @@ class StructuredOutputService:
                     "category": category,
                     "dependencies": [],
                 }))
+
+        source_text = self._build_request_source_text(request)
+        if source_text and updated_items:
+            raw_lines = [normalize_literal_text(line).strip() for line in str(source_text).splitlines()]
+            normalized_lines = [re.sub(r'[^a-z0-9]+', ' ', line.lower()).strip() for line in raw_lines]
+            heading_positions: list[tuple[int, str]] = []
+            for line_index, line in enumerate(raw_lines):
+                lowered = line.lower().strip(' :')
+                if not line or '?' in line:
+                    continue
+                if lowered in {"yes", "no", "not applicable", "n/a"}:
+                    continue
+                if len(line) > 90 or len(line.split()) > 10:
+                    continue
+                is_heading = (
+                    line.endswith(':')
+                    or re.match(r'^(before|after|during|phase|section|step)\b', lowered)
+                    or re.match(r'^(sign[\s-]?in|time[\s-]?out|sign[\s-]?out)\b', lowered)
+                )
+                if is_heading:
+                    heading_positions.append((line_index, line.rstrip(':').strip()))
+
+            if heading_positions:
+                categorized_items = []
+                active_category: str | None = None
+                for item in updated_items:
+                    explicit_category = None if is_noisy_category(item.category) else normalize_literal_text(item.category)
+                    inferred_category = explicit_category or None
+                    if inferred_category is None:
+                        probes = [item.source_text, item.evidence, item.title, item.description]
+                        best_line_index: int | None = None
+                        best_score = 0
+                        for probe in probes:
+                            normalized_probe = re.sub(r'[^a-z0-9]+', ' ', normalize_literal_text(probe).lower()).strip()
+                            if len(normalized_probe) < 8:
+                                continue
+                            for line_index, normalized_line in enumerate(normalized_lines):
+                                if not normalized_line:
+                                    continue
+                                if normalized_probe in normalized_line or normalized_line in normalized_probe:
+                                    score = min(len(normalized_probe), len(normalized_line))
+                                    if score > best_score:
+                                        best_score = score
+                                        best_line_index = line_index
+                            if best_score >= 24:
+                                break
+
+                        if best_line_index is not None:
+                            eligible_headings = [
+                                heading
+                                for heading_index, heading in heading_positions
+                                if heading_index < best_line_index and (best_line_index - heading_index) <= 12
+                            ]
+                            if eligible_headings:
+                                inferred_category = normalize_literal_text(eligible_headings[-1])
+
+                    normalized_category = normalize_literal_text(inferred_category) if inferred_category else None
+                    if normalized_category and not is_noisy_category(normalized_category):
+                        active_category = normalized_category
+                    elif active_category:
+                        normalized_category = active_category
+
+                    categorized_items.append(item.model_copy(update={"category": normalized_category}))
+                updated_items = categorized_items
 
         return payload.model_copy(update={"items": updated_items})
 
@@ -978,58 +1142,58 @@ class StructuredOutputService:
         strong_issue_titles: set[str] = set()
 
         if re.search(r'/\s*len\(', source_text):
-            strong_issue_titles.add('Possible division by zero')
-            if not any((issue.title or '').strip().lower() == 'possible division by zero' for issue in issues):
+            strong_issue_titles.add('possível divisão por zero')
+            if not any((issue.title or '').strip().lower() == 'possível divisão por zero' for issue in issues):
                 issues.append(CodeIssue(
                     severity='high',
-                    category='bug',
-                    title='Possible division by zero',
-                    description='The code divides by the length of a collection without guarding against empty input.',
+                    category='runtime_failure',
+                    title='Possível divisão por zero',
+                    description='O código divide pelo tamanho de uma coleção sem proteger o caso de entrada vazia.',
                     evidence='average = total / len(values)',
-                    recommendation='Return a safe default or guard against empty input before computing the average.',
+                    recommendation='Proteja explicitamente o caso de entrada vazia antes da divisão e defina `average = 0.0` quando não houver valores.',
                 ))
-            risk_notes.append('Division by zero can occur when the input list is empty.')
-            test_suggestions.append('Add a test for empty input to verify average calculation does not raise division by zero.')
+            risk_notes.append('Pode ocorrer divisão por zero quando a lista de entrada estiver vazia.')
+            test_suggestions.append('Adicionar teste para entrada vazia e validar explicitamente o comportamento esperado da média.')
 
         if re.search(r'item\[["\']score["\']\]\s*[<>]', source_text):
-            strong_issue_titles.add('Numeric score assumption')
-            if not any((issue.title or '').strip().lower() == 'numeric score assumption' for issue in issues):
+            strong_issue_titles.add('suposição de score numérico')
+            if not any((issue.title or '').strip().lower() == 'suposição de score numérico' for issue in issues):
                 issues.append(CodeIssue(
                     severity='medium',
-                    category='correctness',
-                    title='Numeric score assumption',
-                    description='The code assumes `score` is numeric when comparing it to bounds.',
+                    category='type_validation',
+                    title='Suposição de score numérico',
+                    description='O código assume que `score` é numérico ao compará-lo com limites.',
                     evidence='if item["score"] > 100 / if item["score"] < 0',
-                    recommendation='Validate or coerce `score` before numeric comparisons.',
+                    recommendation='Valide ou converta `score` antes das comparações numéricas.',
                 ))
-            risk_notes.append('Non-numeric score values can raise type errors during comparison.')
-            test_suggestions.append('Add a test where `score` is non-numeric to verify the function handles type errors safely.')
-            test_suggestions.append('Add tests for score values above 100 and below 0 to verify clamping behavior.')
+            risk_notes.append('Valores não numéricos em `score` podem gerar erro de tipo durante a comparação.')
+            test_suggestions.append('Adicionar teste com `score` não numérico para validar o comportamento de erro ou saneamento.')
+            test_suggestions.append('Adicionar testes para `score` acima de 100 e abaixo de 0 para validar o clamp.')
 
         if re.search(r'item\[["\']score["\']\]\s*=\s*', source_text):
-            strong_issue_titles.add('Input mutation side effect')
-            if not any((issue.title or '').strip().lower() == 'input mutation side effect' for issue in issues):
+            strong_issue_titles.add('efeito colateral por mutação da entrada')
+            if not any((issue.title or '').strip().lower() == 'efeito colateral por mutação da entrada' for issue in issues):
                 issues.append(CodeIssue(
                     severity='medium',
-                    category='maintainability',
-                    title='Input mutation side effect',
-                    description='The function mutates input dictionaries in place when normalizing scores.',
+                    category='input_mutation',
+                    title='Efeito colateral por mutação da entrada',
+                    description='A função altera os dicionários de entrada em memória ao normalizar os scores.',
                     evidence='item["score"] = 100 / item["score"] = 0',
-                    recommendation='Copy each item before normalizing if callers should not observe input mutation.',
+                    recommendation='Use `item.copy()` ou construa um novo dicionário antes da normalização para evitar alterar o objeto original.',
                 ))
-            risk_notes.append('Mutating input items in place can create side effects for callers that reuse the original list.')
-            test_suggestions.append('Add a test that verifies whether input dictionaries are mutated after calling normalize_scores.')
+            risk_notes.append('Mutar itens da entrada em memória pode criar efeitos colaterais para quem reutiliza a lista original.')
+            test_suggestions.append('Adicionar teste que verifique se os dicionários originais são ou não mutados após `normalize_scores`.')
 
         if 'value.get("score", 0)' in source_text or "value.get('score', 0)" in source_text:
-            test_suggestions.append('Add a test for items missing `score` to verify averaging and normalization still behave correctly.')
+            test_suggestions.append('Adicionar teste para itens sem `score` e validar o comportamento da normalização e da média.')
 
         if 'logger.info' in source_text:
-            test_suggestions.append('Add tests with and without a logger to verify logging does not change returned results.')
+            test_suggestions.append('Adicionar testes com e sem logger para garantir que o logging não altera o resultado retornado.')
 
         if strong_issue_titles:
             issues = [
                 issue for issue in issues
-                if (issue.title or '').strip().lower() != 'duplicated logic'
+                if (issue.title or '').strip().lower() not in {'duplicated logic', 'lógica duplicada'}
             ]
 
         generic_test_patterns = (
@@ -1055,11 +1219,139 @@ class StructuredOutputService:
                     if not any(pattern in item.lower() for pattern in generic_risk_patterns)
                 ]
 
+        has_score_guard = bool(re.search(r'if\s+["\']score["\']\s+in\s+item', source_text))
+        has_numeric_score_compare = bool(re.search(r'item\[["\']score["\']\]\s*[<>]=?\s*-?\d', source_text))
+        mutates_input_in_place = bool(re.search(r'item\[["\']score["\']\]\s*=', source_text))
+        reuses_original_reference = bool(re.search(r'\bresult\.append\(\s*item\s*\)', source_text))
+
+        normalized_issues: list[CodeIssue] = []
+        seen_issue_keys: set[tuple[str, str]] = set()
+        for issue in issues:
+            category = self._normalize_code_issue_category(issue.category)
+            title = (issue.title or '').strip()
+            description = (issue.description or '').strip()
+            evidence = (issue.evidence or '').strip() or None
+            recommendation = (issue.recommendation or '').strip() or None
+            issue_blob = ' '.join(part for part in [title, description, evidence or '', recommendation or '', category] if part).lower()
+
+            normalized_issue = issue.model_copy(update={'category': category})
+
+            if category == 'runtime_failure' and (
+                'divisão por zero' in issue_blob
+                or 'zerodivisionerror' in issue_blob
+                or ('len(values)' in issue_blob and 'vazi' in issue_blob)
+            ):
+                normalized_issue = normalized_issue.model_copy(update={
+                    'severity': 'high',
+                    'category': 'runtime_failure',
+                    'recommendation': 'Adicione verificação para lista vazia antes da divisão e defina `average = 0.0` quando não houver valores para agregar.',
+                })
+
+            if has_score_guard and 'score' in issue_blob and (
+                'keyerror' in issue_blob
+                or 'lacks this key' in issue_blob
+                or 'missing score key' in issue_blob
+                or 'assumes each item has a' in issue_blob
+            ):
+                if has_numeric_score_compare:
+                    normalized_issue = issue.model_copy(update={
+                        'severity': 'medium',
+                        'category': 'type_validation',
+                        'title': 'Suposição de score numérico',
+                        'description': 'O código verifica se a chave `score` existe antes de acessá-la, então o risco principal não é ausência da chave. O problema restante é assumir que `score` é numérico ao compará-lo com os limites.',
+                        'evidence': 'if "score" in item ... if item["score"] > 100 / if item["score"] < 0',
+                        'recommendation': 'Valide ou converta `score` antes das comparações numéricas.',
+                    })
+                else:
+                    continue
+            elif mutates_input_in_place and (
+                category in {'correctness', 'maintainability', 'bug'}
+                or 'muta' in issue_blob
+                or 'in-place' in issue_blob
+                or 'objeto original' in issue_blob
+                or 'dicionário de entrada' in issue_blob
+            ):
+                normalized_issue = normalized_issue.model_copy(update={
+                    'severity': 'medium',
+                    'category': 'input_mutation',
+                    'recommendation': 'Use `item.copy()` ou construa um novo dicionário com os campos necessários antes de ajustar `score`, evitando alterar o objeto original.',
+                })
+            elif category == 'input_mutation' and not mutates_input_in_place and reuses_original_reference:
+                normalized_issue = issue.model_copy(update={
+                    'severity': 'low',
+                    'category': 'shared_reference',
+                    'title': 'Reuso da referência original',
+                    'description': 'Para itens sem `score`, a função reaproveita o mesmo dicionário original na saída. Isso pode causar aliasing se esse objeto for modificado depois.',
+                    'evidence': 'result.append(item)',
+                    'recommendation': 'Use `item.copy()` se a função precisar sempre retornar objetos independentes.',
+                })
+
+            normalized_issue_blob = ' '.join(
+                part for part in [
+                    normalized_issue.title,
+                    normalized_issue.description,
+                    normalized_issue.evidence or '',
+                    normalized_issue.recommendation or '',
+                ]
+                if part
+            ).lower()
+            if 'cópia profunda' in normalized_issue_blob or 'deep copy' in normalized_issue_blob:
+                normalized_issue = normalized_issue.model_copy(update={
+                    'recommendation': 'Use `item.copy()` ou construa um novo dicionário com os campos necessários antes de ajustar `score`, evitando alterar o objeto original.',
+                    'category': 'input_mutation' if mutates_input_in_place else normalized_issue.category,
+                })
+
+            key = (
+                (normalized_issue.title or '').strip().lower(),
+                (normalized_issue.category or '').strip().lower(),
+            )
+            if key in seen_issue_keys:
+                continue
+            seen_issue_keys.add(key)
+            normalized_issues.append(normalized_issue)
+
+        normalized_test_suggestions: list[str] = []
+        for item in test_suggestions:
+            cleaned = ' '.join(str(item or '').split()).strip()
+            lowered = cleaned.lower()
+            if 'average 0.0 or raises a controlled error' in lowered:
+                cleaned = 'Adicionar teste para entrada vazia e validar explicitamente a política esperada, sem deixar a expectativa ambígua.'
+            cleaned = re.sub(r'average\s*=\s*0(?!\.\d)', 'average = 0.0', cleaned, flags=re.I)
+            normalized_test_suggestions.append(cleaned)
+
+        normalized_refactor_plan: list[str] = []
+        for item in payload.refactor_plan:
+            cleaned = ' '.join(str(item or '').split()).strip()
+            cleaned = re.sub(r'c[óo]pia profunda', 'cópia rasa (`copy()`) ou um novo dicionário', cleaned, flags=re.I)
+            cleaned = re.sub(r'deep copy', 'shallow copy (`copy()`) ou um novo dicionário', cleaned, flags=re.I)
+            cleaned = re.sub(r'average\s*=\s*0(?!\.\d)', 'average = 0.0', cleaned, flags=re.I)
+            cleaned = cleaned.replace('0 ou outro valor padrão', '0.0')
+            normalized_refactor_plan.append(cleaned)
+
         return payload.model_copy(update={
-            'detected_issues': issues,
-            'test_suggestions': list(dict.fromkeys(item.strip() for item in test_suggestions if item and item.strip())),
+            'detected_issues': normalized_issues,
+            'refactor_plan': list(dict.fromkeys(item.strip() for item in normalized_refactor_plan if item and item.strip())),
+            'test_suggestions': list(dict.fromkeys(item.strip() for item in normalized_test_suggestions if item and item.strip())),
             'risk_notes': list(dict.fromkeys(item.strip() for item in risk_notes if item and item.strip())),
         })
+    def _normalize_code_issue_category(self, value: str | None) -> str:
+        cleaned = re.sub(r'[^a-z0-9]+', '_', (value or '').strip().lower()).strip('_')
+        aliases = {
+            'aliasing': 'shared_reference',
+            'bug': 'correctness',
+            'correctness_bug': 'correctness',
+            'input_mutation': 'input_mutation',
+            'mutation': 'input_mutation',
+            'reference_reuse': 'shared_reference',
+            'runtime_error': 'runtime_failure',
+            'runtime_failure': 'runtime_failure',
+            'shared_reference': 'shared_reference',
+            'type_assumption': 'type_validation',
+            'type_safety': 'type_validation',
+            'type_validation': 'type_validation',
+            'validation': 'type_validation',
+        }
+        return aliases.get(cleaned, cleaned or 'correctness')
     def _parse_date_range_to_month_interval(self, value: str | None) -> tuple[int, int] | None:
         text = (value or '').strip()
         if not text:

@@ -5,8 +5,12 @@ import streamlit as st
 from src.config import get_ollama_settings, get_rag_settings
 from src.evidence_cv.config import build_evidence_config_from_rag_settings
 from src.prompt_profiles import build_prompt_messages, get_prompt_profiles
-from src.providers.registry import build_provider_registry
-from src.rag.loaders import load_document
+from src.providers.registry import (
+    build_provider_registry,
+    filter_registry_by_capability,
+    resolve_provider_runtime_profile,
+)
+from src.rag.loaders import describe_loader_strategy, load_document
 from src.rag.pdf_extraction import describe_pdf_extraction_mode, normalize_pdf_extraction_mode
 from src.rag.prompting import estimate_rag_context_budget_chars, inject_rag_context
 from src.rag.service import (
@@ -36,10 +40,28 @@ from src.storage.phase55_shadow_log import (
     load_shadow_log,
     summarize_shadow_log,
 )
+from src.storage.phase55_langgraph_shadow_log import (
+    append_langgraph_shadow_log_entry,
+    clear_langgraph_shadow_log,
+    load_langgraph_shadow_log,
+    summarize_langgraph_shadow_log,
+)
 from src.storage.rag_store import clear_rag_store, load_rag_store, save_rag_store
 from src.services.document_context import build_structured_document_context
-from src.services.rag_state import clear_rag_state, get_rag_index, initialize_rag_state, set_rag_index
+from src.services.rag_state import (
+    clear_rag_state,
+    get_rag_index,
+    initialize_rag_runtime_settings,
+    initialize_rag_state,
+    set_rag_index,
+    set_rag_runtime_settings,
+)
+from src.services.runtime_snapshot import build_runtime_snapshot
 from src.structured.envelope import StructuredResult, TaskExecutionRequest
+from src.structured.langgraph_workflow import (
+    describe_structured_execution_strategy,
+    run_structured_execution_workflow,
+)
 from src.structured.registry import build_structured_task_registry
 from src.structured.service import structured_service
 from src.structured.tasks import (
@@ -60,18 +82,46 @@ evidence_config = build_evidence_config_from_rag_settings(rag_settings)
 provider_registry = build_provider_registry()
 prompt_profiles = get_prompt_profiles()
 structured_task_registry = build_structured_task_registry()
-embedding_provider = provider_registry["ollama"]["instance"]
-embedding_model_options = embedding_provider.list_available_embedding_models()
+embedding_capable_registry = filter_registry_by_capability(provider_registry, "embeddings")
+if not embedding_capable_registry:
+    raise RuntimeError("Nenhum provider com suporte a embeddings está disponível no ambiente atual.")
+embedding_provider_options = {
+    provider_key: provider_data["label"]
+    for provider_key, provider_data in embedding_capable_registry.items()
+}
+embedding_models_by_provider = {
+    provider_key: (
+        provider_data["instance"].list_available_embedding_models()
+        if hasattr(provider_data["instance"], "list_available_embedding_models")
+        else provider_data["instance"].list_available_models()
+    )
+    for provider_key, provider_data in embedding_capable_registry.items()
+}
+default_embedding_provider = (
+    rag_settings.embedding_provider
+    if rag_settings.embedding_provider in embedding_capable_registry
+    else next(iter(embedding_capable_registry))
+)
+default_embedding_model_by_provider = {
+    provider_key: (
+        rag_settings.embedding_model
+        if provider_key == default_embedding_provider and rag_settings.embedding_model
+        else (models[0] if models else "")
+    )
+    for provider_key, models in embedding_models_by_provider.items()
+}
 
 STRUCTURED_RESULT_STATE_KEY = "phase5_structured_result"
 STRUCTURED_RENDER_MODE_STATE_KEY = "phase5_structured_render_mode"
 CHAT_DOCUMENT_SELECTION_STATE_KEY = "phase5_chat_document_ids"
 STRUCTURED_DOCUMENT_SELECTION_STATE_KEY = "phase5_structured_document_ids"
 PHASE55_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langchain_shadow_log.json"
+PHASE55_LANGGRAPH_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langgraph_shadow_log.json"
 
 AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER = {
     "ollama": 256000,
     "openai": 128000,
+    "huggingface_local": 32768,
 }
 
 STRUCTURED_PROGRESS_STEP_DELAY_S = 0.018
@@ -254,6 +304,103 @@ def _build_shadow_log_entry(
 ) -> dict[str, object]:
     return {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "query": (query or "").strip()[:400],
+        "provider": provider,
+        "model": model,
+        "document_ids": list(document_ids),
+        **shadow_summary,
+    }
+
+
+def _extract_structured_execution_metrics(result: StructuredResult) -> dict[str, object]:
+    metadata = result.execution_metadata if isinstance(result.execution_metadata, dict) else {}
+    telemetry = metadata.get("telemetry") if isinstance(metadata.get("telemetry"), dict) else {}
+    timings = telemetry.get("timings_s") if isinstance(telemetry.get("timings_s"), dict) else {}
+    workflow_total_s = metadata.get("workflow_total_s") if isinstance(metadata.get("workflow_total_s"), (int, float)) else None
+    total_s = timings.get("total_s") if isinstance(timings.get("total_s"), (int, float)) else None
+    return {
+        "strategy_requested": metadata.get("execution_strategy_requested"),
+        "strategy_used": metadata.get("execution_strategy_used"),
+        "fallback_reason": metadata.get("execution_strategy_fallback_reason"),
+        "workflow_id": metadata.get("workflow_id"),
+        "route_decision": metadata.get("workflow_route_decision"),
+        "guardrail_decision": metadata.get("workflow_guardrail_decision"),
+        "needs_review": bool(metadata.get("needs_review")),
+        "needs_review_reason": metadata.get("needs_review_reason"),
+        "workflow_attempts": int(metadata.get("workflow_attempts") or 0),
+        "workflow_context_strategies": list(metadata.get("workflow_context_strategies") or []),
+        "workflow_total_s": round(float(workflow_total_s), 4) if workflow_total_s is not None else (round(float(total_s), 4) if total_s is not None else None),
+        "quality_score": float(result.quality_score) if isinstance(result.quality_score, (int, float)) else None,
+        "success": bool(result.success),
+    }
+
+
+def _build_structured_shadow_summary(
+    primary_result: StructuredResult,
+    alternate_result: StructuredResult,
+) -> dict[str, object]:
+    primary = _extract_structured_execution_metrics(primary_result)
+    alternate = _extract_structured_execution_metrics(alternate_result)
+    primary_quality = primary.get("quality_score")
+    alternate_quality = alternate.get("quality_score")
+    primary_latency = primary.get("workflow_total_s")
+    alternate_latency = alternate.get("workflow_total_s")
+    quality_delta = None
+    latency_delta_s = None
+    if isinstance(primary_quality, (int, float)) and isinstance(alternate_quality, (int, float)):
+        quality_delta = round(float(alternate_quality) - float(primary_quality), 3)
+    if isinstance(primary_latency, (int, float)) and isinstance(alternate_latency, (int, float)):
+        latency_delta_s = round(float(alternate_latency) - float(primary_latency), 3)
+
+    alternate_better_quality = bool(quality_delta is not None and quality_delta > 0.01)
+    primary_better_quality = bool(quality_delta is not None and quality_delta < -0.01)
+    alternate_faster = bool(latency_delta_s is not None and latency_delta_s < -0.05)
+    primary_faster = bool(latency_delta_s is not None and latency_delta_s > 0.05)
+
+    return {
+        "primary_strategy_requested": primary.get("strategy_requested"),
+        "primary_strategy_used": primary.get("strategy_used"),
+        "alternate_strategy_requested": alternate.get("strategy_requested"),
+        "alternate_strategy_used": alternate.get("strategy_used"),
+        "primary_success": primary.get("success"),
+        "alternate_success": alternate.get("success"),
+        "same_success": primary.get("success") == alternate.get("success"),
+        "primary_quality_score": primary_quality,
+        "alternate_quality_score": alternate_quality,
+        "quality_delta": quality_delta,
+        "alternate_better_quality": alternate_better_quality,
+        "primary_better_quality": primary_better_quality,
+        "primary_workflow_total_s": primary_latency,
+        "alternate_workflow_total_s": alternate_latency,
+        "latency_delta_s": latency_delta_s,
+        "alternate_faster": alternate_faster,
+        "primary_faster": primary_faster,
+        "primary_workflow_attempts": primary.get("workflow_attempts"),
+        "alternate_workflow_attempts": alternate.get("workflow_attempts"),
+        "primary_needs_review": primary.get("needs_review"),
+        "alternate_needs_review": alternate.get("needs_review"),
+        "same_needs_review": primary.get("needs_review") == alternate.get("needs_review"),
+        "alternate_avoided_review": bool(primary.get("needs_review") and not alternate.get("needs_review")),
+        "primary_route_decision": primary.get("route_decision"),
+        "alternate_route_decision": alternate.get("route_decision"),
+        "primary_guardrail_decision": primary.get("guardrail_decision"),
+        "alternate_guardrail_decision": alternate.get("guardrail_decision"),
+        "alternate_fallback_reason": alternate.get("fallback_reason"),
+    }
+
+
+def _build_structured_shadow_log_entry(
+    *,
+    task_type: str,
+    query: str,
+    provider: str,
+    model: str,
+    document_ids: list[str],
+    shadow_summary: dict[str, object],
+) -> dict[str, object]:
+    return {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "task_type": task_type,
         "query": (query or "").strip()[:400],
         "provider": provider,
         "model": model,
@@ -466,159 +613,6 @@ def _format_structured_progress_label(task_type: str, step: str, detail: str) ->
 
     return labels_by_task.get(task_type, {}).get(step, step.replace("_", " ").capitalize())
 
-
-def _extract_last_assistant_metadata(messages: list[dict[str, object]]) -> dict[str, object]:
-    for message in reversed(messages):
-        if message.get("role") != "assistant":
-            continue
-        metadata = message.get("metadata")
-        if isinstance(metadata, dict):
-            return metadata
-    return {}
-
-
-def _summarize_provider_path(provider: str, provider_label: str, ollama_base_url: str | None) -> tuple[str, str]:
-    if provider == "ollama":
-        base_url = str(ollama_base_url or "").strip()
-        route = f"{provider_label} -> {base_url or 'endpoint não configurado'}"
-        if any(token in base_url.lower() for token in ["localhost", "127.0.0.1"]):
-            dependency = "Dependência local: app + servidor Ollama rodam na sua máquina."
-        else:
-            dependency = "Dependência local parcial: app local, inferência via endpoint remoto compatível com Ollama."
-        return route, dependency
-    if provider == "openai":
-        return f"{provider_label} -> API cloud direta", "Dependência local: app local; inferência remota."
-    return provider_label, "Dependência local não classificada."
-
-
-def _build_document_runtime_rows(
-    document_ids: list[str],
-    document_preview_map: dict[str, dict[str, object]],
-    *,
-    default_vl_model: str,
-    default_ocr_backend: str,
-) -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
-    for document_id in document_ids:
-        preview = document_preview_map.get(str(document_id)) or {}
-        document = preview.get("document") if isinstance(preview, dict) else {}
-        if not isinstance(document, dict):
-            continue
-        loader_metadata = document.get("loader_metadata") if isinstance(document.get("loader_metadata"), dict) else {}
-        vl_runtime = loader_metadata.get("vl_runtime") if isinstance(loader_metadata.get("vl_runtime"), dict) else {}
-        rows.append(
-            {
-                "documento": document.get("name"),
-                "tipo": document.get("file_type"),
-                "chunks": preview.get("chunks_count"),
-                "extração_pdf": loader_metadata.get("strategy_label") or loader_metadata.get("strategy"),
-                "source_type": loader_metadata.get("source_type"),
-                "ocr_backend": loader_metadata.get("ocr_backend") or default_ocr_backend,
-                "evidence_pipeline": bool(loader_metadata.get("evidence_pipeline_used")),
-                "vl_model": vl_runtime.get("model") or default_vl_model,
-            }
-        )
-    return rows
-
-
-def _build_runtime_snapshot(
-    *,
-    selected_provider: str,
-    selected_provider_label: str,
-    selected_model: str,
-    selected_embedding_model: str,
-    selected_chunking_strategy: str,
-    selected_retrieval_strategy: str,
-    selected_pdf_extraction_mode: str,
-    chat_selected_document_ids: list[str],
-    structured_selected_document_ids: list[str],
-    selected_structured_task: str,
-    messages: list[dict[str, object]],
-    structured_result: StructuredResult | None,
-    structured_task_registry,
-    document_preview_map: dict[str, dict[str, object]],
-    indexed_documents_count: int,
-    ollama_base_url: str,
-    default_vl_model: str,
-    default_ocr_backend: str,
-) -> dict[str, object]:
-    provider_path, local_dependency = _summarize_provider_path(
-        selected_provider,
-        selected_provider_label,
-        ollama_base_url,
-    )
-    last_chat_metadata = _extract_last_assistant_metadata(messages)
-    structured_metadata = structured_result.execution_metadata if structured_result and isinstance(structured_result.execution_metadata, dict) else {}
-    structured_telemetry = structured_metadata.get("telemetry") if isinstance(structured_metadata.get("telemetry"), dict) else {}
-    structured_timings = structured_telemetry.get("timings_s") if isinstance(structured_telemetry.get("timings_s"), dict) else {}
-    last_pre_model_prep_s = None
-    if isinstance(structured_timings, dict):
-        component_values = [
-            structured_timings.get("document_load_s"),
-            structured_timings.get("sanitize_s"),
-            structured_timings.get("context_build_s"),
-        ]
-        numeric_values = [float(value) for value in component_values if isinstance(value, (int, float))]
-        if numeric_values:
-            last_pre_model_prep_s = round(sum(numeric_values), 4)
-
-    task_model_map = {
-        task_name: (task_definition.default_model or selected_model)
-        for task_name, task_definition in structured_task_registry.list_tasks().items()
-    }
-
-    return {
-        "provider_path": provider_path,
-        "local_dependency": local_dependency,
-        "chat": {
-            "provider": last_chat_metadata.get("provider") or selected_provider,
-            "model": last_chat_metadata.get("model") or selected_model,
-            "embedding_model": selected_embedding_model,
-            "selected_documents": len(chat_selected_document_ids),
-            "retrieval_backend": last_chat_metadata.get("vector_backend_used"),
-            "retrieval_strategy": last_chat_metadata.get("retrieval_strategy_used") or last_chat_metadata.get("retrieval_strategy_requested"),
-            "retrieval_shadow_summary": last_chat_metadata.get("retrieval_shadow_summary"),
-            "last_total_s": last_chat_metadata.get("latency_s"),
-            "last_generation_s": last_chat_metadata.get("generation_latency_s"),
-            "last_retrieval_s": last_chat_metadata.get("retrieval_latency_s"),
-            "last_prompt_build_s": last_chat_metadata.get("prompt_build_latency_s"),
-        },
-        "structured": {
-            "current_task": selected_structured_task,
-            "provider": structured_metadata.get("provider") or selected_provider,
-            "model": structured_metadata.get("model") or selected_model,
-            "selected_documents": len(structured_selected_document_ids),
-            "last_total_s": (structured_timings.get("total_s") if isinstance(structured_timings, dict) else None),
-            "last_provider_s": (structured_timings.get("provider_total_s") if isinstance(structured_timings, dict) else None),
-            "last_pre_model_prep_s": last_pre_model_prep_s,
-            "last_document_load_s": (structured_timings.get("document_load_s") if isinstance(structured_timings, dict) else None),
-            "last_sanitize_s": (structured_timings.get("sanitize_s") if isinstance(structured_timings, dict) else None),
-            "last_context_s": (structured_timings.get("context_build_s") if isinstance(structured_timings, dict) else None),
-            "last_parsing_s": (structured_timings.get("parsing_s") if isinstance(structured_timings, dict) else None),
-            "task_model_map": task_model_map,
-        },
-        "documents": {
-            "chunking_strategy": selected_chunking_strategy,
-            "retrieval_strategy": selected_retrieval_strategy,
-            "pdf_extraction_mode": selected_pdf_extraction_mode,
-            "ocr_backend_default": default_ocr_backend,
-            "vl_model_default": default_vl_model,
-            "indexed_documents": indexed_documents_count,
-            "chat_selected_docs": _build_document_runtime_rows(
-                chat_selected_document_ids,
-                document_preview_map,
-                default_vl_model=default_vl_model,
-                default_ocr_backend=default_ocr_backend,
-            ),
-            "structured_selected_docs": _build_document_runtime_rows(
-                structured_selected_document_ids,
-                document_preview_map,
-                default_vl_model=default_vl_model,
-                default_ocr_backend=default_ocr_backend,
-            ),
-        },
-    }
-
 raw_rag_store = load_rag_store(rag_settings.store_path)
 normalized_rag_store = normalize_rag_index(raw_rag_store, rag_settings)
 
@@ -638,6 +632,7 @@ if "rag_index" not in st.session_state:
     initialize_rag_state(normalized_rag_store)
 else:
     initialize_rag_state()
+initialize_rag_runtime_settings(rag_settings)
 
 messages = get_chat_messages()
 last_latency = get_last_latency()
@@ -647,26 +642,30 @@ indexed_chunks_preview = len(rag_index.get("chunks", [])) if isinstance(rag_inde
 vector_backend_status_preview = inspect_vector_backend_status(rag_index, rag_settings)
 phase55_shadow_log_entries = load_shadow_log(PHASE55_SHADOW_LOG_PATH)
 phase55_shadow_log_summary = summarize_shadow_log(phase55_shadow_log_entries)
+phase55_langgraph_shadow_log_entries = load_langgraph_shadow_log(PHASE55_LANGGRAPH_SHADOW_LOG_PATH)
+phase55_langgraph_shadow_log_summary = summarize_langgraph_shadow_log(phase55_langgraph_shadow_log_entries)
+
+chat_capable_registry = filter_registry_by_capability(provider_registry, "chat")
 
 provider_options = {
     provider_key: provider_data["label"]
-    for provider_key, provider_data in provider_registry.items()
+    for provider_key, provider_data in chat_capable_registry.items()
 }
 models_by_provider = {
     provider_key: provider_data["instance"].list_available_models()
-    for provider_key, provider_data in provider_registry.items()
+    for provider_key, provider_data in chat_capable_registry.items()
 }
 default_model_by_provider = {
-    "ollama": settings.default_model,
-    "openai": provider_registry["openai"]["instance"].settings.model if "openai" in provider_registry else "",
+    provider_key: str(provider_data.get("default_model") or (provider_data["instance"].list_available_models()[0] if provider_data["instance"].list_available_models() else ""))
+    for provider_key, provider_data in chat_capable_registry.items()
 }
 provider_details = {
     provider_key: provider_data.get("detail", "")
-    for provider_key, provider_data in provider_registry.items()
+    for provider_key, provider_data in chat_capable_registry.items()
 }
 default_context_window_by_provider = {
-    "ollama": settings.default_context_window,
-    "openai": provider_registry["openai"]["instance"].settings.default_context_window if "openai" in provider_registry else 128000,
+    provider_key: int(provider_data.get("default_context_window") or settings.default_context_window)
+    for provider_key, provider_data in chat_capable_registry.items()
 }
 
 (
@@ -679,8 +678,10 @@ default_context_window_by_provider = {
     rag_chunk_size,
     rag_chunk_overlap,
     rag_top_k,
+    selected_embedding_provider,
     selected_embedding_model,
     selected_embedding_context_window,
+    selected_loader_strategy,
     selected_chunking_strategy,
     selected_retrieval_strategy,
     selected_pdf_extraction_mode,
@@ -698,11 +699,14 @@ default_context_window_by_provider = {
     default_rag_chunk_size=rag_settings.chunk_size,
     default_rag_chunk_overlap=rag_settings.chunk_overlap,
     default_rag_top_k=rag_settings.top_k,
+    default_rag_loader_strategy=rag_settings.loader_strategy,
     default_rag_chunking_strategy=rag_settings.chunking_strategy,
     default_rag_retrieval_strategy=rag_settings.retrieval_strategy,
     default_pdf_extraction_mode=normalize_pdf_extraction_mode(rag_settings.pdf_extraction_mode),
-    embedding_model_options=embedding_model_options,
-    default_embedding_model=rag_settings.embedding_model,
+    embedding_provider_options=embedding_provider_options,
+    default_embedding_provider=default_embedding_provider,
+    embedding_models_by_provider=embedding_models_by_provider,
+    default_embedding_model_by_provider=default_embedding_model_by_provider,
     default_embedding_context_window=rag_settings.embedding_context_window,
     indexed_documents_count=len(indexed_documents_preview),
     indexed_chunks_count=indexed_chunks_preview,
@@ -712,8 +716,24 @@ default_context_window_by_provider = {
     last_latency=last_latency,
 )
 
+embedding_runtime_profile = resolve_provider_runtime_profile(
+    provider_registry,
+    selected_embedding_provider,
+    capability="embeddings",
+    fallback_provider="ollama",
+)
+embedding_provider_key = embedding_runtime_profile.get("effective_provider")
+embedding_provider_entry = embedding_runtime_profile.get("provider_entry")
+embedding_provider_fallback_reason = embedding_runtime_profile.get("fallback_reason")
+if not isinstance(embedding_provider_entry, dict):
+    raise RuntimeError("Nenhum provider com suporte a embeddings está disponível no ambiente atual.")
+embedding_provider = embedding_provider_entry["instance"]
+embedding_provider_label = str(embedding_provider_entry.get("label") or embedding_provider_key or "embedding")
+
 effective_rag_settings = replace(
     rag_settings,
+    loader_strategy=selected_loader_strategy,
+    embedding_provider=str(embedding_provider_key or selected_embedding_provider),
     embedding_model=selected_embedding_model,
     embedding_context_window=selected_embedding_context_window,
     chunk_size=rag_chunk_size,
@@ -723,9 +743,10 @@ effective_rag_settings = replace(
     retrieval_strategy=selected_retrieval_strategy,
     pdf_extraction_mode=normalize_pdf_extraction_mode(selected_pdf_extraction_mode),
 )
+set_rag_runtime_settings(effective_rag_settings)
 
-selected_provider_instance = provider_registry[selected_provider]["instance"]
-selected_provider_label = provider_registry[selected_provider]["label"]
+selected_provider_instance = chat_capable_registry[selected_provider]["instance"]
+selected_provider_label = chat_capable_registry[selected_provider]["label"]
 selected_prompt_profile_label = prompt_profiles[selected_prompt_profile]["label"]
 selected_file_types_count = 0
 estimated_rag_context_chars = effective_rag_settings.chunk_size * max(effective_rag_settings.top_k, 1)
@@ -742,11 +763,16 @@ st.caption(
     f"Provider: `{selected_provider}` · Modelo: `{selected_model}` · Perfil: `{selected_prompt_profile}` · Temperatura: `{temperature:.1f}` · Contexto ({context_window_mode}): `{context_window}`"
 )
 st.caption(
-    f"Embedding: {effective_rag_settings.embedding_model} · embedding_num_ctx={effective_rag_settings.embedding_context_window} · truncate={effective_rag_settings.embedding_truncate}"
+    f"Embedding: provider={effective_rag_settings.embedding_provider} · model={effective_rag_settings.embedding_model} · embedding_num_ctx={effective_rag_settings.embedding_context_window} · truncate={effective_rag_settings.embedding_truncate}"
 )
+if embedding_provider_fallback_reason:
+    st.caption(
+        f"Embedding provider efetivo: `{embedding_provider_key}` ({embedding_provider_label}) · fallback_reason=`{embedding_provider_fallback_reason}`"
+    )
 st.caption(
     f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k} · rerank_pool={effective_rag_settings.rerank_pool_size}"
 )
+st.caption(f"Loader nesta execução: {describe_loader_strategy(selected_loader_strategy)}")
 st.caption(f"Chunking nesta execução: {selected_chunking_strategy}")
 st.caption(f"Retrieval nesta execução: {selected_retrieval_strategy}")
 st.caption(f"Extração PDF nesta execução: {describe_pdf_extraction_mode(effective_rag_settings.pdf_extraction_mode)}")
@@ -764,25 +790,26 @@ if vector_backend_status_preview.get("status") == "dessincronizado":
 elif vector_backend_status_preview.get("status") == "fallback_local":
     st.info(vector_backend_status_preview.get("message"))
 
-if selected_provider == "ollama" and hasattr(selected_provider_instance, "inspect_context_window"):
-    with st.expander("Validação de contexto do Ollama", expanded=False):
+if hasattr(selected_provider_instance, "inspect_context_window"):
+    with st.expander(f"Validação de contexto do provider ({selected_provider_label})", expanded=False):
         context_validation = selected_provider_instance.inspect_context_window(
             model=selected_model,
             requested_context_window=context_window,
         )
         st.write(context_validation)
-        st.caption(
-            "Esta validação combina rota nativa `/api/chat`, leitura de `/api/show` e `ollama ps`. "
-            "Use `ollama ps` apenas como sinal auxiliar, não como prova isolada."
-        )
-    with st.expander("Validação de contexto do embedding (Ollama)", expanded=False):
+        if selected_provider == "ollama":
+            st.caption(
+                "Esta validação combina rota nativa `/api/chat`, leitura de `/api/show` e `ollama ps`. "
+                "Use `ollama ps` apenas como sinal auxiliar, não como prova isolada."
+            )
+    with st.expander(f"Validação do provider de embedding ({embedding_provider_label})", expanded=False):
         embedding_context_validation = embedding_provider.inspect_embedding_context_window(
             model=effective_rag_settings.embedding_model,
             requested_context_window=effective_rag_settings.embedding_context_window,
         )
         st.write(embedding_context_validation)
         st.caption(
-            "O app envia `options.num_ctx` ao endpoint nativo `/api/embed`. Trate isso como controle operacional do pipeline de embedding; a aplicação efetiva ainda depende do modelo e do runtime."
+            "O app registra a configuração operacional do pipeline de embedding e delega ao provider ativo a aplicação efetiva desses parâmetros."
         )
 
 st.divider()
@@ -992,6 +1019,8 @@ with documents_tab:
                         "tipo": document.get("file_type"),
                         "caracteres": document.get("char_count"),
                         "chunks": document.get("chunk_count"),
+                        "loader": loader_metadata.get("loader_strategy_label") or loader_metadata.get("loader_strategy_used"),
+                        "loader_fallback": loader_metadata.get("loader_strategy_fallback_reason"),
                         "chunking": loader_metadata.get("chunking_strategy_label") or loader_metadata.get("chunking_strategy_used"),
                         "chunking_fallback": loader_metadata.get("chunking_strategy_fallback_reason"),
                         "extração_pdf": loader_metadata.get("strategy_label") if document.get("file_type") == "pdf" else None,
@@ -1008,6 +1037,7 @@ with documents_tab:
                 {
                     "documentos": documents_count,
                     "chunks": len(chunks),
+                    "loader_strategy": rag_info.get("loader_strategy"),
                     "chunking_strategy": rag_info.get("chunking_strategy"),
                     "retrieval_strategy": rag_info.get("retrieval_strategy"),
                     "embedding_model": rag_info.get("embedding_model"),
@@ -1095,6 +1125,8 @@ with documents_tab:
 
     if selected_provider == "openai":
         st.info("Provider cloud habilitado por configuração local. Benchmark real com cloud continua sendo foco principal da Fase 7.")
+    elif selected_provider == "huggingface_local":
+        st.info("Provider local experimental via Hugging Face/Transformers habilitado. Use como trilha controlada de evolução arquitetural, não como baseline principal ainda.")
 
 
 rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
@@ -1480,6 +1512,7 @@ with structured_tab:
         "cv_analysis": "Analisa um currículo com base no documento selecionado. Melhor usar 1 CV por vez.",
         "code_analysis": "Analisa código ou texto técnico com foco em propósito, problemas e plano de refatoração.",
     }
+    structured_execution_strategy_options = ["direct", "langgraph_context_retry"]
 
     active_structured_document_ids: list[str] = []
     structured_use_documents = False
@@ -1513,6 +1546,50 @@ with structured_tab:
         key="phase5_structured_task_selector",
     )
     st.caption(task_help.get(selected_structured_task, ""))
+    selected_structured_execution_strategy = st.selectbox(
+        "Estratégia de execução estruturada",
+        structured_execution_strategy_options,
+        index=0,
+        format_func=describe_structured_execution_strategy,
+        key="phase55_structured_execution_strategy_selector",
+        help="`direct` usa o caminho atual. `langgraph_context_retry` usa um workflow experimental com LangGraph que pode refazer a execução usando `retrieval` se a primeira tentativa falhar com `document_scan`.",
+    )
+    st.caption(
+        f"Execução estruturada nesta rodada: {describe_structured_execution_strategy(selected_structured_execution_strategy)}"
+    )
+    shadow_compare_structured = st.checkbox(
+        "Comparar execução direta vs LangGraph (shadow)",
+        value=False,
+        key="phase55_structured_shadow_compare",
+        help="Executa a estratégia alternativa em segundo plano para comparar robustez, latência e guardrails entre `direct` e `langgraph_context_retry`.",
+    )
+
+    with st.expander("Fase 5.5 · histórico direct vs LangGraph", expanded=False):
+        st.caption(f"Log local: `{PHASE55_LANGGRAPH_SHADOW_LOG_PATH.name}`")
+        st.write(phase55_langgraph_shadow_log_summary)
+        if phase55_langgraph_shadow_log_entries:
+            recent_entries = list(reversed(phase55_langgraph_shadow_log_entries[-10:]))
+            st.dataframe(
+                [
+                    {
+                        "timestamp": entry.get("timestamp"),
+                        "task": entry.get("task_type"),
+                        "primary": entry.get("primary_strategy_used"),
+                        "alternate": entry.get("alternate_strategy_used"),
+                        "same_success": entry.get("same_success"),
+                        "quality_delta": entry.get("quality_delta"),
+                        "latency_delta_s": entry.get("latency_delta_s"),
+                        "alternate_avoided_review": entry.get("alternate_avoided_review"),
+                    }
+                    for entry in recent_entries
+                ],
+                width="stretch",
+            )
+            if st.button("Limpar histórico direct vs LangGraph", key="phase55_clear_langgraph_shadow_log"):
+                clear_langgraph_shadow_log(PHASE55_LANGGRAPH_SHADOW_LOG_PATH)
+                st.rerun()
+        else:
+            st.caption("Nenhuma comparação direct vs LangGraph registrada ainda.")
 
     structured_input_text = st.text_area(
         "Input text (opcional quando usar documentos)",
@@ -1799,7 +1876,49 @@ with structured_tab:
                 progress_callback=_structured_progress_callback,
                 telemetry={"current_stage": "structured_request_initialized"},
             )
-            structured_result = structured_service.execute_task(structured_request)
+            structured_result = run_structured_execution_workflow(
+                structured_request,
+                strategy=selected_structured_execution_strategy,
+            )
+            structured_shadow_summary = None
+            if shadow_compare_structured:
+                alternate_strategy = (
+                    "direct"
+                    if selected_structured_execution_strategy == "langgraph_context_retry"
+                    else "langgraph_context_retry"
+                )
+                progress_placeholder.markdown("**97%** · Executando comparação shadow direct vs LangGraph")
+                alternate_request = structured_request.model_copy(
+                    update={
+                        "progress_callback": None,
+                        "telemetry": {"current_stage": "structured_shadow_initialized"},
+                    }
+                )
+                alternate_structured_result = run_structured_execution_workflow(
+                    alternate_request,
+                    strategy=alternate_strategy,
+                )
+                structured_shadow_summary = _build_structured_shadow_summary(
+                    structured_result,
+                    alternate_structured_result,
+                )
+                metadata = structured_result.execution_metadata if isinstance(structured_result.execution_metadata, dict) else {}
+                structured_result.execution_metadata = {
+                    **metadata,
+                    "execution_shadow_summary": structured_shadow_summary,
+                }
+                phase55_langgraph_shadow_log_entries = append_langgraph_shadow_log_entry(
+                    PHASE55_LANGGRAPH_SHADOW_LOG_PATH,
+                    _build_structured_shadow_log_entry(
+                        task_type=selected_structured_task,
+                        query=structured_input_text,
+                        provider=selected_provider,
+                        model=selected_model,
+                        document_ids=list(active_structured_document_ids if structured_use_documents else []),
+                        shadow_summary=structured_shadow_summary,
+                    ),
+                )
+                phase55_langgraph_shadow_log_summary = summarize_langgraph_shadow_log(phase55_langgraph_shadow_log_entries)
             if displayed_progress["value"] < 100:
                 for next_progress in range(displayed_progress["value"] + 1, 101):
                     displayed_progress["value"] = next_progress
@@ -1844,17 +1963,20 @@ with structured_tab:
         st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = selected_render_mode
         render_structured_result(structured_result, requested_mode=selected_render_mode)
 
-runtime_snapshot = _build_runtime_snapshot(
+runtime_snapshot = build_runtime_snapshot(
     selected_provider=selected_provider,
     selected_provider_label=selected_provider_label,
     selected_model=selected_model,
+    selected_embedding_provider=str(embedding_provider_key or selected_embedding_provider),
     selected_embedding_model=selected_embedding_model,
+    selected_loader_strategy=selected_loader_strategy,
     selected_chunking_strategy=selected_chunking_strategy,
     selected_retrieval_strategy=selected_retrieval_strategy,
     selected_pdf_extraction_mode=selected_pdf_extraction_mode,
     chat_selected_document_ids=chat_selected_document_ids if 'chat_selected_document_ids' in locals() else [],
     structured_selected_document_ids=active_structured_document_ids if 'active_structured_document_ids' in locals() else [],
     selected_structured_task=selected_structured_task if 'selected_structured_task' in locals() else "",
+    selected_structured_execution_strategy=selected_structured_execution_strategy if 'selected_structured_execution_strategy' in locals() else "direct",
     messages=get_chat_messages(),
     structured_result=structured_result if 'structured_result' in locals() else None,
     structured_task_registry=structured_task_registry,
