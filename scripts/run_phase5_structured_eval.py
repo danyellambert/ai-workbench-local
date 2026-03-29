@@ -14,6 +14,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from pypdf import PdfReader
+
+from src.storage.phase8_eval_store import append_eval_run
 
 from src.structured.envelope import TaskExecutionRequest, StructuredResult
 from src.structured.service import structured_service
@@ -21,6 +24,7 @@ from src.structured.service import structured_service
 FIXTURES_DIR = PROJECT_ROOT / "phase5_eval" / "fixtures"
 REPORTS_DIR = PROJECT_ROOT / "phase5_eval" / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+EVAL_DB_PATH = PROJECT_ROOT / ".phase8_eval_runs.sqlite3"
 
 PLACEHOLDER_PATTERNS = [
     r"\bfull name\b",
@@ -203,6 +207,19 @@ def _save_report(report: dict[str, Any]) -> Path:
     return out
 
 
+def _extract_latency_s(result: StructuredResult) -> float | None:
+    metadata = result.execution_metadata if isinstance(result.execution_metadata, dict) else {}
+    telemetry = metadata.get("telemetry") if isinstance(metadata.get("telemetry"), dict) else {}
+    timings = telemetry.get("timings_s") if isinstance(telemetry.get("timings_s"), dict) else {}
+    workflow_total = metadata.get("workflow_total_s")
+    if isinstance(workflow_total, (int, float)):
+        return round(float(workflow_total), 4)
+    total_s = timings.get("total_s")
+    if isinstance(total_s, (int, float)):
+        return round(float(total_s), 4)
+    return None
+
+
 def run_tasks(tasks: list[str], provider: str, model: str | None, cv_pdf: str | None) -> int:
     outputs: list[dict[str, Any]] = []
     worst_exit = 0
@@ -230,6 +247,37 @@ def run_tasks(tasks: list[str], provider: str, model: str | None, cv_pdf: str | 
             "payload": result.validated_output.model_dump(mode="json") if result.validated_output else None,
         })
 
+        metadata = result.execution_metadata if isinstance(result.execution_metadata, dict) else {}
+        telemetry = metadata.get("telemetry") if isinstance(metadata.get("telemetry"), dict) else {}
+        parse_recovery = telemetry.get("parse_recovery") if isinstance(telemetry.get("parse_recovery"), dict) else {}
+        append_eval_run(
+            EVAL_DB_PATH,
+            {
+                "suite_name": "structured_smoke_eval",
+                "task_type": task,
+                "case_name": Path(cv_pdf).name if (task == "cv_analysis" and cv_pdf) else f"fixture:{task}",
+                "provider": provider,
+                "model": model,
+                "status": outcome.status,
+                "score": outcome.score,
+                "max_score": outcome.max_score,
+                "quality_score": result.quality_score,
+                "overall_confidence": result.overall_confidence,
+                "latency_s": _extract_latency_s(result),
+                "needs_review": bool(metadata.get("needs_review")),
+                "metrics": {
+                    "success": result.success,
+                    "parse_recovery_used": bool(parse_recovery.get("used")),
+                    "parse_recovery_attempt_count": int(parse_recovery.get("attempt_count") or 0),
+                },
+                "reasons": outcome.reasons,
+                "metadata": {
+                    "validation_error": result.validation_error,
+                    "parsing_error": result.parsing_error,
+                },
+            },
+        )
+
         print(f"[{outcome.status}] {task}: {outcome.score}/{outcome.max_score}")
         if outcome.reasons:
             for reason in outcome.reasons:
@@ -244,6 +292,7 @@ def run_tasks(tasks: list[str], provider: str, model: str | None, cv_pdf: str | 
         "generated_at": datetime.now().isoformat(),
         "provider": provider,
         "model": model,
+        "eval_store_path": str(EVAL_DB_PATH),
         "tasks": outputs,
     }
     out = _save_report(report)
