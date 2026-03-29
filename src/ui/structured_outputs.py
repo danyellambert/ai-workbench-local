@@ -14,9 +14,11 @@ from ..structured.base import (
     CVAnalysisPayload,
     CodeIssue,
     CodeAnalysisPayload,
+    DocumentAgentPayload,
     ExtractionPayload,
     SummaryPayload,
 )
+from ..structured.document_agent import describe_document_agent_intent, describe_document_agent_tool
 from ..structured.envelope import StructuredResult
 
 
@@ -1140,12 +1142,24 @@ def _render_result_header(result: StructuredResult) -> None:
     execution_shadow_summary = metadata.get("execution_shadow_summary") if isinstance(metadata.get("execution_shadow_summary"), dict) else {}
     needs_review = bool(metadata.get("needs_review"))
     needs_review_reason = _clean_text_value(metadata.get("needs_review_reason"))
+    agent_intent_label = _clean_text_value(metadata.get("agent_intent_label") or metadata.get("agent_intent"))
+    agent_tool_label = _clean_text_value(metadata.get("agent_tool_label") or metadata.get("agent_tool"))
 
     if execution_strategy:
         extra_parts = [f"estratégia `{execution_strategy}`"]
         if workflow_id:
             extra_parts.append(f"workflow `{workflow_id}`")
         st.caption("Execução estruturada: " + " · ".join(extra_parts))
+    if result.task_type == "document_agent":
+        agent_parts = []
+        if agent_intent_label:
+            agent_parts.append(f"intenção: {agent_intent_label}")
+        if agent_tool_label:
+            agent_parts.append(f"tool: {agent_tool_label}")
+        if metadata.get("agent_context_strategy"):
+            agent_parts.append(f"contexto: {metadata.get('agent_context_strategy')}")
+        if agent_parts:
+            st.caption("Copiloto documental: " + " · ".join(agent_parts))
     if workflow_route_decision or workflow_guardrail_decision:
         details = []
         if workflow_route_decision:
@@ -1760,6 +1774,201 @@ def _render_code_analysis(payload: CodeAnalysisPayload) -> None:
                 st.write(f"{prefix} {item}")
 
 
+def _render_document_agent(payload: DocumentAgentPayload) -> None:
+    metric_1, metric_2, metric_3, metric_4 = st.columns(4)
+    metric_1.metric("Intenção", describe_document_agent_intent(payload.user_intent))
+    metric_2.metric("Tool", describe_document_agent_tool(payload.tool_used))
+    metric_3.metric("Fontes", len(payload.sources))
+    metric_4.metric("Confiança", f"{payload.confidence:.0%}")
+
+    st.write("**Resumo do copiloto**")
+    st.info(payload.summary)
+
+    if payload.key_points:
+        st.write("**Pontos principais**")
+        for item in payload.key_points:
+            st.write(f"- {item}")
+
+    if payload.recommended_actions:
+        st.write("**Próximos passos sugeridos**")
+        for item in payload.recommended_actions:
+            st.write(f"- {item}")
+
+    if payload.limitations:
+        st.write("**Limitações e pontos de atenção**")
+        for item in payload.limitations:
+            st.write(f"- {item}")
+
+    if payload.guardrails_applied:
+        with st.expander("Guardrails aplicados pelo agente", expanded=False):
+            for item in payload.guardrails_applied:
+                st.write(f"- {item}")
+
+    if payload.available_tools:
+        with st.expander("Tools avaliadas pelo agente", expanded=False):
+            st.dataframe(
+                [
+                    {
+                        "tool": item.get("label") or item.get("name"),
+                        "name": item.get("name"),
+                        "answer_mode": item.get("answer_mode"),
+                        "available": item.get("available"),
+                        "availability_reason": item.get("availability_reason"),
+                        "description": item.get("description"),
+                    }
+                    for item in payload.available_tools
+                ],
+                width="stretch",
+            )
+
+    review_type = None
+    if isinstance(payload.structured_response, dict):
+        review_type = payload.structured_response.get("review_type")
+    if review_type == "policy_compliance":
+        obligations = payload.structured_response.get("obligations") if isinstance(payload.structured_response.get("obligations"), list) else []
+        restrictions = payload.structured_response.get("restrictions") if isinstance(payload.structured_response.get("restrictions"), list) else []
+        compliance_risks = payload.structured_response.get("risks") if isinstance(payload.structured_response.get("risks"), list) else []
+        compliance_gaps = payload.structured_response.get("missing_information") if isinstance(payload.structured_response.get("missing_information"), list) else []
+        if obligations:
+            st.write("**Obrigações identificadas**")
+            for item in obligations:
+                st.write(f"- {item}")
+        if restrictions:
+            st.write("**Restrições / cláusulas relevantes**")
+            for item in restrictions:
+                st.write(f"- {item}")
+        if compliance_risks:
+            st.write("**Riscos de compliance**")
+            for item in compliance_risks:
+                st.write(f"- {item}")
+        if compliance_gaps:
+            st.write("**Lacunas para revisão**")
+            for item in compliance_gaps:
+                st.write(f"- {item}")
+    elif review_type == "risk_gap_review":
+        risks = payload.structured_response.get("risks") if isinstance(payload.structured_response.get("risks"), list) else []
+        gaps = payload.structured_response.get("gaps") if isinstance(payload.structured_response.get("gaps"), list) else []
+        actions = payload.structured_response.get("actions") if isinstance(payload.structured_response.get("actions"), list) else []
+        if risks:
+            st.write("**Riscos identificados**")
+            for item in risks:
+                st.write(f"- {item}")
+        if gaps:
+            st.write("**Lacunas e pendências**")
+            for item in gaps:
+                st.write(f"- {item}")
+        if actions:
+            st.write("**Ações de mitigação sugeridas**")
+            for item in actions:
+                st.write(f"- {item}")
+    elif review_type == "operational_extraction":
+        actions = payload.structured_response.get("actions") if isinstance(payload.structured_response.get("actions"), list) else []
+        deadlines = payload.structured_response.get("deadlines") if isinstance(payload.structured_response.get("deadlines"), list) else []
+        operational_risks = payload.structured_response.get("risks") if isinstance(payload.structured_response.get("risks"), list) else []
+        if actions:
+            st.write("**Tarefas operacionais**")
+            for item in actions:
+                st.write(f"- {item}")
+        if deadlines:
+            st.write("**Prazos e datas**")
+            for item in deadlines:
+                st.write(f"- {item}")
+        if operational_risks:
+            st.write("**Riscos operacionais**")
+            for item in operational_risks:
+                st.write(f"- {item}")
+    elif review_type == "technical_review":
+        detected_issues = payload.structured_response.get("detected_issues") if isinstance(payload.structured_response.get("detected_issues"), list) else []
+        refactor_plan = payload.structured_response.get("refactor_plan") if isinstance(payload.structured_response.get("refactor_plan"), list) else []
+        test_suggestions = payload.structured_response.get("test_suggestions") if isinstance(payload.structured_response.get("test_suggestions"), list) else []
+        risk_notes = payload.structured_response.get("risk_notes") if isinstance(payload.structured_response.get("risk_notes"), list) else []
+        if detected_issues:
+            st.write("**Problemas técnicos identificados**")
+            for item in detected_issues[:6]:
+                if isinstance(item, dict):
+                    severity = item.get("severity")
+                    category = item.get("category")
+                    title = item.get("title")
+                    label = " · ".join(str(part) for part in [severity, category, title] if part)
+                    st.write(f"- {label}")
+        if refactor_plan:
+            st.write("**Plano de refatoração**")
+            for item in refactor_plan:
+                st.write(f"- {item}")
+        if test_suggestions:
+            st.write("**Sugestões de teste**")
+            for item in test_suggestions:
+                st.write(f"- {item}")
+        if risk_notes:
+            st.write("**Riscos técnicos**")
+            for item in risk_notes:
+                st.write(f"- {item}")
+
+    if payload.compared_documents:
+        st.write("**Documentos comparados**")
+        st.write(" · ".join(payload.compared_documents))
+
+    if payload.checklist_preview:
+        st.write("**Prévia do checklist operacional**")
+        for index, item in enumerate(payload.checklist_preview, start=1):
+            st.write(f"{index}. {item}")
+
+    if payload.comparison_findings:
+        st.write("**Achados da comparação**")
+        for finding in payload.comparison_findings:
+            with st.expander(f"{finding.title} · {finding.finding_type}", expanded=False):
+                st.write(finding.description)
+                if finding.documents:
+                    st.caption("Documentos: " + ", ".join(finding.documents))
+                if finding.evidence:
+                    st.caption("Evidências")
+                    for evidence in finding.evidence:
+                        st.write(f"- {evidence}")
+
+    if payload.tool_runs:
+        st.write("**Execução das tools**")
+        st.dataframe(
+            [
+                {
+                    "tool": item.tool_name,
+                    "status": item.status,
+                    "detail": item.detail,
+                }
+                for item in payload.tool_runs
+            ],
+            width="stretch",
+        )
+
+    if payload.sources:
+        st.write("**Fontes consultadas**")
+        st.dataframe(
+            [
+                {
+                    "source": item.source,
+                    "document_id": item.document_id,
+                    "file_type": item.file_type,
+                    "chunk_id": item.chunk_id,
+                    "score": item.score,
+                    "vector_score": item.vector_score,
+                    "lexical_score": item.lexical_score,
+                    "snippet": item.snippet,
+                }
+                for item in payload.sources
+            ],
+            width="stretch",
+        )
+
+    if payload.needs_review:
+        st.warning(
+            "O copiloto marcou a resposta para revisão humana"
+            + (f" · motivo: {payload.needs_review_reason}" if payload.needs_review_reason else "")
+        )
+
+    if payload.structured_response:
+        with st.expander("Ver payload estruturado interno", expanded=False):
+            st.json(payload.structured_response)
+
+
 def _render_friendly_payload(payload: Any, *, execution_id: str | None = None) -> None:
     if isinstance(payload, ExtractionPayload):
         _render_extraction(payload)
@@ -1767,6 +1976,8 @@ def _render_friendly_payload(payload: Any, *, execution_id: str | None = None) -
         _render_summary(payload)
     elif isinstance(payload, ChecklistPayload):
         _render_checklist_friendly(payload, execution_id=execution_id)
+    elif isinstance(payload, DocumentAgentPayload):
+        _render_document_agent(payload)
     elif isinstance(payload, CVAnalysisPayload):
         _render_cv_analysis(payload)
     elif isinstance(payload, CodeAnalysisPayload):

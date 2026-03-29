@@ -39,6 +39,15 @@ class RuntimeSnapshotTests(unittest.TestCase):
                 "provider": "ollama",
                 "model": "qwen2.5:7b",
                 "execution_strategy_used": "langgraph_context_retry",
+                "agent_intent": "Pergunta documental",
+                "agent_tool": "Consultar documentos indexados",
+                "agent_answer_mode": "friendly",
+                "agent_available_tools": [{"name": "consult_documents", "available": True}],
+                "needs_review": True,
+                "needs_review_reason": "low_agent_confidence",
+                "agent_limitations": ["Confiança estimada abaixo do ideal (68%)."],
+                "agent_recommended_actions": ["Encaminhe o resultado para revisão humana."],
+                "agent_guardrails_applied": ["Resposta restrita aos documentos selecionados."],
                 "workflow_attempts": 2,
                 "workflow_context_strategies": ["document_scan", "retrieval"],
                 "telemetry": {
@@ -113,6 +122,13 @@ class RuntimeSnapshotTests(unittest.TestCase):
         self.assertEqual(snapshot["chat"]["embedding_provider"], "ollama")
         self.assertEqual(snapshot["chat"]["embedding_model"], "embeddinggemma:300m")
         self.assertEqual(snapshot["structured"]["execution_strategy"], "langgraph_context_retry")
+        self.assertEqual(snapshot["structured"]["agent_intent"], "Pergunta documental")
+        self.assertEqual(snapshot["structured"]["agent_tool"], "Consultar documentos indexados")
+        self.assertEqual(snapshot["structured"]["agent_available_tools"], [{"name": "consult_documents", "available": True}])
+        self.assertTrue(snapshot["structured"]["needs_review"])
+        self.assertEqual(snapshot["structured"]["agent_limitations"], ["Confiança estimada abaixo do ideal (68%)."])
+        self.assertEqual(snapshot["structured"]["agent_recommended_actions"], ["Encaminhe o resultado para revisão humana."])
+        self.assertEqual(snapshot["structured"]["agent_guardrails_applied"], ["Resposta restrita aos documentos selecionados."])
         self.assertEqual(snapshot["structured"]["workflow_attempts"], 2)
         self.assertEqual(snapshot["structured"]["last_pre_model_prep_s"], 0.6)
         self.assertEqual(snapshot["documents"]["indexed_documents"], 1)

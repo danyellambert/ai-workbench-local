@@ -1,4 +1,10 @@
-from src.config import get_huggingface_settings, get_ollama_settings, get_openai_settings
+from src.config import (
+    get_huggingface_inference_settings,
+    get_huggingface_server_settings,
+    get_huggingface_settings,
+    get_ollama_settings,
+    get_openai_settings,
+)
 from src.providers.ollama_provider import OllamaProvider
 
 try:
@@ -10,6 +16,16 @@ try:
     from src.providers.huggingface_local_provider import HuggingFaceLocalProvider
 except Exception:  # optional dependency
     HuggingFaceLocalProvider = None
+
+try:
+    from src.providers.huggingface_server_provider import HuggingFaceServerProvider
+except Exception:  # optional dependency
+    HuggingFaceServerProvider = None
+
+try:
+    from src.providers.huggingface_inference_provider import HuggingFaceInferenceProvider
+except Exception:  # optional dependency
+    HuggingFaceInferenceProvider = None
 
 
 def capability_to_registry_flag(capability: str) -> str:
@@ -71,6 +87,39 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
             "supports_embeddings": HuggingFaceLocalProvider.supports_embedding_runtime(),
             "default_model": huggingface_settings.model,
             "default_context_window": huggingface_settings.default_context_window,
+        }
+
+    huggingface_server_settings = get_huggingface_server_settings()
+    if (
+        huggingface_server_settings.base_url
+        and huggingface_server_settings.model
+        and HuggingFaceServerProvider is not None
+    ):
+        registry["huggingface_server"] = {
+            "label": "Hugging Face server local",
+            "detail": f"Servidor local configurado em `{huggingface_server_settings.base_url}`",
+            "instance": HuggingFaceServerProvider(huggingface_server_settings),
+            "supports_chat": True,
+            "supports_embeddings": bool(huggingface_server_settings.embedding_model),
+            "default_model": huggingface_server_settings.model,
+            "default_context_window": huggingface_server_settings.default_context_window,
+        }
+
+    huggingface_inference_settings = get_huggingface_inference_settings()
+    if (
+        huggingface_inference_settings.api_key
+        and huggingface_inference_settings.base_url
+        and huggingface_inference_settings.model
+        and HuggingFaceInferenceProvider is not None
+    ):
+        registry["huggingface_inference"] = {
+            "label": "Hugging Face Inference",
+            "detail": f"Endpoint remoto configurado em `{huggingface_inference_settings.base_url}`",
+            "instance": HuggingFaceInferenceProvider(huggingface_inference_settings),
+            "supports_chat": True,
+            "supports_embeddings": bool(huggingface_inference_settings.embedding_model),
+            "default_model": huggingface_inference_settings.model,
+            "default_context_window": huggingface_inference_settings.default_context_window,
         }
 
     return registry

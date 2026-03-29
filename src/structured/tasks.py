@@ -7,8 +7,27 @@ import re
 import time
 from typing import Optional, Type
 
-from .base import ChecklistPayload, CVAnalysisPayload, CodeAnalysisPayload, ExtractionPayload, SummaryPayload
-from .envelope import TaskExecutionRequest, StructuredResult
+from .base import (
+    AgentSource,
+    AgentToolExecution,
+    ChecklistPayload,
+    ComparisonFinding,
+    CVAnalysisPayload,
+    CodeAnalysisPayload,
+    DocumentAgentPayload,
+    ExtractionPayload,
+    SummaryPayload,
+)
+from .document_agent import (
+    classify_document_agent_intent,
+    describe_document_agent_intent,
+    describe_document_agent_tool,
+    extract_bullet_points_from_text,
+    list_document_agent_tools,
+    normalize_agent_bullet_points,
+    select_document_agent_tool,
+)
+from .envelope import RenderMode, TaskExecutionRequest, StructuredResult
 from .parsers import parse_structured_response
 
 
@@ -2061,11 +2080,1028 @@ Return this JSON structure:
 """
 
 
+class DocumentAgentTaskHandler(TaskHandler):
+    def execute(self, request: TaskExecutionRequest) -> StructuredResult:
+        from .parsers import attempt_controlled_failure
+        from .service import structured_service
+
+        total_started_at = time.perf_counter()
+        telemetry = self._telemetry_dict(request)
+        self._report_progress(request, step="initializing", progress=0.08, detail="Inicializando o Document Operations Copilot")
+        provider = self._resolve_provider(request)
+        self._report_progress(request, step="intent_routing", progress=0.20, detail="Classificando intenção e selecionando tool")
+
+        document_ids = list(request.source_document_ids or [])
+        document_count = len(document_ids)
+        available_tools = list_document_agent_tools(
+            document_count=document_count,
+            use_document_context=bool(request.use_document_context),
+        )
+
+        user_intent = str(telemetry.get("agent_intent") or "").strip().lower()
+        intent_reason = str(telemetry.get("agent_intent_reason") or "").strip() or None
+        if not user_intent:
+            user_intent, intent_reason = classify_document_agent_intent(
+                request.input_text,
+                document_count=document_count,
+            )
+
+        tool_name = str(telemetry.get("agent_tool") or "").strip().lower()
+        answer_mode = str(telemetry.get("agent_answer_mode") or "").strip().lower()
+        tool_reason = str(telemetry.get("agent_tool_reason") or "").strip() or None
+        if not tool_name:
+            tool_name, answer_mode, tool_reason = select_document_agent_tool(
+                user_intent,
+                document_count=document_count,
+            )
+
+        context_strategy = self._resolve_document_agent_context_strategy(
+            request=request,
+            tool_name=tool_name,
+        )
+        telemetry.update(
+            {
+                "agent_intent": user_intent,
+                "agent_intent_reason": intent_reason,
+                "agent_tool": tool_name,
+                "agent_tool_reason": tool_reason,
+                "agent_answer_mode": answer_mode,
+                "agent_context_strategy": context_strategy,
+                "agent_available_tools": available_tools,
+            }
+        )
+
+        self._report_progress(request, step="grounding", progress=0.34, detail="Montando grounding documental e fontes")
+        source_bundle = self._build_document_agent_source_bundle(
+            request=request,
+            context_strategy=context_strategy,
+        )
+        sources = source_bundle["sources"]
+        context_text = source_bundle["context_text"]
+        retrieval_details = source_bundle["retrieval_details"]
+        tool_runs: list[AgentToolExecution] = []
+
+        try:
+            self._report_progress(request, step="tool_execution", progress=0.58, detail=f"Executando tool: {describe_document_agent_tool(tool_name)}")
+            if tool_name == "consult_documents":
+                payload = self._run_consult_documents_tool(
+                    provider=provider,
+                    request=request,
+                    user_intent=user_intent,
+                    answer_mode=answer_mode or "friendly",
+                    sources=sources,
+                    context_text=context_text,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success",
+                        detail="Resposta documental gerada com base no contexto selecionado.",
+                    )
+                )
+            elif tool_name == "summarize_document":
+                payload, nested_result = self._run_summary_tool(
+                    request=request,
+                    context_strategy=context_strategy,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success" if nested_result.success else "error",
+                        detail="Resumo executivo gerado a partir dos documentos selecionados." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha ao gerar resumo."),
+                    )
+                )
+            elif tool_name == "extract_structured_data":
+                payload, nested_result = self._run_extraction_tool(
+                    request=request,
+                    context_strategy=context_strategy,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success" if nested_result.success else "error",
+                        detail="Extração estruturada concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na extração estruturada."),
+                    )
+                )
+            elif tool_name == "generate_operational_checklist":
+                payload, nested_result = self._run_checklist_tool(
+                    request=request,
+                    context_strategy=context_strategy,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success" if nested_result.success else "error",
+                        detail="Checklist operacional gerado." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha ao gerar checklist."),
+                    )
+                )
+            elif tool_name == "review_document_risks":
+                payload, nested_result = self._run_document_risk_review_tool(
+                    request=request,
+                    context_strategy=context_strategy,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success" if nested_result.success else "error",
+                        detail="Análise de riscos e lacunas concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na análise de riscos."),
+                    )
+                )
+            elif tool_name == "extract_operational_tasks":
+                payload, nested_result = self._run_operational_task_extraction_tool(
+                    request=request,
+                    context_strategy=context_strategy,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success" if nested_result.success else "error",
+                        detail="Extração operacional concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na extração operacional."),
+                    )
+                )
+            elif tool_name == "review_policy_compliance":
+                payload, nested_result = self._run_policy_compliance_tool(
+                    request=request,
+                    context_strategy=context_strategy,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success" if nested_result.success else "error",
+                        detail="Revisão de policy/compliance concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na revisão de policy/compliance."),
+                    )
+                )
+            elif tool_name == "assist_technical_document":
+                payload, nested_result = self._run_technical_assistance_tool(
+                    request=request,
+                    context_strategy=context_strategy,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success" if nested_result.success else "error",
+                        detail="Assistência técnica concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na assistência técnica."),
+                    )
+                )
+            elif tool_name == "compare_documents":
+                payload, comparison_tool_runs = self._run_compare_documents_tool(
+                    provider=provider,
+                    request=request,
+                    answer_mode=answer_mode or "comparison_structured",
+                    sources=sources,
+                )
+                tool_runs.extend(comparison_tool_runs)
+            else:
+                payload = self._run_consult_documents_tool(
+                    provider=provider,
+                    request=request,
+                    user_intent=user_intent,
+                    answer_mode=answer_mode or "friendly",
+                    sources=sources,
+                    context_text=context_text,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name or "consult_documents",
+                        status="success",
+                        detail="Fallback para consulta documental executado.",
+                    )
+                )
+        except Exception as error:
+            return attempt_controlled_failure(
+                raw_response="",
+                task_type="document_agent",
+                error_message=f"Document agent execution failed: {error}",
+            )
+
+        if not payload.sources:
+            payload.sources = sources
+        payload.tool_runs.extend(tool_runs)
+        if request.use_document_context and document_ids and not payload.sources:
+            payload.needs_review = True
+            payload.needs_review_reason = payload.needs_review_reason or "no_grounded_sources_available"
+            payload.confidence = min(payload.confidence, 0.58) if payload.confidence else 0.58
+        if payload.confidence < 0.62 and not payload.needs_review:
+            payload.needs_review = True
+            payload.needs_review_reason = payload.needs_review_reason or "low_agent_confidence"
+        payload = payload.model_copy(update={"available_tools": available_tools})
+        payload = self._finalize_document_agent_payload(
+            payload=payload,
+            request=request,
+            tool_name=tool_name,
+            context_strategy=context_strategy,
+            retrieval_details=retrieval_details,
+        )
+
+        self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
+        self._report_progress(request, step="done", progress=1.0, detail="Copiloto documental finalizado")
+        return StructuredResult(
+            success=True,
+            task_type="document_agent",
+            parsed_json=payload.model_dump(mode="json"),
+            validated_output=payload,
+            available_render_modes=[
+                RenderMode(mode="json", label="JSON", available=True, priority=1),
+                RenderMode(mode="friendly", label="Friendly view", available=True, priority=0),
+            ],
+            primary_render_mode="friendly",
+            overall_confidence=payload.confidence,
+            quality_score=payload.confidence,
+            execution_metadata={
+                "agent_intent": user_intent,
+                "agent_intent_label": describe_document_agent_intent(user_intent),
+                "agent_intent_reason": intent_reason,
+                "agent_tool": tool_name,
+                "agent_tool_label": describe_document_agent_tool(tool_name),
+                "agent_tool_reason": tool_reason,
+                "agent_answer_mode": answer_mode,
+                "agent_context_strategy": context_strategy,
+                "agent_document_count": document_count,
+                "agent_source_count": len(payload.sources),
+                "agent_available_tools": available_tools,
+                "needs_review": payload.needs_review,
+                "needs_review_reason": payload.needs_review_reason,
+                "agent_limitations": list(payload.limitations),
+                "agent_recommended_actions": list(payload.recommended_actions),
+                "agent_guardrails_applied": list(payload.guardrails_applied),
+                "tool_runs": [item.model_dump(mode="json") for item in payload.tool_runs],
+                "retrieval_backend_used": retrieval_details.get("backend_used") if isinstance(retrieval_details, dict) else None,
+                "retrieval_backend_message": retrieval_details.get("backend_message") if isinstance(retrieval_details, dict) else None,
+                "retrieval_strategy_used": retrieval_details.get("retrieval_strategy_used") if isinstance(retrieval_details, dict) else None,
+                "retrieval_strategy_requested": retrieval_details.get("retrieval_strategy_requested") if isinstance(retrieval_details, dict) else None,
+            },
+        )
+
+    def _finalize_document_agent_payload(
+        self,
+        *,
+        payload: DocumentAgentPayload,
+        request: TaskExecutionRequest,
+        tool_name: str,
+        context_strategy: str,
+        retrieval_details: dict[str, object] | None,
+    ) -> DocumentAgentPayload:
+        limitations = list(payload.limitations)
+        recommended_actions = list(payload.recommended_actions)
+        guardrails_applied = list(payload.guardrails_applied)
+        document_count = len(request.source_document_ids or [])
+
+        if request.use_document_context:
+            guardrails_applied.append("Resposta restrita aos documentos selecionados na base documental.")
+        else:
+            limitations.append("Nenhum documento foi usado como grounding; a resposta depende apenas do texto do pedido.")
+
+        if context_strategy == "retrieval":
+            guardrails_applied.append("Grounding montado por retrieval para priorizar trechos mais relevantes à pergunta.")
+        else:
+            guardrails_applied.append("Grounding montado por document scan para priorizar cobertura mais ampla do documento.")
+
+        if payload.sources:
+            guardrails_applied.append("A resposta inclui fontes rastreáveis para auditoria manual.")
+            recommended_actions.append("Abra os trechos-fonte citados para confirmar a interpretação antes de agir.")
+        else:
+            limitations.append("Não foram encontradas fontes suficientes para sustentar integralmente a resposta.")
+            recommended_actions.append("Revise manualmente os documentos selecionados antes de usar esta resposta em decisão operacional.")
+
+        if isinstance(retrieval_details, dict):
+            fallback_reason = str(retrieval_details.get("retrieval_strategy_fallback_reason") or "").strip()
+            backend_message = str(retrieval_details.get("backend_message") or "").strip()
+            if fallback_reason:
+                limitations.append(f"A estratégia de retrieval caiu em fallback: {fallback_reason}.")
+                guardrails_applied.append("Fallback de retrieval registrado para reduzir falhas silenciosas.")
+            elif backend_message and "fallback" in backend_message.lower():
+                limitations.append(f"Observação do backend de retrieval: {backend_message}.")
+
+        if tool_name == "compare_documents":
+            if document_count > 3:
+                limitations.append("A comparação atual foi limitada a no máximo 3 documentos nesta iteração do agente.")
+                recommended_actions.append("Execute comparações em lotes menores para cobrir todos os documentos selecionados.")
+                guardrails_applied.append("Comparação truncada para evitar sobrecarga e mistura excessiva de contexto.")
+            recommended_actions.append("Valide as diferenças críticas diretamente nos documentos comparados antes de consolidar uma decisão.")
+        elif tool_name == "extract_structured_data":
+            recommended_actions.append("Baixe o JSON estruturado e valide campos críticos antes de integrar a saída em automações.")
+            guardrails_applied.append("Extração limitada a evidências explicitamente presentes no documento.")
+        elif tool_name == "generate_operational_checklist":
+            recommended_actions.append("Revise o checklist com um responsável do processo antes da execução operacional.")
+            guardrails_applied.append("Checklist gerado sem inferir passos implícitos fora do texto disponível.")
+        elif tool_name == "summarize_document":
+            limitations.append("O resumo pode omitir detalhes operacionais finos para ganhar concisão executiva.")
+            recommended_actions.append("Se precisar de detalhe fino, consulte o documento completo ou execute uma pergunta documental específica.")
+            guardrails_applied.append("Resumo comprimido para leitura executiva, preservando apenas os pontos mais relevantes.")
+        else:
+            limitations.append("Perguntas abertas podem exigir leitura humana adicional quando o documento tiver ambiguidade contextual.")
+            guardrails_applied.append("O agente evita afirmar fatos sem grounding forte nos documentos selecionados.")
+
+        if document_count > 1 and tool_name != "compare_documents":
+            limitations.append("Há múltiplos documentos selecionados; confirme se a resposta não combinou contextos distintos de forma indevida.")
+
+        if payload.needs_review:
+            limitations.append("A resposta foi marcada para revisão humana antes de uso decisório.")
+            if payload.needs_review_reason:
+                limitations.append(f"Motivo da revisão humana: {payload.needs_review_reason}.")
+            recommended_actions.append("Encaminhe o resultado para revisão humana antes de tomar uma decisão final.")
+            guardrails_applied.append("Human-in-the-loop ativado para reduzir risco de uso indevido da resposta.")
+
+        if isinstance(payload.confidence, float) and payload.confidence < 0.72:
+            limitations.append(f"Confiança estimada abaixo do ideal ({payload.confidence:.0%}).")
+
+        return payload.model_copy(
+            update={
+                "limitations": normalize_agent_bullet_points(limitations, limit=8),
+                "recommended_actions": normalize_agent_bullet_points(recommended_actions, limit=8),
+                "guardrails_applied": normalize_agent_bullet_points(guardrails_applied, limit=8),
+            }
+        )
+
+    def _resolve_document_agent_context_strategy(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        tool_name: str,
+    ) -> str:
+        if not request.use_document_context or not request.source_document_ids:
+            return "document_scan"
+        normalized_query = (request.input_text or "").strip()
+        if tool_name in {"consult_documents"} and normalized_query:
+            return "retrieval"
+        if tool_name in {"compare_documents"} and normalized_query and len(request.source_document_ids) <= 2:
+            return "retrieval"
+        return "document_scan"
+
+    def _build_document_agent_source_bundle(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        context_strategy: str,
+    ) -> dict[str, object]:
+        from ..rag.service import build_source_metadata, retrieve_relevant_chunks_detailed
+        from ..services.document_context import (
+            _filtered_chunks,
+            _get_effective_rag_settings,
+            _get_embedding_provider,
+            _get_rag_index,
+            _ordered_chunks,
+        )
+
+        context_text = self._build_optional_document_context(
+            request,
+            strategy=context_strategy,
+            max_chunks=10,
+            max_chars=20000,
+        )
+        retrieval_details: dict[str, object] = {}
+        source_rows: list[dict[str, object]] = []
+        rag_index = _get_rag_index()
+        if isinstance(rag_index, dict) and request.source_document_ids:
+            if context_strategy == "retrieval" and (request.input_text or "").strip():
+                embedding_provider = _get_embedding_provider()
+                if embedding_provider is not None:
+                    try:
+                        retrieval_details = retrieve_relevant_chunks_detailed(
+                            query=request.input_text,
+                            rag_index=rag_index,
+                            settings=_get_effective_rag_settings(),
+                            embedding_provider=embedding_provider,
+                            document_ids=request.source_document_ids,
+                        )
+                        source_rows = build_source_metadata(
+                            retrieval_details.get("chunks") if isinstance(retrieval_details.get("chunks"), list) else []
+                        )
+                    except Exception:
+                        retrieval_details = {}
+                        source_rows = []
+            if not source_rows:
+                document_chunks = _ordered_chunks(_filtered_chunks(rag_index, request.source_document_ids))
+                source_rows = build_source_metadata(document_chunks[: min(len(document_chunks), 6)])
+        sources = [AgentSource.model_validate(row) for row in source_rows]
+        return {
+            "context_text": context_text,
+            "sources": sources,
+            "retrieval_details": retrieval_details,
+        }
+
+    def _run_consult_documents_tool(
+        self,
+        *,
+        provider,
+        request: TaskExecutionRequest,
+        user_intent: str,
+        answer_mode: str,
+        sources: list[AgentSource],
+        context_text: str,
+    ) -> DocumentAgentPayload:
+        self._set_telemetry_value(request, "current_stage", "document_agent_consult_documents")
+        prompt = self._build_document_agent_consult_prompt(
+            user_query=request.input_text,
+            context_text=context_text,
+        )
+        response_text = self._collect_response_text(provider, request, prompt)
+        key_points = extract_bullet_points_from_text(response_text)
+        confidence = 0.84 if sources else (0.66 if context_text else 0.52)
+        return DocumentAgentPayload(
+            user_intent=user_intent,
+            intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+            answer_mode=answer_mode,
+            tool_used="consult_documents",
+            summary=response_text.strip() or "Não foi possível gerar uma resposta documental.",
+            key_points=key_points,
+            structured_response={
+                "response_text": response_text,
+                "context_preview": context_text[:3000],
+            },
+            sources=sources,
+            confidence=confidence,
+            needs_review=confidence < 0.6,
+            needs_review_reason="weak_grounding_in_document_consultation" if confidence < 0.6 else None,
+        )
+
+    def _run_summary_tool(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        context_strategy: str,
+    ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        nested_result = self._run_nested_structured_task(
+            request=request,
+            task_type="summary",
+            context_strategy=context_strategy,
+        )
+        if not nested_result.success or not isinstance(nested_result.validated_output, SummaryPayload):
+            raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "summary_tool_failed")
+        payload = nested_result.validated_output
+        key_points = normalize_agent_bullet_points(
+            payload.key_insights or [topic.title for topic in payload.topics],
+            limit=6,
+        )
+        confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.82)
+        return (
+            DocumentAgentPayload(
+                user_intent=str(self._telemetry_dict(request).get("agent_intent") or "executive_summary"),
+                intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+                answer_mode="friendly",
+                tool_used="summarize_document",
+                summary=payload.executive_summary,
+                key_points=key_points,
+                structured_response=payload.model_dump(mode="json"),
+                confidence=confidence,
+                needs_review=bool(nested_result.execution_metadata.get("needs_review")) if isinstance(nested_result.execution_metadata, dict) else False,
+                needs_review_reason=(nested_result.execution_metadata.get("needs_review_reason") if isinstance(nested_result.execution_metadata, dict) else None),
+            ),
+            nested_result,
+        )
+
+    def _run_extraction_tool(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        context_strategy: str,
+    ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        nested_result = self._run_nested_structured_task(
+            request=request,
+            task_type="extraction",
+            context_strategy=context_strategy,
+        )
+        if not nested_result.success or not isinstance(nested_result.validated_output, ExtractionPayload):
+            raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "extraction_tool_failed")
+        payload = nested_result.validated_output
+        key_points = normalize_agent_bullet_points(
+            [
+                *(f"{field.name}: {field.value}" for field in payload.extracted_fields[:4]),
+                *(risk.description for risk in payload.risks[:2]),
+                *(action.description for action in payload.action_items[:2]),
+            ],
+            limit=6,
+        )
+        summary = payload.main_subject or "Extração estruturada concluída."
+        summary = (
+            f"{summary} Foram identificados {len(payload.extracted_fields)} campo(s), {len(payload.entities)} entidade(s), "
+            f"{len(payload.action_items)} ação(ões) e {len(payload.risks)} risco(s)."
+        )
+        confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.8)
+        return (
+            DocumentAgentPayload(
+                user_intent=str(self._telemetry_dict(request).get("agent_intent") or "structured_extraction"),
+                intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+                answer_mode="json",
+                tool_used="extract_structured_data",
+                summary=summary,
+                key_points=key_points,
+                structured_response=payload.model_dump(mode="json"),
+                confidence=confidence,
+                needs_review=bool(nested_result.execution_metadata.get("needs_review")) if isinstance(nested_result.execution_metadata, dict) else False,
+                needs_review_reason=(nested_result.execution_metadata.get("needs_review_reason") if isinstance(nested_result.execution_metadata, dict) else None),
+            ),
+            nested_result,
+        )
+
+    def _run_checklist_tool(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        context_strategy: str,
+    ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        nested_result = self._run_nested_structured_task(
+            request=request,
+            task_type="checklist",
+            context_strategy=context_strategy,
+        )
+        if not nested_result.success or not isinstance(nested_result.validated_output, ChecklistPayload):
+            raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "checklist_tool_failed")
+        payload = nested_result.validated_output
+        checklist_preview = normalize_agent_bullet_points([item.title for item in payload.items], limit=8)
+        confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.8)
+        return (
+            DocumentAgentPayload(
+                user_intent=str(self._telemetry_dict(request).get("agent_intent") or "operational_checklist"),
+                intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+                answer_mode="checklist",
+                tool_used="generate_operational_checklist",
+                summary=f"Checklist operacional gerado com {payload.total_items} item(ns).",
+                key_points=checklist_preview[:5],
+                checklist_preview=checklist_preview,
+                structured_response=payload.model_dump(mode="json"),
+                confidence=confidence,
+                needs_review=bool(nested_result.execution_metadata.get("needs_review")) if isinstance(nested_result.execution_metadata, dict) else False,
+                needs_review_reason=(nested_result.execution_metadata.get("needs_review_reason") if isinstance(nested_result.execution_metadata, dict) else None),
+            ),
+            nested_result,
+        )
+
+    def _run_document_risk_review_tool(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        context_strategy: str,
+    ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        nested_result = self._run_nested_structured_task(
+            request=request,
+            task_type="extraction",
+            context_strategy="document_scan" if request.source_document_ids else context_strategy,
+        )
+        if not nested_result.success or not isinstance(nested_result.validated_output, ExtractionPayload):
+            raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "document_risk_review_tool_failed")
+
+        payload = nested_result.validated_output
+        risks = normalize_agent_bullet_points([item.description for item in payload.risks], limit=8)
+        gaps = normalize_agent_bullet_points(payload.missing_information, limit=6)
+        actions = normalize_agent_bullet_points([item.description for item in payload.action_items], limit=6)
+        key_points = normalize_agent_bullet_points([*risks[:3], *gaps[:2], *actions[:2]], limit=6)
+        confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.79)
+        if not risks and gaps:
+            confidence = min(confidence, 0.69)
+
+        summary_subject = payload.main_subject or "Análise documental"
+        summary = (
+            f"{summary_subject}: {len(risks)} risco(s), {len(gaps)} lacuna(s) e "
+            f"{len(actions)} ação(ões) de mitigação identificada(s)."
+        )
+
+        return (
+            DocumentAgentPayload(
+                user_intent=str(self._telemetry_dict(request).get("agent_intent") or "document_risk_review"),
+                intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+                answer_mode="friendly",
+                tool_used="review_document_risks",
+                summary=summary,
+                key_points=key_points,
+                recommended_actions=actions[:4],
+                limitations=gaps,
+                structured_response={
+                    "review_type": "risk_gap_review",
+                    "risks": risks,
+                    "gaps": gaps,
+                    "actions": actions,
+                    "extraction_payload": payload.model_dump(mode="json"),
+                },
+                confidence=confidence,
+                needs_review=bool(gaps and not risks),
+                needs_review_reason=("risk_review_has_gaps_without_grounded_risks" if (gaps and not risks) else None),
+            ),
+            nested_result,
+        )
+
+    def _run_operational_task_extraction_tool(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        context_strategy: str,
+    ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        nested_result = self._run_nested_structured_task(
+            request=request,
+            task_type="extraction",
+            context_strategy="document_scan" if request.source_document_ids else context_strategy,
+        )
+        if not nested_result.success or not isinstance(nested_result.validated_output, ExtractionPayload):
+            raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "operational_task_extraction_tool_failed")
+
+        payload = nested_result.validated_output
+        actions = normalize_agent_bullet_points([item.description for item in payload.action_items], limit=8)
+        deadlines = normalize_agent_bullet_points(
+            [
+                item.due_date
+                for item in payload.action_items
+                if item.due_date
+            ] + list(payload.important_dates),
+            limit=6,
+        )
+        risks = normalize_agent_bullet_points([item.description for item in payload.risks], limit=6)
+        key_points = normalize_agent_bullet_points([*actions[:4], *deadlines[:1], *risks[:1]], limit=6)
+        confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.78)
+        if not actions:
+            confidence = min(confidence, 0.67)
+
+        summary_subject = payload.main_subject or "Extração operacional"
+        summary = (
+            f"{summary_subject}: {len(actions)} tarefa(s) acionável(is), {len(deadlines)} prazo(s) e "
+            f"{len(risks)} risco(s) operacional(is) identificado(s)."
+        )
+
+        return (
+            DocumentAgentPayload(
+                user_intent=str(self._telemetry_dict(request).get("agent_intent") or "operational_task_extraction"),
+                intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+                answer_mode="friendly",
+                tool_used="extract_operational_tasks",
+                summary=summary,
+                key_points=key_points,
+                checklist_preview=actions[:6],
+                recommended_actions=actions[:4],
+                limitations=normalize_agent_bullet_points(payload.missing_information, limit=6),
+                structured_response={
+                    "review_type": "operational_extraction",
+                    "actions": actions,
+                    "deadlines": deadlines,
+                    "risks": risks,
+                    "extraction_payload": payload.model_dump(mode="json"),
+                },
+                confidence=confidence,
+                needs_review=not bool(actions),
+                needs_review_reason=("operational_extraction_without_grounded_actions" if not actions else None),
+            ),
+            nested_result,
+        )
+
+    def _run_policy_compliance_tool(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        context_strategy: str,
+    ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        nested_result = self._run_nested_structured_task(
+            request=request,
+            task_type="extraction",
+            context_strategy="document_scan" if request.source_document_ids else context_strategy,
+        )
+        if not nested_result.success or not isinstance(nested_result.validated_output, ExtractionPayload):
+            raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "policy_compliance_tool_failed")
+
+        payload = nested_result.validated_output
+        restriction_tokens = (
+            "restriction",
+            "restrição",
+            "restricao",
+            "confidential",
+            "confidencial",
+            "retention",
+            "reten",
+            "notice",
+            "payment",
+            "exclusive",
+            "non-compete",
+            "jurisdiction",
+            "governing law",
+        )
+
+        obligations = normalize_agent_bullet_points(
+            [item.description for item in payload.action_items],
+            limit=8,
+        )
+        restrictions = normalize_agent_bullet_points(
+            [
+                f"{field.name}: {field.value}"
+                for field in payload.extracted_fields
+                if any(token in (field.name or "").lower() for token in restriction_tokens)
+            ],
+            limit=8,
+        )
+        risks = normalize_agent_bullet_points(
+            [item.description for item in payload.risks],
+            limit=8,
+        )
+        gaps = normalize_agent_bullet_points(payload.missing_information, limit=6)
+
+        key_points = normalize_agent_bullet_points(
+            [*obligations[:3], *restrictions[:2], *risks[:2]],
+            limit=6,
+        )
+        confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.78)
+        if not obligations and not restrictions:
+            confidence = min(confidence, 0.68)
+
+        summary_subject = payload.main_subject or "Revisão de policy/compliance"
+        summary = (
+            f"{summary_subject}: {len(obligations)} obrigação(ões), "
+            f"{len(restrictions)} restrição(ões) relevante(s), {len(risks)} risco(s) e {len(gaps)} lacuna(s) identificada(s)."
+        )
+
+        return (
+            DocumentAgentPayload(
+                user_intent=str(self._telemetry_dict(request).get("agent_intent") or "policy_compliance_review"),
+                intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+                answer_mode="friendly",
+                tool_used="review_policy_compliance",
+                summary=summary,
+                key_points=key_points,
+                recommended_actions=obligations[:4],
+                limitations=gaps,
+                structured_response={
+                    "review_type": "policy_compliance",
+                    "obligations": obligations,
+                    "restrictions": restrictions,
+                    "risks": risks,
+                    "missing_information": gaps,
+                    "extraction_payload": payload.model_dump(mode="json"),
+                },
+                confidence=confidence,
+                needs_review=(bool(gaps) and not obligations and not restrictions),
+                needs_review_reason=("policy_compliance_low_grounding" if (bool(gaps) and not obligations and not restrictions) else None),
+            ),
+            nested_result,
+        )
+
+    def _run_technical_assistance_tool(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        context_strategy: str,
+    ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        nested_result = self._run_nested_structured_task(
+            request=request,
+            task_type="code_analysis",
+            context_strategy=context_strategy,
+        )
+        if not nested_result.success or not isinstance(nested_result.validated_output, CodeAnalysisPayload):
+            raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "technical_assistance_tool_failed")
+
+        payload = nested_result.validated_output
+        issue_titles = normalize_agent_bullet_points([item.title for item in payload.detected_issues], limit=6)
+        refactor_plan = normalize_agent_bullet_points(payload.refactor_plan, limit=6)
+        test_suggestions = normalize_agent_bullet_points(payload.test_suggestions, limit=6)
+        risk_notes = normalize_agent_bullet_points(payload.risk_notes, limit=6)
+        key_points = normalize_agent_bullet_points([*issue_titles[:3], *refactor_plan[:2], *test_suggestions[:1]], limit=6)
+        confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.77)
+        high_severity_issues = [item for item in payload.detected_issues if str(item.severity or "").lower() == "high"]
+
+        summary = (
+            f"{payload.snippet_summary} Foram identificados {len(payload.detected_issues)} problema(s), "
+            f"{len(refactor_plan)} passo(s) de refatoração e {len(test_suggestions)} sugestão(ões) de teste."
+        )
+
+        return (
+            DocumentAgentPayload(
+                user_intent=str(self._telemetry_dict(request).get("agent_intent") or "technical_assistance"),
+                intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+                answer_mode="friendly",
+                tool_used="assist_technical_document",
+                summary=summary,
+                key_points=key_points,
+                recommended_actions=refactor_plan[:4],
+                limitations=risk_notes[:4],
+                structured_response={
+                    "review_type": "technical_review",
+                    "snippet_summary": payload.snippet_summary,
+                    "main_purpose": payload.main_purpose,
+                    "detected_issues": payload.model_dump(mode="json").get("detected_issues", []),
+                    "refactor_plan": refactor_plan,
+                    "test_suggestions": test_suggestions,
+                    "risk_notes": risk_notes,
+                },
+                confidence=confidence,
+                needs_review=bool(high_severity_issues),
+                needs_review_reason=("high_severity_technical_issue" if high_severity_issues else None),
+            ),
+            nested_result,
+        )
+
+    def _run_compare_documents_tool(
+        self,
+        *,
+        provider,
+        request: TaskExecutionRequest,
+        answer_mode: str,
+        sources: list[AgentSource],
+    ) -> tuple[DocumentAgentPayload, list[AgentToolExecution]]:
+        document_ids = list(request.source_document_ids or [])
+        if len(document_ids) < 2:
+            raise RuntimeError("compare_documents_requires_at_least_two_documents")
+
+        selected_document_ids = document_ids[:3]
+        document_labels = self._build_document_label_map(selected_document_ids)
+        document_summaries: list[dict[str, object]] = []
+        tool_runs: list[AgentToolExecution] = []
+
+        for document_id in selected_document_ids:
+            nested_result = self._run_nested_structured_task(
+                request=request,
+                task_type="summary",
+                context_strategy="document_scan",
+                source_document_ids=[document_id],
+            )
+            label = document_labels.get(document_id, document_id)
+            if not nested_result.success or not isinstance(nested_result.validated_output, SummaryPayload):
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=f"summarize_document:{document_id}",
+                        status="error",
+                        detail=f"Falha ao resumir o documento {label}.",
+                    )
+                )
+                continue
+            payload = nested_result.validated_output
+            document_summaries.append(
+                {
+                    "document_id": document_id,
+                    "label": label,
+                    "summary": payload.executive_summary,
+                    "key_points": normalize_agent_bullet_points(payload.key_insights or [topic.title for topic in payload.topics], limit=4),
+                    "quality_score": nested_result.quality_score,
+                }
+            )
+            tool_runs.append(
+                AgentToolExecution(
+                    tool_name=f"summarize_document:{document_id}",
+                    status="success",
+                    detail=f"Resumo gerado para {label}.",
+                )
+            )
+
+        if len(document_summaries) < 2:
+            raise RuntimeError("insufficient_document_summaries_for_comparison")
+
+        self._set_telemetry_value(request, "current_stage", "document_agent_compare_documents")
+        comparison_prompt = self._build_document_comparison_prompt(
+            user_query=request.input_text,
+            document_summaries=document_summaries,
+        )
+        comparison_text = self._collect_response_text(provider, request, comparison_prompt)
+        comparison_points = extract_bullet_points_from_text(comparison_text, limit=6)
+
+        findings = [
+            ComparisonFinding(
+                finding_type="document_summary",
+                title=f"Resumo de {item['label']}",
+                description=str(item["summary"]),
+                documents=[str(item["label"])],
+                evidence=list(item.get("key_points") or [])[:2],
+            )
+            for item in document_summaries
+        ]
+        findings.extend(
+            ComparisonFinding(
+                finding_type="cross_document_observation",
+                title=self._short_label_from_text(point),
+                description=point,
+                documents=[str(item["label"]) for item in document_summaries],
+                evidence=[],
+            )
+            for point in comparison_points
+        )
+        tool_runs.append(
+            AgentToolExecution(
+                tool_name="compare_documents",
+                status="success",
+                detail="Comparação documental sintetizada a partir dos resumos individuais.",
+            )
+        )
+
+        quality_scores = [
+            float(item["quality_score"])
+            for item in document_summaries
+            if isinstance(item.get("quality_score"), (int, float))
+        ]
+        confidence = round(sum(quality_scores) / len(quality_scores), 3) if quality_scores else 0.72
+        if len(document_ids) > len(selected_document_ids):
+            confidence = min(confidence, 0.7)
+
+        return (
+            DocumentAgentPayload(
+                user_intent=str(self._telemetry_dict(request).get("agent_intent") or "document_comparison"),
+                intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+                answer_mode=answer_mode,
+                tool_used="compare_documents",
+                summary=comparison_text.strip() or "Comparação documental concluída.",
+                key_points=comparison_points,
+                compared_documents=[str(item["label"]) for item in document_summaries],
+                comparison_findings=findings,
+                structured_response={
+                    "document_summaries": document_summaries,
+                    "comparison_text": comparison_text,
+                    "truncated_document_count": max(0, len(document_ids) - len(selected_document_ids)),
+                },
+                sources=sources,
+                confidence=confidence,
+                needs_review=confidence < 0.65,
+                needs_review_reason="comparison_grounding_is_partial" if confidence < 0.65 else None,
+            ),
+            tool_runs,
+        )
+
+    def _run_nested_structured_task(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        task_type: str,
+        context_strategy: str,
+        source_document_ids: list[str] | None = None,
+    ) -> StructuredResult:
+        from .service import structured_service
+
+        nested_request = request.model_copy(
+            update={
+                "task_type": task_type,
+                "use_rag_context": False,
+                "use_document_context": bool((source_document_ids or request.source_document_ids) and request.use_document_context),
+                "source_document_ids": list(source_document_ids or request.source_document_ids),
+                "context_strategy": context_strategy,
+                "progress_callback": None,
+                "telemetry": {},
+            }
+        )
+        return structured_service.execute_task(nested_request)
+
+    def _build_document_label_map(self, document_ids: list[str]) -> dict[str, str]:
+        from ..services.document_context import _find_documents, _get_rag_index
+
+        rag_index = _get_rag_index()
+        if not isinstance(rag_index, dict):
+            return {document_id: document_id for document_id in document_ids}
+        documents = _find_documents(rag_index, document_ids)
+        mapping: dict[str, str] = {}
+        for document in documents:
+            document_id = str(document.get("document_id") or document.get("file_hash") or "")
+            if not document_id:
+                continue
+            label = str(document.get("name") or document_id)
+            file_type = str(document.get("file_type") or "").strip()
+            mapping[document_id] = f"{label} ({file_type})" if file_type else label
+        return {document_id: mapping.get(document_id, document_id) for document_id in document_ids}
+
+    def _short_label_from_text(self, text: str) -> str:
+        cleaned = " ".join(str(text or "").split()).strip().rstrip(".?!")
+        if not cleaned:
+            return "Achado comparativo"
+        words = cleaned.split()
+        return " ".join(words[:8]) + ("…" if len(words) > 8 else "")
+
+    def _build_document_agent_consult_prompt(self, *, user_query: str, context_text: str) -> str:
+        return f"""
+Você é o Document Operations Copilot.
+Responda em português do Brasil.
+Use apenas as informações presentes no contexto documental.
+Se o contexto estiver insuficiente, diga explicitamente que a informação não está clara e peça revisão humana.
+Evite inventar fatos, datas, números ou nomes.
+Primeiro entregue uma resposta curta e objetiva.
+Depois traga bullets curtos com os principais pontos encontrados.
+
+Pedido do usuário:
+{user_query}
+
+Contexto documental:
+{context_text}
+"""
+
+    def _build_document_comparison_prompt(self, *, user_query: str, document_summaries: list[dict[str, object]]) -> str:
+        serialized = []
+        for item in document_summaries:
+            serialized.append(
+                f"[DOCUMENTO] {item['label']}\n"
+                f"Resumo: {item['summary']}\n"
+                f"Pontos-chave: {'; '.join(item.get('key_points') or [])}"
+            )
+        summary_block = "\n\n".join(serialized)
+        return f"""
+Você é o Document Operations Copilot.
+Compare os documentos resumidos abaixo e responda em português do Brasil.
+Use apenas o conteúdo fornecido.
+Não invente diferenças ou semelhanças não sustentadas pelos resumos.
+Entregue:
+1. um parágrafo curto de comparação executiva;
+2. até 6 bullets curtos começando com '-'.
+
+Pedido do usuário:
+{user_query}
+
+Resumos dos documentos:
+{summary_block}
+"""
+
+
 def get_task_handler(task_type: str) -> Optional[TaskHandler]:
     mapping: dict[str, TaskHandler] = {
         "extraction": ExtractionTaskHandler(),
         "summary": SummaryTaskHandler(),
         "checklist": ChecklistTaskHandler(),
+        "document_agent": DocumentAgentTaskHandler(),
         "cv_analysis": CVAnalysisTaskHandler(),
         "code_analysis": CodeAnalysisTaskHandler(),
     }

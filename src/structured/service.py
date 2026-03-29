@@ -6,7 +6,21 @@ from math import ceil
 from typing import Any
 
 from ..config import get_ollama_settings
-from .base import ActionItem, ChecklistPayload, CVAnalysisPayload, CodeAnalysisPayload, ExtractionPayload, RiskItem, EducationEntry, ExperienceEntry, CVSection, Entity, Relationship, CodeIssue
+from .base import (
+    ActionItem,
+    ChecklistPayload,
+    CVAnalysisPayload,
+    CodeAnalysisPayload,
+    DocumentAgentPayload,
+    ExtractionPayload,
+    RiskItem,
+    EducationEntry,
+    ExperienceEntry,
+    CVSection,
+    Entity,
+    Relationship,
+    CodeIssue,
+)
 from .envelope import StructuredResult, TaskExecutionRequest
 from .registry import task_registry
 from .tasks import get_task_handler
@@ -152,6 +166,7 @@ class StructuredOutputService:
             "extraction": 16384,
             "cv_analysis": 24576,
             "checklist": 16384,
+            "document_agent": 16384,
             "code_analysis": 12288,
         }
         base = base_by_task.get(request.task_type, 12288)
@@ -180,14 +195,21 @@ class StructuredOutputService:
                 base = 24576
             elif doc_chars >= 12000:
                 base = 16384
+        elif request.task_type == "document_agent":
+            if doc_chars >= 100000:
+                base = 32768
+            elif doc_chars >= 30000:
+                base = 24576
+            elif doc_chars >= 8000:
+                base = 16384
         elif request.task_type == "code_analysis":
             if len((request.input_text or "")) >= 12000 or doc_chars >= 20000:
                 base = 16384
 
         strategy = (request.context_strategy or "").lower().strip()
         if strategy == "retrieval":
-            base = min(base, 16384 if request.task_type != "summary" else 24576)
-        elif strategy == "document_scan" and request.task_type in {"summary", "cv_analysis", "extraction", "checklist"}:
+            base = min(base, 16384 if request.task_type not in {"summary", "document_agent"} else 24576)
+        elif strategy == "document_scan" and request.task_type in {"summary", "cv_analysis", "extraction", "checklist", "document_agent"}:
             base = max(base, 16384)
 
         resolved = min(base, cap)
@@ -518,6 +540,59 @@ class StructuredOutputService:
                     "refactor_plan": list(dict.fromkeys(item.strip() for item in payload.refactor_plan if item and item.strip())),
                     "test_suggestions": list(dict.fromkeys(item.strip() for item in payload.test_suggestions if item and item.strip())),
                     "risk_notes": list(dict.fromkeys(item.strip() for item in payload.risk_notes if item and item.strip())),
+                }
+            )
+        if isinstance(result.validated_output, DocumentAgentPayload):
+            payload = result.validated_output
+            normalized_sources = []
+            seen_sources = set()
+            for item in payload.sources:
+                key = (
+                    (item.document_id or "").strip().lower(),
+                    (item.source or "").strip().lower(),
+                    int(item.chunk_id or 0),
+                    (item.snippet or "").strip().lower(),
+                )
+                if key in seen_sources:
+                    continue
+                seen_sources.add(key)
+                normalized_sources.append(item)
+
+            normalized_tool_runs = []
+            seen_tool_runs = set()
+            for item in payload.tool_runs:
+                key = (
+                    (item.tool_name or "").strip().lower(),
+                    (item.status or "").strip().lower(),
+                    (item.detail or "").strip().lower(),
+                )
+                if key in seen_tool_runs:
+                    continue
+                seen_tool_runs.add(key)
+                normalized_tool_runs.append(item)
+
+            normalized_findings = []
+            seen_findings = set()
+            for item in payload.comparison_findings:
+                key = (
+                    (item.finding_type or "").strip().lower(),
+                    (item.title or "").strip().lower(),
+                    (item.description or "").strip().lower(),
+                )
+                if key in seen_findings:
+                    continue
+                seen_findings.add(key)
+                normalized_findings.append(item)
+
+            result.validated_output = payload.model_copy(
+                update={
+                    "key_points": list(dict.fromkeys(item.strip() for item in payload.key_points if item and item.strip())),
+                    "compared_documents": list(dict.fromkeys(item.strip() for item in payload.compared_documents if item and item.strip())),
+                    "checklist_preview": list(dict.fromkeys(item.strip() for item in payload.checklist_preview if item and item.strip())),
+                    "sources": normalized_sources,
+                    "tool_runs": normalized_tool_runs,
+                    "comparison_findings": normalized_findings,
+                    "confidence": max(0.0, min(float(payload.confidence or 0.0), 1.0)),
                 }
             )
         if result.validated_output is not None and hasattr(result.validated_output, "model_dump"):
@@ -1531,6 +1606,18 @@ class StructuredOutputService:
                 score -= 0.12
             if not payload.test_suggestions:
                 score -= 0.1
+        if isinstance(result.validated_output, DocumentAgentPayload):
+            payload = result.validated_output
+            base_confidence = float(payload.confidence or 0.0)
+            score = min(score, max(0.0, base_confidence)) if base_confidence else min(score, 0.7)
+            if not payload.summary:
+                score -= 0.25
+            if not payload.key_points:
+                score -= 0.08
+            if not payload.sources and request.use_document_context:
+                score -= 0.18
+            if payload.needs_review:
+                score -= 0.08
         if result.repair_applied:
             score -= 0.05
         return max(0.0, min(round(score, 3), 1.0))

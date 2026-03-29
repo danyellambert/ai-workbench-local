@@ -9,6 +9,7 @@ from .base import (
     ChecklistPayload,
     CVAnalysisPayload,
     CodeAnalysisPayload,
+    DocumentAgentPayload,
     ExtractionPayload,
     SummaryPayload,
 )
@@ -98,6 +99,15 @@ def build_structured_task_registry() -> StructuredTaskRegistry:
         default_temperature=0.1,
         render_modes=("json", "friendly", "checklist"),
         primary_render_mode="checklist",
+    )
+    registry.register_task(
+        name="document_agent",
+        description="Document Operations Copilot with intent routing, tools and grounded output",
+        payload_schema=DocumentAgentPayload,
+        requires_rag=True,
+        default_temperature=0.1,
+        render_modes=("json", "friendly"),
+        primary_render_mode="friendly",
     )
     registry.register_task(
         name="cv_analysis",

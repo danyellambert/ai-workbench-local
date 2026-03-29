@@ -261,8 +261,14 @@ A Fase 5.5 consolidou a transição do projeto de um pipeline puramente manual p
 - comparação shadow entre `direct` e `langgraph_context_retry`
 - separação explícita entre **provider de geração** e **provider de embeddings**
 - provider local experimental **`huggingface_local`**
+- provider HTTP local **`huggingface_server`**
+- provider remoto **`huggingface_inference`**
 - helpers compartilhados para resolução de runtime multi-provider
 - snapshot operacional consolidado para tornar a UI menos acoplada ao detalhe do runtime
+
+Veja também:
+
+- `docs/HUGGINGFACE_PROVIDER_SETUP.md` → configuração de `huggingface_server` e `huggingface_inference`
 
 ### Leitura arquitetural da fase
 
