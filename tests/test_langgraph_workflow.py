@@ -66,6 +66,44 @@ class LanggraphWorkflowTests(unittest.TestCase):
         self.assertEqual(updated["guardrail_decision"], "finish_needs_review_low_quality")
         self.assertTrue(updated["needs_review"])
 
+    def test_evaluate_document_agent_guardrails_requests_retry_when_sources_are_missing(self) -> None:
+        request = TaskExecutionRequest(
+            task_type="document_agent",
+            input_text="Quais riscos aparecem no contrato?",
+            use_document_context=True,
+            source_document_ids=["doc-1"],
+            context_strategy="document_scan",
+        )
+        result = StructuredResult(
+            success=True,
+            task_type="document_agent",
+            parsed_json={},
+            execution_metadata={"agent_source_count": 0},
+            quality_score=0.75,
+        )
+        state = {
+            "result": result,
+            "effective_request": request,
+            "attempt": 1,
+            "max_attempts": 2,
+            "workflow_trace": [],
+        }
+        updated = workflow._evaluate_document_agent_guardrails(state)
+        self.assertEqual(updated["guardrail_decision"], "retry_with_retrieval_missing_sources")
+        self.assertEqual(updated["retry_reason"], "document_agent_returned_no_grounded_sources")
+
+    def test_build_langgraph_app_for_document_agent_uses_agent_graph(self) -> None:
+        request = TaskExecutionRequest(task_type="document_agent", input_text="Compare os documentos")
+        with patch.object(workflow, "_build_document_agent_langgraph_app", return_value="agent_graph") as agent_builder, patch.object(
+            workflow,
+            "_build_langgraph_app",
+            return_value="default_graph",
+        ):
+            app = workflow._build_langgraph_app_for_request(request)
+
+        self.assertEqual(app, "agent_graph")
+        agent_builder.assert_called_once()
+
     def test_run_structured_execution_workflow_records_direct_timing_and_metadata(self) -> None:
         request = TaskExecutionRequest(task_type="summary", input_text="Resumo")
         with patch("src.structured.service.structured_service.execute_task", return_value=_make_result()):

@@ -11,6 +11,8 @@ __pycache__/
 .rag_store.json
 .phase55_langchain_shadow_log.json
 .phase55_langgraph_shadow_log.json
+.phase6_document_agent_log.json
+.phase7_model_comparison_log.json
 .chroma_rag/
 materials_local/
 .vscode/

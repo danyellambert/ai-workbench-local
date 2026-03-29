@@ -44,6 +44,28 @@ class HuggingFaceSettings:
 
 
 @dataclass(frozen=True)
+class HuggingFaceServerSettings:
+    base_url: str
+    api_key: str | None
+    model: str
+    embedding_model: str
+    default_context_window: int
+    available_models_env: list[str]
+    available_embedding_models_env: list[str]
+
+
+@dataclass(frozen=True)
+class HuggingFaceInferenceSettings:
+    base_url: str
+    api_key: str | None
+    model: str
+    embedding_model: str
+    default_context_window: int
+    available_models_env: list[str]
+    available_embedding_models_env: list[str]
+
+
+@dataclass(frozen=True)
 class RagSettings:
     loader_strategy: str
     chunking_strategy: str
@@ -166,12 +188,62 @@ def get_huggingface_settings() -> HuggingFaceSettings:
     )
 
 
+def get_huggingface_server_settings() -> HuggingFaceServerSettings:
+    available_models_env = [
+        model.strip()
+        for model in os.getenv("HUGGINGFACE_SERVER_AVAILABLE_MODELS", "").split(",")
+        if model.strip()
+    ]
+    available_embedding_models_env = [
+        model.strip()
+        for model in os.getenv("HUGGINGFACE_SERVER_AVAILABLE_EMBEDDING_MODELS", "").split(",")
+        if model.strip()
+    ]
+
+    return HuggingFaceServerSettings(
+        base_url=os.getenv("HUGGINGFACE_SERVER_BASE_URL", "").strip(),
+        api_key=os.getenv("HUGGINGFACE_SERVER_API_KEY"),
+        model=os.getenv("HUGGINGFACE_SERVER_MODEL", "").strip(),
+        embedding_model=os.getenv("HUGGINGFACE_SERVER_EMBEDDING_MODEL", "").strip(),
+        default_context_window=int(os.getenv("HUGGINGFACE_SERVER_CONTEXT_WINDOW", "8192")),
+        available_models_env=available_models_env,
+        available_embedding_models_env=available_embedding_models_env,
+    )
+
+
+def get_huggingface_inference_settings() -> HuggingFaceInferenceSettings:
+    available_models_env = [
+        model.strip()
+        for model in os.getenv("HUGGINGFACE_INFERENCE_AVAILABLE_MODELS", "").split(",")
+        if model.strip()
+    ]
+    available_embedding_models_env = [
+        model.strip()
+        for model in os.getenv("HUGGINGFACE_INFERENCE_AVAILABLE_EMBEDDING_MODELS", "").split(",")
+        if model.strip()
+    ]
+
+    return HuggingFaceInferenceSettings(
+        base_url=os.getenv("HUGGINGFACE_INFERENCE_BASE_URL", "https://router.huggingface.co/v1").strip(),
+        api_key=os.getenv("HUGGINGFACE_INFERENCE_API_KEY"),
+        model=os.getenv("HUGGINGFACE_INFERENCE_MODEL", "").strip(),
+        embedding_model=os.getenv("HUGGINGFACE_INFERENCE_EMBEDDING_MODEL", "").strip(),
+        default_context_window=int(os.getenv("HUGGINGFACE_INFERENCE_CONTEXT_WINDOW", "8192")),
+        available_models_env=available_models_env,
+        available_embedding_models_env=available_embedding_models_env,
+    )
+
+
 
 def get_rag_settings() -> RagSettings:
     embedding_provider = os.getenv("RAG_EMBEDDING_PROVIDER", "ollama").strip().lower() or "ollama"
     provider_default_embedding_model = (
         os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
         if embedding_provider == "openai"
+        else os.getenv("HUGGINGFACE_SERVER_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+        if embedding_provider == "huggingface_server"
+        else os.getenv("HUGGINGFACE_INFERENCE_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+        if embedding_provider == "huggingface_inference"
         else os.getenv("HUGGINGFACE_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
         if embedding_provider == "huggingface_local"
         else os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma:300m")

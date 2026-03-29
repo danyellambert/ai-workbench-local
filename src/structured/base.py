@@ -586,4 +586,68 @@ class CodeAnalysisPayload(BaseTaskPayload):
     risk_notes: List[str] = Field(default_factory=list, description="Operational or correctness risks to highlight")
 
 
-TaskPayload = Union[ExtractionPayload, SummaryPayload, ChecklistPayload, CVAnalysisPayload, CodeAnalysisPayload]
+class AgentSource(BaseModel):
+    """Grounded source reference used by the document agent."""
+
+    source: str = Field(description="Human-readable source/document label")
+    document_id: Optional[str] = Field(default=None, description="Document identifier when available")
+    file_type: Optional[str] = Field(default=None, description="Source file type when available")
+    chunk_id: Optional[int] = Field(default=None, description="Chunk identifier when available")
+    score: Optional[float] = Field(default=None, description="Retrieval score when available")
+    vector_score: Optional[float] = Field(default=None, description="Vector similarity score when available")
+    lexical_score: Optional[float] = Field(default=None, description="Lexical reranking score when available")
+    snippet: Optional[str] = Field(default=None, description="Short grounded snippet from the source")
+
+
+class AgentToolExecution(BaseModel):
+    """Execution status for one agent tool call."""
+
+    tool_name: str = Field(description="Tool identifier used by the agent")
+    status: Literal["success", "error", "skipped"] = Field(description="Execution status")
+    detail: str = Field(description="Short explanation of what happened")
+
+
+class ComparisonFinding(BaseModel):
+    """Structured finding produced by document comparison."""
+
+    finding_type: str = Field(description="Type/category of comparison finding")
+    title: str = Field(description="Short finding title")
+    description: str = Field(description="Detailed explanation of the finding")
+    documents: List[str] = Field(default_factory=list, description="Documents involved in the finding")
+    evidence: List[str] = Field(default_factory=list, description="Short grounded evidence snippets")
+
+
+class DocumentAgentPayload(BaseTaskPayload):
+    """Payload for the Phase 6 document operations copilot."""
+
+    task_type: Literal["document_agent"] = "document_agent"
+    agent_label: str = Field(default="Document Operations Copilot", description="Friendly agent label")
+    user_intent: str = Field(description="Intent inferred from the user request")
+    intent_reason: Optional[str] = Field(default=None, description="Reason for the inferred intent")
+    answer_mode: str = Field(description="Response mode selected by the agent")
+    tool_used: str = Field(description="Tool selected to answer the request")
+    summary: str = Field(description="Primary natural-language response from the agent")
+    key_points: List[str] = Field(default_factory=list, description="Supporting key points returned by the agent")
+    limitations: List[str] = Field(default_factory=list, description="Known limitations, ambiguities or caveats that the user should consider")
+    recommended_actions: List[str] = Field(default_factory=list, description="Suggested follow-up actions or next steps for the user")
+    guardrails_applied: List[str] = Field(default_factory=list, description="Guardrails applied by the agent during routing, grounding and validation")
+    available_tools: List[Dict[str, Any]] = Field(default_factory=list, description="Available tools considered by the agent for the current request")
+    compared_documents: List[str] = Field(default_factory=list, description="Documents compared when comparison mode is used")
+    comparison_findings: List[ComparisonFinding] = Field(default_factory=list, description="Structured document comparison findings")
+    checklist_preview: List[str] = Field(default_factory=list, description="Checklist item preview when checklist mode is used")
+    structured_response: Dict[str, Any] = Field(default_factory=dict, description="Nested structured payload or tool output for downstream inspection")
+    sources: List[AgentSource] = Field(default_factory=list, description="Grounded sources consulted by the agent")
+    tool_runs: List[AgentToolExecution] = Field(default_factory=list, description="Tool execution log for the current answer")
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0, description="Overall confidence score for the agent answer")
+    needs_review: bool = Field(default=False, description="Whether the answer should be reviewed by a human")
+    needs_review_reason: Optional[str] = Field(default=None, description="Why the answer should be reviewed")
+
+
+TaskPayload = Union[
+    ExtractionPayload,
+    SummaryPayload,
+    ChecklistPayload,
+    CVAnalysisPayload,
+    CodeAnalysisPayload,
+    DocumentAgentPayload,
+]

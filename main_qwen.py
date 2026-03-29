@@ -46,8 +46,28 @@ from src.storage.phase55_langgraph_shadow_log import (
     load_langgraph_shadow_log,
     summarize_langgraph_shadow_log,
 )
+from src.storage.phase6_document_agent_log import (
+    append_document_agent_log_entry,
+    clear_document_agent_log,
+    load_document_agent_log,
+    summarize_document_agent_log,
+)
+from src.storage.phase7_model_comparison_log import (
+    append_model_comparison_log_entry,
+    clear_model_comparison_log,
+    load_model_comparison_log,
+    summarize_model_comparison_log,
+)
 from src.storage.rag_store import clear_rag_store, load_rag_store, save_rag_store
 from src.services.document_context import build_structured_document_context
+from src.services.model_comparison import (
+    MODEL_COMPARISON_FORMAT_OPTIONS,
+    MODEL_COMPARISON_RUNTIME_BUCKET_LABELS,
+    MODEL_COMPARISON_QUANTIZATION_LABELS,
+    MODEL_COMPARISON_USE_CASE_PRESETS,
+    run_model_comparison_candidate,
+    summarize_model_comparison_results,
+)
 from src.services.rag_state import (
     clear_rag_state,
     get_rag_index,
@@ -113,10 +133,14 @@ default_embedding_model_by_provider = {
 
 STRUCTURED_RESULT_STATE_KEY = "phase5_structured_result"
 STRUCTURED_RENDER_MODE_STATE_KEY = "phase5_structured_render_mode"
+MODEL_COMPARISON_RESULT_STATE_KEY = "phase7_model_comparison_result"
 CHAT_DOCUMENT_SELECTION_STATE_KEY = "phase5_chat_document_ids"
 STRUCTURED_DOCUMENT_SELECTION_STATE_KEY = "phase5_structured_document_ids"
+PHASE7_DOCUMENT_SELECTION_STATE_KEY = "phase7_model_comparison_document_ids"
 PHASE55_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langchain_shadow_log.json"
 PHASE55_LANGGRAPH_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langgraph_shadow_log.json"
+PHASE6_DOCUMENT_AGENT_LOG_PATH = settings.history_path.parent / ".phase6_document_agent_log.json"
+PHASE7_MODEL_COMPARISON_LOG_PATH = settings.history_path.parent / ".phase7_model_comparison_log.json"
 
 AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER = {
     "ollama": 256000,
@@ -409,6 +433,103 @@ def _build_structured_shadow_log_entry(
     }
 
 
+def _build_document_agent_log_entry(
+    *,
+    result: StructuredResult,
+    query: str,
+    provider: str,
+    model: str,
+    document_ids: list[str],
+) -> dict[str, object]:
+    metadata = result.execution_metadata if isinstance(result.execution_metadata, dict) else {}
+    payload = result.validated_output
+    tool_runs = list(getattr(payload, "tool_runs", []) or [])
+    tool_status_counts: dict[str, int] = {}
+    for item in tool_runs:
+        status = str(getattr(item, "status", "") or "").strip().lower()
+        if not status:
+            continue
+        tool_status_counts[status] = int(tool_status_counts.get(status, 0)) + 1
+
+    return {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "query": (query or "").strip()[:400],
+        "provider": provider,
+        "model": model,
+        "document_ids": list(document_ids),
+        "success": bool(result.success),
+        "execution_strategy_used": metadata.get("execution_strategy_used"),
+        "workflow_id": metadata.get("workflow_id"),
+        "workflow_attempts": metadata.get("workflow_attempts"),
+        "user_intent": getattr(payload, "user_intent", None) or metadata.get("agent_intent"),
+        "tool_used": getattr(payload, "tool_used", None) or metadata.get("agent_tool"),
+        "answer_mode": getattr(payload, "answer_mode", None) or metadata.get("agent_answer_mode"),
+        "confidence": getattr(payload, "confidence", None) if payload is not None else result.quality_score,
+        "needs_review": getattr(payload, "needs_review", None) if payload is not None else metadata.get("needs_review"),
+        "needs_review_reason": getattr(payload, "needs_review_reason", None) if payload is not None else metadata.get("needs_review_reason"),
+        "source_count": len(getattr(payload, "sources", []) or []),
+        "available_tools_count": len(getattr(payload, "available_tools", []) or []),
+        "successful_tool_runs": tool_status_counts.get("success", 0),
+        "error_tool_runs": tool_status_counts.get("error", 0),
+        "tool_status_counts": tool_status_counts,
+        "limitations_count": len(getattr(payload, "limitations", []) or []),
+        "recommended_actions_count": len(getattr(payload, "recommended_actions", []) or []),
+        "guardrails_count": len(getattr(payload, "guardrails_applied", []) or []),
+        "compared_documents_count": len(getattr(payload, "compared_documents", []) or []),
+    }
+
+
+def _build_model_comparison_candidate_option(provider_key: str, model_name: str) -> str:
+    return f"{provider_key}::{model_name}"
+
+
+def _parse_model_comparison_candidate_option(option: str) -> tuple[str, str]:
+    provider_key, _, model_name = str(option or "").partition("::")
+    return provider_key.strip(), model_name.strip()
+
+
+def _format_model_comparison_candidate_option(option: str, provider_labels: dict[str, str]) -> str:
+    provider_key, model_name = _parse_model_comparison_candidate_option(option)
+    provider_label = provider_labels.get(provider_key, provider_key)
+    return f"{provider_label} · {model_name}"
+
+
+def _build_model_comparison_log_entry(
+    *,
+    prompt_text: str,
+    benchmark_use_case: str,
+    prompt_profile: str,
+    response_format: str,
+    retrieval_strategy: str,
+    embedding_provider: str,
+    embedding_model: str,
+    embedding_context_window: int,
+    context_window_mode: str,
+    context_window_resolved: int,
+    use_documents: bool,
+    document_ids: list[str],
+    candidate_results: list[dict[str, object]],
+    aggregate: dict[str, object],
+) -> dict[str, object]:
+    return {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "prompt_text": (prompt_text or "").strip()[:400],
+        "benchmark_use_case": benchmark_use_case,
+        "prompt_profile": prompt_profile,
+        "response_format": response_format,
+        "retrieval_strategy": retrieval_strategy,
+        "embedding_provider": embedding_provider,
+        "embedding_model": embedding_model,
+        "embedding_context_window": int(embedding_context_window),
+        "context_window_mode": context_window_mode,
+        "context_window_resolved": int(context_window_resolved),
+        "use_documents": bool(use_documents),
+        "document_ids": list(document_ids),
+        "candidate_results": candidate_results,
+        "aggregate": aggregate,
+    }
+
+
 def _build_full_document_text_from_selection(
     rag_index: dict[str, object] | None,
     document_ids: list[str],
@@ -536,6 +657,7 @@ def _resolve_structured_context_strategy(
 
     coverage_first_tasks = {"checklist", "extraction", "cv_analysis", "code_analysis"}
     mixed_tasks = {"summary"}
+    agent_tasks = {"document_agent"}
 
     if task_type in coverage_first_tasks:
         if has_meaningful_query and task_type == "code_analysis":
@@ -546,6 +668,11 @@ def _resolve_structured_context_strategy(
         if has_meaningful_query:
             return "retrieval", "Estratégia automática: retrieval, porque há texto suficiente para orientar a busca dos trechos mais relevantes."
         return "document_scan", "Estratégia automática: document_scan, porque não há consulta forte no campo de texto e a task precisa cobrir melhor o documento."
+
+    if task_type in agent_tasks:
+        if has_meaningful_query:
+            return "retrieval", "Estratégia automática inicial do agente: retrieval, porque há uma pergunta/instrução específica para orientar a grounding."
+        return "document_scan", "Estratégia automática inicial do agente: document_scan, porque a intenção ainda depende de cobertura mais ampla do documento."
 
     return "document_scan", "Estratégia automática padrão: document_scan."
 
@@ -609,6 +736,13 @@ def _format_structured_progress_label(task_type: str, step: str, detail: str) ->
             "parsing": "Validando análise",
             "done": "Análise de código finalizada",
         },
+        "document_agent": {
+            "initializing": "Iniciando copiloto documental",
+            "intent_routing": "Classificando intenção",
+            "grounding": "Montando grounding documental",
+            "tool_execution": "Executando tool do agente",
+            "done": "Copiloto documental finalizado",
+        },
     }
 
     return labels_by_task.get(task_type, {}).get(step, step.replace("_", " ").capitalize())
@@ -644,6 +778,10 @@ phase55_shadow_log_entries = load_shadow_log(PHASE55_SHADOW_LOG_PATH)
 phase55_shadow_log_summary = summarize_shadow_log(phase55_shadow_log_entries)
 phase55_langgraph_shadow_log_entries = load_langgraph_shadow_log(PHASE55_LANGGRAPH_SHADOW_LOG_PATH)
 phase55_langgraph_shadow_log_summary = summarize_langgraph_shadow_log(phase55_langgraph_shadow_log_entries)
+phase6_document_agent_log_entries = load_document_agent_log(PHASE6_DOCUMENT_AGENT_LOG_PATH)
+phase6_document_agent_log_summary = summarize_document_agent_log(phase6_document_agent_log_entries)
+phase7_model_comparison_log_entries = load_model_comparison_log(PHASE7_MODEL_COMPARISON_LOG_PATH)
+phase7_model_comparison_log_summary = summarize_model_comparison_log(phase7_model_comparison_log_entries)
 
 chat_capable_registry = filter_registry_by_capability(provider_registry, "chat")
 
@@ -813,7 +951,9 @@ if hasattr(selected_provider_instance, "inspect_context_window"):
         )
 
 st.divider()
-documents_tab, chat_tab, structured_tab = st.tabs(["📚 Documentos", "💬 Chat com RAG", "🧱 Documento estruturado"])
+documents_tab, chat_tab, structured_tab, comparison_tab = st.tabs(
+    ["📚 Documentos", "💬 Chat com RAG", "🧱 Documento estruturado", "⚖️ Comparar modelos"]
+)
 
 with documents_tab:
     st.caption("1. Carga, indexação e manutenção da base documental compartilhada entre Chat com RAG e Documento estruturado.")
@@ -1127,6 +1267,10 @@ with documents_tab:
         st.info("Provider cloud habilitado por configuração local. Benchmark real com cloud continua sendo foco principal da Fase 7.")
     elif selected_provider == "huggingface_local":
         st.info("Provider local experimental via Hugging Face/Transformers habilitado. Use como trilha controlada de evolução arquitetural, não como baseline principal ainda.")
+    elif selected_provider == "huggingface_server":
+        st.info("Provider Hugging Face via servidor local HTTP habilitado. Ideal para comparar modelos do ecossistema HF sem carregar pesos dentro do processo do app.")
+    elif selected_provider == "huggingface_inference":
+        st.info("Provider Hugging Face Inference habilitado. Útil para comparação remota e para cenários de deploy com pouca memória local, como a VPS da Oracle.")
 
 
 rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
@@ -1509,6 +1653,7 @@ with structured_tab:
         "extraction": "Extrai entidades, datas, números, riscos e ações a partir de um documento.",
         "summary": "Resume notas de reunião, briefs e textos técnicos em formato estruturado.",
         "checklist": "Transforma instruções e procedimentos em checklist operacional.",
+        "document_agent": "Copiloto documental com roteamento de intenção, seleção de tool, fontes e sinalização de revisão humana.",
         "cv_analysis": "Analisa um currículo com base no documento selecionado. Melhor usar 1 CV por vez.",
         "code_analysis": "Analisa código ou texto técnico com foco em propósito, problemas e plano de refatoração.",
     }
@@ -1590,6 +1735,32 @@ with structured_tab:
                 st.rerun()
         else:
             st.caption("Nenhuma comparação direct vs LangGraph registrada ainda.")
+
+    with st.expander("Fase 6 · histórico do Document Operations Copilot", expanded=False):
+        st.caption(f"Log local: `{PHASE6_DOCUMENT_AGENT_LOG_PATH.name}`")
+        st.write(phase6_document_agent_log_summary)
+        if phase6_document_agent_log_entries:
+            recent_entries = list(reversed(phase6_document_agent_log_entries[-10:]))
+            st.dataframe(
+                [
+                    {
+                        "timestamp": entry.get("timestamp"),
+                        "intent": entry.get("user_intent"),
+                        "tool": entry.get("tool_used"),
+                        "confidence": entry.get("confidence"),
+                        "needs_review": entry.get("needs_review"),
+                        "source_count": entry.get("source_count"),
+                        "query": entry.get("query"),
+                    }
+                    for entry in recent_entries
+                ],
+                width="stretch",
+            )
+            if st.button("Limpar histórico do agente documental", key="phase6_clear_document_agent_log"):
+                clear_document_agent_log(PHASE6_DOCUMENT_AGENT_LOG_PATH)
+                st.rerun()
+        else:
+            st.caption("Nenhuma execução auditável do Document Operations Copilot registrada ainda.")
 
     structured_input_text = st.text_area(
         "Input text (opcional quando usar documentos)",
@@ -1919,6 +2090,18 @@ with structured_tab:
                     ),
                 )
                 phase55_langgraph_shadow_log_summary = summarize_langgraph_shadow_log(phase55_langgraph_shadow_log_entries)
+            if selected_structured_task == "document_agent":
+                phase6_document_agent_log_entries = append_document_agent_log_entry(
+                    PHASE6_DOCUMENT_AGENT_LOG_PATH,
+                    _build_document_agent_log_entry(
+                        result=structured_result,
+                        query=structured_input_text,
+                        provider=selected_provider,
+                        model=selected_model,
+                        document_ids=list(active_structured_document_ids if structured_use_documents else []),
+                    ),
+                )
+                phase6_document_agent_log_summary = summarize_document_agent_log(phase6_document_agent_log_entries)
             if displayed_progress["value"] < 100:
                 for next_progress in range(displayed_progress["value"] + 1, 101):
                     displayed_progress["value"] = next_progress
@@ -1962,6 +2145,450 @@ with structured_tab:
             selected_render_mode = structured_result.primary_render_mode or "json"
         st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = selected_render_mode
         render_structured_result(structured_result, requested_mode=selected_render_mode)
+
+with comparison_tab:
+    st.caption("4. Compare múltiplos modelos/providers lado a lado usando o mesmo prompt e, opcionalmente, o mesmo grounding documental.")
+    st.info(
+        "Slice inicial da Fase 7: comparação local entre combinações de provider/model com métricas básicas de latência, tamanho de resposta e aderência ao formato pedido."
+    )
+    st.caption(
+        "A Fase 7 agora também suporta presets por caso de uso e classificação automática de família de quantização para tornar o benchmark mais repetível e mais fácil de defender."
+    )
+
+    comparison_document_ids_default = _normalize_document_selection(
+        all_indexed_document_ids,
+        st.session_state.get(PHASE7_DOCUMENT_SELECTION_STATE_KEY),
+        default_to_all=False,
+    )
+    comparison_candidate_options = [
+        _build_model_comparison_candidate_option(provider_key, model_name)
+        for provider_key, model_names in models_by_provider.items()
+        for model_name in model_names
+        if model_name
+    ]
+    default_candidate_options: list[str] = []
+    current_candidate = _build_model_comparison_candidate_option(selected_provider, selected_model)
+    if current_candidate in comparison_candidate_options:
+        default_candidate_options.append(current_candidate)
+    for option in comparison_candidate_options:
+        if option not in default_candidate_options:
+            default_candidate_options.append(option)
+        if len(default_candidate_options) >= 2:
+            break
+
+    with st.expander("Fase 7 · histórico local de comparação entre modelos", expanded=False):
+        st.caption(f"Log local: `{PHASE7_MODEL_COMPARISON_LOG_PATH.name}`")
+        st.write(phase7_model_comparison_log_summary)
+        if phase7_model_comparison_log_summary.get("total_candidates"):
+            summary_col_1, summary_col_2, summary_col_3, summary_col_4 = st.columns(4)
+            summary_col_1.metric("Runs", int(phase7_model_comparison_log_summary.get("total_runs") or 0))
+            summary_col_2.metric("Candidatos", int(phase7_model_comparison_log_summary.get("total_candidates") or 0))
+            summary_col_3.metric("Sucesso médio", f"{float(phase7_model_comparison_log_summary.get('success_rate', 0.0)):.0%}")
+            summary_col_4.metric("Latência média", f"{float(phase7_model_comparison_log_summary.get('avg_latency_s', 0.0)):.2f}s")
+
+            top_provider = phase7_model_comparison_log_summary.get("top_provider") if isinstance(phase7_model_comparison_log_summary.get("top_provider"), dict) else None
+            top_model = phase7_model_comparison_log_summary.get("top_model") if isinstance(phase7_model_comparison_log_summary.get("top_model"), dict) else None
+            top_format = phase7_model_comparison_log_summary.get("top_format") if isinstance(phase7_model_comparison_log_summary.get("top_format"), dict) else None
+            if top_provider:
+                st.caption(
+                    f"Top provider agregado: {top_provider.get('provider')} · success={float(top_provider.get('success_rate', 0.0)):.0%} · latency={float(top_provider.get('avg_latency_s', 0.0)):.2f}s"
+                )
+            if top_model:
+                st.caption(
+                    f"Top model agregado: {top_model.get('model')} · success={float(top_model.get('success_rate', 0.0)):.0%} · adherence={float(top_model.get('avg_format_adherence', 0.0)):.0%}"
+                )
+            if top_format:
+                st.caption(
+                    f"Top formato agregado: {top_format.get('response_format')} · success={float(top_format.get('success_rate', 0.0)):.0%}"
+                )
+            top_benchmark_use_case = phase7_model_comparison_log_summary.get("top_benchmark_use_case") if isinstance(phase7_model_comparison_log_summary.get("top_benchmark_use_case"), dict) else None
+            if top_benchmark_use_case:
+                top_use_case_key = str(top_benchmark_use_case.get("benchmark_use_case") or "ad_hoc")
+                top_use_case_label = MODEL_COMPARISON_USE_CASE_PRESETS.get(top_use_case_key, {}).get("label", top_use_case_key)
+                st.caption(
+                    f"Top caso de uso agregado: {top_use_case_label} · success={float(top_benchmark_use_case.get('success_rate', 0.0)):.0%} · latency={float(top_benchmark_use_case.get('avg_latency_s', 0.0)):.2f}s"
+                )
+
+            provider_leaderboard = phase7_model_comparison_log_summary.get("provider_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("provider_leaderboard"), list) else []
+            model_leaderboard = phase7_model_comparison_log_summary.get("model_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("model_leaderboard"), list) else []
+            format_leaderboard = phase7_model_comparison_log_summary.get("format_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("format_leaderboard"), list) else []
+            if provider_leaderboard:
+                st.write("**Leaderboard por provider**")
+                st.dataframe(provider_leaderboard[:5], width="stretch")
+            if model_leaderboard:
+                st.write("**Leaderboard por model**")
+                st.dataframe(model_leaderboard[:5], width="stretch")
+            if format_leaderboard:
+                st.write("**Leaderboard por formato**")
+                st.dataframe(format_leaderboard[:5], width="stretch")
+            runtime_bucket_leaderboard = phase7_model_comparison_log_summary.get("runtime_bucket_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("runtime_bucket_leaderboard"), list) else []
+            top_runtime_bucket = phase7_model_comparison_log_summary.get("top_runtime_bucket") if isinstance(phase7_model_comparison_log_summary.get("top_runtime_bucket"), dict) else None
+            if top_runtime_bucket:
+                runtime_bucket_label = MODEL_COMPARISON_RUNTIME_BUCKET_LABELS.get(
+                    str(top_runtime_bucket.get("runtime_bucket") or ""),
+                    str(top_runtime_bucket.get("runtime_bucket") or "runtime"),
+                )
+                st.caption(
+                    f"Top bucket de runtime: {runtime_bucket_label} · success={float(top_runtime_bucket.get('success_rate', 0.0)):.0%} · latency={float(top_runtime_bucket.get('avg_latency_s', 0.0)):.2f}s"
+                )
+            if runtime_bucket_leaderboard:
+                st.write("**Leaderboard por bucket de runtime**")
+                st.dataframe(
+                    [
+                        {
+                            **item,
+                            "runtime_bucket_label": MODEL_COMPARISON_RUNTIME_BUCKET_LABELS.get(
+                                str(item.get("runtime_bucket") or ""),
+                                str(item.get("runtime_bucket") or "runtime"),
+                            ),
+                        }
+                        for item in runtime_bucket_leaderboard[:5]
+                    ],
+                    width="stretch",
+                )
+            quantization_family_leaderboard = phase7_model_comparison_log_summary.get("quantization_family_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("quantization_family_leaderboard"), list) else []
+            top_quantization_family = phase7_model_comparison_log_summary.get("top_quantization_family") if isinstance(phase7_model_comparison_log_summary.get("top_quantization_family"), dict) else None
+            if top_quantization_family:
+                quantization_label = MODEL_COMPARISON_QUANTIZATION_LABELS.get(
+                    str(top_quantization_family.get("quantization_family") or ""),
+                    str(top_quantization_family.get("quantization_family") or "quantization"),
+                )
+                st.caption(
+                    f"Top família de quantização: {quantization_label} · success={float(top_quantization_family.get('success_rate', 0.0)):.0%} · latency={float(top_quantization_family.get('avg_latency_s', 0.0)):.2f}s"
+                )
+            if quantization_family_leaderboard:
+                st.write("**Leaderboard por família de quantização**")
+                st.dataframe(
+                    [
+                        {
+                            **item,
+                            "quantization_family_label": MODEL_COMPARISON_QUANTIZATION_LABELS.get(
+                                str(item.get("quantization_family") or ""),
+                                str(item.get("quantization_family") or "quantization"),
+                            ),
+                        }
+                        for item in quantization_family_leaderboard[:5]
+                    ],
+                    width="stretch",
+                )
+            retrieval_strategy_leaderboard = phase7_model_comparison_log_summary.get("retrieval_strategy_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("retrieval_strategy_leaderboard"), list) else []
+            embedding_provider_leaderboard = phase7_model_comparison_log_summary.get("embedding_provider_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("embedding_provider_leaderboard"), list) else []
+            embedding_model_leaderboard = phase7_model_comparison_log_summary.get("embedding_model_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("embedding_model_leaderboard"), list) else []
+            prompt_profile_leaderboard = phase7_model_comparison_log_summary.get("prompt_profile_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("prompt_profile_leaderboard"), list) else []
+            document_usage_leaderboard = phase7_model_comparison_log_summary.get("document_usage_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("document_usage_leaderboard"), list) else []
+            benchmark_use_case_leaderboard = phase7_model_comparison_log_summary.get("benchmark_use_case_leaderboard") if isinstance(phase7_model_comparison_log_summary.get("benchmark_use_case_leaderboard"), list) else []
+            if retrieval_strategy_leaderboard:
+                st.write("**Leaderboard por retrieval strategy**")
+                st.dataframe(retrieval_strategy_leaderboard[:5], width="stretch")
+            if embedding_provider_leaderboard:
+                st.write("**Leaderboard por embedding provider**")
+                st.dataframe(embedding_provider_leaderboard[:5], width="stretch")
+            if embedding_model_leaderboard:
+                st.write("**Leaderboard por embedding model**")
+                st.dataframe(embedding_model_leaderboard[:5], width="stretch")
+            if prompt_profile_leaderboard:
+                st.write("**Leaderboard por prompt profile**")
+                st.dataframe(prompt_profile_leaderboard[:5], width="stretch")
+            if document_usage_leaderboard:
+                st.write("**Leaderboard por uso de documentos**")
+                st.dataframe(document_usage_leaderboard[:5], width="stretch")
+            if benchmark_use_case_leaderboard:
+                st.write("**Leaderboard por caso de uso do benchmark**")
+                st.dataframe(benchmark_use_case_leaderboard[:5], width="stretch")
+        if phase7_model_comparison_log_entries:
+            recent_entries = list(reversed(phase7_model_comparison_log_entries[-10:]))
+            st.dataframe(
+                [
+                    {
+                        "timestamp": entry.get("timestamp"),
+                        "use_case": entry.get("benchmark_use_case"),
+                        "profile": entry.get("prompt_profile"),
+                        "format": entry.get("response_format"),
+                        "docs": len(entry.get("document_ids") or []),
+                        "candidates": len(entry.get("candidate_results") or []),
+                        "success_rate": (entry.get("aggregate") or {}).get("success_rate") if isinstance(entry.get("aggregate"), dict) else None,
+                        "avg_latency_s": (entry.get("aggregate") or {}).get("avg_latency_s") if isinstance(entry.get("aggregate"), dict) else None,
+                        "prompt": entry.get("prompt_text"),
+                    }
+                    for entry in recent_entries
+                ],
+                width="stretch",
+            )
+            if st.button("Limpar histórico de comparação da Fase 7", key="phase7_clear_model_comparison_log"):
+                clear_model_comparison_log(PHASE7_MODEL_COMPARISON_LOG_PATH)
+                st.rerun()
+        else:
+            st.caption("Nenhuma comparação registrada ainda.")
+
+    with st.expander("Fase 7 · benchmark de estratégias adjacentes", expanded=False):
+        retrieval_metric_col_1, retrieval_metric_col_2, retrieval_metric_col_3 = st.columns(3)
+        retrieval_metric_col_1.metric("Retrieval shadow runs", int(phase55_shadow_log_summary.get("total_runs") or 0))
+        retrieval_metric_col_2.metric("Same top-1", f"{float(phase55_shadow_log_summary.get('same_top_1_rate', 0.0)):.0%}")
+        retrieval_metric_col_3.metric("Overlap médio", f"{float(phase55_shadow_log_summary.get('avg_overlap_ratio', 0.0)):.0%}")
+        st.caption("Manual hybrid vs LangChain/Chroma: benchmark de recuperação reaproveitado como evidência comparativa da Fase 7.")
+        if phase55_shadow_log_summary.get("strategy_pairs"):
+            st.write({
+                "retrieval_strategy_pairs": phase55_shadow_log_summary.get("strategy_pairs"),
+                "retrieval_alternate_fallbacks": phase55_shadow_log_summary.get("alternate_fallbacks"),
+            })
+
+        langgraph_metric_col_1, langgraph_metric_col_2, langgraph_metric_col_3, langgraph_metric_col_4 = st.columns(4)
+        langgraph_metric_col_1.metric("LangGraph shadow runs", int(phase55_langgraph_shadow_log_summary.get("total_runs") or 0))
+        langgraph_metric_col_2.metric("Same success", f"{float(phase55_langgraph_shadow_log_summary.get('same_success_rate', 0.0)):.0%}")
+        langgraph_metric_col_3.metric("Δ latência média", f"{float(phase55_langgraph_shadow_log_summary.get('avg_latency_delta_s', 0.0)):.2f}s")
+        langgraph_metric_col_4.metric("Δ qualidade média", f"{float(phase55_langgraph_shadow_log_summary.get('avg_quality_delta', 0.0)):.3f}")
+        st.caption("Direct vs LangGraph context retry: benchmark estruturado reaproveitado como benchmark de estratégia da Fase 7.")
+        if phase55_langgraph_shadow_log_summary.get("strategy_pairs"):
+            st.write({
+                "langgraph_strategy_pairs": phase55_langgraph_shadow_log_summary.get("strategy_pairs"),
+                "langgraph_alternate_fallbacks": phase55_langgraph_shadow_log_summary.get("alternate_fallbacks"),
+            })
+
+    comparison_use_case = st.selectbox(
+        "Caso de uso do benchmark",
+        options=list(MODEL_COMPARISON_USE_CASE_PRESETS.keys()),
+        index=0,
+        format_func=lambda key: MODEL_COMPARISON_USE_CASE_PRESETS[key]["label"],
+        key="phase7_model_comparison_use_case",
+        help="Use presets para criar comparações repetíveis por tipo de tarefa.",
+    )
+    selected_use_case_preset = MODEL_COMPARISON_USE_CASE_PRESETS.get(comparison_use_case, MODEL_COMPARISON_USE_CASE_PRESETS["ad_hoc"])
+    last_applied_use_case = st.session_state.get("phase7_model_comparison_last_applied_use_case")
+    if comparison_use_case != last_applied_use_case:
+        st.session_state["phase7_model_comparison_last_applied_use_case"] = comparison_use_case
+        if comparison_use_case != "ad_hoc":
+            preset_prompt_text = str(selected_use_case_preset.get("prompt_text") or "")
+            preset_prompt_profile = str(selected_use_case_preset.get("prompt_profile") or "")
+            preset_response_format = str(selected_use_case_preset.get("response_format") or "")
+            st.session_state["phase7_model_comparison_prompt"] = preset_prompt_text
+            st.session_state["phase7_model_comparison_prompt_text"] = preset_prompt_text
+            if preset_prompt_profile in prompt_profiles:
+                st.session_state["phase7_model_comparison_prompt_profile"] = preset_prompt_profile
+            if preset_response_format in MODEL_COMPARISON_FORMAT_OPTIONS:
+                st.session_state["phase7_model_comparison_response_format"] = preset_response_format
+            st.rerun()
+    comparison_prompt_text = st.text_area(
+        "Prompt para comparar",
+        value=st.session_state.get(
+            "phase7_model_comparison_prompt_text",
+            st.session_state.get("phase7_model_comparison_prompt", ""),
+        ),
+        height=180,
+        placeholder="Ex.: Resuma os principais riscos e próximos passos em bullets curtos.",
+        key="phase7_model_comparison_prompt_text",
+    )
+    st.caption(str(selected_use_case_preset.get("description") or ""))
+    if comparison_use_case != "ad_hoc":
+        st.caption(f"Preset sugerido: formato `{selected_use_case_preset.get('response_format')}` · profile `{selected_use_case_preset.get('prompt_profile')}`")
+        if not comparison_prompt_text.strip():
+            comparison_prompt_text = str(selected_use_case_preset.get("prompt_text") or "")
+    comparison_prompt_profile = st.selectbox(
+        "Perfil de prompt da comparação",
+        options=list(prompt_profiles.keys()),
+        index=list(prompt_profiles.keys()).index(
+            selected_use_case_preset.get("prompt_profile")
+            if comparison_use_case != "ad_hoc" and selected_use_case_preset.get("prompt_profile") in prompt_profiles
+            else selected_prompt_profile if selected_prompt_profile in prompt_profiles else list(prompt_profiles.keys())[0]
+        ),
+        format_func=lambda key: prompt_profiles[key]["label"],
+        key="phase7_model_comparison_prompt_profile",
+    )
+    comparison_response_format = st.selectbox(
+        "Formato desejado da resposta",
+        options=list(MODEL_COMPARISON_FORMAT_OPTIONS.keys()),
+        index=list(MODEL_COMPARISON_FORMAT_OPTIONS.keys()).index(
+            selected_use_case_preset.get("response_format")
+            if comparison_use_case != "ad_hoc" and selected_use_case_preset.get("response_format") in MODEL_COMPARISON_FORMAT_OPTIONS
+            else list(MODEL_COMPARISON_FORMAT_OPTIONS.keys())[0]
+        ),
+        format_func=lambda key: MODEL_COMPARISON_FORMAT_OPTIONS.get(key, key),
+        key="phase7_model_comparison_response_format",
+    )
+    comparison_candidates = st.multiselect(
+        "Combinações de provider/model para comparar",
+        options=comparison_candidate_options,
+        default=default_candidate_options,
+        format_func=lambda option: _format_model_comparison_candidate_option(option, provider_options),
+        key="phase7_model_comparison_candidates",
+        help="Selecione pelo menos 2 combinações para comparar lado a lado.",
+    )
+    comparison_use_documents = st.checkbox(
+        "Usar documentos indexados na comparação",
+        value=False,
+        disabled=not bool(all_indexed_document_ids),
+        key="phase7_model_comparison_use_documents",
+    )
+    if comparison_use_documents and all_indexed_document_ids:
+        comparison_document_ids = st.multiselect(
+            "Documentos para grounding da comparação",
+            options=all_indexed_document_ids,
+            default=comparison_document_ids_default,
+            format_func=lambda item: document_labels.get(item, item),
+            key="phase7_model_comparison_document_selector",
+        )
+        st.session_state[PHASE7_DOCUMENT_SELECTION_STATE_KEY] = comparison_document_ids
+    else:
+        comparison_document_ids = []
+        st.session_state[PHASE7_DOCUMENT_SELECTION_STATE_KEY] = []
+
+    comparison_effective_context_window, comparison_context_window_cap = _resolve_chat_context_window(
+        provider=selected_provider,
+        mode=context_window_mode,
+        manual_context_window=context_window,
+        document_ids=comparison_document_ids,
+        input_text=comparison_prompt_text,
+        rag_index=rag_index,
+    )
+    st.caption(
+        f"Contexto da comparação: modo `{context_window_mode}` · resolvido em `{comparison_effective_context_window}` · cap `{comparison_context_window_cap}`"
+    )
+
+    comparison_can_run = bool(comparison_prompt_text.strip()) and len(comparison_candidates) >= 2
+    if comparison_candidates and len(comparison_candidates) < 2:
+        st.warning("Selecione pelo menos 2 combinações de provider/model para comparar lado a lado.")
+
+    if st.button("Executar comparação entre modelos", disabled=not comparison_can_run, key="phase7_run_model_comparison"):
+        st.session_state["phase7_model_comparison_prompt"] = comparison_prompt_text
+        retrieved_chunks_for_comparison: list[dict[str, object]] = []
+        if comparison_use_documents and comparison_document_ids and embedding_compatibility.get("compatible", True):
+            try:
+                retrieval_details = retrieve_relevant_chunks_detailed(
+                    query=comparison_prompt_text,
+                    rag_index=rag_index,
+                    settings=effective_rag_settings,
+                    embedding_provider=embedding_provider,
+                    document_ids=comparison_document_ids,
+                    file_types=None,
+                )
+                retrieved_chunks_for_comparison = retrieval_details.get("chunks") or []
+            except Exception as error:
+                st.warning(f"A comparação seguirá sem grounding documental porque o retrieval falhou: {error}")
+        elif comparison_use_documents and comparison_document_ids and not embedding_compatibility.get("compatible", True):
+            st.warning("A comparação seguirá sem grounding documental porque o embedding ativo não é compatível com o índice atual.")
+
+        comparison_progress = st.progress(0)
+        comparison_status = st.empty()
+        comparison_results: list[dict[str, object]] = []
+        total_candidates = len(comparison_candidates)
+        for index, candidate_option in enumerate(comparison_candidates, start=1):
+            provider_key, model_name = _parse_model_comparison_candidate_option(candidate_option)
+            comparison_status.caption(
+                f"Comparando {index}/{total_candidates}: {_format_model_comparison_candidate_option(candidate_option, provider_options)}"
+            )
+            comparison_results.append(
+                run_model_comparison_candidate(
+                    registry=chat_capable_registry,
+                    provider_name=provider_key,
+                    model_name=model_name,
+                    prompt_profile=comparison_prompt_profile,
+                    prompt_text=comparison_prompt_text,
+                    benchmark_use_case=comparison_use_case,
+                    response_format=comparison_response_format,
+                    temperature=temperature,
+                    context_window=comparison_effective_context_window,
+                    retrieved_chunks=retrieved_chunks_for_comparison,
+                    rag_settings=effective_rag_settings,
+                )
+            )
+            comparison_progress.progress(int((index / max(total_candidates, 1)) * 100))
+
+        comparison_status.caption("Comparação finalizada.")
+        aggregate = summarize_model_comparison_results(comparison_results)
+        phase7_model_comparison_log_entries = append_model_comparison_log_entry(
+            PHASE7_MODEL_COMPARISON_LOG_PATH,
+            _build_model_comparison_log_entry(
+                prompt_text=comparison_prompt_text,
+                benchmark_use_case=comparison_use_case,
+                prompt_profile=comparison_prompt_profile,
+                response_format=comparison_response_format,
+                retrieval_strategy=selected_retrieval_strategy,
+                embedding_provider=str(embedding_provider_key or selected_embedding_provider),
+                embedding_model=selected_embedding_model,
+                embedding_context_window=selected_embedding_context_window,
+                context_window_mode=context_window_mode,
+                context_window_resolved=comparison_effective_context_window,
+                use_documents=bool(comparison_use_documents and comparison_document_ids),
+                document_ids=list(comparison_document_ids),
+                candidate_results=comparison_results,
+                aggregate=aggregate,
+            ),
+        )
+        phase7_model_comparison_log_summary = summarize_model_comparison_log(phase7_model_comparison_log_entries)
+        st.session_state[MODEL_COMPARISON_RESULT_STATE_KEY] = {
+            "benchmark_use_case": comparison_use_case,
+            "prompt_text": comparison_prompt_text,
+            "prompt_profile": comparison_prompt_profile,
+            "response_format": comparison_response_format,
+            "document_ids": list(comparison_document_ids),
+            "candidate_results": comparison_results,
+            "aggregate": aggregate,
+        }
+
+    stored_model_comparison_result = st.session_state.get(MODEL_COMPARISON_RESULT_STATE_KEY)
+    if isinstance(stored_model_comparison_result, dict):
+        aggregate = stored_model_comparison_result.get("aggregate") if isinstance(stored_model_comparison_result.get("aggregate"), dict) else {}
+        candidate_results = stored_model_comparison_result.get("candidate_results") if isinstance(stored_model_comparison_result.get("candidate_results"), list) else []
+        stored_use_case = str(stored_model_comparison_result.get("benchmark_use_case") or "ad_hoc")
+        stored_use_case_label = MODEL_COMPARISON_USE_CASE_PRESETS.get(stored_use_case, {}).get("label", stored_use_case)
+        st.markdown("### Resultado da comparação")
+        st.caption(f"Caso de uso desta execução: {stored_use_case_label}")
+        metric_col_1, metric_col_2, metric_col_3, metric_col_4 = st.columns(4)
+        metric_col_1.metric("Candidatos", aggregate.get("total_candidates", 0))
+        metric_col_2.metric("Taxa de sucesso", f"{float(aggregate.get('success_rate', 0.0)):.0%}")
+        metric_col_3.metric("Latência média", f"{float(aggregate.get('avg_latency_s', 0.0)):.2f}s")
+        metric_col_4.metric("Aderência média", f"{float(aggregate.get('avg_format_adherence', 0.0)):.0%}")
+        if comparison_use_documents:
+            st.caption(f"Groundedness média: {float(aggregate.get('avg_groundedness_score', 0.0)):.0%}")
+        if comparison_response_format == "json":
+            st.caption(f"Schema adherence média: {float(aggregate.get('avg_schema_adherence', 0.0)):.0%}")
+        st.caption(f"Use-case fit médio: {float(aggregate.get('avg_use_case_fit_score', 0.0)):.0%}")
+
+        best_latency = aggregate.get("best_latency_candidate") if isinstance(aggregate.get("best_latency_candidate"), dict) else None
+        best_format = aggregate.get("best_format_candidate") if isinstance(aggregate.get("best_format_candidate"), dict) else None
+        best_overall = aggregate.get("best_overall_candidate") if isinstance(aggregate.get("best_overall_candidate"), dict) else None
+        if best_latency:
+            st.caption(
+                f"Melhor latência: {best_latency.get('provider')} · {best_latency.get('model')} · {best_latency.get('latency_s')}s"
+            )
+        if best_format:
+            st.caption(
+                f"Melhor aderência ao formato: {best_format.get('provider')} · {best_format.get('model')} · {float(best_format.get('format_adherence', 0.0)):.0%}"
+            )
+        if best_overall:
+            st.caption(
+                f"Melhor geral: {best_overall.get('provider')} · {best_overall.get('model')} · score={float(best_overall.get('comparison_score', 0.0)):.3f}"
+            )
+
+        candidate_ranking = aggregate.get("candidate_ranking") if isinstance(aggregate.get("candidate_ranking"), list) else []
+        if candidate_ranking:
+            with st.expander("Ranking consolidado da execução", expanded=False):
+                st.dataframe(candidate_ranking, width="stretch")
+
+        columns_count = min(3, max(1, len(candidate_results)))
+        cols = st.columns(columns_count)
+        for index, candidate in enumerate(candidate_results):
+            with cols[index % columns_count]:
+                with st.container(border=True):
+                    st.write(
+                        f"**{candidate.get('provider_label') or candidate.get('provider_effective')} · {candidate.get('model_effective')}**"
+                    )
+                    st.caption(
+                        f"{MODEL_COMPARISON_RUNTIME_BUCKET_LABELS.get(str(candidate.get('runtime_bucket') or ''), str(candidate.get('runtime_bucket') or 'runtime'))} · {MODEL_COMPARISON_QUANTIZATION_LABELS.get(str(candidate.get('quantization_family') or ''), str(candidate.get('quantization_family') or 'quantization'))} · success={candidate.get('success')} · latency={candidate.get('latency_s')}s · adherence={float(candidate.get('format_adherence', 0.0)):.0%}"
+                    )
+                    st.caption(
+                        f"chars={candidate.get('output_chars')} · words={candidate.get('output_words')} · used_chunks={candidate.get('used_chunks')} · grounded={float(candidate.get('groundedness_score', 0.0)):.0%} · use-case-fit={float(candidate.get('use_case_fit_score', 0.0)):.0%}"
+                    )
+                    if isinstance(candidate.get("schema_adherence"), (int, float)):
+                        st.caption(f"schema={float(candidate.get('schema_adherence', 0.0)):.0%}")
+                    if candidate.get("error"):
+                        st.error(str(candidate.get("error")))
+                    st.text_area(
+                        f"comparison_output_{index}",
+                        value=str(candidate.get("response_text") or ""),
+                        height=260,
+                        disabled=True,
+                        label_visibility="collapsed",
+                    )
 
 runtime_snapshot = build_runtime_snapshot(
     selected_provider=selected_provider,
