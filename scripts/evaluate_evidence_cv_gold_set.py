@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -12,10 +13,12 @@ if str(ROOT_DIR) not in sys.path:
 from src.config import get_rag_settings
 from src.evidence_cv.config import build_evidence_config_from_rag_settings
 from src.evidence_cv.pipeline.runner import run_cv_pipeline_from_bytes
+from src.storage.phase8_eval_store import append_eval_run
 from src.rag.loaders import _extract_pdf_text, _extract_pdf_text_with_evidence_pipeline
 
 
 EMAIL_PATTERN = __import__("re").compile(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", __import__("re").I)
+EVAL_DB_PATH = ROOT_DIR / ".phase8_eval_runs.sqlite3"
 
 
 def _normalize_phone(value: str) -> str:
@@ -129,6 +132,73 @@ def _score_single(predicted: str | None, expected: str | None, status: str) -> d
     }
 
 
+def _f1_score(field_score: dict[str, object]) -> float:
+    precision = float(field_score.get("precision") or 0.0)
+    recall = float(field_score.get("recall") or 0.0)
+    if precision + recall <= 0:
+        return 0.0
+    return round((2 * precision * recall) / (precision + recall), 4)
+
+
+def _build_eval_run_for_variant(
+    *,
+    file_name: str,
+    gold_set_path: str,
+    variant: str,
+    variant_scores: dict[str, dict[str, object]],
+) -> dict[str, object]:
+    email_f1 = _f1_score(variant_scores.get("emails") or {})
+    phone_f1 = _f1_score(variant_scores.get("phones") or {})
+    name_f1 = _f1_score(variant_scores.get("name") or {})
+    location_f1 = _f1_score(variant_scores.get("location") or {})
+    avg_f1 = round((email_f1 + phone_f1 + name_f1 + location_f1) / 4, 4)
+    score = round(avg_f1 * 4, 3)
+
+    status = "PASS"
+    if avg_f1 < 0.65:
+        status = "FAIL"
+    elif avg_f1 < 0.9:
+        status = "WARN"
+
+    reasons: list[str] = []
+    if email_f1 < 0.9:
+        reasons.append(f"email_f1_below_target:{email_f1:.3f}")
+    if phone_f1 < 0.9:
+        reasons.append(f"phone_f1_below_target:{phone_f1:.3f}")
+    if name_f1 < 1.0:
+        reasons.append(f"name_match_incomplete:{name_f1:.3f}")
+    if location_f1 < 1.0:
+        reasons.append(f"location_match_incomplete:{location_f1:.3f}")
+
+    return {
+        "created_at": datetime.now().isoformat(),
+        "suite_name": "evidence_cv_gold_eval",
+        "task_type": "cv_contacts",
+        "case_name": file_name,
+        "provider": "evidence_cv",
+        "model": variant,
+        "status": status,
+        "score": score,
+        "max_score": 4,
+        "metrics": {
+            "avg_f1": avg_f1,
+            "email_f1": email_f1,
+            "phone_f1": phone_f1,
+            "name_f1": name_f1,
+            "location_f1": location_f1,
+            "emails_precision": variant_scores.get("emails", {}).get("precision"),
+            "emails_recall": variant_scores.get("emails", {}).get("recall"),
+            "phones_precision": variant_scores.get("phones", {}).get("precision"),
+            "phones_recall": variant_scores.get("phones", {}).get("recall"),
+        },
+        "reasons": reasons,
+        "metadata": {
+            "gold_set": gold_set_path,
+            "variant": variant,
+        },
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Evaluate evidence CV extraction against mini gold set")
     parser.add_argument("--gold-set", default="phase5_eval/reports/evidence_cv_mini_gold_set.json")
@@ -193,13 +263,29 @@ def main() -> int:
             "scores": scores,
         })
 
+        for variant, variant_scores in scores.items():
+            append_eval_run(
+                EVAL_DB_PATH,
+                _build_eval_run_for_variant(
+                    file_name=file_path.name,
+                    gold_set_path=args.gold_set,
+                    variant=variant,
+                    variant_scores=variant_scores,
+                ),
+            )
+
     for variant, fields in aggregate.items():
         for field_name, counts in fields.items():
             tp, fp, fn = counts["tp"], counts["fp"], counts["fn"]
             counts["precision"] = round(tp / (tp + fp), 4) if tp + fp else 1.0
             counts["recall"] = round(tp / (tp + fn), 4) if tp + fn else 1.0
 
-    payload = {"gold_set": args.gold_set, "aggregate": aggregate, "per_file": per_file}
+    payload = {
+        "gold_set": args.gold_set,
+        "eval_store_path": str(EVAL_DB_PATH),
+        "aggregate": aggregate,
+        "per_file": per_file,
+    }
     Path(args.out).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0

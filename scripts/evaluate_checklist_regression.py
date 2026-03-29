@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import Any
 
 from src.config import get_rag_settings
+from src.storage.phase8_eval_store import append_eval_run
 from src.storage.rag_store import load_rag_store
 from src.structured.envelope import TaskExecutionRequest
 from src.structured.service import structured_service
@@ -24,6 +25,7 @@ from src.structured.service import structured_service
 FIXTURE_DEFAULT = PROJECT_ROOT / "phase5_eval" / "fixtures" / "06_checklist_who_surgical_gold.json"
 REPORTS_DIR = PROJECT_ROOT / "phase5_eval" / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+EVAL_DB_PATH = PROJECT_ROOT / ".phase8_eval_runs.sqlite3"
 
 
 def _normalize_text(value: Any) -> str:
@@ -109,6 +111,8 @@ def _evaluate_checklist_payload(payload: dict[str, Any], fixture: dict[str, Any]
     expected_sequence = fixture.get("expected_sequence", [])
     items = [item for item in payload.get("items", []) if isinstance(item, dict)]
     item_texts = [_item_match_text(item) for item in items]
+    grounded_items = [item for item in items if _normalize_text(item.get("source_text")) or _normalize_text(item.get("evidence"))]
+    citation_ready_items = [item for item in items if _normalize_text(item.get("source_text")) and _normalize_text(item.get("evidence"))]
 
     id_counts = Counter(str(item.get("id") or "") for item in items if item.get("id"))
     duplicate_ids = sorted(item_id for item_id, count in id_counts.items() if count > 1)
@@ -203,6 +207,8 @@ def _evaluate_checklist_payload(payload: dict[str, Any], fixture: dict[str, Any]
     return {
         "status": status,
         "coverage": round(coverage, 4),
+        "grounded_item_rate": round(len(grounded_items) / max(len(items), 1), 4) if items else 0.0,
+        "citation_precision_proxy": round(len(citation_ready_items) / max(len(items), 1), 4) if items else 0.0,
         "expected_items": len(expected_sequence),
         "matched_items": len(matched),
         "missing_items": missing,
@@ -222,6 +228,19 @@ def _save_report(report: dict[str, Any]) -> Path:
     out = REPORTS_DIR / f"checklist_regression_{stamp}.json"
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return out
+
+
+def _extract_latency_s(result) -> float | None:
+    metadata = result.execution_metadata if isinstance(result.execution_metadata, dict) else {}
+    telemetry = metadata.get("telemetry") if isinstance(metadata.get("telemetry"), dict) else {}
+    timings = telemetry.get("timings_s") if isinstance(telemetry.get("timings_s"), dict) else {}
+    workflow_total = metadata.get("workflow_total_s")
+    if isinstance(workflow_total, (int, float)):
+        return round(float(workflow_total), 4)
+    total_s = timings.get("total_s")
+    if isinstance(total_s, (int, float)):
+        return round(float(total_s), 4)
+    return None
 
 
 def main() -> int:
@@ -273,6 +292,7 @@ def main() -> int:
     report: dict[str, Any] = {
         "generated_at": datetime.now().isoformat(),
         "fixture": str(Path(args.fixture)),
+        "eval_store_path": str(EVAL_DB_PATH),
         "provider": args.provider,
         "model": args.model,
         "context_strategy": args.context_strategy,
@@ -299,6 +319,40 @@ def main() -> int:
             "status": "FAIL",
             "reasons": ["structured execution failed before checklist evaluation"],
         }
+
+    evaluation = report["evaluation"] if isinstance(report.get("evaluation"), dict) else {}
+    append_eval_run(
+        EVAL_DB_PATH,
+        {
+            "suite_name": "checklist_regression",
+            "task_type": "checklist",
+            "case_name": str(document.get("name") or Path(args.fixture).name),
+            "provider": args.provider,
+            "model": args.model,
+            "status": str(evaluation.get("status") or "FAIL"),
+            "score": int(evaluation.get("matched_items") or 0),
+            "max_score": int(evaluation.get("expected_items") or 0),
+            "quality_score": result.quality_score,
+            "overall_confidence": result.overall_confidence,
+            "latency_s": _extract_latency_s(result),
+            "needs_review": bool((result.execution_metadata or {}).get("needs_review")) if isinstance(result.execution_metadata, dict) else False,
+            "context_strategy": args.context_strategy,
+            "metrics": {
+                "coverage": evaluation.get("coverage"),
+                "grounded_item_rate": evaluation.get("grounded_item_rate"),
+                "citation_precision_proxy": evaluation.get("citation_precision_proxy"),
+                "duplicate_ids": len(evaluation.get("duplicate_ids") or []),
+                "artifact_items": len(evaluation.get("artifact_items") or []),
+                "collapsed_items": len(evaluation.get("collapsed_items") or []),
+                "style_issue_items": len(evaluation.get("style_issue_items") or []),
+            },
+            "reasons": evaluation.get("reasons") or [],
+            "metadata": {
+                "fixture": str(Path(args.fixture)),
+                "document_id": document.get("document_id"),
+            },
+        },
+    )
 
     out = _save_report(report)
     print(f"Report saved to: {out}")
