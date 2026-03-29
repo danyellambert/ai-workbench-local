@@ -1,0 +1,230 @@
+{
+  "routing_cases": [
+    {
+      "case_id": "document_question_basic",
+      "input_text": "Quais são os principais riscos documentados?",
+      "document_count": 1,
+      "expected_intent": "document_question",
+      "expected_tool": "consult_documents",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "retrieval"
+    },
+    {
+      "case_id": "executive_summary_basic",
+      "input_text": "Faça um resumo executivo do contrato.",
+      "document_count": 1,
+      "expected_intent": "executive_summary",
+      "expected_tool": "summarize_document",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "document_scan"
+    },
+    {
+      "case_id": "structured_extraction_basic",
+      "input_text": "Extraia os campos importantes em JSON.",
+      "document_count": 1,
+      "expected_intent": "structured_extraction",
+      "expected_tool": "extract_structured_data",
+      "expected_answer_mode": "json",
+      "expected_context_strategy": "document_scan"
+    },
+    {
+      "case_id": "document_comparison_two_docs",
+      "input_text": "Compare estes dois contratos e destaque as diferenças principais.",
+      "document_count": 2,
+      "expected_intent": "document_comparison",
+      "expected_tool": "compare_documents",
+      "expected_answer_mode": "comparison_structured",
+      "expected_context_strategy": "retrieval"
+    },
+    {
+      "case_id": "operational_checklist_basic",
+      "input_text": "Gere um checklist operacional a partir do documento.",
+      "document_count": 1,
+      "expected_intent": "operational_checklist",
+      "expected_tool": "generate_operational_checklist",
+      "expected_answer_mode": "checklist",
+      "expected_context_strategy": "document_scan"
+    },
+    {
+      "case_id": "policy_compliance_basic",
+      "input_text": "Revise as cláusulas de confidencialidade e retenção para checar compliance.",
+      "document_count": 1,
+      "expected_intent": "policy_compliance_review",
+      "expected_tool": "review_policy_compliance",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "document_scan"
+    },
+    {
+      "case_id": "risk_review_basic",
+      "input_text": "Liste os riscos, lacunas e red flags do contrato.",
+      "document_count": 1,
+      "expected_intent": "document_risk_review",
+      "expected_tool": "review_document_risks",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "document_scan"
+    },
+    {
+      "case_id": "operational_task_extraction_basic",
+      "input_text": "Extraia os action items e próximas ações operacionais.",
+      "document_count": 1,
+      "expected_intent": "operational_task_extraction",
+      "expected_tool": "extract_operational_tasks",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "document_scan"
+    },
+    {
+      "case_id": "technical_assistance_basic",
+      "input_text": "Revise o código e a API para encontrar bugs e sugerir refatoração.",
+      "document_count": 1,
+      "expected_intent": "technical_assistance",
+      "expected_tool": "assist_technical_document",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "document_scan"
+    }
+  ],
+  "workflow_cases": [
+    {
+      "case_id": "structured_failed_scan_retry",
+      "workflow_type": "structured",
+      "task_type": "extraction",
+      "input_text": "Extraia os campos do documento",
+      "document_count": 1,
+      "context_strategy": "document_scan",
+      "result": {
+        "success": false,
+        "quality_score": 0.0
+      },
+      "expected_guardrail_decision": "retry_with_retrieval_after_failure",
+      "expected_transition": "retry_with_retrieval",
+      "retry_expected": true,
+      "needs_review_expected": false
+    },
+    {
+      "case_id": "structured_low_quality_retry",
+      "workflow_type": "structured",
+      "task_type": "summary",
+      "input_text": "Resuma os pontos principais",
+      "document_count": 1,
+      "context_strategy": "document_scan",
+      "result": {
+        "success": true,
+        "quality_score": 0.55
+      },
+      "expected_guardrail_decision": "retry_with_retrieval_low_quality",
+      "expected_transition": "retry_with_retrieval",
+      "retry_expected": true,
+      "needs_review_expected": false
+    },
+    {
+      "case_id": "structured_low_quality_review",
+      "workflow_type": "structured",
+      "task_type": "summary",
+      "input_text": "Resuma os pontos principais",
+      "document_count": 1,
+      "context_strategy": "retrieval",
+      "attempt": 2,
+      "max_attempts": 2,
+      "result": {
+        "success": true,
+        "quality_score": 0.7
+      },
+      "expected_guardrail_decision": "finish_needs_review_low_quality",
+      "expected_transition": "mark_needs_review",
+      "retry_expected": false,
+      "needs_review_expected": true
+    },
+    {
+      "case_id": "structured_parse_recovery_review",
+      "workflow_type": "structured",
+      "task_type": "checklist",
+      "input_text": "Gere um checklist",
+      "document_count": 1,
+      "context_strategy": "retrieval",
+      "attempt": 2,
+      "max_attempts": 2,
+      "result": {
+        "success": true,
+        "quality_score": 0.85,
+        "parse_recovery_used": true
+      },
+      "expected_guardrail_decision": "finish_needs_review_parse_recovery",
+      "expected_transition": "mark_needs_review",
+      "retry_expected": false,
+      "needs_review_expected": true
+    },
+    {
+      "case_id": "agent_missing_sources_retry",
+      "workflow_type": "document_agent",
+      "task_type": "document_agent",
+      "input_text": "Quais riscos aparecem no contrato?",
+      "document_count": 1,
+      "context_strategy": "document_scan",
+      "result": {
+        "success": true,
+        "confidence": 0.75,
+        "sources_count": 0
+      },
+      "expected_guardrail_decision": "retry_with_retrieval_missing_sources",
+      "expected_transition": "retry_with_retrieval",
+      "retry_expected": true,
+      "needs_review_expected": false
+    },
+    {
+      "case_id": "agent_low_confidence_retry",
+      "workflow_type": "document_agent",
+      "task_type": "document_agent",
+      "input_text": "Quais riscos aparecem no contrato?",
+      "document_count": 1,
+      "context_strategy": "document_scan",
+      "result": {
+        "success": true,
+        "confidence": 0.5,
+        "sources_count": 1
+      },
+      "expected_guardrail_decision": "retry_with_retrieval_low_confidence",
+      "expected_transition": "retry_with_retrieval",
+      "retry_expected": true,
+      "needs_review_expected": false
+    },
+    {
+      "case_id": "agent_needs_review_finish",
+      "workflow_type": "document_agent",
+      "task_type": "document_agent",
+      "input_text": "Quais riscos aparecem no contrato?",
+      "document_count": 1,
+      "context_strategy": "retrieval",
+      "attempt": 2,
+      "max_attempts": 2,
+      "result": {
+        "success": true,
+        "confidence": 0.8,
+        "sources_count": 1,
+        "needs_review": true,
+        "needs_review_reason": "manual_review_required"
+      },
+      "expected_guardrail_decision": "finish_needs_review_agent",
+      "expected_transition": "mark_needs_review",
+      "retry_expected": false,
+      "needs_review_expected": true
+    },
+    {
+      "case_id": "agent_finish_ok",
+      "workflow_type": "document_agent",
+      "task_type": "document_agent",
+      "input_text": "Quais riscos aparecem no contrato?",
+      "document_count": 1,
+      "context_strategy": "retrieval",
+      "attempt": 2,
+      "max_attempts": 2,
+      "result": {
+        "success": true,
+        "confidence": 0.84,
+        "sources_count": 2
+      },
+      "expected_guardrail_decision": "finish_ok",
+      "expected_transition": "finish",
+      "retry_expected": false,
+      "needs_review_expected": false
+    }
+  ]
+}

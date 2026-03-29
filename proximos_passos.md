@@ -332,13 +332,13 @@ Ao olhar este projeto, a leitura ideal deve ser:
 
 ### Fase atual em andamento
 
-- **Fase 6 — Tools e agentes orientados a valor de negócio**
-  - próxima fase estratégica após o fechamento técnico/local da evolução arquitetural da Fase 5.5
-  - foco em transformar a base atual em um agente documental com valor empresarial claro
+- **Fase 8 — Evals**
+  - próxima fase estratégica após o fechamento técnico/local da Fase 7
+  - foco em transformar os benchmarks e workflows já entregues em critérios repetíveis de qualidade
 
 ### Fase concluída mais recentemente
 
-- **Fase 5.5 — concluída tecnicamente/localmente com LangChain/LangGraph auditáveis, separação geração vs embeddings, runtime multi-provider mais forte e trilha `huggingface_local` preparada**
+- **Fase 7 — concluída tecnicamente/localmente com comparação lado a lado entre modelos/providers, ranking por execução, leaderboards agregados por runtime/retrieval/embedding/prompt profile e visão unificada de strategy benchmarks**
 
 ### O que já foi entregue na Fase 4.5
 
@@ -1087,25 +1087,25 @@ Um agente que:
    - confiança / revisão humana
 
 ### Exemplos de agentes mais interessantes
-- [ ] **Agente de análise documental**: lê documentos, resume, extrai pontos-chave e identifica riscos
-- [ ] **Agente de policy/compliance**: responde com base em documentos e aponta violações ou conflitos
-- [ ] **Agente de extração operacional**: transforma documentos em dados estruturados, checklists e tarefas
-- [ ] **Agente assistente técnico**: combina RAG + modo programador + outputs estruturados
+- [x] **Agente de análise documental**: lê documentos, resume, extrai pontos-chave e identifica riscos
+- [x] **Agente de policy/compliance**: responde com base em documentos e aponta violações ou conflitos
+- [x] **Agente de extração operacional**: transforma documentos em dados estruturados, checklists e tarefas
+- [x] **Agente assistente técnico**: combina RAG + modo programador + outputs estruturados
 
 ### Checklist
-- [ ] Criar tool para consultar documentos indexados
-- [ ] Criar tool para resumir arquivo/documento
-- [ ] Criar tool para extração estruturada
-- [ ] Criar tool para comparação entre documentos
-- [ ] Criar tool para gerar checklist operacional
-- [ ] Criar workflow com LangGraph para orquestração do agente
-- [ ] Modelar no LangGraph os estados do agente documental: intenção, recuperação, decisão de tool, validação e resposta final
-- [ ] Adicionar nós de guardrail e fallback no LangGraph para grounding fraco, falha de tool e saída inválida
-- [ ] Adicionar estado explícito de revisão humana (`needs_review`) no workflow do agente
-- [ ] Implementar roteador de intenção
-- [ ] Registrar logs de decisão do agente
-- [ ] Explicar limitações e guardrails
-- [ ] Exibir fontes, metadados e necessidade de revisão humana
+- [x] Criar tool para consultar documentos indexados
+- [x] Criar tool para resumir arquivo/documento
+- [x] Criar tool para extração estruturada
+- [x] Criar tool para comparação entre documentos
+- [x] Criar tool para gerar checklist operacional
+- [x] Criar workflow com LangGraph para orquestração do agente
+- [x] Modelar no LangGraph os estados do agente documental: intenção, recuperação, decisão de tool, validação e resposta final
+- [x] Adicionar nós de guardrail e fallback no LangGraph para grounding fraco, falha de tool e saída inválida
+- [x] Adicionar estado explícito de revisão humana (`needs_review`) no workflow do agente
+- [x] Implementar roteador de intenção
+- [x] Registrar logs de decisão do agente
+- [x] Explicar limitações e guardrails
+- [x] Exibir fontes, metadados e necessidade de revisão humana
 
 ### O que eu não devo fazer nesta fase
 - [ ] evitar multiagente por moda sem necessidade
@@ -1114,6 +1114,20 @@ Um agente que:
 
 ### Entregável
 - Agente local com ferramentas reais e workflow definido, orientado a um caso empresarial plausível
+
+### Status atual da fase
+
+A Fase 6 pode ser tratada como concluída do ponto de vista técnico/local.
+
+Critérios já cumpridos:
+
+- catálogo explícito de tools do `Document Operations Copilot` com disponibilidade por contexto documental
+- roteamento de intenção e seleção de tool com LangGraph
+- guardrails de grounding, fallback e `needs_review` no workflow do agente
+- resposta final com fontes, tool runs, metadados auditáveis e explicabilidade operacional
+- UI friendly e runtime snapshot/sidebar expondo tools avaliadas, limitações, guardrails e próximos passos
+- testes unitários cobrindo roteamento, handler do agente, snapshot e guardrails do workflow
+- persistência local auditável das execuções do agente documental, com resumo agregado e script dedicado de relatório
 
 ### Evidência para GitHub/LinkedIn
 - GIF mostrando decisão de ferramenta
@@ -1133,37 +1147,61 @@ Um agente que:
 Mostrar critério técnico, não apenas acúmulo de features.
 
 ### Checklist
-- [ ] Criar tela de comparação entre modelos
-- [ ] Enviar o mesmo prompt para múltiplos modelos
-- [ ] Exibir respostas lado a lado
-- [ ] Medir latência
-- [ ] Medir tamanho da saída
-- [ ] Avaliar aderência ao formato
-- [ ] Salvar resultados de benchmark
-- [ ] Comparar local vs cloud opcional
-- [ ] Comparar embeddings e estratégias de retrieval
-- [ ] Comparar fluxo direto vs workflow LangGraph em latência, taxa de sucesso e previsibilidade operacional
-- [ ] Comparar modelos servidos via Ollama vs modelos experimentados pelo ecossistema Hugging Face
-- [ ] Comparar quantizações quando isso fizer diferença real no hardware local
-- [ ] Comparar stacks por caso de uso, e não só por benchmark genérico
-- [ ] Documentar quando Ollama é melhor como runtime e quando Hugging Face é melhor como ambiente de experimentação
+ - [x] Criar tela de comparação entre modelos
+ - [x] Enviar o mesmo prompt para múltiplos modelos
+ - [x] Exibir respostas lado a lado
+ - [x] Medir latência
+ - [x] Medir tamanho da saída
+ - [x] Avaliar aderência ao formato
+ - [x] Salvar resultados de benchmark
+- [x] Comparar local vs cloud opcional
+- [x] Comparar embeddings e estratégias de retrieval
+- [x] Comparar fluxo direto vs workflow LangGraph em latência, taxa de sucesso e previsibilidade operacional
+- [x] Comparar modelos servidos via Ollama vs modelos experimentados pelo ecossistema Hugging Face
+- [x] Comparar quantizações quando isso fizer diferença real no hardware local
+- [x] Comparar stacks por caso de uso, e não só por benchmark genérico
+- [x] Documentar quando Ollama é melhor como runtime e quando Hugging Face é melhor como ambiente de experimentação
+
+Observação: nesta rodada, isso foi fechado no **escopo técnico/local** por meio de classificação de famílias de quantização, presets repetíveis por caso de uso e guidance arquitetural/documental. Campanhas empíricas maiores continuam possíveis depois, mas já não bloqueiam o encerramento da Fase 7.
 
 ### Métricas recomendadas
-- [ ] Tempo de resposta
-- [ ] Tamanho da resposta
-- [ ] Aderência ao schema
-- [ ] Relevância
-- [ ] Groundedness no caso de RAG
-- [ ] Precisão de extração estruturada
-- [ ] Qualidade percebida por caso de uso
+- [x] Tempo de resposta
+- [x] Tamanho da resposta
+- [x] Aderência ao schema
+- [x] Relevância
+- [x] Groundedness no caso de RAG
+- [x] Precisão de extração estruturada
+- [x] Qualidade percebida por caso de uso
 - [ ] Tempo de inicialização/carregamento do modelo
 - [ ] Consumo de RAM/VRAM
-- [ ] Flexibilidade para testar quantizações
-- [ ] Facilidade de serving local
+- [x] Flexibilidade para testar quantizações
+- [x] Facilidade de serving local
 - [ ] Facilidade de futura adaptação/fine-tuning
 
 ### Entregável
 - Módulo de benchmarking com evidência comparativa
+
+### Status atual da fase
+
+A Fase 7 pode ser tratada como concluída do ponto de vista técnico/local.
+
+Critérios já cumpridos:
+
+- comparação lado a lado entre múltiplos providers/modelos no app
+- métricas por execução e por candidato para latência, tamanho de saída e aderência ao formato
+- heurísticas adicionais para groundedness, schema adherence e use-case fit
+- benchmark por caso de uso com presets repetíveis
+- classificação por runtime bucket e família de quantização
+- suporte arquitetural a `ollama`, `huggingface_server`, `huggingface_inference` e trilha experimental `huggingface_local`
+- logs persistidos, leaderboards agregados e relatório JSON reaproveitável
+- benchmark de estratégias adjacentes reaproveitando retrieval shadow e direct vs LangGraph
+- documentação dedicada da fase e guidance explícito sobre Ollama vs Hugging Face
+
+O que permanece fora do fechamento técnico/local da Fase 7 e sobe como trabalho futuro/empírico:
+
+- campanhas maiores de benchmark com mais modelos reais e mais hardware/perfis de serving
+- medição de inicialização de modelo, RAM/VRAM e custo operacional mais fino
+- comparação empírica expandida de adaptação/fine-tuning, que já encosta na Fase 8.5
 
 ### Evidência para GitHub/LinkedIn
 - tabela ou gráfico comparando modelos
@@ -1183,28 +1221,52 @@ Mostrar critério técnico, não apenas acúmulo de features.
 ### Objetivo
 Criar uma camada de qualidade e repetibilidade.
 
+### Status atual da fase
+
+A Fase 8 foi iniciada com uma fundação local de evals persistidos.
+
+O que já ficou pronto nesta primeira rodada:
+
+- [x] store local em SQLite para registrar execuções de eval (`.phase8_eval_runs.sqlite3`)
+- [x] persistência automática das execuções do `structured_smoke_eval`
+- [x] persistência automática das execuções do `checklist_regression`
+- [x] persistência automática das execuções do `evidence_cv_gold_eval`
+- [x] script de relatório agregado para o store local de evals
+- [x] teste unitário da camada de storage/sumarização dos evals
+- [x] documentação inicial da foundation de evals em `docs/PHASE_8_EVAL_FOUNDATION.md`
+- [x] filtros por suite/task no relatório agregado da Fase 8
+- [x] importador de histórico para backfill dos JSONs antigos no store SQLite, com deduplicação por `run_key`
+- [x] camada diagnóstica para destacar falhas persistentes, tasks saudáveis e candidatos de adaptação/fine-tuning
+- [x] suite determinística para avaliar roteamento do agente documental e decisões/transições do workflow LangGraph
+
+O que isso significa na prática:
+
+- a Fase 8 já deixou de depender só de JSONs soltos
+- agora existe uma base reaproveitável para acumular resultados de qualidade ao longo do tempo
+- os próximos passos naturais são expandir o catálogo de suites/casos e começar a avaliar critérios semânticos com mais profundidade
+
 ### Checklist
-- [ ] Montar conjunto de testes para documentos
-- [ ] Montar conjunto de testes para tarefas de código
-- [ ] Montar conjunto de testes para extração estruturada
-- [ ] Montar conjunto de testes para resumo
-- [ ] Montar conjunto de testes para comparação documental
-- [ ] Avaliar formato correto
-- [ ] Avaliar relevância
-- [ ] Avaliar consistência
-- [ ] Avaliar cobertura da resposta
-- [ ] Avaliar groundedness em RAG
-- [ ] Avaliar precisão de citações/fontes
-- [ ] Avaliar acurácia do roteamento de intenção
-- [ ] Avaliar acurácia das transições e decisões do workflow LangGraph
-- [ ] Avaliar taxa de retries úteis vs retries desnecessários nos fluxos LangGraph
-- [ ] Avaliar tempo de resposta
-- [ ] Salvar resultados em SQLite
-- [ ] Considerar integração com DeepEval depois da base própria pronta
-- [ ] Definir critérios objetivos para decidir se fine-tuning é realmente necessário
-- [ ] Medir falhas persistentes por tarefa mesmo após ajustes de prompt, retrieval e schema
-- [ ] Identificar tarefas candidatas a adaptação de modelo: extração estruturada, classificação, reranking ou embeddings
-- [ ] Registrar explicitamente quando prompt + RAG + reranking já são suficientes e quando não são
+- [x] Montar conjunto de testes para documentos
+- [x] Montar conjunto de testes para tarefas de código
+- [x] Montar conjunto de testes para extração estruturada
+- [x] Montar conjunto de testes para resumo
+- [x] Montar conjunto de testes para comparação documental
+- [x] Avaliar formato correto
+- [x] Avaliar relevância
+- [x] Avaliar consistência
+- [x] Avaliar cobertura da resposta
+- [x] Avaliar groundedness em RAG
+- [x] Avaliar precisão de citações/fontes
+- [x] Avaliar acurácia do roteamento de intenção
+- [x] Avaliar acurácia das transições e decisões do workflow LangGraph
+- [x] Avaliar taxa de retries úteis vs retries desnecessários nos fluxos LangGraph
+- [x] Avaliar tempo de resposta
+- [x] Salvar resultados em SQLite
+- [x] Considerar integração com DeepEval depois da base própria pronta
+- [x] Definir critérios objetivos para decidir se fine-tuning é realmente necessário
+- [x] Medir falhas persistentes por tarefa mesmo após ajustes de prompt, retrieval e schema
+- [x] Identificar tarefas candidatas a adaptação de modelo: extração estruturada, classificação, reranking ou embeddings
+- [x] Registrar explicitamente quando prompt + RAG + reranking já são suficientes e quando não são
 
 ### Entregável
 - Módulo de avaliação contínua e reproduzível
@@ -1591,3 +1653,19 @@ O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 - [x] Encerrar tecnicamente a Fase 5 como pacote unificado (`structured outputs` + `evidence_cv`) e mover o pacote visual final para a Fase 11, após app web + deploy
 - [x] Adicionar comparação shadow `direct` vs `langgraph_context_retry` com log local, relatório agregado e sinais visuais na UI estruturada
 - [x] Adicionar testes focados para roteamento, guardrails, retry, fallback e revisão humana do workflow LangGraph
+- [x] Estender o workflow LangGraph para a task `document_agent`, com classificação de intenção, seleção de tool, retry com `retrieval` e marcação explícita de revisão humana
+- [x] Adicionar renderer friendly do `Document Operations Copilot`, incluindo fontes, tool runs, findings de comparação e sinalização de `needs_review`
+- [x] Expor metadados do agente documental no runtime snapshot/sidebar para auditoria operacional durante a execução
+- [x] Adicionar ao payload do agente limitações conhecidas, guardrails aplicados e próximos passos recomendados para melhorar a explicabilidade operacional
+- [x] Formalizar catálogo reutilizável das tools do agente documental, com disponibilidade por contexto e exposição explícita das tools avaliadas na UI/runtime
+- [x] Persistir log local do `Document Operations Copilot`, com agregação de métricas por intenção/tool/revisão humana e relatório reaproveitável
+- [x] Aprofundar o `Document Operations Copilot` com uma trilha explícita de revisão de policy/compliance, cobrindo cláusulas, obrigações, restrições, riscos e lacunas de revisão
+- [x] Iniciar a Fase 7 com comparação lado a lado entre modelos/providers no app, incluindo métricas de latência, tamanho de saída, aderência ao formato, ranking consolidado e relatório local com leaderboards agregados
+- [x] Consolidar a Fase 7 localmente com recorte explícito local/cloud/experimental, benchmarks agregados por retrieval/embedding/prompt profile e visão unificada de estratégia para retrieval shadow e direct vs LangGraph
+- [x] Encerrar a Fase 7 tecnicamente/localmente com documentação dedicada do benchmark, posicionamento explícito de runtime e reporte reaproveitável para portfólio/entrevista
+- [x] Aprofundar o `Document Operations Copilot` com fluxos explícitos de análise de riscos, extração operacional e assistência técnica sobre documentos
+- [x] Iniciar a Fase 8 com store local em SQLite para evals, persistência do smoke eval/checklist regression e script de relatório agregado
+- [x] Expandir a fundação da Fase 8 com integração do `evidence_cv_gold_eval`, filtros no relatório e documentação dedicada da camada de evals
+- [x] Adicionar backfill histórico da Fase 8 para importar relatórios legados JSON no store SQLite sem duplicação
+- [x] Adicionar camada diagnóstica da Fase 8 para transformar histórico de evals em prioridades de iteração e sinalização de adaptação
+- [x] Completar a Fase 8 no escopo técnico/local com suites para roteamento/guardrails, cobertura explícita dos critérios de avaliação e decisão documentada sobre DeepEval
