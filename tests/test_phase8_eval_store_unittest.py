@@ -89,6 +89,7 @@ class Phase8EvalStoreTests(unittest.TestCase):
                   "tasks": [
                     {
                       "task": "summary",
+                      "suite_name": "structured_real_document_eval",
                       "status": "PASS",
                       "score": 5,
                       "max_score": 5,
@@ -96,6 +97,43 @@ class Phase8EvalStoreTests(unittest.TestCase):
                       "success": true,
                       "validation_error": null,
                       "parsing_error": null
+                    }
+                  ]
+                }
+                """,
+                encoding="utf-8",
+            )
+
+            (reports_dir / "phase8_agent_workflow_eval_20260330_100000.json").write_text(
+                """
+                {
+                  "generated_at": "2026-03-30T10:00:00",
+                  "routing_results": [
+                    {
+                      "suite_name": "document_agent_routing_eval",
+                      "task_type": "document_agent_routing",
+                      "case_name": "routing-case-1",
+                      "status": "PASS",
+                      "score": 4,
+                      "max_score": 4,
+                      "latency_s": 0.001,
+                      "metrics": {"score_ratio": 1.0},
+                      "reasons": [],
+                      "metadata": {"actual_intent": "document_question"}
+                    }
+                  ],
+                  "workflow_results": [
+                    {
+                      "suite_name": "langgraph_workflow_eval",
+                      "task_type": "langgraph_guardrails",
+                      "case_name": "workflow-case-1",
+                      "status": "WARN",
+                      "score": 3,
+                      "max_score": 4,
+                      "latency_s": 0.002,
+                      "metrics": {"score_ratio": 0.75},
+                      "reasons": ["transition_correct"],
+                      "metadata": {"actual_transition": "retry_with_retrieval"}
                     }
                   ]
                 }
@@ -159,19 +197,24 @@ class Phase8EvalStoreTests(unittest.TestCase):
             )
 
             counts = import_eval_history_reports(reports_dir, db_path)
-            self.assertEqual(counts["structured_smoke_eval"], 1)
+            self.assertEqual(counts["structured_real_document_eval"], 1)
             self.assertEqual(counts["checklist_regression"], 1)
             self.assertEqual(counts["evidence_cv_gold_eval"], 2)
+            self.assertEqual(counts["document_agent_routing_eval"], 1)
+            self.assertEqual(counts["langgraph_workflow_eval"], 1)
 
             entries = load_eval_runs(db_path)
-            self.assertEqual(len(entries), 4)
+            self.assertEqual(len(entries), 6)
             summary = summarize_eval_runs(entries)
-            self.assertEqual(summary["total_runs"], 4)
-            self.assertIn("structured_smoke_eval", summary["suite_counts"])
+            self.assertEqual(summary["total_runs"], 6)
+            self.assertIn("structured_real_document_eval", summary["suite_counts"])
             self.assertIn("evidence_cv_gold_eval", summary["suite_counts"])
+            self.assertIn("document_agent_routing_eval", summary["suite_counts"])
 
             counts_second_run = import_eval_history_reports(reports_dir, db_path)
-            self.assertEqual(counts_second_run["structured_smoke_eval"], 0)
+            self.assertEqual(counts_second_run["structured_real_document_eval"], 0)
             self.assertEqual(counts_second_run["checklist_regression"], 0)
             self.assertEqual(counts_second_run["evidence_cv_gold_eval"], 0)
-            self.assertEqual(len(load_eval_runs(db_path)), 4)
+            self.assertEqual(counts_second_run["document_agent_routing_eval"], 0)
+            self.assertEqual(counts_second_run["langgraph_workflow_eval"], 0)
+            self.assertEqual(len(load_eval_runs(db_path)), 6)

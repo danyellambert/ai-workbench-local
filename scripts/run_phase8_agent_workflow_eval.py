@@ -10,6 +10,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from src.evals.phase8_thresholds import build_phase8_threshold_catalog  # noqa: E402
 from src.evals.phase8_agent_workflow import (  # noqa: E402
     evaluate_routing_case,
     evaluate_workflow_case,
@@ -41,6 +42,7 @@ def main() -> int:
         "generated_at": datetime.now().isoformat(),
         "cases_path": str(Path(args.cases)),
         "eval_store_path": str(EVAL_DB_PATH),
+        "threshold_catalog": build_phase8_threshold_catalog(),
         "routing_summary": summarize_phase8_case_results(routing_results, suite_name="document_agent_routing_eval"),
         "workflow_summary": summarize_phase8_case_results(workflow_results, suite_name="langgraph_workflow_eval"),
         "routing_results": routing_results,

@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from typing import Any
 
+from ..evals.phase8_thresholds import DIAGNOSIS_THRESHOLDS
+
 
 ADAPTATION_ELIGIBLE_TASKS = {
     "extraction",
@@ -30,9 +32,17 @@ def _status_counts(entries: list[dict[str, Any]]) -> dict[str, int]:
 
 
 def _task_health_label(*, pass_rate: float, fail_rate: float, avg_score_ratio: float) -> str:
-    if pass_rate >= 0.75 and fail_rate <= 0.15 and avg_score_ratio >= 0.8:
+    if (
+        pass_rate >= float(DIAGNOSIS_THRESHOLDS.get("healthy_pass_rate") or 0.75)
+        and fail_rate <= float(DIAGNOSIS_THRESHOLDS.get("healthy_fail_rate") or 0.15)
+        and avg_score_ratio >= float(DIAGNOSIS_THRESHOLDS.get("healthy_avg_score_ratio") or 0.8)
+    ):
         return "healthy"
-    if pass_rate >= 0.6 and fail_rate <= 0.3 and avg_score_ratio >= 0.7:
+    if (
+        pass_rate >= float(DIAGNOSIS_THRESHOLDS.get("monitor_pass_rate") or 0.6)
+        and fail_rate <= float(DIAGNOSIS_THRESHOLDS.get("monitor_fail_rate") or 0.3)
+        and avg_score_ratio >= float(DIAGNOSIS_THRESHOLDS.get("monitor_avg_score_ratio") or 0.7)
+    ):
         return "monitor"
     return "needs_iteration"
 
@@ -40,9 +50,17 @@ def _task_health_label(*, pass_rate: float, fail_rate: float, avg_score_ratio: f
 def _adaptation_priority(task_type: str, *, total_runs: int, fail_rate: float, avg_score_ratio: float) -> str | None:
     if task_type not in ADAPTATION_ELIGIBLE_TASKS:
         return None
-    if total_runs >= 5 and fail_rate >= 0.6 and avg_score_ratio < 0.65:
+    if (
+        total_runs >= int(DIAGNOSIS_THRESHOLDS.get("adaptation_high_min_runs") or 5)
+        and fail_rate >= float(DIAGNOSIS_THRESHOLDS.get("adaptation_high_fail_rate") or 0.6)
+        and avg_score_ratio < float(DIAGNOSIS_THRESHOLDS.get("adaptation_high_avg_score_ratio") or 0.65)
+    ):
         return "high"
-    if total_runs >= 5 and fail_rate >= 0.3 and avg_score_ratio < 0.72:
+    if (
+        total_runs >= int(DIAGNOSIS_THRESHOLDS.get("adaptation_medium_min_runs") or 5)
+        and fail_rate >= float(DIAGNOSIS_THRESHOLDS.get("adaptation_medium_fail_rate") or 0.3)
+        and avg_score_ratio < float(DIAGNOSIS_THRESHOLDS.get("adaptation_medium_avg_score_ratio") or 0.72)
+    ):
         return "medium"
     return None
 
@@ -155,7 +173,10 @@ def build_eval_diagnosis(entries: list[dict[str, Any]], *, recent_window: int = 
 
         if health_label == "healthy":
             healthy_tasks.append(row)
-        if total_runs >= 3 and (fail_rate >= 0.3 or recent_fail_rate >= 0.4):
+        if total_runs >= int(DIAGNOSIS_THRESHOLDS.get("persistent_failure_min_runs") or 3) and (
+            fail_rate >= float(DIAGNOSIS_THRESHOLDS.get("persistent_failure_fail_rate") or 0.3)
+            or recent_fail_rate >= float(DIAGNOSIS_THRESHOLDS.get("persistent_failure_recent_fail_rate") or 0.4)
+        ):
             persistent_failure_tasks.append(row)
         if adaptation_priority is not None:
             adaptation_candidates.append(row)

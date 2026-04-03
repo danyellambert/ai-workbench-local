@@ -9,6 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from src.evals.phase8_thresholds import build_phase8_threshold_catalog  # noqa: E402
 from src.storage.phase8_eval_diagnosis import build_eval_diagnosis  # noqa: E402
 from src.storage.phase8_eval_store import load_eval_runs, summarize_eval_runs  # noqa: E402
 
@@ -43,6 +44,7 @@ def main() -> int:
         "db_path": str(db_path),
         "suite_filter": args.suite,
         "task_filter": args.task,
+        "threshold_catalog": build_phase8_threshold_catalog(),
         "aggregate": summarize_eval_runs(entries),
         "diagnosis": build_eval_diagnosis(entries),
     }

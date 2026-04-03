@@ -1,0 +1,81 @@
+name: phase8-evals-live
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "Chat provider to use for live evals"
+        required: false
+        default: "ollama"
+      model:
+        description: "Optional explicit chat model"
+        required: false
+        default: ""
+      context_strategy:
+        description: "Context strategy for structured/checklist live evals"
+        required: false
+        default: "document_scan"
+      limit_structured_docs:
+        description: "Limit the number of structured real-document evals"
+        required: false
+        default: "3"
+
+jobs:
+  live-evals:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Preflight live eval environment
+        run: |
+          CMD=(python scripts/run_phase8_live_evals.py
+            --provider "${{ inputs.provider }}"
+            --context-strategy "${{ inputs.context_strategy }}"
+            --limit-structured-docs "${{ inputs.limit_structured_docs }}"
+            --strict
+            --preflight-only
+            --out phase5_eval/reports/phase8_live_evals_preflight_ci.json)
+          if [ -n "${{ inputs.model }}" ]; then
+            CMD+=(--model "${{ inputs.model }}")
+          fi
+          "${CMD[@]}"
+
+      - name: Run live evals against prepared local environment
+        run: |
+          CMD=(python scripts/run_phase8_live_evals.py
+            --provider "${{ inputs.provider }}"
+            --context-strategy "${{ inputs.context_strategy }}"
+            --limit-structured-docs "${{ inputs.limit_structured_docs }}"
+            --strict
+            --out phase5_eval/reports/phase8_live_evals_ci.json)
+          if [ -n "${{ inputs.model }}" ]; then
+            CMD+=(--model "${{ inputs.model }}")
+          fi
+          "${CMD[@]}"
+
+      - name: Generate SQLite summary after live evals
+        run: |
+          python scripts/report_phase8_eval_store.py --limit 50 --out phase5_eval/reports/phase8_eval_summary_live_ci.json
+          python scripts/report_phase8_eval_diagnosis.py --out phase5_eval/reports/phase8_eval_diagnosis_live_ci.json
+
+      - name: Upload live eval artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase8-live-evals
+          path: |
+            phase5_eval/reports/phase8_live_evals_preflight_ci.json
+            phase5_eval/reports/phase8_live_evals_ci.json
+            phase5_eval/reports/phase8_eval_summary_live_ci.json
+            phase5_eval/reports/phase8_eval_diagnosis_live_ci.json
