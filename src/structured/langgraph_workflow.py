@@ -214,6 +214,8 @@ def _resolve_document_agent_context_strategy(tool_name: str, request: TaskExecut
         return "document_scan", "no_documents_or_context_disabled"
     if tool_name == "consult_documents" and normalized_query:
         return "retrieval", "document_question_prefers_retrieval"
+    if tool_name == "draft_business_response" and normalized_query:
+        return "retrieval", "drafting_prefers_retrieval"
     if tool_name == "compare_documents" and normalized_query and len(request.source_document_ids or []) <= 2:
         return "retrieval", "comparison_prefers_retrieval_when_document_count_is_small"
     return "document_scan", "coverage_first_document_agent"

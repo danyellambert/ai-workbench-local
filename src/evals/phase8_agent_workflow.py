@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from src.evals.phase8_thresholds import AGENT_ROUTING_THRESHOLDS, AGENT_WORKFLOW_THRESHOLDS
 from src.structured.base import AgentSource, DocumentAgentPayload
 from src.structured.document_agent import classify_document_agent_intent, select_document_agent_tool
 from src.structured.envelope import StructuredResult, TaskExecutionRequest
@@ -113,7 +114,14 @@ def evaluate_routing_case(case: dict[str, Any]) -> dict[str, Any]:
     }
     score = sum(1 for value in checks.values() if value)
     max_score = len(checks)
-    status = "PASS" if score == max_score else "WARN" if score >= max_score - 1 else "FAIL"
+    score_ratio = score / max(max_score, 1)
+    status = (
+        "PASS"
+        if score_ratio >= float(AGENT_ROUTING_THRESHOLDS.get("pass_min_ratio") or 1.0)
+        else "WARN"
+        if score_ratio >= float(AGENT_ROUTING_THRESHOLDS.get("warn_min_ratio") or 0.75)
+        else "FAIL"
+    )
     reasons = [name for name, ok in checks.items() if not ok]
 
     return {
@@ -130,6 +138,7 @@ def evaluate_routing_case(case: dict[str, Any]) -> dict[str, Any]:
             "tool_accuracy": 1.0 if checks["tool_correct"] else 0.0,
             "answer_mode_accuracy": 1.0 if checks["answer_mode_correct"] else 0.0,
             "context_strategy_accuracy": 1.0 if checks["context_strategy_correct"] else 0.0,
+            "score_ratio": round(score_ratio, 3),
         },
         "reasons": reasons,
         "metadata": {
@@ -146,6 +155,7 @@ def evaluate_routing_case(case: dict[str, Any]) -> dict[str, Any]:
             "expected_context_strategy": case.get("expected_context_strategy"),
             "actual_context_strategy": actual_context_strategy,
             "actual_context_reason": actual_context_reason,
+            "thresholds": AGENT_ROUTING_THRESHOLDS,
         },
     }
 
@@ -203,7 +213,14 @@ def evaluate_workflow_case(case: dict[str, Any]) -> dict[str, Any]:
     }
     score = sum(1 for value in checks.values() if value)
     max_score = len(checks)
-    status = "PASS" if score == max_score else "WARN" if score >= max_score - 1 else "FAIL"
+    score_ratio = score / max(max_score, 1)
+    status = (
+        "PASS"
+        if score_ratio >= float(AGENT_WORKFLOW_THRESHOLDS.get("pass_min_ratio") or 1.0)
+        else "WARN"
+        if score_ratio >= float(AGENT_WORKFLOW_THRESHOLDS.get("warn_min_ratio") or 0.75)
+        else "FAIL"
+    )
     reasons = [name for name, ok in checks.items() if not ok]
 
     return {
@@ -221,6 +238,7 @@ def evaluate_workflow_case(case: dict[str, Any]) -> dict[str, Any]:
             "retry_actual": actual_retry,
             "useful_retry": 1.0 if expected_retry and actual_retry else 0.0,
             "unnecessary_retry": 1.0 if (not expected_retry and actual_retry) else 0.0,
+            "score_ratio": round(score_ratio, 3),
         },
         "reasons": reasons,
         "metadata": {
@@ -234,6 +252,7 @@ def evaluate_workflow_case(case: dict[str, Any]) -> dict[str, Any]:
             "actual_retry": actual_retry,
             "expected_needs_review": expected_needs_review,
             "actual_needs_review": actual_needs_review,
+            "thresholds": AGENT_WORKFLOW_THRESHOLDS,
         },
     }
 
