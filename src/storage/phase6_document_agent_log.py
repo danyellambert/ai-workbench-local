@@ -48,6 +48,8 @@ def summarize_document_agent_log(entries: list[dict[str, object]]) -> dict[str, 
             "tool_counts": {},
             "answer_mode_counts": {},
             "execution_strategy_counts": {},
+            "workflow_route_decision_counts": {},
+            "workflow_guardrail_decision_counts": {},
             "review_reasons": {},
         }
 
@@ -74,6 +76,8 @@ def summarize_document_agent_log(entries: list[dict[str, object]]) -> dict[str, 
     tool_counter: Counter[str] = Counter()
     answer_mode_counter: Counter[str] = Counter()
     strategy_counter: Counter[str] = Counter()
+    route_decision_counter: Counter[str] = Counter()
+    guardrail_decision_counter: Counter[str] = Counter()
     review_reason_counter: Counter[str] = Counter()
 
     runs_with_tool_errors = 0
@@ -82,6 +86,8 @@ def summarize_document_agent_log(entries: list[dict[str, object]]) -> dict[str, 
         tool = str(item.get("tool_used") or "").strip()
         answer_mode = str(item.get("answer_mode") or "").strip()
         strategy = str(item.get("execution_strategy_used") or "").strip()
+        route_decision = str(item.get("workflow_route_decision") or "").strip()
+        guardrail_decision = str(item.get("workflow_guardrail_decision") or "").strip()
         review_reason = str(item.get("needs_review_reason") or "").strip()
         error_tool_runs = int(item.get("error_tool_runs") or 0)
         if error_tool_runs > 0:
@@ -94,6 +100,10 @@ def summarize_document_agent_log(entries: list[dict[str, object]]) -> dict[str, 
             answer_mode_counter[answer_mode] += 1
         if strategy:
             strategy_counter[strategy] += 1
+        if route_decision:
+            route_decision_counter[route_decision] += 1
+        if guardrail_decision:
+            guardrail_decision_counter[guardrail_decision] += 1
         if review_reason:
             review_reason_counter[review_reason] += 1
 
@@ -109,5 +119,7 @@ def summarize_document_agent_log(entries: list[dict[str, object]]) -> dict[str, 
         "tool_counts": dict(tool_counter),
         "answer_mode_counts": dict(answer_mode_counter),
         "execution_strategy_counts": dict(strategy_counter),
+        "workflow_route_decision_counts": dict(route_decision_counter),
+        "workflow_guardrail_decision_counts": dict(guardrail_decision_counter),
         "review_reasons": dict(review_reason_counter),
     }

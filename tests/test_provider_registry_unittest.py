@@ -1,6 +1,8 @@
 import unittest
 
 from src.providers.registry import (
+    build_embedding_provider_sidebar_state,
+    describe_embedding_provider_unavailable_reason,
     filter_registry_by_capability,
     resolve_provider_entry,
     resolve_provider_runtime_profile,
@@ -8,6 +10,13 @@ from src.providers.registry import (
 
 
 class ProviderRegistryTests(unittest.TestCase):
+    class _DummyEmbeddingProvider:
+        def __init__(self, models: list[str]) -> None:
+            self._models = models
+
+        def list_available_embedding_models(self) -> list[str]:
+            return list(self._models)
+
     def test_resolve_provider_entry_returns_requested_provider_when_capability_exists(self) -> None:
         registry = {
             "ollama": {"supports_chat": True, "supports_embeddings": True, "instance": object()},
@@ -86,6 +95,39 @@ class ProviderRegistryTests(unittest.TestCase):
         self.assertEqual(runtime["default_model"], "qwen2.5:7b")
         self.assertEqual(runtime["default_context_window"], 8192)
         self.assertEqual(runtime["fallback_reason"], "chat_provider_unavailable:openai")
+
+    def test_describe_embedding_provider_unavailable_reason_explains_hf_server_and_inference(self) -> None:
+        self.assertIn("supports_embeddings=true", describe_embedding_provider_unavailable_reason("huggingface_server"))
+        self.assertIn("HUGGINGFACE_INFERENCE_EMBEDDING_MODEL", describe_embedding_provider_unavailable_reason("huggingface_inference"))
+
+    def test_build_embedding_provider_sidebar_state_separates_available_and_disabled_entries(self) -> None:
+        registry = {
+            "ollama": {
+                "label": "Ollama (local)",
+                "supports_embeddings": True,
+                "instance": self._DummyEmbeddingProvider(["embeddinggemma:300m"]),
+            },
+            "huggingface_server": {
+                "label": "Hugging Face server local",
+                "supports_embeddings": False,
+                "instance": self._DummyEmbeddingProvider([]),
+            },
+            "huggingface_inference": {
+                "label": "Hugging Face Inference",
+                "supports_embeddings": False,
+                "instance": self._DummyEmbeddingProvider([]),
+            },
+        }
+
+        state = build_embedding_provider_sidebar_state(registry)
+
+        self.assertEqual(state["available_options"], {"ollama": "Ollama (local)"})
+        self.assertEqual(state["available_models_by_provider"]["ollama"], ["embeddinggemma:300m"])
+        unavailable_by_key = {item["provider_key"]: item for item in state["unavailable_items"]}
+        self.assertIn("huggingface_server", unavailable_by_key)
+        self.assertIn("supports_embeddings=true", unavailable_by_key["huggingface_server"]["reason"])
+        self.assertIn("huggingface_inference", unavailable_by_key)
+        self.assertIn("HUGGINGFACE_INFERENCE_EMBEDDING_MODEL", unavailable_by_key["huggingface_inference"]["reason"])
 
 
 if __name__ == "__main__":

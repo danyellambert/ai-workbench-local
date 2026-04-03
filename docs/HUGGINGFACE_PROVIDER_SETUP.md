@@ -33,6 +33,7 @@ HUGGINGFACE_SERVER_CONTEXT_WINDOW=8192
 - mantenha os pesos/cache fora do repositório
 - o endpoint só fica disponível enquanto o servidor estiver rodando
 - isso é o caminho mais próximo de usar Hugging Face “como se fosse Ollama”
+- o app encaminha `temperature`, `ctx_size`, `top_p` e `max_tokens` como overrides operacionais via `provider_config`, mas a aplicação real desses parâmetros depende do serviço/hub por trás do alias
 
 ---
 
@@ -62,6 +63,7 @@ HUGGINGFACE_INFERENCE_CONTEXT_WINDOW=8192
 - o endpoint ideal é compatível com chat completions
 - isso é especialmente útil para deploy em VPS com pouca memória
 - para Oracle VPS, este provider faz mais sentido do que tentar subir modelos grandes localmente na VM
+- o app pode encaminhar `temperature`, `top_p` e `max_tokens`, mas não assume um equivalente universal de `num_ctx` nesse caminho
 
 ---
 
@@ -87,6 +89,12 @@ HUGGINGFACE_INFERENCE_CONTEXT_WINDOW=8192
 ## 4. Nota importante sobre embeddings
 
 Os providers `huggingface_server` e `huggingface_inference` só entram como providers de embedding se você configurar explicitamente um modelo de embedding para eles.
+
+Na UI principal:
+
+- `huggingface_server` aparece em Embeddings quando o serviço publica aliases com `supports_embeddings=true`
+- `huggingface_inference` aparece em Embeddings quando `HUGGINGFACE_INFERENCE_EMBEDDING_MODEL` estiver configurado
+- quando não estiverem disponíveis, o app os mostra como desabilitados com uma explicação operacional
 
 Se você não configurar isso, o caminho mais simples continua sendo:
 

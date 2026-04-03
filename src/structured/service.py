@@ -42,6 +42,7 @@ _AUTO_CONTEXT_WINDOW_CAP_BY_PROVIDER = {
     "ollama": 256000,
     "openai": 128000,
     "huggingface_local": 32768,
+    "huggingface_server": 32768,
 }
 
 

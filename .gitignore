@@ -13,6 +13,7 @@ __pycache__/
 .phase55_langgraph_shadow_log.json
 .phase6_document_agent_log.json
 .phase7_model_comparison_log.json
+.runtime_execution_log.json
 .chroma_rag/
 materials_local/
 .vscode/
@@ -26,7 +27,12 @@ phase5_eval/reports/
 phase5_eval/resume_benchmark_quick/
 phase5_eval/resume_benchmark_full/
 
-data/
+data/*
+!data/materials_demo/
+data/materials_demo/*
+!data/materials_demo/README.md
+!data/materials_demo/public_material_sources.json
+historico/
 .clinerules
 
 src/structured/s

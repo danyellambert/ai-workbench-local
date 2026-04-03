@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 from urllib import request as urllib_request
+from urllib.parse import urlparse
 
 from openai import OpenAI
 
@@ -35,6 +36,10 @@ class OllamaProvider:
         return normalized
 
     def _discover_local_models(self) -> list[str]:
+        discovered_via_api = self._discover_models_via_api()
+        if discovered_via_api:
+            return discovered_via_api
+
         discovered_models: list[str] = []
         try:
             result = subprocess.run(
@@ -51,6 +56,30 @@ class OllamaProvider:
         except OSError:
             pass
         return discovered_models
+
+    def _discover_models_via_api(self) -> list[str]:
+        try:
+            with urllib_request.urlopen(f"{self.native_base_url}/api/tags", timeout=5) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except Exception:
+            return []
+
+        ordered_models: list[str] = []
+        for item in payload.get("models") or []:
+            if not isinstance(item, dict):
+                continue
+            model_name = str(item.get("name") or item.get("model_ref") or "").strip()
+            if model_name and model_name not in ordered_models:
+                ordered_models.append(model_name)
+        return ordered_models
+
+    def _should_use_native_cli_runtime_hints(self) -> bool:
+        if os.getenv("OLLAMA_USE_NATIVE_CLI_HINTS", "true").strip().lower() in {"0", "false", "no", "off"}:
+            return False
+        parsed = urlparse(self.native_base_url)
+        hostname = (parsed.hostname or "").strip().lower()
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        return hostname in {"127.0.0.1", "localhost"} and port == 11434
 
     @staticmethod
     def _looks_like_embedding_model(model_name: str) -> bool:
@@ -171,9 +200,13 @@ class OllamaProvider:
             output["show_available"] = False
             output["show_error"] = str(error)
 
-        ps_context = self._read_ollama_ps_context(model)
-        if ps_context is not None:
-            output["ollama_ps_context"] = ps_context
+        if self._should_use_native_cli_runtime_hints():
+            ps_context = self._read_ollama_ps_context(model)
+            if ps_context is not None:
+                output["ollama_ps_context"] = ps_context
+        else:
+            output["ollama_ps_context"] = None
+            output["runtime_hint_source"] = "http-only"
 
         output["validation_summary"] = (
             "Use `/api/chat` para aplicar `num_ctx`, `/api/show` para ver o contexto declarado do modelo "
@@ -211,7 +244,11 @@ class OllamaProvider:
         model: str,
         temperature: float,
         context_window: int | None = None,
+        top_p: float | None = None,
+        max_tokens: int | None = None,
     ):
+        resolved_top_p = top_p if top_p is not None else self.settings.default_top_p
+        resolved_max_tokens = max_tokens if max_tokens is not None else self.settings.default_max_tokens
         payload = {
             "model": model,
             "messages": messages,
@@ -223,6 +260,10 @@ class OllamaProvider:
 
         if context_window:
             payload["options"]["num_ctx"] = int(context_window)
+        if resolved_top_p is not None:
+            payload["options"]["top_p"] = float(resolved_top_p)
+        if resolved_max_tokens is not None:
+            payload["options"]["num_predict"] = int(resolved_max_tokens)
 
         request = urllib_request.Request(
             url=f"{self.native_base_url}/api/chat",

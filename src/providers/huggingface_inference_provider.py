@@ -57,13 +57,22 @@ class HuggingFaceInferenceProvider:
         model: str,
         temperature: float,
         context_window: int | None = None,
+        top_p: float | None = None,
+        max_tokens: int | None = None,
     ):
-        return self.client.chat.completions.create(
-            messages=messages,
-            model=model,
-            temperature=temperature,
-            stream=True,
-        )
+        request_kwargs: dict[str, object] = {
+            "messages": messages,
+            "model": model,
+            "temperature": temperature,
+            "stream": True,
+        }
+        resolved_top_p = top_p if top_p is not None else self.settings.default_top_p
+        resolved_max_tokens = max_tokens if max_tokens is not None else self.settings.default_max_tokens
+        if resolved_top_p is not None:
+            request_kwargs["top_p"] = float(resolved_top_p)
+        if resolved_max_tokens is not None:
+            request_kwargs["max_tokens"] = int(resolved_max_tokens)
+        return self.client.chat.completions.create(**request_kwargs)
 
     def create_embeddings(
         self,

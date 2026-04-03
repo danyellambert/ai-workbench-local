@@ -20,6 +20,8 @@ class OllamaSettings:
     available_models_env: list[str]
     available_embedding_models_env: list[str]
     history_path: Path
+    default_top_p: float | None = None
+    default_max_tokens: int | None = None
 
 
 @dataclass(frozen=True)
@@ -30,6 +32,8 @@ class OpenAISettings:
     default_context_window: int
     available_models_env: list[str]
     available_embedding_models_env: list[str]
+    default_top_p: float | None = None
+    default_max_tokens: int | None = None
 
 
 @dataclass(frozen=True)
@@ -41,6 +45,7 @@ class HuggingFaceSettings:
     available_embedding_models_env: list[str]
     generation_task: str
     max_new_tokens: int
+    top_p: float | None = None
 
 
 @dataclass(frozen=True)
@@ -52,6 +57,8 @@ class HuggingFaceServerSettings:
     default_context_window: int
     available_models_env: list[str]
     available_embedding_models_env: list[str]
+    default_top_p: float | None = None
+    default_max_tokens: int | None = None
 
 
 @dataclass(frozen=True)
@@ -63,6 +70,22 @@ class HuggingFaceInferenceSettings:
     default_context_window: int
     available_models_env: list[str]
     available_embedding_models_env: list[str]
+    default_top_p: float | None = None
+    default_max_tokens: int | None = None
+
+
+def _optional_float_env(name: str) -> float | None:
+    raw_value = str(os.getenv(name, "")).strip()
+    if not raw_value:
+        return None
+    return float(raw_value)
+
+
+def _optional_int_env(name: str) -> int | None:
+    raw_value = str(os.getenv(name, "")).strip()
+    if not raw_value:
+        return None
+    return int(raw_value)
 
 
 @dataclass(frozen=True)
@@ -81,6 +104,8 @@ class RagSettings:
     chroma_path: Path
     rerank_pool_size: int = 16
     rerank_lexical_weight: float = 0.35
+    evidence_vl_model: str = "sorc/qwen3.5-instruct:2b"
+    evidence_ocr_backend: str = "ocrmypdf"
     context_budget_ratio: float = 0.45
     context_chars_per_token: float = 4.0
     context_budget_min_chars: int = 1800
@@ -135,6 +160,8 @@ def get_ollama_settings() -> OllamaSettings:
         default_model=default_model,
         default_temperature=float(os.getenv("OLLAMA_TEMPERATURE", "0.2")),
         default_context_window=int(os.getenv("OLLAMA_CONTEXT_WINDOW", "8192")),
+        default_top_p=_optional_float_env("OLLAMA_TOP_P"),
+        default_max_tokens=_optional_int_env("OLLAMA_MAX_TOKENS"),
         default_prompt_profile=os.getenv("DEFAULT_PROMPT_PROFILE", "neutro"),
         available_models_env=available_models_env,
         available_embedding_models_env=available_embedding_models_env,
@@ -160,6 +187,8 @@ def get_openai_settings() -> OpenAISettings:
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         embedding_model=os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
         default_context_window=int(os.getenv("OPENAI_CONTEXT_WINDOW", "128000")),
+        default_top_p=_optional_float_env("OPENAI_TOP_P"),
+        default_max_tokens=_optional_int_env("OPENAI_MAX_TOKENS"),
         available_models_env=available_models_env,
         available_embedding_models_env=available_embedding_models_env,
     )
@@ -185,6 +214,7 @@ def get_huggingface_settings() -> HuggingFaceSettings:
         available_embedding_models_env=available_embedding_models_env,
         generation_task=os.getenv("HUGGINGFACE_GENERATION_TASK", "text-generation").strip() or "text-generation",
         max_new_tokens=int(os.getenv("HUGGINGFACE_MAX_NEW_TOKENS", "512")),
+        top_p=_optional_float_env("HUGGINGFACE_TOP_P"),
     )
 
 
@@ -206,6 +236,8 @@ def get_huggingface_server_settings() -> HuggingFaceServerSettings:
         model=os.getenv("HUGGINGFACE_SERVER_MODEL", "").strip(),
         embedding_model=os.getenv("HUGGINGFACE_SERVER_EMBEDDING_MODEL", "").strip(),
         default_context_window=int(os.getenv("HUGGINGFACE_SERVER_CONTEXT_WINDOW", "8192")),
+        default_top_p=_optional_float_env("HUGGINGFACE_SERVER_TOP_P"),
+        default_max_tokens=_optional_int_env("HUGGINGFACE_SERVER_MAX_TOKENS"),
         available_models_env=available_models_env,
         available_embedding_models_env=available_embedding_models_env,
     )
@@ -229,6 +261,8 @@ def get_huggingface_inference_settings() -> HuggingFaceInferenceSettings:
         model=os.getenv("HUGGINGFACE_INFERENCE_MODEL", "").strip(),
         embedding_model=os.getenv("HUGGINGFACE_INFERENCE_EMBEDDING_MODEL", "").strip(),
         default_context_window=int(os.getenv("HUGGINGFACE_INFERENCE_CONTEXT_WINDOW", "8192")),
+        default_top_p=_optional_float_env("HUGGINGFACE_INFERENCE_TOP_P"),
+        default_max_tokens=_optional_int_env("HUGGINGFACE_INFERENCE_MAX_TOKENS"),
         available_models_env=available_models_env,
         available_embedding_models_env=available_embedding_models_env,
     )
@@ -273,6 +307,8 @@ def get_rag_settings() -> RagSettings:
         chroma_path=BASE_DIR / ".chroma_rag",
         rerank_pool_size=int(os.getenv("RAG_RERANK_POOL_SIZE", "16")),
         rerank_lexical_weight=float(os.getenv("RAG_RERANK_LEXICAL_WEIGHT", "0.35")),
+        evidence_vl_model=os.getenv("EVIDENCE_VL_MODEL", "sorc/qwen3.5-instruct:2b").strip() or "sorc/qwen3.5-instruct:2b",
+        evidence_ocr_backend=os.getenv("EVIDENCE_OCR_BACKEND", "ocrmypdf").strip() or "ocrmypdf",
         context_budget_ratio=float(os.getenv("RAG_CONTEXT_BUDGET_RATIO", "0.45")),
         context_chars_per_token=float(os.getenv("RAG_CONTEXT_CHARS_PER_TOKEN", "4.0")),
         context_budget_min_chars=int(os.getenv("RAG_CONTEXT_BUDGET_MIN_CHARS", "1800")),

@@ -142,6 +142,7 @@ class ModelComparisonServiceTests(unittest.TestCase):
         self.assertEqual(infer_model_comparison_runtime_bucket("openai", "gpt-4o-mini"), "cloud")
         self.assertEqual(infer_model_comparison_runtime_bucket("huggingface_inference", "meta-llama/Llama-3.1-8B-Instruct"), "cloud")
         self.assertEqual(infer_model_comparison_runtime_bucket("huggingface_local", "Qwen/Qwen2.5-7B-Instruct"), "experimental_local")
+        self.assertEqual(infer_model_comparison_runtime_bucket("huggingface_server", "service-chat"), "local")
 
     def test_infer_model_comparison_quantization_family_handles_common_suffixes(self) -> None:
         self.assertEqual(infer_model_comparison_quantization_family("ollama", "llama3.1:8b-instruct-q4_K_M"), "q4")
