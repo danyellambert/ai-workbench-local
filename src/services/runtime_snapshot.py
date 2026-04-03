@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from ..structured.envelope import StructuredResult
@@ -23,6 +24,10 @@ def summarize_provider_path(provider: str, provider_label: str, ollama_base_url:
             dependency = "Dependência local: app + servidor Ollama rodam na sua máquina."
         else:
             dependency = "Dependência local parcial: app local, inferência via endpoint remoto compatível com Ollama."
+        return route, dependency
+    if provider == "huggingface_server":
+        route = f"{provider_label} -> serviço OpenAI-compatible / AI hub local"
+        dependency = "Dependência local: app + serviço hub local; o backend efetivo pode variar por alias/modelo publicado no serviço."
         return route, dependency
     if provider == "openai":
         return f"{provider_label} -> API cloud direta", "Dependência local: app local; inferência remota."
@@ -62,10 +67,241 @@ def build_document_runtime_rows(
     return rows
 
 
+def build_eval_runtime_summary(
+    eval_db_path: str | Path | None,
+    *,
+    recent_limit: int = 250,
+) -> dict[str, object]:
+    if not eval_db_path:
+        return {}
+
+    db_path = Path(eval_db_path)
+    if not db_path.exists():
+        return {
+            "db_path": str(db_path),
+            "db_exists": False,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    try:
+        from ..storage.phase8_eval_diagnosis import build_eval_diagnosis
+        from ..storage.phase8_eval_store import load_eval_runs, summarize_eval_runs
+
+        entries = load_eval_runs(db_path, limit=recent_limit)
+    except Exception:
+        return {
+            "db_path": str(db_path),
+            "db_exists": True,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    if not entries:
+        return {
+            "db_path": str(db_path),
+            "db_exists": True,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    aggregate = summarize_eval_runs(entries)
+    diagnosis = build_eval_diagnosis(entries)
+    decision_summary = diagnosis.get("decision_summary") if isinstance(diagnosis.get("decision_summary"), dict) else {}
+    top_failure_reasons = diagnosis.get("top_failure_reasons") if isinstance(diagnosis.get("top_failure_reasons"), list) else []
+    adaptation_candidates = diagnosis.get("adaptation_candidates") if isinstance(diagnosis.get("adaptation_candidates"), list) else []
+    next_eval_priorities = decision_summary.get("next_eval_priorities") if isinstance(decision_summary.get("next_eval_priorities"), list) else []
+    healthy_tasks = decision_summary.get("prompt_rag_sufficient_tasks") if isinstance(decision_summary.get("prompt_rag_sufficient_tasks"), list) else []
+
+    return {
+        "db_path": str(db_path),
+        "db_exists": True,
+        "entries_considered": len(entries),
+        "recent_limit": int(recent_limit),
+        "total_runs": int(aggregate.get("total_runs") or 0),
+        "pass_rate": float(aggregate.get("pass_rate") or 0.0),
+        "warn_rate": float(aggregate.get("warn_rate") or 0.0),
+        "fail_rate": float(aggregate.get("fail_rate") or 0.0),
+        "avg_score_ratio": float(aggregate.get("avg_score_ratio") or 0.0),
+        "avg_latency_s": float(aggregate.get("avg_latency_s") or 0.0),
+        "needs_review_rate": float(aggregate.get("needs_review_rate") or 0.0),
+        "suite_counts": dict(aggregate.get("suite_counts") or {}),
+        "task_counts": dict(aggregate.get("task_counts") or {}),
+        "global_recommendation": decision_summary.get("global_recommendation"),
+        "healthy_tasks": [
+            {
+                "task_type": item.get("task_type"),
+                "pass_rate": item.get("pass_rate"),
+                "avg_score_ratio": item.get("avg_score_ratio"),
+            }
+            for item in healthy_tasks[:5]
+            if isinstance(item, dict)
+        ],
+        "adaptation_candidates": [
+            {
+                "task_type": item.get("task_type"),
+                "adaptation_priority": item.get("adaptation_priority"),
+                "fail_rate": item.get("fail_rate"),
+                "avg_score_ratio": item.get("avg_score_ratio"),
+                "recommended_action": item.get("recommended_action"),
+            }
+            for item in adaptation_candidates[:5]
+            if isinstance(item, dict)
+        ],
+        "next_eval_priorities": [
+            {
+                "task_type": item.get("task_type"),
+                "fail_rate": item.get("fail_rate"),
+                "recent_fail_rate": item.get("recent_fail_rate"),
+                "recommended_action": item.get("recommended_action"),
+            }
+            for item in next_eval_priorities[:5]
+            if isinstance(item, dict)
+        ],
+        "top_failure_reasons": [
+            {
+                "reason": item.get("reason"),
+                "count": item.get("count"),
+            }
+            for item in top_failure_reasons[:5]
+            if isinstance(item, dict)
+        ],
+        "latest_created_at": entries[0].get("created_at"),
+    }
+
+
+def build_document_agent_runtime_summary(
+    log_path: str | Path | None,
+    *,
+    recent_limit: int = 25,
+) -> dict[str, object]:
+    if not log_path:
+        return {}
+
+    resolved_path = Path(log_path)
+    if not resolved_path.exists():
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": False,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    try:
+        from ..storage.phase6_document_agent_log import load_document_agent_log, summarize_document_agent_log
+
+        entries = load_document_agent_log(resolved_path)
+    except Exception:
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": True,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    if not entries:
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": True,
+            "entries_considered": 0,
+            "total_runs": 0,
+            "recent_entries": [],
+        }
+
+    aggregate = summarize_document_agent_log(entries)
+    recent_entries = list(reversed(entries[-recent_limit:]))
+    needs_review_examples = [
+        {
+            "timestamp": entry.get("timestamp"),
+            "user_intent": entry.get("user_intent"),
+            "tool_used": entry.get("tool_used"),
+            "confidence": entry.get("confidence"),
+            "needs_review_reason": entry.get("needs_review_reason"),
+            "query": entry.get("query"),
+        }
+        for entry in recent_entries
+        if bool(entry.get("needs_review"))
+    ][:5]
+
+    return {
+        "log_path": str(resolved_path),
+        "log_exists": True,
+        "entries_considered": len(entries),
+        "recent_limit": int(recent_limit),
+        "total_runs": int(aggregate.get("total_runs") or 0),
+        "success_rate": float(aggregate.get("success_rate") or 0.0),
+        "needs_review_rate": float(aggregate.get("needs_review_rate") or 0.0),
+        "avg_confidence": float(aggregate.get("avg_confidence") or 0.0),
+        "avg_source_count": float(aggregate.get("avg_source_count") or 0.0),
+        "avg_available_tools": float(aggregate.get("avg_available_tools") or 0.0),
+        "runs_with_tool_errors": int(aggregate.get("runs_with_tool_errors") or 0),
+        "intent_counts": dict(aggregate.get("intent_counts") or {}),
+        "tool_counts": dict(aggregate.get("tool_counts") or {}),
+        "answer_mode_counts": dict(aggregate.get("answer_mode_counts") or {}),
+        "execution_strategy_counts": dict(aggregate.get("execution_strategy_counts") or {}),
+        "workflow_route_decision_counts": dict(aggregate.get("workflow_route_decision_counts") or {}),
+        "workflow_guardrail_decision_counts": dict(aggregate.get("workflow_guardrail_decision_counts") or {}),
+        "review_reasons": dict(aggregate.get("review_reasons") or {}),
+        "recent_entries": recent_entries,
+        "needs_review_examples": needs_review_examples,
+        "latest_timestamp": entries[-1].get("timestamp"),
+    }
+
+
+def build_runtime_execution_summary(
+    log_path: str | Path | None,
+    *,
+    recent_limit: int = 25,
+) -> dict[str, object]:
+    if not log_path:
+        return {}
+
+    resolved_path = Path(log_path)
+    if not resolved_path.exists():
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": False,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    try:
+        from ..storage.runtime_execution_log import load_runtime_execution_log, summarize_runtime_execution_log
+
+        entries = load_runtime_execution_log(resolved_path)
+    except Exception:
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": True,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    if not entries:
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": True,
+            "entries_considered": 0,
+            "total_runs": 0,
+            "recent_entries": [],
+        }
+
+    aggregate = summarize_runtime_execution_log(entries)
+    return {
+        "log_path": str(resolved_path),
+        "log_exists": True,
+        "entries_considered": len(entries),
+        "recent_limit": int(recent_limit),
+        **aggregate,
+        "recent_entries": list(reversed(entries[-recent_limit:])),
+    }
+
+
 def build_runtime_snapshot(
     *,
     selected_provider: str,
     selected_provider_label: str,
+    provider_detail: str | None = None,
     selected_model: str,
     selected_embedding_provider: str,
     selected_embedding_model: str,
@@ -85,10 +321,13 @@ def build_runtime_snapshot(
     ollama_base_url: str,
     default_vl_model: str,
     default_ocr_backend: str,
+    phase6_document_agent_log_path: str | Path | None = None,
+    phase8_eval_db_path: str | Path | None = None,
+    runtime_execution_log_path: str | Path | None = None,
 ) -> dict[str, object]:
     provider_path, local_dependency = summarize_provider_path(
         selected_provider,
-        selected_provider_label,
+        selected_provider_label if not provider_detail else f"{selected_provider_label} ({provider_detail})",
         ollama_base_url,
     )
     last_chat_metadata = extract_last_assistant_metadata(messages)
@@ -127,6 +366,11 @@ def build_runtime_snapshot(
             "last_generation_s": last_chat_metadata.get("generation_latency_s"),
             "last_retrieval_s": last_chat_metadata.get("retrieval_latency_s"),
             "last_prompt_build_s": last_chat_metadata.get("prompt_build_latency_s"),
+            "last_total_tokens": ((last_chat_metadata.get("usage") or {}).get("total_tokens") if isinstance(last_chat_metadata.get("usage"), dict) else None),
+            "last_cost_usd": ((last_chat_metadata.get("usage") or {}).get("cost_usd") if isinstance(last_chat_metadata.get("usage"), dict) else None),
+            "budget_routing_mode": last_chat_metadata.get("budget_routing_mode"),
+            "budget_routing_reason": last_chat_metadata.get("budget_routing_reason"),
+            "budget_auto_degrade_applied": last_chat_metadata.get("budget_auto_degrade_applied"),
         },
         "structured": {
             "current_task": selected_structured_task,
@@ -152,6 +396,11 @@ def build_runtime_snapshot(
             "last_sanitize_s": (structured_timings.get("sanitize_s") if isinstance(structured_timings, dict) else None),
             "last_context_s": (structured_timings.get("context_build_s") if isinstance(structured_timings, dict) else None),
             "last_parsing_s": (structured_timings.get("parsing_s") if isinstance(structured_timings, dict) else None),
+            "last_total_tokens": structured_telemetry.get("budget_total_tokens") if isinstance(structured_telemetry, dict) else None,
+            "last_cost_usd": structured_telemetry.get("budget_cost_usd") if isinstance(structured_telemetry, dict) else None,
+            "budget_routing_mode": structured_telemetry.get("budget_routing_mode") if isinstance(structured_telemetry, dict) else None,
+            "budget_routing_reason": structured_telemetry.get("budget_routing_reason") if isinstance(structured_telemetry, dict) else None,
+            "budget_auto_degrade_applied": structured_telemetry.get("budget_auto_degrade_applied") if isinstance(structured_telemetry, dict) else None,
             "task_model_map": task_model_map,
         },
         "documents": {
@@ -175,4 +424,7 @@ def build_runtime_snapshot(
                 default_ocr_backend=default_ocr_backend,
             ),
         },
+        "document_agent": build_document_agent_runtime_summary(phase6_document_agent_log_path),
+        "evals": build_eval_runtime_summary(phase8_eval_db_path),
+        "runtime_execution": build_runtime_execution_summary(runtime_execution_log_path),
     }

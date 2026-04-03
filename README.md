@@ -118,11 +118,69 @@ Exemplo de modelos locais:
 - geração: `qwen2.5:7b`
 - embeddings: modelo configurado no `.env`
 
-### 4. Execute a versão local
+### 4. Execute a versão principal
 
 ```bash
 streamlit run main_qwen.py
 ```
+
+O app principal mantém:
+
+- `ollama` como provider default
+- `huggingface_server` como provider opcional para apontar para um endpoint OpenAI-compatible, como o `hf_local_llm_service`
+
+### 4.1 Usar o `hf_local_llm_service` como AI hub opcional
+
+No `.env`, configure por exemplo:
+
+```env
+HUGGINGFACE_SERVER_BASE_URL=http://127.0.0.1:8788/v1
+HUGGINGFACE_SERVER_MODEL=
+HUGGINGFACE_SERVER_EMBEDDING_MODEL=
+```
+
+Depois, no app principal (`main_qwen.py`):
+
+- mantenha `ollama` como default para o fluxo atual
+- selecione `huggingface_server` quando quiser usar o serviço como hub multi-provider
+
+Importante:
+
+- os modelos mostrados em `huggingface_server` são aliases publicados pelo serviço
+- o backend real por trás do alias pode ser `ollama`, `huggingface_local`, `huggingface_mlx`, `llama.cpp`, `openai`, etc.
+- para RAG com `huggingface_server`, o serviço precisa publicar pelo menos um alias com suporte a embeddings
+- `huggingface_server` só aparece na seção de embeddings quando o serviço publicar aliases com `supports_embeddings=true`
+- `huggingface_inference` só aparece na seção de embeddings quando `HUGGINGFACE_INFERENCE_EMBEDDING_MODEL` estiver configurado
+
+### 4.1.1 Overrides operacionais do app vs comportamento backend-native
+
+Hoje o app diferencia dois grupos:
+
+- **operacionais do app**: `temperature`, `context_window`, `embedding_context_window`, `truncate`, além de `top_p` e `max_tokens` quando configurados por ambiente
+- **backend-native**: a forma como cada runtime realmente interpreta esses valores
+
+Na prática:
+
+- `ollama` recebe `temperature`, `num_ctx`, `top_p` e `num_predict` no caminho nativo de chat, e `truncate` + `num_ctx` em embeddings
+- `huggingface_server` recebe esses mesmos sinais operacionais via `provider_config` (`temperature`, `ctx_size`, `top_p`, `max_tokens`, `truncate`), mas a aplicação efetiva ainda depende do hub/servidor por trás do alias
+- `huggingface_inference` e `openai` aceitam `temperature`, `top_p` e `max_tokens` quando configurados, mas não expõem um equivalente universal a `num_ctx`
+
+### 4.2 Controles operacionais expostos na sidebar
+
+Além de geração e embeddings, a sidebar do app principal agora também expõe:
+
+- parâmetros de reranking híbrido (`rerank_pool_size`, `rerank_lexical_weight`)
+- backend OCR documental (`EVIDENCE_OCR_BACKEND`)
+- modelo VLM documental (`EVIDENCE_VL_MODEL`)
+
+Esses controles ajudam a separar melhor:
+
+- geração
+- embeddings
+- retrieval/reranking
+- parsing documental / OCR / vision
+
+Além disso, a sidebar mostra explicitamente os providers de embedding indisponíveis como **desabilitados**, com o motivo operacional.
 
 ### 5. Execute a versão OpenAI-compatible (opcional)
 
@@ -269,6 +327,7 @@ A Fase 5.5 consolidou a transição do projeto de um pipeline puramente manual p
 Veja também:
 
 - `docs/HUGGINGFACE_PROVIDER_SETUP.md` → configuração de `huggingface_server` e `huggingface_inference`
+- `../hf_local_llm_service/docs/OLLAMA_DEFAULT_PLUS_HF_SERVICE_ROADMAP.md` → roadmap da convivência entre `ollama` default e `huggingface_server` opcional via AI hub local
 
 ### Leitura arquitetural da fase
 

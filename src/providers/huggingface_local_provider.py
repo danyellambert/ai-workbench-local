@@ -90,15 +90,21 @@ class HuggingFaceLocalProvider:
         model: str,
         temperature: float,
         context_window: int | None = None,
+        top_p: float | None = None,
+        max_tokens: int | None = None,
     ):
         prompt = self._format_messages_as_prompt(messages)
         pipe = self._load_generation_pipeline(model)
+        resolved_top_p = top_p if top_p is not None else self.settings.top_p
+        resolved_max_tokens = max_tokens if max_tokens is not None else self.settings.max_new_tokens
         generate_kwargs: dict[str, object] = {
-            "max_new_tokens": int(self.settings.max_new_tokens),
+            "max_new_tokens": int(resolved_max_tokens),
             "do_sample": bool(temperature and temperature > 0.0),
         }
         if temperature and temperature > 0.0:
             generate_kwargs["temperature"] = max(float(temperature), 0.1)
+        if resolved_top_p is not None:
+            generate_kwargs["top_p"] = float(resolved_top_p)
         result = pipe(prompt, **generate_kwargs)
         generated_text = ""
         if isinstance(result, list) and result:

@@ -12,6 +12,8 @@ class Phase6DocumentAgentLogTests(unittest.TestCase):
                 "tool_used": "consult_documents",
                 "answer_mode": "friendly",
                 "execution_strategy_used": "langgraph_context_retry",
+                "workflow_route_decision": "document_question->consult_documents",
+                "workflow_guardrail_decision": "finish_ok",
                 "needs_review": False,
                 "confidence": 0.82,
                 "source_count": 3,
@@ -24,6 +26,8 @@ class Phase6DocumentAgentLogTests(unittest.TestCase):
                 "tool_used": "compare_documents",
                 "answer_mode": "comparison_structured",
                 "execution_strategy_used": "langgraph_context_retry",
+                "workflow_route_decision": "document_comparison->compare_documents",
+                "workflow_guardrail_decision": "finish_needs_review_agent",
                 "needs_review": True,
                 "needs_review_reason": "comparison_grounding_is_partial",
                 "confidence": 0.61,
@@ -41,4 +45,6 @@ class Phase6DocumentAgentLogTests(unittest.TestCase):
         self.assertEqual(summary["runs_with_tool_errors"], 1)
         self.assertEqual(summary["intent_counts"]["document_question"], 1)
         self.assertEqual(summary["tool_counts"]["compare_documents"], 1)
+        self.assertEqual(summary["workflow_route_decision_counts"]["document_question->consult_documents"], 1)
+        self.assertEqual(summary["workflow_guardrail_decision_counts"]["finish_needs_review_agent"], 1)
         self.assertEqual(summary["review_reasons"]["comparison_grounding_is_partial"], 1)

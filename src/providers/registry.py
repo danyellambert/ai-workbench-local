@@ -1,3 +1,6 @@
+import os
+from dataclasses import replace
+
 from src.config import (
     get_huggingface_inference_settings,
     get_huggingface_server_settings,
@@ -47,6 +50,57 @@ def filter_registry_by_capability(
     }
 
 
+def describe_embedding_provider_unavailable_reason(
+    provider_key: str,
+    provider_data: dict[str, object] | None = None,
+) -> str:
+    if provider_key == "huggingface_server":
+        return "o serviço atual não publicou aliases com suporte a embeddings (`supports_embeddings=true`) no catálogo `/v1/models`."
+    if provider_key == "huggingface_inference":
+        return "configure `HUGGINGFACE_INFERENCE_EMBEDDING_MODEL` para habilitar embeddings nesse runtime remoto."
+    if provider_key == "huggingface_local":
+        return "o runtime local de embeddings do ecossistema Hugging Face não está disponível ou não foi configurado neste ambiente."
+    if provider_key == "openai":
+        return "o provider OpenAI não está disponível no ambiente atual ou não foi configurado com chave/modelo adequados."
+    return "este provider não expõe embeddings na configuração atual."
+
+
+def build_embedding_provider_sidebar_state(
+    registry: dict[str, dict[str, object]],
+) -> dict[str, object]:
+    available_registry = filter_registry_by_capability(registry, "embeddings")
+    available_options = {
+        provider_key: str(provider_data.get("label") or provider_key)
+        for provider_key, provider_data in available_registry.items()
+    }
+    available_models_by_provider = {
+        provider_key: (
+            provider_data["instance"].list_available_embedding_models()
+            if hasattr(provider_data["instance"], "list_available_embedding_models")
+            else provider_data["instance"].list_available_models()
+        )
+        for provider_key, provider_data in available_registry.items()
+    }
+    unavailable_items: list[dict[str, str]] = []
+    for provider_key, provider_data in registry.items():
+        if provider_key in available_registry or not isinstance(provider_data, dict):
+            continue
+        unavailable_items.append(
+            {
+                "provider_key": provider_key,
+                "label": str(provider_data.get("label") or provider_key),
+                "reason": describe_embedding_provider_unavailable_reason(provider_key, provider_data),
+            }
+        )
+    unavailable_items.sort(key=lambda item: item["label"].lower())
+    return {
+        "available_registry": available_registry,
+        "available_options": available_options,
+        "available_models_by_provider": available_models_by_provider,
+        "unavailable_items": unavailable_items,
+    }
+
+
 def build_provider_registry() -> dict[str, dict[str, object]]:
     ollama_settings = get_ollama_settings()
     registry: dict[str, dict[str, object]] = {
@@ -90,20 +144,37 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
         }
 
     huggingface_server_settings = get_huggingface_server_settings()
-    if (
-        huggingface_server_settings.base_url
-        and huggingface_server_settings.model
-        and HuggingFaceServerProvider is not None
-    ):
-        registry["huggingface_server"] = {
-            "label": "Hugging Face server local",
-            "detail": f"Servidor local configurado em `{huggingface_server_settings.base_url}`",
-            "instance": HuggingFaceServerProvider(huggingface_server_settings),
-            "supports_chat": True,
-            "supports_embeddings": bool(huggingface_server_settings.embedding_model),
-            "default_model": huggingface_server_settings.model,
-            "default_context_window": huggingface_server_settings.default_context_window,
-        }
+    if HuggingFaceServerProvider is not None:
+        candidate_settings = []
+        if huggingface_server_settings.base_url:
+            candidate_settings.append((huggingface_server_settings, False))
+        else:
+            for candidate_base_url in [
+                str(os.getenv("HF_LOCAL_LLM_SERVICE_BASE_URL") or "").strip(),
+                "http://127.0.0.1:8788/v1",
+            ]:
+                if not candidate_base_url:
+                    continue
+                candidate_settings.append((replace(huggingface_server_settings, base_url=candidate_base_url), True))
+
+        for candidate_setting, autodiscovered in candidate_settings:
+            huggingface_server_provider = HuggingFaceServerProvider(candidate_setting)
+            available_server_models = huggingface_server_provider.list_available_models()
+            if not available_server_models:
+                continue
+            available_server_embedding_models = huggingface_server_provider.list_available_embedding_models()
+            default_server_model = candidate_setting.model or available_server_models[0]
+            detail_prefix = "Servidor local auto-descoberto em" if autodiscovered else "Servidor local configurado em"
+            registry["huggingface_server"] = {
+                "label": "Hugging Face server local",
+                "detail": f"{detail_prefix} `{candidate_setting.base_url}`",
+                "instance": huggingface_server_provider,
+                "supports_chat": True,
+                "supports_embeddings": bool(available_server_embedding_models),
+                "default_model": default_server_model,
+                "default_context_window": candidate_setting.default_context_window,
+            }
+            break
 
     huggingface_inference_settings = get_huggingface_inference_settings()
     if (

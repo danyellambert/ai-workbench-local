@@ -234,6 +234,8 @@ def infer_model_comparison_runtime_bucket(provider_name: str, model_name: str) -
 
     if normalized_provider in {"openai", "huggingface_inference"}:
         return "cloud"
+    if normalized_provider == "huggingface_server":
+        return "local"
     if normalized_provider == "huggingface_local":
         return "experimental_local"
     if "cloud" in normalized_model:

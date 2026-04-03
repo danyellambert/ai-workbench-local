@@ -84,6 +84,22 @@ class StructuredServiceTests(unittest.TestCase):
 
         self.assertEqual(resolved, 32768)
 
+    def test_resolve_context_window_uses_huggingface_server_cap(self) -> None:
+        service = StructuredOutputService()
+        request = TaskExecutionRequest(
+            task_type="summary",
+            input_text="x" * 90000,
+            provider="huggingface_server",
+        )
+
+        resolved = service.resolve_context_window(
+            request,
+            max_context_window=8192,
+            effective_provider="huggingface_server",
+        )
+
+        self.assertEqual(resolved, 32768)
+
 
 if __name__ == "__main__":
     unittest.main()
