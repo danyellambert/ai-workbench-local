@@ -33,6 +33,7 @@ class EvidencePipelineConfig:
 def build_evidence_config_from_rag_settings(rag_settings) -> EvidencePipelineConfig:
     return EvidencePipelineConfig(
         ollama_base_url="http://localhost:11434",
-        ocr_backend="ocrmypdf",
+        vl_model=getattr(rag_settings, "evidence_vl_model", "sorc/qwen3.5-instruct:2b"),
+        ocr_backend=getattr(rag_settings, "evidence_ocr_backend", "ocrmypdf"),
         image_dpi=getattr(rag_settings, "pdf_scan_image_ocr_oversample_dpi", 300),
     )

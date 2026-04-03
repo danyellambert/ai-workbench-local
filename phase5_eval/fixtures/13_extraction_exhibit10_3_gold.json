@@ -1,0 +1,333 @@
+{
+  "name": "Real document gold set - extraction exhibit10-3.pdf",
+  "task_type": "extraction",
+  "document_name": "exhibit10-3.pdf",
+  "document_path": "data/materials_demo/extraction/exhibit10-3.pdf",
+  "input_text": "Extract the main subject, counterparties, key fields, servicing obligations, repurchase obligations, notices, governing law, and grounded action items from the selected agreement.",
+  "gold_type": "rubric",
+  "notes": "Manual gold set prepared from Exhibit 10.3. The evaluator should prefer grounded contract obligations and governance terms instead of title-only extraction.",
+  "expected": {
+    "evaluation_guidance": {
+      "core_required_fields": [
+        "main_subject",
+        "entities",
+        "extracted_fields",
+        "relationships",
+        "action_items"
+      ],
+      "secondary_but_expected_fields": [
+        "categories",
+        "important_dates",
+        "important_numbers",
+        "clause_coverage",
+        "grounded_evidence_per_field"
+      ],
+      "minimum_entity_hits": 4,
+      "minimum_field_hits": 5,
+      "minimum_action_hits": 4,
+      "minimum_risk_hits": 2,
+      "threshold_overrides": {
+        "pass_ratio": 0.64,
+        "warn_ratio": 0.42
+      }
+    },
+    "main_subject_aliases": [
+      "Seller’s Purchase, Warranties and Interim Servicing Agreement between DLJ Mortgage Capital, Inc. and E-LOAN, Inc.",
+      "mortgage purchase, warranties and interim servicing agreement",
+      "agreement governing mortgage loan purchase and interim servicing"
+    ],
+    "categories_any": [
+      "Agreement",
+      "Contract",
+      "Interim Servicing Agreement"
+    ],
+    "entities_present": [
+      {
+        "value_aliases": [
+          "DLJ Mortgage Capital, Inc.",
+          "DLJ Mortgage Capital"
+        ],
+        "type_aliases": [
+          "organization"
+        ]
+      },
+      {
+        "value_aliases": [
+          "E-LOAN, Inc.",
+          "E-LOAN"
+        ],
+        "type_aliases": [
+          "organization"
+        ]
+      },
+      {
+        "value_aliases": [
+          "Fannie Mae"
+        ],
+        "type_aliases": [
+          "organization"
+        ]
+      },
+      {
+        "value_aliases": [
+          "Freddie Mac"
+        ],
+        "type_aliases": [
+          "organization"
+        ]
+      }
+    ],
+    "fields_present": [
+      {
+        "name_aliases": [
+          "effective_date",
+          "agreement_date",
+          "date"
+        ],
+        "value_aliases": [
+          "April 1, 2003"
+        ]
+      },
+      {
+        "name_aliases": [
+          "document_type",
+          "agreement_type"
+        ],
+        "value_aliases": [
+          "Seller’s Purchase, Warranties and Interim Servicing Agreement",
+          "Interim Servicing Agreement"
+        ]
+      },
+      {
+        "name_aliases": [
+          "purchaser",
+          "counterparty"
+        ],
+        "value_aliases": [
+          "DLJ Mortgage Capital, Inc."
+        ]
+      },
+      {
+        "name_aliases": [
+          "seller",
+          "servicer",
+          "counterparty"
+        ],
+        "value_aliases": [
+          "E-LOAN, Inc."
+        ]
+      },
+      {
+        "name_aliases": [
+          "governing_law"
+        ],
+        "value_aliases": [
+          "State of New York",
+          "New York"
+        ]
+      },
+      {
+        "name_aliases": [
+          "interim_servicing_fee",
+          "servicing_fee"
+        ],
+        "value_aliases": [
+          "$7 per Mortgage Loan per month",
+          "seven dollars ($7) per Mortgage Loan per month"
+        ]
+      }
+    ],
+    "relationships_present": [
+      {
+        "from_aliases": [
+          "DLJ Mortgage Capital, Inc."
+        ],
+        "to_aliases": [
+          "E-LOAN, Inc."
+        ],
+        "relationship_aliases": [
+          "purchaser_of_mortgage_loans_from",
+          "agreement_between",
+          "purchases from"
+        ]
+      },
+      {
+        "from_aliases": [
+          "E-LOAN, Inc."
+        ],
+        "to_aliases": [
+          "Mortgage Loans"
+        ],
+        "relationship_aliases": [
+          "services",
+          "interim services",
+          "seller_and_servicer_of"
+        ]
+      }
+    ],
+    "expected_clause_coverage": [
+      {
+        "clause_aliases": [
+          "Agreement to Purchase"
+        ],
+        "required_terms": [
+          "purchase",
+          "mortgage loans"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Purchase Price"
+        ],
+        "required_terms": [
+          "purchase price",
+          "scheduled principal balance"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Quality Control Procedures"
+        ],
+        "required_terms": [
+          "quality control",
+          "verify"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Repurchase; Substitution"
+        ],
+        "required_terms": [
+          "repurchase",
+          "substitute"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Monthly Advances by the Servicer"
+        ],
+        "required_terms": [
+          "monthly advances",
+          "custodial account"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Indemnification; Third Party Claims"
+        ],
+        "required_terms": [
+          "indemnify",
+          "third party claims"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Governing Law"
+        ],
+        "required_terms": [
+          "governing law",
+          "New York"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "No Solicitation"
+        ],
+        "required_terms": [
+          "solicit",
+          "refinance"
+        ]
+      }
+    ],
+    "expected_risks": [
+      {
+        "aliases": [
+          "repurchase risk for defective mortgage loans",
+          "seller must repurchase loans for uncured breaches",
+          "repurchase obligation if mortgage loan representations are breached"
+        ]
+      },
+      {
+        "aliases": [
+          "document-delivery delay risk tied to recording offices and closing deadlines",
+          "delay in delivery of recorded mortgage documents",
+          "seller must use best efforts to deliver delayed recorded documents within 120 days"
+        ]
+      },
+      {
+        "aliases": [
+          "servicer indemnification exposure for failures in servicing or compliance",
+          "third party claims indemnification",
+          "liability if servicing obligations are not observed"
+        ]
+      }
+    ],
+    "expected_action_items": [
+      {
+        "aliases": [
+          "deliver the mortgage loan schedule at least four business days before closing",
+          "provide the mortgage loan schedule before the closing date",
+          "deliver mortgage loan schedule in electronic format"
+        ]
+      },
+      {
+        "aliases": [
+          "deliver mortgage loan documents within five business days prior to closing",
+          "deliver original recorded documents within 90 days when delayed by recording office",
+          "use best efforts to deliver delayed recorded documents within 120 days"
+        ]
+      },
+      {
+        "aliases": [
+          "deposit custodial-account collections daily",
+          "segregate and hold mortgage funds separate from seller funds",
+          "maintain custodial account and escrow account"
+        ]
+      },
+      {
+        "aliases": [
+          "maintain hazard insurance flood insurance and mortgage insurance coverage",
+          "pay taxes insurance and charges in a timely manner",
+          "force place flood insurance if needed"
+        ]
+      },
+      {
+        "aliases": [
+          "provide annual statement as to compliance and annual independent accountants servicing report",
+          "furnish annual compliance certificate",
+          "deliver annual servicing report"
+        ]
+      },
+      {
+        "aliases": [
+          "notify mortgagors and taxing authorities on servicing transfer",
+          "transfer servicing records escrow balances and servicing files on servicing transfer date",
+          "wire escrow payments and suspense balances on servicing transfer"
+        ]
+      }
+    ],
+    "expected_operational_restrictions": [
+      {
+        "aliases": [
+          "no transfer of servicing without prior written approval of the purchaser",
+          "governing law is New York",
+          "no solicitation of mortgagors to refinance without consent"
+        ]
+      }
+    ],
+    "important_dates_any": [
+      "April 1, 2003",
+      "90 days",
+      "120 days",
+      "30 days"
+    ],
+    "important_numbers_any": [
+      "$7",
+      "five (5) business days",
+      "90 days",
+      "120 days",
+      "30 days"
+    ],
+    "minimum_clause_hits": 5
+  }
+}

@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import Any
 
 from src.config import get_rag_settings
+from src.evals.phase8_thresholds import CHECKLIST_REGRESSION_THRESHOLDS
 from src.storage.phase8_eval_store import append_eval_run
 from src.storage.rag_store import load_rag_store
 from src.structured.envelope import TaskExecutionRequest
@@ -85,6 +86,16 @@ def _matches_expected(item_text: str, expected: dict[str, Any]) -> bool:
     if required_terms and all(term and term in item_text for term in required_terms):
         return True
     return False
+
+
+def _is_collapsed_match_group(matches: list[dict[str, Any]]) -> bool:
+    if len(matches) <= 1:
+        return False
+    expected_indexes = [int(item.get("expected_index") or 0) for item in matches]
+    phases = {str(item.get("phase") or "") for item in matches if item.get("phase")}
+    if len(phases) == 1:
+        return True
+    return (max(expected_indexes) - min(expected_indexes)) <= 2
 
 
 def _is_artifact_item(item: dict[str, Any]) -> bool:
@@ -157,16 +168,20 @@ def _evaluate_checklist_payload(payload: dict[str, Any], fixture: dict[str, Any]
 
     collapsed_items: list[dict[str, Any]] = []
     for index, item_text in enumerate(item_texts):
-        matched_expected_ids = [
-            str(expected.get("id"))
-            for expected in expected_sequence
+        matched_expected_rows = [
+            {
+                "expected_id": str(expected.get("id")),
+                "expected_index": expected_index,
+                "phase": expected.get("phase"),
+            }
+            for expected_index, expected in enumerate(expected_sequence)
             if _matches_expected(item_text, expected)
         ]
-        if len(matched_expected_ids) > 1:
+        if _is_collapsed_match_group(matched_expected_rows):
             collapsed_items.append({
                 "item_index": index,
                 "title": items[index].get("title"),
-                "matched_expected_ids": matched_expected_ids,
+                "matched_expected_ids": [row["expected_id"] for row in matched_expected_rows],
             })
 
     unexpected_items = [
@@ -180,6 +195,8 @@ def _evaluate_checklist_payload(payload: dict[str, Any], fixture: dict[str, Any]
     ]
 
     coverage = len(matched) / max(len(expected_sequence), 1)
+    grounded_item_rate = round(len(grounded_items) / max(len(items), 1), 4) if items else 0.0
+    citation_precision_proxy = round(len(citation_ready_items) / max(len(items), 1), 4) if items else 0.0
     status = "PASS"
     reasons: list[str] = []
     if duplicate_ids:
@@ -191,12 +208,24 @@ def _evaluate_checklist_payload(payload: dict[str, Any], fixture: dict[str, Any]
     if collapsed_items:
         status = "FAIL"
         reasons.append(f"collapsed items detected: {len(collapsed_items)}")
-    if coverage < 0.75:
+    if coverage < float(CHECKLIST_REGRESSION_THRESHOLDS.get("warn_min_coverage") or 0.75):
         status = "FAIL"
         reasons.append(f"coverage too low: {coverage:.2%}")
-    elif coverage < 0.9 and status != "FAIL":
+    elif coverage < float(CHECKLIST_REGRESSION_THRESHOLDS.get("pass_min_coverage") or 0.9) and status != "FAIL":
         status = "WARN"
         reasons.append(f"coverage below target: {coverage:.2%}")
+    if grounded_item_rate < float(CHECKLIST_REGRESSION_THRESHOLDS.get("warn_min_grounded_item_rate") or 0.65):
+        status = "FAIL"
+        reasons.append(f"grounded item rate too low: {grounded_item_rate:.2%}")
+    elif grounded_item_rate < float(CHECKLIST_REGRESSION_THRESHOLDS.get("pass_min_grounded_item_rate") or 0.85) and status != "FAIL":
+        status = "WARN"
+        reasons.append(f"grounded item rate below target: {grounded_item_rate:.2%}")
+    if citation_precision_proxy < float(CHECKLIST_REGRESSION_THRESHOLDS.get("warn_min_citation_precision_proxy") or 0.55):
+        status = "FAIL"
+        reasons.append(f"citation precision proxy too low: {citation_precision_proxy:.2%}")
+    elif citation_precision_proxy < float(CHECKLIST_REGRESSION_THRESHOLDS.get("pass_min_citation_precision_proxy") or 0.75) and status != "FAIL":
+        status = "WARN"
+        reasons.append(f"citation precision proxy below target: {citation_precision_proxy:.2%}")
     if order_breaks and status == "PASS":
         status = "WARN"
         reasons.append(f"order breaks detected: {len(order_breaks)}")
@@ -207,8 +236,9 @@ def _evaluate_checklist_payload(payload: dict[str, Any], fixture: dict[str, Any]
     return {
         "status": status,
         "coverage": round(coverage, 4),
-        "grounded_item_rate": round(len(grounded_items) / max(len(items), 1), 4) if items else 0.0,
-        "citation_precision_proxy": round(len(citation_ready_items) / max(len(items), 1), 4) if items else 0.0,
+        "grounded_item_rate": grounded_item_rate,
+        "citation_precision_proxy": citation_precision_proxy,
+        "thresholds": CHECKLIST_REGRESSION_THRESHOLDS,
         "expected_items": len(expected_sequence),
         "matched_items": len(matched),
         "missing_items": missing,
@@ -350,6 +380,7 @@ def main() -> int:
             "metadata": {
                 "fixture": str(Path(args.fixture)),
                 "document_id": document.get("document_id"),
+                "thresholds": CHECKLIST_REGRESSION_THRESHOLDS,
             },
         },
     )
