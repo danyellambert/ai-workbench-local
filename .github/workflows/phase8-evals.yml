@@ -1,0 +1,42 @@
+name: phase8-evals
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  deterministic-evals:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run eval-related unit tests
+        run: |
+          python -m unittest \
+            tests.test_phase8_eval_store_unittest \
+            tests.test_phase8_eval_diagnosis_unittest \
+            tests.test_phase8_agent_workflow_eval_unittest \
+            tests.test_phase8_live_evals_unittest \
+            tests.test_runtime_snapshot_unittest \
+            tests.test_phase5_real_document_eval_unittest
+
+      - name: Run deterministic workflow eval suite
+        run: |
+          python scripts/run_phase8_agent_workflow_eval.py --out phase5_eval/reports/phase8_agent_workflow_eval_ci.json
+
+      - name: Generate eval summary and diagnosis
+        run: |
+          python scripts/report_phase8_eval_store.py --limit 10 --out phase5_eval/reports/phase8_eval_summary_ci.json
+          python scripts/report_phase8_eval_diagnosis.py --out phase5_eval/reports/phase8_eval_diagnosis_ci.json

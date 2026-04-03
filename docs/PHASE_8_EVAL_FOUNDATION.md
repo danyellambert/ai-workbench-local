@@ -15,6 +15,34 @@ Create a reusable local evaluation layer that persists quality signals over time
 - historical backfill from legacy JSON reports
 - diagnostic report for persistent failures and adaptation candidates
 - explicit decision summary showing when the current prompt+RAG stack seems sufficient and when targeted adaptation may be justified
+- runtime snapshot/sidebar integration exposing recent eval readiness signals directly in the app, including:
+  - global recommendation for Phase 8.5 readiness
+  - top failure reasons
+  - healthy tasks where prompt+RAG still seem sufficient
+  - adaptation candidates and next eval priorities
+- explicit threshold catalog per suite/task in `src/evals/phase8_thresholds.py`
+- additional manually reviewed real-document gold sets for:
+  - `asap-2025-annual-report-tagged.pdf`
+  - `exhibit10-3.pdf`
+  - `Sample-Resume-1-07262023.pdf`
+  - `Sample-Resume-2-1.pdf`
+  - `Sample-Resume-3-.pdf`
+- curated public-source registry for selected extra local materials in `data/materials_demo/public_material_sources.json`
+- helper script to reproduce/download selected public materials:
+
+```bash
+python scripts/download_phase8_public_materials.py --dry-run
+```
+
+- live/local eval orchestration script for prepared provider + RAG environments:
+
+```bash
+python scripts/run_phase8_live_evals.py --preflight-only
+python scripts/run_phase8_live_evals.py --limit-structured-docs 3
+```
+- separate GitHub Actions workflow for environment-dependent live evals in `.github/workflows/phase8-evals-live.yml`
+- operating routine document for continuous use in `docs/PHASE_8_EVAL_OPERATING_RHYTHM.md`
+- GitHub Actions workflow for deterministic eval/test coverage in `.github/workflows/phase8-evals.yml`
 - aggregated report script:
 
 ```bash
@@ -74,6 +102,10 @@ This suite now also exposes groundedness/citation proxies such as:
 python scripts/evaluate_evidence_cv_gold_set.py
 ```
 
+Default gold set fixture:
+
+- `phase5_eval/fixtures/evidence_cv_mini_gold_set.json`
+
 Writes one eval run per file and per variant:
 
 - `legacy`
@@ -95,6 +127,22 @@ This deterministic suite covers:
 - transition accuracy
 - retry useful vs unnecessary
 - latency for routing/guardrail evaluation
+
+### 5. Live eval orchestration for prepared local environments
+
+```bash
+python scripts/run_phase8_live_evals.py --preflight-only
+python scripts/run_phase8_live_evals.py --limit-structured-docs 3
+```
+
+This orchestration layer is intended for local/self-hosted environments where the following are already available:
+
+- local provider runtime (for example Ollama)
+- local/accessible embedding runtime
+- indexed documents in the RAG store
+- local real-document gold fixtures
+
+It can also optionally attempt to index missing manifest documents before execution.
 
 ## Historical backfill
 

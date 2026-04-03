@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from ..evals.phase8_thresholds import EVIDENCE_CV_GOLD_THRESHOLDS
 from .phase8_eval_store import append_eval_run
 
 
@@ -44,19 +45,19 @@ def _build_evidence_eval_entry(
     score = round(avg_f1 * 4, 3)
 
     status = "PASS"
-    if avg_f1 < 0.65:
+    if avg_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("warn_min_avg_f1") or 0.65):
         status = "FAIL"
-    elif avg_f1 < 0.9:
+    elif avg_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("pass_min_avg_f1") or 0.9):
         status = "WARN"
 
     reasons: list[str] = []
-    if email_f1 < 0.9:
+    if email_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("email_f1_target") or 0.9):
         reasons.append(f"email_f1_below_target:{email_f1:.3f}")
-    if phone_f1 < 0.9:
+    if phone_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("phone_f1_target") or 0.9):
         reasons.append(f"phone_f1_below_target:{phone_f1:.3f}")
-    if name_f1 < 1.0:
+    if name_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("name_f1_target") or 1.0):
         reasons.append(f"name_match_incomplete:{name_f1:.3f}")
-    if location_f1 < 1.0:
+    if location_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("location_f1_target") or 1.0):
         reasons.append(f"location_match_incomplete:{location_f1:.3f}")
 
     return {
@@ -81,6 +82,7 @@ def _build_evidence_eval_entry(
             "source_report": str(report_path),
             "gold_set": gold_set,
             "variant": variant,
+            "thresholds": EVIDENCE_CV_GOLD_THRESHOLDS,
         },
     }
 
@@ -88,8 +90,11 @@ def _build_evidence_eval_entry(
 def import_eval_history_reports(reports_dir: Path, db_path: Path) -> dict[str, int]:
     counts = {
         "structured_smoke_eval": 0,
+        "structured_real_document_eval": 0,
         "checklist_regression": 0,
         "evidence_cv_gold_eval": 0,
+        "document_agent_routing_eval": 0,
+        "langgraph_workflow_eval": 0,
     }
 
     for report_path in sorted(reports_dir.glob("phase5_structured_eval_*.json")):
@@ -102,11 +107,12 @@ def import_eval_history_reports(reports_dir: Path, db_path: Path) -> dict[str, i
         for task_entry in payload.get("tasks") or []:
             if not isinstance(task_entry, dict):
                 continue
+            suite_name = str(task_entry.get("suite_name") or "structured_smoke_eval")
             row_id = append_eval_run(
                 db_path,
                 {
                     "created_at": created_at,
-                    "suite_name": "structured_smoke_eval",
+                    "suite_name": suite_name,
                     "task_type": str(task_entry.get("task") or "unknown"),
                     "case_name": f"fixture:{str(task_entry.get('task') or 'unknown')}",
                     "provider": provider,
@@ -126,7 +132,7 @@ def import_eval_history_reports(reports_dir: Path, db_path: Path) -> dict[str, i
                 },
             )
             if row_id:
-                counts["structured_smoke_eval"] += 1
+                counts[suite_name] = counts.get(suite_name, 0) + 1
 
     for report_path in sorted(reports_dir.glob("checklist_regression_*.json")):
         payload = _read_json(report_path)
@@ -191,5 +197,29 @@ def import_eval_history_reports(reports_dir: Path, db_path: Path) -> dict[str, i
                 )
                 if row_id:
                     counts["evidence_cv_gold_eval"] += 1
+
+    for report_path in sorted(reports_dir.glob("phase8_agent_workflow_eval*.json")):
+        payload = _read_json(report_path)
+        if not payload:
+            continue
+        generated_at = str(payload.get("generated_at") or _json_mtime_iso(report_path))
+        for result_key, suite_name in (("routing_results", "document_agent_routing_eval"), ("workflow_results", "langgraph_workflow_eval")):
+            for item in payload.get(result_key) or []:
+                if not isinstance(item, dict):
+                    continue
+                row_id = append_eval_run(
+                    db_path,
+                    {
+                        "created_at": generated_at,
+                        **item,
+                        "suite_name": str(item.get("suite_name") or suite_name),
+                        "metadata": {
+                            **(item.get("metadata") if isinstance(item.get("metadata"), dict) else {}),
+                            "source_report": str(report_path),
+                        },
+                    },
+                )
+                if row_id:
+                    counts[suite_name] = counts.get(suite_name, 0) + 1
 
     return counts
