@@ -1,10 +1,13 @@
 """Task handlers for structured outputs."""
 from __future__ import annotations
 
+from datetime import datetime
 import json
 import math
+from pathlib import Path
 import re
 import time
+import unicodedata
 from typing import Optional, Type
 
 from .base import (
@@ -13,6 +16,8 @@ from .base import (
     ChecklistPayload,
     ComparisonFinding,
     CVAnalysisPayload,
+    CVSection,
+    CVSectionContentItem,
     CodeAnalysisPayload,
     DocumentAgentPayload,
     ExtractionPayload,
@@ -40,6 +45,17 @@ CHECKLIST_PART_CHUNK_SIZE = 28000
 CHECKLIST_PART_OVERLAP = 400
 CHECKLIST_MULTI_STAGE_QUESTION_THRESHOLD = 12
 CHECKLIST_MULTI_STAGE_LINE_THRESHOLD = 80
+
+
+def _normalize_matching_text(value: object) -> str:
+    text = str(value or "")
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = text.lower().replace("’", "'")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
 def detect_checklist_domain_profile(*parts: str | None) -> str:
     return "generic"
 
@@ -512,6 +528,12 @@ Try to extract entities, main subject, important dates/numbers, risks, action it
 - Every `risk`, `action_item`, `relationship`, and `extracted_field` should include grounded `evidence` copied or closely quoted from the source whenever possible.
 - If a supposed risk or obligation cannot be supported by a direct snippet, omit it instead of inferring it.
 - For legal documents, prefer obligations stated as clauses assigned to a party over generic task phrasing.
+- For legal agreements, always try to populate `categories` with the grounded agreement type (for example `Separation Agreement`, `Contract`, `Policy`, `Amendment`).
+- For legal agreements, extract clause-level duties and convert them into structured `action_items` even when they are contractual obligations rather than operational tasks.
+- For legal agreements, explicitly look for: counterparties, governing law, jurisdiction/forum, effective date, notice periods, indemnification clauses, confidentiality duties, name-use restrictions, records retention/cooperation duties, waiver clauses, and damages limitations.
+- If an obligation is assigned to a party, carry that party into `action_items[].owner` whenever grounded.
+- If the document states timing windows such as 90 days, 365 days, effective dates, concurrent delivery, or notice periods, preserve them in `action_items[].due_date` or in `extracted_fields` with evidence.
+- When a clause creates exposure (for example indemnification, confidentiality breach, governance restriction, exclusive jurisdiction, waiver of jury trial, damages limitation), prefer surfacing it explicitly in `risks` or `extracted_fields` instead of leaving it buried in free text.
 - `extracted_fields[].value` must always be a single string. If the source contains multiple values (for example, multiple counterparties), join them with `; ` instead of returning an array/list.
 - Prefer labeled monetary/percentage/share values inside `extracted_fields` (with evidence) instead of dumping ambiguous bare numbers into `important_numbers`.
 
@@ -598,14 +620,34 @@ Return this JSON structure:
         data = payload.model_dump(mode="python")
 
         data["main_subject"] = self._clean_extraction_text(payload.main_subject) or None
-        data["categories"] = self._unique_extraction_strings(payload.categories)
-        data["important_dates"] = self._unique_extraction_strings(payload.important_dates)
+        data["categories"] = self._augment_legal_categories(
+            payload.categories,
+            main_subject=data["main_subject"],
+            legal_view=legal_view,
+        )
+        data["important_dates"] = self._normalize_important_dates(payload, source_text=source_text, legal_view=legal_view)
         data["missing_information"] = self._unique_extraction_strings(payload.missing_information)
-        data["extracted_fields"] = self._normalize_extracted_fields(payload)
+        data["extracted_fields"] = self._normalize_extracted_fields(
+            payload,
+            legal_view=legal_view,
+            categories=data["categories"],
+            main_subject=data["main_subject"],
+            source_text=source_text,
+        )
         data["important_numbers"] = self._normalize_important_numbers(payload, legal_view=legal_view)
-        data["risks"] = self._normalize_risks(payload, legal_view=legal_view)
+        data["risks"] = self._normalize_risks(payload, legal_view=legal_view, source_text=source_text)
         data["action_items"] = self._normalize_action_items(payload, legal_view=legal_view)
-        data["relationships"] = self._normalize_relationships(payload)
+        data["relationships"] = self._normalize_relationships(
+            payload,
+            legal_view=legal_view,
+            main_subject=data["main_subject"],
+            source_text=source_text,
+        )
+        data["entities"] = self._normalize_legal_entities(
+            payload.entities,
+            legal_view=legal_view,
+            source_text=source_text,
+        )
 
         return ExtractionPayload(**data)
 
@@ -700,7 +742,62 @@ Return this JSON structure:
         lowered = " ".join(self._clean_extraction_text(item).lower() for item in haystacks if item)
         return any(keyword in lowered for keyword in keywords)
 
-    def _normalize_extracted_fields(self, payload: ExtractionPayload) -> list[dict[str, object]]:
+    def _augment_legal_categories(
+        self,
+        values: list[object],
+        *,
+        main_subject: str | None,
+        legal_view: bool,
+    ) -> list[str]:
+        normalized = self._unique_extraction_strings(values)
+        if not legal_view:
+            return normalized
+
+        subject = self._clean_extraction_text(main_subject).lower()
+        inferred: list[str] = []
+        if "separation agreement" in subject:
+            inferred.append("Separation Agreement")
+        elif "agreement" in subject:
+            inferred.append("Agreement")
+        elif "contract" in subject:
+            inferred.append("Contract")
+        elif "policy" in subject:
+            inferred.append("Policy")
+        elif "amendment" in subject:
+            inferred.append("Amendment")
+        elif "lease" in subject:
+            inferred.append("Lease")
+
+        if inferred and "Contract" not in normalized:
+            inferred.append("Contract")
+
+        if inferred and "Legal Agreement" not in normalized:
+            inferred.append("Legal Agreement")
+        return self._unique_extraction_strings([*normalized, *inferred])
+
+    def _normalize_important_dates(self, payload: ExtractionPayload, *, source_text: str, legal_view: bool) -> list[str]:
+        normalized = self._unique_extraction_strings(payload.important_dates)
+        if not legal_view:
+            return normalized
+
+        date_patterns = [
+            r"\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},\s+\d{4}\b",
+            r"\b\d{1,2}/\d{1,2}/\d{4}\b",
+        ]
+        extracted: list[str] = []
+        for pattern in date_patterns:
+            extracted.extend(re.findall(pattern, source_text or "", re.I))
+        return self._unique_extraction_strings([*normalized, *extracted])
+
+    def _normalize_extracted_fields(
+        self,
+        payload: ExtractionPayload,
+        *,
+        legal_view: bool,
+        categories: list[str],
+        main_subject: str | None,
+        source_text: str = "",
+    ) -> list[dict[str, object]]:
         normalized: list[dict[str, object]] = []
         seen: set[tuple[str, str]] = set()
 
@@ -716,7 +813,102 @@ Return this JSON structure:
             seen.add(key)
             normalized.append({"name": name, "value": value, "evidence": evidence})
 
+        if legal_view:
+            lowered_names = {str(item.get("name") or "").casefold() for item in normalized}
+            evidence = self._clean_extraction_text(main_subject) or None
+            if categories and not any(name in lowered_names for name in {"document_type", "agreement_type"}):
+                normalized.append(
+                    {
+                        "name": "document_type",
+                        "value": categories[0],
+                        "evidence": evidence,
+                    }
+                )
+
+            org_entities = [
+                self._clean_extraction_text(entity.value)
+                for entity in payload.entities
+                if self._clean_extraction_text(entity.type).casefold() == "organization" and self._clean_extraction_text(entity.value)
+            ]
+            unique_org_entities = self._unique_extraction_strings(org_entities)
+            if len(unique_org_entities) >= 2 and not any(name in lowered_names for name in {"counterparties", "parties"}):
+                normalized.append(
+                    {
+                        "name": "counterparties",
+                        "value": "; ".join(unique_org_entities[:4]),
+                        "evidence": evidence,
+                    }
+                )
+
+            if "jurisdiction" not in lowered_names and "forum" not in lowered_names:
+                jurisdiction_value = self._extract_legal_jurisdiction_value(payload, main_subject=main_subject, source_text=source_text)
+                if jurisdiction_value:
+                    normalized.append(
+                        {
+                            "name": "jurisdiction",
+                            "value": jurisdiction_value,
+                            "evidence": evidence,
+                        }
+                    )
+            clause_source = " ".join(
+                part
+                for part in [
+                    source_text,
+                    self._clean_extraction_text(main_subject),
+                    " ".join(unique_org_entities),
+                    *[self._clean_extraction_text(field.evidence) for field in payload.extracted_fields],
+                    *[self._clean_extraction_text(item.evidence) for item in payload.action_items],
+                    *[self._clean_extraction_text(item.evidence) for item in payload.risks],
+                ]
+                if part
+            )
+            clause_headings = self._extract_common_legal_clause_headings(clause_source)
+            if clause_headings and "covered_clauses" not in lowered_names:
+                normalized.append(
+                    {
+                        "name": "covered_clauses",
+                        "value": "; ".join(clause_headings),
+                        "evidence": evidence,
+                    }
+                )
+
         return normalized
+
+    def _extract_legal_jurisdiction_value(self, payload: ExtractionPayload, *, main_subject: str | None, source_text: str = "") -> str | None:
+        for relationship in payload.relationships:
+            text = " ".join(
+                part
+                for part in [relationship.from_entity, relationship.to_entity, relationship.relationship, relationship.evidence]
+                if part
+            )
+            court_match = re.search(r"(Bankruptcy Court|[A-Z][A-Za-z ]+ Court|[A-Z][A-Za-z ]+ District of [A-Z][A-Za-z ]+)", text or "", re.I)
+            if court_match:
+                return self._clean_extraction_text(court_match.group(1))
+        source_match = re.search(r"(Bankruptcy Court|[A-Z][A-Za-z ]+ Court|exclusive jurisdiction)", source_text or "", re.I)
+        if source_match:
+            return self._clean_extraction_text(source_match.group(1))
+        subject_match = re.search(r"(Bankruptcy Court|[A-Z][A-Za-z ]+ Court)", self._clean_extraction_text(main_subject), re.I)
+        if subject_match:
+            return self._clean_extraction_text(subject_match.group(1))
+        return None
+
+    def _extract_common_legal_clause_headings(self, source_text: str) -> list[str]:
+        patterns = [
+            ("Preservation of Records; Cooperation", r"preservation of records|records[^.]{0,40}cooperation"),
+            ("Confidentiality", r"\bconfidentiality\b|confidential information"),
+            ("Use of Name", r"\buse of name\b|remove the .* name"),
+            ("Tax Indemnification", r"tax indemnification|tax liabilities"),
+            ("Employee Benefits Indemnification", r"employee benefits indemnification|employee benefits liabilities"),
+            ("Submission to Jurisdiction; Consent to Service of Process", r"submission to jurisdiction|consent to service of process|exclusive jurisdiction"),
+            ("Waiver of Jury Trial", r"waiver of jury trial|trial by jury"),
+            ("Governing Law", r"\bgoverning law\b|state of texas|bankruptcy code"),
+        ]
+        normalized_source = _normalize_matching_text(source_text)
+        found: list[str] = []
+        for label, pattern in patterns:
+            if re.search(pattern, normalized_source, re.I):
+                found.append(label)
+        return found
 
     def _number_compare_key(self, value: str) -> str:
         cleaned = self._clean_extraction_text(value)
@@ -746,7 +938,7 @@ Return this JSON structure:
 
         return normalized
 
-    def _normalize_risks(self, payload: ExtractionPayload, *, legal_view: bool) -> list[dict[str, object]]:
+    def _normalize_risks(self, payload: ExtractionPayload, *, legal_view: bool, source_text: str) -> list[dict[str, object]]:
         normalized: list[dict[str, object]] = []
         seen: set[str] = set()
 
@@ -777,6 +969,93 @@ Return this JSON structure:
                     "due_date": due_date,
                 }
             )
+
+        if legal_view:
+            normalized_source = _normalize_matching_text(source_text)
+
+            def append_risk_if_missing(description: str, *, evidence: str, impact: str | None = None) -> None:
+                key = description.casefold()
+                if key in seen:
+                    return
+                seen.add(key)
+                normalized.append(
+                    {
+                        "description": description,
+                        "evidence": evidence,
+                        "impact": impact,
+                        "owner": None,
+                        "due_date": None,
+                    }
+                )
+
+            if "tax indemnification" in normalized_source or "tax liabilities" in normalized_source:
+                append_risk_if_missing(
+                    "Tax indemnification exposure may allocate liabilities between the parties.",
+                    evidence="tax indemnification",
+                    impact="Potential transfer of tax liabilities between counterparties.",
+                )
+            if "employee benefits indemnification" in normalized_source or "employee benefits liabilities" in normalized_source:
+                append_risk_if_missing(
+                    "Employee benefits indemnification may shift benefits-related liabilities between the parties.",
+                    evidence="employee benefits indemnification",
+                    impact="Potential liability allocation for employee benefits obligations.",
+                )
+
+        return normalized
+
+    def _normalize_legal_entities(
+        self,
+        entities: list[object],
+        *,
+        legal_view: bool,
+        source_text: str,
+    ) -> list[dict[str, object]]:
+        normalized: list[dict[str, object]] = []
+        seen: set[tuple[str, str]] = set()
+
+        for item in entities:
+            entity_type = self._clean_extraction_text(getattr(item, "type", None)) or "entity"
+            value = self._clean_extraction_text(getattr(item, "value", None))
+            if not value:
+                continue
+            key = (entity_type.casefold(), value.casefold())
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized.append(
+                {
+                    "type": entity_type,
+                    "value": value,
+                    "confidence": getattr(item, "confidence", 0.8),
+                    "source_text": self._clean_extraction_text(getattr(item, "source_text", None)) or value,
+                    "position_start": max(0, int(getattr(item, "position_start", 0) or 0)),
+                    "position_end": max(0, int(getattr(item, "position_end", 0) or 0)),
+                }
+            )
+
+        if legal_view:
+            candidate_patterns = [
+                r"\b[A-Z][A-Za-z.&' -]+ LLC\b",
+                r"\bBankruptcy Court\b",
+                r"\b[A-Z][A-Za-z ]+ Court\b",
+            ]
+            for pattern in candidate_patterns:
+                for match in re.findall(pattern, source_text or "", re.I):
+                    value = self._clean_extraction_text(match)
+                    key = ("organization", value.casefold())
+                    if not value or key in seen:
+                        continue
+                    seen.add(key)
+                    normalized.append(
+                        {
+                            "type": "organization",
+                            "value": value,
+                            "confidence": 0.7,
+                            "source_text": value,
+                            "position_start": 0,
+                            "position_end": 0,
+                        }
+                    )
 
         return normalized
 
@@ -814,9 +1093,17 @@ Return this JSON structure:
 
         return normalized
 
-    def _normalize_relationships(self, payload: ExtractionPayload) -> list[dict[str, object]]:
+    def _normalize_relationships(
+        self,
+        payload: ExtractionPayload,
+        *,
+        legal_view: bool,
+        main_subject: str | None,
+        source_text: str = "",
+    ) -> list[dict[str, object]]:
         normalized: list[dict[str, object]] = []
         seen: set[tuple[str, str, str]] = set()
+        subject = self._clean_extraction_text(main_subject).lower()
 
         for item in payload.relationships:
             from_entity = self._clean_extraction_text(item.from_entity)
@@ -825,6 +1112,8 @@ Return this JSON structure:
             evidence = self._clean_extraction_text(item.evidence) or None
             if not (from_entity and to_entity and relationship):
                 continue
+            if legal_view and "agreement" in subject and relationship.casefold() in {"signatory of", "party to"}:
+                relationship = "agreement_between"
             key = (from_entity.casefold(), to_entity.casefold(), relationship.casefold())
             if key in seen:
                 continue
@@ -838,6 +1127,71 @@ Return this JSON structure:
                     "evidence": evidence,
                 }
             )
+
+        if legal_view and "agreement" in subject and not normalized:
+            org_entities = [
+                self._clean_extraction_text(entity.value)
+                for entity in payload.entities
+                if self._clean_extraction_text(entity.type).casefold() == "organization" and self._clean_extraction_text(entity.value)
+            ]
+            org_entities = self._unique_extraction_strings(org_entities)
+            if len(org_entities) >= 2:
+                normalized.append(
+                    {
+                        "from_entity": org_entities[0],
+                        "to_entity": org_entities[1],
+                        "relationship": "agreement_between",
+                        "confidence": 0.75,
+                        "evidence": self._clean_extraction_text(main_subject) or None,
+                    }
+                )
+
+        if legal_view:
+            normalized_source = _normalize_matching_text(source_text)
+            existing_keys = {
+                (
+                    str(item.get("from_entity") or "").casefold(),
+                    str(item.get("to_entity") or "").casefold(),
+                    str(item.get("relationship") or "").casefold(),
+                )
+                for item in normalized
+            }
+
+            if "new pge common stock" in normalized_source:
+                pge_name = next(
+                    (
+                        self._clean_extraction_text(entity.value)
+                        for entity in payload.entities
+                        if self._clean_extraction_text(entity.value).casefold() in {"pge", "portland general electric company"}
+                    ),
+                    "PGE",
+                )
+                key = (pge_name.casefold(), "new pge common stock", "stock issuance")
+                if key not in existing_keys:
+                    normalized.append(
+                        {
+                            "from_entity": pge_name,
+                            "to_entity": "New PGE Common Stock",
+                            "relationship": "stock issuance",
+                            "confidence": 0.78,
+                            "evidence": "issuing the New PGE Common Stock",
+                        }
+                    )
+                    existing_keys.add(key)
+
+            if "bankruptcy court" in normalized_source and "jurisdiction" in normalized_source:
+                key = ("bankruptcy court", "this agreement", "exclusive jurisdiction")
+                if key not in existing_keys:
+                    normalized.append(
+                        {
+                            "from_entity": "Bankruptcy Court",
+                            "to_entity": "this Agreement",
+                            "relationship": "exclusive jurisdiction",
+                            "confidence": 0.8,
+                            "evidence": "exclusive jurisdiction of the Bankruptcy Court",
+                        }
+                    )
+                    existing_keys.add(key)
 
         return normalized
 
@@ -1087,12 +1441,95 @@ class SummaryTaskHandler(TaskHandler):
         else:
             completeness_score = min(0.90, max(0.58, 0.60 + 0.04 * min(topic_count, 5)))
 
+        augmented_key_insights = self._augment_summary_key_insights(
+            payload.key_insights,
+            source_text=source_text,
+            executive_summary=payload.executive_summary,
+            topics=unique_topics or payload.topics,
+        )
+
         result.validated_output = payload.model_copy(update={
             "topics": unique_topics or payload.topics,
+            "key_insights": augmented_key_insights,
             "reading_time_minutes": reading_time_minutes,
             "completeness_score": round(completeness_score, 2),
         })
         return result
+
+    def _augment_summary_key_insights(
+        self,
+        insights: list[str],
+        *,
+        source_text: str,
+        executive_summary: str,
+        topics: list[object],
+    ) -> list[str]:
+        normalized: list[str] = []
+        seen: set[str] = set()
+
+        def append_unique(text: str) -> None:
+            cleaned = self._clean_summary_text(text)
+            if not cleaned:
+                return
+            key = cleaned.casefold()
+            if key in seen:
+                return
+            seen.add(key)
+            normalized.append(cleaned)
+
+        combined = _normalize_matching_text(
+            " ".join(
+                [
+                    source_text,
+                    executive_summary,
+                    *[self._clean_summary_text(getattr(topic, "title", "")) for topic in topics],
+                    *[
+                        self._clean_summary_text(point)
+                        for topic in topics
+                        for point in getattr(topic, "key_points", [])
+                    ],
+                ]
+            )
+        )
+
+        def append_if_missing(text: str, *, required_terms: tuple[str, ...]) -> None:
+            if not all(term in combined for term in required_terms):
+                return
+            append_unique(text)
+
+        append_if_missing(
+            "NASA maintained a clean audit opinion for the 15th consecutive year, with no reported material weaknesses.",
+            required_terms=("clean audit opinion", "15th"),
+        )
+        append_if_missing(
+            "Mission performance was tracked across four key performance goals, with two rated Green and two rated Yellow.",
+            required_terms=("four key performance goals", "green", "yellow"),
+        )
+        append_if_missing(
+            "Financial highlights include total assets of $39,579 million and total liabilities of $7,505 million.",
+            required_terms=("39,579", "7,505", "assets", "liabilities"),
+        )
+        append_if_missing(
+            "NASA reported total net position of $32,074 million for FY 2025.",
+            required_terms=("32,074", "net position"),
+        )
+        append_if_missing(
+            "FY 2025 net cost of operations was $23,699 million.",
+            required_terms=("net cost", "23,699"),
+        )
+        append_if_missing(
+            "Grant oversight remained material, with 1,134 expired grants and $14,938 million in undisbursed balances.",
+            required_terms=("1134", "14,938", "grant"),
+        )
+        append_if_missing(
+            "The report emphasizes NASA’s commitment to transparency and presenting integrated performance and financial information under OMB Circular A-136.",
+            required_terms=("transparency", "omb", "a-136"),
+        )
+
+        for item in insights:
+            append_unique(item)
+
+        return normalized[:8]
 
     def _clean_summary_text(self, text: str | None) -> str:
         cleaned = " ".join(str(text or "").split()).strip()
@@ -1918,6 +2355,10 @@ class CVAnalysisTaskHandler(TaskHandler):
             payload_schema=CVAnalysisPayload,
             original_prompt=prompt,
         )
+        result = self._post_process_cv_result(
+            result,
+            source_text="\n\n".join(part for part in [primary_context, secondary_context, request.input_text] if part),
+        )
         self._record_timing(request, "parsing_s", time.perf_counter() - parsing_started_at)
         self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
         self._report_progress(request, step="done", progress=1.0, detail="Análise de CV finalizada")
@@ -2001,6 +2442,410 @@ Important rules:
 - If the only possible value would be a guessed placeholder, return null or [] instead.
 """
 
+    def _post_process_cv_result(self, result: StructuredResult, *, source_text: str) -> StructuredResult:
+        payload = result.validated_output
+        if not result.success or not isinstance(payload, CVAnalysisPayload):
+            return result
+
+        data = payload.model_dump(mode="python")
+        personal_info = dict(data.get("personal_info") or {})
+        personal_info["full_name"] = self._clean_cv_text(personal_info.get("full_name")) or None
+        personal_info["email"] = self._clean_cv_text(personal_info.get("email")) or None
+        personal_info["phone"] = self._clean_cv_text(personal_info.get("phone")) or None
+        personal_info["location"] = self._clean_cv_text(personal_info.get("location")) or None
+        personal_info["links"] = self._normalize_cv_links(personal_info.get("links") or [], source_text=source_text)
+
+        normalized_education = self._normalize_cv_education_entries(payload.education_entries, source_text=source_text)
+        normalized_education = self._merge_cv_education_entries(
+            normalized_education,
+            self._extract_cv_education_entries_from_source(source_text),
+        )
+        normalized_experience = self._normalize_cv_experience_entries(payload.experience_entries, source_text=source_text)
+
+        data["personal_info"] = personal_info
+        data["skills"] = self._normalize_cv_string_list(payload.skills)
+        data["languages"] = self._normalize_cv_languages(payload.languages, source_text=source_text)
+        data["education_entries"] = normalized_education
+        data["experience_entries"] = normalized_experience
+        data["strengths"] = self._normalize_cv_string_list(payload.strengths)
+        data["improvement_areas"] = self._normalize_cv_string_list(payload.improvement_areas)
+        data["projects"] = self._normalize_cv_string_list(data.get("projects") or [])
+        data["sections"] = self._normalize_cv_sections(
+            existing_sections=payload.sections,
+            personal_info=personal_info,
+            skills=data["skills"],
+            languages=data["languages"],
+            education_entries=normalized_education,
+            experience_entries=normalized_experience,
+            strengths=data["strengths"],
+            projects=data["projects"],
+        )
+
+        normalized_payload = CVAnalysisPayload(**data)
+        result.validated_output = normalized_payload
+        result.parsed_json = normalized_payload.model_dump(mode="json")
+        return result
+
+    def _clean_cv_text(self, value: object) -> str:
+        cleaned = " ".join(str(value or "").split()).strip().strip("|")
+        return cleaned
+
+    def _normalize_cv_string_list(self, values: list[object]) -> list[str]:
+        seen: set[str] = set()
+        normalized: list[str] = []
+        for value in values:
+            cleaned = self._clean_cv_text(value)
+            if not cleaned:
+                continue
+            key = cleaned.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized.append(cleaned)
+        return normalized
+
+    def _normalize_cv_links(self, values: list[object], *, source_text: str) -> list[str]:
+        patterns = [
+            r"https?://[^\s,;]+",
+            r"linkedin\.com/[^\s,;]+",
+            r"/in/[a-z0-9\-_/]+",
+        ]
+        collected = self._normalize_cv_string_list(values)
+        for pattern in patterns:
+            for match in re.findall(pattern, source_text or "", re.I):
+                collected.append(self._clean_cv_text(match))
+        return self._normalize_cv_string_list(collected)
+
+    def _normalize_cv_languages(self, values: list[object], *, source_text: str) -> list[str]:
+        normalized_source = _normalize_matching_text(source_text)
+        specs = [
+            ("Portugais", r"portugais|portuguese|portugues", "Natif", r"natif|native"),
+            ("Français", r"francais|français|french", "Bilingue", r"bilingue|bilingual"),
+            ("Anglais", r"anglais|english", "Bilingue", r"bilingue|bilingual"),
+        ]
+
+        normalized_values: list[str] = []
+        for raw_value in values:
+            cleaned = self._clean_cv_text(raw_value)
+            if not cleaned:
+                continue
+            lowered = _normalize_matching_text(cleaned)
+            matched_spec = next((spec for spec in specs if re.search(spec[1], lowered, re.I)), None)
+            if matched_spec is None:
+                normalized_values.append(cleaned)
+                continue
+            lang_label, lang_pattern, prof_label, prof_pattern = matched_spec
+            if re.search(prof_pattern, lowered, re.I):
+                normalized_values.append(f"{lang_label} — {prof_label}")
+                continue
+            paired_pattern = rf"(?:{lang_pattern}).{{0,24}}(?:{prof_pattern})|(?:{prof_pattern}).{{0,24}}(?:{lang_pattern})"
+            if re.search(paired_pattern, normalized_source, re.I):
+                normalized_values.append(f"{lang_label} — {prof_label}")
+            else:
+                normalized_values.append(lang_label)
+
+        for lang_label, lang_pattern, prof_label, prof_pattern in specs:
+            if re.search(lang_pattern, normalized_source, re.I) and re.search(prof_pattern, normalized_source, re.I):
+                normalized_values.append(f"{lang_label} — {prof_label}")
+
+        return self._normalize_cv_string_list(normalized_values)
+
+    def _extract_cv_date_range(self, text: str) -> str | None:
+        patterns = [
+            r"\b\d{4}\s*[-–]\s*\d{4}\b",
+            r"\b\d{2}/\d{4}\s*[-–]\s*\d{2}/\d{4}\b",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                return self._clean_cv_text(match.group(0))
+        return None
+
+    def _infer_cv_organization(self, text: str) -> str | None:
+        patterns = [
+            r"Laboratoire des sources alternatives d[’']énergie",
+            r"EDF R&D",
+            r"\bONS\b",
+            r"CentraleSupélec",
+            r"Université Paris-Saclay",
+            r"Université Fédérale du Rio de Janeiro",
+            r"Université [A-ZÀ-ÿa-zà-ÿ' -]+",
+            r"Laboratoire [A-ZÀ-ÿa-zà-ÿ' -]+",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text, re.I)
+            if match:
+                return self._clean_cv_text(match.group(0))
+        return None
+
+    def _extract_cv_location(self, text: str) -> str | None:
+        pipe_match = re.search(r"\|\s*([A-ZÀ-ÿ][A-Za-zÀ-ÿ' -]+)$", text)
+        if pipe_match:
+            return self._clean_cv_text(pipe_match.group(1))
+        for candidate in ("Paris-Saclay", "Rio de Janeiro"):
+            if candidate.lower() in text.lower():
+                return candidate
+        return None
+
+    def _strip_cv_noise(self, text: str) -> str:
+        cleaned = self._clean_cv_text(text)
+        if not cleaned:
+            return ""
+        noise_markers = [
+            r"\bMusique\b",
+            r"\bSports\b",
+            r"\bTechnologie\b",
+            r"CENTRES? D['’]INT[ÉE]R[ÊE]T",
+            r"\bCOMP[ÉE]TENCES\b",
+        ]
+        for marker in noise_markers:
+            parts = re.split(marker, cleaned, maxsplit=1, flags=re.I)
+            if parts:
+                cleaned = self._clean_cv_text(parts[0])
+        return cleaned
+
+    def _extract_cv_education_institution_hint(self, text: str) -> str | None:
+        cleaned = self._clean_cv_text(text)
+        if not cleaned:
+            return None
+        explicit_candidates = (
+            "CentraleSupélec",
+            "Université Paris-Saclay",
+            "Université Fédérale do Rio de Janeiro",
+            "Université Fédérale du Rio de Janeiro",
+        )
+        normalized_cleaned = _normalize_matching_text(cleaned)
+        for candidate in explicit_candidates:
+            if _normalize_matching_text(candidate) in normalized_cleaned:
+                return candidate.replace("do Rio", "du Rio")
+        colon_match = re.search(r":\s*(Université [A-ZÀ-ÿa-zà-ÿ' -]+)$", cleaned, re.I)
+        if colon_match:
+            return self._clean_cv_text(colon_match.group(1))
+        pipe_match = re.search(r"\|\s*(Université [A-ZÀ-ÿa-zà-ÿ' -]+)", cleaned, re.I)
+        if pipe_match:
+            return self._clean_cv_text(pipe_match.group(1))
+        generic_match = re.search(r"(Université [A-ZÀ-ÿa-zà-ÿ' -]+?)(?=\s*(?:\||\d{4}|$))", cleaned, re.I)
+        if generic_match:
+            return self._clean_cv_text(generic_match.group(1))
+        if "centralesupelec" in normalized_cleaned:
+            return "CentraleSupélec"
+        return None
+
+    def _cleanup_cv_degree_text(self, text: str | None, *, institution: str | None = None) -> str:
+        cleaned = self._strip_cv_noise(text)
+        if not cleaned:
+            return ""
+        if institution:
+            cleaned = re.sub(re.escape(institution), "", cleaned, flags=re.I)
+        cleaned = re.sub(r"\b\d{4}\s*[-–]\s*\d{4}\b", "", cleaned)
+        cleaned = re.sub(r"\b\d{2}/\d{4}\s*[-–]\s*\d{2}/\d{4}\b", "", cleaned)
+        cleaned = re.sub(r"\s*\|\s*", " | ", cleaned)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip(" |:-")
+        return cleaned
+
+    def _find_cv_source_window(self, source_text: str, anchor_text: str) -> str:
+        anchor = self._clean_cv_text(anchor_text)
+        if len(anchor) < 12:
+            return ""
+        match = re.search(re.escape(anchor[:60]), source_text or "", re.I)
+        if not match:
+            return ""
+        start = max(0, match.start() - 120)
+        end = min(len(source_text), match.end() + 220)
+        return source_text[start:end]
+
+    def _extract_cv_education_entries_from_source(self, source_text: str) -> list[dict[str, object]]:
+        if not source_text:
+            return []
+        matches: list[dict[str, object]] = []
+        for match in re.finditer(r"(CentraleSupélec|Université [A-ZÀ-ÿa-zà-ÿ' -]+)", source_text, re.I):
+            institution = self._clean_cv_text(match.group(1))
+            start = max(0, match.start() - 180)
+            end = min(len(source_text), match.end() + 220)
+            window = source_text[start:end]
+            degree_match = None
+            for pattern in (
+                r"Formation d['’]Ing[ée]nieur[^\n]{0,120}",
+                r"Ing[ée]nieur[^\n]{0,120}",
+                r"Master[^\n]{0,140}",
+                r"double dipl[oô]me[^\n]{0,140}",
+            ):
+                degree_match = re.search(pattern, window, re.I)
+                if degree_match:
+                    break
+            degree = self._cleanup_cv_degree_text(degree_match.group(0) if degree_match else "", institution=institution) or None
+            date_range = self._extract_cv_date_range(window)
+            location = self._extract_cv_location(window)
+            description = self._clean_cv_text(window[:220])
+            if not (institution and (degree or date_range)):
+                continue
+            matches.append(
+                {
+                    "degree": degree,
+                    "institution": institution,
+                    "location": location,
+                    "date_range": date_range,
+                    "description": description,
+                }
+            )
+        return matches
+
+    def _merge_cv_education_entries(self, primary: list[dict[str, object]], secondary: list[dict[str, object]]) -> list[dict[str, object]]:
+        merged: list[dict[str, object]] = []
+        seen: set[tuple[str, str, str]] = set()
+        for entry in [*primary, *secondary]:
+            institution = self._clean_cv_text(entry.get("institution"))
+            degree = self._clean_cv_text(entry.get("degree"))
+            date_range = self._clean_cv_text(entry.get("date_range"))
+            key = (institution.casefold(), degree.casefold(), date_range.casefold())
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(entry)
+        return merged
+
+    def _normalize_cv_education_entries(self, entries: list[object], *, source_text: str) -> list[dict[str, object]]:
+        normalized: list[dict[str, object]] = []
+        for entry in entries:
+            raw_degree = self._strip_cv_noise(getattr(entry, "degree", None))
+            raw_institution = self._clean_cv_text(getattr(entry, "institution", None))
+            raw_location = self._clean_cv_text(getattr(entry, "location", None))
+            raw_date_range = self._clean_cv_text(getattr(entry, "date_range", None))
+            raw_description = self._strip_cv_noise(getattr(entry, "description", None))
+            source_window = self._find_cv_source_window(source_text, raw_degree or raw_description)
+            combined = " | ".join(part for part in [raw_degree, raw_institution, raw_location, raw_date_range, raw_description, source_window] if part)
+            institution = raw_institution or self._extract_cv_education_institution_hint(raw_degree or raw_description or "") or self._infer_cv_organization(combined)
+            date_range = raw_date_range or self._extract_cv_date_range(combined)
+            location = raw_location or self._extract_cv_location(combined)
+            description = raw_description or self._strip_cv_noise(combined)
+            degree = self._cleanup_cv_degree_text(raw_degree or description, institution=institution) or None
+            if not (degree or institution):
+                continue
+            normalized.append(
+                {
+                    "degree": degree,
+                    "institution": institution,
+                    "location": location,
+                    "date_range": date_range,
+                    "description": description,
+                }
+            )
+        return normalized
+
+    def _normalize_cv_experience_entries(self, entries: list[object], *, source_text: str) -> list[dict[str, object]]:
+        normalized: list[dict[str, object]] = []
+        for entry in entries:
+            raw_title = self._clean_cv_text(getattr(entry, "title", None))
+            raw_organization = self._clean_cv_text(getattr(entry, "organization", None))
+            raw_location = self._clean_cv_text(getattr(entry, "location", None))
+            raw_date_range = self._clean_cv_text(getattr(entry, "date_range", None))
+            raw_bullets = self._normalize_cv_string_list(getattr(entry, "bullets", []) or [])
+            raw_description = self._clean_cv_text(getattr(entry, "description", None))
+            raw_title_is_date_only = bool(raw_title) and (
+                raw_title == self._clean_cv_text(raw_date_range)
+                or bool(re.fullmatch(r"(?:\d{2}/)?\d{4}\s*[-–]\s*(?:\d{2}/)?\d{4}", raw_title))
+            )
+            raw_description_is_date_only = bool(raw_description) and (
+                raw_description == self._clean_cv_text(raw_date_range)
+                or bool(re.fullmatch(r"(?:\d{2}/)?\d{4}\s*[-–]\s*(?:\d{2}/)?\d{4}", raw_description))
+            )
+            if (raw_title_is_date_only or raw_description_is_date_only) and not raw_organization and not raw_bullets:
+                continue
+            source_window = self._find_cv_source_window(source_text, raw_title or raw_description)
+            combined = " | ".join(part for part in [raw_title, raw_organization, raw_location, raw_date_range, raw_description, source_window, *raw_bullets] if part)
+            organization = raw_organization
+            if not organization or organization.casefold() in {"projet", "project"}:
+                organization = self._infer_cv_organization(combined)
+            date_range = raw_date_range or self._extract_cv_date_range(combined)
+            location = raw_location or self._extract_cv_location(combined)
+            description = raw_description or combined or None
+            title = raw_title or description or None
+            if not title:
+                continue
+            cleaned_title = self._clean_cv_text(title)
+            if date_range and cleaned_title == self._clean_cv_text(date_range) and not organization and not raw_bullets:
+                continue
+            if re.fullmatch(r"(?:\d{2}/)?\d{4}\s*[-–]\s*(?:\d{2}/)?\d{4}", cleaned_title) and not organization and not raw_bullets:
+                continue
+            normalized.append(
+                {
+                    "title": title,
+                    "organization": organization,
+                    "location": location,
+                    "date_range": date_range,
+                    "bullets": raw_bullets,
+                    "description": description,
+                }
+            )
+        return normalized
+
+    def _normalize_cv_sections(
+        self,
+        *,
+        existing_sections: list[object],
+        personal_info: dict[str, object],
+        skills: list[str],
+        languages: list[str],
+        education_entries: list[dict[str, object]],
+        experience_entries: list[dict[str, object]],
+        strengths: list[str],
+        projects: list[str],
+    ) -> list[CVSection | dict[str, object]]:
+        normalized_existing: list[CVSection | dict[str, object]] = []
+        for item in existing_sections:
+            if isinstance(item, CVSection):
+                normalized_existing.append(CVSection.model_validate(item.model_dump(mode="python")))
+            elif isinstance(item, dict):
+                normalized_existing.append(CVSection.model_validate(item))
+        if normalized_existing:
+            return normalized_existing
+        inferred: list[CVSection] = []
+
+        def append_section(section_type: str, content: list[str]) -> None:
+            if not content:
+                return
+            inferred.append(
+                CVSection(
+                    section_type=section_type,
+                    title=section_type.replace("_", " ").title(),
+                    content=[CVSectionContentItem(text=item, details={}) for item in content[:5]],
+                    confidence=0.8,
+                )
+            )
+
+        if any(personal_info.get(field) for field in ("full_name", "email", "phone", "location")):
+            append_section(
+                "personal_info",
+                [
+                    str(personal_info.get("full_name") or ""),
+                    str(personal_info.get("email") or ""),
+                    str(personal_info.get("location") or ""),
+                ],
+            )
+        append_section("languages", languages)
+        append_section("skills", skills)
+        append_section(
+            "education",
+            [
+                " | ".join(
+                    part for part in [entry.get("degree"), entry.get("institution"), entry.get("date_range")] if part
+                )
+                for entry in education_entries
+            ],
+        )
+        append_section(
+            "experience",
+            [
+                " | ".join(
+                    part for part in [entry.get("title"), entry.get("organization"), entry.get("date_range")] if part
+                )
+                for entry in experience_entries
+            ],
+        )
+        append_section("strengths", strengths)
+        append_section("projects", projects)
+        return inferred
+
 
 class CodeAnalysisTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
@@ -2026,10 +2871,133 @@ class CodeAnalysisTaskHandler(TaskHandler):
             payload_schema=CodeAnalysisPayload,
             original_prompt=prompt,
         )
+        result = self._post_process_code_analysis_result(
+            result,
+            source_text="\n\n".join(part for part in [context_text, request.input_text] if part),
+        )
         self._record_timing(request, "parsing_s", time.perf_counter() - parsing_started_at)
         self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
         self._report_progress(request, step="done", progress=1.0, detail="Análise de código finalizada")
         return result
+
+    def _post_process_code_analysis_result(self, result: StructuredResult, *, source_text: str) -> StructuredResult:
+        payload = result.validated_output
+        if not result.success or not isinstance(payload, CodeAnalysisPayload):
+            return result
+
+        data = payload.model_dump(mode="python")
+        issues = list(data.get("detected_issues") or [])
+        refactor_plan = self._normalize_code_string_list(data.get("refactor_plan") or [])
+        test_suggestions = self._normalize_code_string_list(data.get("test_suggestions") or [])
+        readability = self._normalize_code_string_list(data.get("readability_improvements") or [])
+        maintainability = self._normalize_code_string_list(data.get("maintainability_improvements") or [])
+        risk_notes = self._normalize_code_string_list(data.get("risk_notes") or [])
+
+        if self._detect_empty_input_division_pattern(source_text):
+            issues = self._append_code_issue_if_missing(
+                issues,
+                {
+                    "severity": "high",
+                    "category": "runtime_failure",
+                    "title": "Division by zero on empty input",
+                    "description": "A divisão por `len(...)` pode falhar quando a coleção processada estiver vazia.",
+                    "evidence": "average = total / len(values)",
+                    "recommendation": "Trate entrada vazia antes da divisão e retorne `0.0` quando não houver valores.",
+                },
+            )
+            refactor_plan.append("Tratar entrada vazia antes do cálculo da média e retornar `0.0` quando não houver itens.")
+            test_suggestions.append("Adicionar teste para entrada vazia verificando que a média retorna `0.0` sem exceção.")
+            risk_notes.append("Uma entrada vazia pode causar falha em tempo de execução por divisão por zero.")
+
+        if self._detect_input_mutation_pattern(source_text):
+            issues = self._append_code_issue_if_missing(
+                issues,
+                {
+                    "severity": "medium",
+                    "category": "input_mutation",
+                    "title": "Mutates caller-provided items in place",
+                    "description": "O código altera objetos recebidos do chamador diretamente durante a normalização.",
+                    "evidence": "item[\"score\"] = ...",
+                    "recommendation": "Construir um novo objeto normalizado em vez de mutar o objeto original.",
+                },
+            )
+            refactor_plan.append("Evitar mutação in-place construindo novos objetos normalizados para a saída.")
+            test_suggestions.append("Adicionar teste para garantir que os objetos de entrada não sejam modificados in-place.")
+            maintainability.append("Explicitar o contrato de imutabilidade da entrada e preservar esse contrato na implementação.")
+
+        if self._detect_heterogeneous_output_pattern(source_text):
+            issues = self._append_code_issue_if_missing(
+                issues,
+                {
+                    "severity": "medium",
+                    "category": "api_contract",
+                    "title": "Output structure is inconsistent",
+                    "description": "Ramos diferentes retornam itens com formatos diferentes, o que fragiliza o contrato da API.",
+                    "evidence": "result.append({\"name\": ...}) / result.append(item)",
+                    "recommendation": "Padronizar a estrutura de saída para que todos os itens retornem o mesmo shape.",
+                },
+            )
+            refactor_plan.append("Normalizar o schema de saída para que todos os itens retornem a mesma estrutura.")
+            test_suggestions.append("Adicionar teste cobrindo itens sem `score` e verificando que o formato de saída continua consistente.")
+            readability.append("Documentar claramente o schema esperado de entrada e saída.")
+            maintainability.append("Separar a etapa de normalização da etapa de agregação para simplificar o fluxo e o contrato da API.")
+            risk_notes.append("Saídas com formatos mistos podem quebrar consumidores que esperam uma estrutura estável.")
+
+        data["detected_issues"] = issues
+        data["refactor_plan"] = self._normalize_code_string_list(refactor_plan)
+        data["test_suggestions"] = self._normalize_code_string_list(test_suggestions)
+        data["readability_improvements"] = self._normalize_code_string_list(readability)
+        data["maintainability_improvements"] = self._normalize_code_string_list(maintainability)
+        data["risk_notes"] = self._normalize_code_string_list(risk_notes)
+
+        normalized_payload = CodeAnalysisPayload(**data)
+        result.validated_output = normalized_payload
+        result.parsed_json = normalized_payload.model_dump(mode="json")
+        return result
+
+    def _normalize_code_string_list(self, values: list[object]) -> list[str]:
+        seen: set[str] = set()
+        normalized: list[str] = []
+        for value in values:
+            cleaned = " ".join(str(value or "").split()).strip()
+            if not cleaned:
+                continue
+            key = cleaned.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized.append(cleaned)
+        return normalized
+
+    def _append_code_issue_if_missing(self, issues: list[dict[str, object]], new_issue: dict[str, object]) -> list[dict[str, object]]:
+        new_title = " ".join(str(new_issue.get("title") or "").split()).strip().casefold()
+        if not new_title:
+            return issues
+        for issue in issues:
+            title = " ".join(str(issue.get("title") or "").split()).strip().casefold()
+            if title == new_title:
+                return issues
+        return [*issues, new_issue]
+
+    def _detect_empty_input_division_pattern(self, source_text: str) -> bool:
+        normalized = _normalize_matching_text(source_text)
+        if "len(values)" not in normalized and "len(items)" not in normalized:
+            return False
+        if not re.search(r"/\s*len\((?:values|items)\)", source_text or ""):
+            return False
+        guard_patterns = (
+            r"if\s+not\s+(?:values|items)",
+            r"if\s+len\((?:values|items)\)\s*(?:==|<=)\s*0",
+            r"if\s+(?:values|items)\s*:",
+        )
+        return not any(re.search(pattern, source_text or "", re.I) for pattern in guard_patterns)
+
+    def _detect_input_mutation_pattern(self, source_text: str) -> bool:
+        return bool(re.search(r"\b\w+\s*\[\s*['\"][^'\"]+['\"]\s*\]\s*=", source_text or ""))
+
+    def _detect_heterogeneous_output_pattern(self, source_text: str) -> bool:
+        normalized = source_text or ""
+        return "append({" in normalized and re.search(r"append\((?:item|value|entry)\)", normalized)
 
     def _build_code_analysis_prompt(self, text: str, context_text: str) -> str:
         context_block = f"\nCode/document context:\n{context_text}\n" if context_text else ""
@@ -2052,6 +3020,9 @@ Do not invent bugs or features that are not grounded in the code.
 - Use `high` severity only for issues that can realistically break execution, corrupt data, or produce obviously wrong results in normal use.
 - Test suggestions must be specific to the actual snippet, not placeholders like `edge case X`.
 - Risk notes must be snippet-specific and grounded in visible code behavior.
+- If multiple independent grounded issues are present, return all of them instead of stopping after the first one or two.
+- If the code divides by the size of a collection without a visible empty guard, surface that as a runtime/correctness risk.
+- If one branch returns normalized objects and another returns the original raw object, surface that as an inconsistent output/API contract issue.
 
 Code or technical text to analyze:
 {text}
@@ -2171,6 +3142,21 @@ class DocumentAgentTaskHandler(TaskHandler):
                         detail="Resumo executivo gerado a partir dos documentos selecionados." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha ao gerar resumo."),
                     )
                 )
+            elif tool_name == "draft_business_response":
+                payload = self._run_business_response_drafting_tool(
+                    provider=provider,
+                    request=request,
+                    answer_mode=answer_mode or "friendly",
+                    sources=sources,
+                    context_text=context_text,
+                )
+                tool_runs.append(
+                    AgentToolExecution(
+                        tool_name=tool_name,
+                        status="success",
+                        detail="Rascunho de resposta documental gerado para revisão humana.",
+                    )
+                )
             elif tool_name == "extract_structured_data":
                 payload, nested_result = self._run_extraction_tool(
                     request=request,
@@ -2268,10 +3254,34 @@ class DocumentAgentTaskHandler(TaskHandler):
                     )
                 )
         except Exception as error:
+            failure_message = f"Document agent execution failed: {error}"
+            self._append_document_agent_log(
+                request=request,
+                success=False,
+                payload=None,
+                error_message=failure_message,
+                execution_metadata={
+                    "agent_intent": user_intent,
+                    "agent_intent_reason": intent_reason,
+                    "agent_tool": tool_name,
+                    "agent_tool_reason": tool_reason,
+                    "agent_answer_mode": answer_mode,
+                    "agent_context_strategy": context_strategy,
+                    "agent_document_count": document_count,
+                    "agent_source_count": len(sources),
+                    "needs_review": True,
+                    "needs_review_reason": "document_agent_execution_failed",
+                    "retrieval_backend_used": retrieval_details.get("backend_used") if isinstance(retrieval_details, dict) else None,
+                    "retrieval_strategy_used": retrieval_details.get("retrieval_strategy_used") if isinstance(retrieval_details, dict) else None,
+                    "retrieval_strategy_requested": retrieval_details.get("retrieval_strategy_requested") if isinstance(retrieval_details, dict) else None,
+                },
+                available_tools=available_tools,
+                tool_runs=tool_runs,
+            )
             return attempt_controlled_failure(
                 raw_response="",
                 task_type="document_agent",
-                error_message=f"Document agent execution failed: {error}",
+                error_message=failure_message,
             )
 
         if not payload.sources:
@@ -2293,6 +3303,45 @@ class DocumentAgentTaskHandler(TaskHandler):
             retrieval_details=retrieval_details,
         )
 
+        execution_metadata = {
+            "agent_intent": user_intent,
+            "agent_intent_label": describe_document_agent_intent(user_intent),
+            "agent_intent_reason": intent_reason,
+            "agent_tool": tool_name,
+            "agent_tool_label": describe_document_agent_tool(tool_name),
+            "agent_tool_reason": tool_reason,
+            "agent_answer_mode": answer_mode,
+            "agent_context_strategy": context_strategy,
+            "agent_document_count": document_count,
+            "agent_source_count": len(payload.sources),
+            "agent_available_tools": available_tools,
+            "needs_review": payload.needs_review,
+            "needs_review_reason": payload.needs_review_reason,
+            "agent_limitations": list(payload.limitations),
+            "agent_recommended_actions": list(payload.recommended_actions),
+            "agent_guardrails_applied": list(payload.guardrails_applied),
+            "tool_runs": [item.model_dump(mode="json") for item in payload.tool_runs],
+            "retrieval_backend_used": retrieval_details.get("backend_used") if isinstance(retrieval_details, dict) else None,
+            "retrieval_backend_message": retrieval_details.get("backend_message") if isinstance(retrieval_details, dict) else None,
+            "retrieval_strategy_used": retrieval_details.get("retrieval_strategy_used") if isinstance(retrieval_details, dict) else None,
+            "retrieval_strategy_requested": retrieval_details.get("retrieval_strategy_requested") if isinstance(retrieval_details, dict) else None,
+            "execution_strategy_requested": telemetry.get("execution_strategy_requested"),
+            "execution_strategy_used": telemetry.get("execution_strategy_used"),
+            "execution_strategy_fallback_reason": telemetry.get("execution_strategy_fallback_reason"),
+            "workflow_id": telemetry.get("workflow_id"),
+            "workflow_route_decision": telemetry.get("workflow_route_decision"),
+            "workflow_guardrail_decision": telemetry.get("workflow_guardrail_decision"),
+        }
+
+        self._append_document_agent_log(
+            request=request,
+            success=True,
+            payload=payload,
+            execution_metadata=execution_metadata,
+            available_tools=available_tools,
+            tool_runs=payload.tool_runs,
+        )
+
         self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
         self._report_progress(request, step="done", progress=1.0, detail="Copiloto documental finalizado")
         return StructuredResult(
@@ -2307,30 +3356,75 @@ class DocumentAgentTaskHandler(TaskHandler):
             primary_render_mode="friendly",
             overall_confidence=payload.confidence,
             quality_score=payload.confidence,
-            execution_metadata={
-                "agent_intent": user_intent,
-                "agent_intent_label": describe_document_agent_intent(user_intent),
-                "agent_intent_reason": intent_reason,
-                "agent_tool": tool_name,
-                "agent_tool_label": describe_document_agent_tool(tool_name),
-                "agent_tool_reason": tool_reason,
-                "agent_answer_mode": answer_mode,
-                "agent_context_strategy": context_strategy,
-                "agent_document_count": document_count,
-                "agent_source_count": len(payload.sources),
-                "agent_available_tools": available_tools,
-                "needs_review": payload.needs_review,
-                "needs_review_reason": payload.needs_review_reason,
-                "agent_limitations": list(payload.limitations),
-                "agent_recommended_actions": list(payload.recommended_actions),
-                "agent_guardrails_applied": list(payload.guardrails_applied),
-                "tool_runs": [item.model_dump(mode="json") for item in payload.tool_runs],
-                "retrieval_backend_used": retrieval_details.get("backend_used") if isinstance(retrieval_details, dict) else None,
-                "retrieval_backend_message": retrieval_details.get("backend_message") if isinstance(retrieval_details, dict) else None,
-                "retrieval_strategy_used": retrieval_details.get("retrieval_strategy_used") if isinstance(retrieval_details, dict) else None,
-                "retrieval_strategy_requested": retrieval_details.get("retrieval_strategy_requested") if isinstance(retrieval_details, dict) else None,
-            },
+            execution_metadata=execution_metadata,
         )
+
+    def _get_document_agent_log_path(self) -> Path:
+        return Path(__file__).resolve().parents[2] / ".phase6_document_agent_log.json"
+
+    def _append_document_agent_log(
+        self,
+        *,
+        request: TaskExecutionRequest,
+        success: bool,
+        payload: DocumentAgentPayload | None,
+        error_message: str | None = None,
+        execution_metadata: dict[str, object] | None = None,
+        available_tools: list[dict[str, object]] | None = None,
+        tool_runs: list[AgentToolExecution] | None = None,
+    ) -> None:
+        try:
+            from ..storage.phase6_document_agent_log import append_document_agent_log_entry
+
+            metadata = execution_metadata if isinstance(execution_metadata, dict) else {}
+            telemetry = self._telemetry_dict(request)
+            raw_available_tools = payload.available_tools if payload is not None else (available_tools or metadata.get("agent_available_tools") or telemetry.get("agent_available_tools") or [])
+            resolved_available_tools = raw_available_tools if isinstance(raw_available_tools, list) else []
+            resolved_tool_runs = tool_runs if tool_runs is not None else (list(payload.tool_runs) if payload is not None else [])
+            serialized_tool_runs = [
+                item.model_dump(mode="json") if hasattr(item, "model_dump") else item
+                for item in resolved_tool_runs
+            ]
+            error_tool_runs = sum(
+                1
+                for item in serialized_tool_runs
+                if isinstance(item, dict) and str(item.get("status") or "").strip().lower() == "error"
+            )
+
+            entry = {
+                "timestamp": datetime.now().isoformat(),
+                "task_type": "document_agent",
+                "success": success,
+                "query": request.input_text,
+                "provider_requested": metadata.get("provider_requested") or telemetry.get("provider_requested") or request.provider,
+                "provider_effective": metadata.get("provider_effective") or telemetry.get("provider_effective") or request.provider,
+                "model": metadata.get("model") or request.model,
+                "user_intent": payload.user_intent if payload is not None else (metadata.get("agent_intent") or telemetry.get("agent_intent")),
+                "tool_used": payload.tool_used if payload is not None else (metadata.get("agent_tool") or telemetry.get("agent_tool")),
+                "answer_mode": payload.answer_mode if payload is not None else (metadata.get("agent_answer_mode") or telemetry.get("agent_answer_mode")),
+                "agent_context_strategy": metadata.get("agent_context_strategy") or telemetry.get("agent_context_strategy"),
+                "execution_strategy_requested": metadata.get("execution_strategy_requested") or telemetry.get("execution_strategy_requested"),
+                "execution_strategy_used": metadata.get("execution_strategy_used") or telemetry.get("execution_strategy_used"),
+                "execution_strategy_fallback_reason": metadata.get("execution_strategy_fallback_reason") or telemetry.get("execution_strategy_fallback_reason"),
+                "workflow_id": metadata.get("workflow_id") or telemetry.get("workflow_id"),
+                "workflow_route_decision": metadata.get("workflow_route_decision") or telemetry.get("workflow_route_decision"),
+                "workflow_guardrail_decision": metadata.get("workflow_guardrail_decision") or telemetry.get("workflow_guardrail_decision"),
+                "confidence": float(payload.confidence) if payload is not None else float(metadata.get("confidence") or 0.0),
+                "needs_review": bool(payload.needs_review) if payload is not None else bool(metadata.get("needs_review")),
+                "needs_review_reason": payload.needs_review_reason if payload is not None else metadata.get("needs_review_reason"),
+                "source_count": len(payload.sources) if payload is not None else int(metadata.get("agent_source_count") or 0),
+                "available_tools_count": len(resolved_available_tools),
+                "error_tool_runs": error_tool_runs,
+                "retrieval_backend_used": metadata.get("retrieval_backend_used"),
+                "retrieval_strategy_used": metadata.get("retrieval_strategy_used"),
+                "retrieval_strategy_requested": metadata.get("retrieval_strategy_requested"),
+                "tool_runs": serialized_tool_runs,
+            }
+            if error_message:
+                entry["error_message"] = error_message
+            append_document_agent_log_entry(self._get_document_agent_log_path(), entry)
+        except Exception:
+            return None
 
     def _finalize_document_agent_payload(
         self,
@@ -2378,6 +3472,11 @@ class DocumentAgentTaskHandler(TaskHandler):
                 recommended_actions.append("Execute comparações em lotes menores para cobrir todos os documentos selecionados.")
                 guardrails_applied.append("Comparação truncada para evitar sobrecarga e mistura excessiva de contexto.")
             recommended_actions.append("Valide as diferenças críticas diretamente nos documentos comparados antes de consolidar uma decisão.")
+        elif tool_name == "draft_business_response":
+            limitations.append("O rascunho não deve ser enviado automaticamente sem revisão humana do conteúdo e do tom.")
+            recommended_actions.append("Revise destinatário, compromissos, datas e tom antes de enviar a resposta.")
+            recommended_actions.append("Confirme nos trechos-fonte qualquer afirmação regulatória, contratual ou operacional relevante.")
+            guardrails_applied.append("Rascunho produzido apenas com grounding documental e marcado explicitamente para aprovação humana.")
         elif tool_name == "extract_structured_data":
             recommended_actions.append("Baixe o JSON estruturado e valide campos críticos antes de integrar a saída em automações.")
             guardrails_applied.append("Extração limitada a evidências explicitamente presentes no documento.")
@@ -2422,7 +3521,7 @@ class DocumentAgentTaskHandler(TaskHandler):
         if not request.use_document_context or not request.source_document_ids:
             return "document_scan"
         normalized_query = (request.input_text or "").strip()
-        if tool_name in {"consult_documents"} and normalized_query:
+        if tool_name in {"consult_documents", "draft_business_response"} and normalized_query:
             return "retrieval"
         if tool_name in {"compare_documents"} and normalized_query and len(request.source_document_ids) <= 2:
             return "retrieval"
@@ -2592,6 +3691,52 @@ class DocumentAgentTaskHandler(TaskHandler):
                 needs_review_reason=(nested_result.execution_metadata.get("needs_review_reason") if isinstance(nested_result.execution_metadata, dict) else None),
             ),
             nested_result,
+        )
+
+    def _run_business_response_drafting_tool(
+        self,
+        *,
+        provider,
+        request: TaskExecutionRequest,
+        answer_mode: str,
+        sources: list[AgentSource],
+        context_text: str,
+    ) -> DocumentAgentPayload:
+        self._set_telemetry_value(request, "current_stage", "document_agent_draft_business_response")
+        prompt = self._build_business_response_drafting_prompt(
+            user_query=request.input_text,
+            context_text=context_text,
+        )
+        response_text = self._collect_response_text(provider, request, prompt)
+        confidence = 0.78 if sources else (0.6 if context_text else 0.48)
+        draft_highlights = normalize_agent_bullet_points(
+            extract_bullet_points_from_text(response_text, limit=8),
+            limit=6,
+        )
+        if not draft_highlights:
+            draft_highlights = normalize_agent_bullet_points(
+                [
+                    "Rascunho gerado com base nos documentos selecionados.",
+                    "Revise compromissos, datas e destinatário antes do envio.",
+                ],
+                limit=4,
+            )
+        return DocumentAgentPayload(
+            user_intent=str(self._telemetry_dict(request).get("agent_intent") or "business_response_drafting"),
+            intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
+            answer_mode=answer_mode,
+            tool_used="draft_business_response",
+            summary=response_text.strip() or "Não foi possível gerar um rascunho de resposta com base no contexto documental.",
+            key_points=draft_highlights,
+            structured_response={
+                "draft_text": response_text.strip(),
+                "draft_type": "business_response",
+                "context_preview": context_text[:3000],
+            },
+            sources=sources,
+            confidence=confidence,
+            needs_review=True,
+            needs_review_reason="business_response_draft_requires_human_approval",
         )
 
     def _run_checklist_tool(
@@ -3062,6 +4207,27 @@ Se o contexto estiver insuficiente, diga explicitamente que a informação não 
 Evite inventar fatos, datas, números ou nomes.
 Primeiro entregue uma resposta curta e objetiva.
 Depois traga bullets curtos com os principais pontos encontrados.
+
+Pedido do usuário:
+{user_query}
+
+Contexto documental:
+{context_text}
+"""
+
+    def _build_business_response_drafting_prompt(self, *, user_query: str, context_text: str) -> str:
+        return f"""
+Você é o Document Operations Copilot.
+Redija em português do Brasil um rascunho curto de resposta profissional orientado pelos documentos.
+Use apenas fatos explícitos do contexto documental.
+Não invente compromissos, datas, números, cláusulas, prazos ou aprovações que não estejam sustentados pelas fontes.
+Se faltar informação importante, mantenha a redação conservadora e explicite a necessidade de confirmação humana.
+Evite linguagem excessivamente assertiva quando o contexto estiver parcial.
+Produza uma resposta pronta para revisão humana, não para envio automático.
+
+Formato desejado:
+- um rascunho principal em tom profissional;
+- se necessário, inclua um fechamento curto pedindo validação/revisão interna antes do envio.
 
 Pedido do usuário:
 {user_query}

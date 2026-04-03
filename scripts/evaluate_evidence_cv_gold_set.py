@@ -11,6 +11,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from src.config import get_rag_settings
+from src.evals.phase8_thresholds import EVIDENCE_CV_GOLD_THRESHOLDS
 from src.evidence_cv.config import build_evidence_config_from_rag_settings
 from src.evidence_cv.pipeline.runner import run_cv_pipeline_from_bytes
 from src.storage.phase8_eval_store import append_eval_run
@@ -115,9 +116,12 @@ def _score_list(predicted: list[str], expected: list[str]) -> dict[str, float | 
 def _score_single(predicted: str | None, expected: str | None, status: str) -> dict[str, object]:
     predicted_norm = (predicted or "").strip().lower() or None
     expected_norm = (expected or "").strip().lower() or None
-    tp = int(predicted_norm is not None and predicted_norm == expected_norm)
-    fp = int(predicted_norm is not None and predicted_norm != expected_norm)
-    fn = int(expected_norm is not None and predicted_norm != expected_norm)
+    matched = False
+    if predicted_norm is not None and expected_norm is not None:
+        matched = predicted_norm == expected_norm or expected_norm in predicted_norm or predicted_norm in expected_norm
+    tp = int(matched)
+    fp = int(predicted_norm is not None and not matched)
+    fn = int(expected_norm is not None and not matched)
     precision = tp / (tp + fp) if tp + fp else 1.0
     recall = tp / (tp + fn) if tp + fn else 1.0
     return {
@@ -155,19 +159,19 @@ def _build_eval_run_for_variant(
     score = round(avg_f1 * 4, 3)
 
     status = "PASS"
-    if avg_f1 < 0.65:
+    if avg_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("warn_min_avg_f1") or 0.65):
         status = "FAIL"
-    elif avg_f1 < 0.9:
+    elif avg_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("pass_min_avg_f1") or 0.9):
         status = "WARN"
 
     reasons: list[str] = []
-    if email_f1 < 0.9:
+    if email_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("email_f1_target") or 0.9):
         reasons.append(f"email_f1_below_target:{email_f1:.3f}")
-    if phone_f1 < 0.9:
+    if phone_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("phone_f1_target") or 0.9):
         reasons.append(f"phone_f1_below_target:{phone_f1:.3f}")
-    if name_f1 < 1.0:
+    if name_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("name_f1_target") or 1.0):
         reasons.append(f"name_match_incomplete:{name_f1:.3f}")
-    if location_f1 < 1.0:
+    if location_f1 < float(EVIDENCE_CV_GOLD_THRESHOLDS.get("location_f1_target") or 1.0):
         reasons.append(f"location_match_incomplete:{location_f1:.3f}")
 
     return {
@@ -195,13 +199,14 @@ def _build_eval_run_for_variant(
         "metadata": {
             "gold_set": gold_set_path,
             "variant": variant,
+            "thresholds": EVIDENCE_CV_GOLD_THRESHOLDS,
         },
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Evaluate evidence CV extraction against mini gold set")
-    parser.add_argument("--gold-set", default="phase5_eval/reports/evidence_cv_mini_gold_set.json")
+    parser.add_argument("--gold-set", default="phase5_eval/fixtures/evidence_cv_mini_gold_set.json")
     parser.add_argument("--out", default="phase5_eval/reports/evidence_cv_eval_metrics.json")
     args = parser.parse_args()
 

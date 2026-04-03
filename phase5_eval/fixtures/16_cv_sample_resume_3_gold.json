@@ -1,0 +1,213 @@
+{
+  "name": "Real document gold set - cv_analysis Sample-Resume-3-.pdf",
+  "task_type": "cv_analysis",
+  "document_name": "Sample-Resume-3-.pdf",
+  "document_path": "data/materials_demo/cv_analysis/Sample-Resume-3-.pdf",
+  "input_text": "Analyze the selected CV and return grounded personal information, education, work experience, leadership, and interests without hallucinating fields that do not appear.",
+  "gold_type": "rubric",
+  "notes": "Manual gold set reviewed from a recruiting/education-focused resume with international experience. This case expands public CV coverage with talent acquisition, teaching, fellowships, and volunteer work.",
+  "expected": {
+    "evaluation_guidance": {
+      "core_required_fields": [
+        "personal_info",
+        "education_entries",
+        "experience_entries"
+      ],
+      "secondary_but_expected_fields": [
+        "skills",
+        "sections",
+        "interests"
+      ],
+      "minimum_skill_hits": 2,
+      "threshold_overrides": {
+        "pass_ratio": 0.64,
+        "warn_ratio": 0.44
+      }
+    },
+    "expected_personal_info": {
+      "full_name_aliases": [
+        "Darrell Wiremu Rogers",
+        "Darrell Rogers"
+      ],
+      "email_aliases": [
+        "dwr5@apple.com"
+      ],
+      "location_aliases": [
+        "Auckland, NZ",
+        "Auckland"
+      ],
+      "link_aliases": []
+    },
+    "expected_profile_summary_aliases": [
+      "talent acquisition and education professional with recruiting teaching and fellowship experience",
+      "recruiting manager with education sector teaching and international fellowship background"
+    ],
+    "expected_languages": [],
+    "expected_skills_any": [
+      "Tableau",
+      "Adobe Photoshop",
+      "CPR certified",
+      "Notary Public",
+      "recruitment",
+      "diversity equity and inclusion",
+      "data analysis",
+      "lesson plans"
+    ],
+    "minimum_skill_hits": 2,
+    "expected_interests_any": [
+      "LSU sports",
+      "New Zealand Tour Guide",
+      "Afrobeats"
+    ],
+    "expected_education": [
+      {
+        "institution_aliases": [
+          "Harvard Graduate School of Education"
+        ],
+        "degree_aliases": [
+          "Ed.M."
+        ],
+        "date_aliases": [
+          "May 2020"
+        ],
+        "location_aliases": [
+          "Cambridge, MA"
+        ],
+        "description_terms": [
+          "Intellectual Contribution Award"
+        ]
+      },
+      {
+        "institution_aliases": [
+          "Louisiana State University"
+        ],
+        "degree_aliases": [
+          "B.A.",
+          "History major"
+        ],
+        "date_aliases": [
+          "May 2014"
+        ],
+        "location_aliases": [
+          "Baton Rouge, LA"
+        ],
+        "description_terms": [
+          "secondary education",
+          "Communication Studies minor",
+          "University of Auckland"
+        ]
+      }
+    ],
+    "expected_experience": [
+      {
+        "organization_aliases": [
+          "KPMG"
+        ],
+        "date_aliases": [
+          "July 2020",
+          "Present"
+        ],
+        "title_aliases": [
+          "Talent Acquisition Manager"
+        ],
+        "bullet_terms": [
+          "recruitment",
+          "hiring",
+          "team of three"
+        ],
+        "description_terms": [
+          "diversity equity and inclusion committee",
+          "KPIs"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Goldman Sachs"
+        ],
+        "date_aliases": [
+          "July 2020",
+          "July 2022"
+        ],
+        "title_aliases": [
+          "Associate, Campus Recruiting"
+        ],
+        "bullet_terms": [
+          "colleges and universities",
+          "pipeline",
+          "operations roles"
+        ],
+        "description_terms": [
+          "recruited remotely",
+          "data analysis projects",
+          "COVID-19 pandemic"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Nelson College"
+        ],
+        "date_aliases": [
+          "May 2017",
+          "June 2019"
+        ],
+        "title_aliases": [
+          "Social Sciences Teacher"
+        ],
+        "bullet_terms": [
+          "Classics",
+          "History",
+          "rugby team"
+        ],
+        "description_terms": [
+          "boarding students",
+          "conflict resolution"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Teach for America"
+        ],
+        "date_aliases": [
+          "August 2014",
+          "June 2016"
+        ],
+        "title_aliases": [
+          "Middle School History Teacher"
+        ],
+        "bullet_terms": [
+          "under-resourced public school",
+          "lesson plans",
+          "culturally responsive pedagogy"
+        ],
+        "description_terms": [
+          "students and families",
+          "limited funding and resources"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "LSU Sport Shop"
+        ],
+        "date_aliases": [
+          "January 2011",
+          "May 2014"
+        ],
+        "title_aliases": [
+          "Cashier",
+          "Manager"
+        ],
+        "bullet_terms": [
+          "gift and merchandise",
+          "apparel",
+          "school spirit"
+        ],
+        "description_terms": [
+          "promoted to manager",
+          "LSU athletics"
+        ]
+      }
+    ],
+    "minimum_experience_entries": 3,
+    "minimum_experience_years": 1.0
+  }
+}

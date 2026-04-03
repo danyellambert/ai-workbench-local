@@ -1,0 +1,154 @@
+{
+  "name": "Real document gold set - cv_analysis Sample-Resume-1-07262023.pdf",
+  "task_type": "cv_analysis",
+  "document_name": "Sample-Resume-1-07262023.pdf",
+  "document_path": "data/materials_demo/cv_analysis/Sample-Resume-1-07262023.pdf",
+  "input_text": "Analyze the selected CV and return grounded personal information, education, work experience, leadership, and interests without hallucinating fields that do not appear.",
+  "gold_type": "rubric",
+  "notes": "Manual gold set reviewed from a simple English resume. This case is useful as a lower-complexity real CV baseline.",
+  "expected": {
+    "evaluation_guidance": {
+      "core_required_fields": [
+        "personal_info",
+        "education_entries",
+        "experience_entries"
+      ],
+      "secondary_but_expected_fields": [
+        "skills",
+        "sections",
+        "interests"
+      ],
+      "minimum_skill_hits": 2,
+      "threshold_overrides": {
+        "pass_ratio": 0.64,
+        "warn_ratio": 0.44
+      }
+    },
+    "expected_personal_info": {
+      "full_name_aliases": [
+        "Francis B. Taylor",
+        "Francis Taylor"
+      ],
+      "email_aliases": [
+        "francisjtaylor@gmail.com"
+      ],
+      "location_aliases": [
+        "Cincinatti, OH 45201",
+        "Cincinnati, OH 45201",
+        "Ohio"
+      ],
+      "link_aliases": []
+    },
+    "expected_profile_summary_aliases": [
+      "science-oriented candidate with biochemistry training and medical-device research experience",
+      "scientist with laboratory, surgical support and academic support experience"
+    ],
+    "expected_languages": [],
+    "expected_skills_any": [
+      "Biochemistry",
+      "scientific support",
+      "surgical support",
+      "medical devices",
+      "lectures",
+      "laboratory manuals",
+      "conflict mediation",
+      "community building"
+    ],
+    "minimum_skill_hits": 2,
+    "expected_interests_any": [
+      "Bollywood movies",
+      "nature documentaries",
+      "hiking",
+      "boxing",
+      "gardening"
+    ],
+    "expected_education": [
+      {
+        "institution_aliases": [
+          "Creighton University"
+        ],
+        "degree_aliases": [
+          "Bachelor of Science, Biochemistry",
+          "Bachelor of Science in Biochemistry"
+        ],
+        "date_aliases": [
+          "May 2019"
+        ],
+        "location_aliases": [
+          "Omaha, NE"
+        ],
+        "description_terms": [
+          "Phi Beta Kappa",
+          "Magna Cum Laude"
+        ]
+      }
+    ],
+    "expected_experience": [
+      {
+        "organization_aliases": [
+          "Johnson & Johnson"
+        ],
+        "date_aliases": [
+          "July 2019—Present",
+          "2019—Present"
+        ],
+        "title_aliases": [
+          "Scientist"
+        ],
+        "bullet_terms": [
+          "scientific support",
+          "preclinical research facilities",
+          "medical devices"
+        ],
+        "description_terms": [
+          "surgical support",
+          "research and development",
+          "Covid-19"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Creighton University Department of Chemistry"
+        ],
+        "date_aliases": [
+          "August 2016—May 2019"
+        ],
+        "title_aliases": [
+          "Teaching Assistant"
+        ],
+        "bullet_terms": [
+          "lectures",
+          "General Chemistry",
+          "Organic Chemistry Lab"
+        ],
+        "description_terms": [
+          "grader",
+          "150 students",
+          "research projects"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Creighton University Admissions Office"
+        ],
+        "date_aliases": [
+          "Summer 2016, 2017, 2018"
+        ],
+        "title_aliases": [
+          "Admissions Fellow"
+        ],
+        "bullet_terms": [
+          "interviews",
+          "admissions committee",
+          "tours"
+        ],
+        "description_terms": [
+          "prospective students",
+          "written evaluations"
+        ]
+      }
+    ],
+    "minimum_experience_entries": 3,
+    "minimum_experience_years": 1.0
+  }
+}
