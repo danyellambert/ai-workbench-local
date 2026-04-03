@@ -19,6 +19,15 @@
       "expected_context_strategy": "document_scan"
     },
     {
+      "case_id": "business_response_drafting_basic",
+      "input_text": "Redija um e-mail de resposta para o cliente com base neste contrato.",
+      "document_count": 1,
+      "expected_intent": "business_response_drafting",
+      "expected_tool": "draft_business_response",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "retrieval"
+    },
+    {
       "case_id": "structured_extraction_basic",
       "input_text": "Extraia os campos importantes em JSON.",
       "document_count": 1,
@@ -80,6 +89,24 @@
       "expected_tool": "assist_technical_document",
       "expected_answer_mode": "friendly",
       "expected_context_strategy": "document_scan"
+    },
+    {
+      "case_id": "comparison_request_with_single_document_fallback",
+      "input_text": "Compare estes dois contratos e destaque as diferenças principais.",
+      "document_count": 1,
+      "expected_intent": "document_question",
+      "expected_tool": "consult_documents",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "retrieval"
+    },
+    {
+      "case_id": "risk_question_stays_as_document_question",
+      "input_text": "Quais são os principais riscos documentados?",
+      "document_count": 1,
+      "expected_intent": "document_question",
+      "expected_tool": "consult_documents",
+      "expected_answer_mode": "friendly",
+      "expected_context_strategy": "retrieval"
     }
   ],
   "workflow_cases": [
@@ -225,6 +252,41 @@
       "expected_transition": "finish",
       "retry_expected": false,
       "needs_review_expected": false
+    },
+    {
+      "case_id": "structured_finish_ok_without_retry",
+      "workflow_type": "structured",
+      "task_type": "summary",
+      "input_text": "Resuma os principais pontos",
+      "document_count": 1,
+      "context_strategy": "document_scan",
+      "result": {
+        "success": true,
+        "quality_score": 0.82
+      },
+      "expected_guardrail_decision": "finish_ok",
+      "expected_transition": "finish",
+      "retry_expected": false,
+      "needs_review_expected": false
+    },
+    {
+      "case_id": "agent_low_confidence_review_on_final_attempt",
+      "workflow_type": "document_agent",
+      "task_type": "document_agent",
+      "input_text": "Quais riscos aparecem no contrato?",
+      "document_count": 1,
+      "context_strategy": "retrieval",
+      "attempt": 2,
+      "max_attempts": 2,
+      "result": {
+        "success": true,
+        "confidence": 0.68,
+        "sources_count": 1
+      },
+      "expected_guardrail_decision": "finish_needs_review_agent",
+      "expected_transition": "mark_needs_review",
+      "retry_expected": false,
+      "needs_review_expected": true
     }
   ]
 }

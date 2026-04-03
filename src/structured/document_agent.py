@@ -8,6 +8,7 @@ import re
 DOCUMENT_AGENT_INTENT_LABELS = {
     "document_question": "Pergunta documental",
     "executive_summary": "Resumo executivo",
+    "business_response_drafting": "Elaboração de resposta",
     "structured_extraction": "Extração estruturada",
     "document_comparison": "Comparação documental",
     "operational_checklist": "Checklist operacional",
@@ -20,6 +21,7 @@ DOCUMENT_AGENT_INTENT_LABELS = {
 DOCUMENT_AGENT_TOOL_LABELS = {
     "consult_documents": "Consultar documentos indexados",
     "summarize_document": "Resumir documento",
+    "draft_business_response": "Redigir resposta orientada por documentos",
     "extract_structured_data": "Extrair informação estruturada",
     "compare_documents": "Comparar documentos",
     "generate_operational_checklist": "Gerar checklist operacional",
@@ -52,6 +54,13 @@ DOCUMENT_AGENT_TOOL_DEFINITIONS = {
         name="summarize_document",
         label=DOCUMENT_AGENT_TOOL_LABELS["summarize_document"],
         description="Gera resumo executivo grounded do documento ou conjunto documental selecionado.",
+        answer_mode="friendly",
+        min_document_count=1,
+    ),
+    "draft_business_response": DocumentAgentToolDefinition(
+        name="draft_business_response",
+        label=DOCUMENT_AGENT_TOOL_LABELS["draft_business_response"],
+        description="Redige um rascunho de resposta, e-mail ou posicionamento curto com base apenas nos documentos selecionados e já preparado para revisão humana.",
         answer_mode="friendly",
         min_document_count=1,
     ),
@@ -170,6 +179,28 @@ def classify_document_agent_intent(user_input: str, *, document_count: int = 0) 
         "acoes",
         "to-do",
         "todo",
+    )
+    drafting_tokens = (
+        "redija",
+        "redigir",
+        "rascunhe",
+        "rascunho",
+        "minuta",
+        "elabore uma resposta",
+        "elabore resposta",
+        "escreva uma resposta",
+        "escreva um email",
+        "escreva um e-mail",
+        "redija um email",
+        "redija um e-mail",
+        "draft a reply",
+        "draft reply",
+        "draft response",
+        "reply to",
+        "responda ao cliente",
+        "resposta para o cliente",
+        "email para o cliente",
+        "e-mail para o cliente",
     )
     extraction_tokens = (
         "extrair",
@@ -293,6 +324,8 @@ def classify_document_agent_intent(user_input: str, *, document_count: int = 0) 
 
     if document_count >= 2 and any(token in normalized for token in comparison_tokens):
         return "document_comparison", "comparison_keywords_with_multiple_documents"
+    if any(token in normalized for token in drafting_tokens):
+        return "business_response_drafting", "drafting_keywords_detected"
     if any(token in normalized for token in operational_task_tokens):
         return "operational_task_extraction", "operational_task_keywords_detected"
     if any(token in normalized for token in checklist_tokens):
@@ -323,6 +356,8 @@ def select_document_agent_tool(intent: str, *, document_count: int = 0) -> tuple
         if document_count >= 2:
             return "compare_documents", "comparison_structured", "comparison_intent"
         return "summarize_document", "friendly", "comparison_requires_multiple_documents_fallback_to_summary"
+    if normalized_intent == "business_response_drafting":
+        return "draft_business_response", "friendly", "business_response_drafting_intent"
     if normalized_intent == "document_risk_review":
         return "review_document_risks", "friendly", "document_risk_review_intent"
     if normalized_intent == "operational_task_extraction":

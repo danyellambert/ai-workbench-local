@@ -1,3 +1,5 @@
+import tempfile
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
@@ -5,6 +7,7 @@ from src.structured.base import ActionItem, AgentSource, CodeAnalysisPayload, Co
 from src.structured.envelope import StructuredResult, TaskExecutionRequest
 from src.structured.document_agent import classify_document_agent_intent, list_document_agent_tools, select_document_agent_tool
 from src.structured.tasks import DocumentAgentTaskHandler
+from src.storage.phase6_document_agent_log import load_document_agent_log
 
 
 class DocumentAgentIntentTests(unittest.TestCase):
@@ -24,6 +27,23 @@ class DocumentAgentIntentTests(unittest.TestCase):
         self.assertEqual(tool_name, "generate_operational_checklist")
         self.assertEqual(answer_mode, "checklist")
         self.assertEqual(reason, "checklist_intent")
+
+    def test_classify_document_agent_intent_detects_business_response_drafting(self) -> None:
+        intent, reason = classify_document_agent_intent(
+            "Redija um e-mail de resposta para o cliente com base neste contrato.",
+            document_count=1,
+        )
+        self.assertEqual(intent, "business_response_drafting")
+        self.assertEqual(reason, "drafting_keywords_detected")
+
+    def test_select_document_agent_tool_uses_business_response_drafting_tool(self) -> None:
+        tool_name, answer_mode, reason = select_document_agent_tool(
+            "business_response_drafting",
+            document_count=1,
+        )
+        self.assertEqual(tool_name, "draft_business_response")
+        self.assertEqual(answer_mode, "friendly")
+        self.assertEqual(reason, "business_response_drafting_intent")
 
     def test_list_document_agent_tools_marks_comparison_unavailable_with_single_document(self) -> None:
         tools = list_document_agent_tools(document_count=1, use_document_context=True)
@@ -129,6 +149,168 @@ class DocumentAgentHandlerTests(unittest.TestCase):
         self.assertIn("agent_available_tools", result.execution_metadata)
         self.assertIn("agent_limitations", result.execution_metadata)
         self.assertIn("agent_guardrails_applied", result.execution_metadata)
+
+    def test_execute_document_agent_business_response_drafting_returns_review_payload(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        request = TaskExecutionRequest(
+            task_type="document_agent",
+            input_text="Redija um e-mail de resposta para o cliente com base neste contrato.",
+            use_document_context=True,
+            source_document_ids=["doc-1"],
+            context_strategy="retrieval",
+            provider="ollama",
+            model="qwen2.5:7b",
+            temperature=0.1,
+            context_window=8192,
+        )
+
+        with patch.object(handler, "_resolve_provider", return_value=object()), patch.object(
+            handler,
+            "_build_document_agent_source_bundle",
+            return_value={
+                "sources": [
+                    AgentSource(
+                        source="contrato_resposta.pdf",
+                        document_id="doc-1",
+                        file_type="pdf",
+                        chunk_id=1,
+                        score=0.95,
+                        snippet="Responder ao cliente em até 5 dias úteis com confirmação do cronograma.",
+                    )
+                ],
+                "context_text": "[Source: contrato_resposta.pdf]\nResponder ao cliente em até 5 dias úteis com confirmação do cronograma.",
+                "retrieval_details": {
+                    "backend_used": "chroma",
+                    "retrieval_strategy_used": "manual_hybrid",
+                    "retrieval_strategy_requested": "manual_hybrid",
+                },
+            },
+        ), patch.object(
+            handler,
+            "_collect_response_text",
+            return_value="Olá, confirmamos o recebimento e retornaremos com o cronograma em até 5 dias úteis. Antes do envio final, valide o destinatário e a aprovação interna.",
+        ):
+            result = handler.execute(request)
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.validated_output.tool_used, "draft_business_response")
+        self.assertEqual(result.validated_output.user_intent, "business_response_drafting")
+        self.assertTrue(result.validated_output.needs_review)
+        self.assertEqual(result.validated_output.needs_review_reason, "business_response_draft_requires_human_approval")
+        self.assertEqual(result.execution_metadata["agent_context_strategy"], "retrieval")
+        self.assertIn("aprovação", result.validated_output.summary.lower())
+
+    def test_execute_document_agent_consult_documents_appends_phase6_log_entry(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        request = TaskExecutionRequest(
+            task_type="document_agent",
+            input_text="Quais são os principais riscos documentados?",
+            use_document_context=True,
+            source_document_ids=["doc-1"],
+            context_strategy="retrieval",
+            provider="ollama",
+            model="qwen2.5:7b",
+            temperature=0.1,
+            context_window=8192,
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            log_path = Path(tmp_dir) / ".phase6_document_agent_log.json"
+            with patch.object(handler, "_get_document_agent_log_path", return_value=log_path), patch.object(handler, "_resolve_provider", return_value=object()), patch.object(
+                handler,
+                "_build_document_agent_source_bundle",
+                return_value={
+                    "sources": [
+                        AgentSource(
+                            source="contrato_a.pdf",
+                            document_id="doc-1",
+                            file_type="pdf",
+                            chunk_id=1,
+                            score=0.92,
+                            snippet="Cláusula de risco operacional.",
+                        )
+                    ],
+                    "context_text": "[Source: contrato_a.pdf]\nCláusula de risco operacional.",
+                    "retrieval_details": {
+                        "backend_used": "chroma",
+                        "retrieval_strategy_used": "manual_hybrid",
+                        "retrieval_strategy_requested": "manual_hybrid",
+                    },
+                },
+            ), patch.object(
+                handler,
+                "_collect_response_text",
+                return_value="Há um risco operacional relevante.\n- risco operacional mapeado\n- revisão jurídica recomendada",
+            ):
+                result = handler.execute(request)
+
+            self.assertTrue(result.success)
+            entries = load_document_agent_log(log_path)
+
+        self.assertEqual(len(entries), 1)
+        self.assertTrue(entries[0]["success"])
+        self.assertEqual(entries[0]["user_intent"], "document_question")
+        self.assertEqual(entries[0]["tool_used"], "consult_documents")
+        self.assertEqual(entries[0]["answer_mode"], "friendly")
+        self.assertEqual(entries[0]["source_count"], 1)
+        self.assertEqual(entries[0]["retrieval_strategy_used"], "manual_hybrid")
+        self.assertEqual(entries[0]["available_tools_count"], len(result.validated_output.available_tools))
+        self.assertEqual(entries[0]["error_tool_runs"], 0)
+
+    def test_execute_document_agent_logs_failure_when_tool_execution_raises(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        request = TaskExecutionRequest(
+            task_type="document_agent",
+            input_text="Quais são os principais riscos documentados?",
+            use_document_context=True,
+            source_document_ids=["doc-1"],
+            context_strategy="document_scan",
+            provider="ollama",
+            model="qwen2.5:7b",
+            temperature=0.1,
+            context_window=8192,
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            log_path = Path(tmp_dir) / ".phase6_document_agent_log.json"
+            with patch.object(handler, "_get_document_agent_log_path", return_value=log_path), patch.object(handler, "_resolve_provider", return_value=object()), patch.object(
+                handler,
+                "_build_document_agent_source_bundle",
+                return_value={
+                    "sources": [
+                        AgentSource(
+                            source="contrato_a.pdf",
+                            document_id="doc-1",
+                            file_type="pdf",
+                            chunk_id=1,
+                            score=0.92,
+                            snippet="Cláusula de risco operacional.",
+                        )
+                    ],
+                    "context_text": "[Source: contrato_a.pdf]\nCláusula de risco operacional.",
+                    "retrieval_details": {
+                        "backend_used": "chroma",
+                        "retrieval_strategy_used": "document_scan",
+                        "retrieval_strategy_requested": "document_scan",
+                    },
+                },
+            ), patch.object(
+                handler,
+                "_run_consult_documents_tool",
+                side_effect=RuntimeError("boom during consult"),
+            ):
+                result = handler.execute(request)
+
+            entries = load_document_agent_log(log_path)
+
+        self.assertFalse(result.success)
+        self.assertEqual(len(entries), 1)
+        self.assertFalse(entries[0]["success"])
+        self.assertEqual(entries[0]["user_intent"], "document_question")
+        self.assertEqual(entries[0]["tool_used"], "consult_documents")
+        self.assertTrue(entries[0]["needs_review"])
+        self.assertEqual(entries[0]["needs_review_reason"], "document_agent_execution_failed")
+        self.assertIn("boom during consult", entries[0]["error_message"])
 
     def test_execute_document_agent_policy_compliance_returns_review_payload(self) -> None:
         handler = DocumentAgentTaskHandler()

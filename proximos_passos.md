@@ -1,5 +1,23 @@
 # Roadmap Definitivo — AI Workbench Local
 
+## Ajuste tático em andamento — paridade de overrides + sidebar multi-provider
+
+Objetivo desta trilha curta:
+
+- alinhar melhor o comportamento de `huggingface_server` com o que já existia para `ollama`
+- deixar mais explícito por que certos providers aparecem ou não na seção de embeddings
+- limpar a UX da sidebar para separar melhor geração, embeddings, retrieval/reranking e parsing documental
+
+### Checklist desta trilha
+
+- [x] documentar o plano antes da implementação
+- [x] fazer `huggingface_server` reaproveitar melhor os overrides operacionais já usados no app (`temperature`, `context_window`, `embedding_context_window`, `truncate`)
+- [x] deixar explícito na sidebar quando `huggingface_server` / `huggingface_inference` não aparecem para embeddings e por quê
+- [x] expor controles de reranking já existentes (`rerank_pool_size`, `rerank_lexical_weight`)
+- [x] expor controles operacionais de OCR e VLM na sidebar
+- [x] melhorar nomenclatura da sidebar para reduzir confusão entre geração, embeddings e backends documentais
+- [x] validar com testes focados e atualizar documentação final
+
 ## 1. Visão do projeto
 
 ### Objetivo principal
@@ -447,10 +465,12 @@ A ordem mais forte agora passa a ser:
 3. **Fase 8 — Evals**
 4. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
 5. **Fase 9 — Observabilidade**
-6. **Fase 10 — Engenharia profissional**
-7. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
-8. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
-9. **Fase 11 — Pacote final de portfólio**
+6. **Fase 9.25 — AI runtime economics, usage observability e budget-aware routing**
+7. **Fase 9.5 — MCPs e integrações operacionais empresariais**
+8. **Fase 10 — Engenharia profissional**
+9. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+10. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
+11. **Fase 11 — Pacote final de portfólio**
 
 ---
 
@@ -1238,6 +1258,12 @@ O que já ficou pronto nesta primeira rodada:
 - [x] importador de histórico para backfill dos JSONs antigos no store SQLite, com deduplicação por `run_key`
 - [x] camada diagnóstica para destacar falhas persistentes, tasks saudáveis e candidatos de adaptação/fine-tuning
 - [x] suite determinística para avaliar roteamento do agente documental e decisões/transições do workflow LangGraph
+- [x] workflow separado para evals live dependentes de ambiente (`.github/workflows/phase8-evals-live.yml`)
+- [x] runner consolidado de evals reais com preflight, indexação opcional e execução em lote (`scripts/run_phase8_live_evals.py`)
+- [x] registro reproduzível de materiais públicos extras e helper de download para fortalecer os casos reais de eval
+- [x] indexação dos documentos faltantes do manifesto real e rerun do ciclo live completo com nova evidência no SQLite
+- [x] correção do falso positivo de `collapsed_items` no `checklist_regression`
+- [x] melhoria da trilha `evidence_cv_gold_eval` com recuperação melhor de `name`/`location` em casos reais de CV
 
 O que isso significa na prática:
 
@@ -1348,21 +1374,21 @@ A prioridade desta fase deve ser:
 Monitorar o comportamento do sistema de IA.
 
 ### Checklist
-- [ ] Registrar provider/modelo usado
-- [ ] Registrar prompt profile
-- [ ] Registrar `context_window`
-- [ ] Registrar embedding model usado
-- [ ] Registrar parâmetros de RAG
-- [ ] Registrar arquivos consultados
-- [ ] Registrar chunks recuperados
-- [ ] Registrar tool usada
-- [ ] Registrar tempo de retrieval
-- [ ] Registrar tempo de geração
-- [ ] Registrar `workflow_id`, nós percorridos, transições, retries e fallback reasons dos fluxos LangGraph
-- [ ] Registrar resultado da avaliação
-- [ ] Registrar erros
-- [ ] Criar dashboard local com métricas
-- [ ] Criar visualização de histórico de execuções
+- [x] Registrar provider/modelo usado
+- [x] Registrar prompt profile
+- [x] Registrar `context_window`
+- [x] Registrar embedding model usado
+- [x] Registrar parâmetros de RAG
+- [x] Registrar arquivos consultados
+- [x] Registrar chunks recuperados
+- [x] Registrar tool usada
+- [x] Registrar tempo de retrieval
+- [x] Registrar tempo de geração
+- [x] Registrar `workflow_id`, nós percorridos, transições, retries e fallback reasons dos fluxos LangGraph
+- [x] Registrar resultado da avaliação
+- [x] Registrar erros
+- [x] Criar dashboard local com métricas
+- [x] Criar visualização de histórico de execuções
 
 ### Entregável
 - Painel local de logs e métricas
@@ -1378,23 +1404,205 @@ Monitorar o comportamento do sistema de IA.
 
 ---
 
+## Fase 9.25 — AI runtime economics, usage observability e budget-aware routing
+
+### Objetivo
+Transformar a observabilidade atual em uma camada explícita de consumo operacional, custo estimado e roteamento orientado a budget.
+
+### Por que essa fase existe
+
+O objetivo do projeto não é só responder bem, mas também se comportar como um **produto de IA útil para negócios**. Isso exige responder perguntas como:
+
+- quanto custa cada fluxo do app
+- quantos tokens são consumidos por tipo de task
+- quando vale usar local vs cloud
+- quando OCR/VLM realmente se paga
+- quando o sistema deve degradar para um caminho mais barato e previsível
+
+Essa fase entra **depois da Fase 9**, porque depende da base de observabilidade já criada, e **antes da Fase 9.5**, porque integrar MCP sem visibilidade de consumo/custo tende a tornar o produto mais caro e mais difícil de governar.
+
+### Direção recomendada
+
+- consolidar métricas de uso em um modelo unificado de execução
+- transformar `prompt_tokens`, `completion_tokens`, `total_tokens`, chars de contexto, OCR/VLM usage e latência em métricas operacionais do produto
+- criar políticas explícitas de budget por task/fluxo/provider
+- usar essas métricas para decidir roteamento, fallback e degradação controlada
+- começar em **rollout conservador**, com visibilidade e quality floor antes de qualquer corte agressivo
+
+### Princípios do budget-aware routing
+
+- **qualidade primeiro, otimização depois**
+- tasks de alta sensibilidade devem operar em modo `quality_first`
+- degradação automática só deve começar em tasks de baixa/média sensibilidade e com evidência de que o impacto é aceitável
+- toda decisão de budget routing deve ser auditável (`mode`, `reason`, `quality_floor`, `auto_degrade_applied`)
+- budgets só devem virar automação permanente depois de comparação controlada em evals/benchmarks
+
+### Sensibilidade por task
+
+#### Alta sensibilidade
+- `document_agent`
+- `summary`
+- `extraction`
+- `cv_analysis`
+- fluxos de `policy/compliance/risk review`
+
+Nessas tasks, a expectativa é priorizar qualidade e grounding, mesmo quando o custo operacional for maior.
+
+#### Média sensibilidade
+- `chat_rag`
+- `checklist`
+- `code_analysis`
+
+Nessas tasks, o budget routing pode atuar primeiro em knobs mais seguros, como candidate pool e ajustes conservadores de contexto.
+
+#### Baixa sensibilidade
+- roteamentos auxiliares
+- flows comparativos rápidos
+- heurísticas operacionais não críticas
+
+Nessas tasks, a automação de economia pode ser mais agressiva, desde que continue observável.
+
+### Checklist
+- [ ] consolidar uma camada única de usage/runtime metrics por execução
+- [ ] registrar `prompt_tokens`, `completion_tokens`/`generation_tokens` e `total_tokens` quando o provider/runtime expuser esses dados
+- [ ] registrar custo estimado por execução para providers pagos/opcionais
+- [ ] registrar chars de contexto enviados, chunks usados/descartados e impacto do truncamento
+- [ ] registrar quando OCR, Docling e VLM foram acionados e com que impacto operacional
+- [ ] criar visão agregada de consumo por fluxo (`chat`, `structured`, `document_agent`, `comparison`)
+- [ ] criar visão agregada de consumo por provider/modelo
+- [ ] introduzir budgets por task e thresholds de alerta
+- [ ] implementar **budget-aware routing** (ex.: preferir caminho mais barato quando suficiente)
+- [ ] definir política de fallback local/cloud orientada a custo, latência e qualidade
+- [ ] documentar trade-offs de custo vs qualidade por caso de uso
+- [ ] validar budget-aware routing contra evals para confirmar que não derruba tasks críticas abaixo do quality floor
+
+### Métricas alvo
+- [ ] tokens por request
+- [ ] custo estimado por request
+- [ ] custo estimado por task
+- [ ] custo estimado por provider/modelo
+- [ ] latência por fluxo
+- [ ] uso de OCR/VLM por fluxo
+- [ ] taxa de fallback para caminhos mais caros
+- [ ] taxa de sucesso sob budget
+
+### Entregável
+- camada de cost & usage observability integrada ao app, com budget-aware routing e evidência clara de custo operacional por fluxo
+
+### Evidência para GitHub/LinkedIn
+- dashboard mostrando tokens, custo estimado e latência por fluxo
+- tabela comparando local vs cloud por custo/qualidade
+- write-up curto explicando como o produto decide entre caminhos mais baratos e mais caros
+
+### O que preciso saber defender em entrevista
+- por que custo em IA não é só preço de API, mas também contexto, OCR, reranking e latência
+- como medi consumo operacional do app
+- como defini budget-aware routing
+- como equilibrei qualidade, custo e previsibilidade para um produto de negócio
+
+---
+
+## Fase 9.5 — MCPs e integrações operacionais empresariais
+
+### Objetivo
+Conectar o copiloto documental a fontes e sistemas externos via MCP, com foco em casos de uso empresariais úteis, auditáveis e de baixo custo operacional.
+
+### Tese desta fase
+Esta fase transforma o projeto de uma aplicação de IA com base documental em um **copiloto operacional empresarial** capaz de:
+
+- consultar bases documentais externas
+- comparar versões de documentos e políticas
+- extrair gaps, riscos, obrigações e próximos passos
+- gerar evidence packs e checklists operacionais
+- registrar pendências com trilha auditável
+
+### Por que esta fase entra aqui
+
+Ela faz mais sentido **depois da Fase 9**, porque o projeto já passa a ter:
+
+- observabilidade suficiente para medir latência, qualidade e custo operacional
+- agente documental e tools já estabelecidos
+- evals e guardrails suficientes para suportar integração com sistemas reais
+
+E faz mais sentido **antes das fases finais de engenharia, deploy e portfólio**, para que o MCP já faça parte da identidade do produto antes da versão pública/demonstrável.
+
+### Vertical recomendada
+
+Começar com uma vertical principal, gratuita e muito alinhada ao projeto atual:
+
+- **EvidenceOps MCP**
+
+Essa vertical mira cenários de:
+
+- compliance
+- auditoria
+- procurement
+- governança documental
+- operações com forte dependência de evidências e revisão humana
+
+### Direção recomendada
+
+- começar com **1 vertical forte**, não com muitas integrações dispersas
+- priorizar integrações gratuitas / self-hosted
+- manter human-in-the-loop em ações sensíveis
+- usar MCP para consulta + ação operacional leve, sempre com grounding e rastreabilidade
+
+### Checklist
+- [ ] definir o caso principal do MCP (`EvidenceOps MCP`)
+- [ ] criar um **Document Repository MCP** usando fonte gratuita/self-hosted (`filesystem`, `Nextcloud`, `WebDAV`, sincronização de drive ou equivalente)
+- [ ] criar um **Worklog / Action MCP** usando `SQLite`, `GitHub Issues` free ou fila operacional local
+- [ ] criar um corpus de demo curado para negócio (`policies`, `contracts`, `audit`, `templates`, `gold_sets`)
+- [ ] suportar busca documental externa e recuperação com fontes via MCP
+- [ ] suportar comparação de versões e drift documental (policy/contract/template)
+- [ ] extrair gaps, obrigações, riscos, owners e prazos em output estruturado
+- [ ] gerar checklist operacional com fontes rastreáveis
+- [ ] montar evidence pack estruturado reaproveitável
+- [ ] registrar pendências/ações em store auditável
+- [ ] adicionar guardrails, permissões e revisão humana nas ações sensíveis
+- [ ] medir latência, consumo e custo operacional por fluxo MCP
+- [ ] criar demo end-to-end do caso empresarial
+
+### Stack gratuita sugerida
+- `filesystem` local como baseline
+- `Nextcloud` / `WebDAV` para base documental remota sem custo
+- `SQLite` para store operacional local
+- `GitHub Issues` free ou fila local para registro de gaps e próximos passos
+- `Ollama` / `hf_local_llm_service` como camada principal de inferência local
+
+### Entregável
+- primeiro MCP empresarial útil e auditável, integrado ao copiloto documental, com caso de uso demonstrável de negócio
+
+### Evidência para GitHub/LinkedIn
+- diagrama do MCP e do fluxo end-to-end
+- GIF ou vídeo curto mostrando busca externa + comparação + checklist + registro de gap
+- corpus de demo curado para negócio
+- documentação da arquitetura e das limitações do MCP
+
+### O que preciso saber defender em entrevista
+- por que MCP entra depois de evals e observabilidade
+- por que comecei com uma vertical forte em vez de muitas integrações ao mesmo tempo
+- como garanti grounding, trilha auditável e revisão humana
+- por que esse MCP resolve problema real em compliance/auditoria/operações sem depender de stack paga
+
+---
+
 ## Fase 10 — Engenharia profissional
 
 ### Objetivo
 Transformar o projeto em algo tecnicamente defendível.
 
 ### Checklist
-- [ ] Criar testes unitários das partes críticas
+- [x] Criar testes unitários das partes críticas
 - [ ] Criar testes smoke da aplicação
-- [ ] Criar testes dos fluxos de RAG
-- [ ] Criar testes dos schemas estruturados
-- [ ] Criar testes do roteador de intenção
+- [x] Criar testes dos fluxos de RAG
+- [x] Criar testes dos schemas estruturados
+- [x] Criar testes do roteador de intenção
 - [x] Criar testes dos grafos LangGraph e das transições críticas de estado
 - [x] Criar testes dos caminhos de retry, fallback e revisão humana nos workflows LangGraph
 - [ ] Adicionar `Dockerfile`
-- [ ] Criar GitHub Actions para checks/testes
+- [x] Criar GitHub Actions para checks/testes
 - [ ] Padronizar tratamento de falhas
-- [ ] Criar arquivo central de configuração
+- [x] Criar arquivo central de configuração
 - [ ] Padronizar logs
 - [ ] Revisar estrutura do código para clareza e manutenção
 - [ ] Medir gargalos de performance de retrieval e geração
@@ -1613,16 +1821,18 @@ Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA a
 3. **Fase 8 — Evals**
 4. **Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve**
 5. **Fase 9 — Observabilidade**
-6. **Fase 10 — Engenharia profissional**
-7. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
-8. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
-9. **Fase 11 — Pacote final de portfólio**
+6. **Fase 9.25 — AI runtime economics, usage observability e budget-aware routing**
+7. **Fase 9.5 — MCPs e integrações operacionais empresariais**
+8. **Fase 10 — Engenharia profissional**
+9. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+10. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
+11. **Fase 11 — Pacote final de portfólio**
 
 ### Métrica de sucesso do roadmap
 
 O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 
-> Construí uma aplicação de IA que começou com fundamentos locais, evoluiu para RAG real com base documental, passou a produzir saídas estruturadas, foi instrumentada com benchmarking/evals/observabilidade e, só quando isso fez sentido, explorou Hugging Face, quantização e fine-tuning leve de forma orientada por evidência. Também evoluí a interface de prototipagem para demo AI-first e depois para uma camada web mais próxima de produto antes do deploy público.
+> Construí uma aplicação de IA que começou com fundamentos locais, evoluiu para RAG real com base documental, passou a produzir saídas estruturadas, foi instrumentada com benchmarking/evals/observabilidade e depois ganhou uma camada explícita de cost/usage observability com budget-aware routing. Só então conectei o produto a integrações empresariais via MCP com grounding e trilha auditável. Também evoluí a interface de prototipagem para demo AI-first e depois para uma camada web mais próxima de produto antes do deploy público.
 
 
 ### Atualização local recente
@@ -1669,3 +1879,10 @@ O roadmap está bom se, ao final, eu conseguir dizer com honestidade:
 - [x] Adicionar backfill histórico da Fase 8 para importar relatórios legados JSON no store SQLite sem duplicação
 - [x] Adicionar camada diagnóstica da Fase 8 para transformar histórico de evals em prioridades de iteração e sinalização de adaptação
 - [x] Completar a Fase 8 no escopo técnico/local com suites para roteamento/guardrails, cobertura explícita dos critérios de avaliação e decisão documentada sobre DeepEval
+- [x] Adicionar workflow live separado da Fase 8 para evals dependentes de ambiente preparado
+- [x] Adicionar runner consolidado com `preflight`, `--index-missing` e execução em lote de evals reais
+- [x] Indexar os documentos faltantes do manifesto real e sincronizar o backend Chroma sem divergência com o store canônico
+- [x] Corrigir a regressão do `checklist_regression` (falso positivo em `collapsed_items`) e voltar o suite para `PASS`
+- [x] Melhorar a recuperação de `name`/`location` na trilha `evidence_cv` e elevar o recall do mini gold set para 1.0 nesses campos
+- [x] Rerodar o ciclo live completo da Fase 8 com geração de nova evidência persistida no SQLite
+- [x] Adicionar histórico agregado local de execuções do app (chat + structured), com parâmetros de RAG, erros, latências e visualização resumida na sidebar
