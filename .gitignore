@@ -13,8 +13,11 @@ __pycache__/
 .phase55_langgraph_shadow_log.json
 .phase6_document_agent_log.json
 .phase7_model_comparison_log.json
+.phase95_evidenceops_worklog.json
 .runtime_execution_log.json
 .chroma_rag/
+artifacts/
+outputs/
 materials_local/
 .vscode/
 old/
