@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
+from src.config import EvidenceOpsExternalSettings, get_evidenceops_external_settings
+from .evidenceops_external_targets import (
+    build_nextcloud_repository_snapshot,
+    get_nextcloud_repository_document,
+    list_nextcloud_repository_documents,
+)
 from .evidenceops_repository import (
     build_evidenceops_repository_snapshot,
     diff_evidenceops_repository_snapshots,
@@ -11,6 +18,7 @@ from .evidenceops_repository import (
     summarize_evidenceops_repository_documents,
 )
 from ..storage.phase95_evidenceops_action_store import (
+    append_evidenceops_actions_from_worklog_entry,
     load_evidenceops_actions,
     summarize_evidenceops_actions,
     update_evidenceops_action,
@@ -20,6 +28,22 @@ from ..storage.phase95_evidenceops_repository_snapshot import (
     save_evidenceops_repository_snapshot,
 )
 from ..storage.phase95_evidenceops_worklog import load_evidenceops_worklog, summarize_evidenceops_worklog
+from ..storage.phase95_evidenceops_worklog import append_evidenceops_worklog_entry
+
+
+def _resolve_repository_backend(
+    repository_backend: str | None = None,
+    *,
+    external_settings: EvidenceOpsExternalSettings | None = None,
+) -> str:
+    if repository_backend is not None:
+        normalized = str(repository_backend).strip().lower()
+        return normalized or "local"
+    if external_settings is not None:
+        normalized = str(external_settings.repository_backend or "").strip().lower()
+        return normalized or "local"
+    normalized = str(os.getenv("EVIDENCEOPS_REPOSITORY_BACKEND", "")).strip().lower()
+    return normalized or "local"
 
 
 def list_evidenceops_repository_entries(
@@ -30,7 +54,20 @@ def list_evidenceops_repository_entries(
     suffix: str | None = None,
     document_id: str | None = None,
     limit: int | None = None,
+    repository_backend: str | None = None,
+    external_settings: EvidenceOpsExternalSettings | None = None,
 ) -> list[dict[str, Any]]:
+    resolved_settings = external_settings or get_evidenceops_external_settings()
+    resolved_backend = _resolve_repository_backend(repository_backend, external_settings=resolved_settings)
+    if resolved_backend == "nextcloud_webdav":
+        return list_nextcloud_repository_documents(
+            settings=resolved_settings,
+            query=query,
+            category=category,
+            suffix=suffix,
+            document_id=document_id,
+            limit=limit,
+        )
     return list_evidenceops_repository_documents(
         repository_root,
         query=query,
@@ -49,14 +86,18 @@ def search_evidenceops_repository_entries(
     suffix: str | None = None,
     document_id: str | None = None,
     limit: int | None = None,
+    repository_backend: str | None = None,
+    external_settings: EvidenceOpsExternalSettings | None = None,
 ) -> list[dict[str, Any]]:
-    return search_evidenceops_repository_documents(
+    return list_evidenceops_repository_entries(
         repository_root,
         query=query,
         category=category,
         suffix=suffix,
         document_id=document_id,
         limit=limit,
+        repository_backend=repository_backend,
+        external_settings=external_settings,
     )
 
 
@@ -65,7 +106,17 @@ def get_evidenceops_repository_document(
     *,
     relative_path: str | None = None,
     document_id: str | None = None,
+    repository_backend: str | None = None,
+    external_settings: EvidenceOpsExternalSettings | None = None,
 ) -> dict[str, Any] | None:
+    resolved_settings = external_settings or get_evidenceops_external_settings()
+    resolved_backend = _resolve_repository_backend(repository_backend, external_settings=resolved_settings)
+    if resolved_backend == "nextcloud_webdav":
+        return get_nextcloud_repository_document(
+            settings=resolved_settings,
+            relative_path=relative_path,
+            document_id=document_id,
+        )
     documents = list_evidenceops_repository_documents(repository_root)
     normalized_relative_path = str(relative_path or "").strip()
     normalized_document_id = str(document_id or "").strip()
@@ -115,36 +166,75 @@ def summarize_evidenceops_repository_entries(
     category: str | None = None,
     suffix: str | None = None,
     document_id: str | None = None,
+    repository_backend: str | None = None,
+    external_settings: EvidenceOpsExternalSettings | None = None,
 ) -> dict[str, Any]:
-    documents = list_evidenceops_repository_documents(
+    resolved_settings = external_settings or get_evidenceops_external_settings()
+    resolved_backend = _resolve_repository_backend(repository_backend, external_settings=resolved_settings)
+    documents = list_evidenceops_repository_entries(
         repository_root,
         category=category,
         suffix=suffix,
         document_id=document_id,
+        repository_backend=resolved_backend,
+        external_settings=resolved_settings,
     )
-    return summarize_evidenceops_repository_documents(documents)
+    return {
+        **summarize_evidenceops_repository_documents(documents),
+        "repository_backend": resolved_backend,
+    }
 
 
 def compare_evidenceops_repository_state(
     repository_root: Path,
     *,
     snapshot_path: Path | None = None,
+    repository_backend: str | None = None,
+    external_settings: EvidenceOpsExternalSettings | None = None,
 ) -> dict[str, Any]:
+    resolved_settings = external_settings or get_evidenceops_external_settings()
+    resolved_backend = _resolve_repository_backend(repository_backend, external_settings=resolved_settings)
     resolved_snapshot_path = snapshot_path or (repository_root / ".phase95_evidenceops_repository_snapshot.json")
     previous_snapshot = load_evidenceops_repository_snapshot(resolved_snapshot_path)
-    current_snapshot = build_evidenceops_repository_snapshot(repository_root)
+    current_snapshot = (
+        build_nextcloud_repository_snapshot(settings=resolved_settings)
+        if resolved_backend == "nextcloud_webdav"
+        else build_evidenceops_repository_snapshot(repository_root)
+    )
     diff = diff_evidenceops_repository_snapshots(previous_snapshot, current_snapshot)
     save_evidenceops_repository_snapshot(resolved_snapshot_path, current_snapshot)
     return {
         **diff,
         "snapshot_path": str(resolved_snapshot_path),
-        "repository_root": str(repository_root),
+        "repository_root": str(repository_root) if resolved_backend == "local" else resolved_settings.nextcloud.root_path,
+        "repository_backend": resolved_backend,
     }
 
 
 def summarize_evidenceops_worklog_entries(log_path: Path) -> dict[str, Any]:
     entries = load_evidenceops_worklog(log_path)
     return summarize_evidenceops_worklog(entries)
+
+
+def register_evidenceops_entry(
+    worklog_path: Path,
+    store_path: Path,
+    *,
+    entry: dict[str, Any],
+) -> dict[str, Any]:
+    if not isinstance(entry, dict):
+        raise ValueError("'entry' must be a dictionary.")
+
+    worklog_entries = append_evidenceops_worklog_entry(worklog_path, entry)
+    inserted_actions = append_evidenceops_actions_from_worklog_entry(store_path, entry)
+    action_entries = load_evidenceops_actions(store_path)
+    return {
+        "registered_entry": entry,
+        "worklog_total_runs": len(worklog_entries),
+        "actions_inserted": int(inserted_actions),
+        "worklog_summary": summarize_evidenceops_worklog(worklog_entries),
+        "action_summary": summarize_evidenceops_actions(action_entries),
+    }
 
 
 def update_evidenceops_action_item(

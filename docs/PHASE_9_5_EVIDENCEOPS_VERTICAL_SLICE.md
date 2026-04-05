@@ -38,13 +38,38 @@ O ganho é que a vertical passa a ficar **“MCP-shaped”**:
 - comparação de estado documental
 - trilha auditável para writes
 
+## Direção oficial do Slice 2
+
+Depois desta rodada, a direção oficial da Fase 9.5 deixa de ser genérica e passa a ser:
+
+- **`Nextcloud/WebDAV`** para o **Document Repository MCP** externo
+- **`Trello`** para o **Worklog / Action MCP** externo
+- **`Notion`** para **evidence register, dashboard operacional e handoff executivo**
+
+Leitura recomendada:
+
+- `filesystem + SQLite` continuam como fundação local auditável
+- a tríade `Nextcloud/WebDAV + Trello + Notion` passa a ser o alvo externo principal
+- `GitHub Issues` deixa de ser o target principal e vira uma alternativa secundária para contextos mais dev-centric
+
 ## O que isso prepara para depois
 
 Com essa base, o próximo passo pode trocar adapters sem reescrever a vertical:
 
 - `filesystem` -> `Nextcloud/WebDAV`
-- `SQLite local` -> `GitHub Issues` / fila externa
+- `SQLite local` -> `Trello`
+- summaries/evidence packs locais -> `Notion`
 - fachada local -> MCP server/adapter HTTP
+
+## O que ainda depende de credenciais/configuração
+
+O slice 1B fica completo sem depender de serviços externos.
+
+Para promover a vertical ao slice externo final da Fase 9.5, ainda serão necessários:
+
+- credenciais de `Nextcloud/WebDAV`
+- credenciais e board/list mapping do `Trello`
+- integration token + database/page mapping do `Notion`
 
 ## Evidência de pronto
 

@@ -140,6 +140,73 @@ class RagSettings:
     pdf_evidence_pipeline_rollout_percentage: int = 100
 
 
+@dataclass(frozen=True)
+class NextcloudWebDavSettings:
+    base_url: str
+    username: str
+    app_password: str
+    root_path: str
+
+
+@dataclass(frozen=True)
+class TrelloSettings:
+    api_key: str
+    token: str
+    board_id: str
+    list_open_id: str
+    list_review_id: str
+    list_approved_id: str
+    list_done_id: str
+
+
+@dataclass(frozen=True)
+class NotionSettings:
+    api_key: str
+    database_id: str
+    parent_page_id: str
+    api_version: str = "2022-06-28"
+
+
+@dataclass(frozen=True)
+class PresentationExportSettings:
+    enabled: bool
+    base_url: str
+    timeout_seconds: int
+    remote_output_dir: str
+    remote_preview_dir: str
+    local_artifact_dir: Path
+    include_review: bool = True
+    preview_backend: str = "auto"
+    require_real_previews: bool = False
+    fail_on_regression: bool = False
+    enabled_export_kinds: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class GradioProductSettings:
+    app_name: str
+    server_name: str
+    server_port: int
+    theme: str
+    default_workflow: str
+    max_upload_files: int
+    enable_deck_generation: bool = True
+    show_ai_lab_entry: bool = True
+    accent_color: str = "#6ae3ff"
+    default_density: str = "comfortable"
+
+
+@dataclass(frozen=True)
+class EvidenceOpsExternalSettings:
+    repository_backend: str
+    external_sync_enabled: bool
+    corpus_primary_root: Path
+    corpus_public_root: Path
+    nextcloud: NextcloudWebDavSettings
+    trello: TrelloSettings
+    notion: NotionSettings
+
+
 
 def get_ollama_settings() -> OllamaSettings:
     default_model = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
@@ -265,6 +332,104 @@ def get_huggingface_inference_settings() -> HuggingFaceInferenceSettings:
         default_max_tokens=_optional_int_env("HUGGINGFACE_INFERENCE_MAX_TOKENS"),
         available_models_env=available_models_env,
         available_embedding_models_env=available_embedding_models_env,
+    )
+
+
+def get_presentation_export_settings() -> PresentationExportSettings:
+    enabled_export_kinds = tuple(
+        value.strip()
+        for value in os.getenv("PRESENTATION_EXPORT_ENABLED_EXPORT_KINDS", "").split(",")
+        if value.strip()
+    )
+    return PresentationExportSettings(
+        enabled=os.getenv("PRESENTATION_EXPORT_ENABLED", "false").strip().lower() in {"1", "true", "yes"},
+        base_url=os.getenv("PRESENTATION_EXPORT_BASE_URL", "http://127.0.0.1:8787").strip(),
+        timeout_seconds=int(os.getenv("PRESENTATION_EXPORT_TIMEOUT_SECONDS", "120")),
+        remote_output_dir=(
+            os.getenv("PRESENTATION_EXPORT_REMOTE_OUTPUT_DIR", "outputs/ai_workbench_exports").strip()
+            or "outputs/ai_workbench_exports"
+        ),
+        remote_preview_dir=(
+            os.getenv("PRESENTATION_EXPORT_REMOTE_PREVIEW_DIR", "outputs/ai_workbench_export_previews").strip()
+            or "outputs/ai_workbench_export_previews"
+        ),
+        local_artifact_dir=Path(
+            os.getenv(
+                "PRESENTATION_EXPORT_LOCAL_ARTIFACT_DIR",
+                str(BASE_DIR / "artifacts" / "presentation_exports"),
+            )
+        ),
+        include_review=os.getenv("PRESENTATION_EXPORT_INCLUDE_REVIEW", "true").strip().lower() not in {"0", "false", "no"},
+        preview_backend=os.getenv("PRESENTATION_EXPORT_PREVIEW_BACKEND", "auto").strip() or "auto",
+        require_real_previews=os.getenv("PRESENTATION_EXPORT_REQUIRE_REAL_PREVIEWS", "false").strip().lower() in {"1", "true", "yes"},
+        fail_on_regression=os.getenv("PRESENTATION_EXPORT_FAIL_ON_REGRESSION", "false").strip().lower() in {"1", "true", "yes"},
+        enabled_export_kinds=enabled_export_kinds,
+    )
+
+
+def get_gradio_product_settings() -> GradioProductSettings:
+    return GradioProductSettings(
+        app_name=os.getenv("GRADIO_PRODUCT_APP_NAME", "AI Workbench Product").strip() or "AI Workbench Product",
+        server_name=os.getenv("GRADIO_PRODUCT_SERVER_NAME", "127.0.0.1").strip() or "127.0.0.1",
+        server_port=int(os.getenv("GRADIO_PRODUCT_SERVER_PORT", "7860")),
+        theme=os.getenv("GRADIO_PRODUCT_THEME", "premium_dark").strip() or "premium_dark",
+        default_workflow=os.getenv("GRADIO_PRODUCT_DEFAULT_WORKFLOW", "document_review").strip() or "document_review",
+        max_upload_files=max(1, int(os.getenv("GRADIO_PRODUCT_MAX_UPLOAD_FILES", "6"))),
+        enable_deck_generation=os.getenv("GRADIO_PRODUCT_ENABLE_DECK_GENERATION", "true").strip().lower() not in {"0", "false", "no"},
+        show_ai_lab_entry=os.getenv("GRADIO_PRODUCT_SHOW_AI_LAB_ENTRY", "true").strip().lower() not in {"0", "false", "no"},
+        accent_color=os.getenv("GRADIO_PRODUCT_ACCENT_COLOR", "#6ae3ff").strip() or "#6ae3ff",
+        default_density=os.getenv("GRADIO_PRODUCT_DEFAULT_DENSITY", "comfortable").strip() or "comfortable",
+    )
+
+
+def get_evidenceops_external_settings() -> EvidenceOpsExternalSettings:
+    external_sync_enabled = os.getenv("EVIDENCEOPS_EXTERNAL_SYNC_ENABLED", "false").strip().lower() in {"1", "true", "yes"}
+    nextcloud_base_url = os.getenv("EVIDENCEOPS_NEXTCLOUD_BASE_URL", "").strip()
+    nextcloud_username = os.getenv("EVIDENCEOPS_NEXTCLOUD_USERNAME", "").strip()
+    nextcloud_app_password = os.getenv("EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD", "").strip()
+    configured_default_backend = (
+        "nextcloud_webdav"
+        if external_sync_enabled and nextcloud_base_url and nextcloud_username and nextcloud_app_password
+        else "local"
+    )
+    corpus_primary_root = Path(
+        os.getenv(
+            "EVIDENCEOPS_CORPUS_PRIMARY_ROOT",
+            str(BASE_DIR / "data" / "corpus_revisado" / "option_b_synthetic_premium"),
+        )
+    )
+    corpus_public_root = Path(
+        os.getenv(
+            "EVIDENCEOPS_CORPUS_PUBLIC_ROOT",
+            str(BASE_DIR / "data" / "corpus_revisado" / "option_a_public_corpus_v2"),
+        )
+    )
+    return EvidenceOpsExternalSettings(
+        repository_backend=os.getenv("EVIDENCEOPS_REPOSITORY_BACKEND", configured_default_backend).strip().lower() or configured_default_backend,
+        external_sync_enabled=external_sync_enabled,
+        corpus_primary_root=corpus_primary_root,
+        corpus_public_root=corpus_public_root,
+        nextcloud=NextcloudWebDavSettings(
+            base_url=nextcloud_base_url,
+            username=nextcloud_username,
+            app_password=nextcloud_app_password,
+            root_path=os.getenv("EVIDENCEOPS_NEXTCLOUD_ROOT_PATH", "/EvidenceOpsDemo").strip() or "/EvidenceOpsDemo",
+        ),
+        trello=TrelloSettings(
+            api_key=os.getenv("EVIDENCEOPS_TRELLO_API_KEY", "").strip(),
+            token=os.getenv("EVIDENCEOPS_TRELLO_TOKEN", "").strip(),
+            board_id=os.getenv("EVIDENCEOPS_TRELLO_BOARD_ID", "").strip(),
+            list_open_id=os.getenv("EVIDENCEOPS_TRELLO_LIST_OPEN_ID", "").strip(),
+            list_review_id=os.getenv("EVIDENCEOPS_TRELLO_LIST_REVIEW_ID", "").strip(),
+            list_approved_id=os.getenv("EVIDENCEOPS_TRELLO_LIST_APPROVED_ID", "").strip(),
+            list_done_id=os.getenv("EVIDENCEOPS_TRELLO_LIST_DONE_ID", "").strip(),
+        ),
+        notion=NotionSettings(
+            api_key=os.getenv("EVIDENCEOPS_NOTION_API_KEY", "").strip(),
+            database_id=os.getenv("EVIDENCEOPS_NOTION_DATABASE_ID", "").strip(),
+            parent_page_id=os.getenv("EVIDENCEOPS_NOTION_PARENT_PAGE_ID", "").strip(),
+            api_version=os.getenv("EVIDENCEOPS_NOTION_API_VERSION", "2022-06-28").strip() or "2022-06-28",
+        ),
     )
 
 
