@@ -52,9 +52,12 @@ class HuggingFaceLocalProvider:
             "generation_task": self.settings.generation_task,
             "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
             "model": model,
+            "prompt_serialization_mode": "tokenizer_chat_template_if_available_else_manual_role_prompt",
+            "chat_template_verification": "runtime_checked_during_generation",
             "validation_summary": (
                 "Providers locais baseados em Transformers não expõem um equivalente universal a `num_ctx` do Ollama. "
-                "O valor configurado no app funciona como budget operacional e referência de observabilidade."
+                "O valor configurado no app funciona como budget operacional e referência de observabilidade. "
+                "Quando o tokenizer local expõe chat template, o provider passa a usá-lo; caso contrário, faz fallback para serialização manual por papéis."
             ),
         }
 
@@ -69,7 +72,23 @@ class HuggingFaceLocalProvider:
             ),
         }
 
-    def _format_messages_as_prompt(self, messages: list[dict[str, str]]) -> str:
+    def _format_messages_as_prompt(self, messages: list[dict[str, str]], tokenizer: object | None = None) -> tuple[str, dict[str, object]]:
+        if tokenizer is not None and hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
+            try:
+                prompt = tokenizer.apply_chat_template(  # type: ignore[attr-defined]
+                    messages,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                )
+                if isinstance(prompt, str) and prompt.strip():
+                    return prompt, {
+                        "prompt_serialization_mode": "tokenizer_chat_template",
+                        "chat_template_used": True,
+                        "chat_template_source": "transformers_tokenizer",
+                    }
+            except Exception:
+                pass
+
         lines: list[str] = []
         for message in messages:
             role = str(message.get("role") or "user").upper()
@@ -77,7 +96,11 @@ class HuggingFaceLocalProvider:
             if content:
                 lines.append(f"{role}: {content}")
         lines.append("ASSISTANT:")
-        return "\n".join(lines)
+        return "\n".join(lines), {
+            "prompt_serialization_mode": "manual_role_prompt",
+            "chat_template_used": False,
+            "chat_template_source": None,
+        }
 
     def _load_generation_pipeline(self, model: str):
         cached = self._generation_pipelines.get(model)
@@ -99,10 +122,19 @@ class HuggingFaceLocalProvider:
         context_window: int | None = None,
         top_p: float | None = None,
         max_tokens: int | None = None,
+        think: bool | None = None,
     ):
         self.reset_last_usage_metrics()
-        prompt = self._format_messages_as_prompt(messages)
         pipe = self._load_generation_pipeline(model)
+        prompt, prompt_metadata = self._format_messages_as_prompt(
+            messages,
+            tokenizer=getattr(pipe, "tokenizer", None),
+        )
+        self._last_usage_metrics = {
+            **self._last_usage_metrics,
+            **prompt_metadata,
+            "usage_source": "huggingface_local_runtime_metadata",
+        }
         resolved_top_p = top_p if top_p is not None else self.settings.top_p
         resolved_max_tokens = max_tokens if max_tokens is not None else self.settings.max_new_tokens
         generate_kwargs: dict[str, object] = {

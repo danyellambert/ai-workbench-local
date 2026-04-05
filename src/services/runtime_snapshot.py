@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from ..structured.envelope import StructuredResult
+from .phase8_5_runtime_metadata import infer_resolved_runtime_family, summarize_runtime_family_artifacts
 
 
 def _safe_distribution_version(distribution_name: str) -> str | None:
@@ -37,6 +38,61 @@ def _read_git_commit(project_root: str | Path | None) -> str | None:
         return None
     commit_hash = str(result.stdout or "").strip()
     return commit_hash or None
+
+
+def _read_ollama_version() -> str | None:
+    try:
+        result = subprocess.run(
+            ["ollama", "--version"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    output = str(result.stdout or result.stderr or "").strip()
+    return output or None
+
+
+def _summarize_model_resolution_artifacts(resolved_case_artifacts: list[dict[str, object]] | None) -> dict[str, object]:
+    counts: dict[str, int] = {}
+    substitutions: list[dict[str, object]] = []
+    seen_keys: set[tuple[str, str, str, str, str]] = set()
+    for artifact in resolved_case_artifacts or []:
+        if not isinstance(artifact, dict):
+            continue
+        status = str(artifact.get("model_resolution_status") or "exact").strip() or "exact"
+        counts[status] = counts.get(status, 0) + 1
+        requested_model = str(artifact.get("model_requested") or "").strip()
+        effective_model = str(artifact.get("model_effective") or "").strip()
+        if status == "exact" and requested_model == effective_model:
+            continue
+        key = (
+            str(artifact.get("group") or ""),
+            str(artifact.get("provider_requested") or ""),
+            requested_model,
+            effective_model,
+            status,
+        )
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        substitutions.append(
+            {
+                "group": artifact.get("group"),
+                "provider_requested": artifact.get("provider_requested"),
+                "model_requested": requested_model,
+                "model_effective": effective_model,
+                "mapping_status": status,
+                "resolution_source": artifact.get("model_resolution_source"),
+            }
+        )
+    return {
+        "counts": counts,
+        "substitutions": substitutions,
+    }
 
 
 def build_benchmark_environment_snapshot(
@@ -113,16 +169,24 @@ def build_benchmark_environment_snapshot(
             "supports_embeddings": bool(provider_entry.get("supports_embeddings")),
             "default_model": provider_entry.get("default_model"),
             "default_context_window": provider_entry.get("default_context_window"),
+            "default_runtime_family": infer_resolved_runtime_family(
+                provider_effective=provider_key,
+                model_effective=str(provider_entry.get("default_model") or ""),
+                runtime_artifact=None,
+            ),
             "available_chat_models": chat_models,
             "available_embedding_models": embedding_models,
         }
 
     ollama_inventory = provider_inventory.get("ollama") if isinstance(provider_inventory.get("ollama"), dict) else {}
+    model_resolution_summary = _summarize_model_resolution_artifacts(resolved_case_artifacts)
+    runtime_family_resolution_summary = summarize_runtime_family_artifacts(resolved_case_artifacts)
 
     return {
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "project_root": str(resolved_root),
         "git_commit_hash": _read_git_commit(resolved_root),
+        "ollama_version": _read_ollama_version(),
         "python": {
             "version": sys.version,
             "executable": sys.executable,
@@ -139,6 +203,8 @@ def build_benchmark_environment_snapshot(
             "http_timeout_seconds": str(os.getenv("OLLAMA_HTTP_TIMEOUT_SECONDS", "")).strip() or None,
             "embed_batch_size": str(os.getenv("OLLAMA_EMBED_BATCH_SIZE", "")).strip() or None,
         },
+        "model_resolution_summary": model_resolution_summary,
+        "runtime_family_resolution_summary": runtime_family_resolution_summary,
         "resolved_case_artifacts": list(resolved_case_artifacts or []),
     }
 

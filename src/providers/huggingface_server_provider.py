@@ -192,6 +192,7 @@ class HuggingFaceServerProvider:
         context_window: int | None = None,
         top_p: float | None = None,
         max_tokens: int | None = None,
+        think: bool | None = None,
     ):
         self.reset_last_usage_metrics()
         provider_config: dict[str, object] = {"temperature": temperature}

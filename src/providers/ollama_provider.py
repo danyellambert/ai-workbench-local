@@ -253,6 +253,7 @@ class OllamaProvider:
         context_window: int | None = None,
         top_p: float | None = None,
         max_tokens: int | None = None,
+        think: bool | None = None,
     ):
         self.reset_last_usage_metrics()
         resolved_top_p = top_p if top_p is not None else self.settings.default_top_p
@@ -265,6 +266,8 @@ class OllamaProvider:
                 "temperature": temperature,
             },
         }
+        if think is not None:
+            payload["think"] = bool(think)
 
         if context_window:
             payload["options"]["num_ctx"] = int(context_window)

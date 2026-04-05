@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from src.config import RagSettings
+from src.services.app_logging import get_logger
 from src.rag.chunking import chunk_text, describe_chunking_strategy
 from src.rag.langchain_adapter import (
     describe_retrieval_strategy,
@@ -15,6 +16,9 @@ from src.rag.langchain_adapter import (
 from src.rag.loaders import LoadedDocument
 from src.rag.reranking import build_candidate_pool_size, hybrid_rerank_chunks, rank_chunks_lexically
 from src.rag.vector_store import ChromaVectorStore, LocalVectorStore
+
+
+logger = get_logger(__name__)
 
 
 
@@ -245,7 +249,7 @@ def sync_chroma_from_rag_index(
                 "persist_dir_exists": settings.chroma_path.exists(),
                 "message": f"Falha ao limpar logicamente o Chroma nesta sessão: {error}",
             }
-        print(f"[RAG] Falha ao sincronizar Chroma; mantendo fallback local: {error}")
+        logger.warning("Falha ao sincronizar Chroma; mantendo fallback local: %s", error)
         return {
             "ok": False,
             "backend": "local_fallback",
@@ -628,9 +632,9 @@ def retrieve_relevant_chunks_detailed(
                 vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in chroma_results]
                 effective_retrieval_strategy = "manual_hybrid"
             else:
-                print("[RAG] Chroma não retornou resultados; usando fallback local.")
+                logger.warning("Chroma não retornou resultados; usando fallback local.")
         except Exception as error:
-            print(f"[RAG] Chroma falhou na busca; usando fallback local: {error}")
+            logger.warning("Chroma falhou na busca; usando fallback local: %s", error)
             vector_backend_status = {
                 **vector_backend_status,
                 "status": "fallback_local",

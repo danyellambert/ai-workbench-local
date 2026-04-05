@@ -50,6 +50,19 @@ class Phase85BenchmarkRound2Tests(unittest.TestCase):
         self.assertEqual(cases[0]["group"], "rerankers")
         self.assertEqual(cases[0]["embedding_provider"], "ollama")
         self.assertEqual(cases[0]["embedding_model"], "embeddinggemma:300m")
+        self.assertEqual(cases[0]["pdf_extraction_mode"], "basic")
+        self.assertFalse(cases[0]["pdf_docling_enabled"])
+        self.assertFalse(cases[0]["pdf_ocr_fallback_enabled"])
+
+    def test_build_reranker_cases_includes_neural_challenger_definitions(self) -> None:
+        manifest = load_benchmark_manifest(DEFAULT_PHASE8_5_MANIFEST_PATH)
+
+        cases = build_reranker_cases(manifest, smoke=False, provider_filter="huggingface_local")
+
+        neural_cases = [case for case in cases if case.get("candidate_role") == "challenger_neural"]
+        self.assertTrue(neural_cases)
+        self.assertTrue(any(case.get("requested_runtime_family") == "hf_local_or_mlx" for case in neural_cases))
+        self.assertTrue(any(case.get("requested_model") == "bge-reranker-v2-m3" for case in neural_cases))
 
     def test_build_ocr_vlm_cases_smoke_uses_existing_gold_backed_cases(self) -> None:
         manifest = load_benchmark_manifest(DEFAULT_PHASE8_5_MANIFEST_PATH)
@@ -60,6 +73,10 @@ class Phase85BenchmarkRound2Tests(unittest.TestCase):
         self.assertEqual(cases[0]["group"], "ocr_vlm")
         self.assertTrue(Path(cases[0]["pdf_path"]).exists())
         self.assertTrue(Path(cases[0]["gold_path"]).exists())
+        self.assertEqual(len(cases[0]["variant_matrix"]), 6)
+        self.assertIn("pdf_hybrid", {item["variant"] for item in cases[0]["variant_matrix"]})
+        self.assertIn("pdf_complete", {item["variant"] for item in cases[0]["variant_matrix"]})
+        self.assertIn("evidence_no_vl_docling_disabled", {item["variant"] for item in cases[0]["variant_matrix"]})
 
     def test_preflight_counts_round2_groups_without_execution(self) -> None:
         manifest = load_benchmark_manifest(DEFAULT_PHASE8_5_MANIFEST_PATH)
@@ -109,9 +126,34 @@ class Phase85BenchmarkRound2Tests(unittest.TestCase):
                     "provider_effective": "ollama",
                     "model_requested": "embeddinggemma:300m",
                     "model_effective": "embeddinggemma:300m",
+                    "requested_runtime_family": "ollama_local",
+                    "resolved_runtime_family": "ollama_local",
+                    "runtime_family_resolution_status": "exact",
+                    "document_count": 4,
+                    "embedding_context_window": 512,
+                    "embedding_truncate": True,
+                    "chunk_size": 1200,
+                    "chunk_overlap": 80,
+                    "top_k": 4,
                     "retrieval_strategy": "manual_hybrid",
                     "rerank_pool_size": 8,
                     "rerank_lexical_weight": 0.35,
+                    "runtime_bucket": "local",
+                    "quantization_family": "unspecified_local",
+                    "runtime_path": "direct_runtime",
+                    "runtime_path_label": "Direct runtime",
+                    "backend_equivalence_type": "native_runtime",
+                    "backend_provider_resolved": "ollama",
+                    "backend_model_ref_resolved": "embeddinggemma:300m",
+                    "backend_equivalence_key": "ollama::embeddinggemma:300m",
+                    "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+                    "path_overhead_expected": False,
+                    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+                    "total_wall_time_s": 1.5,
+                    "total_wall_time_status": "measured",
+                    "cold_start_status": "estimated",
+                    "warm_start_status": "not_supported",
+                    "memory_status": "estimated",
                     "indexing_seconds": 1.2,
                     "aggregate_metrics": {
                         "question_count": 2,
@@ -147,7 +189,15 @@ class Phase85BenchmarkRound2Tests(unittest.TestCase):
                     "variant_results": [
                         {
                             "variant": "legacy_pdf",
+                            "requested_runtime_family": "legacy_pdf_text_extraction",
+                            "resolved_runtime_family": "legacy_pdf_text_extraction",
+                            "runtime_family_resolution_status": "exact",
                             "latency_s": 0.8,
+                            "total_wall_time_s": 0.8,
+                            "total_wall_time_status": "measured",
+                            "cold_start_status": "estimated",
+                            "warm_start_status": "not_supported",
+                            "memory_status": "estimated",
                             "scores": {
                                 "avg_f1": 0.4,
                                 "emails": {"f1": 0.5},
@@ -161,7 +211,15 @@ class Phase85BenchmarkRound2Tests(unittest.TestCase):
                         },
                         {
                             "variant": "evidence_with_vl",
+                            "requested_runtime_family": "ollama_vl_local",
+                            "resolved_runtime_family": "ollama_local",
+                            "runtime_family_resolution_status": "exact",
                             "latency_s": 1.4,
+                            "total_wall_time_s": 1.4,
+                            "total_wall_time_status": "measured",
+                            "cold_start_status": "estimated",
+                            "warm_start_status": "not_supported",
+                            "memory_status": "estimated",
                             "scores": {
                                 "avg_f1": 0.7,
                                 "emails": {"f1": 0.8},
@@ -183,6 +241,10 @@ class Phase85BenchmarkRound2Tests(unittest.TestCase):
         self.assertEqual(len(normalized["reranker_questions"]), 1)
         self.assertEqual(len(normalized["ocr_vlm"]), 2)
         self.assertEqual(normalized["ocr_vlm"][1]["variant"], "evidence_with_vl")
+        self.assertEqual(normalized["rerankers"][0]["runtime_family_resolution_status"], "exact")
+        self.assertEqual(normalized["ocr_vlm"][1]["resolved_runtime_family"], "ollama_local")
+        self.assertEqual(normalized["rerankers"][0]["runtime_path"], "direct_runtime")
+        self.assertEqual(normalized["reranker_questions"][0]["backend_equivalence_key"], "ollama::embeddinggemma:300m")
 
     def test_round2_aggregation_helpers_produce_rankings(self) -> None:
         reranker_summary = aggregate_reranker_events(

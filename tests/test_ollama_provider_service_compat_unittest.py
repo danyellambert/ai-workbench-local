@@ -103,9 +103,11 @@ def test_ollama_provider_forwards_chat_operational_overrides(monkeypatch) -> Non
         context_window=16384,
         top_p=0.75,
         max_tokens=256,
+        think=False,
     )
 
     assert str(captured["url"]).endswith("/api/chat")
+    assert captured["payload"]["think"] is False
     assert captured["payload"]["options"] == {
         "temperature": 0.3,
         "num_ctx": 16384,

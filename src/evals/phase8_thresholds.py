@@ -97,6 +97,21 @@ DIAGNOSIS_THRESHOLDS: dict[str, Any] = {
 }
 
 
+PHASE8_5_DECISION_THRESHOLDS: dict[str, Any] = {
+    "runtime_win_min_use_case_fit_delta": 0.03,
+    "runtime_win_min_format_delta": 0.05,
+    "runtime_win_latency_improvement_ratio": 0.15,
+    "runtime_win_max_latency_regression_ratio": 1.35,
+    "embedding_win_min_mrr_delta": 0.05,
+    "embedding_win_min_hit_at_1_delta": 0.10,
+    "embedding_win_max_latency_regression_ratio": 1.50,
+    "reranker_win_min_mrr_delta": 0.05,
+    "reranker_win_min_groundedness_delta": 0.05,
+    "reranker_win_max_latency_regression_ratio": 1.75,
+    "notes": "Decision-gate thresholds priorizam ganhos claros e conservadores antes de justificar adaptação leve.",
+}
+
+
 def get_real_document_eval_thresholds(task_type: str, overrides: dict[str, Any] | None = None) -> dict[str, Any]:
     base = deepcopy(REAL_DOCUMENT_EVAL_THRESHOLDS.get(task_type, {"pass_ratio": 0.75, "warn_ratio": 0.5}))
     if isinstance(overrides, dict):
@@ -116,4 +131,5 @@ def build_phase8_threshold_catalog() -> dict[str, Any]:
         "document_agent_routing_eval": deepcopy(AGENT_ROUTING_THRESHOLDS),
         "langgraph_workflow_eval": deepcopy(AGENT_WORKFLOW_THRESHOLDS),
         "diagnosis": deepcopy(DIAGNOSIS_THRESHOLDS),
+        "phase8_5_decision_gate": deepcopy(PHASE8_5_DECISION_THRESHOLDS),
     }

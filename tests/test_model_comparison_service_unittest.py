@@ -24,7 +24,7 @@ class _DummyProvider:
             "usage_source": "dummy_usage",
         }
 
-    def stream_chat_completion(self, messages, model, temperature, context_window=None, top_p=None, max_tokens=None):
+    def stream_chat_completion(self, messages, model, temperature, context_window=None, top_p=None, max_tokens=None, think=None):
         return [self.response_text]
 
     @staticmethod
@@ -73,6 +73,41 @@ class ModelComparisonServiceTests(unittest.TestCase):
         self.assertGreaterEqual(float(result["use_case_fit_score"]), 0.5)
         self.assertEqual(result["total_tokens"], 20)
         self.assertEqual(result["usage_source"], "dummy_usage")
+        self.assertEqual(result["total_wall_time_status"], "measured")
+        self.assertEqual(result["ttft_status"], "measured")
+        self.assertEqual(result["throughput_status"], "measured")
+        self.assertIsNotNone(result["ttft_s"])
+        self.assertGreater(float(result["throughput_tokens_per_s"]), 0.0)
+        self.assertEqual(result["cold_start_status"], "not_supported")
+        self.assertEqual(result["memory_status"], "not_supported")
+
+    def test_run_model_comparison_candidate_marks_empty_response_as_failure(self) -> None:
+        registry = {
+            "ollama": {
+                "label": "Ollama (local)",
+                "instance": _DummyProvider(""),
+                "supports_chat": True,
+                "default_model": "qwen2.5:7b",
+                "default_context_window": 8192,
+            }
+        }
+
+        result = run_model_comparison_candidate(
+            registry=registry,
+            provider_name="ollama",
+            model_name="qwen2.5:7b",
+            prompt_profile="neutro",
+            prompt_text="Liste os principais pontos.",
+            benchmark_use_case="executive_summary",
+            response_format="bullet_list",
+            temperature=0.1,
+            context_window=8192,
+            retrieved_chunks=[],
+            rag_settings=get_rag_settings(),
+        )
+
+        self.assertFalse(result["success"])
+        self.assertEqual(result["error"], "empty_response_text")
 
     def test_summarize_model_comparison_results_aggregates_metrics(self) -> None:
         summary = summarize_model_comparison_results(

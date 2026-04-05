@@ -12,6 +12,12 @@ if str(ROOT_DIR) not in sys.path:
 
 
 from src.providers.registry import build_provider_registry  # noqa: E402
+from src.services.phase8_5_campaign import (  # noqa: E402
+    build_phase8_5_campaign_id,
+    build_phase8_5_campaign_plan,
+    resolve_phase8_5_campaign_dir,
+    run_phase8_5_staged_campaign,
+)
 from src.services.phase8_5_benchmark import (  # noqa: E402
     DEFAULT_PHASE8_5_MANIFEST_PATH,
     build_preflight_payload,
@@ -62,6 +68,11 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional explicit run directory override. Defaults to <manifest root_dir>/<stable run id>.",
     )
+    parser.add_argument(
+        "--staged-campaign",
+        action="store_true",
+        help="Run the selected groups as a staged full-matrix campaign with one run directory per group plus a merged campaign bundle.",
+    )
     return parser.parse_args()
 
 
@@ -92,7 +103,7 @@ def resolve_run_dir(
     if output_dir_override:
         return resolve_repo_path(output_dir_override)
     output_policy = manifest.get("output_directory_policy") if isinstance(manifest.get("output_directory_policy"), dict) else {}
-    root_dir = resolve_repo_path(str(output_policy.get("root_dir") or "benchmark_runs/phase8_5_round1"))
+    root_dir = resolve_repo_path(str(output_policy.get("root_dir") or "benchmark_runs/phase8_5_matrix"))
     return root_dir / run_id
 
 
@@ -118,6 +129,62 @@ def main() -> int:
     manifest = load_benchmark_manifest(args.manifest)
     registry = build_provider_registry()
     selected_groups = resolve_selected_groups(manifest, args.group)
+
+    if args.staged_campaign:
+        campaign_id = build_phase8_5_campaign_id(
+            manifest,
+            selected_groups=selected_groups,
+            provider_filter=args.provider,
+            model_filter=args.model,
+            smoke=bool(args.smoke),
+        )
+        campaign_dir = resolve_phase8_5_campaign_dir(
+            manifest,
+            campaign_id=campaign_id,
+            output_dir_override=args.output_dir,
+        )
+        campaign_plan = build_phase8_5_campaign_plan(
+            manifest,
+            registry=registry,
+            campaign_id=campaign_id,
+            campaign_dir=campaign_dir,
+            selected_groups=selected_groups,
+            smoke=bool(args.smoke),
+            provider_filter=args.provider,
+            model_filter=args.model,
+            resume=bool(args.resume),
+        )
+        if args.dry_run:
+            print(json.dumps({**campaign_plan, "dry_run": True, "manifest_path": manifest.get("_manifest_path")}, indent=2, ensure_ascii=False))
+            return 0
+        if args.preflight:
+            campaign_dir.mkdir(parents=True, exist_ok=True)
+            preflight_path = campaign_dir / "preflight.json"
+            preflight_path.write_text(json.dumps(campaign_plan.get("preflight") or {}, indent=2, ensure_ascii=False), encoding="utf-8")
+            (campaign_dir / "campaign_plan.json").write_text(json.dumps(campaign_plan, indent=2, ensure_ascii=False), encoding="utf-8")
+            print(json.dumps(campaign_plan.get("preflight") or {}, indent=2, ensure_ascii=False))
+            print(f"\nCampaign preflight written to: {preflight_path}")
+            print(f"Campaign plan written to: {campaign_dir / 'campaign_plan.json'}")
+            return 0
+
+        result = run_phase8_5_staged_campaign(
+            manifest,
+            registry=registry,
+            campaign_id=campaign_id,
+            campaign_dir=campaign_dir,
+            selected_groups=selected_groups,
+            smoke=bool(args.smoke),
+            provider_filter=args.provider,
+            model_filter=args.model,
+            resume=bool(args.resume),
+        )
+        aggregated = result.get("aggregated") if isinstance(result.get("aggregated"), dict) else {}
+        print(json.dumps(aggregated, indent=2, ensure_ascii=False))
+        print(f"\nCampaign directory: {campaign_dir}")
+        print(f"Campaign raw events: {campaign_dir / 'raw' / 'events.jsonl'}")
+        print(f"Campaign markdown report: {campaign_dir / 'report.md'}")
+        return 0
+
     run_id = build_run_id(
         manifest,
         selected_groups=selected_groups,

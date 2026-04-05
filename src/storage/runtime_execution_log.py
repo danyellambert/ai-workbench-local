@@ -22,6 +22,30 @@ def _sanitize_json_like(value: object):
     return str(value)
 
 
+def _optional_float(value: object) -> float | None:
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
+
+
+def _compute_latency_stage_breakdown(entry: dict[str, object]) -> dict[str, float]:
+    total_latency = _optional_float(entry.get("latency_s"))
+    retrieval_latency = max(_optional_float(entry.get("retrieval_latency_s")) or 0.0, 0.0)
+    generation_latency = max(_optional_float(entry.get("generation_latency_s")) or 0.0, 0.0)
+    prompt_build_latency = max(_optional_float(entry.get("prompt_build_latency_s")) or 0.0, 0.0)
+    known_latency = retrieval_latency + generation_latency + prompt_build_latency
+    denominator = total_latency if total_latency and total_latency > 0 else known_latency
+    if not denominator or denominator <= 0:
+        return {}
+    other_latency = max((total_latency or known_latency) - known_latency, 0.0)
+    return {
+        "retrieval": retrieval_latency / denominator,
+        "generation": generation_latency / denominator,
+        "prompt_build": prompt_build_latency / denominator,
+        "other": other_latency / denominator,
+    }
+
+
 def load_runtime_execution_log(path: Path) -> list[dict[str, object]]:
     if not path.exists():
         return []
@@ -86,6 +110,23 @@ def summarize_runtime_execution_log(entries: list[dict[str, object]]) -> dict[st
             "ocr_involved_runs": 0,
             "docling_involved_runs": 0,
             "vl_involved_runs": 0,
+            "mcp_runs": 0,
+            "total_mcp_tool_calls": 0,
+            "total_mcp_read_calls": 0,
+            "total_mcp_write_calls": 0,
+            "avg_mcp_tool_calls_per_run": 0.0,
+            "avg_mcp_total_latency_s": 0.0,
+            "mcp_error_rate": 0.0,
+            "mcp_server_counts": {},
+            "mcp_tool_counts": {},
+            "mcp_transport_counts": {},
+            "mcp_status_counts": {},
+            "bottleneck_stage_counts": {},
+            "avg_retrieval_share": 0.0,
+            "avg_generation_share": 0.0,
+            "avg_prompt_build_share": 0.0,
+            "avg_other_latency_share": 0.0,
+            "avg_bottleneck_share": 0.0,
             "usage_source_counts": {},
             "cost_source_counts": {},
             "budget_mode_counts": {},
@@ -201,6 +242,22 @@ def summarize_runtime_execution_log(entries: list[dict[str, object]]) -> dict[st
     ocr_involved_runs = 0
     docling_involved_runs = 0
     vl_involved_runs = 0
+    mcp_runs = 0
+    total_mcp_tool_calls = 0
+    total_mcp_read_calls = 0
+    total_mcp_write_calls = 0
+    mcp_total_latencies: list[float] = []
+    mcp_error_calls = 0
+    mcp_server_counter: Counter[str] = Counter()
+    mcp_tool_counter: Counter[str] = Counter()
+    mcp_transport_counter: Counter[str] = Counter()
+    mcp_status_counter: Counter[str] = Counter()
+    bottleneck_stage_counter: Counter[str] = Counter()
+    retrieval_shares: list[float] = []
+    generation_shares: list[float] = []
+    prompt_build_shares: list[float] = []
+    other_latency_shares: list[float] = []
+    bottleneck_shares: list[float] = []
 
     for item in entries:
         flow_type = str(item.get("flow_type") or "").strip()
@@ -250,6 +307,42 @@ def summarize_runtime_execution_log(entries: list[dict[str, object]]) -> dict[st
                 normalized_name = backend_name.strip()
                 if normalized_name:
                     ocr_backend_counter[normalized_name] += int(backend_count)
+        mcp_server = str(item.get("mcp_server") or "").strip()
+        mcp_transport = str(item.get("mcp_transport") or "").strip()
+        mcp_status = str(item.get("mcp_status") or "").strip()
+        mcp_tool_call_count = int(item.get("mcp_tool_call_count") or 0)
+        mcp_read_call_count = int(item.get("mcp_read_call_count") or 0)
+        mcp_write_call_count = int(item.get("mcp_write_call_count") or 0)
+        mcp_error_call_count = int(item.get("mcp_error_call_count") or 0)
+        mcp_total_latency_s = float(item.get("mcp_total_latency_s") or 0.0)
+        mcp_tool_names = item.get("mcp_tool_names") if isinstance(item.get("mcp_tool_names"), list) else []
+        if mcp_server or mcp_tool_call_count > 0 or mcp_read_call_count > 0:
+            mcp_runs += 1
+        if mcp_server:
+            mcp_server_counter[mcp_server] += 1
+        if mcp_transport:
+            mcp_transport_counter[mcp_transport] += 1
+        if mcp_status:
+            mcp_status_counter[mcp_status] += 1
+        total_mcp_tool_calls += mcp_tool_call_count
+        total_mcp_read_calls += mcp_read_call_count
+        total_mcp_write_calls += mcp_write_call_count
+        mcp_error_calls += mcp_error_call_count
+        if mcp_total_latency_s > 0:
+            mcp_total_latencies.append(mcp_total_latency_s)
+        for tool_name in mcp_tool_names:
+            normalized_tool_name = str(tool_name or "").strip()
+            if normalized_tool_name:
+                mcp_tool_counter[normalized_tool_name] += 1
+        latency_breakdown = _compute_latency_stage_breakdown(item)
+        if latency_breakdown:
+            retrieval_shares.append(latency_breakdown.get("retrieval", 0.0))
+            generation_shares.append(latency_breakdown.get("generation", 0.0))
+            prompt_build_shares.append(latency_breakdown.get("prompt_build", 0.0))
+            other_latency_shares.append(latency_breakdown.get("other", 0.0))
+            bottleneck_stage, bottleneck_share = max(latency_breakdown.items(), key=lambda item: item[1])
+            bottleneck_stage_counter[bottleneck_stage] += 1
+            bottleneck_shares.append(bottleneck_share)
 
     return {
         "total_runs": total_runs,
@@ -290,6 +383,23 @@ def summarize_runtime_execution_log(entries: list[dict[str, object]]) -> dict[st
         "ocr_involved_runs": ocr_involved_runs,
         "docling_involved_runs": docling_involved_runs,
         "vl_involved_runs": vl_involved_runs,
+        "mcp_runs": mcp_runs,
+        "total_mcp_tool_calls": total_mcp_tool_calls,
+        "total_mcp_read_calls": total_mcp_read_calls,
+        "total_mcp_write_calls": total_mcp_write_calls,
+        "avg_mcp_tool_calls_per_run": round(total_mcp_tool_calls / max(mcp_runs, 1), 3) if mcp_runs else 0.0,
+        "avg_mcp_total_latency_s": round(sum(mcp_total_latencies) / max(len(mcp_total_latencies), 1), 3) if mcp_total_latencies else 0.0,
+        "mcp_error_rate": round(mcp_error_calls / max(total_mcp_tool_calls, 1), 3) if total_mcp_tool_calls else 0.0,
+        "mcp_server_counts": dict(mcp_server_counter),
+        "mcp_tool_counts": dict(mcp_tool_counter),
+        "mcp_transport_counts": dict(mcp_transport_counter),
+        "mcp_status_counts": dict(mcp_status_counter),
+        "bottleneck_stage_counts": dict(bottleneck_stage_counter),
+        "avg_retrieval_share": round(sum(retrieval_shares) / max(len(retrieval_shares), 1), 3) if retrieval_shares else 0.0,
+        "avg_generation_share": round(sum(generation_shares) / max(len(generation_shares), 1), 3) if generation_shares else 0.0,
+        "avg_prompt_build_share": round(sum(prompt_build_shares) / max(len(prompt_build_shares), 1), 3) if prompt_build_shares else 0.0,
+        "avg_other_latency_share": round(sum(other_latency_shares) / max(len(other_latency_shares), 1), 3) if other_latency_shares else 0.0,
+        "avg_bottleneck_share": round(sum(bottleneck_shares) / max(len(bottleneck_shares), 1), 3) if bottleneck_shares else 0.0,
         "flow_counts": dict(flow_counter),
         "task_counts": dict(task_counter),
         "provider_counts": dict(provider_counter),
