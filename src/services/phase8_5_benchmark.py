@@ -9,6 +9,7 @@ import statistics
 import time
 from collections import defaultdict
 from dataclasses import replace
+from difflib import get_close_matches
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +35,12 @@ from .phase8_5_benchmark_round2 import (
     normalize_round2_case_results,
     validate_round2_manifest_groups,
 )
+from .phase8_5_operational_metrics import build_operational_metrics_bundle
+from .phase8_5_runtime_metadata import (
+    build_runtime_family_metadata,
+    summarize_runtime_family_artifacts,
+)
+from .phase8_5_timeout import TimeoutExecutionError, time_limit
 from .runtime_snapshot import build_benchmark_environment_snapshot
 
 
@@ -71,6 +78,7 @@ def build_case_id(case_payload: dict[str, object]) -> str:
         "group": case_payload.get("group"),
         "provider": case_payload.get("provider"),
         "model": case_payload.get("model"),
+        "requested_model": case_payload.get("requested_model"),
         "case_name": case_payload.get("case_name"),
         "use_case_id": case_payload.get("use_case_id"),
         "candidate_id": case_payload.get("candidate_id"),
@@ -83,6 +91,7 @@ def build_case_id(case_payload: dict[str, object]) -> str:
         "temperature": case_payload.get("temperature"),
         "top_p": case_payload.get("top_p"),
         "max_output_tokens": case_payload.get("max_output_tokens"),
+        "think": case_payload.get("think"),
         "context_window": case_payload.get("context_window"),
         "embedding_context_window": case_payload.get("embedding_context_window"),
         "chunk_size": case_payload.get("chunk_size"),
@@ -90,6 +99,7 @@ def build_case_id(case_payload: dict[str, object]) -> str:
         "top_k": case_payload.get("top_k"),
         "rerank_pool_size": case_payload.get("rerank_pool_size"),
         "rerank_lexical_weight": case_payload.get("rerank_lexical_weight"),
+        "model_resolution_status": case_payload.get("model_resolution_status"),
     }
     return f"case_{stable_hash(identity, length=16)}"
 
@@ -102,9 +112,15 @@ def build_run_id(
     model_filter: str | None,
     smoke: bool,
 ) -> str:
+    manifest_fingerprint_source = {
+        key: value
+        for key, value in manifest.items()
+        if key != "_manifest_path"
+    }
     identity = {
         "benchmark_id": manifest.get("benchmark_id"),
         "manifest_version": manifest.get("manifest_version"),
+        "manifest_fingerprint": stable_hash(manifest_fingerprint_source, length=16),
         "selected_groups": sorted(selected_groups),
         "provider_filter": str(provider_filter or "").strip().lower() or None,
         "model_filter": str(model_filter or "").strip() or None,
@@ -141,12 +157,20 @@ def collect_relevant_environment_values() -> dict[str, object]:
         "OPENAI_MODEL",
         "OPENAI_CONTEXT_WINDOW",
         "HUGGINGFACE_MODEL",
+        "HUGGINGFACE_AVAILABLE_MODELS",
         "HUGGINGFACE_CONTEXT_WINDOW",
+        "HUGGINGFACE_EMBEDDING_MODEL",
+        "HUGGINGFACE_AVAILABLE_EMBEDDING_MODELS",
         "HUGGINGFACE_SERVER_BASE_URL",
         "HUGGINGFACE_SERVER_MODEL",
+        "HUGGINGFACE_SERVER_AVAILABLE_MODELS",
         "HUGGINGFACE_SERVER_CONTEXT_WINDOW",
+        "HUGGINGFACE_SERVER_EMBEDDING_MODEL",
+        "HUGGINGFACE_SERVER_AVAILABLE_EMBEDDING_MODELS",
         "HUGGINGFACE_INFERENCE_MODEL",
         "HUGGINGFACE_INFERENCE_CONTEXT_WINDOW",
+        "OLLAMA_AVAILABLE_MODELS",
+        "OLLAMA_AVAILABLE_EMBEDDING_MODELS",
     ]
     return {
         key: (str(os.getenv(key, "")).strip() or None)
@@ -169,6 +193,7 @@ def validate_benchmark_manifest(manifest: dict[str, object], *, project_root: Pa
         "benchmark_id",
         "manifest_version",
         "groups",
+        "model_resolution_policy",
         "fairness",
         "timeout_policy",
         "output_directory_policy",
@@ -181,6 +206,10 @@ def validate_benchmark_manifest(manifest: dict[str, object], *, project_root: Pa
     groups = manifest.get("groups")
     if not isinstance(groups, dict) or not groups:
         raise ValueError("Manifest 'groups' must be a non-empty object.")
+
+    resolution_policy = manifest.get("model_resolution_policy")
+    if not isinstance(resolution_policy, dict):
+        raise ValueError("Manifest 'model_resolution_policy' must be an object.")
 
     generation_group = groups.get("generation")
     if generation_group is not None:
@@ -195,6 +224,9 @@ def validate_benchmark_manifest(manifest: dict[str, object], *, project_root: Pa
         for pair in provider_pairs:
             if not isinstance(pair, dict) or not str(pair.get("provider") or "").strip() or not str(pair.get("model") or "").strip():
                 raise ValueError("Each generation provider/model pair must include non-empty 'provider' and 'model'.")
+            candidate_models = pair.get("candidate_models")
+            if candidate_models is not None and not isinstance(candidate_models, list):
+                raise ValueError("Generation provider/model pair 'candidate_models' must be a list when provided.")
         for use_case_group in use_case_groups:
             if not isinstance(use_case_group, dict) or not isinstance(use_case_group.get("cases"), list):
                 raise ValueError("Each generation use_case_group must contain a 'cases' list.")
@@ -230,6 +262,9 @@ def validate_benchmark_manifest(manifest: dict[str, object], *, project_root: Pa
         for candidate in candidates:
             if not isinstance(candidate, dict) or not str(candidate.get("provider") or "").strip() or not str(candidate.get("model") or "").strip():
                 raise ValueError("Each embedding candidate must include non-empty 'provider' and 'model'.")
+            candidate_models = candidate.get("candidate_models")
+            if candidate_models is not None and not isinstance(candidate_models, list):
+                raise ValueError("Embedding candidate 'candidate_models' must be a list when provided.")
         for pdf_path in pdf_paths:
             resolved_pdf_path = resolve_repo_path(str(pdf_path), project_root=project_root)
             if not resolved_pdf_path.exists():
@@ -284,6 +319,187 @@ def _discover_provider_models(
         except Exception:
             return []
     return []
+
+
+def _candidate_supports_embedding_subset(candidate_role: str, subset_kind: str) -> bool:
+    normalized_role = str(candidate_role or "").strip().lower()
+    normalized_subset = str(subset_kind or "general").strip().lower() or "general"
+    if "code" in normalized_role:
+        return normalized_subset == "code"
+    if normalized_role.startswith("baseline"):
+        return True
+    if "general" in normalized_role:
+        return normalized_subset == "general"
+    return True
+
+
+def _load_embedding_dataset_subsets(
+    dataset: dict[str, object],
+    *,
+    smoke_limits: dict[str, object],
+    smoke: bool,
+) -> list[dict[str, object]]:
+    configured_subsets = [item for item in (dataset.get("subsets") or []) if isinstance(item, dict)]
+    subset_specs = configured_subsets or [
+        {
+            "subset_id": str(dataset.get("dataset_id") or "phase8_embedding_dataset"),
+            "subset_label": str(dataset.get("dataset_id") or "phase8_embedding_dataset"),
+            "subset_kind": "general",
+            "document_paths": list(dataset.get("pdf_paths") or []),
+            "question_set_path": dataset.get("question_set_path"),
+        }
+    ]
+
+    prepared: list[dict[str, object]] = []
+    for subset in subset_specs:
+        document_paths = [resolve_repo_path(str(item)) for item in (subset.get("document_paths") or subset.get("pdf_paths") or [])]
+        question_set_path = resolve_repo_path(str(subset.get("question_set_path") or dataset.get("question_set_path") or ""))
+        question_payload = json.loads(question_set_path.read_text(encoding="utf-8"))
+        questions = [item for item in (question_payload.get("questions") or []) if isinstance(item, dict)]
+        if smoke:
+            document_paths = document_paths[: max(1, int(smoke_limits.get("max_pdfs") or 1))]
+            questions = questions[: max(1, int(smoke_limits.get("max_questions") or 1))]
+        prepared.append(
+            {
+                "subset_id": str(subset.get("subset_id") or question_set_path.stem),
+                "subset_label": str(subset.get("subset_label") or subset.get("subset_id") or question_set_path.stem),
+                "subset_kind": str(subset.get("subset_kind") or "general"),
+                "document_paths": [str(path) for path in document_paths],
+                "question_set_path": str(question_set_path),
+                "question_set_id": str(subset.get("question_set_id") or question_set_path.stem),
+                "questions": questions,
+            }
+        )
+    return prepared
+
+
+def _clean_model_list(values: object) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    ordered: list[str] = []
+    for item in values:
+        normalized = str(item or "").strip()
+        if normalized and normalized not in ordered:
+            ordered.append(normalized)
+    return ordered
+
+
+def _match_available_model_name(candidate: str | None, available_models: list[str]) -> str | None:
+    normalized_candidate = str(candidate or "").strip().lower()
+    if not normalized_candidate:
+        return None
+    for available_model in available_models:
+        normalized_available = str(available_model or "").strip()
+        if normalized_available.lower() == normalized_candidate:
+            return normalized_available
+    return None
+
+
+def _heuristic_closest_available_model(candidate_options: list[str], available_models: list[str]) -> str | None:
+    if not candidate_options or not available_models:
+        return None
+    lowered_available = {str(item).strip().lower(): str(item).strip() for item in available_models if str(item).strip()}
+    for candidate in candidate_options:
+        matches = get_close_matches(str(candidate).strip().lower(), list(lowered_available.keys()), n=1, cutoff=0.55)
+        if matches:
+            return lowered_available[matches[0]]
+    return None
+
+
+def _candidate_model_options(
+    manifest: dict[str, object],
+    candidate_entry: dict[str, object],
+    *,
+    requested_model: str,
+) -> list[str]:
+    ordered: list[str] = []
+
+    def _append(value: str | None) -> None:
+        normalized = str(value or "").strip()
+        if normalized and normalized not in ordered:
+            ordered.append(normalized)
+
+    _append(requested_model)
+    for item in _clean_model_list(candidate_entry.get("candidate_models")):
+        _append(item)
+    _append(str(candidate_entry.get("model") or ""))
+
+    resolution_policy = manifest.get("model_resolution_policy") if isinstance(manifest.get("model_resolution_policy"), dict) else {}
+    default_requested_map = (
+        resolution_policy.get("default_requested_to_candidate_models")
+        if isinstance(resolution_policy.get("default_requested_to_candidate_models"), dict)
+        else {}
+    )
+    for item in _clean_model_list(default_requested_map.get(requested_model)):
+        _append(item)
+    return ordered
+
+
+def resolve_requested_model(
+    manifest: dict[str, object],
+    candidate_entry: dict[str, object],
+    *,
+    requested_model: str,
+    available_models: list[str],
+) -> dict[str, object]:
+    resolution_policy = manifest.get("model_resolution_policy") if isinstance(manifest.get("model_resolution_policy"), dict) else {}
+    heuristic_enabled = bool(resolution_policy.get("heuristic_closest_match_enabled", True))
+    candidate_model_options = _candidate_model_options(
+        manifest,
+        candidate_entry,
+        requested_model=requested_model,
+    )
+
+    if available_models:
+        for candidate_model in candidate_model_options:
+            matched = _match_available_model_name(candidate_model, available_models)
+            if matched:
+                return {
+                    "requested_model": requested_model,
+                    "model_resolved": matched,
+                    "mapping_status": "exact" if matched.lower() == requested_model.lower() else "closest_available",
+                    "resolution_source": "provider_inventory",
+                    "candidate_model_options": candidate_model_options,
+                    "available_models": available_models,
+                }
+
+        if heuristic_enabled:
+            heuristic_match = _heuristic_closest_available_model(candidate_model_options, available_models)
+            if heuristic_match:
+                return {
+                    "requested_model": requested_model,
+                    "model_resolved": heuristic_match,
+                    "mapping_status": "closest_available",
+                    "resolution_source": "heuristic_provider_inventory",
+                    "candidate_model_options": candidate_model_options,
+                    "available_models": available_models,
+                }
+
+        return {
+            "requested_model": requested_model,
+            "model_resolved": None,
+            "mapping_status": "skipped",
+            "resolution_source": "provider_inventory",
+            "candidate_model_options": candidate_model_options,
+            "available_models": available_models,
+        }
+
+    explicit_manifest_fallback = str(candidate_entry.get("model") or "").strip()
+    explicit_candidate_models = _clean_model_list(candidate_entry.get("candidate_models"))
+    fallback_model = (
+        explicit_manifest_fallback
+        or (explicit_candidate_models[0] if explicit_candidate_models else None)
+        or (candidate_model_options[0] if candidate_model_options else None)
+        or requested_model
+    )
+    return {
+        "requested_model": requested_model,
+        "model_resolved": fallback_model,
+        "mapping_status": "exact" if fallback_model.lower() == requested_model.lower() else "closest_available",
+        "resolution_source": "manifest_assumption_without_inventory",
+        "candidate_model_options": candidate_model_options,
+        "available_models": available_models,
+    }
 
 
 def _inspect_runtime_artifact(
@@ -366,7 +582,10 @@ def build_generation_cases(
         selected_provider_pairs = [
             item
             for item in selected_provider_pairs
-            if str(item.get("model") or "").strip() == normalized_model_filter
+            if normalized_model_filter in {
+                str(item.get("model") or "").strip(),
+                str(item.get("requested_model") or "").strip(),
+            }
         ]
     selected_use_case_groups = [
         item
@@ -407,27 +626,39 @@ def build_generation_cases(
 
     for provider_pair in selected_provider_pairs:
         provider = str(provider_pair.get("provider") or "").strip().lower()
-        model = str(provider_pair.get("model") or "").strip()
+        requested_model = str(provider_pair.get("requested_model") or provider_pair.get("model") or "").strip()
         provider_entry = registry.get(provider)
         if not isinstance(provider_entry, dict) or not bool(provider_entry.get("supports_chat")):
             skipped.append(
                 {
                     "group": "generation",
                     "provider": provider,
-                    "model": model,
+                    "model": requested_model,
+                    "requested_model": requested_model,
                     "reason": "provider_unavailable_or_no_chat_support",
                 }
             )
             continue
         available_models = _discover_provider_models(provider, provider_entry, capability="chat")
-        if available_models and model not in available_models:
+        resolution = resolve_requested_model(
+            manifest,
+            provider_pair,
+            requested_model=requested_model,
+            available_models=available_models,
+        )
+        model = str(resolution.get("model_resolved") or "").strip()
+        if resolution.get("mapping_status") == "skipped" or not model:
             skipped.append(
                 {
                     "group": "generation",
                     "provider": provider,
-                    "model": model,
+                    "model": requested_model,
+                    "requested_model": requested_model,
                     "reason": "model_not_available_for_provider",
                     "available_models": available_models,
+                    "candidate_model_options": resolution.get("candidate_model_options"),
+                    "mapping_status": resolution.get("mapping_status"),
+                    "resolution_source": resolution.get("resolution_source"),
                 }
             )
             continue
@@ -441,6 +672,7 @@ def build_generation_cases(
                     "group": "generation",
                     "provider": provider,
                     "model": model,
+                    "requested_model": requested_model,
                     "case_name": str(use_case.get("use_case_id") or "generation_case"),
                     "use_case_id": str(use_case.get("use_case_id") or "generation_case"),
                     "input_file": str(input_path),
@@ -458,6 +690,11 @@ def build_generation_cases(
                         "group": "generation",
                         "provider": provider,
                         "model": model,
+                        "requested_model": requested_model,
+                        "requested_runtime_family": provider_pair.get("requested_runtime_family"),
+                        "model_resolution_status": resolution.get("mapping_status"),
+                        "model_resolution_source": resolution.get("resolution_source"),
+                        "requested_model_candidates": resolution.get("candidate_model_options") or [],
                         "provider_label": provider_entry.get("label"),
                         "group_id": use_case.get("group_id"),
                         "group_label": use_case.get("group_label"),
@@ -474,6 +711,7 @@ def build_generation_cases(
                         "temperature": fairness.get("temperature"),
                         "top_p": fairness.get("top_p"),
                         "max_output_tokens": fairness.get("max_output_tokens"),
+                        "think": fairness.get("think"),
                         "context_window": fairness.get("context_window"),
                         "seed": fairness.get("seed"),
                         "seed_supported": fairness.get("seed_supported"),
@@ -513,7 +751,10 @@ def build_embedding_cases(
         candidate_entries = [
             item
             for item in candidate_entries
-            if str(item.get("model") or "").strip() == normalized_model_filter
+            if normalized_model_filter in {
+                str(item.get("model") or "").strip(),
+                str(item.get("requested_model") or "").strip(),
+            }
         ]
     if smoke:
         candidate_entries = _apply_smoke_limit(
@@ -521,13 +762,11 @@ def build_embedding_cases(
             max_items=int(smoke_limits.get("max_candidates") or 0),
         )
 
-    pdf_paths = [resolve_repo_path(str(item)) for item in (dataset.get("pdf_paths") or [])]
-    question_set_path = resolve_repo_path(str(dataset.get("question_set_path") or ""))
-    question_payload = json.loads(question_set_path.read_text(encoding="utf-8"))
-    questions = [item for item in (question_payload.get("questions") or []) if isinstance(item, dict)]
-    if smoke:
-        pdf_paths = pdf_paths[: max(1, int(smoke_limits.get("max_pdfs") or 1))]
-        questions = questions[: max(1, int(smoke_limits.get("max_questions") or 1))]
+    subset_specs = _load_embedding_dataset_subsets(
+        dataset,
+        smoke_limits=smoke_limits,
+        smoke=smoke,
+    )
 
     repetitions = int(embeddings_group.get("repetitions") or 1)
     if smoke:
@@ -538,64 +777,60 @@ def build_embedding_cases(
 
     for candidate in candidate_entries:
         provider = str(candidate.get("provider") or "").strip().lower()
-        model = str(candidate.get("model") or "").strip()
+        requested_model = str(candidate.get("requested_model") or candidate.get("model") or "").strip()
         provider_entry = registry.get(provider)
         if not isinstance(provider_entry, dict) or not bool(provider_entry.get("supports_embeddings")):
             skipped.append(
                 {
                     "group": "embeddings",
                     "provider": provider,
-                    "model": model,
+                    "model": requested_model,
+                    "requested_model": requested_model,
                     "reason": "provider_unavailable_or_no_embedding_support",
                 }
             )
             continue
         available_models = _discover_provider_models(provider, provider_entry, capability="embeddings")
-        if available_models and model not in available_models:
+        resolution = resolve_requested_model(
+            manifest,
+            candidate,
+            requested_model=requested_model,
+            available_models=available_models,
+        )
+        model = str(resolution.get("model_resolved") or "").strip()
+        if resolution.get("mapping_status") == "skipped" or not model:
             skipped.append(
                 {
                     "group": "embeddings",
                     "provider": provider,
-                    "model": model,
+                    "model": requested_model,
+                    "requested_model": requested_model,
                     "reason": "model_not_available_for_provider",
                     "available_models": available_models,
+                    "candidate_model_options": resolution.get("candidate_model_options"),
+                    "mapping_status": resolution.get("mapping_status"),
+                    "resolution_source": resolution.get("resolution_source"),
                 }
             )
             continue
 
-        for repetition in range(1, repetitions + 1):
-            case_payload = {
-                "group": "embeddings",
-                "provider": provider,
-                "model": model,
-                "case_name": str(candidate.get("candidate_id") or model),
-                "candidate_id": str(candidate.get("candidate_id") or model),
-                "dataset_id": str(dataset.get("dataset_id") or "phase8_embedding_dataset"),
-                "question_set_id": str(dataset.get("question_set_id") or question_set_path.stem),
-                "embedding_context_window": fairness.get("embedding_context_window"),
-                "chunk_size": fairness.get("chunk_size"),
-                "chunk_overlap": fairness.get("chunk_overlap"),
-                "top_k": fairness.get("top_k"),
-                "rerank_pool_size": fairness.get("rerank_pool_size"),
-                "rerank_lexical_weight": fairness.get("rerank_lexical_weight"),
-                "repetition": repetition,
-            }
-            cases.append(
-                {
-                    "case_id": build_case_id(case_payload),
+        candidate_role = str(candidate.get("role") or "challenger")
+        for subset in subset_specs:
+            subset_id = str(subset.get("subset_id") or "default")
+            subset_kind = str(subset.get("subset_kind") or "general")
+            if not _candidate_supports_embedding_subset(candidate_role, subset_kind):
+                continue
+            for repetition in range(1, repetitions + 1):
+                case_payload = {
                     "group": "embeddings",
                     "provider": provider,
                     "model": model,
-                    "provider_label": provider_entry.get("label"),
-                    "candidate_id": candidate.get("candidate_id") or model,
-                    "candidate_role": candidate.get("role") or "challenger",
-                    "dataset_id": dataset.get("dataset_id") or "phase8_embedding_dataset",
-                    "question_set_id": dataset.get("question_set_id") or question_set_path.stem,
-                    "pdf_paths": [str(path) for path in pdf_paths],
-                    "questions": questions,
-                    "question_set_path": str(question_set_path),
+                    "requested_model": requested_model,
+                    "case_name": str(candidate.get("candidate_id") or model),
+                    "candidate_id": str(candidate.get("candidate_id") or model),
+                    "dataset_id": str(dataset.get("dataset_id") or "phase8_embedding_dataset"),
+                    "question_set_id": str(subset.get("question_set_id") or subset_id),
                     "embedding_context_window": fairness.get("embedding_context_window"),
-                    "embedding_truncate": fairness.get("embedding_truncate"),
                     "chunk_size": fairness.get("chunk_size"),
                     "chunk_overlap": fairness.get("chunk_overlap"),
                     "top_k": fairness.get("top_k"),
@@ -603,7 +838,44 @@ def build_embedding_cases(
                     "rerank_lexical_weight": fairness.get("rerank_lexical_weight"),
                     "repetition": repetition,
                 }
-            )
+                cases.append(
+                    {
+                        "case_id": build_case_id(case_payload),
+                        "group": "embeddings",
+                        "provider": provider,
+                        "model": model,
+                        "requested_model": requested_model,
+                        "requested_runtime_family": candidate.get("requested_runtime_family"),
+                        "model_resolution_status": resolution.get("mapping_status"),
+                        "model_resolution_source": resolution.get("resolution_source"),
+                        "requested_model_candidates": resolution.get("candidate_model_options") or [],
+                        "provider_label": provider_entry.get("label"),
+                        "candidate_id": candidate.get("candidate_id") or model,
+                        "candidate_role": candidate_role,
+                        "dataset_id": dataset.get("dataset_id") or "phase8_embedding_dataset",
+                        "subset_id": subset_id,
+                        "subset_label": subset.get("subset_label") or subset_id,
+                        "subset_kind": subset_kind,
+                        "question_set_id": subset.get("question_set_id") or subset_id,
+                        "document_paths": list(subset.get("document_paths") or []),
+                        "pdf_paths": list(subset.get("document_paths") or []),
+                        "questions": list(subset.get("questions") or []),
+                        "question_set_path": str(subset.get("question_set_path") or ""),
+                        "embedding_context_window": fairness.get("embedding_context_window"),
+                        "embedding_truncate": fairness.get("embedding_truncate"),
+                        "chunk_size": fairness.get("chunk_size"),
+                        "chunk_overlap": fairness.get("chunk_overlap"),
+                        "top_k": fairness.get("top_k"),
+                        "rerank_pool_size": fairness.get("rerank_pool_size"),
+                        "rerank_lexical_weight": fairness.get("rerank_lexical_weight"),
+                        "pdf_extraction_mode": dataset.get("pdf_extraction_mode") or "basic",
+                        "pdf_docling_enabled": bool(dataset.get("pdf_docling_enabled", False)),
+                        "pdf_ocr_fallback_enabled": bool(dataset.get("pdf_ocr_fallback_enabled", False)),
+                        "pdf_scan_image_ocr_enabled": bool(dataset.get("pdf_scan_image_ocr_enabled", False)),
+                        "pdf_evidence_pipeline_enabled": bool(dataset.get("pdf_evidence_pipeline_enabled", False)),
+                        "repetition": repetition,
+                    }
+                )
 
     return cases, skipped
 
@@ -779,6 +1051,11 @@ def _build_isolated_rag_settings(case: dict[str, object], case_dir: Path) -> Rag
         top_k=int(case.get("top_k") or base_settings.top_k),
         rerank_pool_size=int(case.get("rerank_pool_size") or base_settings.rerank_pool_size),
         rerank_lexical_weight=float(case.get("rerank_lexical_weight") or base_settings.rerank_lexical_weight),
+        pdf_extraction_mode=str(case.get("pdf_extraction_mode") or base_settings.pdf_extraction_mode),
+        pdf_docling_enabled=bool(case.get("pdf_docling_enabled", base_settings.pdf_docling_enabled)),
+        pdf_ocr_fallback_enabled=bool(case.get("pdf_ocr_fallback_enabled", base_settings.pdf_ocr_fallback_enabled)),
+        pdf_scan_image_ocr_enabled=bool(case.get("pdf_scan_image_ocr_enabled", base_settings.pdf_scan_image_ocr_enabled)),
+        pdf_evidence_pipeline_enabled=bool(case.get("pdf_evidence_pipeline_enabled", base_settings.pdf_evidence_pipeline_enabled)),
         store_path=case_dir / ".rag_store.json",
         chroma_path=case_dir / ".chroma_rag",
     )
@@ -790,6 +1067,7 @@ def _run_embedding_questions(
     rag_index: dict[str, object],
     settings: RagSettings,
     embedding_provider: object,
+    query_timeout_s: int | None = None,
 ) -> tuple[list[dict[str, object]], dict[str, object]]:
     per_question_results: list[dict[str, object]] = []
     retrieval_latencies: list[float] = []
@@ -801,12 +1079,16 @@ def _run_embedding_questions(
         question = str(item.get("question") or "")
         expected_document_names = {str(name) for name in item.get("expected_document_names", [])}
         started_at = time.perf_counter()
-        retrieval_details = retrieve_relevant_chunks_detailed(
-            query=question,
-            rag_index=rag_index,
-            settings=settings,
-            embedding_provider=embedding_provider,
-        )
+        with time_limit(
+            query_timeout_s,
+            f"embedding query timeout after {query_timeout_s}s",
+        ):
+            retrieval_details = retrieve_relevant_chunks_detailed(
+                query=question,
+                rag_index=rag_index,
+                settings=settings,
+                embedding_provider=embedding_provider,
+            )
         retrieval_seconds = time.perf_counter() - started_at
         retrieval_latencies.append(retrieval_seconds)
 
@@ -957,9 +1239,11 @@ def execute_generation_case(
     *,
     run_id: str,
     registry: dict[str, dict[str, object]],
+    timeout_s: int | None = None,
 ) -> dict[str, object]:
     requested_provider = str(case.get("provider") or "")
-    requested_model = str(case.get("model") or "")
+    requested_model = str(case.get("requested_model") or case.get("model") or "")
+    resolved_model = str(case.get("model") or requested_model)
     runtime_profile = resolve_provider_runtime_profile(
         registry,
         requested_provider,
@@ -979,31 +1263,71 @@ def execute_generation_case(
     runtime_artifact = _inspect_runtime_artifact(
         provider_entry,
         capability="chat",
-        model=requested_model,
+        model=resolved_model,
         requested_context_window=int(case.get("context_window") or 0) or None,
     )
     started_at = time.time()
-    result = run_model_comparison_candidate(
-        registry=registry,
-        provider_name=requested_provider,
-        model_name=requested_model,
-        prompt_profile=str(case.get("prompt_profile") or "neutro"),
-        prompt_text=str(case.get("prompt_text") or ""),
-        benchmark_use_case=str(case.get("benchmark_use_case") or "ad_hoc"),
-        response_format=str(case.get("response_format") or "plain_text"),
-        temperature=float(case.get("temperature") or 0.0),
-        context_window=int(case.get("context_window") or 8192),
-        retrieved_chunks=list(case.get("context_chunks") or []),
-        rag_settings=get_rag_settings(),
-        top_p=float(case.get("top_p")) if isinstance(case.get("top_p"), (int, float)) else None,
-        max_tokens=int(case.get("max_output_tokens")) if isinstance(case.get("max_output_tokens"), (int, float)) else None,
-        fallback_provider=None,
-    )
+    try:
+        with time_limit(timeout_s, f"generation case timeout after {timeout_s}s"):
+            result = run_model_comparison_candidate(
+                registry=registry,
+                provider_name=requested_provider,
+                model_name=resolved_model,
+                prompt_profile=str(case.get("prompt_profile") or "neutro"),
+                prompt_text=str(case.get("prompt_text") or ""),
+                benchmark_use_case=str(case.get("benchmark_use_case") or "ad_hoc"),
+                response_format=str(case.get("response_format") or "plain_text"),
+                temperature=float(case.get("temperature") or 0.0),
+                context_window=int(case.get("context_window") or 8192),
+                retrieved_chunks=list(case.get("context_chunks") or []),
+                rag_settings=get_rag_settings(),
+                top_p=float(case.get("top_p")) if isinstance(case.get("top_p"), (int, float)) else None,
+                max_tokens=int(case.get("max_output_tokens")) if isinstance(case.get("max_output_tokens"), (int, float)) else None,
+                think=case.get("think") if isinstance(case.get("think"), bool) else None,
+                fallback_provider=None,
+            )
+    except TimeoutExecutionError as error:
+        result = {
+            "success": False,
+            "provider_effective": requested_provider,
+            "model_effective": resolved_model,
+            "runtime_bucket": infer_model_comparison_runtime_bucket(requested_provider, resolved_model),
+            "quantization_family": infer_model_comparison_quantization_family(requested_provider, resolved_model),
+            "latency_s": None,
+            "output_chars": 0,
+            "output_words": 0,
+            "format_adherence": 0.0,
+            "groundedness_score": 0.0,
+            "schema_adherence": None,
+            "use_case_fit_score": 0.0,
+            "prompt_tokens": None,
+            "completion_tokens": None,
+            "total_tokens": None,
+            "usage_source": None,
+            "context_injected": False,
+            "used_chunks": 0,
+            "dropped_chunks": 0,
+            "context_preview_chars": 0,
+            "error": str(error),
+            "response_text": "",
+        }
     runtime_path_metadata = classify_runtime_path(
         provider_requested=requested_provider,
         provider_effective=str(result.get("provider_effective") or requested_provider),
-        model_effective=str(result.get("model_effective") or requested_model),
+        model_effective=str(result.get("model_effective") or resolved_model),
         runtime_artifact=runtime_artifact,
+    )
+    runtime_family_metadata = build_runtime_family_metadata(
+        requested_runtime_family=str(case.get("requested_runtime_family") or "") or None,
+        provider_effective=str(result.get("provider_effective") or requested_provider),
+        model_effective=str(result.get("model_effective") or resolved_model),
+        runtime_artifact=runtime_artifact,
+    )
+    generation_metrics = build_operational_metrics_bundle(
+        total_wall_time_s=result.get("total_wall_time_s") if isinstance(result.get("total_wall_time_s"), (int, float)) else None,
+        repetition=int(case.get("repetition") or 1),
+        ttft_s=result.get("ttft_s") if isinstance(result.get("ttft_s"), (int, float)) else None,
+        throughput_tokens_per_s=result.get("throughput_tokens_per_s") if isinstance(result.get("throughput_tokens_per_s"), (int, float)) else None,
     )
     event = {
         "event_type": "case_result",
@@ -1017,6 +1341,10 @@ def execute_generation_case(
         "provider_effective": result.get("provider_effective"),
         "model_requested": requested_model,
         "model_effective": result.get("model_effective"),
+        "requested_runtime_family": case.get("requested_runtime_family"),
+        "model_resolution_status": case.get("model_resolution_status"),
+        "model_resolution_source": case.get("model_resolution_source"),
+        "requested_model_candidates": case.get("requested_model_candidates") or [],
         "provider_label": case.get("provider_label"),
         "group_id": case.get("group_id"),
         "group_label": case.get("group_label"),
@@ -1031,6 +1359,7 @@ def execute_generation_case(
         "temperature": case.get("temperature"),
         "top_p": case.get("top_p"),
         "max_output_tokens": case.get("max_output_tokens"),
+        "think_requested": case.get("think"),
         "context_window": case.get("context_window"),
         "seed_requested": case.get("seed"),
         "seed_supported": bool(case.get("seed_supported")),
@@ -1049,14 +1378,33 @@ def execute_generation_case(
         "completion_tokens": result.get("completion_tokens"),
         "total_tokens": result.get("total_tokens"),
         "usage_source": result.get("usage_source"),
+        "total_wall_time_s": result.get("total_wall_time_s"),
+        "total_wall_time_status": result.get("total_wall_time_status"),
+        "ttft_s": result.get("ttft_s"),
+        "ttft_status": result.get("ttft_status"),
+        "ttft_measurement_method": result.get("ttft_measurement_method"),
+        "throughput_tokens_per_s": result.get("throughput_tokens_per_s"),
+        "throughput_status": result.get("throughput_status"),
+        "cold_start_wall_time_s": result.get("cold_start_wall_time_s"),
+        "cold_start_status": result.get("cold_start_status"),
+        "warm_start_wall_time_s": result.get("warm_start_wall_time_s"),
+        "warm_start_status": result.get("warm_start_status"),
+        "memory_peak_estimate_mb": result.get("memory_peak_estimate_mb"),
+        "memory_status": result.get("memory_status"),
+        "memory_measurement_method": result.get("memory_measurement_method"),
         "context_injected": result.get("context_injected"),
         "used_chunks": result.get("used_chunks"),
         "dropped_chunks": result.get("dropped_chunks"),
         "context_preview_chars": result.get("context_preview_chars"),
+        "prompt_serialization_mode": result.get("prompt_serialization_mode"),
+        "chat_template_used": result.get("chat_template_used"),
+        "chat_template_source": result.get("chat_template_source"),
         "runtime_artifact": runtime_artifact,
         "error": result.get("error"),
         "response_text": result.get("response_text"),
         **runtime_path_metadata,
+        **runtime_family_metadata,
+        **generation_metrics,
     }
     return event
 
@@ -1067,9 +1415,12 @@ def execute_embedding_case(
     run_id: str,
     registry: dict[str, dict[str, object]],
     run_output_dir: Path,
+    indexing_timeout_s: int | None = None,
+    query_timeout_s: int | None = None,
 ) -> dict[str, object]:
     requested_provider = str(case.get("provider") or "")
-    requested_model = str(case.get("model") or "")
+    requested_model = str(case.get("requested_model") or case.get("model") or "")
+    resolved_model = str(case.get("model") or requested_model)
     runtime_profile = resolve_provider_runtime_profile(
         registry,
         requested_provider,
@@ -1090,10 +1441,11 @@ def execute_embedding_case(
     runtime_artifact = _inspect_runtime_artifact(
         provider_entry,
         capability="embeddings",
-        model=requested_model,
+        model=resolved_model,
         requested_context_window=int(case.get("embedding_context_window") or 0) or None,
     )
     started_at = time.time()
+    event_started_perf = time.perf_counter()
     event: dict[str, object] = {
         "event_type": "case_result",
         "run_id": run_id,
@@ -1104,14 +1456,21 @@ def execute_embedding_case(
         "provider_requested": requested_provider,
         "provider_effective": runtime_profile.get("effective_provider") or requested_provider,
         "model_requested": requested_model,
-        "model_effective": requested_model,
+        "model_effective": resolved_model,
+        "requested_runtime_family": case.get("requested_runtime_family"),
+        "model_resolution_status": case.get("model_resolution_status"),
+        "model_resolution_source": case.get("model_resolution_source"),
+        "requested_model_candidates": case.get("requested_model_candidates") or [],
         "provider_label": case.get("provider_label"),
         "candidate_id": case.get("candidate_id"),
         "candidate_role": case.get("candidate_role"),
         "dataset_id": case.get("dataset_id"),
+        "subset_id": case.get("subset_id"),
+        "subset_label": case.get("subset_label"),
+        "subset_kind": case.get("subset_kind"),
         "question_set_id": case.get("question_set_id"),
         "question_set_path": case.get("question_set_path"),
-        "document_count": len(case.get("pdf_paths") or []),
+        "document_count": len(case.get("document_paths") or case.get("pdf_paths") or []),
         "question_count": len(case.get("questions") or []),
         "embedding_context_window": case.get("embedding_context_window"),
         "embedding_truncate": case.get("embedding_truncate"),
@@ -1120,45 +1479,68 @@ def execute_embedding_case(
         "top_k": case.get("top_k"),
         "rerank_pool_size": case.get("rerank_pool_size"),
         "rerank_lexical_weight": case.get("rerank_lexical_weight"),
+        "pdf_extraction_mode": case.get("pdf_extraction_mode"),
+        "pdf_docling_enabled": case.get("pdf_docling_enabled"),
+        "pdf_ocr_fallback_enabled": case.get("pdf_ocr_fallback_enabled"),
+        "pdf_scan_image_ocr_enabled": case.get("pdf_scan_image_ocr_enabled"),
+        "pdf_evidence_pipeline_enabled": case.get("pdf_evidence_pipeline_enabled"),
         "repetition": case.get("repetition"),
-        "runtime_bucket": infer_model_comparison_runtime_bucket(requested_provider, requested_model),
-        "quantization_family": infer_model_comparison_quantization_family(requested_provider, requested_model),
+        "runtime_bucket": infer_model_comparison_runtime_bucket(requested_provider, resolved_model),
+        "quantization_family": infer_model_comparison_quantization_family(requested_provider, resolved_model),
         "runtime_artifact": runtime_artifact,
         "error": None,
     }
     runtime_path_metadata = classify_runtime_path(
         provider_requested=requested_provider,
         provider_effective=str(runtime_profile.get("effective_provider") or requested_provider),
-        model_effective=requested_model,
+        model_effective=resolved_model,
+        runtime_artifact=runtime_artifact,
+    )
+    runtime_family_metadata = build_runtime_family_metadata(
+        requested_runtime_family=str(case.get("requested_runtime_family") or "") or None,
+        provider_effective=str(runtime_profile.get("effective_provider") or requested_provider),
+        model_effective=resolved_model,
         runtime_artifact=runtime_artifact,
     )
     event.update(runtime_path_metadata)
+    event.update(runtime_family_metadata)
     if provider_instance is None:
         event["finished_at"] = time.time()
         event["error"] = runtime_profile.get("fallback_reason") or "provider_unavailable"
+        event.update(
+            build_operational_metrics_bundle(
+                total_wall_time_s=time.perf_counter() - event_started_perf,
+                repetition=int(case.get("repetition") or 1),
+            )
+        )
         return event
 
     case_dir = run_output_dir / "cases" / str(case.get("case_id"))
     case_dir.mkdir(parents=True, exist_ok=True)
     settings = _build_isolated_rag_settings(case, case_dir)
     try:
-        loaded_documents = [
-            load_document(_LocalUploadedFile(Path(path)), settings)
-            for path in case.get("pdf_paths") or []
-        ]
         indexing_started = time.perf_counter()
-        rag_index, sync_status = upsert_documents_in_rag_index(
-            documents=loaded_documents,
-            settings=settings,
-            embedding_provider=provider_instance,
-            rag_index=None,
-        )
+        with time_limit(
+            indexing_timeout_s,
+            f"embedding indexing timeout after {indexing_timeout_s}s",
+        ):
+            loaded_documents = [
+                load_document(_LocalUploadedFile(Path(path)), settings)
+                for path in case.get("document_paths") or case.get("pdf_paths") or []
+            ]
+            rag_index, sync_status = upsert_documents_in_rag_index(
+                documents=loaded_documents,
+                settings=settings,
+                embedding_provider=provider_instance,
+                rag_index=None,
+            )
         indexing_seconds = time.perf_counter() - indexing_started
         per_question_results, aggregate_metrics = _run_embedding_questions(
             questions=list(case.get("questions") or []),
             rag_index=rag_index,
             settings=settings,
             embedding_provider=provider_instance,
+            query_timeout_s=query_timeout_s,
         )
         event.update(
             {
@@ -1177,6 +1559,12 @@ def execute_embedding_case(
         )
     except Exception as error:
         event["error"] = str(error)
+    event.update(
+        build_operational_metrics_bundle(
+            total_wall_time_s=time.perf_counter() - event_started_perf,
+            repetition=int(case.get("repetition") or 1),
+        )
+    )
     event["finished_at"] = time.time()
     return event
 
@@ -1196,6 +1584,12 @@ def normalize_case_results(events: list[dict[str, object]]) -> dict[str, list[di
                     "provider_effective": event.get("provider_effective"),
                     "model_requested": event.get("model_requested"),
                     "model_effective": event.get("model_effective"),
+                    "requested_runtime_family": event.get("requested_runtime_family"),
+                    "resolved_runtime_family": event.get("resolved_runtime_family"),
+                    "runtime_family_resolution_status": event.get("runtime_family_resolution_status"),
+                    "runtime_family_resolution_note": event.get("runtime_family_resolution_note"),
+                    "model_resolution_status": event.get("model_resolution_status"),
+                    "model_resolution_source": event.get("model_resolution_source"),
                     "group_id": event.get("group_id"),
                     "use_case_id": event.get("use_case_id"),
                     "benchmark_use_case": event.get("benchmark_use_case"),
@@ -1205,6 +1599,7 @@ def normalize_case_results(events: list[dict[str, object]]) -> dict[str, list[di
                     "temperature": event.get("temperature"),
                     "top_p": event.get("top_p"),
                     "max_output_tokens": event.get("max_output_tokens"),
+                    "think_requested": event.get("think_requested"),
                     "context_window": event.get("context_window"),
                     "repetition": event.get("repetition"),
                     "runtime_bucket": event.get("runtime_bucket"),
@@ -1220,6 +1615,20 @@ def normalize_case_results(events: list[dict[str, object]]) -> dict[str, list[di
                     "completion_tokens": event.get("completion_tokens"),
                     "total_tokens": event.get("total_tokens"),
                     "usage_source": event.get("usage_source"),
+                    "total_wall_time_s": event.get("total_wall_time_s"),
+                    "total_wall_time_status": event.get("total_wall_time_status"),
+                    "ttft_s": event.get("ttft_s"),
+                    "ttft_status": event.get("ttft_status"),
+                    "ttft_measurement_method": event.get("ttft_measurement_method"),
+                    "throughput_tokens_per_s": event.get("throughput_tokens_per_s"),
+                    "throughput_status": event.get("throughput_status"),
+                    "cold_start_wall_time_s": event.get("cold_start_wall_time_s"),
+                    "cold_start_status": event.get("cold_start_status"),
+                    "warm_start_wall_time_s": event.get("warm_start_wall_time_s"),
+                    "warm_start_status": event.get("warm_start_status"),
+                    "memory_peak_estimate_mb": event.get("memory_peak_estimate_mb"),
+                    "memory_status": event.get("memory_status"),
+                    "memory_measurement_method": event.get("memory_measurement_method"),
                     "runtime_path": event.get("runtime_path"),
                     "runtime_path_label": event.get("runtime_path_label"),
                     "backend_equivalence_type": event.get("backend_equivalence_type"),
@@ -1232,6 +1641,9 @@ def normalize_case_results(events: list[dict[str, object]]) -> dict[str, list[di
                     "seed_requested": event.get("seed_requested"),
                     "seed_supported": event.get("seed_supported"),
                     "seed_applied": event.get("seed_applied"),
+                    "prompt_serialization_mode": event.get("prompt_serialization_mode"),
+                    "chat_template_used": event.get("chat_template_used"),
+                    "chat_template_source": event.get("chat_template_source"),
                     "error": event.get("error"),
                 }
             )
@@ -1246,9 +1658,18 @@ def normalize_case_results(events: list[dict[str, object]]) -> dict[str, list[di
                     "provider_effective": event.get("provider_effective"),
                     "model_requested": event.get("model_requested"),
                     "model_effective": event.get("model_effective"),
+                    "requested_runtime_family": event.get("requested_runtime_family"),
+                    "resolved_runtime_family": event.get("resolved_runtime_family"),
+                    "runtime_family_resolution_status": event.get("runtime_family_resolution_status"),
+                    "runtime_family_resolution_note": event.get("runtime_family_resolution_note"),
+                    "model_resolution_status": event.get("model_resolution_status"),
+                    "model_resolution_source": event.get("model_resolution_source"),
                     "candidate_id": event.get("candidate_id"),
                     "candidate_role": event.get("candidate_role"),
                     "dataset_id": event.get("dataset_id"),
+                    "subset_id": event.get("subset_id"),
+                    "subset_label": event.get("subset_label"),
+                    "subset_kind": event.get("subset_kind"),
                     "question_set_id": event.get("question_set_id"),
                     "document_count": event.get("document_count"),
                     "question_count": event.get("question_count"),
@@ -1257,6 +1678,11 @@ def normalize_case_results(events: list[dict[str, object]]) -> dict[str, list[di
                     "chunk_size": event.get("chunk_size"),
                     "chunk_overlap": event.get("chunk_overlap"),
                     "top_k": event.get("top_k"),
+                    "pdf_extraction_mode": event.get("pdf_extraction_mode"),
+                    "pdf_docling_enabled": event.get("pdf_docling_enabled"),
+                    "pdf_ocr_fallback_enabled": event.get("pdf_ocr_fallback_enabled"),
+                    "pdf_scan_image_ocr_enabled": event.get("pdf_scan_image_ocr_enabled"),
+                    "pdf_evidence_pipeline_enabled": event.get("pdf_evidence_pipeline_enabled"),
                     "rerank_pool_size": event.get("rerank_pool_size"),
                     "rerank_lexical_weight": event.get("rerank_lexical_weight"),
                     "repetition": event.get("repetition"),
@@ -1271,6 +1697,15 @@ def normalize_case_results(events: list[dict[str, object]]) -> dict[str, list[di
                     "equivalent_direct_runtime_key": event.get("equivalent_direct_runtime_key"),
                     "path_overhead_expected": event.get("path_overhead_expected"),
                     "path_comparison_note": event.get("path_comparison_note"),
+                    "total_wall_time_s": event.get("total_wall_time_s"),
+                    "total_wall_time_status": event.get("total_wall_time_status"),
+                    "cold_start_wall_time_s": event.get("cold_start_wall_time_s"),
+                    "cold_start_status": event.get("cold_start_status"),
+                    "warm_start_wall_time_s": event.get("warm_start_wall_time_s"),
+                    "warm_start_status": event.get("warm_start_status"),
+                    "memory_peak_estimate_mb": event.get("memory_peak_estimate_mb"),
+                    "memory_status": event.get("memory_status"),
+                    "memory_measurement_method": event.get("memory_measurement_method"),
                     "indexing_seconds": event.get("indexing_seconds"),
                     "hit_at_1": aggregate_metrics.get("hit_at_1", event.get("hit_at_1")),
                     "hit_at_k": aggregate_metrics.get("hit_at_k", event.get("hit_at_k")),
@@ -1291,6 +1726,8 @@ def normalize_case_results(events: list[dict[str, object]]) -> dict[str, list[di
                         "provider_requested": event.get("provider_requested"),
                         "model_requested": event.get("model_requested"),
                         "candidate_id": event.get("candidate_id"),
+                        "subset_id": event.get("subset_id"),
+                        "subset_kind": event.get("subset_kind"),
                         "runtime_path": event.get("runtime_path"),
                         "backend_equivalence_key": event.get("backend_equivalence_key"),
                         "question": question_result.get("question"),
@@ -1323,6 +1760,52 @@ def _format_backend_label(item: dict[str, object]) -> str | None:
     if backend_model:
         return backend_model
     return None
+
+
+def _summarize_model_resolution(events: list[dict[str, object]]) -> dict[str, object]:
+    counts: dict[str, int] = defaultdict(int)
+    substitutions: list[dict[str, object]] = []
+    seen_keys: set[tuple[str, str, str, str, str]] = set()
+    for event in events:
+        status = str(event.get("model_resolution_status") or "exact").strip() or "exact"
+        counts[status] += 1
+        requested_model = str(event.get("model_requested") or "").strip()
+        effective_model = str(event.get("model_effective") or "").strip()
+        if status == "exact" and requested_model == effective_model:
+            continue
+        key = (
+            str(event.get("group") or ""),
+            str(event.get("provider_requested") or ""),
+            requested_model,
+            effective_model,
+            status,
+        )
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        substitutions.append(
+            {
+                "group": event.get("group"),
+                "provider_requested": event.get("provider_requested"),
+                "model_requested": requested_model,
+                "model_effective": effective_model,
+                "mapping_status": status,
+                "resolution_source": event.get("model_resolution_source"),
+                "requested_model_candidates": event.get("requested_model_candidates") or [],
+            }
+        )
+    return {
+        "counts": dict(counts),
+        "substitutions": substitutions,
+    }
+
+
+def _summarize_metric_status_counts(events: list[dict[str, object]], field_name: str) -> dict[str, int]:
+    counts: dict[str, int] = defaultdict(int)
+    for event in events:
+        status = str(event.get(field_name) or "not_supported").strip() or "not_supported"
+        counts[status] += 1
+    return dict(counts)
 
 
 def _summarize_runtime_paths(events: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -1401,6 +1884,29 @@ def aggregate_case_results(events: list[dict[str, object]]) -> dict[str, object]
                         for item in candidate_events
                         if isinstance(item.get("use_case_fit_score"), (int, float))
                     ]),
+                    "avg_total_wall_time_s": _average([
+                        float(item.get("total_wall_time_s"))
+                        for item in candidate_events
+                        if isinstance(item.get("total_wall_time_s"), (int, float))
+                    ]),
+                    "avg_ttft_s": _average([
+                        float(item.get("ttft_s"))
+                        for item in candidate_events
+                        if isinstance(item.get("ttft_s"), (int, float))
+                    ]),
+                    "avg_throughput_tokens_per_s": _average([
+                        float(item.get("throughput_tokens_per_s"))
+                        for item in candidate_events
+                        if isinstance(item.get("throughput_tokens_per_s"), (int, float))
+                    ]),
+                    "operational_metric_support": {
+                        "total_wall_time_status": _summarize_metric_status_counts(candidate_events, "total_wall_time_status"),
+                        "ttft_status": _summarize_metric_status_counts(candidate_events, "ttft_status"),
+                        "throughput_status": _summarize_metric_status_counts(candidate_events, "throughput_status"),
+                        "cold_start_status": _summarize_metric_status_counts(candidate_events, "cold_start_status"),
+                        "warm_start_status": _summarize_metric_status_counts(candidate_events, "warm_start_status"),
+                        "memory_status": _summarize_metric_status_counts(candidate_events, "memory_status"),
+                    },
                     "avg_total_tokens": _average([
                         float(item.get("total_tokens"))
                         for item in candidate_events
@@ -1427,9 +1933,12 @@ def aggregate_case_results(events: list[dict[str, object]]) -> dict[str, object]
 
     def _aggregate_embeddings() -> dict[str, object]:
         by_candidate: dict[str, list[dict[str, object]]] = defaultdict(list)
+        by_subset: dict[str, list[dict[str, object]]] = defaultdict(list)
         for event in embedding_events:
-            key = f"{event.get('provider_requested')}::{event.get('model_requested')}"
+            subset_id = str(event.get("subset_id") or "default")
+            key = f"{event.get('provider_requested')}::{event.get('model_requested')}::{subset_id}"
             by_candidate[key].append(event)
+            by_subset[subset_id].append(event)
         ranking: list[dict[str, object]] = []
         for key, candidate_events in by_candidate.items():
             successful = [item for item in candidate_events if item.get("status") == "success"]
@@ -1439,6 +1948,13 @@ def aggregate_case_results(events: list[dict[str, object]]) -> dict[str, object]
                     "provider": candidate_events[0].get("provider_requested"),
                     "model": candidate_events[0].get("model_requested"),
                     "candidate_role": candidate_events[0].get("candidate_role"),
+                    "model_effective": candidate_events[0].get("model_effective"),
+                    "model_resolution_status": candidate_events[0].get("model_resolution_status"),
+                    "subset_id": candidate_events[0].get("subset_id"),
+                    "subset_label": candidate_events[0].get("subset_label"),
+                    "subset_kind": candidate_events[0].get("subset_kind"),
+                    "requested_runtime_family": candidate_events[0].get("requested_runtime_family"),
+                    "resolved_runtime_family": candidate_events[0].get("resolved_runtime_family"),
                     "runtime_path": candidate_events[0].get("runtime_path"),
                     "runtime_path_label": candidate_events[0].get("runtime_path_label"),
                     "backend_equivalence_type": candidate_events[0].get("backend_equivalence_type"),
@@ -1474,6 +1990,11 @@ def aggregate_case_results(events: list[dict[str, object]]) -> dict[str, object]
                         for item in successful
                         if isinstance(item.get("average_retrieval_seconds"), (int, float))
                     ]),
+                    "avg_total_wall_time_s": _average([
+                        float(item.get("total_wall_time_s"))
+                        for item in successful
+                        if isinstance(item.get("total_wall_time_s"), (int, float))
+                    ]),
                 }
             )
         ranking.sort(
@@ -1484,13 +2005,83 @@ def aggregate_case_results(events: list[dict[str, object]]) -> dict[str, object]
                 float(item.get("avg_retrieval_seconds") or 10**9),
             )
         )
+        subset_rankings: list[dict[str, object]] = []
+        for subset_id, subset_events in by_subset.items():
+            subset_candidates = [item for item in ranking if str(item.get("subset_id") or "default") == subset_id]
+            subset_rankings.append(
+                {
+                    "subset_id": subset_id,
+                    "subset_label": next((item.get("subset_label") for item in subset_candidates if item.get("subset_label")), subset_id),
+                    "subset_kind": next((item.get("subset_kind") for item in subset_candidates if item.get("subset_kind")), None),
+                    "case_count": len(subset_events),
+                    "candidate_ranking": subset_candidates,
+                    "top_candidate": subset_candidates[0] if subset_candidates else None,
+                }
+            )
+        subset_rankings.sort(key=lambda item: str(item.get("subset_id") or ""))
+        preferred_top = next(
+            (
+                item.get("top_candidate")
+                for item in subset_rankings
+                if str(item.get("subset_kind") or "").strip().lower() == "general" and isinstance(item.get("top_candidate"), dict)
+            ),
+            ranking[0] if ranking else None,
+        )
+        subset_notes: list[dict[str, object]] = []
+        general_top_candidate = next(
+            (
+                item.get("top_candidate")
+                for item in subset_rankings
+                if str(item.get("subset_kind") or "").strip().lower() == "general"
+                and isinstance(item.get("top_candidate"), dict)
+            ),
+            None,
+        )
+        for item in subset_rankings:
+            if str(item.get("subset_kind") or "").strip().lower() != "code":
+                continue
+            top_candidate = item.get("top_candidate") if isinstance(item.get("top_candidate"), dict) else None
+            if not isinstance(top_candidate, dict):
+                continue
+
+            same_as_general_winner = (
+                isinstance(general_top_candidate, dict)
+                and str(top_candidate.get("provider") or "").strip() == str(general_top_candidate.get("provider") or "").strip()
+                and str(top_candidate.get("model") or "").strip() == str(general_top_candidate.get("model") or "").strip()
+            )
+            candidate_role = str(top_candidate.get("candidate_role") or "").strip().lower()
+            if not same_as_general_winner and "code" in candidate_role:
+                continue
+
+            reason = "same_as_general_winner" if same_as_general_winner else "no_dedicated_code_winner"
+            model_label = str(top_candidate.get("model_effective") or top_candidate.get("model") or "").strip() or "unknown-model"
+            provider_label = str(top_candidate.get("provider") or "unknown-provider").strip()
+            message = (
+                f"The code subset currently reuses `{provider_label}::{model_label}` as the best available local code fallback "
+                f"because no stronger dedicated code embedding won cleanly in this environment."
+            )
+            subset_notes.append(
+                {
+                    "subset_id": item.get("subset_id"),
+                    "subset_label": item.get("subset_label"),
+                    "subset_kind": item.get("subset_kind"),
+                    "reason": reason,
+                    "provider": top_candidate.get("provider"),
+                    "model": top_candidate.get("model"),
+                    "model_effective": top_candidate.get("model_effective"),
+                    "candidate_role": top_candidate.get("candidate_role"),
+                    "message": message,
+                }
+            )
         return {
             "total_cases": len(embedding_events),
             "successful_cases": sum(1 for event in embedding_events if event.get("status") == "success"),
             "failed_cases": sum(1 for event in embedding_events if event.get("status") != "success"),
             "runtime_path_breakdown": _summarize_runtime_paths(embedding_events),
             "candidate_ranking": ranking,
-            "top_candidate": ranking[0] if ranking else None,
+            "subset_rankings": subset_rankings,
+            "subset_notes": subset_notes,
+            "top_candidate": preferred_top,
         }
 
     aggregated = {
@@ -1498,6 +2089,8 @@ def aggregate_case_results(events: list[dict[str, object]]) -> dict[str, object]
         "successful_cases": sum(1 for event in events if event.get("status") == "success"),
         "failed_cases": sum(1 for event in events if event.get("status") != "success"),
         "runtime_path_breakdown": _summarize_runtime_paths(events),
+        "model_resolution_summary": _summarize_model_resolution(events),
+        "runtime_family_resolution_summary": summarize_runtime_family_artifacts(events),
         "generation": _aggregate_generation(),
         "embeddings": _aggregate_embeddings(),
     }
@@ -1596,6 +2189,22 @@ def write_benchmark_outputs(
     report_lines.extend(
         [
             "",
+            "## Generation operational metrics",
+            "",
+            "| Provider | Model | Avg total wall time (s) | Avg TTFT (s) | Avg throughput (tok/s) | TTFT status counts | Throughput status counts |",
+            "| --- | --- | ---: | ---: | ---: | --- | --- |",
+        ]
+    )
+    for item in (aggregated.get("generation") or {}).get("candidate_ranking", []):
+        support = item.get("operational_metric_support") if isinstance(item.get("operational_metric_support"), dict) else {}
+        ttft_counts = json.dumps(support.get("ttft_status") or {}, ensure_ascii=False, sort_keys=True)
+        throughput_counts = json.dumps(support.get("throughput_status") or {}, ensure_ascii=False, sort_keys=True)
+        report_lines.append(
+            f"| `{item.get('provider')}` | `{item.get('model')}` | {float(item.get('avg_total_wall_time_s') or 0.0):.4f} | {float(item.get('avg_ttft_s') or 0.0):.4f} | {float(item.get('avg_throughput_tokens_per_s') or 0.0):.4f} | `{ttft_counts}` | `{throughput_counts}` |"
+        )
+    report_lines.extend(
+        [
+            "",
             "## Embedding ranking",
             "",
             "| Rank | Provider | Model | Role | Runtime path | Backend | Avg MRR | Avg Hit@1 | Avg retrieval (s) |",
@@ -1607,6 +2216,21 @@ def write_benchmark_outputs(
         report_lines.append(
             f"| {index} | `{item.get('provider')}` | `{item.get('model')}` | `{item.get('candidate_role')}` | `{item.get('runtime_path') or '-'}` | `{backend_label}` | {float(item.get('avg_mrr') or 0.0):.4f} | {float(item.get('avg_hit_at_1') or 0.0):.4f} | {float(item.get('avg_retrieval_seconds') or 0.0):.4f} |"
         )
+    embedding_subset_notes = [
+        item
+        for item in ((aggregated.get("embeddings") or {}).get("subset_notes") or [])
+        if isinstance(item, dict)
+    ]
+    if embedding_subset_notes:
+        report_lines.extend(
+            [
+                "",
+                "### Embedding subset notes",
+                "",
+            ]
+        )
+        for item in embedding_subset_notes:
+            report_lines.append(f"- `{item.get('subset_label') or item.get('subset_id')}`: {item.get('message')}")
     report_lines.extend(
         [
             "",
@@ -1621,6 +2245,30 @@ def write_benchmark_outputs(
         report_lines.append(
             f"| `{item.get('runtime_path')}` | {int(item.get('case_count') or 0)} | {int(item.get('successful_cases') or 0)} | {int(item.get('failed_cases') or 0)} | {'yes' if item.get('path_overhead_expected') else 'no'} | {backend_examples} |"
         )
+    model_resolution_summary = aggregated.get("model_resolution_summary") if isinstance(aggregated.get("model_resolution_summary"), dict) else {}
+    substitutions = [item for item in (model_resolution_summary.get("substitutions") or []) if isinstance(item, dict)]
+    report_lines.extend(
+        [
+            "",
+            "## Requested vs resolved model mapping",
+            "",
+            f"- Resolution counts: `{json.dumps(model_resolution_summary.get('counts') or {}, ensure_ascii=False, sort_keys=True)}`",
+        ]
+    )
+    if substitutions:
+        report_lines.extend(
+            [
+                "",
+                "| Group | Provider | Requested model | Resolved model | Mapping status | Resolution source |",
+                "| --- | --- | --- | --- | --- | --- |",
+            ]
+        )
+        for item in substitutions:
+            report_lines.append(
+                f"| `{item.get('group') or '-'}` | `{item.get('provider_requested') or '-'}` | `{item.get('model_requested') or '-'}` | `{item.get('model_effective') or '-'}` | `{item.get('mapping_status') or '-'}` | `{item.get('resolution_source') or '-'}` |"
+            )
+    else:
+        report_lines.append("- No requested-vs-resolved substitutions were needed for the latest case results.")
     if reranker_events or ocr_vlm_events:
         report_lines.extend([""])
         report_lines.extend(build_round2_report_sections(aggregated))
@@ -1653,6 +2301,7 @@ def run_phase8_5_benchmark(
     model_filter: str | None,
     resume: bool,
 ) -> dict[str, object]:
+    timeout_policy = manifest.get("timeout_policy") if isinstance(manifest.get("timeout_policy"), dict) else {}
     preflight = build_preflight_payload(
         manifest,
         registry=registry,
@@ -1731,11 +2380,30 @@ def run_phase8_5_benchmark(
             )
             continue
         if case.get("group") == "generation":
-            event = execute_generation_case(case, run_id=run_id, registry=registry)
+            event = execute_generation_case(
+                case,
+                run_id=run_id,
+                registry=registry,
+                timeout_s=int(timeout_policy.get("generation_case_timeout_s") or 0) or None,
+            )
         elif case.get("group") == "embeddings":
-            event = execute_embedding_case(case, run_id=run_id, registry=registry, run_output_dir=run_dir)
+            event = execute_embedding_case(
+                case,
+                run_id=run_id,
+                registry=registry,
+                run_output_dir=run_dir,
+                indexing_timeout_s=int(timeout_policy.get("embedding_indexing_timeout_s") or 0) or None,
+                query_timeout_s=int(timeout_policy.get("embedding_query_timeout_s") or 0) or None,
+            )
         elif case.get("group") == "rerankers":
-            event = execute_reranker_case(case, run_id=run_id, registry=registry, run_output_dir=run_dir)
+            event = execute_reranker_case(
+                case,
+                run_id=run_id,
+                registry=registry,
+                run_output_dir=run_dir,
+                indexing_timeout_s=int(timeout_policy.get("embedding_indexing_timeout_s") or 0) or None,
+                query_timeout_s=int(timeout_policy.get("embedding_query_timeout_s") or 0) or None,
+            )
         else:
             event = execute_ocr_vlm_case(case, run_id=run_id)
         append_jsonl_record(raw_events_path, event)
@@ -1750,6 +2418,13 @@ def run_phase8_5_benchmark(
             "provider_effective": event.get("provider_effective"),
             "model_requested": event.get("model_requested"),
             "model_effective": event.get("model_effective"),
+            "requested_runtime_family": event.get("requested_runtime_family"),
+            "resolved_runtime_family": event.get("resolved_runtime_family"),
+            "runtime_family_resolution_status": event.get("runtime_family_resolution_status"),
+            "runtime_family_resolution_note": event.get("runtime_family_resolution_note"),
+            "model_resolution_status": event.get("model_resolution_status"),
+            "model_resolution_source": event.get("model_resolution_source"),
+            "requested_model_candidates": event.get("requested_model_candidates") or [],
             "runtime_artifact": event.get("runtime_artifact"),
             "runtime_bucket": event.get("runtime_bucket"),
             "quantization_family": event.get("quantization_family"),

@@ -228,6 +228,10 @@ def estimate_use_case_fit_score(
     return round((float(format_adherence) * 0.6) + (length_signal * 0.4), 3)
 
 
+def _metric_status(value: object) -> str:
+    return "measured" if isinstance(value, (int, float)) else "not_supported"
+
+
 def infer_model_comparison_runtime_bucket(provider_name: str, model_name: str) -> str:
     normalized_provider = str(provider_name or "").strip().lower()
     normalized_model = str(model_name or "").strip().lower()
@@ -387,6 +391,7 @@ def run_model_comparison_candidate(
     rag_settings: RagSettings,
     top_p: float | None = None,
     max_tokens: int | None = None,
+    think: bool | None = None,
     fallback_provider: str | None = "ollama",
 ) -> dict[str, Any]:
     runtime_profile = resolve_provider_runtime_profile(
@@ -437,6 +442,23 @@ def run_model_comparison_candidate(
         "completion_tokens": None,
         "total_tokens": None,
         "usage_source": None,
+        "total_wall_time_s": None,
+        "total_wall_time_status": "not_supported",
+        "ttft_s": None,
+        "ttft_status": "not_supported",
+        "ttft_measurement_method": None,
+        "throughput_tokens_per_s": None,
+        "throughput_status": "not_supported",
+        "cold_start_wall_time_s": None,
+        "cold_start_status": "not_supported",
+        "warm_start_wall_time_s": None,
+        "warm_start_status": "not_supported",
+        "memory_peak_estimate_mb": None,
+        "memory_status": "not_supported",
+        "memory_measurement_method": None,
+        "prompt_serialization_mode": None,
+        "chat_template_used": None,
+        "chat_template_source": None,
     }
 
     if provider_instance is None:
@@ -466,6 +488,7 @@ def run_model_comparison_candidate(
         messages_for_model = base_messages
 
     started_at = time.perf_counter()
+    raw_total_wall_time_s = None
     try:
         stream = provider_instance.stream_chat_completion(
             messages=messages_for_model,
@@ -474,14 +497,31 @@ def run_model_comparison_candidate(
             context_window=context_window,
             top_p=top_p,
             max_tokens=max_tokens,
+            think=think,
         )
-        response_text = "".join(provider_instance.iter_stream_text(stream)).strip()
-        result["success"] = True
+        response_chunks: list[str] = []
+        ttft_s = None
+        for chunk_text in provider_instance.iter_stream_text(stream):
+            if ttft_s is None:
+                ttft_s = round(time.perf_counter() - started_at, 4)
+            response_chunks.append(str(chunk_text))
+        response_text = "".join(response_chunks).strip()
         result["response_text"] = response_text
+        result["ttft_s"] = ttft_s
+        result["ttft_status"] = _metric_status(ttft_s)
+        result["ttft_measurement_method"] = "first_stream_chunk" if ttft_s is not None else None
+        if response_text:
+            result["success"] = True
+        else:
+            result["success"] = False
+            result["error"] = "empty_response_text"
     except Exception as error:
         result["error"] = str(error)
     finally:
-        result["latency_s"] = round(time.perf_counter() - started_at, 4)
+        raw_total_wall_time_s = time.perf_counter() - started_at
+        result["latency_s"] = round(raw_total_wall_time_s, 4)
+        result["total_wall_time_s"] = result["latency_s"]
+        result["total_wall_time_status"] = _metric_status(result.get("total_wall_time_s"))
 
     response_text = str(result.get("response_text") or "")
     result["output_chars"] = len(response_text)
@@ -511,6 +551,13 @@ def run_model_comparison_candidate(
             result["completion_tokens"] = usage_metrics.get("completion_tokens")
             result["total_tokens"] = usage_metrics.get("total_tokens")
             result["usage_source"] = usage_metrics.get("usage_source")
+            result["prompt_serialization_mode"] = usage_metrics.get("prompt_serialization_mode")
+            result["chat_template_used"] = usage_metrics.get("chat_template_used")
+            result["chat_template_source"] = usage_metrics.get("chat_template_source")
+    completion_tokens = result.get("completion_tokens")
+    if isinstance(completion_tokens, (int, float)) and isinstance(raw_total_wall_time_s, (int, float)) and float(raw_total_wall_time_s) > 0:
+        result["throughput_tokens_per_s"] = round(float(completion_tokens) / float(raw_total_wall_time_s), 4)
+        result["throughput_status"] = "measured"
     return result
 
 

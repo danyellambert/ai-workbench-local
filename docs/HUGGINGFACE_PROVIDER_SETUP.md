@@ -78,6 +78,7 @@ HUGGINGFACE_INFERENCE_CONTEXT_WINDOW=8192
 - comparar com modelos que o Ollama não oferece
 - manter pesos fora do projeto
 - fazer benchmark local por API
+- publicar no catálogo apenas aliases realmente funcionais nesse caminho; se um alias como DeepSeek R1 estiver falhando via `huggingface_server`, é melhor deixá-lo temporariamente fora do catálogo até corrigir o provider path
 
 ### `huggingface_inference`
 - comparar provider remoto

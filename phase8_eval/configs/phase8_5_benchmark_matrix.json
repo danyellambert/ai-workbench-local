@@ -1,7 +1,64 @@
 {
-  "benchmark_id": "phase8_5_round1",
+  "benchmark_id": "phase8_5_matrix",
   "manifest_version": "1.0",
-  "description": "Phase 8.5 benchmark matrix for local generation/runtime, embeddings, rerankers, and OCR/VLM fallback comparisons.",
+  "description": "Phase 8.5 benchmark matrix for resumable local generation/runtime, embeddings, rerankers, and OCR/VLM fallback comparisons with explicit requested-vs-resolved model mapping.",
+  "model_resolution_policy": {
+    "requested_vs_resolved_logging": true,
+    "heuristic_closest_match_enabled": true,
+    "mapping_statuses": [
+      "exact",
+      "closest_available",
+      "skipped"
+    ],
+    "default_requested_to_candidate_models": {
+      "phi4-mini:3.8b-q4_K_M": [
+        "phi4-mini:3.8b",
+        "phi4-mini:3.8b-q4_K_M"
+      ],
+      "Phi-4-mini-instruct-4bit": [
+        "Phi-4-mini-instruct",
+        "Phi-4-mini-instruct-4bit"
+      ],
+      "qwen2.5-coder:3b": [
+        "qwen2.5-coder:7b",
+        "qwen2.5-coder:3b"
+      ],
+      "Qwen2.5-Coder-3B-Instruct-4bit": [
+        "Qwen2.5-Coder-7B-Instruct-4bit",
+        "Qwen2.5-Coder-3B-Instruct-4bit"
+      ],
+      "jina-embeddings-v5-text-nano-retrieval-mlx": [
+        "jina-embeddings-v5-text-small-retrieval-mlx",
+        "nomic-embed-text-v2-moe",
+        "bge-m3",
+        "bge-m3:latest"
+      ],
+      "jina-embeddings-v5-text-small-retrieval-mlx": [
+        "nomic-embed-text-v2-moe",
+        "bge-m3",
+        "bge-m3:latest"
+      ],
+      "jina-code-embeddings-0.5b-mlx": [
+        "nomic-embed-text-v2-moe",
+        "bge-m3",
+        "bge-m3:latest"
+      ],
+      "jina-reranker-v3-mlx": [
+        "bge-reranker-v2-m3",
+        "Qwen3-Reranker-0.6B",
+        "mxbai-rerank-large-v1"
+      ],
+      "glm-ocr": [
+        "qwen2.5vl:3b",
+        "Qwen2.5-VL-3B-Instruct-4bit"
+      ],
+      "jina-vlm-mlx": [
+        "Qwen2.5-VL-3B-Instruct-4bit",
+        "qwen2.5vl:3b"
+      ]
+    },
+    "notes": "Prefer exact local artifacts when available; otherwise map to the strongest explicitly listed local equivalent and record the substitution transparently."
+  },
   "groups": {
     "generation": {
       "enabled": true,
@@ -9,17 +66,82 @@
       "provider_model_pairs": [
         {
           "provider": "ollama",
+          "requested_model": "qwen3.5:4b",
           "model": "qwen2.5:7b",
-          "role": "baseline_local"
+          "candidate_models": [
+            "qwen3.5:4b",
+            "qwen2.5:7b"
+          ],
+          "requested_runtime_family": "ollama_local",
+          "role": "baseline_general_local"
+        },
+        {
+          "provider": "huggingface_local",
+          "requested_model": "Qwen3.5-4B-MLX-4bit",
+          "model": "Qwen3.5-4B-MLX-4bit",
+          "candidate_models": [
+            "Qwen3.5-4B-MLX-4bit",
+            "Qwen3.5-4B-Instruct",
+            "Qwen2.5-7B-Instruct"
+          ],
+          "requested_runtime_family": "hf_local_or_mlx",
+          "role": "challenger_hf_local_general"
         },
         {
           "provider": "ollama",
+          "requested_model": "phi4-mini:3.8b",
+          "model": "phi4-mini:3.8b",
+          "candidate_models": [
+            "phi4-mini:3.8b",
+            "phi4-mini:3.8b-q4_K_M"
+          ],
+          "requested_runtime_family": "ollama_local",
+          "role": "baseline_lightweight_local"
+        },
+        {
+          "provider": "huggingface_local",
+          "requested_model": "Phi-4-mini-instruct",
+          "model": "Phi-4-mini-instruct",
+          "candidate_models": [
+            "Phi-4-mini-instruct",
+            "Phi-4-mini-instruct-4bit"
+          ],
+          "requested_runtime_family": "hf_local_or_mlx",
+          "role": "challenger_hf_local_lightweight"
+        },
+        {
+          "provider": "ollama",
+          "requested_model": "qwen2.5-coder:7b",
           "model": "qwen2.5-coder:7b",
-          "role": "challenger_local"
+          "candidate_models": [
+            "qwen2.5-coder:7b",
+            "qwen2.5-coder:3b"
+          ],
+          "requested_runtime_family": "ollama_local",
+          "role": "baseline_code_local"
+        },
+        {
+          "provider": "huggingface_local",
+          "requested_model": "Qwen2.5-Coder-7B-Instruct-4bit",
+          "model": "Qwen2.5-Coder-7B-Instruct-4bit",
+          "candidate_models": [
+            "Qwen2.5-Coder-7B-Instruct-4bit",
+            "Qwen2.5-Coder-3B-Instruct-4bit",
+            "Qwen2.5-Coder-7B-Instruct"
+          ],
+          "requested_runtime_family": "hf_local_or_mlx",
+          "role": "challenger_hf_local_code"
         },
         {
           "provider": "huggingface_server",
+          "requested_model": "qwen2.5:7b-ollama",
           "model": "qwen2.5:7b-ollama",
+          "candidate_models": [
+            "qwen2.5:7b-ollama",
+            "qwen3.5:4b",
+            "qwen2.5:7b"
+          ],
+          "requested_runtime_family": "hf_local_llm_service",
           "role": "optional_local_hub"
         }
       ],
@@ -83,37 +205,117 @@
       "dataset": {
         "dataset_id": "phase8_5_embedding_pdf_corpus",
         "question_set_id": "phase8_5_embedding_questions_v1",
+        "subsets": [
+          {
+            "subset_id": "general_retrieval",
+            "subset_label": "General document retrieval",
+            "subset_kind": "general",
+            "document_paths": [
+              "benchmark_pdfs/2025-HB-44-20250106-Final-508.pdf",
+              "benchmark_pdfs/kaur-2016-ijca-911367.pdf",
+              "benchmark_pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+              "benchmark_pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+            ],
+            "question_set_path": "docs/embedding_benchmark_questions.example.json"
+          },
+          {
+            "subset_id": "code_retrieval",
+            "subset_label": "Code retrieval subset",
+            "subset_kind": "code",
+            "document_paths": [
+              "phase5_eval/fixtures/05_code_sample.py",
+              "src/services/model_comparison.py",
+              "src/rag/reranking.py"
+            ],
+            "question_set_path": "phase8_eval/fixtures/phase8_5_code_embedding_questions.json"
+          }
+        ],
         "pdf_paths": [
           "benchmark_pdfs/2025-HB-44-20250106-Final-508.pdf",
           "benchmark_pdfs/kaur-2016-ijca-911367.pdf",
           "benchmark_pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
           "benchmark_pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
         ],
-        "question_set_path": "docs/embedding_benchmark_questions.example.json"
+        "question_set_path": "docs/embedding_benchmark_questions.example.json",
+        "pdf_extraction_mode": "basic",
+        "pdf_docling_enabled": false,
+        "pdf_ocr_fallback_enabled": false,
+        "pdf_scan_image_ocr_enabled": false,
+        "pdf_evidence_pipeline_enabled": false
       },
       "embedding_candidates": [
         {
           "candidate_id": "ollama_embeddinggemma_300m",
           "provider": "ollama",
+          "requested_model": "embeddinggemma:300m",
           "model": "embeddinggemma:300m",
-          "role": "baseline"
-        },
-        {
-          "candidate_id": "ollama_bge_m3_latest",
-          "provider": "ollama",
-          "model": "bge-m3:latest",
-          "role": "challenger"
+          "candidate_models": [
+            "embeddinggemma:300m"
+          ],
+          "requested_runtime_family": "ollama_local",
+          "role": "baseline_general_retrieval"
         },
         {
           "candidate_id": "ollama_qwen3_embedding_0_6b",
           "provider": "ollama",
+          "requested_model": "qwen3-embedding:0.6b",
           "model": "qwen3-embedding:0.6b",
-          "role": "challenger"
+          "candidate_models": [
+            "qwen3-embedding:0.6b"
+          ],
+          "requested_runtime_family": "ollama_local",
+          "role": "challenger_general_retrieval"
+        },
+        {
+          "candidate_id": "ollama_bge_m3_latest",
+          "provider": "ollama",
+          "requested_model": "bge-m3",
+          "model": "bge-m3:latest",
+          "candidate_models": [
+            "bge-m3:latest",
+            "bge-m3"
+          ],
+          "requested_runtime_family": "ollama_local",
+          "role": "challenger_general_retrieval"
+        },
+        {
+          "candidate_id": "hf_local_retrieval_best_available",
+          "provider": "huggingface_local",
+          "requested_model": "jina-embeddings-v5-text-small-retrieval-mlx",
+          "model": "bge-m3",
+          "candidate_models": [
+            "jina-embeddings-v5-text-small-retrieval-mlx",
+            "jina-embeddings-v5-text-nano-retrieval-mlx",
+            "nomic-embed-text-v2-moe",
+            "bge-m3"
+          ],
+          "requested_runtime_family": "hf_local_or_mlx",
+          "role": "challenger_hf_local_general"
+        },
+        {
+          "candidate_id": "hf_local_code_embedding_best_available",
+          "provider": "huggingface_local",
+          "requested_model": "jina-code-embeddings-0.5b-mlx",
+          "model": "bge-m3",
+          "candidate_models": [
+            "jina-code-embeddings-0.5b-mlx",
+            "nomic-embed-text-v2-moe",
+            "bge-m3"
+          ],
+          "requested_runtime_family": "hf_local_or_mlx",
+          "role": "challenger_code_subset"
         },
         {
           "candidate_id": "huggingface_server_service_embed",
           "provider": "huggingface_server",
+          "requested_model": "embeddinggemma:300m",
           "model": "embeddinggemma:300m",
+          "candidate_models": [
+            "embeddinggemma:300m",
+            "bge-m3",
+            "qwen3-embedding:0.6b"
+          ],
+          "requested_runtime_family": "hf_local_llm_service",
           "role": "optional_local_hub"
         }
       ],
@@ -143,7 +345,12 @@
         "chunk_overlap": 80,
         "embedding_context_window": 512,
         "embedding_truncate": true,
-        "top_k": 4
+        "top_k": 4,
+        "pdf_extraction_mode": "basic",
+        "pdf_docling_enabled": false,
+        "pdf_ocr_fallback_enabled": false,
+        "pdf_scan_image_ocr_enabled": false,
+        "pdf_evidence_pipeline_enabled": false
       },
       "candidates": [
         {
@@ -165,6 +372,44 @@
           "rerank_pool_size": 8,
           "rerank_lexical_weight": 0.35,
           "support_status": "fully_supported"
+        },
+        {
+          "candidate_id": "neural_rerank_bge_v2_m3",
+          "label": "Neural reranker via local HF runtime (BGE v2 m3)",
+          "role": "challenger_neural",
+          "retrieval_strategy": "manual_hybrid",
+          "top_k": 4,
+          "rerank_pool_size": 8,
+          "rerank_lexical_weight": 0.0,
+          "neural_reranker_provider": "huggingface_local",
+          "requested_neural_reranker_model": "bge-reranker-v2-m3",
+          "neural_reranker_model": "bge-reranker-v2-m3",
+          "neural_reranker_candidate_models": [
+            "bge-reranker-v2-m3",
+            "Qwen3-Reranker-0.6B",
+            "mxbai-rerank-large-v1"
+          ],
+          "requested_runtime_family": "hf_local_or_mlx",
+          "support_status": "conditional_local_runtime"
+        },
+        {
+          "candidate_id": "neural_rerank_jina_v3_mlx",
+          "label": "Neural reranker via local HF/MLX runtime (Jina v3)",
+          "role": "challenger_neural",
+          "retrieval_strategy": "manual_hybrid",
+          "top_k": 4,
+          "rerank_pool_size": 8,
+          "rerank_lexical_weight": 0.0,
+          "neural_reranker_provider": "huggingface_local",
+          "requested_neural_reranker_model": "jina-reranker-v3-mlx",
+          "neural_reranker_model": "jina-reranker-v3-mlx",
+          "neural_reranker_candidate_models": [
+            "jina-reranker-v3-mlx",
+            "bge-reranker-v2-m3",
+            "Qwen3-Reranker-0.6B"
+          ],
+          "requested_runtime_family": "hf_local_or_mlx",
+          "support_status": "conditional_local_runtime"
         }
       ],
       "smoke_limits": {
@@ -177,6 +422,50 @@
     "ocr_vlm": {
       "enabled": true,
       "repetitions": 1,
+      "variant_matrix": [
+        {
+          "variant": "pdf_hybrid",
+          "kind": "pdf_pipeline",
+          "pdf_extraction_mode": "hybrid",
+          "requested_runtime_family": "pdf_hybrid_local"
+        },
+        {
+          "variant": "pdf_complete",
+          "kind": "pdf_pipeline",
+          "pdf_extraction_mode": "complete",
+          "requested_runtime_family": "pdf_complete_local"
+        },
+        {
+          "variant": "legacy_pdf",
+          "kind": "legacy_pdf",
+          "requested_runtime_family": "legacy_pdf_text_extraction"
+        },
+        {
+          "variant": "evidence_no_vl",
+          "kind": "evidence_pipeline",
+          "enable_vl": false,
+          "enable_docling": true,
+          "ocr_backend": "ocrmypdf",
+          "requested_runtime_family": "evidence_pipeline_local"
+        },
+        {
+          "variant": "evidence_no_vl_docling_disabled",
+          "kind": "evidence_pipeline",
+          "enable_vl": false,
+          "enable_docling": false,
+          "ocr_backend": "ocrmypdf",
+          "requested_runtime_family": "ocr_local_pipeline"
+        },
+        {
+          "variant": "evidence_with_vl",
+          "kind": "evidence_pipeline",
+          "enable_vl": true,
+          "enable_docling": true,
+          "ocr_backend": "ocrmypdf",
+          "vl_model": "sorc/qwen3.5-instruct:2b",
+          "requested_runtime_family": "ollama_vl_local"
+        }
+      ],
       "cases": [
         {
           "case_name": "cv_lucas_real_document",
@@ -221,6 +510,7 @@
     "temperature": 0.2,
     "top_p": null,
     "max_output_tokens": 512,
+    "think": false,
     "context_window": 8192,
     "embedding_context_window": 512,
     "embedding_truncate": true,
@@ -240,7 +530,7 @@
     "provider_transport_timeout_source": "native_provider_timeout"
   },
   "output_directory_policy": {
-    "root_dir": "benchmark_runs/phase8_5_round1",
+    "root_dir": "benchmark_runs/phase8_5_matrix",
     "run_dir_strategy": "stable_run_id",
     "raw_dir": "raw",
     "normalized_dir": "normalized",

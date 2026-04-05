@@ -43,6 +43,15 @@ class RuntimeExecutionLogTests(unittest.TestCase):
                 "docling_document_count": 1,
                 "vl_document_count": 0,
                 "ocr_backend_counts": {"ocrmypdf": 1},
+                "mcp_server": "evidenceops-local-mcp",
+                "mcp_transport": "stdio",
+                "mcp_status": "success",
+                "mcp_tool_call_count": 2,
+                "mcp_read_call_count": 1,
+                "mcp_write_call_count": 1,
+                "mcp_error_call_count": 0,
+                "mcp_total_latency_s": 0.18,
+                "mcp_tool_names": ["register_evidenceops_entry", "compare_repository_state"],
             },
             {
                 "timestamp": "2026-03-30 20:05:00",
@@ -68,6 +77,15 @@ class RuntimeExecutionLogTests(unittest.TestCase):
                 "budget_auto_degrade_applied": False,
                 "context_pressure_ratio": 0.42,
                 "vl_document_count": 1,
+                "mcp_server": "evidenceops-local-mcp",
+                "mcp_transport": "stdio",
+                "mcp_status": "fallback_local",
+                "mcp_tool_call_count": 1,
+                "mcp_read_call_count": 0,
+                "mcp_write_call_count": 1,
+                "mcp_error_call_count": 1,
+                "mcp_total_latency_s": 0.09,
+                "mcp_tool_names": ["register_evidenceops_entry"],
             },
         ]
 
@@ -95,6 +113,20 @@ class RuntimeExecutionLogTests(unittest.TestCase):
         self.assertEqual(summary["budget_mode_counts"]["budget_guarded"], 1)
         self.assertEqual(summary["cost_source_counts"]["local_runtime_not_priced"], 1)
         self.assertEqual(summary["ocr_backend_counts"]["ocrmypdf"], 1)
+        self.assertEqual(summary["mcp_runs"], 2)
+        self.assertEqual(summary["total_mcp_tool_calls"], 3)
+        self.assertEqual(summary["total_mcp_read_calls"], 1)
+        self.assertEqual(summary["total_mcp_write_calls"], 2)
+        self.assertEqual(summary["avg_mcp_tool_calls_per_run"], 1.5)
+        self.assertEqual(summary["avg_mcp_total_latency_s"], 0.135)
+        self.assertEqual(summary["mcp_error_rate"], 0.333)
+        self.assertEqual(summary["mcp_server_counts"]["evidenceops-local-mcp"], 2)
+        self.assertEqual(summary["mcp_tool_counts"]["register_evidenceops_entry"], 2)
+        self.assertEqual(summary["mcp_transport_counts"]["stdio"], 2)
+        self.assertEqual(summary["mcp_status_counts"]["fallback_local"], 1)
+        self.assertEqual(summary["bottleneck_stage_counts"]["generation"], 1)
+        self.assertEqual(summary["bottleneck_stage_counts"]["other"], 1)
+        self.assertEqual(summary["avg_bottleneck_share"], 0.833)
 
     def test_build_runtime_execution_summary_exposes_recent_entries(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -130,6 +162,14 @@ class RuntimeExecutionLogTests(unittest.TestCase):
                     "completion_tokens": 90,
                     "total_tokens": 410,
                     "usage_source": "estimated_chars",
+                    "mcp_server": "evidenceops-local-mcp",
+                    "mcp_transport": "stdio",
+                    "mcp_status": "success",
+                    "mcp_tool_call_count": 1,
+                    "mcp_write_call_count": 1,
+                    "mcp_error_call_count": 0,
+                    "mcp_total_latency_s": 0.12,
+                    "mcp_tool_names": ["register_evidenceops_entry"],
                 },
             )
 
@@ -141,6 +181,7 @@ class RuntimeExecutionLogTests(unittest.TestCase):
         self.assertEqual(summary["recent_entries"][0]["task_type"], "summary")
         self.assertEqual(summary["avg_total_tokens"], 315.0)
         self.assertEqual(summary["recent_entries"][0]["total_tokens"], 410)
+        self.assertEqual(summary["mcp_runs"], 1)
 
 
 if __name__ == "__main__":

@@ -837,6 +837,23 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                         f"geração: {float(runtime_execution.get('avg_generation_latency_s', 0.0)):.2f}s · "
                         f"prompt build: {float(runtime_execution.get('avg_prompt_build_latency_s', 0.0)):.2f}s"
                     )
+                    bottleneck_stage_counts = runtime_execution.get("bottleneck_stage_counts")
+                    if isinstance(bottleneck_stage_counts, dict) and bottleneck_stage_counts:
+                        st.caption(
+                            f"Share médio de latência: retrieval={float(runtime_execution.get('avg_retrieval_share', 0.0)):.0%} · "
+                            f"geração={float(runtime_execution.get('avg_generation_share', 0.0)):.0%} · "
+                            f"prompt build={float(runtime_execution.get('avg_prompt_build_share', 0.0)):.0%} · "
+                            f"outros={float(runtime_execution.get('avg_other_latency_share', 0.0)):.0%} · "
+                            f"gargalo dominante médio={float(runtime_execution.get('avg_bottleneck_share', 0.0)):.0%}"
+                        )
+                        st.caption("Gargalo dominante por execução")
+                        st.dataframe(
+                            [
+                                {"latency_stage": stage_name, "count": count}
+                                for stage_name, count in bottleneck_stage_counts.items()
+                            ],
+                            width="stretch",
+                        )
                     st.caption(
                         f"Tokens médios: prompt={float(runtime_execution.get('avg_prompt_tokens', 0.0)):.1f} · "
                         f"completion={float(runtime_execution.get('avg_completion_tokens', 0.0)):.1f} · "
@@ -860,6 +877,17 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     runtime_doc_metric_2.metric("OCR envolvido", int(runtime_execution.get("ocr_involved_runs") or 0))
                     runtime_doc_metric_3.metric("Docling envolvido", int(runtime_execution.get("docling_involved_runs") or 0))
                     runtime_doc_metric_4.metric("VL envolvido", int(runtime_execution.get("vl_involved_runs") or 0))
+                    mcp_metric_1, mcp_metric_2, mcp_metric_3, mcp_metric_4 = st.columns(4)
+                    mcp_metric_1.metric("MCP runs", int(runtime_execution.get("mcp_runs") or 0))
+                    mcp_metric_2.metric("MCP calls", int(runtime_execution.get("total_mcp_tool_calls") or 0))
+                    mcp_metric_3.metric("MCP erro", _format_ratio(runtime_execution.get("mcp_error_rate")))
+                    mcp_metric_4.metric("MCP latência", f"{float(runtime_execution.get('avg_mcp_total_latency_s', 0.0)):.2f}s")
+                    if int(runtime_execution.get("mcp_runs") or 0) > 0:
+                        st.caption(
+                            f"MCP read calls: {int(runtime_execution.get('total_mcp_read_calls') or 0)} · "
+                            f"write calls: {int(runtime_execution.get('total_mcp_write_calls') or 0)} · "
+                            f"média de calls/run MCP: {float(runtime_execution.get('avg_mcp_tool_calls_per_run', 0.0)):.2f}"
+                        )
 
                     for label, field_name, key_name in [
                         ("Distribuição por fluxo", "flow_counts", "flow_type"),
@@ -872,6 +900,10 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                         ("Distribuição por budget reason", "budget_reason_counts", "budget_reason"),
                         ("Distribuição por modo de contexto", "context_window_mode_counts", "context_window_mode"),
                         ("Distribuição por backend OCR", "ocr_backend_counts", "ocr_backend"),
+                        ("Distribuição por server MCP", "mcp_server_counts", "mcp_server"),
+                        ("Distribuição por tool MCP", "mcp_tool_counts", "mcp_tool"),
+                        ("Distribuição por transporte MCP", "mcp_transport_counts", "mcp_transport"),
+                        ("Distribuição por status MCP", "mcp_status_counts", "mcp_status"),
                     ]:
                         rows = runtime_execution.get(field_name)
                         if isinstance(rows, dict) and rows:
@@ -902,6 +934,9 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                                     "usage_source": entry.get("usage_source"),
                                     "budget_mode": entry.get("budget_routing_mode"),
                                     "context_pressure_ratio": entry.get("context_pressure_ratio"),
+                                    "mcp_status": entry.get("mcp_status"),
+                                    "mcp_calls": entry.get("mcp_tool_call_count"),
+                                    "mcp_latency_s": entry.get("mcp_total_latency_s"),
                                     "prompt_context_truncated": entry.get("prompt_context_truncated"),
                                     "ocr_docs": entry.get("ocr_document_count"),
                                     "docling_docs": entry.get("docling_document_count"),

@@ -48,6 +48,7 @@ class OpenAIProvider:
         context_window: int | None = None,
         top_p: float | None = None,
         max_tokens: int | None = None,
+        think: bool | None = None,
     ):
         if self.client is None:
             raise RuntimeError("OPENAI_API_KEY não configurada")

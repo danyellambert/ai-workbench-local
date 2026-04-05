@@ -82,6 +82,66 @@ class _DoclingAvailability:
 _DOC_AVAILABILITY: _DoclingAvailability | None = None
 
 
+def _qpdf_available() -> bool:
+    return shutil.which("qpdf") is not None
+
+
+def _decrypt_pdf_with_qpdf(file_bytes: bytes) -> tuple[bytes | None, str | None]:
+    qpdf_binary = shutil.which("qpdf")
+    if not qpdf_binary:
+        return None, "qpdf command not found"
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir_path = Path(temp_dir)
+        input_path = temp_dir_path / "encrypted.pdf"
+        output_path = temp_dir_path / "decrypted.pdf"
+        input_path.write_bytes(file_bytes)
+
+        try:
+            subprocess.run(
+                [qpdf_binary, "--password=", "--decrypt", str(input_path), str(output_path)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return output_path.read_bytes(), None
+        except FileNotFoundError as error:
+            return None, f"qpdf unavailable: {error}"
+        except subprocess.CalledProcessError as error:
+            stderr = error.stderr.strip() if isinstance(error.stderr, str) else ""
+            return None, f"qpdf failed ({error.returncode}): {stderr}"
+        except Exception as error:  # pragma: no cover - defensive fallback
+            return None, str(error)
+
+
+def _prepare_pdf_bytes_for_processing(file_bytes: bytes) -> tuple[bytes, dict[str, object]]:
+    metadata: dict[str, object] = {
+        "pdf_encrypted": False,
+        "pdf_decryption_attempted": False,
+        "pdf_decryption_method": None,
+        "pdf_decryption_error": None,
+    }
+    try:
+        reader = PdfReader(io.BytesIO(file_bytes), strict=False)
+        if not bool(getattr(reader, "is_encrypted", False)):
+            return file_bytes, metadata
+    except Exception as error:
+        metadata["pdf_encryption_inspection_error"] = str(error)
+        return file_bytes, metadata
+
+    metadata["pdf_encrypted"] = True
+    metadata["pdf_decryption_attempted"] = True
+
+    decrypted_bytes, decrypt_error = _decrypt_pdf_with_qpdf(file_bytes)
+    if decrypted_bytes:
+        metadata["pdf_decryption_method"] = "qpdf_blank_user_password"
+        return decrypted_bytes, metadata
+
+    metadata["pdf_decryption_error"] = decrypt_error or "qpdf_decrypt_failed"
+    return file_bytes, metadata
+
+
 def normalize_pdf_extraction_mode(mode: str | None) -> str:
     normalized = (mode or "hybrid").strip().lower()
     if normalized in BASIC_EXTRACTION_MODES:
@@ -374,7 +434,8 @@ def _ocrmypdf_available() -> bool:
 
 def _extract_pdf_text_with_pypdf(file_bytes: bytes) -> str:
     try:
-        reader = PdfReader(io.BytesIO(file_bytes), strict=False)
+        prepared_bytes, _ = _prepare_pdf_bytes_for_processing(file_bytes)
+        reader = PdfReader(io.BytesIO(prepared_bytes), strict=False)
         texts: list[str] = []
         for page in reader.pages:
             text, _ = _safe_extract_page_text(page)
@@ -548,7 +609,9 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
     resolved_mode = normalize_pdf_extraction_mode(settings.extraction_mode)
     effective_settings = _build_complete_docling_settings(settings) if resolved_mode == "complete" else settings
 
-    reader = PdfReader(io.BytesIO(file_bytes), strict=False)
+    prepared_file_bytes, pdf_security_metadata = _prepare_pdf_bytes_for_processing(file_bytes)
+
+    reader = PdfReader(io.BytesIO(prepared_file_bytes), strict=False)
     page_analyses: list[PdfPageAnalysis] = []
     baseline_pages: list[tuple[int, str]] = []
 
@@ -590,9 +653,9 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
             if resolved_mode == "complete":
                 docling_attempted = True
                 docling_mode = "page_complete"
-                complete_docling_text = _docling_extract_pdf_text(file_bytes, effective_settings).strip()
+                complete_docling_text = _docling_extract_pdf_text(prepared_file_bytes, effective_settings).strip()
                 for page in page_analyses:
-                    enriched = _docling_extract_page(file_bytes, page.page_number - 1, effective_settings).strip()
+                    enriched = _docling_extract_page(prepared_file_bytes, page.page_number - 1, effective_settings).strip()
                     merged_text, changed = _merge_page_texts(
                         base_text=merged_pages.get(page.page_number, ""),
                         enriched_text=enriched,
@@ -611,7 +674,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
             elif resolved_mode == "docling" or _should_run_full_docling(page_analyses, effective_settings):
                 docling_attempted = True
                 docling_mode = "full_document"
-                docling_text = _docling_extract_pdf_text(file_bytes, effective_settings).strip()
+                docling_text = _docling_extract_pdf_text(prepared_file_bytes, effective_settings).strip()
                 if len(docling_text) > len(baseline_text) * 0.7:
                     baseline_text = docling_text
                     for page in page_analyses:
@@ -623,7 +686,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
                 docling_mode = "selective_pages"
                 pages_to_enrich = suspicious_pages[: effective_settings.max_selective_docling_pages]
                 for page in pages_to_enrich:
-                    enriched = _docling_extract_page(file_bytes, page.page_number - 1, effective_settings).strip()
+                    enriched = _docling_extract_page(prepared_file_bytes, page.page_number - 1, effective_settings).strip()
                     merged_text, changed = _merge_page_texts(
                         base_text=merged_pages.get(page.page_number, ""),
                         enriched_text=enriched,
@@ -656,7 +719,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
             image_first_ocr_attempted = True
             image_first_ocr_reason = image_first_reason
             ocr_backend = "ocrmypdf_image_first"
-            rasterized_images, raster_error = _rasterize_pdf_with_ghostscript(file_bytes, effective_settings)
+            rasterized_images, raster_error = _rasterize_pdf_with_ghostscript(prepared_file_bytes, effective_settings)
             if raster_error:
                 image_first_ocr_error = raster_error
             else:
@@ -671,7 +734,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
 
         if not ocr_fallback_applied and _ocrmypdf_available():
             ocr_backend = "ocrmypdf"
-            ocr_text, ocr_error = _ocrmypdf_extract_pdf_text(file_bytes, effective_settings)
+            ocr_text, ocr_error = _ocrmypdf_extract_pdf_text(prepared_file_bytes, effective_settings)
             ocr_fallback_error = ocr_error
             normalized_ocr = _normalize_page_text(ocr_text)
             normalized_base = _normalize_page_text(baseline_text)
@@ -706,6 +769,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
         "image_first_ocr_applied": image_first_ocr_applied,
         "image_first_ocr_reason": image_first_ocr_reason,
         "image_first_ocr_error": image_first_ocr_error,
+        **pdf_security_metadata,
         "pages_analysis": [
             {
                 "page_number": page.page_number,

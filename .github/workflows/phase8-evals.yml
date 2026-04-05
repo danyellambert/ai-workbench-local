@@ -25,10 +25,13 @@ jobs:
       - name: Run eval-related unit tests
         run: |
           python -m unittest \
+            tests.test_app_bootstrap_smoke_unittest \
+            tests.test_streamlit_app_smoke_unittest \
             tests.test_phase8_eval_store_unittest \
             tests.test_phase8_eval_diagnosis_unittest \
             tests.test_phase8_agent_workflow_eval_unittest \
             tests.test_phase8_live_evals_unittest \
+            tests.test_runtime_execution_log_unittest \
             tests.test_runtime_snapshot_unittest \
             tests.test_phase5_real_document_eval_unittest
 

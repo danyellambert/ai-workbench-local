@@ -66,6 +66,7 @@ class HuggingFaceInferenceProvider:
         context_window: int | None = None,
         top_p: float | None = None,
         max_tokens: int | None = None,
+        think: bool | None = None,
     ):
         self.reset_last_usage_metrics()
         request_kwargs: dict[str, object] = {
