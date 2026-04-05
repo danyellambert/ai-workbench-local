@@ -27,6 +27,13 @@ class OllamaProvider:
         self.settings = settings
         self.client = OpenAI(base_url=settings.base_url, api_key="ollama")
         self.native_base_url = self._build_native_base_url(settings.base_url)
+        self._last_usage_metrics: dict[str, object] = {}
+
+    def reset_last_usage_metrics(self) -> None:
+        self._last_usage_metrics = {}
+
+    def get_last_usage_metrics(self) -> dict[str, object]:
+        return dict(self._last_usage_metrics)
 
     @staticmethod
     def _build_native_base_url(base_url: str) -> str:
@@ -247,6 +254,7 @@ class OllamaProvider:
         top_p: float | None = None,
         max_tokens: int | None = None,
     ):
+        self.reset_last_usage_metrics()
         resolved_top_p = top_p if top_p is not None else self.settings.default_top_p
         resolved_max_tokens = max_tokens if max_tokens is not None else self.settings.default_max_tokens
         payload = {
@@ -307,8 +315,7 @@ class OllamaProvider:
 
         return all_embeddings
 
-    @staticmethod
-    def iter_stream_text(stream):
+    def iter_stream_text(self, stream):
         if hasattr(stream, "__iter__") and not hasattr(stream, "choices"):
             for raw_line in stream:
                 if isinstance(raw_line, bytes):
@@ -325,6 +332,18 @@ class OllamaProvider:
                         content = message.get("content") or ""
                         if content:
                             yield content
+                    if bool(payload.get("done")):
+                        prompt_tokens = payload.get("prompt_eval_count")
+                        completion_tokens = payload.get("eval_count")
+                        total_tokens = None
+                        if isinstance(prompt_tokens, int) and isinstance(completion_tokens, int):
+                            total_tokens = int(prompt_tokens) + int(completion_tokens)
+                        self._last_usage_metrics = {
+                            "prompt_tokens": prompt_tokens,
+                            "completion_tokens": completion_tokens,
+                            "total_tokens": total_tokens,
+                            "usage_source": "ollama_native_usage",
+                        }
             return
 
         for chunk in stream:

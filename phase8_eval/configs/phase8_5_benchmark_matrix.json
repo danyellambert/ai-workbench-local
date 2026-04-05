@@ -1,0 +1,257 @@
+{
+  "benchmark_id": "phase8_5_round1",
+  "manifest_version": "1.0",
+  "description": "Phase 8.5 benchmark matrix for local generation/runtime, embeddings, rerankers, and OCR/VLM fallback comparisons.",
+  "groups": {
+    "generation": {
+      "enabled": true,
+      "repetitions": 2,
+      "provider_model_pairs": [
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "role": "baseline_local"
+        },
+        {
+          "provider": "ollama",
+          "model": "qwen2.5-coder:7b",
+          "role": "challenger_local"
+        },
+        {
+          "provider": "huggingface_server",
+          "model": "qwen2.5:7b-ollama",
+          "role": "optional_local_hub"
+        }
+      ],
+      "use_case_groups": [
+        {
+          "group_id": "phase8_5_round1_core_generation",
+          "label": "Phase 8.5 core generation cases",
+          "cases": [
+            {
+              "use_case_id": "ops_update_summary",
+              "label": "Ops update summary",
+              "benchmark_use_case": "executive_summary",
+              "prompt_profile": "neutro",
+              "response_format": "bullet_list",
+              "structured_output_mode": "bullet_prompt_contract",
+              "input_file": "phase5_eval/fixtures/02_summary_input.txt",
+              "prompt_template": "Use only the information below.\n\n{input_text}\n\nSummarize the main points, risks, and next steps in concise bullets."
+            },
+            {
+              "use_case_id": "release_candidate_risk_review",
+              "label": "Release candidate risk review",
+              "benchmark_use_case": "risk_review",
+              "prompt_profile": "neutro",
+              "response_format": "bullet_list",
+              "structured_output_mode": "bullet_prompt_contract",
+              "input_file": "phase5_eval/fixtures/03_checklist_input.txt",
+              "prompt_template": "Use only the information below.\n\n{input_text}\n\nIdentify the main risks, blockers, controls, and recommended next steps in bullets."
+            },
+            {
+              "use_case_id": "cv_structured_extraction",
+              "label": "CV structured extraction",
+              "benchmark_use_case": "structured_extraction",
+              "prompt_profile": "extrator",
+              "response_format": "json",
+              "structured_output_mode": "json_prompt_contract",
+              "input_file": "phase5_eval/fixtures/04_cv_sample.txt",
+              "prompt_template": "Use only the CV content below.\n\n{input_text}\n\nExtract the most relevant information as JSON with keys: summary, risks, actions, entities."
+            },
+            {
+              "use_case_id": "code_quality_review",
+              "label": "Code quality review",
+              "benchmark_use_case": "technical_review",
+              "prompt_profile": "programador",
+              "response_format": "bullet_list",
+              "structured_output_mode": "bullet_prompt_contract",
+              "input_file": "phase5_eval/fixtures/05_code_sample.py",
+              "prompt_template": "Use only the code below.\n\n{input_text}\n\nExplain the main technical issues, impacts, and prioritized recommendations in bullets."
+            }
+          ]
+        }
+      ],
+      "smoke_limits": {
+        "max_provider_model_pairs": 1,
+        "max_use_cases": 2,
+        "repetitions": 1
+      }
+    },
+    "embeddings": {
+      "enabled": true,
+      "repetitions": 1,
+      "dataset": {
+        "dataset_id": "phase8_5_embedding_pdf_corpus",
+        "question_set_id": "phase8_5_embedding_questions_v1",
+        "pdf_paths": [
+          "benchmark_pdfs/2025-HB-44-20250106-Final-508.pdf",
+          "benchmark_pdfs/kaur-2016-ijca-911367.pdf",
+          "benchmark_pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "benchmark_pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "question_set_path": "docs/embedding_benchmark_questions.example.json"
+      },
+      "embedding_candidates": [
+        {
+          "candidate_id": "ollama_embeddinggemma_300m",
+          "provider": "ollama",
+          "model": "embeddinggemma:300m",
+          "role": "baseline"
+        },
+        {
+          "candidate_id": "ollama_bge_m3_latest",
+          "provider": "ollama",
+          "model": "bge-m3:latest",
+          "role": "challenger"
+        },
+        {
+          "candidate_id": "ollama_qwen3_embedding_0_6b",
+          "provider": "ollama",
+          "model": "qwen3-embedding:0.6b",
+          "role": "challenger"
+        },
+        {
+          "candidate_id": "huggingface_server_service_embed",
+          "provider": "huggingface_server",
+          "model": "embeddinggemma:300m",
+          "role": "optional_local_hub"
+        }
+      ],
+      "smoke_limits": {
+        "max_candidates": 1,
+        "max_pdfs": 2,
+        "max_questions": 2,
+        "repetitions": 1
+      }
+    },
+    "rerankers": {
+      "enabled": true,
+      "repetitions": 1,
+      "dataset": {
+        "dataset_id": "phase8_5_reranker_pdf_corpus",
+        "question_set_id": "phase8_5_reranker_questions_v1",
+        "embedding_provider": "ollama",
+        "embedding_model": "embeddinggemma:300m",
+        "pdf_paths": [
+          "benchmark_pdfs/2025-HB-44-20250106-Final-508.pdf",
+          "benchmark_pdfs/kaur-2016-ijca-911367.pdf",
+          "benchmark_pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "benchmark_pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "question_set_path": "docs/embedding_benchmark_questions.example.json",
+        "chunk_size": 1200,
+        "chunk_overlap": 80,
+        "embedding_context_window": 512,
+        "embedding_truncate": true,
+        "top_k": 4
+      },
+      "candidates": [
+        {
+          "candidate_id": "vector_only_local_baseline",
+          "label": "Vector-only baseline (lexical weight 0)",
+          "role": "baseline",
+          "retrieval_strategy": "manual_hybrid",
+          "top_k": 4,
+          "rerank_pool_size": 4,
+          "rerank_lexical_weight": 0.0,
+          "support_status": "fully_supported"
+        },
+        {
+          "candidate_id": "hybrid_rerank_current_default",
+          "label": "Hybrid vector + lexical rerank",
+          "role": "current_default",
+          "retrieval_strategy": "manual_hybrid",
+          "top_k": 4,
+          "rerank_pool_size": 8,
+          "rerank_lexical_weight": 0.35,
+          "support_status": "fully_supported"
+        }
+      ],
+      "smoke_limits": {
+        "max_candidates": 1,
+        "max_pdfs": 2,
+        "max_questions": 2,
+        "repetitions": 1
+      }
+    },
+    "ocr_vlm": {
+      "enabled": true,
+      "repetitions": 1,
+      "cases": [
+        {
+          "case_name": "cv_lucas_real_document",
+          "label": "Real CV Lucas with OCR/VLM fallback slices",
+          "document_type": "cv_resume",
+          "pdf_path": "data/materials_demo/cv_analysis/CV - Lucas - gen.pdf",
+          "gold_path": "phase5_eval/fixtures/08_cv_lucas_real_gold.json",
+          "support_status": "partially_supported"
+        },
+        {
+          "case_name": "cv_sample_resume_1",
+          "label": "Sample Resume 1 OCR/VLM fallback slice",
+          "document_type": "cv_resume",
+          "pdf_path": "data/materials_demo/cv_analysis/Sample-Resume-1-07262023.pdf",
+          "gold_path": "phase5_eval/fixtures/14_cv_sample_resume_1_gold.json",
+          "support_status": "partially_supported"
+        },
+        {
+          "case_name": "cv_sample_resume_2",
+          "label": "Sample Resume 2 OCR/VLM fallback slice",
+          "document_type": "cv_resume",
+          "pdf_path": "data/materials_demo/cv_analysis/Sample-Resume-2-1.pdf",
+          "gold_path": "phase5_eval/fixtures/15_cv_sample_resume_2_gold.json",
+          "support_status": "partially_supported"
+        },
+        {
+          "case_name": "cv_sample_resume_3",
+          "label": "Sample Resume 3 OCR/VLM fallback slice",
+          "document_type": "cv_resume",
+          "pdf_path": "data/materials_demo/cv_analysis/Sample-Resume-3-.pdf",
+          "gold_path": "phase5_eval/fixtures/16_cv_sample_resume_3_gold.json",
+          "support_status": "partially_supported"
+        }
+      ],
+      "smoke_limits": {
+        "max_cases": 1,
+        "repetitions": 1
+      }
+    }
+  },
+  "fairness": {
+    "temperature": 0.2,
+    "top_p": null,
+    "max_output_tokens": 512,
+    "context_window": 8192,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "seed": null,
+    "seed_supported": false,
+    "structured_output_mode": "prompt_contract_only"
+  },
+  "timeout_policy": {
+    "generation_case_timeout_s": 180,
+    "embedding_indexing_timeout_s": 600,
+    "embedding_query_timeout_s": 180,
+    "provider_transport_timeout_source": "native_provider_timeout"
+  },
+  "output_directory_policy": {
+    "root_dir": "benchmark_runs/phase8_5_round1",
+    "run_dir_strategy": "stable_run_id",
+    "raw_dir": "raw",
+    "normalized_dir": "normalized",
+    "aggregated_dir": "aggregated",
+    "case_dir": "cases",
+    "prevent_overwrite_without_resume": true
+  },
+  "resume_policy": {
+    "skip_successful_cases": true,
+    "rerun_failed_cases": true,
+    "events_file": "raw/events.jsonl",
+    "case_success_status": "success"
+  }
+}

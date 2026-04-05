@@ -11,6 +11,8 @@ from src.services.runtime_snapshot import (
     summarize_provider_path,
 )
 from src.storage.phase6_document_agent_log import append_document_agent_log_entry
+from src.storage.phase95_evidenceops_action_store import append_evidenceops_actions_from_worklog_entry
+from src.storage.phase95_evidenceops_worklog import append_evidenceops_worklog_entry
 from src.storage.phase8_eval_store import append_eval_run
 from src.storage.runtime_execution_log import append_runtime_execution_log_entry
 from src.structured.base import SummaryPayload
@@ -71,7 +73,14 @@ class RuntimeSnapshotTests(unittest.TestCase):
                 "agent_guardrails_applied": ["Resposta restrita aos documentos selecionados."],
                 "workflow_attempts": 2,
                 "workflow_context_strategies": ["document_scan", "retrieval"],
+                "context_chars_sent": 1600,
+                "full_document_chars": 4200,
+                "context_strategy": "document_scan",
                 "telemetry": {
+                    "budget_routing_mode": "quality_first",
+                    "budget_routing_reason": "high_sensitivity_task",
+                    "budget_auto_degrade_applied": False,
+                    "budget_total_tokens": 280,
                     "timings_s": {
                         "total_s": 2.5,
                         "provider_total_s": 1.5,
@@ -95,6 +104,13 @@ class RuntimeSnapshotTests(unittest.TestCase):
                     "generation_latency_s": 0.8,
                     "retrieval_latency_s": 0.2,
                     "prompt_build_latency_s": 0.1,
+                    "prompt_context": {
+                        "used_chars": 700,
+                        "used_chunks": 3,
+                        "dropped_chunks": 1,
+                        "truncated": True,
+                    },
+                    "usage": {"total_tokens": 320, "cost_usd": None, "context_chars": 700},
                 },
             }
         ]
@@ -153,6 +169,10 @@ class RuntimeSnapshotTests(unittest.TestCase):
         self.assertEqual(snapshot["structured"]["agent_guardrails_applied"], ["Resposta restrita aos documentos selecionados."])
         self.assertEqual(snapshot["structured"]["workflow_attempts"], 2)
         self.assertEqual(snapshot["structured"]["last_pre_model_prep_s"], 0.6)
+        self.assertEqual(snapshot["chat"]["last_prompt_context_used_chunks"], 3)
+        self.assertTrue(snapshot["chat"]["last_prompt_context_truncated"])
+        self.assertEqual(snapshot["structured"]["last_context_chars"], 1600)
+        self.assertEqual(snapshot["structured"]["last_context_strategy"], "document_scan")
         self.assertEqual(snapshot["documents"]["indexed_documents"], 1)
         self.assertEqual(snapshot["documents"]["chat_selected_docs"][0]["documento"], "cv.pdf")
         self.assertEqual(snapshot["documents"]["chat_selected_docs"][0]["ocr_backend"], "ocrmypdf")
@@ -335,6 +355,10 @@ class RuntimeSnapshotTests(unittest.TestCase):
                     "budget_routing_mode": "budget_guarded",
                     "budget_routing_reason": "high_context_pressure",
                     "budget_auto_degrade_applied": True,
+                    "budget_alert_status": "warn",
+                    "budget_alerts": [{"type": "context_pressure_threshold_exceeded", "severity": "warn"}],
+                    "provider_requested": "openai",
+                    "provider_effective": "ollama",
                 },
             }
         ]
@@ -366,6 +390,8 @@ class RuntimeSnapshotTests(unittest.TestCase):
 
         self.assertEqual(snapshot["chat"]["budget_routing_mode"], "budget_guarded")
         self.assertTrue(snapshot["chat"]["budget_auto_degrade_applied"])
+        self.assertEqual(snapshot["chat"]["budget_alert_status"], "warn")
+        self.assertEqual(snapshot["chat"]["provider_requested"], "openai")
         self.assertEqual(snapshot["chat"]["last_total_tokens"], 320)
         self.assertEqual(snapshot["structured"]["budget_routing_mode"], "quality_first")
         self.assertEqual(snapshot["structured"]["last_total_tokens"], 280)
@@ -500,6 +526,384 @@ class RuntimeSnapshotTests(unittest.TestCase):
         self.assertTrue(snapshot["document_agent"]["log_exists"])
         self.assertEqual(snapshot["document_agent"]["total_runs"], 1)
         self.assertEqual(snapshot["document_agent"]["tool_counts"]["compare_documents"], 1)
+
+    def test_build_runtime_snapshot_includes_phase95_evidenceops_summary(self) -> None:
+        structured_result = StructuredResult(
+            success=True,
+            task_type="summary",
+            raw_output_text="{}",
+            parsed_json={},
+            validated_output=SummaryPayload(
+                task_type="summary",
+                topics=[],
+                executive_summary="ok",
+                key_insights=[],
+                reading_time_minutes=1,
+                completeness_score=0.8,
+            ),
+            execution_metadata={},
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            log_path = Path(tmp_dir) / ".phase95_evidenceops_worklog.json"
+            append_evidenceops_worklog_entry(
+                log_path,
+                {
+                    "timestamp": "2026-04-03T10:00:00",
+                    "review_type": "risk_gap_review",
+                    "tool_used": "review_document_risks",
+                    "confidence": 0.81,
+                    "needs_review": False,
+                    "document_ids": ["CTR-002"],
+                    "source_count": 2,
+                    "findings": [{"finding_type": "risk"}, {"finding_type": "gap"}],
+                    "action_items": [{"owner": "Legal", "status": "open", "due_date": "2026-05-01"}],
+                    "recommended_actions": ["Atualizar cláusula"],
+                },
+            )
+
+            snapshot = build_runtime_snapshot(
+                selected_provider="ollama",
+                selected_provider_label="Ollama (local)",
+                provider_detail=None,
+                selected_model="qwen2.5:7b",
+                selected_embedding_provider="ollama",
+                selected_embedding_model="embeddinggemma:300m",
+                selected_loader_strategy="manual",
+                selected_chunking_strategy="langchain_recursive",
+                selected_retrieval_strategy="langchain_chroma",
+                selected_pdf_extraction_mode="hybrid",
+                chat_selected_document_ids=[],
+                structured_selected_document_ids=[],
+                selected_structured_task="summary",
+                selected_structured_execution_strategy="direct",
+                messages=[],
+                structured_result=structured_result,
+                structured_task_registry=_DummyStructuredTaskRegistry(),
+                document_preview_map={},
+                indexed_documents_count=0,
+                ollama_base_url="http://localhost:11434",
+                default_vl_model="llava",
+                default_ocr_backend="ocrmypdf",
+                phase95_evidenceops_worklog_path=log_path,
+            )
+
+        self.assertIn("evidenceops", snapshot)
+        self.assertTrue(snapshot["evidenceops"]["log_exists"])
+        self.assertEqual(snapshot["evidenceops"]["total_runs"], 1)
+        self.assertEqual(snapshot["evidenceops"]["total_findings"], 2)
+        self.assertEqual(snapshot["evidenceops"]["finding_type_counts"]["risk"], 1)
+        self.assertEqual(snapshot["evidenceops"]["owner_counts"]["Legal"], 1)
+
+    def test_build_runtime_snapshot_includes_phase95_evidenceops_action_store_summary(self) -> None:
+        structured_result = StructuredResult(
+            success=True,
+            task_type="summary",
+            raw_output_text="{}",
+            parsed_json={},
+            validated_output=SummaryPayload(
+                task_type="summary",
+                topics=[],
+                executive_summary="ok",
+                key_insights=[],
+                reading_time_minutes=1,
+                completeness_score=0.8,
+            ),
+            execution_metadata={},
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            store_path = Path(tmp_dir) / ".phase95_evidenceops_actions.sqlite3"
+            append_evidenceops_actions_from_worklog_entry(
+                store_path,
+                {
+                    "timestamp": "2026-04-03T10:00:00",
+                    "task_type": "document_agent",
+                    "review_type": "risk_gap_review",
+                    "tool_used": "review_document_risks",
+                    "query": "Liste os riscos",
+                    "confidence": 0.81,
+                    "needs_review": False,
+                    "document_ids": ["CTR-002"],
+                    "source_count": 2,
+                    "action_items": [
+                        {
+                            "description": "Solicitar redline da cláusula de incidente",
+                            "owner": "Legal",
+                            "due_date": "2026-05-01",
+                            "status": "open",
+                            "evidence": "notify within 10 business days",
+                        }
+                    ],
+                    "recommended_actions": ["Atualizar cláusula"],
+                },
+            )
+
+            snapshot = build_runtime_snapshot(
+                selected_provider="ollama",
+                selected_provider_label="Ollama (local)",
+                provider_detail=None,
+                selected_model="qwen2.5:7b",
+                selected_embedding_provider="ollama",
+                selected_embedding_model="embeddinggemma:300m",
+                selected_loader_strategy="manual",
+                selected_chunking_strategy="langchain_recursive",
+                selected_retrieval_strategy="langchain_chroma",
+                selected_pdf_extraction_mode="hybrid",
+                chat_selected_document_ids=[],
+                structured_selected_document_ids=[],
+                selected_structured_task="summary",
+                selected_structured_execution_strategy="direct",
+                messages=[],
+                structured_result=structured_result,
+                structured_task_registry=_DummyStructuredTaskRegistry(),
+                document_preview_map={},
+                indexed_documents_count=0,
+                ollama_base_url="http://localhost:11434",
+                default_vl_model="llava",
+                default_ocr_backend="ocrmypdf",
+                phase95_evidenceops_action_store_path=store_path,
+            )
+
+        self.assertIn("evidenceops_actions", snapshot)
+        self.assertTrue(snapshot["evidenceops_actions"]["store_exists"])
+        self.assertEqual(snapshot["evidenceops_actions"]["total_actions"], 2)
+        self.assertEqual(snapshot["evidenceops_actions"]["open_actions"], 2)
+        self.assertEqual(snapshot["evidenceops_actions"]["owner_counts"]["Legal"], 1)
+        self.assertEqual(snapshot["evidenceops_actions"]["pending_approval_actions"], 0)
+
+    def test_build_runtime_snapshot_exposes_action_governance_metrics_after_sensitive_update(self) -> None:
+        structured_result = StructuredResult(
+            success=True,
+            task_type="summary",
+            raw_output_text="{}",
+            parsed_json={},
+            validated_output=SummaryPayload(
+                task_type="summary",
+                topics=[],
+                executive_summary="ok",
+                key_insights=[],
+                reading_time_minutes=1,
+                completeness_score=0.8,
+            ),
+            execution_metadata={},
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            store_path = Path(tmp_dir) / ".phase95_evidenceops_actions.sqlite3"
+            append_evidenceops_actions_from_worklog_entry(
+                store_path,
+                {
+                    "timestamp": "2026-04-03T10:00:00",
+                    "task_type": "document_agent",
+                    "review_type": "risk_gap_review",
+                    "tool_used": "review_document_risks",
+                    "query": "Liste os riscos",
+                    "confidence": 0.81,
+                    "needs_review": False,
+                    "document_ids": ["CTR-002"],
+                    "source_count": 2,
+                    "action_items": [
+                        {
+                            "description": "Solicitar redline da cláusula de incidente",
+                            "owner": "Legal",
+                            "due_date": "2026-05-01",
+                            "status": "open",
+                            "evidence": "notify within 10 business days",
+                        }
+                    ],
+                },
+            )
+            from src.services.evidenceops_local_ops import list_evidenceops_action_items, update_evidenceops_action_item
+
+            open_actions = list_evidenceops_action_items(store_path, status="open")
+            update_evidenceops_action_item(
+                store_path,
+                action_id=int(open_actions[0]["id"]),
+                status="closed",
+                approval_status="approved",
+                approval_reason="Encerramento validado pelo gestor responsável.",
+                approved_by="manager",
+            )
+
+            snapshot = build_runtime_snapshot(
+                selected_provider="ollama",
+                selected_provider_label="Ollama (local)",
+                provider_detail=None,
+                selected_model="qwen2.5:7b",
+                selected_embedding_provider="ollama",
+                selected_embedding_model="embeddinggemma:300m",
+                selected_loader_strategy="manual",
+                selected_chunking_strategy="langchain_recursive",
+                selected_retrieval_strategy="langchain_chroma",
+                selected_pdf_extraction_mode="hybrid",
+                chat_selected_document_ids=[],
+                structured_selected_document_ids=[],
+                selected_structured_task="summary",
+                selected_structured_execution_strategy="direct",
+                messages=[],
+                structured_result=structured_result,
+                structured_task_registry=_DummyStructuredTaskRegistry(),
+                document_preview_map={},
+                indexed_documents_count=0,
+                ollama_base_url="http://localhost:11434",
+                default_vl_model="llava",
+                default_ocr_backend="ocrmypdf",
+                phase95_evidenceops_action_store_path=store_path,
+            )
+
+        self.assertEqual(snapshot["evidenceops_actions"]["review_required_actions"], 1)
+        self.assertEqual(snapshot["evidenceops_actions"]["approved_actions"], 1)
+        self.assertEqual(snapshot["evidenceops_actions"]["sensitive_update_count"], 1)
+
+    def test_build_runtime_snapshot_includes_phase95_evidenceops_repository_summary(self) -> None:
+        structured_result = StructuredResult(
+            success=True,
+            task_type="summary",
+            raw_output_text="{}",
+            parsed_json={},
+            validated_output=SummaryPayload(
+                task_type="summary",
+                topics=[],
+                executive_summary="ok",
+                key_insights=[],
+                reading_time_minutes=1,
+                completeness_score=0.8,
+            ),
+            execution_metadata={},
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repository_root = Path(tmp_dir) / "evidenceops_repo"
+            (repository_root / "policies").mkdir(parents=True)
+            (repository_root / "contracts").mkdir(parents=True)
+            (repository_root / "policies" / "POL-001_Information_Security_Policy_v1.pdf").write_text("policy", encoding="utf-8")
+            (repository_root / "contracts" / "CTR-001_Master_Services_Agreement.txt").write_text("contract", encoding="utf-8")
+
+            snapshot = build_runtime_snapshot(
+                selected_provider="ollama",
+                selected_provider_label="Ollama (local)",
+                provider_detail=None,
+                selected_model="qwen2.5:7b",
+                selected_embedding_provider="ollama",
+                selected_embedding_model="embeddinggemma:300m",
+                selected_loader_strategy="manual",
+                selected_chunking_strategy="langchain_recursive",
+                selected_retrieval_strategy="langchain_chroma",
+                selected_pdf_extraction_mode="hybrid",
+                chat_selected_document_ids=[],
+                structured_selected_document_ids=[],
+                selected_structured_task="summary",
+                selected_structured_execution_strategy="direct",
+                messages=[],
+                structured_result=structured_result,
+                structured_task_registry=_DummyStructuredTaskRegistry(),
+                document_preview_map={},
+                indexed_documents_count=0,
+                ollama_base_url="http://localhost:11434",
+                default_vl_model="llava",
+                default_ocr_backend="ocrmypdf",
+                phase95_evidenceops_repository_root=repository_root,
+            )
+
+        self.assertIn("evidenceops_repository", snapshot)
+        self.assertTrue(snapshot["evidenceops_repository"]["repository_exists"])
+        self.assertEqual(snapshot["evidenceops_repository"]["total_documents"], 2)
+        self.assertEqual(snapshot["evidenceops_repository"]["category_counts"]["policies"], 1)
+        self.assertEqual(snapshot["evidenceops_repository"]["category_counts"]["contracts"], 1)
+
+    def test_build_runtime_snapshot_exposes_repository_drift_summary(self) -> None:
+        structured_result = StructuredResult(
+            success=True,
+            task_type="summary",
+            raw_output_text="{}",
+            parsed_json={},
+            validated_output=SummaryPayload(
+                task_type="summary",
+                topics=[],
+                executive_summary="ok",
+                key_insights=[],
+                reading_time_minutes=1,
+                completeness_score=0.8,
+            ),
+            execution_metadata={},
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repository_root = Path(tmp_dir) / "evidenceops_repo"
+            snapshot_path = repository_root / ".phase95_evidenceops_repository_snapshot.json"
+            (repository_root / "policies").mkdir(parents=True)
+            (repository_root / "contracts").mkdir(parents=True)
+            policy_path = repository_root / "policies" / "POL-001_Information_Security_Policy_v1.pdf"
+            contract_path = repository_root / "contracts" / "CTR-001_Master_Services_Agreement.txt"
+            policy_path.write_text("policy-v1", encoding="utf-8")
+            contract_path.write_text("contract", encoding="utf-8")
+
+            build_runtime_snapshot(
+                selected_provider="ollama",
+                selected_provider_label="Ollama (local)",
+                provider_detail=None,
+                selected_model="qwen2.5:7b",
+                selected_embedding_provider="ollama",
+                selected_embedding_model="embeddinggemma:300m",
+                selected_loader_strategy="manual",
+                selected_chunking_strategy="langchain_recursive",
+                selected_retrieval_strategy="langchain_chroma",
+                selected_pdf_extraction_mode="hybrid",
+                chat_selected_document_ids=[],
+                structured_selected_document_ids=[],
+                selected_structured_task="summary",
+                selected_structured_execution_strategy="direct",
+                messages=[],
+                structured_result=structured_result,
+                structured_task_registry=_DummyStructuredTaskRegistry(),
+                document_preview_map={},
+                indexed_documents_count=0,
+                ollama_base_url="http://localhost:11434",
+                default_vl_model="llava",
+                default_ocr_backend="ocrmypdf",
+                phase95_evidenceops_repository_root=repository_root,
+                phase95_evidenceops_repository_snapshot_path=snapshot_path,
+            )
+
+            policy_path.write_text("policy-v2", encoding="utf-8")
+            contract_path.unlink()
+            (repository_root / "audit").mkdir(parents=True)
+            (repository_root / "audit" / "AUD-001_Control_Test.md").write_text("audit", encoding="utf-8")
+
+            snapshot = build_runtime_snapshot(
+                selected_provider="ollama",
+                selected_provider_label="Ollama (local)",
+                provider_detail=None,
+                selected_model="qwen2.5:7b",
+                selected_embedding_provider="ollama",
+                selected_embedding_model="embeddinggemma:300m",
+                selected_loader_strategy="manual",
+                selected_chunking_strategy="langchain_recursive",
+                selected_retrieval_strategy="langchain_chroma",
+                selected_pdf_extraction_mode="hybrid",
+                chat_selected_document_ids=[],
+                structured_selected_document_ids=[],
+                selected_structured_task="summary",
+                selected_structured_execution_strategy="direct",
+                messages=[],
+                structured_result=structured_result,
+                structured_task_registry=_DummyStructuredTaskRegistry(),
+                document_preview_map={},
+                indexed_documents_count=0,
+                ollama_base_url="http://localhost:11434",
+                default_vl_model="llava",
+                default_ocr_backend="ocrmypdf",
+                phase95_evidenceops_repository_root=repository_root,
+                phase95_evidenceops_repository_snapshot_path=snapshot_path,
+            )
+
+        drift_summary = snapshot["evidenceops_repository"]["drift_summary"]
+        self.assertTrue(drift_summary["has_previous_snapshot"])
+        self.assertEqual(drift_summary["changed_documents_count"], 1)
+        self.assertEqual(drift_summary["removed_documents_count"], 1)
+        self.assertEqual(drift_summary["new_documents_count"], 1)
+        self.assertEqual(snapshot["evidenceops_repository"]["changed_documents"][0]["document_id"], "POL-001")
 
     def test_build_runtime_snapshot_includes_runtime_execution_summary(self) -> None:
         structured_result = StructuredResult(

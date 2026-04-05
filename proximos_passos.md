@@ -1313,36 +1313,99 @@ O que isso significa na prática:
 ## Fase 8.5 — Adaptação de modelos com Hugging Face, quantização e fine-tuning leve
 
 ### Objetivo
-Explorar de forma controlada quando vale adaptar modelos ou usar o ecossistema Hugging Face para ir além do runtime padrão do projeto.
+Transformar benchmark + evals em uma decisão técnica sobre **quando comparar runtimes/modelos/quantizações**, **quando ajustar embeddings ou rerankers** e **quando realmente vale adaptar modelo** em vez de continuar iterando prompt + RAG + schema.
 
 ### Por que essa fase existe?
 
 Porque o projeto já terá benchmark, evals e casos de uso mais claros.
 Assim, adaptação de modelo deixa de ser “feature por moda” e passa a ser uma decisão técnica justificável.
 
+### Papel do `hf_local_llm_service` nesta fase
+
+Nesta fase, o `hf_local_llm_service` deve ser tratado como **hub local de experimentação**, não como novo runtime obrigatório do produto.
+
+Leitura arquitetural recomendada:
+
+- **`ollama` continua como runtime default** do app principal
+- **`hf_local_llm_service` entra como camada de comparação e experimentação**
+- o serviço pode expor runtimes/aliases para:
+  - `huggingface_server`
+  - `huggingface_local`
+  - `huggingface_mlx`
+  - `llama_cpp`
+  - `ollama`
+- o app principal continua funcionando mesmo sem expandir mais o serviço
+
+Ou seja: melhorias futuras no serviço ajudam a 8.5, mas **não bloqueiam** o início da fase.
+
 ### Direção recomendada
 
 A prioridade desta fase deve ser:
 
-1. comparação de variantes e quantizações locais
-2. experimentação com embeddings e rerankers
-3. fine-tuning leve com LoRA/PEFT em tarefa específica
-4. documentação honesta de custo, ganho e complexidade
+1. comparação de runtimes, variantes e quantizações locais
+2. experimentação com embeddings e rerankers antes de mexer no LLM
+3. decisão explícita sobre quando prompt + RAG + reranking já são suficientes
+4. fine-tuning leve com LoRA/PEFT apenas em tarefa específica e bem delimitada
+5. documentação honesta de custo, ganho e complexidade
+
+### Ordem recomendada dentro da fase
+
+#### 8.5A — comparação de runtime/modelo
+- comparar `ollama`, `huggingface_server`, `huggingface_local`, `huggingface_mlx` e `llama_cpp` quando fizer sentido no hardware local
+- comparar famílias de modelo e especializações por caso de uso
+- comparar quantizações relevantes para latência, memória e estabilidade
+
+#### 8.5B — retrieval/embedding adaptation first
+- testar embeddings e rerankers antes de concluir que o LLM precisa ser adaptado
+- medir se o ganho real vem mais de retrieval do que de mudança/adaptação do gerador
+
+#### 8.5C — decision gate orientado por evals
+- usar a Fase 8 para provar falha persistente
+- só promover adaptação quando prompt + RAG + schema + reranking não fecharem o gap
+
+#### 8.5D — adaptação leve somente se justificada
+- executar um experimento pequeno de LoRA/PEFT em task específica
+- comparar baseline vs adaptado com critérios explícitos
+- registrar honestamente quando **não** vale seguir com a adaptação
+
+### Critério de entrada para adaptação
+
+A adaptação só deve entrar quando houver evidência clara de pelo menos parte destes sinais:
+
+- falha persistente em evals após iterações de prompt, grounding, schema e retrieval
+- task estreita e repetível, com hipótese clara de melhoria
+- métrica objetiva de sucesso (`pass_rate`, `schema_adherence`, `groundedness`, `use-case fit` ou similar)
+- baseline já documentado para comparação justa
 
 ### O que priorizar
 - [ ] Testar modelos do ecossistema Hugging Face fora do catálogo principal do Ollama
+- [ ] Usar o `hf_local_llm_service` como hub de experimentação para comparar runtimes sob um contrato HTTP único
+- [ ] Comparar `ollama`, `huggingface_server`, `huggingface_local`, `huggingface_mlx` e `llama_cpp` onde houver valor real
 - [ ] Comparar quantizações relevantes para o hardware local
 - [ ] Avaliar modelos menores especializados para tarefas estruturadas
+- [ ] Comparar embeddings e rerankers antes de ajustar o LLM inteiro
 - [ ] Testar adaptação leve com LoRA/PEFT em tarefa específica
-- [ ] Comparar baseline vs prompt engineering vs RAG vs RAG + reranker vs modelo adaptado
+- [ ] Comparar baseline vs prompt engineering vs RAG vs RAG + reranker vs troca de runtime/modelo vs modelo adaptado
 - [ ] Documentar custo operacional, complexidade e ganho real
 - [ ] Avaliar se embeddings ou rerankers ajustados geram mais valor do que ajustar o LLM inteiro
 - [ ] Registrar claramente quando **não** vale adotar a adaptação
+- [ ] Montar matriz comparativa por runtime/modelo/quantização com qualidade, latência, footprint e complexidade operacional
+
+### Backlog opcional do `hf_local_llm_service` para fortalecer a 8.5
+
+Esses itens ajudam, mas **não são pré-requisito** para começar a fase:
+
+- [ ] suportar múltiplos presets nomeados por alias/provider
+- [ ] adicionar editor visual dedicado desses presets na UI do serviço
+- [ ] padronizar melhor as métricas entre runtimes diferentes
+- [ ] adicionar store/log simples de experimentos comparativos no serviço
 
 ### O que evitar nesta fase
 - [ ] Evitar full fine-tuning grande de LLM como foco principal do projeto
 - [ ] Evitar abrir uma frente pesada sem evidência dos evals
 - [ ] Evitar treinar “por treinar” sem hipótese e sem métrica de sucesso
+- [ ] Evitar transformar o `hf_local_llm_service` em um produto paralelo antes de provar o valor experimental da fase
+- [ ] Evitar adaptar o LLM antes de testar direito embeddings, rerankers e troca de runtime/modelo
 
 ### Candidatos mais inteligentes para adaptação
 - [ ] Extração estruturada
@@ -1352,18 +1415,21 @@ A prioridade desta fase deve ser:
 - [ ] Formatação rígida de saída
 
 ### Entregável
-- Relatório técnico mostrando quando Hugging Face, quantização e fine-tuning leve geram ganho real e quando não compensam
+- Relatório técnico mostrando quando Hugging Face, troca de runtime, quantização, embeddings/rerankers e fine-tuning leve geram ganho real — e quando **não** compensam
 
 ### Evidência para GitHub/LinkedIn
-- gráfico comparando baseline vs modelo adaptado
-- tabela de trade-offs entre qualidade, custo e complexidade
+- gráfico comparando runtimes/modelos/quantizações ou baseline vs adaptado
+- tabela de trade-offs entre qualidade, custo, latência, footprint e complexidade
 - write-up explicando por que a adaptação foi ou não foi adotada
+- registro explícito de quando trocar embedding/reranker foi mais útil do que adaptar o gerador
 
 ### O que preciso saber defender em entrevista
 - por que não comecei com fine-tuning
+- por que tratei o `hf_local_llm_service` como hub de experimentação, e não como novo default do produto
 - como decidi que valia adaptar
 - por que LoRA/PEFT fez mais sentido do que treino completo
 - quando Hugging Face agrega mais do que Ollama
+- por que embeddings e rerankers podem gerar mais ROI do que ajustar o LLM inteiro
 - como medi custo vs ganho
 
 ---
@@ -1463,22 +1529,30 @@ Nessas tasks, o budget routing pode atuar primeiro em knobs mais seguros, como c
 Nessas tasks, a automação de economia pode ser mais agressiva, desde que continue observável.
 
 ### Checklist
-- [ ] consolidar uma camada única de usage/runtime metrics por execução
-- [ ] registrar `prompt_tokens`, `completion_tokens`/`generation_tokens` e `total_tokens` quando o provider/runtime expuser esses dados
-- [ ] registrar custo estimado por execução para providers pagos/opcionais
-- [ ] registrar chars de contexto enviados, chunks usados/descartados e impacto do truncamento
-- [ ] registrar quando OCR, Docling e VLM foram acionados e com que impacto operacional
+- [x] consolidar uma camada única de usage/runtime metrics por execução
+- [x] registrar `prompt_tokens`, `completion_tokens`/`generation_tokens` e `total_tokens` quando o provider/runtime expuser esses dados
+- [x] registrar custo estimado por execução para providers pagos/opcionais
+- [x] registrar chars de contexto enviados, chunks usados/descartados e impacto do truncamento
+- [x] registrar quando OCR, Docling e VLM foram acionados e com que impacto operacional
 - [ ] criar visão agregada de consumo por fluxo (`chat`, `structured`, `document_agent`, `comparison`)
-- [ ] criar visão agregada de consumo por provider/modelo
-- [ ] introduzir budgets por task e thresholds de alerta
-- [ ] implementar **budget-aware routing** (ex.: preferir caminho mais barato quando suficiente)
+- [x] criar visão agregada de consumo por provider/modelo
+- [x] introduzir budgets por task e thresholds de alerta
+- [x] implementar **budget-aware routing** (ex.: preferir caminho mais barato quando suficiente)
 - [ ] definir política de fallback local/cloud orientada a custo, latência e qualidade
 - [ ] documentar trade-offs de custo vs qualidade por caso de uso
 - [ ] validar budget-aware routing contra evals para confirmar que não derruba tasks críticas abaixo do quality floor
 
+### Status local adiantado nesta rodada
+
+- histórico agregado de execução enriquecido com latência de build de prompt, pressão de contexto, truncamento, auto-degrade e sinais documentais (OCR/Docling/VLM)
+- runtime snapshot/sidebar agora mostram melhor o estado operacional recente de chat e structured
+- captura de usage nativo quando o provider expõe telemetria e estimativa de custo por execução para providers pagos/opcionais
+- budgets por task, thresholds de alerta e budget-aware routing já existem localmente com trilha auditável no runtime
+- ainda falta fechar budgets explícitos por task, policy de fallback e validação sistemática contra evals
+
 ### Métricas alvo
-- [ ] tokens por request
-- [ ] custo estimado por request
+- [x] tokens por request
+- [x] custo estimado por request
 - [ ] custo estimado por task
 - [ ] custo estimado por provider/modelo
 - [ ] latência por fluxo
@@ -1548,7 +1622,7 @@ Essa vertical mira cenários de:
 - usar MCP para consulta + ação operacional leve, sempre com grounding e rastreabilidade
 
 ### Checklist
-- [ ] definir o caso principal do MCP (`EvidenceOps MCP`)
+- [x] definir o caso principal do MCP (`EvidenceOps MCP`)
 - [ ] criar um **Document Repository MCP** usando fonte gratuita/self-hosted (`filesystem`, `Nextcloud`, `WebDAV`, sincronização de drive ou equivalente)
 - [ ] criar um **Worklog / Action MCP** usando `SQLite`, `GitHub Issues` free ou fila operacional local
 - [ ] criar um corpus de demo curado para negócio (`policies`, `contracts`, `audit`, `templates`, `gold_sets`)
@@ -1556,11 +1630,18 @@ Essa vertical mira cenários de:
 - [ ] suportar comparação de versões e drift documental (policy/contract/template)
 - [ ] extrair gaps, obrigações, riscos, owners e prazos em output estruturado
 - [ ] gerar checklist operacional com fontes rastreáveis
-- [ ] montar evidence pack estruturado reaproveitável
-- [ ] registrar pendências/ações em store auditável
+- [x] montar evidence pack estruturado reaproveitável
+- [x] registrar pendências/ações em store auditável
 - [ ] adicionar guardrails, permissões e revisão humana nas ações sensíveis
 - [ ] medir latência, consumo e custo operacional por fluxo MCP
 - [ ] criar demo end-to-end do caso empresarial
+
+### Status local adiantado nesta rodada
+
+- o worklog local do EvidenceOps agora gera `evidence_pack` estruturado com contagens por finding/action/owner/status/due_date
+- o agregado local já resume melhor documentos únicos, tipos de finding e distribuição operacional
+- agora também existe store auditável local em `SQLite` para pendências/ações derivadas do worklog (`.phase95_evidenceops_actions.sqlite3`)
+- a parte MCP externa continua pendente e ainda não foi iniciada nesta rodada
 
 ### Stack gratuita sugerida
 - `filesystem` local como baseline

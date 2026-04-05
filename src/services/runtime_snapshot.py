@@ -1,9 +1,146 @@
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
+from datetime import datetime, timezone
+from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any
 
 from ..structured.envelope import StructuredResult
+
+
+def _safe_distribution_version(distribution_name: str) -> str | None:
+    try:
+        return importlib_metadata.version(distribution_name)
+    except importlib_metadata.PackageNotFoundError:
+        return None
+    except Exception:
+        return None
+
+
+def _read_git_commit(project_root: str | Path | None) -> str | None:
+    if not project_root:
+        return None
+    resolved_root = Path(project_root)
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(resolved_root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    commit_hash = str(result.stdout or "").strip()
+    return commit_hash or None
+
+
+def build_benchmark_environment_snapshot(
+    *,
+    project_root: str | Path,
+    registry: dict[str, dict[str, object]],
+    manifest: dict[str, object],
+    selected_groups: list[str],
+    fairness_config: dict[str, object] | None = None,
+    environment_overrides: dict[str, object] | None = None,
+    package_names: list[str] | None = None,
+    resolved_case_artifacts: list[dict[str, object]] | None = None,
+) -> dict[str, object]:
+    resolved_root = Path(project_root)
+    package_snapshot: dict[str, str | None] = {}
+    requested_packages = package_names or [
+        "openai",
+        "streamlit",
+        "chromadb",
+        "langchain-community",
+        "langchain-chroma",
+        "langgraph",
+        "pypdf",
+        "python-dotenv",
+    ]
+    for package_name in requested_packages:
+        package_snapshot[package_name] = _safe_distribution_version(package_name)
+
+    provider_inventory: dict[str, dict[str, object]] = {}
+    for provider_key, provider_entry in registry.items():
+        if not isinstance(provider_entry, dict):
+            continue
+        provider_instance = provider_entry.get("instance")
+        chat_models = []
+        embedding_models = []
+        if provider_key == "ollama" and hasattr(provider_instance, "_discover_local_models"):
+            try:
+                discovered_models = list(provider_instance._discover_local_models())  # type: ignore[attr-defined]
+            except Exception:
+                discovered_models = []
+            chat_models = list(discovered_models)
+            if hasattr(provider_instance, "_looks_like_embedding_model"):
+                embedding_models = [
+                    model
+                    for model in discovered_models
+                    if provider_instance._looks_like_embedding_model(model)  # type: ignore[attr-defined]
+                ]
+        elif provider_key == "huggingface_server":
+            if hasattr(provider_instance, "_catalog_chat_models"):
+                try:
+                    chat_models = list(provider_instance._catalog_chat_models())  # type: ignore[attr-defined]
+                except Exception:
+                    chat_models = []
+            if hasattr(provider_instance, "_catalog_embedding_models"):
+                try:
+                    embedding_models = list(provider_instance._catalog_embedding_models())  # type: ignore[attr-defined]
+                except Exception:
+                    embedding_models = []
+        else:
+            if hasattr(provider_instance, "list_available_models"):
+                try:
+                    chat_models = list(provider_instance.list_available_models())
+                except Exception:
+                    chat_models = []
+            if hasattr(provider_instance, "list_available_embedding_models"):
+                try:
+                    embedding_models = list(provider_instance.list_available_embedding_models())
+                except Exception:
+                    embedding_models = []
+        provider_inventory[provider_key] = {
+            "label": provider_entry.get("label"),
+            "detail": provider_entry.get("detail"),
+            "supports_chat": bool(provider_entry.get("supports_chat")),
+            "supports_embeddings": bool(provider_entry.get("supports_embeddings")),
+            "default_model": provider_entry.get("default_model"),
+            "default_context_window": provider_entry.get("default_context_window"),
+            "available_chat_models": chat_models,
+            "available_embedding_models": embedding_models,
+        }
+
+    ollama_inventory = provider_inventory.get("ollama") if isinstance(provider_inventory.get("ollama"), dict) else {}
+
+    return {
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "project_root": str(resolved_root),
+        "git_commit_hash": _read_git_commit(resolved_root),
+        "python": {
+            "version": sys.version,
+            "executable": sys.executable,
+        },
+        "packages": package_snapshot,
+        "selected_groups": list(selected_groups),
+        "benchmark_config": manifest,
+        "fairness_config": dict(fairness_config or {}),
+        "active_environment": dict(environment_overrides or {}),
+        "provider_inventory": provider_inventory,
+        "ollama_inventory": {
+            "available_chat_models": list(ollama_inventory.get("available_chat_models") or []),
+            "available_embedding_models": list(ollama_inventory.get("available_embedding_models") or []),
+            "http_timeout_seconds": str(os.getenv("OLLAMA_HTTP_TIMEOUT_SECONDS", "")).strip() or None,
+            "embed_batch_size": str(os.getenv("OLLAMA_EMBED_BATCH_SIZE", "")).strip() or None,
+        },
+        "resolved_case_artifacts": list(resolved_case_artifacts or []),
+    }
 
 
 def extract_last_assistant_metadata(messages: list[dict[str, object]]) -> dict[str, object]:
@@ -297,6 +434,184 @@ def build_runtime_execution_summary(
     }
 
 
+def build_evidenceops_worklog_summary(
+    log_path: str | Path | None,
+    *,
+    recent_limit: int = 25,
+) -> dict[str, object]:
+    if not log_path:
+        return {}
+
+    resolved_path = Path(log_path)
+    if not resolved_path.exists():
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": False,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    try:
+        from ..storage.phase95_evidenceops_worklog import load_evidenceops_worklog, summarize_evidenceops_worklog
+
+        entries = load_evidenceops_worklog(resolved_path)
+    except Exception:
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": True,
+            "entries_considered": 0,
+            "total_runs": 0,
+        }
+
+    if not entries:
+        return {
+            "log_path": str(resolved_path),
+            "log_exists": True,
+            "entries_considered": 0,
+            "total_runs": 0,
+            "recent_entries": [],
+        }
+
+    aggregate = summarize_evidenceops_worklog(entries)
+    return {
+        "log_path": str(resolved_path),
+        "log_exists": True,
+        "entries_considered": len(entries),
+        "recent_limit": int(recent_limit),
+        **aggregate,
+        "recent_entries": list(reversed(entries[-recent_limit:])),
+    }
+
+
+def build_evidenceops_action_store_summary(
+    store_path: str | Path | None,
+    *,
+    recent_limit: int = 25,
+) -> dict[str, object]:
+    if not store_path:
+        return {}
+
+    resolved_path = Path(store_path)
+    if not resolved_path.exists():
+        return {
+            "store_path": str(resolved_path),
+            "store_exists": False,
+            "entries_considered": 0,
+            "total_actions": 0,
+        }
+
+    try:
+        from ..storage.phase95_evidenceops_action_store import load_evidenceops_actions, summarize_evidenceops_actions
+
+        entries = load_evidenceops_actions(resolved_path)
+    except Exception:
+        return {
+            "store_path": str(resolved_path),
+            "store_exists": True,
+            "entries_considered": 0,
+            "total_actions": 0,
+        }
+
+    if not entries:
+        return {
+            "store_path": str(resolved_path),
+            "store_exists": True,
+            "entries_considered": 0,
+            "total_actions": 0,
+            "recent_entries": [],
+        }
+
+    aggregate = summarize_evidenceops_actions(entries)
+    return {
+        "store_path": str(resolved_path),
+        "store_exists": True,
+        "entries_considered": len(entries),
+        "recent_limit": int(recent_limit),
+        **aggregate,
+        "recent_entries": entries[:recent_limit],
+    }
+
+
+def build_evidenceops_repository_summary(
+    repository_root: str | Path | None,
+    *,
+    recent_limit: int = 25,
+    snapshot_path: str | Path | None = None,
+) -> dict[str, object]:
+    if not repository_root:
+        return {}
+
+    resolved_root = Path(repository_root)
+    resolved_snapshot_path = Path(snapshot_path) if snapshot_path else (resolved_root / ".phase95_evidenceops_repository_snapshot.json")
+    if not resolved_root.exists() or not resolved_root.is_dir():
+        return {
+            "repository_root": str(resolved_root),
+            "repository_exists": False,
+            "snapshot_path": str(resolved_snapshot_path),
+            "entries_considered": 0,
+            "total_documents": 0,
+        }
+
+    try:
+        from ..storage.phase95_evidenceops_repository_snapshot import (
+            load_evidenceops_repository_snapshot,
+            save_evidenceops_repository_snapshot,
+        )
+        from .evidenceops_repository import (
+            build_evidenceops_repository_snapshot,
+            diff_evidenceops_repository_snapshots,
+            list_evidenceops_repository_documents,
+            summarize_evidenceops_repository_documents,
+        )
+
+        documents = list_evidenceops_repository_documents(resolved_root)
+    except Exception:
+        return {
+            "repository_root": str(resolved_root),
+            "repository_exists": True,
+            "snapshot_path": str(resolved_snapshot_path),
+            "entries_considered": 0,
+            "total_documents": 0,
+        }
+
+    aggregate = summarize_evidenceops_repository_documents(documents)
+    previous_snapshot = load_evidenceops_repository_snapshot(resolved_snapshot_path)
+    current_snapshot = build_evidenceops_repository_snapshot(resolved_root)
+    drift_summary = diff_evidenceops_repository_snapshots(previous_snapshot, current_snapshot)
+    save_evidenceops_repository_snapshot(resolved_snapshot_path, current_snapshot)
+    recent_documents = sorted(
+        documents,
+        key=lambda item: (
+            int(item.get("modified_at") or 0),
+            str(item.get("relative_path") or ""),
+        ),
+        reverse=True,
+    )[:recent_limit]
+    return {
+        "repository_root": str(resolved_root),
+        "repository_exists": True,
+        "snapshot_path": str(resolved_snapshot_path),
+        "entries_considered": len(documents),
+        "recent_limit": int(recent_limit),
+        **aggregate,
+        "drift_summary": drift_summary,
+        "new_documents": drift_summary.get("new_documents") or [],
+        "changed_documents": drift_summary.get("changed_documents") or [],
+        "removed_documents": drift_summary.get("removed_documents") or [],
+        "recent_documents": [
+            {
+                "document_id": item.get("document_id"),
+                "title": item.get("title"),
+                "category": item.get("category"),
+                "relative_path": item.get("relative_path"),
+                "suffix": item.get("suffix"),
+                "size_kb": round(int(item.get("size_bytes") or 0) / 1024, 2),
+            }
+            for item in recent_documents
+        ],
+    }
+
+
 def build_runtime_snapshot(
     *,
     selected_provider: str,
@@ -322,8 +637,12 @@ def build_runtime_snapshot(
     default_vl_model: str,
     default_ocr_backend: str,
     phase6_document_agent_log_path: str | Path | None = None,
+    phase95_evidenceops_action_store_path: str | Path | None = None,
+    phase95_evidenceops_repository_root: str | Path | None = None,
+    phase95_evidenceops_repository_snapshot_path: str | Path | None = None,
     phase8_eval_db_path: str | Path | None = None,
     runtime_execution_log_path: str | Path | None = None,
+    phase95_evidenceops_worklog_path: str | Path | None = None,
 ) -> dict[str, object]:
     provider_path, local_dependency = summarize_provider_path(
         selected_provider,
@@ -331,6 +650,10 @@ def build_runtime_snapshot(
         ollama_base_url,
     )
     last_chat_metadata = extract_last_assistant_metadata(messages)
+    last_chat_usage = last_chat_metadata.get("usage") if isinstance(last_chat_metadata.get("usage"), dict) else {}
+    last_chat_prompt_context = (
+        last_chat_metadata.get("prompt_context") if isinstance(last_chat_metadata.get("prompt_context"), dict) else {}
+    )
     structured_metadata = structured_result.execution_metadata if structured_result and isinstance(structured_result.execution_metadata, dict) else {}
     structured_telemetry = structured_metadata.get("telemetry") if isinstance(structured_metadata.get("telemetry"), dict) else {}
     structured_timings = structured_telemetry.get("timings_s") if isinstance(structured_telemetry.get("timings_s"), dict) else {}
@@ -366,11 +689,19 @@ def build_runtime_snapshot(
             "last_generation_s": last_chat_metadata.get("generation_latency_s"),
             "last_retrieval_s": last_chat_metadata.get("retrieval_latency_s"),
             "last_prompt_build_s": last_chat_metadata.get("prompt_build_latency_s"),
-            "last_total_tokens": ((last_chat_metadata.get("usage") or {}).get("total_tokens") if isinstance(last_chat_metadata.get("usage"), dict) else None),
-            "last_cost_usd": ((last_chat_metadata.get("usage") or {}).get("cost_usd") if isinstance(last_chat_metadata.get("usage"), dict) else None),
+            "last_context_chars": last_chat_prompt_context.get("used_chars") or last_chat_usage.get("context_chars"),
+            "last_prompt_context_used_chunks": last_chat_prompt_context.get("used_chunks"),
+            "last_prompt_context_dropped_chunks": last_chat_prompt_context.get("dropped_chunks"),
+            "last_prompt_context_truncated": last_chat_prompt_context.get("truncated"),
+            "last_total_tokens": last_chat_usage.get("total_tokens"),
+            "last_cost_usd": last_chat_usage.get("cost_usd"),
             "budget_routing_mode": last_chat_metadata.get("budget_routing_mode"),
             "budget_routing_reason": last_chat_metadata.get("budget_routing_reason"),
             "budget_auto_degrade_applied": last_chat_metadata.get("budget_auto_degrade_applied"),
+            "budget_alert_status": last_chat_metadata.get("budget_alert_status"),
+            "budget_alerts": last_chat_metadata.get("budget_alerts"),
+            "provider_requested": last_chat_metadata.get("provider_requested"),
+            "provider_effective": last_chat_metadata.get("provider_effective"),
         },
         "structured": {
             "current_task": selected_structured_task,
@@ -396,11 +727,16 @@ def build_runtime_snapshot(
             "last_sanitize_s": (structured_timings.get("sanitize_s") if isinstance(structured_timings, dict) else None),
             "last_context_s": (structured_timings.get("context_build_s") if isinstance(structured_timings, dict) else None),
             "last_parsing_s": (structured_timings.get("parsing_s") if isinstance(structured_timings, dict) else None),
+            "last_context_chars": structured_metadata.get("context_chars_sent"),
+            "last_full_document_chars": structured_metadata.get("full_document_chars"),
+            "last_context_strategy": structured_metadata.get("context_strategy"),
             "last_total_tokens": structured_telemetry.get("budget_total_tokens") if isinstance(structured_telemetry, dict) else None,
             "last_cost_usd": structured_telemetry.get("budget_cost_usd") if isinstance(structured_telemetry, dict) else None,
             "budget_routing_mode": structured_telemetry.get("budget_routing_mode") if isinstance(structured_telemetry, dict) else None,
             "budget_routing_reason": structured_telemetry.get("budget_routing_reason") if isinstance(structured_telemetry, dict) else None,
             "budget_auto_degrade_applied": structured_telemetry.get("budget_auto_degrade_applied") if isinstance(structured_telemetry, dict) else None,
+            "budget_alert_status": structured_telemetry.get("budget_alert_status") if isinstance(structured_telemetry, dict) else None,
+            "budget_alerts": structured_telemetry.get("budget_alerts") if isinstance(structured_telemetry, dict) else None,
             "task_model_map": task_model_map,
         },
         "documents": {
@@ -425,6 +761,12 @@ def build_runtime_snapshot(
             ),
         },
         "document_agent": build_document_agent_runtime_summary(phase6_document_agent_log_path),
+        "evidenceops": build_evidenceops_worklog_summary(phase95_evidenceops_worklog_path),
+        "evidenceops_actions": build_evidenceops_action_store_summary(phase95_evidenceops_action_store_path),
+        "evidenceops_repository": build_evidenceops_repository_summary(
+            phase95_evidenceops_repository_root,
+            snapshot_path=phase95_evidenceops_repository_snapshot_path,
+        ),
         "evals": build_eval_runtime_summary(phase8_eval_db_path),
         "runtime_execution": build_runtime_execution_summary(runtime_execution_log_path),
     }

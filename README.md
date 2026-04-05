@@ -15,6 +15,18 @@ Este projeto está sendo evoluído para se tornar um ativo forte de portfólio, 
 - benchmarking, avaliação e observabilidade
 - experimentação controlada de arquitetura
 
+### Avanços locais recentes
+
+Além das fases anteriores já consolidadas, o projeto agora também possui uma base local mais forte para:
+
+- **runtime economics / usage observability**
+- **budget-aware routing auditável**
+- **EvidenceOps worklog com evidence pack estruturado**
+
+Documentação desta rodada:
+
+- `docs/PHASE_9_25_RUNTIME_ECONOMICS_AND_EVIDENCEOPS_LOCAL.md`
+
 ---
 
 ## Casos de uso principais
@@ -55,6 +67,7 @@ Este projeto está sendo evoluído para se tornar um ativo forte de portfólio, 
 - `docs/PHASE_4_5_BENCHMARK_RESULTS.md` → resultados completos com tabelas, gráficos e decisões
 - `docs/PHASE_4_5_VALIDATION.md` → fechamento técnico e operacional da Fase 4.5
 - `docs/BENCHMARK_PDF_EXTRACTION_en.md` → benchmark detalhado de extração de PDF
+- `docs/PHASE_9_25_RUNTIME_ECONOMICS_AND_EVIDENCEOPS_LOCAL.md` → fundação local de runtime economics + EvidenceOps
 
 ---
 
