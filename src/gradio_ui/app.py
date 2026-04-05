@@ -267,10 +267,8 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
         )
         return export_result, [artifact.path for artifact in artifacts if artifact.path], updated_state
 
-    with gr.Blocks(
-        title=bootstrap.product_settings.app_name,
-        css=build_product_css(bootstrap.product_settings.accent_color),
-    ) as app:
+    with gr.Blocks(title=bootstrap.product_settings.app_name) as app:
+        gr.HTML(f"<style>{build_product_css(bootstrap.product_settings.accent_color)}</style>")
         workflow_state = gr.State(initial_state)
         gr.HTML(build_topbar_html(app_name=bootstrap.product_settings.app_name, show_ai_lab_entry=bootstrap.product_settings.show_ai_lab_entry))
         gr.HTML(build_hero_html())
