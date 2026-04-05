@@ -472,8 +472,23 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                         "last_generation_s": chat.get("last_generation_s"),
                         "last_retrieval_s": chat.get("last_retrieval_s"),
                         "last_prompt_build_s": chat.get("last_prompt_build_s"),
+                        "last_context_chars": chat.get("last_context_chars"),
+                        "last_prompt_context_used_chunks": chat.get("last_prompt_context_used_chunks"),
+                        "last_prompt_context_dropped_chunks": chat.get("last_prompt_context_dropped_chunks"),
+                        "last_prompt_context_truncated": chat.get("last_prompt_context_truncated"),
+                        "last_total_tokens": chat.get("last_total_tokens"),
+                        "last_cost_usd": chat.get("last_cost_usd"),
+                        "budget_routing_mode": chat.get("budget_routing_mode"),
+                        "budget_routing_reason": chat.get("budget_routing_reason"),
+                        "budget_auto_degrade_applied": chat.get("budget_auto_degrade_applied"),
+                        "budget_alert_status": chat.get("budget_alert_status"),
+                        "budget_alerts": chat.get("budget_alerts"),
+                        "provider_requested": chat.get("provider_requested"),
+                        "provider_effective": chat.get("provider_effective"),
                     }
                 )
+                if str(chat.get("budget_alert_status") or "") == "warn":
+                    st.warning("O último chat acionou alertas de budget/runtime. Revise os detalhes antes de repetir o padrão em produção local.")
 
         structured = snapshot.get("structured")
         if isinstance(structured, dict):
@@ -503,8 +518,20 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                         "last_sanitize_s": structured.get("last_sanitize_s"),
                         "last_context_s": structured.get("last_context_s"),
                         "last_parsing_s": structured.get("last_parsing_s"),
+                        "last_context_chars": structured.get("last_context_chars"),
+                        "last_full_document_chars": structured.get("last_full_document_chars"),
+                        "last_context_strategy": structured.get("last_context_strategy"),
+                        "last_total_tokens": structured.get("last_total_tokens"),
+                        "last_cost_usd": structured.get("last_cost_usd"),
+                        "budget_routing_mode": structured.get("budget_routing_mode"),
+                        "budget_routing_reason": structured.get("budget_routing_reason"),
+                        "budget_auto_degrade_applied": structured.get("budget_auto_degrade_applied"),
+                        "budget_alert_status": structured.get("budget_alert_status"),
+                        "budget_alerts": structured.get("budget_alerts"),
                     }
                 )
+                if str(structured.get("budget_alert_status") or "") == "warn":
+                    st.warning("A última execução estruturada acionou alertas de budget/runtime. Revise os detalhes antes de automatizar esse fluxo.")
                 task_model_map = structured.get("task_model_map")
                 if isinstance(task_model_map, dict) and task_model_map:
                     st.caption("Modelo efetivo por task")
@@ -604,6 +631,187 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                             width="stretch",
                         )
 
+        evidenceops = snapshot.get("evidenceops")
+        if isinstance(evidenceops, dict) and evidenceops:
+            with st.expander("EvidenceOps · worklog operacional", expanded=False):
+                st.write(
+                    {
+                        "log_path": evidenceops.get("log_path"),
+                        "log_exists": evidenceops.get("log_exists"),
+                        "entries_considered": evidenceops.get("entries_considered"),
+                        "latest_timestamp": evidenceops.get("latest_timestamp"),
+                    }
+                )
+
+                if evidenceops.get("log_exists") and int(evidenceops.get("total_runs") or 0) > 0:
+                    metric_col_1, metric_col_2, metric_col_3, metric_col_4 = st.columns(4)
+                    metric_col_1.metric("Runs", int(evidenceops.get("total_runs") or 0))
+                    metric_col_2.metric("Findings", int(evidenceops.get("total_findings") or 0))
+                    metric_col_3.metric("Actions", int(evidenceops.get("total_action_items") or 0))
+                    metric_col_4.metric("Needs review", _format_ratio(evidenceops.get("needs_review_rate")))
+                    st.caption(
+                        f"Confiança média: {_format_ratio(evidenceops.get('avg_confidence'))} · fontes/run: {float(evidenceops.get('avg_source_count', 0.0)):.1f} · recomendações totais: {int(evidenceops.get('total_recommended_actions') or 0)} · documentos únicos: {int(evidenceops.get('unique_document_count') or 0)}"
+                    )
+
+                    for label, field_name, key_name in [
+                        ("Distribuição por review type", "review_type_counts", "review_type"),
+                        ("Distribuição por tool", "tool_counts", "tool"),
+                        ("Distribuição por finding type", "finding_type_counts", "finding_type"),
+                        ("Distribuição por owner", "owner_counts", "owner"),
+                        ("Distribuição por status", "status_counts", "status"),
+                        ("Distribuição por due date", "due_date_counts", "due_date"),
+                    ]:
+                        rows = evidenceops.get(field_name)
+                        if isinstance(rows, dict) and rows:
+                            st.caption(label)
+                            st.dataframe(
+                                [{key_name: name, "count": count} for name, count in rows.items()],
+                                width="stretch",
+                            )
+
+                    recent_entries = evidenceops.get("recent_entries")
+                    if isinstance(recent_entries, list) and recent_entries:
+                        st.caption("Entradas recentes do worklog")
+                        st.dataframe(
+                            [
+                                {
+                                    "timestamp": entry.get("timestamp"),
+                                    "review_type": entry.get("review_type"),
+                                    "tool": entry.get("tool_used"),
+                                    "findings": len(entry.get("findings") or []),
+                                    "actions": len(entry.get("action_items") or []),
+                                    "needs_review": entry.get("needs_review"),
+                                    "query": entry.get("query"),
+                                }
+                                for entry in recent_entries[:10]
+                                if isinstance(entry, dict)
+                            ],
+                            width="stretch",
+                        )
+
+        evidenceops_actions = snapshot.get("evidenceops_actions")
+        if isinstance(evidenceops_actions, dict) and evidenceops_actions:
+            with st.expander("EvidenceOps · action store local", expanded=False):
+                st.write(
+                    {
+                        "store_path": evidenceops_actions.get("store_path"),
+                        "store_exists": evidenceops_actions.get("store_exists"),
+                        "entries_considered": evidenceops_actions.get("entries_considered"),
+                        "latest_created_at": evidenceops_actions.get("latest_created_at"),
+                    }
+                )
+
+                if evidenceops_actions.get("store_exists") and int(evidenceops_actions.get("total_actions") or 0) > 0:
+                    metric_col_1, metric_col_2, metric_col_3, metric_col_4 = st.columns(4)
+                    metric_col_1.metric("Total actions", int(evidenceops_actions.get("total_actions") or 0))
+                    metric_col_2.metric("Open actions", int(evidenceops_actions.get("open_actions") or 0))
+                    metric_col_3.metric("Recommended", int(evidenceops_actions.get("recommended_actions") or 0))
+                    metric_col_4.metric("Needs review", _format_ratio(evidenceops_actions.get("needs_review_rate")))
+                    st.caption(
+                        f"Ações com due date: {int(evidenceops_actions.get('actions_with_due_date') or 0)} · sem owner: {int(evidenceops_actions.get('actions_without_owner') or 0)} · documentos únicos: {int(evidenceops_actions.get('unique_document_count') or 0)}"
+                    )
+                    governance_col_1, governance_col_2, governance_col_3, governance_col_4 = st.columns(4)
+                    governance_col_1.metric("Review required", int(evidenceops_actions.get("review_required_actions") or 0))
+                    governance_col_2.metric("Approved", int(evidenceops_actions.get("approved_actions") or 0))
+                    governance_col_3.metric("Pending approval", int(evidenceops_actions.get("pending_approval_actions") or 0))
+                    governance_col_4.metric("Overdue", int(evidenceops_actions.get("overdue_actions") or 0))
+                    st.caption(
+                        f"Open sem owner: {int(evidenceops_actions.get('unassigned_open_actions') or 0)} · updates sensíveis auditados: {int(evidenceops_actions.get('sensitive_update_count') or 0)}"
+                    )
+
+                    for label, field_name, key_name in [
+                        ("Distribuição por action type", "action_type_counts", "action_type"),
+                        ("Distribuição por status", "status_counts", "status"),
+                        ("Distribuição por owner", "owner_counts", "owner"),
+                        ("Distribuição por review type", "review_type_counts", "review_type"),
+                        ("Distribuição por tool", "tool_counts", "tool"),
+                    ]:
+                        rows = evidenceops_actions.get(field_name)
+                        if isinstance(rows, dict) and rows:
+                            st.caption(label)
+                            st.dataframe(
+                                [{key_name: name, "count": count} for name, count in rows.items()],
+                                width="stretch",
+                            )
+
+                    recent_entries = evidenceops_actions.get("recent_entries")
+                    if isinstance(recent_entries, list) and recent_entries:
+                        st.caption("Ações recentes")
+                        st.dataframe(
+                            [
+                                {
+                                    "id": entry.get("id"),
+                                    "created_at": entry.get("created_at"),
+                                    "review_type": entry.get("review_type"),
+                                    "action_type": entry.get("action_type"),
+                                    "description": entry.get("description"),
+                                    "owner": entry.get("owner"),
+                                    "status": entry.get("status"),
+                                    "due_date": entry.get("due_date"),
+                                    "needs_review": entry.get("needs_review"),
+                                }
+                                for entry in recent_entries[:10]
+                                if isinstance(entry, dict)
+                            ],
+                            width="stretch",
+                        )
+
+        evidenceops_repository = snapshot.get("evidenceops_repository")
+        if isinstance(evidenceops_repository, dict) and evidenceops_repository:
+            with st.expander("EvidenceOps · document repository local", expanded=False):
+                st.write(
+                    {
+                        "repository_root": evidenceops_repository.get("repository_root"),
+                        "repository_exists": evidenceops_repository.get("repository_exists"),
+                        "snapshot_path": evidenceops_repository.get("snapshot_path"),
+                        "entries_considered": evidenceops_repository.get("entries_considered"),
+                        "latest_document": evidenceops_repository.get("latest_document"),
+                    }
+                )
+
+                if evidenceops_repository.get("repository_exists") and int(evidenceops_repository.get("total_documents") or 0) > 0:
+                    metric_col_1, metric_col_2, metric_col_3 = st.columns(3)
+                    metric_col_1.metric("Documents", int(evidenceops_repository.get("total_documents") or 0))
+                    metric_col_2.metric("Categories", int(evidenceops_repository.get("total_categories") or 0))
+                    metric_col_3.metric("Size (KB)", round(float(evidenceops_repository.get("total_size_bytes") or 0) / 1024, 1))
+                    drift_summary = evidenceops_repository.get("drift_summary")
+                    if isinstance(drift_summary, dict):
+                        drift_col_1, drift_col_2, drift_col_3, drift_col_4 = st.columns(4)
+                        drift_col_1.metric("New docs", int(drift_summary.get("new_documents_count") or 0))
+                        drift_col_2.metric("Changed docs", int(drift_summary.get("changed_documents_count") or 0))
+                        drift_col_3.metric("Removed docs", int(drift_summary.get("removed_documents_count") or 0))
+                        drift_col_4.metric("Has drift", "Sim" if drift_summary.get("has_drift") else "Não")
+                        st.caption(
+                            f"Snapshot anterior: {drift_summary.get('previous_captured_at') or 'n/d'} · atual: {drift_summary.get('current_captured_at') or 'n/d'}"
+                        )
+
+                    for label, field_name, key_name in [
+                        ("Distribuição por categoria", "category_counts", "category"),
+                        ("Distribuição por tipo de arquivo", "suffix_counts", "suffix"),
+                    ]:
+                        rows = evidenceops_repository.get(field_name)
+                        if isinstance(rows, dict) and rows:
+                            st.caption(label)
+                            st.dataframe(
+                                [{key_name: name, "count": count} for name, count in rows.items()],
+                                width="stretch",
+                            )
+
+                    recent_documents = evidenceops_repository.get("recent_documents")
+                    if isinstance(recent_documents, list) and recent_documents:
+                        st.caption("Documentos recentes do corpus local")
+                        st.dataframe(recent_documents[:10], width="stretch")
+
+                    for label, field_name in [
+                        ("Novos documentos detectados desde o último snapshot", "new_documents"),
+                        ("Documentos alterados desde o último snapshot", "changed_documents"),
+                        ("Documentos removidos desde o último snapshot", "removed_documents"),
+                    ]:
+                        rows = evidenceops_repository.get(field_name)
+                        if isinstance(rows, list) and rows:
+                            st.caption(label)
+                            st.dataframe(rows[:10], width="stretch")
+
         runtime_execution = snapshot.get("runtime_execution")
         if isinstance(runtime_execution, dict) and runtime_execution:
             with st.expander("Observabilidade · histórico agregado de execuções", expanded=False):
@@ -626,12 +834,20 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     st.caption(
                         f"Latência média total: {float(runtime_execution.get('avg_latency_s', 0.0)):.2f}s · "
                         f"retrieval: {float(runtime_execution.get('avg_retrieval_latency_s', 0.0)):.2f}s · "
-                        f"geração: {float(runtime_execution.get('avg_generation_latency_s', 0.0)):.2f}s"
+                        f"geração: {float(runtime_execution.get('avg_generation_latency_s', 0.0)):.2f}s · "
+                        f"prompt build: {float(runtime_execution.get('avg_prompt_build_latency_s', 0.0)):.2f}s"
                     )
                     st.caption(
                         f"Tokens médios: prompt={float(runtime_execution.get('avg_prompt_tokens', 0.0)):.1f} · "
                         f"completion={float(runtime_execution.get('avg_completion_tokens', 0.0)):.1f} · "
                         f"total={float(runtime_execution.get('avg_total_tokens', 0.0)):.1f}"
+                    )
+                    st.caption(
+                        f"Docs/run: {float(runtime_execution.get('avg_selected_documents', 0.0)):.1f} · "
+                        f"chunks recuperados/run: {float(runtime_execution.get('avg_retrieved_chunks_count', 0.0)):.1f} · "
+                        f"pressão média de contexto: {float(runtime_execution.get('avg_context_pressure_ratio', 0.0)):.2f} · "
+                        f"auto-degrade: {_format_ratio(runtime_execution.get('auto_degrade_rate'))} · "
+                        f"truncamento de contexto: {_format_ratio(runtime_execution.get('truncated_prompt_rate'))}"
                     )
                     costed_runs = int(runtime_execution.get("costed_runs") or 0)
                     if costed_runs > 0:
@@ -639,6 +855,11 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                             f"Custo direto estimado: total=${float(runtime_execution.get('total_cost_usd', 0.0)):.6f} · "
                             f"média/run=${float(runtime_execution.get('avg_cost_usd', 0.0)):.6f} · runs com pricing={costed_runs}"
                         )
+                    runtime_doc_metric_1, runtime_doc_metric_2, runtime_doc_metric_3, runtime_doc_metric_4 = st.columns(4)
+                    runtime_doc_metric_1.metric("Evidence pipeline", int(runtime_execution.get("evidence_pipeline_runs") or 0))
+                    runtime_doc_metric_2.metric("OCR envolvido", int(runtime_execution.get("ocr_involved_runs") or 0))
+                    runtime_doc_metric_3.metric("Docling envolvido", int(runtime_execution.get("docling_involved_runs") or 0))
+                    runtime_doc_metric_4.metric("VL envolvido", int(runtime_execution.get("vl_involved_runs") or 0))
 
                     for label, field_name, key_name in [
                         ("Distribuição por fluxo", "flow_counts", "flow_type"),
@@ -646,6 +867,11 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                         ("Distribuição por provider", "provider_counts", "provider"),
                         ("Distribuição por model", "model_counts", "model"),
                         ("Distribuição por fonte de usage", "usage_source_counts", "usage_source"),
+                        ("Distribuição por fonte de custo", "cost_source_counts", "cost_source"),
+                        ("Distribuição por budget mode", "budget_mode_counts", "budget_mode"),
+                        ("Distribuição por budget reason", "budget_reason_counts", "budget_reason"),
+                        ("Distribuição por modo de contexto", "context_window_mode_counts", "context_window_mode"),
+                        ("Distribuição por backend OCR", "ocr_backend_counts", "ocr_backend"),
                     ]:
                         rows = runtime_execution.get(field_name)
                         if isinstance(rows, dict) and rows:
@@ -674,6 +900,12 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                                     "tokens": entry.get("total_tokens"),
                                     "cost_usd": entry.get("cost_usd"),
                                     "usage_source": entry.get("usage_source"),
+                                    "budget_mode": entry.get("budget_routing_mode"),
+                                    "context_pressure_ratio": entry.get("context_pressure_ratio"),
+                                    "prompt_context_truncated": entry.get("prompt_context_truncated"),
+                                    "ocr_docs": entry.get("ocr_document_count"),
+                                    "docling_docs": entry.get("docling_document_count"),
+                                    "vl_docs": entry.get("vl_document_count"),
                                     "needs_review": entry.get("needs_review"),
                                     "error_message": entry.get("error_message"),
                                 }

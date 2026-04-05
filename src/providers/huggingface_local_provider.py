@@ -8,6 +8,13 @@ class HuggingFaceLocalProvider:
         self.settings = settings
         self._generation_pipelines: dict[str, object] = {}
         self._embedding_models: dict[str, object] = {}
+        self._last_usage_metrics: dict[str, object] = {}
+
+    def reset_last_usage_metrics(self) -> None:
+        self._last_usage_metrics = {}
+
+    def get_last_usage_metrics(self) -> dict[str, object]:
+        return dict(self._last_usage_metrics)
 
     @staticmethod
     def supports_generation_runtime() -> bool:
@@ -93,6 +100,7 @@ class HuggingFaceLocalProvider:
         top_p: float | None = None,
         max_tokens: int | None = None,
     ):
+        self.reset_last_usage_metrics()
         prompt = self._format_messages_as_prompt(messages)
         pipe = self._load_generation_pipeline(model)
         resolved_top_p = top_p if top_p is not None else self.settings.top_p

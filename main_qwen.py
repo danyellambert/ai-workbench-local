@@ -58,9 +58,12 @@ from src.storage.phase7_model_comparison_log import (
     load_model_comparison_log,
     summarize_model_comparison_log,
 )
+from src.storage.phase95_evidenceops_action_store import append_evidenceops_actions_from_worklog_entry
+from src.storage.phase95_evidenceops_worklog import append_evidenceops_worklog_entry
 from src.storage.runtime_execution_log import append_runtime_execution_log_entry
 from src.storage.rag_store import clear_rag_store, load_rag_store, save_rag_store
 from src.services.document_context import build_structured_document_context
+from src.services.evidenceops_worklog import build_evidenceops_worklog_entry
 from src.services.model_comparison import (
     MODEL_COMPARISON_FORMAT_OPTIONS,
     MODEL_COMPARISON_RUNTIME_BUCKET_LABELS,
@@ -69,8 +72,18 @@ from src.services.model_comparison import (
     run_model_comparison_candidate,
     summarize_model_comparison_results,
 )
-from src.services.runtime_budgeting import build_budget_routing_decision
-from src.services.runtime_economics import count_message_chars, estimate_runtime_usage_metrics
+from src.services.runtime_budgeting import (
+    assess_budget_quality_gate,
+    build_budget_routing_decision,
+    evaluate_budget_alerts,
+    resolve_budget_provider_routing,
+)
+from src.services.runtime_economics import (
+    aggregate_provider_call_native_usage,
+    count_message_chars,
+    estimate_runtime_usage_metrics,
+    get_provider_native_usage_metrics,
+)
 from src.services.rag_state import (
     clear_rag_state,
     get_rag_index,
@@ -80,6 +93,7 @@ from src.services.rag_state import (
     set_rag_runtime_settings,
 )
 from src.services.runtime_snapshot import build_runtime_snapshot
+from src.structured.base import DocumentAgentPayload
 from src.structured.envelope import StructuredResult, TaskExecutionRequest
 from src.structured.langgraph_workflow import (
     describe_structured_execution_strategy,
@@ -133,6 +147,12 @@ PHASE7_DOCUMENT_SELECTION_STATE_KEY = "phase7_model_comparison_document_ids"
 PHASE55_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langchain_shadow_log.json"
 PHASE55_LANGGRAPH_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langgraph_shadow_log.json"
 PHASE6_DOCUMENT_AGENT_LOG_PATH = settings.history_path.parent / ".phase6_document_agent_log.json"
+PHASE95_EVIDENCEOPS_ACTION_STORE_PATH = settings.history_path.parent / ".phase95_evidenceops_actions.sqlite3"
+PHASE95_EVIDENCEOPS_WORKLOG_PATH = settings.history_path.parent / ".phase95_evidenceops_worklog.json"
+PHASE95_EVIDENCEOPS_REPOSITORY_ROOT = settings.history_path.parent / "data" / "evidenceops_option_b_synthetic"
+PHASE95_EVIDENCEOPS_REPOSITORY_SNAPSHOT_PATH = (
+    PHASE95_EVIDENCEOPS_REPOSITORY_ROOT / ".phase95_evidenceops_repository_snapshot.json"
+)
 PHASE7_MODEL_COMPARISON_LOG_PATH = settings.history_path.parent / ".phase7_model_comparison_log.json"
 PHASE8_EVAL_DB_PATH = settings.history_path.parent / ".phase8_eval_runs.sqlite3"
 RUNTIME_EXECUTION_LOG_PATH = settings.history_path.parent / ".runtime_execution_log.json"
@@ -627,6 +647,79 @@ def _build_runtime_execution_log_entry(
     if isinstance(extra, dict):
         entry.update(extra)
     return entry
+
+
+def _build_document_runtime_signal_summary(
+    document_ids: list[str],
+    document_preview_map: dict[str, dict[str, object]],
+) -> dict[str, object]:
+    selected_ids = [str(document_id) for document_id in document_ids if str(document_id or "").strip()]
+    if not selected_ids:
+        return {
+            "evidence_pipeline_document_count": 0,
+            "ocr_document_count": 0,
+            "docling_document_count": 0,
+            "vl_document_count": 0,
+            "suspicious_pages_total": 0,
+            "docling_pages_total": 0,
+            "vl_regions_attempted_total": 0,
+            "vl_regions_succeeded_total": 0,
+            "ocr_backend_counts": {},
+        }
+
+    evidence_pipeline_document_count = 0
+    ocr_document_count = 0
+    docling_document_count = 0
+    vl_document_count = 0
+    suspicious_pages_total = 0
+    docling_pages_total = 0
+    vl_regions_attempted_total = 0
+    vl_regions_succeeded_total = 0
+    ocr_backend_counts: dict[str, int] = {}
+
+    for document_id in selected_ids:
+        preview = document_preview_map.get(document_id) or {}
+        document = preview.get("document") if isinstance(preview, dict) else {}
+        if not isinstance(document, dict):
+            continue
+        loader_metadata = document.get("loader_metadata") if isinstance(document.get("loader_metadata"), dict) else {}
+        if not isinstance(loader_metadata, dict):
+            continue
+        if bool(loader_metadata.get("evidence_pipeline_used")):
+            evidence_pipeline_document_count += 1
+        if bool(loader_metadata.get("ocr_fallback_applied") or loader_metadata.get("ocr_fallback_attempted")):
+            ocr_document_count += 1
+        docling_mode = str(loader_metadata.get("docling_mode") or "").strip().lower()
+        docling_pages_used = loader_metadata.get("docling_pages_used") if isinstance(loader_metadata.get("docling_pages_used"), list) else []
+        suspicious_pages = loader_metadata.get("suspicious_pages") if isinstance(loader_metadata.get("suspicious_pages"), list) else []
+        if (docling_mode and docling_mode != "none") or docling_pages_used:
+            docling_document_count += 1
+        suspicious_pages_total += len(suspicious_pages)
+        docling_pages_total += len(docling_pages_used)
+        ocr_backend = str(loader_metadata.get("ocr_backend") or "").strip()
+        if ocr_backend:
+            ocr_backend_counts[ocr_backend] = int(ocr_backend_counts.get(ocr_backend, 0)) + 1
+
+        vl_runtime = loader_metadata.get("vl_runtime") if isinstance(loader_metadata.get("vl_runtime"), dict) else {}
+        vl_regions_attempted = int(vl_runtime.get("regions_attempted") or 0) if isinstance(vl_runtime.get("regions_attempted"), (int, float)) else 0
+        vl_regions_succeeded = int(vl_runtime.get("regions_succeeded") or 0) if isinstance(vl_runtime.get("regions_succeeded"), (int, float)) else 0
+        vl_fallback_used = bool(vl_runtime.get("fallback_used"))
+        if vl_regions_attempted > 0 or vl_regions_succeeded > 0 or vl_fallback_used:
+            vl_document_count += 1
+        vl_regions_attempted_total += vl_regions_attempted
+        vl_regions_succeeded_total += vl_regions_succeeded
+
+    return {
+        "evidence_pipeline_document_count": evidence_pipeline_document_count,
+        "ocr_document_count": ocr_document_count,
+        "docling_document_count": docling_document_count,
+        "vl_document_count": vl_document_count,
+        "suspicious_pages_total": suspicious_pages_total,
+        "docling_pages_total": docling_pages_total,
+        "vl_regions_attempted_total": vl_regions_attempted_total,
+        "vl_regions_succeeded_total": vl_regions_succeeded_total,
+        "ocr_backend_counts": ocr_backend_counts,
+    }
 
 
 def _build_full_document_text_from_selection(
@@ -1521,6 +1614,31 @@ with chat_tab:
             prompt_chars=len(texto_usuario or ""),
             allow_auto_degrade=True,
         )
+        chat_quality_gate = assess_budget_quality_gate(
+            task_type="chat_rag",
+            eval_db_path=PHASE8_EVAL_DB_PATH,
+        )
+        chat_provider_routing = resolve_budget_provider_routing(
+            selected_provider=selected_provider,
+            task_type="chat_rag",
+            available_chat_providers=list(chat_capable_registry.keys()),
+            routing_decision=chat_budget_decision,
+            quality_gate=chat_quality_gate,
+            auto_switch_enabled=True,
+        )
+        chat_effective_provider = str(chat_provider_routing.get("effective_provider") or selected_provider)
+        chat_provider_entry = chat_capable_registry.get(chat_effective_provider) or chat_capable_registry[selected_provider]
+        chat_execution_provider_instance = chat_provider_entry["instance"]
+        chat_execution_provider_label = str(chat_provider_entry.get("label") or chat_effective_provider)
+        chat_provider_models = models_by_provider.get(chat_effective_provider, [])
+        chat_execution_model = (
+            selected_model
+            if selected_model in chat_provider_models
+            else default_model_by_provider.get(
+                chat_effective_provider,
+                chat_provider_models[0] if chat_provider_models else selected_model,
+            )
+        )
         chat_runtime_rag_settings = replace(
             effective_rag_settings,
             top_k=int(chat_budget_decision.get("top_k_effective") or effective_rag_settings.top_k),
@@ -1628,15 +1746,15 @@ with chat_tab:
                 )
                 prompt_build_latency = time.perf_counter() - prompt_build_started_at
                 generation_started_at = time.perf_counter()
-                stream = selected_provider_instance.stream_chat_completion(
+                stream = chat_execution_provider_instance.stream_chat_completion(
                     messages=model_messages,
-                    model=selected_model,
+                    model=chat_execution_model,
                     temperature=temperature,
                     context_window=chat_effective_context_window,
                 )
 
                 partes = []
-                for token in selected_provider_instance.iter_stream_text(stream):
+                for token in chat_execution_provider_instance.iter_stream_text(stream):
                     partes.append(token)
                     placeholder.markdown("".join(partes) + "▌")
 
@@ -1659,6 +1777,10 @@ with chat_tab:
                 st.caption(
                     f"Contexto do chat nesta execução: modo `{context_window_mode}` · resolvido em `{chat_effective_context_window}` · cap `{chat_context_window_cap}`"
                 )
+                if bool(chat_provider_routing.get("provider_switch_applied")):
+                    st.caption(
+                        f"Budget provider routing no chat: `{selected_provider}` -> `{chat_effective_provider}` ({chat_execution_provider_label}) · model efetivo `{chat_execution_model}`"
+                    )
                 if bool(chat_budget_decision.get("auto_degrade_applied")):
                     st.caption(
                         f"Budget routing ativo no chat: modo `{chat_budget_decision.get('routing_mode')}` · razão `{chat_budget_decision.get('reason')}` · top_k efetivo `{chat_budget_decision.get('top_k_effective')}` · rerank_pool efetivo `{chat_budget_decision.get('rerank_pool_size_effective')}`"
@@ -1739,12 +1861,20 @@ with chat_tab:
             except Exception as erro:
                 set_last_latency(None)
                 chat_error_message = str(erro)
-                texto_resposta_ia = selected_provider_instance.format_error(selected_model, erro)
+                texto_resposta_ia = chat_execution_provider_instance.format_error(chat_execution_model, erro)
                 placeholder.empty()
                 st.error(texto_resposta_ia)
 
+        chat_native_usage_metrics = get_provider_native_usage_metrics(chat_execution_provider_instance)
         assistant_metadata = {
             **user_metadata,
+            "provider": chat_effective_provider,
+            "provider_requested": selected_provider,
+            "provider_effective": chat_effective_provider,
+            "provider_effective_label": chat_execution_provider_label,
+            "model": chat_execution_model,
+            "model_requested": selected_model,
+            "model_effective": chat_execution_model,
             "latency_s": round(get_last_latency(), 2) if get_last_latency() is not None else None,
             "retrieval_latency_s": round(retrieval_latency, 2) if retrieval_latency is not None else None,
             "prompt_build_latency_s": round(prompt_build_latency, 2) if prompt_build_latency is not None else None,
@@ -1768,6 +1898,8 @@ with chat_tab:
             "budget_routing_reason": chat_budget_decision.get("reason"),
             "budget_auto_degrade_applied": chat_budget_decision.get("auto_degrade_applied"),
             "budget_sensitivity": chat_budget_decision.get("sensitivity"),
+            "budget_quality_gate": chat_quality_gate,
+            "budget_provider_routing": chat_provider_routing,
             "prompt_context": {
                 "budget_chars": prompt_context_details.get("budget_chars"),
                 "used_chars": prompt_context_details.get("used_chars"),
@@ -1781,9 +1913,25 @@ with chat_tab:
             prompt_chars=count_message_chars(model_messages),
             completion_chars=len(texto_resposta_ia or ""),
             context_chars=int(prompt_context_details.get("used_chars") or 0),
-            provider=selected_provider,
+            provider=chat_effective_provider,
+            native_usage=chat_native_usage_metrics,
             chars_per_token=effective_rag_settings.context_chars_per_token,
         )
+        chat_document_runtime_signals = _build_document_runtime_signal_summary(
+            chat_selected_document_ids,
+            document_preview_map,
+        )
+        chat_budget_alerts = evaluate_budget_alerts(
+            task_type="chat_rag",
+            provider=chat_effective_provider,
+            total_tokens=int(chat_usage_metrics.get("total_tokens") or 0),
+            cost_usd=(float(chat_usage_metrics.get("cost_usd")) if isinstance(chat_usage_metrics.get("cost_usd"), (int, float)) else None),
+            latency_s=(get_last_latency() if get_last_latency() is not None else total_latency),
+            context_pressure_ratio=(float(chat_budget_decision.get("context_pressure_ratio")) if isinstance(chat_budget_decision.get("context_pressure_ratio"), (int, float)) else None),
+            auto_degrade_applied=bool(chat_budget_decision.get("auto_degrade_applied")),
+        )
+        assistant_metadata["budget_alert_status"] = chat_budget_alerts.get("status")
+        assistant_metadata["budget_alerts"] = chat_budget_alerts.get("alerts")
         assistant_metadata["usage"] = chat_usage_metrics
         append_chat_message("assistant", texto_resposta_ia, metadata=assistant_metadata)
         save_chat_history(settings.history_path, get_chat_messages())
@@ -1792,8 +1940,8 @@ with chat_tab:
             _build_runtime_execution_log_entry(
                 flow_type="chat_rag",
                 task_type="chat_rag",
-                provider=selected_provider,
-                model=selected_model,
+                provider=chat_effective_provider,
+                model=chat_execution_model,
                 success=chat_success,
                 latency_s=(get_last_latency() if get_last_latency() is not None else (time.perf_counter() - chat_total_started_at)),
                 retrieval_latency_s=retrieval_latency,
@@ -1833,6 +1981,22 @@ with chat_tab:
                     "context_budget_chars": chat_budget_decision.get("context_budget_chars"),
                     "estimated_context_chars": chat_budget_decision.get("estimated_context_chars"),
                     "context_pressure_ratio": chat_budget_decision.get("context_pressure_ratio"),
+                    "prompt_context_used_chunks": prompt_context_details.get("used_chunks"),
+                    "prompt_context_dropped_chunks": prompt_context_details.get("dropped_chunks"),
+                    "prompt_context_truncated": bool(prompt_context_details.get("truncated")),
+                    "provider_requested": selected_provider,
+                    "model_requested": selected_model,
+                    "provider_switch_applied": bool(chat_provider_routing.get("provider_switch_applied")),
+                    "provider_switch_reason": chat_provider_routing.get("reason"),
+                    "quality_gate_status": chat_quality_gate.get("status"),
+                    "quality_gate_reason": chat_quality_gate.get("reason"),
+                    "quality_gate_pass_rate": chat_quality_gate.get("pass_rate"),
+                    "quality_gate_min_pass_rate": chat_quality_gate.get("min_pass_rate"),
+                    "quality_gate_recent_runs": chat_quality_gate.get("recent_runs"),
+                    "budget_alert_status": chat_budget_alerts.get("status"),
+                    "budget_alerts": chat_budget_alerts.get("alerts"),
+                    "budget_thresholds": chat_budget_alerts.get("thresholds"),
+                    **chat_document_runtime_signals,
                 },
             ),
         )
@@ -2065,6 +2229,28 @@ with structured_tab:
         prompt_chars=len(structured_input_text or ""),
         allow_auto_degrade=False,
     )
+    structured_quality_gate = assess_budget_quality_gate(
+        task_type=selected_structured_task,
+        eval_db_path=PHASE8_EVAL_DB_PATH,
+    )
+    structured_provider_routing = resolve_budget_provider_routing(
+        selected_provider=selected_provider,
+        task_type=selected_structured_task,
+        available_chat_providers=list(chat_capable_registry.keys()),
+        routing_decision=structured_budget_decision,
+        quality_gate=structured_quality_gate,
+        auto_switch_enabled=True,
+    )
+    structured_effective_provider = str(structured_provider_routing.get("effective_provider") or selected_provider)
+    structured_provider_models = models_by_provider.get(structured_effective_provider, [])
+    structured_execution_model = (
+        selected_model
+        if selected_model in structured_provider_models
+        else default_model_by_provider.get(
+            structured_effective_provider,
+            structured_provider_models[0] if structured_provider_models else selected_model,
+        )
+    )
 
     can_run_structured = bool(structured_input_text.strip()) or bool(structured_use_documents and active_structured_document_ids)
 
@@ -2267,8 +2453,8 @@ with structured_tab:
                 use_document_context=bool(structured_use_documents and active_structured_document_ids),
                 source_document_ids=list(active_structured_document_ids if structured_use_documents else []),
                 context_strategy=structured_context_strategy,
-                provider=selected_provider,
-                model=selected_model,
+                provider=structured_effective_provider,
+                model=structured_execution_model,
                 temperature=temperature,
                 context_window=None if context_window_mode == "auto" else structured_context_window_cap,
                 progress_callback=_structured_progress_callback,
@@ -2281,6 +2467,11 @@ with structured_tab:
                     "budget_auto_degrade_applied": structured_budget_decision.get("auto_degrade_applied"),
                     "budget_context_pressure_ratio": structured_budget_decision.get("context_pressure_ratio"),
                     "budget_context_budget_chars": structured_budget_decision.get("context_budget_chars"),
+                    "budget_provider_requested": selected_provider,
+                    "budget_provider_effective": structured_effective_provider,
+                    "budget_provider_switch_applied": bool(structured_provider_routing.get("provider_switch_applied")),
+                    "budget_provider_switch_reason": structured_provider_routing.get("reason"),
+                    "budget_quality_gate": structured_quality_gate,
                 },
             )
             structured_result = run_structured_execution_workflow(
@@ -2361,7 +2552,29 @@ with structured_tab:
                 completion_chars=len(str(structured_result.raw_output_text or "")),
                 context_chars=structured_context_chars,
                 provider=str(structured_result_metadata.get("provider") or selected_provider),
+                native_usage=aggregate_provider_call_native_usage(structured_provider_calls),
                 chars_per_token=effective_rag_settings.context_chars_per_token,
+            )
+            structured_result_telemetry["budget_total_tokens"] = structured_usage_metrics.get("total_tokens")
+            structured_result_telemetry["budget_cost_usd"] = structured_usage_metrics.get("cost_usd")
+            structured_result_telemetry["budget_usage_source"] = structured_usage_metrics.get("usage_source")
+            structured_result_telemetry["budget_cost_source"] = structured_usage_metrics.get("cost_source")
+            structured_result_telemetry["budget_native_usage_available"] = structured_usage_metrics.get("native_usage_available")
+            structured_budget_alerts = evaluate_budget_alerts(
+                task_type=selected_structured_task,
+                provider=str(structured_result_metadata.get("provider") or structured_effective_provider),
+                total_tokens=int(structured_usage_metrics.get("total_tokens") or 0),
+                cost_usd=(float(structured_usage_metrics.get("cost_usd")) if isinstance(structured_usage_metrics.get("cost_usd"), (int, float)) else None),
+                latency_s=(float(structured_total_latency) if isinstance(structured_total_latency, (int, float)) else None),
+                context_pressure_ratio=(float(structured_budget_decision.get("context_pressure_ratio")) if isinstance(structured_budget_decision.get("context_pressure_ratio"), (int, float)) else None),
+                auto_degrade_applied=bool(structured_budget_decision.get("auto_degrade_applied")),
+            )
+            structured_result_telemetry["budget_alert_status"] = structured_budget_alerts.get("status")
+            structured_result_telemetry["budget_alerts"] = structured_budget_alerts.get("alerts")
+            structured_result_telemetry["budget_thresholds"] = structured_budget_alerts.get("thresholds")
+            structured_document_runtime_signals = _build_document_runtime_signal_summary(
+                list(active_structured_document_ids if structured_use_documents else []),
+                document_preview_map,
             )
             structured_error_message = (
                 structured_result.validation_error
@@ -2414,9 +2627,40 @@ with structured_tab:
                         "context_budget_chars": structured_budget_decision.get("context_budget_chars"),
                         "estimated_context_chars": structured_budget_decision.get("estimated_context_chars"),
                         "context_pressure_ratio": structured_budget_decision.get("context_pressure_ratio"),
+                        "document_context_strategy": structured_context_strategy,
+                        "structured_context_blocks": effective_structured_context_blocks,
+                        "estimated_document_chars": estimated_structured_document_chars,
+                        "provider_requested": selected_provider,
+                        "model_requested": selected_model,
+                        "provider_switch_applied": bool(structured_provider_routing.get("provider_switch_applied")),
+                        "provider_switch_reason": structured_provider_routing.get("reason"),
+                        "quality_gate_status": structured_quality_gate.get("status"),
+                        "quality_gate_reason": structured_quality_gate.get("reason"),
+                        "quality_gate_pass_rate": structured_quality_gate.get("pass_rate"),
+                        "quality_gate_min_pass_rate": structured_quality_gate.get("min_pass_rate"),
+                        "quality_gate_recent_runs": structured_quality_gate.get("recent_runs"),
+                        "budget_alert_status": structured_budget_alerts.get("status"),
+                        "budget_alerts": structured_budget_alerts.get("alerts"),
+                        "budget_thresholds": structured_budget_alerts.get("thresholds"),
+                        **structured_document_runtime_signals,
                     },
                 ),
             )
+            if selected_structured_task == "document_agent" and isinstance(structured_result.validated_output, DocumentAgentPayload):
+                evidenceops_entry = build_evidenceops_worklog_entry(
+                    payload=structured_result.validated_output,
+                    query=structured_input_text,
+                    document_ids=list(active_structured_document_ids if structured_use_documents else []),
+                    execution_metadata=structured_result_metadata,
+                )
+                append_evidenceops_worklog_entry(
+                    PHASE95_EVIDENCEOPS_WORKLOG_PATH,
+                    evidenceops_entry,
+                )
+                append_evidenceops_actions_from_worklog_entry(
+                    PHASE95_EVIDENCEOPS_ACTION_STORE_PATH,
+                    evidenceops_entry,
+                )
             st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
             default_mode = structured_result.primary_render_mode or "json"
             st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode
@@ -2921,6 +3165,10 @@ runtime_snapshot = build_runtime_snapshot(
     default_vl_model=evidence_config.vl_model,
     default_ocr_backend=evidence_config.ocr_backend,
     phase6_document_agent_log_path=PHASE6_DOCUMENT_AGENT_LOG_PATH,
+    phase95_evidenceops_action_store_path=PHASE95_EVIDENCEOPS_ACTION_STORE_PATH,
+    phase95_evidenceops_repository_root=PHASE95_EVIDENCEOPS_REPOSITORY_ROOT,
+    phase95_evidenceops_repository_snapshot_path=PHASE95_EVIDENCEOPS_REPOSITORY_SNAPSHOT_PATH,
+    phase95_evidenceops_worklog_path=PHASE95_EVIDENCEOPS_WORKLOG_PATH,
     phase8_eval_db_path=PHASE8_EVAL_DB_PATH,
     runtime_execution_log_path=RUNTIME_EXECUTION_LOG_PATH,
 )

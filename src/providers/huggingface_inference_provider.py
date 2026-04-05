@@ -12,6 +12,13 @@ class HuggingFaceInferenceProvider:
             base_url=settings.base_url,
             api_key=settings.api_key,
         )
+        self._last_usage_metrics: dict[str, object] = {}
+
+    def reset_last_usage_metrics(self) -> None:
+        self._last_usage_metrics = {}
+
+    def get_last_usage_metrics(self) -> dict[str, object]:
+        return dict(self._last_usage_metrics)
 
     def list_available_models(self) -> list[str]:
         ordered_models: list[str] = []
@@ -60,11 +67,13 @@ class HuggingFaceInferenceProvider:
         top_p: float | None = None,
         max_tokens: int | None = None,
     ):
+        self.reset_last_usage_metrics()
         request_kwargs: dict[str, object] = {
             "messages": messages,
             "model": model,
             "temperature": temperature,
             "stream": True,
+            "stream_options": {"include_usage": True},
         }
         resolved_top_p = top_p if top_p is not None else self.settings.default_top_p
         resolved_max_tokens = max_tokens if max_tokens is not None else self.settings.default_max_tokens
@@ -84,9 +93,16 @@ class HuggingFaceInferenceProvider:
         response = self.client.embeddings.create(model=model, input=texts)
         return [item.embedding for item in response.data]
 
-    @staticmethod
-    def iter_stream_text(stream):
+    def iter_stream_text(self, stream):
         for chunk in stream:
+            usage = getattr(chunk, "usage", None)
+            if usage is not None:
+                self._last_usage_metrics = {
+                    "prompt_tokens": getattr(usage, "prompt_tokens", None),
+                    "completion_tokens": getattr(usage, "completion_tokens", None),
+                    "total_tokens": getattr(usage, "total_tokens", None),
+                    "usage_source": "huggingface_inference_native_usage",
+                }
             if not getattr(chunk, "choices", None):
                 continue
             delta = getattr(chunk.choices[0], "delta", None)

@@ -385,17 +385,30 @@ def run_model_comparison_candidate(
     context_window: int,
     retrieved_chunks: list[dict[str, object]],
     rag_settings: RagSettings,
+    top_p: float | None = None,
+    max_tokens: int | None = None,
+    fallback_provider: str | None = "ollama",
 ) -> dict[str, Any]:
     runtime_profile = resolve_provider_runtime_profile(
         registry,
         provider_name,
         capability="chat",
-        fallback_provider="ollama",
+        fallback_provider=fallback_provider,
     )
     provider_entry = runtime_profile.get("provider_entry") if isinstance(runtime_profile.get("provider_entry"), dict) else {}
     provider_instance = provider_entry.get("instance")
     effective_provider = str(runtime_profile.get("effective_provider") or provider_name)
     effective_model = str(model_name or provider_entry.get("default_model") or "")
+
+    if fallback_provider is None and str(provider_name or "").strip() and effective_provider != str(provider_name).strip().lower():
+        provider_entry = {}
+        provider_instance = None
+        effective_provider = str(provider_name).strip().lower()
+        effective_model = str(model_name or "")
+        runtime_profile = {
+            **runtime_profile,
+            "fallback_reason": f"requested_provider_unavailable:{provider_name}",
+        }
 
     result: dict[str, Any] = {
         "provider_requested": provider_name,
@@ -420,6 +433,10 @@ def run_model_comparison_candidate(
         "groundedness_score": None,
         "schema_adherence": None,
         "use_case_fit_score": 0.0,
+        "prompt_tokens": None,
+        "completion_tokens": None,
+        "total_tokens": None,
+        "usage_source": None,
     }
 
     if provider_instance is None:
@@ -455,6 +472,8 @@ def run_model_comparison_candidate(
             model=effective_model,
             temperature=temperature,
             context_window=context_window,
+            top_p=top_p,
+            max_tokens=max_tokens,
         )
         response_text = "".join(provider_instance.iter_stream_text(stream)).strip()
         result["success"] = True
@@ -485,6 +504,13 @@ def run_model_comparison_candidate(
     result["used_chunks"] = int(prompt_context_details.get("used_chunks") or 0)
     result["dropped_chunks"] = int(prompt_context_details.get("dropped_chunks") or 0)
     result["context_preview_chars"] = int(prompt_context_details.get("context_preview_chars") or 0)
+    if hasattr(provider_instance, "get_last_usage_metrics"):
+        usage_metrics = provider_instance.get_last_usage_metrics()
+        if isinstance(usage_metrics, dict):
+            result["prompt_tokens"] = usage_metrics.get("prompt_tokens")
+            result["completion_tokens"] = usage_metrics.get("completion_tokens")
+            result["total_tokens"] = usage_metrics.get("total_tokens")
+            result["usage_source"] = usage_metrics.get("usage_source")
     return result
 
 

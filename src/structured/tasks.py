@@ -187,10 +187,13 @@ class TaskHandler:
         return provider_entry["instance"]
 
     def _collect_response_text(self, provider, request: TaskExecutionRequest, prompt: str) -> str:
+        from ..services.runtime_economics import get_provider_native_usage_metrics
+
         telemetry = self._telemetry_dict(request)
         stage_name = str(telemetry.get("current_stage") or "provider_call")
         started_at = time.perf_counter()
         error_message = None
+        native_usage: dict[str, object] = {}
         messages = [{"role": "user", "content": prompt}]
         try:
             stream = provider.stream_chat_completion(
@@ -200,9 +203,11 @@ class TaskHandler:
                 context_window=request.context_window,
             )
             response_text = "".join(provider.iter_stream_text(stream))
+            native_usage = get_provider_native_usage_metrics(provider)
             return response_text
         except Exception as error:
             error_message = str(error)
+            native_usage = get_provider_native_usage_metrics(provider)
             raise
         finally:
             duration_s = round(time.perf_counter() - started_at, 4)
@@ -218,6 +223,7 @@ class TaskHandler:
                         "duration_s": duration_s,
                         "prompt_chars": len(prompt or ""),
                         "success": error_message is None,
+                        **({"native_usage": native_usage} if native_usage else {}),
                         **({"error": error_message} if error_message else {}),
                     }
                 )

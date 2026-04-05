@@ -17,14 +17,23 @@ from src.services.model_comparison import (
 class _DummyProvider:
     def __init__(self, response_text: str) -> None:
         self.response_text = response_text
+        self._last_usage_metrics = {
+            "prompt_tokens": 12,
+            "completion_tokens": 8,
+            "total_tokens": 20,
+            "usage_source": "dummy_usage",
+        }
 
-    def stream_chat_completion(self, messages, model, temperature, context_window=None):
+    def stream_chat_completion(self, messages, model, temperature, context_window=None, top_p=None, max_tokens=None):
         return [self.response_text]
 
     @staticmethod
     def iter_stream_text(stream):
         for item in stream:
             yield item
+
+    def get_last_usage_metrics(self):
+        return dict(self._last_usage_metrics)
 
 
 class ModelComparisonServiceTests(unittest.TestCase):
@@ -62,6 +71,8 @@ class ModelComparisonServiceTests(unittest.TestCase):
         self.assertGreater(result["output_chars"], 0)
         self.assertEqual(result["format_adherence"], 1.0)
         self.assertGreaterEqual(float(result["use_case_fit_score"]), 0.5)
+        self.assertEqual(result["total_tokens"], 20)
+        self.assertEqual(result["usage_source"], "dummy_usage")
 
     def test_summarize_model_comparison_results_aggregates_metrics(self) -> None:
         summary = summarize_model_comparison_results(
