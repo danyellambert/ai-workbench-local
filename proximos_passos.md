@@ -1,5 +1,23 @@
 # Roadmap Definitivo — AI Workbench Local
 
+## Ajuste tático em andamento — renderer host-native agora, Docker-ready depois
+
+Objetivo desta trilha curta:
+
+- consolidar o `ppt_creator_app` como renderer HTTP externo do AI Workbench
+- padronizar o uso **host-native** como operação principal do P1 atual
+- deixar o projeto irmão preparado para subir em Docker depois, sem tornar Docker bloqueante agora
+
+### Checklist desta trilha
+
+- [x] configurar `presentation export` no AI Workbench para apontar para `http://127.0.0.1:8787`
+- [x] adicionar helper local para subir o renderer host-native a partir deste repositório
+- [x] documentar o fluxo operacional recomendado no README do AI Workbench
+- [x] preparar o `ppt_creator_app` para Docker service-first no repositório irmão
+- [ ] validar smoke test manual completo: `AI Workbench -> /health -> /render -> /artifact`
+- [ ] validar `docker compose up --build` no `ppt_creator_app` quando chegar a hora de endurecer a operação
+- [ ] decidir quando ativar `PRESENTATION_EXPORT_REQUIRE_REAL_PREVIEWS=true` para o runtime containerizado
+
 ## Ajuste tático em andamento — paridade de overrides + sidebar multi-provider
 
 Objetivo desta trilha curta:
@@ -124,6 +142,33 @@ Ou seja: um sistema que trabalha em cima de documentos da empresa e consegue:
 - apontar riscos e lacunas
 - gerar checklist de ação
 - produzir resposta pronta para revisão humana
+
+### Leitura oficial em duas trilhas
+
+Para evitar que o projeto pareça ao mesmo tempo um produto difuso e um laboratório sem foco, a leitura oficial passa a ser:
+
+1. **Business Workflows / produto**
+   - document review
+   - policy / contract comparison
+   - action plan / evidence review
+   - candidate review
+   - executive deck generation como capability transversal
+
+2. **AI Engineering Lab**
+   - benchmark de modelos
+   - evals
+   - routing e observabilidade
+   - runtime economics
+   - experimentação controlada de arquitetura
+
+Regra prática:
+
+- a trilha de **produto** resolve a dor de negócio
+- a trilha de **lab** garante confiabilidade, auditabilidade e evolução segura
+
+Documento de referência:
+
+- `docs/PROJECT_POSITIONING_TWO_TRACKS.md`
 
 ---
 
@@ -468,7 +513,7 @@ A ordem mais forte agora passa a ser:
 6. **Fase 9.25 — AI runtime economics, usage observability e budget-aware routing**
 7. **Fase 9.5 — MCPs e integrações operacionais empresariais**
 8. **Fase 10 — Engenharia profissional**
-9. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+9. **Fase 10.25 — Split oficial entre AI Lab e produto: Streamlit -> Gradio -> App Web**
 10. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
 11. **Fase 11 — Pacote final de portfólio**
 
@@ -1377,19 +1422,25 @@ A adaptação só deve entrar quando houver evidência clara de pelo menos parte
 - métrica objetiva de sucesso (`pass_rate`, `schema_adherence`, `groundedness`, `use-case fit` ou similar)
 - baseline já documentado para comparação justa
 
+### Rodada 0 — audit / preflight de fechamento
+
+- [x] consolidar audit do que já existia na Fase 8.5 antes de fechar a fase
+- [x] gerar artefato de readiness/closure com benchmark + eval + diagnosis
+- [x] explicitar o que está totalmente suportado vs parcialmente suportado no bundle final
+
 ### O que priorizar
-- [ ] Testar modelos do ecossistema Hugging Face fora do catálogo principal do Ollama
-- [ ] Usar o `hf_local_llm_service` como hub de experimentação para comparar runtimes sob um contrato HTTP único
-- [ ] Comparar `ollama`, `huggingface_server`, `huggingface_local`, `huggingface_mlx` e `llama_cpp` onde houver valor real
-- [ ] Comparar quantizações relevantes para o hardware local
-- [ ] Avaliar modelos menores especializados para tarefas estruturadas
-- [ ] Comparar embeddings e rerankers antes de ajustar o LLM inteiro
-- [ ] Testar adaptação leve com LoRA/PEFT em tarefa específica
-- [ ] Comparar baseline vs prompt engineering vs RAG vs RAG + reranker vs troca de runtime/modelo vs modelo adaptado
-- [ ] Documentar custo operacional, complexidade e ganho real
-- [ ] Avaliar se embeddings ou rerankers ajustados geram mais valor do que ajustar o LLM inteiro
-- [ ] Registrar claramente quando **não** vale adotar a adaptação
-- [ ] Montar matriz comparativa por runtime/modelo/quantização com qualidade, latência, footprint e complexidade operacional
+- [x] fechar a trilha Hugging Face do ecossistema atual com catálogo seguro e suporte HTTP/local já existente no repositório
+- [x] usar o `hf_local_llm_service` / `huggingface_server` como hub de experimentação sob contrato HTTP único onde o path já é limpo
+- [x] comparar os runtimes atualmente suportados no repo (`ollama`, `huggingface_server`, `huggingface_local`) e registrar explicitamente os runtimes fora do fechamento atual (`huggingface_mlx`, `llama_cpp`)
+- [x] classificar runtime bucket / quantização / path operacional nas saídas de benchmark
+- [x] avaliar tarefas estruturadas e estreitas via decision gate em vez de pular direto para treino pesado
+- [x] comparar embeddings e rerankers antes de ajustar o LLM inteiro
+- [x] criar scaffold conservador para adaptação leve por task específica, sem executar jobs pesados nesta fase
+- [x] comparar baseline vs prompt/RAG/schema vs retrieval/reranker vs troca de runtime/modelo e registrar quando modelo adaptado ainda não é necessário
+- [x] documentar custo operacional, complexidade e ganho real
+- [x] avaliar se embeddings ou rerankers ajustados geram mais valor do que ajustar o LLM inteiro
+- [x] registrar claramente quando **não** vale adotar a adaptação
+- [x] montar matriz comparativa por runtime/modelo/quantização com qualidade, latência, complexidade operacional e limites explícitos do bundle atual
 
 ### Backlog opcional do `hf_local_llm_service` para fortalecer a 8.5
 
@@ -1401,18 +1452,156 @@ Esses itens ajudam, mas **não são pré-requisito** para começar a fase:
 - [ ] adicionar store/log simples de experimentos comparativos no serviço
 
 ### O que evitar nesta fase
-- [ ] Evitar full fine-tuning grande de LLM como foco principal do projeto
-- [ ] Evitar abrir uma frente pesada sem evidência dos evals
-- [ ] Evitar treinar “por treinar” sem hipótese e sem métrica de sucesso
-- [ ] Evitar transformar o `hf_local_llm_service` em um produto paralelo antes de provar o valor experimental da fase
-- [ ] Evitar adaptar o LLM antes de testar direito embeddings, rerankers e troca de runtime/modelo
+- [x] Evitar full fine-tuning grande de LLM como foco principal do projeto
+- [x] Evitar abrir uma frente pesada sem evidência dos evals
+- [x] Evitar treinar “por treinar” sem hipótese e sem métrica de sucesso
+- [x] Evitar transformar o `hf_local_llm_service` em um produto paralelo antes de provar o valor experimental da fase
+- [x] Evitar adaptar o LLM antes de testar direito embeddings, rerankers e troca de runtime/modelo
 
-### Candidatos mais inteligentes para adaptação
-- [ ] Extração estruturada
+### Candidatos mais inteligentes para adaptação identificados nesta fase
+- [x] Extração estruturada
+- [x] Extração/contatos de CV
 - [ ] Classificação de intenção
 - [ ] Reranking
 - [ ] Embeddings
 - [ ] Formatação rígida de saída
+
+### Status final da fase
+
+- [x] Round 0 — audit/preflight de fechamento implementada
+- [x] Round 1 — benchmark core de geração/runtime + embeddings integrado ao workflow resumable
+- [x] Round 2 — rerankers + OCR/VLM fallback integrados ao workflow resumable
+- [x] Round 3 — decision gate implementada com resumo JSON + markdown
+- [x] expansão incremental documentada: embeddings com subsets general/code, rerankers neurais locais condicionais e matriz OCR/VLM configurável com runtime-family explícita
+- [x] scaffold conservador de adaptação leve implementado como artefato/configuração, sem treinamento pesado
+- [x] relatório final de closure da Fase 8.5 implementado com distinção entre fully supported vs partially supported
+- [x] documentação e testes focados atualizados para sustentar a narrativa técnica da fase
+
+### Extensão recomendada — benchmark automation expandido da Fase 8.5
+
+Para um alvo mais ambicioso de portfólio, a fase pode continuar evoluindo como um **fully automated, reproducible local benchmarking system**. O que entra nessa expansão:
+
+- matriz explícita requested-vs-resolved para modelos locais
+  - `qwen3.5:4b`
+  - `phi4-mini:3.8b`
+  - `qwen2.5-coder:7b`
+  - equivalentes locais HF/MLX quando disponíveis
+- challengers locais de embeddings com política de substituição documentada
+- ranking requested-vs-resolved transparente em relatórios finais
+- benchmark mais forte de HF local / MLX local quando o path estiver limpo no ambiente
+- métricas operacionais mais profundas (`cold start`, `warm start`, `TTFT`, throughput, memória) quando houver instrumentação confiável por runtime
+
+Regra importante de honestidade:
+
+- a implementação atual da 8.5 **não deve fingir suporte universal** a todas as famílias de runtime/modelo do prompt expandido
+- o que não tiver path limpo no repo deve permanecer como:
+  - `closest_available`
+  - `skipped`
+  - ou `support boundary` explícita
+
+### Limites atuais que ainda podem subir como trabalho futuro
+
+- ampliar benchmark neural de rerankers além do baseline híbrido já limpo no repo
+- ampliar benchmark OCR/VLM com mais runtimes locais dedicados
+- validar HF local / MLX local com catálogos maiores e chat-template fairness mais forte
+- adicionar métricas operacionais mais profundas por provider/runtime
+
+### Roadmap explícito para finalizar a 8.5 expandida
+
+- [x] documentar a expansão recomendada e os limites atuais
+- [x] registrar política explícita de requested-vs-resolved model mapping
+- [x] fechar suporte limpo às famílias de runtime HF local / HF service / MLX local que realmente existirem no ambiente atual e registrar limites explícitos para os demais paths
+- [x] investigar e explicar a divergência do `embeddinggemma` via `hf_local_llm_service` quando o serviço passar isoladamente mas falhar no benchmark
+- [x] adicionar métricas operacionais mais profundas (`cold start`, `warm start`, `TTFT`, throughput, memória)
+- [x] ampliar rerankers neurais quando houver path local limpo
+- [x] ampliar OCR/VLM fallback matrix quando houver runtimes locais limpos
+- [x] rerodar benchmark expandido smoke-safe + audit + decision gate + closure
+- [x] rerodar campanha expandida non-smoke por grupos em ordem estável + audit + decision gate + closure
+
+Documento detalhado de execução dessa finalização:
+
+- `docs/PHASE_8_5_EXPANDED_COMPLETION_ROADMAP.md`
+
+### Pacotes de trabalho para fechar a 8.5 expandida
+
+#### A. Runtime-family normalization e inventory hardening
+- [x] inventariar com clareza os runtimes locais realmente disponíveis para benchmark
+  - [x] `ollama`
+  - [x] `huggingface_local`
+  - [x] `huggingface_server`
+  - [x] equivalentes `MLX local` quando houver path limpo no ambiente
+- [x] diferenciar explicitamente `requested_runtime_family` vs `resolved_runtime_family`, e não só `requested_model` vs `resolved_model`
+- [x] endurecer os metadados de benchmark para registrar motivo de resolução/substituição
+- [x] validar fairness de chat template no caminho HF local antes de comparar com Ollama
+- [x] reproduzir e explicar/corrigir a divergência do `embeddinggemma` via `hf_local_llm_service`
+
+#### B. Métricas operacionais mais profundas
+- [x] adicionar slice inicial de métricas operacionais em geração com:
+  - `total wall time`
+  - `TTFT`
+  - `throughput tokens/s`
+- [x] marcar status de métrica como `measured` vs `not_supported` nas saídas atuais
+- [x] expor esse slice inicial em raw events, CSVs normalizados, sumários agregados e markdown report
+- [x] adicionar contrato explícito de métricas para:
+  - [x] `cold start`
+  - [x] `warm start`
+  - [x] `TTFT`
+  - [x] `total wall time`
+  - [x] `throughput`
+  - [x] `memory snapshot / peak estimate`
+- [x] marcar cada métrica como:
+  - [x] `measured`
+  - [x] `estimated`
+  - [x] `not_supported`
+- [x] expor essas métricas em raw events, CSVs normalizados, sumários agregados e markdown report
+
+#### C. Embedding expansion
+- [x] fechar benchmark explícito de embeddings gerais + code subset
+- [x] adicionar challengers HF/MLX locais quando houver path executável limpo
+- [x] documentar quando um embedding geral estiver sendo reutilizado como melhor fallback disponível para código
+
+#### D. Neural reranker expansion
+- [x] criar adapter pequeno e limpo para challengers de reranker neural locais
+- [x] benchmarkar baseline atual, híbrido atual e challengers neurais realmente disponíveis
+- [x] manter `skipped` explícito para challengers indisponíveis ou sem path limpo
+
+#### E. OCR / VLM expanded fallback matrix
+- [x] manter `hybrid` e `complete` como baseline
+- [x] adicionar fallbacks OCR/VLM locais adicionais quando houver suporte limpo
+- [x] comparar qualidade por campo + custo de latência + ganho real do fallback
+
+#### F. Rerun final + closure expandida
+- [x] rerodar `preflight`
+- [x] rerodar `smoke`
+- [x] suportar e executar campanha expandida por grupos em ordem estável via `--staged-campaign` com bundles merged smoke-safe e non-smoke
+- [x] regenerar `audit`, `decision gate` e `closure`
+- [x] só declarar a 8.5 expandida como concluída quando esses artefatos estiverem consistentes com o escopo maior
+
+### Critério explícito para considerar a 8.5 expandida totalmente concluída
+
+- [x] generation matrix forte com requested-vs-resolved auditável
+- [x] embedding matrix forte incluindo code subset
+- [x] reranker matrix com baseline + challengers neurais locais quando suportados
+- [x] OCR/VLM matrix ampliada com fallback trade-offs documentados
+- [x] métricas operacionais mais ricas do que apenas wall-time simples
+- [x] closure final coerente com o escopo expandido, sem overclaim de runtimes sem path limpo
+
+### Ordem recomendada de execução no hardware atual
+
+1. `preflight` de todos os grupos
+2. `smoke` de todos os grupos
+3. full run de `generation`
+4. full run de `embeddings`
+5. full run de `rerankers`
+6. full run de `ocr_vlm`
+7. `decision gate`
+8. `closure`
+
+Nota importante de honestidade operacional:
+
+- a **implementação** da Fase 8.5 está fechada do ponto de vista técnico/local
+- o bundle final de closure pode continuar marcando **suporte parcial de Round 2** enquanto o benchmark mais recente ainda não incluir uma execução real com `rerankers` + `ocr_vlm`
+- isso não significa que o workflow esteja incompleto; significa apenas que a **evidência empírica mais recente** ainda depende de rodar esse slice quando for apropriado executar benchmarks
 
 ### Entregável
 - Relatório técnico mostrando quando Hugging Face, troca de runtime, quantização, embeddings/rerankers e fine-tuning leve geram ganho real — e quando **não** compensam
@@ -1612,6 +1801,35 @@ Essa vertical mira cenários de:
 - auditoria
 - procurement
 - governança documental
+
+### Decisão de direção já tomada nesta trilha
+
+Para o fechamento da Fase 9.5, a direção oficial do projeto passa a ser:
+
+- **`Nextcloud/WebDAV`** como alvo principal do **Document Repository MCP**
+- **`Trello`** como alvo principal do **Worklog / Action MCP**
+- **`Notion`** como camada de **evidence register / dashboard operacional / handoff executivo**
+
+Leitura arquitetural desejada:
+
+- `filesystem + SQLite` continuam como **baseline local e fallback auditável**
+- `Nextcloud/WebDAV + Trello + Notion` passam a ser a **tríade externa-alvo** da fase
+- `GitHub Issues` deixa de ser a direção principal e vira apenas uma opção secundária para contextos mais dev-centric
+
+### Decisão oficial de corpus da demo 9.5
+
+O corpus principal oficial da demo da Fase 9.5 passa a ser:
+
+- **`data/corpus_revisado/option_b_synthetic_premium`**
+
+O corpus complementar/canônico de validação pública continua sendo:
+
+- **`data/corpus_revisado/option_a_public_corpus_v2`**
+
+Mapeamento-alvo:
+
+- `option_b_synthetic_premium` -> base principal de `Nextcloud/WebDAV`, storylines de `Trello` e registers de `Notion`
+- `option_a_public_corpus_v2` -> complemento público/canônico para benchmark, validação e referências
 - operações com forte dependência de evidências e revisão humana
 
 ### Direção recomendada
@@ -1623,8 +1841,11 @@ Essa vertical mira cenários de:
 
 ### Checklist
 - [x] definir o caso principal do MCP (`EvidenceOps MCP`)
-- [ ] criar um **Document Repository MCP** usando fonte gratuita/self-hosted (`filesystem`, `Nextcloud`, `WebDAV`, sincronização de drive ou equivalente)
-- [ ] criar um **Worklog / Action MCP** usando `SQLite`, `GitHub Issues` free ou fila operacional local
+- [x] definir a tríade externa-alvo da fase 9.5 (`Nextcloud/WebDAV` + `Trello` + `Notion`)
+- [x] promover a vertical local para **MCP server real** + **cliente MCP do app**
+- [ ] criar um **Document Repository MCP** usando target oficial `Nextcloud/WebDAV`
+- [ ] criar um **Worklog / Action MCP** usando target oficial `Trello`
+- [ ] criar uma camada `Notion` para evidence register, dashboard operacional e handoff executivo
 - [ ] criar um corpus de demo curado para negócio (`policies`, `contracts`, `audit`, `templates`, `gold_sets`)
 - [ ] suportar busca documental externa e recuperação com fontes via MCP
 - [ ] suportar comparação de versões e drift documental (policy/contract/template)
@@ -1633,22 +1854,48 @@ Essa vertical mira cenários de:
 - [x] montar evidence pack estruturado reaproveitável
 - [x] registrar pendências/ações em store auditável
 - [ ] adicionar guardrails, permissões e revisão humana nas ações sensíveis
-- [ ] medir latência, consumo e custo operacional por fluxo MCP
-- [ ] criar demo end-to-end do caso empresarial
+- [x] medir latência, consumo e custo operacional por fluxo MCP local
+- [x] criar demo end-to-end local do caso empresarial via MCP
+- [ ] criar demo end-to-end com adapters externos (`Nextcloud/WebDAV` + `Trello` + `Notion`)
 
 ### Status local adiantado nesta rodada
 
 - o worklog local do EvidenceOps agora gera `evidence_pack` estruturado com contagens por finding/action/owner/status/due_date
 - o agregado local já resume melhor documentos únicos, tipos de finding e distribuição operacional
 - agora também existe store auditável local em `SQLite` para pendências/ações derivadas do worklog (`.phase95_evidenceops_actions.sqlite3`)
-- a parte MCP externa continua pendente e ainda não foi iniciada nesta rodada
+- a vertical foi promovida para **MCP server real em stdio** com tools/resources de repository, worklog e action store
+- o app agora tem **cliente MCP próprio** e já usa MCP no fluxo principal do `document_agent`
+- a observabilidade agora já mede **métricas específicas de MCP** no runtime snapshot/sidebar
+- existe demo end-to-end local por script e também console operacional do MCP dentro do app
+- a parte de adapters externos (`Nextcloud/WebDAV`, `Trello`, `Notion`) continua pendente e depende de credenciais/configuração
 
 ### Stack gratuita sugerida
 - `filesystem` local como baseline
 - `Nextcloud` / `WebDAV` para base documental remota sem custo
-- `SQLite` para store operacional local
-- `GitHub Issues` free ou fila local para registro de gaps e próximos passos
+- `Trello` para fila operacional, owners, comentários e fluxo humano de ações
+- `Notion` para evidence register, dashboard operacional e visibilidade executiva
+- `SQLite` para store operacional local/fallback auditável
+- `GitHub Issues` apenas como opção secundária se o contexto do time for fortemente dev-centric
 - `Ollama` / `hf_local_llm_service` como camada principal de inferência local
+
+### O que ainda depende de setup externo
+
+Para fechar a fase completa no sentido do roadmap, ainda serão necessários:
+
+- **Nextcloud/WebDAV**
+  - base URL
+  - usuário
+  - senha ou app password
+  - pasta/base documental alvo
+- **Trello**
+  - API key
+  - token
+  - board alvo
+  - listas/estados mínimos (`Open`, `Review`, `Approved`, `Done` ou equivalente)
+- **Notion**
+  - integration token
+  - database IDs ou page IDs
+  - definição mínima do schema para evidence packs, status, owner, due date e links de origem
 
 ### Entregável
 - primeiro MCP empresarial útil e auditável, integrado ao copiloto documental, com caso de uso demonstrável de negócio
@@ -1674,27 +1921,27 @@ Transformar o projeto em algo tecnicamente defendível.
 
 ### Checklist
 - [x] Criar testes unitários das partes críticas
-- [ ] Criar testes smoke da aplicação
+- [x] Criar testes smoke da aplicação
 - [x] Criar testes dos fluxos de RAG
 - [x] Criar testes dos schemas estruturados
 - [x] Criar testes do roteador de intenção
 - [x] Criar testes dos grafos LangGraph e das transições críticas de estado
 - [x] Criar testes dos caminhos de retry, fallback e revisão humana nos workflows LangGraph
-- [ ] Adicionar `Dockerfile`
+- [x] Adicionar `Dockerfile`
 - [x] Criar GitHub Actions para checks/testes
-- [ ] Padronizar tratamento de falhas
+- [x] Padronizar tratamento de falhas
 - [x] Criar arquivo central de configuração
-- [ ] Padronizar logs
-- [ ] Revisar estrutura do código para clareza e manutenção
-- [ ] Medir gargalos de performance de retrieval e geração
+- [x] Padronizar logs
+- [x] Revisar estrutura do código para clareza e manutenção
+- [x] Medir gargalos de performance de retrieval e geração
 
 ### Entregável
-- Repositório com padrão profissional de engenharia
+- [x] Repositório com padrão profissional de engenharia
 
 ### Evidência para GitHub/LinkedIn
-- badge de CI no README
-- screenshot ou trecho do pipeline rodando
-- documento curto de decisões arquiteturais
+- [x] badge de CI no README
+- [ ] screenshot ou trecho do pipeline rodando
+- [x] documento curto de decisões arquiteturais
 
 ### O que preciso saber defender em entrevista
 - o que mudaria para produção
@@ -1704,10 +1951,91 @@ Transformar o projeto em algo tecnicamente defendível.
 ---
 
 
-## Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web
+## Fase 10.25 — Split oficial entre AI Lab e produto: Streamlit -> Gradio -> App Web
 
 ### Objetivo
-Evoluir a interface do projeto de uma UI de prototipagem para uma UI de demo AI-first e, depois, para uma aplicação web mais próxima de produto real antes do deploy na Oracle.
+Evoluir a interface do projeto separando formalmente:
+
+- **Streamlit** como **AI Lab dashboard**
+- **Gradio** como superfície de **produto**
+- **app/web** como evolução posterior mais próxima de produto real antes do deploy na Oracle
+
+### Decisão adicional já tomada nesta trilha
+
+Dentro desta fase, a leitura oficial da interface passa a ser:
+
+- o **produto principal** será apresentado como **Decision workflows grounded em documentos**
+- a superfície de **produto** ficará no **Gradio**
+- a superfície de **AI Lab** ficará no **Streamlit**
+- o Streamlit atual deve ser **adaptado primeiro** para assumir o papel de dashboard de engenharia, antes de abrir um novo app Streamlit separado
+- os quatro subworkflows principais do produto passam a ser:
+  1. **Document Review**
+  2. **Policy / Contract Comparison**
+  3. **Action Plan / Evidence Review**
+  4. **Candidate Review**
+- `cv_analysis` deixa de ser surface de produto e passa a ser entendido como **engine interna** do workflow **Candidate Review**
+- **Executive Deck Generation** passa a ser capability transversal desses workflows, e não workflow concorrente
+
+Documento de referência desta decisão:
+
+- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md`
+
+Dentro da evolução para backend HTTP + app web, a direção adotada passa a incluir explicitamente uma capability de **Executive Deck Generation** usando o `ppt_creator_app` como serviço/renderizador especializado.
+
+Leitura arquitetural decidida:
+
+- o **AI Workbench Local** continua como fonte da verdade de benchmark, eval, EvidenceOps e outputs estruturados
+- o **`ppt_creator_app`** entra como camada especializada de **renderização executiva** (`JSON estruturado -> deck .pptx`)
+- a capability deve ser entendida como um subproduto recorrente do ecossistema, e não como export isolado
+- as famílias de decks prioritárias passam a ser:
+  1. **summary / executive review decks**
+  2. **document review decks**
+  3. **comparison / decision decks**
+  4. **action-plan decks**
+  5. **candidate review decks**
+  6. **evidence / audit decks**
+- o primeiro slice priorizado dessa capability continua sendo:
+  - **benchmark/eval -> executive review deck**
+- a ordem recomendada dessa trilha passa a ser:
+  1. capability map e catálogo oficial de deck types
+  2. contrato intermediário versionado para o primeiro deck
+  3. adapter local no AI Workbench
+  4. chamada HTTP para o serviço de decks
+  5. UX mínima no app atual
+  6. só depois Docker/porta/volume como caminho operacional padrão
+
+Documentação inicial desta decisão:
+
+- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+- `docs/PRESENTATION_EXPORT_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/PHASE_10_25_PRESENTATION_EXPORT_PRODUCTIZATION.md`
+- `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
+- `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
+- `docs/EXECUTIVE_DECK_GENERATION_SERVICE_ARCHITECTURE.md`
+- `docs/EXECUTIVE_DECK_GENERATION_API_CONTRACT.md`
+- `docs/EXECUTIVE_DECK_GENERATION_ARTIFACT_LIFECYCLE.md`
+- `docs/EXECUTIVE_DECK_GENERATION_UX_SPEC.md`
+- `docs/EXECUTIVE_DECK_GENERATION_TEST_STRATEGY.md`
+- `docs/EXECUTIVE_DECK_GENERATION_QUALITY_AND_GOVERNANCE.md`
+
+### Roadmap específico da capability
+
+Prioridade recomendada do catálogo:
+
+#### P1 — fechar agora
+
+1. **Benchmark & Eval Executive Review Deck**
+
+#### P2 — subir em seguida
+
+2. **Document Review Deck**
+3. **Policy / Contract Comparison Deck**
+
+#### P3 — expansão do subproduto
+
+4. **Action Plan Deck**
+5. **Candidate Review Deck**
+6. **Evidence Pack / Audit Deck**
 
 ### Tese desta fase
 Esta fase existe para provar maturidade de produto e de arquitetura de interface.
@@ -1717,6 +2045,71 @@ A ideia não é migrar cedo demais, e sim mostrar uma progressão defendível:
 - **Gradio** para demo AI-first mais clara
 - **app/website real** para uma camada de produto mais sólida antes do deploy público
 
+### Como ficará o Streamlit adaptado
+
+O Streamlit atual deve ser reorganizado para virar o **AI Lab dashboard**, com uma navegação orientada a engenharia.
+
+Estrutura recomendada:
+
+1. **Lab Overview**
+2. **Benchmarks & Model Comparison**
+3. **Evals & Diagnosis**
+4. **Runtime & Observability**
+5. **Document Agent & Workflow Inspector**
+6. **EvidenceOps / MCP / Ops Console**
+7. **Structured / Advanced Experiments**
+
+Regra prática:
+
+- o Streamlit deixa de ser a homepage do produto
+- ele vira a superfície oficial de benchmark, evals, observabilidade, tracing e operações avançadas
+
+### Como ficará o Gradio de produto
+
+O Gradio deve nascer como a superfície principal de **Decision workflows grounded em documentos**.
+
+Shell comum recomendado:
+
+1. home com os 4 workflows
+2. seleção do workflow
+3. entrada documental
+4. preview grounded
+5. findings / recommendation
+6. ações finais (`download`, `export`, `deck`, `handoff`)
+
+Workflows principais:
+
+1. **Document Review**
+2. **Policy / Contract Comparison**
+3. **Action Plan / Evidence Review**
+4. **Candidate Review**
+
+Regra prática:
+
+- `cv_analysis` continua interno
+- o produto expõe **Candidate Review**
+- `Executive Deck Generation` entra como capability transversal, não como workflow separado
+
+### Mapa inicial de migração
+
+Vai para o **Streamlit / AI Lab**:
+
+- model comparison
+- benchmark/evals
+- diagnosis
+- runtime economics
+- workflow traces
+- MCP / EvidenceOps console
+- superfícies avançadas e experimentais
+
+Vai para o **Gradio / produto**:
+
+- Document Review
+- Policy / Contract Comparison
+- Action Plan / Evidence Review
+- Candidate Review
+- artefatos finais e deck generation do produto
+
 ### Quando executar
 Executar apenas quando:
 
@@ -1725,33 +2118,61 @@ Executar apenas quando:
 - structured outputs, benchmark, evals e observabilidade já estiverem defensáveis
 
 ### Checklist
+- [ ] Classificar a UI atual entre **Business Workflows / produto** e **AI Lab**
+- [ ] Adaptar o Streamlit atual para ele assumir explicitamente o papel de **AI Lab dashboard**
+- [ ] Definir a navegação oficial do Streamlit adaptado (`Lab Overview`, `Benchmarks`, `Evals`, `Runtime`, `Workflow Inspector`, `MCP`, `Advanced`)
+- [ ] Definir um decision gate para decidir se a adaptação do Streamlit atual basta ou se um novo app Streamlit do lab será necessário
 - [ ] Garantir que a lógica de negócio esteja desacoplada da UI Streamlit atual
-- [ ] Identificar os fluxos principais que precisam existir na interface intermediária
-- [ ] Criar uma primeira UI em Gradio para os fluxos mais fortes do produto
+- [ ] Formalizar o produto principal como **Decision workflows grounded em documentos**
+- [ ] Identificar os 4 subworkflows principais que precisam existir na interface intermediária
+- [ ] Promover `cv_analysis` a engine interna de `Candidate Review`
+- [ ] Definir o shell comum do Gradio (`workflow selector`, `grounded preview`, `findings`, `artifacts`)
+- [ ] Formalizar o catálogo oficial de deck types da capability `Executive Deck Generation`
+- [ ] Fechar o P1 `Benchmark & Eval Executive Review Deck`
+- [ ] Planejar o P2 `Document Review Deck`
+- [ ] Planejar o P2 `Policy / Contract Comparison Deck`
+- [ ] Planejar o P2 `Action Plan / Evidence Review`
+- [ ] Planejar o P2 `Candidate Review`
+- [ ] Criar uma primeira UI em Gradio para os 4 workflows principais do produto
 - [ ] Comparar Streamlit vs Gradio em velocidade de iteração, clareza da demo e aderência ao caso de uso
 - [ ] Documentar por que Gradio entrou e o que melhorou
 - [ ] Extrair backend HTTP claro para suportar frontend desacoplado
 - [ ] Definir contratos explícitos entre frontend e backend
+- [ ] Integrar a capability `Executive Deck Generation` ao backend do produto via contratos intermediários versionados
+- [ ] Implementar `presentation_export_service` chamando o `ppt_creator_app` por HTTP
+- [ ] Externalizar configuração da integração (`PRESENTATION_EXPORT_BASE_URL`, timeout e estratégia de artefatos)
 - [ ] Criar frontend web mais próximo de produto real
 - [ ] Desacoplar estado de sessão, autenticação futura e chamadas de inferência da UI original
+- [ ] Expor na UI catálogo explícito de geração de decks executivos, começando por benchmark/eval e depois document review/comparison
 - [ ] Preparar o sistema para deploy com separação clara entre frontend, backend e bridge de inferência local
 
 ### Entregável
+- dashboard **AI Lab** funcional em Streamlit
 - versão Gradio funcional para demo AI-first
+- versão Gradio com os 4 workflows principais do produto
 - versão web mais próxima de produto real preparada para deploy
+- Executive Deck Generation preparada como capability recorrente do produto via backend HTTP
 - documentação da evolução da interface
 
 ### Evidência para GitHub/LinkedIn
+- screenshot do dashboard do AI Lab
 - screenshot comparando Streamlit e Gradio
 - vídeo curto mostrando a evolução da UI
 - screenshot do app/web final antes do deploy
+- screenshot/GIF mostrando geração de decks executivos recorrentes a partir de benchmark/eval e fluxos documentais
 - diagrama da evolução da arquitetura de interface
 
 ### O que preciso saber defender em entrevista
+- por que separei produto e AI Lab em superfícies diferentes
+- por que adaptei primeiro o Streamlit atual como dashboard de engenharia
 - por que comecei com Streamlit
 - por que Gradio fez sentido como etapa intermediária
 - por que um app/web real foi necessário antes do deploy público
 - como mantive a lógica de negócio desacoplada da camada de interface
+- por que o produto foi organizado em 4 workflows grounded em documentos
+- por que `Candidate Review` entra no produto enquanto `cv_analysis` continua como engine interna
+- por que tratei Executive Deck Generation como capability do produto, e não como export isolado
+- por que mantive o `ppt_creator_app` como serviço especializado de artefatos em vez de misturar essa lógica ao core do runtime de IA
 
 ---
 
@@ -1905,7 +2326,7 @@ Este projeto deve evoluir de um chat local com LLM para uma **plataforma de IA a
 6. **Fase 9.25 — AI runtime economics, usage observability e budget-aware routing**
 7. **Fase 9.5 — MCPs e integrações operacionais empresariais**
 8. **Fase 10 — Engenharia profissional**
-9. **Fase 10.25 — Evolução de interface: Streamlit -> Gradio -> App Web**
+9. **Fase 10.25 — Split oficial entre AI Lab e produto: Streamlit -> Gradio -> App Web**
 10. **Fase 10.5 — Deploy híbrido demonstrável (Oracle + Cloudflare Tunnel + Ollama local)**
 11. **Fase 11 — Pacote final de portfólio**
 

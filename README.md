@@ -1,5 +1,7 @@
 # AI Workbench Local
 
+[![phase8-evals](https://github.com/danyellambert/ai-workbench-local/actions/workflows/phase8-evals.yml/badge.svg)](https://github.com/danyellambert/ai-workbench-local/actions/workflows/phase8-evals.yml)
+
 Plataforma de IA aplicada para experimentar **LLMs locais**, conversar com documentos, comparar estratégias de ingestão e retrieval, avaliar respostas e evoluir um pipeline de **RAG robusto, explicável e orientado a portfólio**.
 
 ---
@@ -26,6 +28,33 @@ Além das fases anteriores já consolidadas, o projeto agora também possui uma 
 Documentação desta rodada:
 
 - `docs/PHASE_9_25_RUNTIME_ECONOMICS_AND_EVIDENCEOPS_LOCAL.md`
+- `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`
+- `docs/PROJECT_POSITIONING_TWO_TRACKS.md` → leitura oficial do projeto em duas trilhas: **Business Workflows** + **AI Engineering Lab**
+- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md` → split oficial entre **produto em Gradio** e **AI Lab dashboard**
+
+---
+
+## Leitura estratégica atual
+
+Para manter o projeto compreensível como produto e portfólio, a narrativa oficial passa a ser organizada em duas trilhas complementares:
+
+1. **Business Workflows / produto**
+   - resolve o problema de negócio com **Decision workflows grounded em documentos**
+   - subworkflows principais: **Document Review**, **Policy / Contract Comparison**, **Action Plan / Evidence Review** e **Candidate Review**
+   - **Executive Deck Generation** entra como capability transversal desses workflows
+
+2. **AI Engineering Lab**
+   - mede, compara e evolui modelos, retrieval, routing, evals e observabilidade que sustentam o produto
+
+Também passa a valer uma separação explícita de superfícies:
+
+- **Gradio** = produto (`Decision workflows grounded em documentos`)
+- **Streamlit** = AI Lab dashboard
+
+Documento de referência:
+
+- `docs/PROJECT_POSITIONING_TWO_TRACKS.md`
+- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md`
 
 ---
 
@@ -131,6 +160,26 @@ Exemplo de modelos locais:
 - geração: `qwen2.5:7b`
 - embeddings: modelo configurado no `.env`
 
+### 3.1. Suba o renderer de deck em modo host-native
+
+Para o slice atual de **Executive Deck Generation**, o caminho recomendado agora é manter o `ppt_creator_app` rodando nativamente no host, como serviço HTTP local:
+
+```bash
+bash scripts/run_ppt_creator_renderer_host.sh
+```
+
+Cheque rapidamente a saúde do serviço:
+
+```bash
+curl http://127.0.0.1:8787/health
+```
+
+Notas importantes:
+
+- o app principal já está configurado para falar com `PRESENTATION_EXPORT_BASE_URL=http://127.0.0.1:8787`
+- o fluxo atual usa `GET /health`, `POST /render` e `GET /artifact`
+- o caminho **Docker-later** do `ppt_creator_app` foi preparado no repositório irmão, mas o modo host-native continua sendo a operação recomendada agora
+
 ### 4. Execute a versão principal
 
 ```bash
@@ -141,6 +190,7 @@ O app principal mantém:
 
 - `ollama` como provider default
 - `huggingface_server` como provider opcional para apontar para um endpoint OpenAI-compatible, como o `hf_local_llm_service`
+- `ppt_creator_app` como renderer HTTP especializado para o P1 de Executive Deck Generation quando o serviço local estiver disponível
 
 ### 4.1 Usar o `hf_local_llm_service` como AI hub opcional
 
@@ -202,6 +252,24 @@ Preencha `OPENAI_API_KEY` no `.env` e rode:
 ```bash
 streamlit run main.py
 ```
+
+### 6. Rodar via Docker (Fase 10)
+
+```bash
+docker build -t ai-workbench-local .
+docker run --rm -p 8501:8501 --env-file .env ai-workbench-local
+```
+
+### 7. Qualidade de engenharia da Fase 10
+
+Esta fase passou a incluir explicitamente:
+
+- `Dockerfile` e `.dockerignore`
+- smoke tests reais das apps Streamlit com `streamlit.testing.v1`
+- logging central da aplicação
+- tratamento padronizado de falhas nos fluxos críticos de UI
+- observabilidade de gargalos de latência em retrieval / geração / prompt build
+- documentação curta das decisões de engenharia
 
 ---
 
