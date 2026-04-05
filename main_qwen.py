@@ -2,9 +2,11 @@ import time
 from dataclasses import replace
 
 import streamlit as st
-from src.config import get_ollama_settings, get_rag_settings
+from src.app.bootstrap import build_app_bootstrap
+from src.config import get_ollama_settings, get_presentation_export_settings, get_rag_settings
 from src.evidence_cv.config import build_evidence_config_from_rag_settings
 from src.prompt_profiles import build_prompt_messages, get_prompt_profiles
+from src.services.presentation_export import DEFAULT_PRESENTATION_EXPORT_KIND
 from src.providers.registry import (
     build_embedding_provider_sidebar_state,
     build_provider_registry,
@@ -34,6 +36,8 @@ from src.services.chat_state import (
     initialize_chat_state,
     set_last_latency,
 )
+from src.services.app_errors import build_ui_error_message
+from src.services.app_logging import configure_logging, get_logger
 from src.storage.chat_history import clear_chat_history, load_chat_history, save_chat_history
 from src.storage.phase55_shadow_log import (
     append_shadow_log_entry,
@@ -63,6 +67,7 @@ from src.storage.phase95_evidenceops_worklog import append_evidenceops_worklog_e
 from src.storage.runtime_execution_log import append_runtime_execution_log_entry
 from src.storage.rag_store import clear_rag_store, load_rag_store, save_rag_store
 from src.services.document_context import build_structured_document_context
+from src.services.evidenceops_mcp_client import register_evidenceops_entry_via_mcp
 from src.services.evidenceops_worklog import build_evidenceops_worklog_entry
 from src.services.model_comparison import (
     MODEL_COMPARISON_FORMAT_OPTIONS,
@@ -99,6 +104,7 @@ from src.structured.langgraph_workflow import (
     describe_structured_execution_strategy,
     run_structured_execution_workflow,
 )
+from src.structured.parsers import attempt_controlled_failure
 from src.structured.registry import build_structured_task_registry
 from src.structured.service import structured_service
 from src.structured.tasks import (
@@ -109,17 +115,24 @@ from src.structured.tasks import (
     build_checklist_execution_preview,
 )
 from src.ui.chat import render_chat_message
+from src.ui.evidenceops_mcp_panel import render_evidenceops_mcp_panel
+from src.ui.executive_deck_generation import render_executive_deck_generation_panel
 from src.ui.sidebar import render_chat_sidebar, render_runtime_sidebar_panel
 from src.ui.structured_outputs import render_structured_result
 
 
-settings = get_ollama_settings()
-rag_settings = get_rag_settings()
-evidence_config = build_evidence_config_from_rag_settings(rag_settings)
-provider_registry = build_provider_registry()
-prompt_profiles = get_prompt_profiles()
-structured_task_registry = build_structured_task_registry()
-embedding_sidebar_state = build_embedding_provider_sidebar_state(provider_registry)
+configure_logging()
+logger = get_logger(__name__)
+
+app_bootstrap = build_app_bootstrap()
+settings = app_bootstrap.settings
+rag_settings = app_bootstrap.rag_settings
+evidence_config = app_bootstrap.evidence_config
+provider_registry = app_bootstrap.provider_registry
+prompt_profiles = app_bootstrap.prompt_profiles
+structured_task_registry = app_bootstrap.structured_task_registry
+presentation_export_settings = get_presentation_export_settings()
+embedding_sidebar_state = app_bootstrap.embedding_sidebar_state
 embedding_capable_registry = embedding_sidebar_state["available_registry"]
 if not embedding_capable_registry:
     raise RuntimeError("Nenhum provider com suporte a embeddings está disponível no ambiente atual.")
@@ -143,6 +156,10 @@ STRUCTURED_RENDER_MODE_STATE_KEY = "phase5_structured_render_mode"
 MODEL_COMPARISON_RESULT_STATE_KEY = "phase7_model_comparison_result"
 CHAT_DOCUMENT_SELECTION_STATE_KEY = "phase5_chat_document_ids"
 STRUCTURED_DOCUMENT_SELECTION_STATE_KEY = "phase5_structured_document_ids"
+EVIDENCEOPS_MCP_LAST_ENTRY_STATE_KEY = "phase95_evidenceops_mcp_last_entry"
+EVIDENCEOPS_MCP_LAST_REGISTER_RESULT_STATE_KEY = "phase95_evidenceops_mcp_last_register_result"
+EVIDENCEOPS_MCP_LAST_TELEMETRY_STATE_KEY = "phase95_evidenceops_mcp_last_telemetry"
+EVIDENCEOPS_MCP_CONSOLE_STATE_KEY = "phase95_evidenceops_mcp_console_state"
 PHASE7_DOCUMENT_SELECTION_STATE_KEY = "phase7_model_comparison_document_ids"
 PHASE55_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langchain_shadow_log.json"
 PHASE55_LANGGRAPH_SHADOW_LOG_PATH = settings.history_path.parent / ".phase55_langgraph_shadow_log.json"
@@ -1106,9 +1123,12 @@ if clear_requested:
     clear_chat_history(settings.history_path)
     st.rerun()
 
-st.write(f"# {settings.project_name}")
+st.write(f"# {settings.project_name} — AI Lab")
 st.caption(
-    f"Provider: `{selected_provider}` · Modelo: `{selected_model}` · Perfil: `{selected_prompt_profile}` · Temperatura: `{temperature:.1f}` · Contexto ({context_window_mode}): `{context_window}`"
+    f"AI Lab runtime: provider=`{selected_provider}` · model=`{selected_model}` · prompt_profile=`{selected_prompt_profile}` · temperature=`{temperature:.1f}` · context ({context_window_mode})=`{context_window}``"
+)
+st.caption(
+    "Esta superfície concentra benchmark, evals, observabilidade, MCP e inspeção técnica. Os workflows de produto passam a viver na UI em Gradio."
 )
 st.caption(
     f"Embedding: provider={effective_rag_settings.embedding_provider} · model={effective_rag_settings.embedding_model} · embedding_num_ctx={effective_rag_settings.embedding_context_window} · truncate={effective_rag_settings.embedding_truncate}"
@@ -1163,8 +1183,8 @@ if hasattr(selected_provider_instance, "inspect_context_window"):
         )
 
 st.divider()
-documents_tab, chat_tab, structured_tab, comparison_tab = st.tabs(
-    ["📚 Documentos", "💬 Chat com RAG", "🧱 Documento estruturado", "⚖️ Comparar modelos"]
+documents_tab, chat_tab, structured_tab, comparison_tab, evidenceops_tab = st.tabs(
+    ["📚 Documentos", "💬 Chat com RAG", "🧱 Documento estruturado", "⚖️ Comparar modelos", "🧾 EvidenceOps MCP"]
 )
 
 with documents_tab:
@@ -1311,7 +1331,8 @@ with documents_tab:
             )
             st.rerun()
         except Exception as error:
-            st.error(f"Erro ao indexar documento: {error}")
+            logger.exception("Document indexing failed")
+            st.error(build_ui_error_message("Erro ao indexar documento", error))
 
     if clear_rag_requested:
         sync_status = clear_persisted_rag_index(effective_rag_settings)
@@ -1717,7 +1738,8 @@ with chat_tab:
                         )
                         phase55_shadow_log_summary = summarize_shadow_log(phase55_shadow_log_entries)
             except Exception as error:
-                st.warning(f"Não foi possível recuperar contexto do documento. A resposta seguirá sem RAG. Detalhes: {error}")
+                logger.exception("Chat retrieval failed; continuing without RAG")
+                st.warning(build_ui_error_message("Não foi possível recuperar contexto do documento. A resposta seguirá sem RAG", error))
                 retrieved_chunks = []
                 retrieval_backend_used = "error"
                 retrieval_backend_message = str(error)
@@ -1859,6 +1881,7 @@ with chat_tab:
                                 if shadow_snippet:
                                     st.code(shadow_snippet)
             except Exception as erro:
+                logger.exception("Chat generation failed")
                 set_last_latency(None)
                 chat_error_message = str(erro)
                 texto_resposta_ia = chat_execution_provider_instance.format_error(chat_execution_model, erro)
@@ -2474,49 +2497,74 @@ with structured_tab:
                     "budget_quality_gate": structured_quality_gate,
                 },
             )
-            structured_result = run_structured_execution_workflow(
-                structured_request,
-                strategy=selected_structured_execution_strategy,
-            )
             structured_shadow_summary = None
-            if shadow_compare_structured:
-                alternate_strategy = (
-                    "direct"
-                    if selected_structured_execution_strategy == "langgraph_context_retry"
-                    else "langgraph_context_retry"
+            try:
+                structured_result = run_structured_execution_workflow(
+                    structured_request,
+                    strategy=selected_structured_execution_strategy,
                 )
-                progress_placeholder.markdown("**97%** · Executando comparação shadow direct vs LangGraph")
-                alternate_request = structured_request.model_copy(
-                    update={
-                        "progress_callback": None,
-                        "telemetry": {"current_stage": "structured_shadow_initialized"},
+                if shadow_compare_structured:
+                    alternate_strategy = (
+                        "direct"
+                        if selected_structured_execution_strategy == "langgraph_context_retry"
+                        else "langgraph_context_retry"
+                    )
+                    progress_placeholder.markdown("**97%** · Executando comparação shadow direct vs LangGraph")
+                    alternate_request = structured_request.model_copy(
+                        update={
+                            "progress_callback": None,
+                            "telemetry": {"current_stage": "structured_shadow_initialized"},
+                        }
+                    )
+                    alternate_structured_result = run_structured_execution_workflow(
+                        alternate_request,
+                        strategy=alternate_strategy,
+                    )
+                    structured_shadow_summary = _build_structured_shadow_summary(
+                        structured_result,
+                        alternate_structured_result,
+                    )
+                    metadata = structured_result.execution_metadata if isinstance(structured_result.execution_metadata, dict) else {}
+                    structured_result.execution_metadata = {
+                        **metadata,
+                        "execution_shadow_summary": structured_shadow_summary,
                     }
+                    phase55_langgraph_shadow_log_entries = append_langgraph_shadow_log_entry(
+                        PHASE55_LANGGRAPH_SHADOW_LOG_PATH,
+                        _build_structured_shadow_log_entry(
+                            task_type=selected_structured_task,
+                            query=structured_input_text,
+                            provider=selected_provider,
+                            model=selected_model,
+                            document_ids=list(active_structured_document_ids if structured_use_documents else []),
+                            shadow_summary=structured_shadow_summary,
+                        ),
+                    )
+                    phase55_langgraph_shadow_log_summary = summarize_langgraph_shadow_log(phase55_langgraph_shadow_log_entries)
+            except Exception as error:
+                logger.exception("Structured execution failed")
+                structured_error_message = build_ui_error_message("Falha na execução estruturada", error)
+                structured_result = attempt_controlled_failure(
+                    raw_response="",
+                    task_type=selected_structured_task,
+                    error_message=structured_error_message,
                 )
-                alternate_structured_result = run_structured_execution_workflow(
-                    alternate_request,
-                    strategy=alternate_strategy,
-                )
-                structured_shadow_summary = _build_structured_shadow_summary(
-                    structured_result,
-                    alternate_structured_result,
-                )
-                metadata = structured_result.execution_metadata if isinstance(structured_result.execution_metadata, dict) else {}
                 structured_result.execution_metadata = {
-                    **metadata,
-                    "execution_shadow_summary": structured_shadow_summary,
+                    "provider": structured_effective_provider,
+                    "model": structured_execution_model,
+                    "execution_strategy_used": selected_structured_execution_strategy,
+                    "context_strategy": structured_context_strategy,
+                    "telemetry": {
+                        "budget_routing_mode": structured_budget_decision.get("routing_mode"),
+                        "budget_routing_reason": structured_budget_decision.get("reason"),
+                        "budget_auto_degrade_applied": structured_budget_decision.get("auto_degrade_applied"),
+                        "budget_alert_status": "warn",
+                        "budget_alerts": [structured_error_message],
+                        "timings_s": {},
+                        "provider_calls": [],
+                    },
                 }
-                phase55_langgraph_shadow_log_entries = append_langgraph_shadow_log_entry(
-                    PHASE55_LANGGRAPH_SHADOW_LOG_PATH,
-                    _build_structured_shadow_log_entry(
-                        task_type=selected_structured_task,
-                        query=structured_input_text,
-                        provider=selected_provider,
-                        model=selected_model,
-                        document_ids=list(active_structured_document_ids if structured_use_documents else []),
-                        shadow_summary=structured_shadow_summary,
-                    ),
-                )
-                phase55_langgraph_shadow_log_summary = summarize_langgraph_shadow_log(phase55_langgraph_shadow_log_entries)
+                st.error(structured_error_message)
             if displayed_progress["value"] < 100:
                 for next_progress in range(displayed_progress["value"] + 1, 101):
                     displayed_progress["value"] = next_progress
@@ -2581,6 +2629,55 @@ with structured_tab:
                 or structured_result.parsing_error
                 or (structured_result.error.message if structured_result.error else None)
             )
+            evidenceops_mcp_summary: dict[str, object] = {}
+            if selected_structured_task == "document_agent" and isinstance(structured_result.validated_output, DocumentAgentPayload):
+                evidenceops_entry = build_evidenceops_worklog_entry(
+                    payload=structured_result.validated_output,
+                    query=structured_input_text,
+                    document_ids=list(active_structured_document_ids if structured_use_documents else []),
+                    execution_metadata=structured_result_metadata,
+                )
+                try:
+                    evidenceops_mcp_result, evidenceops_mcp_summary = register_evidenceops_entry_via_mcp(evidenceops_entry)
+                    st.session_state[EVIDENCEOPS_MCP_LAST_ENTRY_STATE_KEY] = evidenceops_entry
+                    st.session_state[EVIDENCEOPS_MCP_LAST_REGISTER_RESULT_STATE_KEY] = evidenceops_mcp_result
+                    st.session_state[EVIDENCEOPS_MCP_LAST_TELEMETRY_STATE_KEY] = evidenceops_mcp_summary
+                    if isinstance(structured_result_metadata, dict):
+                        structured_result_metadata["evidenceops_mcp"] = {
+                            **evidenceops_mcp_summary,
+                            "register_result": evidenceops_mcp_result,
+                        }
+                except Exception as error:
+                    logger.exception("EvidenceOps MCP registration failed; falling back to local stores")
+                    append_evidenceops_worklog_entry(
+                        PHASE95_EVIDENCEOPS_WORKLOG_PATH,
+                        evidenceops_entry,
+                    )
+                    inserted_actions = append_evidenceops_actions_from_worklog_entry(
+                        PHASE95_EVIDENCEOPS_ACTION_STORE_PATH,
+                        evidenceops_entry,
+                    )
+                    evidenceops_mcp_summary = {
+                        "server_name": "evidenceops-local-mcp",
+                        "transport": "stdio",
+                        "status": "fallback_local",
+                        "tool_call_count": 1,
+                        "read_call_count": 0,
+                        "write_call_count": 1,
+                        "error_call_count": 1,
+                        "total_latency_s": 0.0,
+                        "tool_names": ["register_evidenceops_entry"],
+                        "error_message": str(error),
+                        "fallback_actions_inserted": int(inserted_actions),
+                    }
+                    st.session_state[EVIDENCEOPS_MCP_LAST_ENTRY_STATE_KEY] = evidenceops_entry
+                    st.session_state[EVIDENCEOPS_MCP_LAST_REGISTER_RESULT_STATE_KEY] = {
+                        "fallback": True,
+                        "actions_inserted": int(inserted_actions),
+                    }
+                    st.session_state[EVIDENCEOPS_MCP_LAST_TELEMETRY_STATE_KEY] = dict(evidenceops_mcp_summary)
+                    if isinstance(structured_result_metadata, dict):
+                        structured_result_metadata["evidenceops_mcp"] = dict(evidenceops_mcp_summary)
             append_runtime_execution_log_entry(
                 RUNTIME_EXECUTION_LOG_PATH,
                 _build_runtime_execution_log_entry(
@@ -2642,25 +2739,19 @@ with structured_tab:
                         "budget_alert_status": structured_budget_alerts.get("status"),
                         "budget_alerts": structured_budget_alerts.get("alerts"),
                         "budget_thresholds": structured_budget_alerts.get("thresholds"),
+                        "mcp_server": evidenceops_mcp_summary.get("server_name"),
+                        "mcp_transport": evidenceops_mcp_summary.get("transport"),
+                        "mcp_status": evidenceops_mcp_summary.get("status"),
+                        "mcp_tool_call_count": evidenceops_mcp_summary.get("tool_call_count"),
+                        "mcp_read_call_count": evidenceops_mcp_summary.get("read_call_count"),
+                        "mcp_write_call_count": evidenceops_mcp_summary.get("write_call_count"),
+                        "mcp_error_call_count": evidenceops_mcp_summary.get("error_call_count"),
+                        "mcp_total_latency_s": evidenceops_mcp_summary.get("total_latency_s"),
+                        "mcp_tool_names": evidenceops_mcp_summary.get("tool_names"),
                         **structured_document_runtime_signals,
                     },
                 ),
             )
-            if selected_structured_task == "document_agent" and isinstance(structured_result.validated_output, DocumentAgentPayload):
-                evidenceops_entry = build_evidenceops_worklog_entry(
-                    payload=structured_result.validated_output,
-                    query=structured_input_text,
-                    document_ids=list(active_structured_document_ids if structured_use_documents else []),
-                    execution_metadata=structured_result_metadata,
-                )
-                append_evidenceops_worklog_entry(
-                    PHASE95_EVIDENCEOPS_WORKLOG_PATH,
-                    evidenceops_entry,
-                )
-                append_evidenceops_actions_from_worklog_entry(
-                    PHASE95_EVIDENCEOPS_ACTION_STORE_PATH,
-                    evidenceops_entry,
-                )
             st.session_state[STRUCTURED_RESULT_STATE_KEY] = structured_result.model_dump(mode="json")
             default_mode = structured_result.primary_render_mode or "json"
             st.session_state[STRUCTURED_RENDER_MODE_STATE_KEY] = default_mode
@@ -2704,6 +2795,18 @@ with comparison_tab:
     )
     st.caption(
         "A Fase 7 agora também suporta presets por caso de uso e classificação automática de família de quantização para tornar o benchmark mais repetível e mais fácil de defender."
+    )
+
+    st.caption("AI Lab deck exports: esta superfície prioriza o executive review de benchmark/evals. Os decks de workflows de negócio migram para o produto em Gradio.")
+    render_executive_deck_generation_panel(
+        model_comparison_entries=phase7_model_comparison_log_entries,
+        phase8_eval_db_path=PHASE8_EVAL_DB_PATH,
+        structured_result=st.session_state.get(STRUCTURED_RESULT_STATE_KEY),
+        phase95_evidenceops_worklog_path=PHASE95_EVIDENCEOPS_WORKLOG_PATH,
+        phase95_evidenceops_action_store_path=PHASE95_EVIDENCEOPS_ACTION_STORE_PATH,
+        settings=presentation_export_settings,
+        allowed_export_kinds=[DEFAULT_PRESENTATION_EXPORT_KIND],
+        surface_label="AI Lab",
     )
 
     comparison_document_ids_default = _normalize_document_selection(
@@ -3013,7 +3116,8 @@ with comparison_tab:
                 )
                 retrieved_chunks_for_comparison = retrieval_details.get("chunks") or []
             except Exception as error:
-                st.warning(f"A comparação seguirá sem grounding documental porque o retrieval falhou: {error}")
+                logger.exception("Model comparison retrieval failed; continuing without document grounding")
+                st.warning(build_ui_error_message("A comparação seguirá sem grounding documental porque o retrieval falhou", error))
         elif comparison_use_documents and comparison_document_ids and not embedding_compatibility.get("compatible", True):
             st.warning("A comparação seguirá sem grounding documental porque o embedding ativo não é compatível com o índice atual.")
 
@@ -3140,6 +3244,14 @@ with comparison_tab:
                         disabled=True,
                         label_visibility="collapsed",
                     )
+
+with evidenceops_tab:
+    render_evidenceops_mcp_panel(
+        console_state_key=EVIDENCEOPS_MCP_CONSOLE_STATE_KEY,
+        last_mcp_entry=st.session_state.get(EVIDENCEOPS_MCP_LAST_ENTRY_STATE_KEY),
+        last_mcp_register_result=st.session_state.get(EVIDENCEOPS_MCP_LAST_REGISTER_RESULT_STATE_KEY),
+        last_mcp_telemetry=st.session_state.get(EVIDENCEOPS_MCP_LAST_TELEMETRY_STATE_KEY),
+    )
 
 runtime_snapshot = build_runtime_snapshot(
     selected_provider=selected_provider,
