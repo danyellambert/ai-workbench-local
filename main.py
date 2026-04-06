@@ -3188,7 +3188,7 @@ with comparison_tab:
     if comparison_candidates and len(comparison_candidates) < 2:
         st.warning("Selecione pelo menos 2 combinações de provider/model para comparar lado a lado.")
 
-    if st.button("Executar comparação entre modelos", disabled=not comparison_can_run, key="phase7_run_model_comparison"):
+    if st.button("Run model comparison", disabled=not comparison_can_run, key="phase7_run_model_comparison"):
         st.session_state["phase7_model_comparison_prompt"] = comparison_prompt_text
         retrieved_chunks_for_comparison: list[dict[str, object]] = []
         if comparison_use_documents and comparison_document_ids and embedding_compatibility.get("compatible", True):
