@@ -438,30 +438,30 @@ IMPORTANT:
 class ExtractionTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         total_started_at = time.perf_counter()
-        self._report_progress(request, step="initializing", progress=0.10, detail="Inicializando extração estruturada")
+        self._report_progress(request, step="initializing", progress=0.10, detail="Initializing structured extraction")
         provider = self._resolve_provider(request)
-        self._report_progress(request, step="provider_ready", progress=0.22, detail="Provider pronto; preparando documento/contexto")
+        self._report_progress(request, step="provider_ready", progress=0.22, detail="Provider ready; preparing document/context")
         document_started_at = time.perf_counter()
         full_document_text = self._build_full_document_text(request)
         self._record_timing(request, "document_load_s", time.perf_counter() - document_started_at)
         estimated_chars = len((full_document_text or "").strip())
         use_full_document = bool(full_document_text and estimated_chars <= EXTRACTION_FULL_DOCUMENT_DIRECT_CHARS)
         if use_full_document:
-            self._report_progress(request, step="preparing_document", progress=0.34, detail="Usando documento completo para extração")
+            self._report_progress(request, step="preparing_document", progress=0.34, detail="Using full document for extraction")
             context_text = full_document_text
             extraction_mode = "full_document_direct"
         else:
-            self._report_progress(request, step="building_context", progress=0.34, detail="Montando contexto estruturado")
+            self._report_progress(request, step="building_context", progress=0.34, detail="Building structured context")
             context_started_at = time.perf_counter()
             context_text = self._build_optional_document_context(request, strategy="document_scan", max_chunks=24, max_chars=64000)
             self._record_timing(request, "context_build_s", time.perf_counter() - context_started_at)
             extraction_mode = "document_scan_context"
-        self._report_progress(request, step="prompt_ready", progress=0.48, detail="Contexto pronto; montando prompt de extração")
+        self._report_progress(request, step="prompt_ready", progress=0.48, detail="Context ready; building extraction prompt")
         prompt = self._build_extraction_prompt(request.input_text, context_text)
-        self._report_progress(request, step="model_inference", progress=0.72, detail="Executando extração no modelo")
+        self._report_progress(request, step="model_inference", progress=0.72, detail="Running extraction on the model")
         self._set_telemetry_value(request, "current_stage", "extraction_single_pass")
         response_text = self._collect_response_text(provider, request, prompt)
-        self._report_progress(request, step="parsing", progress=0.9, detail="Validando saída estruturada")
+        self._report_progress(request, step="parsing", progress=0.9, detail="Validating structured output")
         parsing_started_at = time.perf_counter()
         result = self._parse_with_recovery(
             provider=provider,
@@ -476,20 +476,20 @@ class ExtractionTaskHandler(TaskHandler):
         )
         self._record_timing(request, "parsing_s", time.perf_counter() - parsing_started_at)
         self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
-        self._report_progress(request, step="done", progress=1.0, detail="Extração finalizada")
+        self._report_progress(request, step="done", progress=1.0, detail="Extraction completed")
         result.execution_metadata = {
             "extraction_mode": extraction_mode,
             "full_document_chars": len(full_document_text or ""),
             "context_chars_sent": len(context_text or ""),
             "context_note": (
-                "Extração gerada com o documento inteiro porque o tamanho ainda é seguro para envio direto."
+                "Extraction generated from the full document because the size is still safe for direct submission."
                 if extraction_mode == "full_document_direct"
-                else "Extração gerada com contexto recortado do document scan."
+                else "Extraction generated from selected document-scan context."
             ),
             "stages": [
                 {
                     "stage_type": extraction_mode,
-                    "label": "Entrada de geração da extração",
+                    "label": "Extraction generation input",
                     "chars_sent": len(context_text or ""),
                     "context_preview": context_text or "",
                     "prompt_preview": prompt,
@@ -1206,10 +1206,10 @@ Return this JSON structure:
 class SummaryTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         total_started_at = time.perf_counter()
-        self._report_progress(request, step="initializing", progress=0.08, detail="Inicializando sumarização estruturada")
-        self._report_progress(request, step="preparing_document", progress=0.16, detail="Preparando texto completo do documento")
+        self._report_progress(request, step="initializing", progress=0.08, detail="Initializing structured summarization")
+        self._report_progress(request, step="preparing_document", progress=0.16, detail="Preparing full document text")
         provider = self._resolve_provider(request)
-        self._report_progress(request, step="provider_ready", progress=0.24, detail="Provider pronto; analisando documento")
+        self._report_progress(request, step="provider_ready", progress=0.24, detail="Provider ready; analyzing document")
         document_started_at = time.perf_counter()
         full_document_text = self._build_full_document_text(request)
         self._record_timing(request, "document_load_s", time.perf_counter() - document_started_at)
@@ -1219,16 +1219,16 @@ class SummaryTaskHandler(TaskHandler):
                 request,
                 step="map_reduce_setup",
                 progress=0.30,
-                detail=f"Documento grande detectado; dividindo em {len(document_parts)} parte(s)",
+                detail=f"Large document detected; splitting into {len(document_parts)} part(s)",
             )
             partial_summaries, map_stage_details = self._summarize_document_in_parts(provider, request, full_document_text)
             prompt = self._build_summary_reduce_prompt(request.input_text, partial_summaries)
-            self._report_progress(request, step="reduce", progress=0.82, detail="Consolidando resumo final")
+            self._report_progress(request, step="reduce", progress=0.82, detail="Consolidating final summary")
             self._set_telemetry_value(request, "current_stage", "summary_reduce")
             reduce_started_at = time.perf_counter()
             response_text = self._collect_response_text(provider, request, prompt)
             reduce_duration_s = round(time.perf_counter() - reduce_started_at, 2)
-            self._report_progress(request, step="parsing", progress=0.94, detail="Validando resumo final")
+            self._report_progress(request, step="parsing", progress=0.94, detail="Validating final summary")
             parsing_started_at = time.perf_counter()
             result = self._parse_with_recovery(
                 provider=provider,
@@ -1256,21 +1256,21 @@ class SummaryTaskHandler(TaskHandler):
                     *map_stage_details,
                     {
                         "stage_type": "reduce",
-                        "label": "Síntese final",
+                        "label": "Final synthesis",
                         "chars_sent": len(prompt),
                         "duration_s": reduce_duration_s,
                         "prompt_preview": prompt[:6000],
                         "context_preview": prompt[:6000],
                     },
                 ],
-                "context_note": "Summary gerado a partir do documento inteiro em múltiplas partes; o preview curto de doc scan/retrieval não representa sozinho todo o conteúdo consumido neste modo.",
+                "context_note": "Summary generated from the full document in multiple parts; the short doc-scan/retrieval preview alone does not represent all content consumed in this mode.",
             }
             self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
-            self._report_progress(request, step="done", progress=1.0, detail="Resumo completo finalizado")
+            self._report_progress(request, step="done", progress=1.0, detail="Full summary completed")
             return result
 
         strategy = request.context_strategy or "retrieval"
-        self._report_progress(request, step="building_context", progress=0.38, detail=f"Montando contexto ({strategy})")
+        self._report_progress(request, step="building_context", progress=0.38, detail=f"Building context ({strategy})")
         context_started_at = time.perf_counter()
         context_text = self._build_optional_document_context(
             request,
@@ -1280,12 +1280,12 @@ class SummaryTaskHandler(TaskHandler):
         )
         self._record_timing(request, "context_build_s", time.perf_counter() - context_started_at)
         prompt = self._build_summary_prompt(request.input_text, context_text)
-        self._report_progress(request, step="model_inference", progress=0.72, detail="Gerando resumo no modelo")
+        self._report_progress(request, step="model_inference", progress=0.72, detail="Generating summary on the model")
         self._set_telemetry_value(request, "current_stage", "summary_single_pass")
         single_pass_started_at = time.perf_counter()
         response_text = self._collect_response_text(provider, request, prompt)
         single_pass_duration_s = round(time.perf_counter() - single_pass_started_at, 2)
-        self._report_progress(request, step="parsing", progress=0.92, detail="Validando resumo")
+        self._report_progress(request, step="parsing", progress=0.92, detail="Validating summary")
         parsing_started_at = time.perf_counter()
         result = self._parse_with_recovery(
             provider=provider,
@@ -1311,17 +1311,17 @@ class SummaryTaskHandler(TaskHandler):
             "stages": [
                 {
                     "stage_type": "single_pass",
-                    "label": f"Resumo em passo único ({strategy})",
+                    "label": f"Single-pass summary ({strategy})",
                     "chars_sent": len(context_text or ""),
                     "duration_s": single_pass_duration_s,
                     "context_preview": (context_text or "")[:6000],
                     "prompt_preview": prompt[:6000],
                 }
             ],
-            "context_note": "Summary gerado em um único passo usando contexto recortado (doc scan/retrieval).",
+            "context_note": "Summary generated in a single pass using selected context (doc scan/retrieval).",
         }
         self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
-        self._report_progress(request, step="done", progress=1.0, detail="Resumo finalizado")
+        self._report_progress(request, step="done", progress=1.0, detail="Summary completed")
         return result
 
     def _build_full_document_text(self, request: TaskExecutionRequest) -> str:
@@ -1377,7 +1377,7 @@ class SummaryTaskHandler(TaskHandler):
                 request,
                 step="map",
                 progress=current_progress,
-                detail=f"Processando parte {index} de {total_chunks}",
+                detail=f"Processing part {index} of {total_chunks}",
             )
             started_at = time.perf_counter()
             self._set_telemetry_value(request, "current_stage", f"summary_map_part_{index}")
@@ -1393,7 +1393,7 @@ class SummaryTaskHandler(TaskHandler):
             stage_details.append(
                 {
                     "stage_type": "map",
-                    "label": f"Parte {index} de {total_chunks}",
+                    "label": f"Part {index} of {total_chunks}",
                     "chars_sent": len(chunk),
                     "duration_s": duration_s,
                     "context_preview": chunk[:6000],
@@ -1723,19 +1723,19 @@ class ChecklistTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         total_started_at = time.perf_counter()
         provider = self._resolve_provider(request)
-        self._report_progress(request, step="initializing", progress=0.10, detail="Inicializando geração de checklist")
-        self._report_progress(request, step="loading_document", progress=0.18, detail="Carregando documento e contexto base")
+        self._report_progress(request, step="initializing", progress=0.10, detail="Initializing checklist generation")
+        self._report_progress(request, step="loading_document", progress=0.18, detail="Loading document and base context")
         document_started_at = time.perf_counter()
         full_document_text = self._build_full_document_text(request)
         self._record_timing(request, "document_load_s", time.perf_counter() - document_started_at)
-        self._report_progress(request, step="document_ready", progress=0.26, detail="Documento carregado; preparando texto operacional")
+        self._report_progress(request, step="document_ready", progress=0.26, detail="Document loaded; preparing operational text")
         sanitize_started_at = time.perf_counter()
         sanitized_document_text = self._sanitize_checklist_document_text(full_document_text)
         self._record_timing(request, "sanitize_s", time.perf_counter() - sanitize_started_at)
         effective_document_text = sanitized_document_text or full_document_text
         should_use_multi_stage = self._should_use_checklist_multi_stage(effective_document_text)
         if effective_document_text and not should_use_multi_stage:
-            self._report_progress(request, step="preparing_document", progress=0.34, detail="Usando documento completo para gerar checklist")
+            self._report_progress(request, step="preparing_document", progress=0.34, detail="Using full document to generate checklist")
             context_text = effective_document_text
             context_mode = "full_document_direct"
         elif effective_document_text:
@@ -1744,15 +1744,15 @@ class ChecklistTaskHandler(TaskHandler):
                 request,
                 step="map_reduce_setup",
                 progress=0.34,
-                detail=f"Documento grande detectado; dividindo checklist em {len(parts)} parte(s)",
+                detail=f"Large document detected; splitting checklist into {len(parts)} part(s)",
             )
             partial_checklists, map_stage_details = self._build_partial_checklists(provider, request, parts)
             prompt = self._build_checklist_reduce_prompt(request.input_text, partial_checklists)
-            self._report_progress(request, step="reduce_prep", progress=0.78, detail="Preparando consolidação final do checklist")
-            self._report_progress(request, step="reduce", progress=0.86, detail="Consolidando checklist final")
+            self._report_progress(request, step="reduce_prep", progress=0.78, detail="Preparing final checklist consolidation")
+            self._report_progress(request, step="reduce", progress=0.86, detail="Consolidating final checklist")
             self._set_telemetry_value(request, "current_stage", "checklist_reduce")
             response_text = self._collect_response_text(provider, request, prompt)
-            self._report_progress(request, step="parsing", progress=0.94, detail="Validando checklist")
+            self._report_progress(request, step="parsing", progress=0.94, detail="Validating checklist")
             parsing_started_at = time.perf_counter()
             result = self._parse_with_recovery(
                 provider=provider,
@@ -1762,7 +1762,7 @@ class ChecklistTaskHandler(TaskHandler):
                 original_prompt=prompt,
             )
             self._record_timing(request, "parsing_s", time.perf_counter() - parsing_started_at)
-            self._report_progress(request, step="done", progress=1.0, detail="Checklist finalizado")
+            self._report_progress(request, step="done", progress=1.0, detail="Checklist completed")
             result.execution_metadata = {
                 "checklist_mode": "full_document_map_reduce",
                 "checklist_profile": detect_checklist_domain_profile(request.input_text, effective_document_text),
@@ -1771,12 +1771,12 @@ class ChecklistTaskHandler(TaskHandler):
                 "checklist_question_count": effective_document_text.count('?') if effective_document_text else 0,
                 "checklist_line_count": len([line for line in (effective_document_text or '').splitlines() if line.strip()]),
                 "context_chars_sent": len(prompt),
-                "context_note": "Checklist gerado a partir do documento inteiro em múltiplas partes, seguido de consolidação final.",
+                "context_note": "Checklist generated from the full document in multiple parts, followed by final consolidation.",
                 "stages": [
                     *map_stage_details,
                     {
                         "stage_type": "reduce",
-                        "label": "Síntese final do checklist",
+                        "label": "Final checklist synthesis",
                         "chars_sent": len(prompt),
                         "context_preview": prompt[:6000],
                         "prompt_preview": prompt[:6000],
@@ -1786,17 +1786,17 @@ class ChecklistTaskHandler(TaskHandler):
             self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
             return result
         else:
-            self._report_progress(request, step="building_context", progress=0.34, detail="Montando contexto")
+            self._report_progress(request, step="building_context", progress=0.34, detail="Building context")
             context_started_at = time.perf_counter()
             context_text = self._build_optional_document_context(request, strategy="document_scan", max_chunks=10, max_chars=24000)
             self._record_timing(request, "context_build_s", time.perf_counter() - context_started_at)
             context_mode = "document_scan_context"
-        self._report_progress(request, step="prompt_ready", progress=0.50, detail="Contexto preparado; montando prompt")
+        self._report_progress(request, step="prompt_ready", progress=0.50, detail="Context prepared; building prompt")
         prompt = self._build_checklist_prompt(request.input_text, context_text)
-        self._report_progress(request, step="model_inference", progress=0.74, detail="Gerando checklist")
+        self._report_progress(request, step="model_inference", progress=0.74, detail="Generating checklist")
         self._set_telemetry_value(request, "current_stage", "checklist_single_pass")
         response_text = self._collect_response_text(provider, request, prompt)
-        self._report_progress(request, step="parsing", progress=0.92, detail="Validando checklist")
+        self._report_progress(request, step="parsing", progress=0.92, detail="Validating checklist")
         parsing_started_at = time.perf_counter()
         result = self._parse_with_recovery(
             provider=provider,
@@ -1806,7 +1806,7 @@ class ChecklistTaskHandler(TaskHandler):
             original_prompt=prompt,
         )
         self._record_timing(request, "parsing_s", time.perf_counter() - parsing_started_at)
-        self._report_progress(request, step="done", progress=1.0, detail="Checklist finalizado")
+        self._report_progress(request, step="done", progress=1.0, detail="Checklist completed")
         result.execution_metadata = {
             "checklist_mode": context_mode,
             "checklist_profile": detect_checklist_domain_profile(request.input_text, context_text),
@@ -1816,14 +1816,14 @@ class ChecklistTaskHandler(TaskHandler):
             "checklist_line_count": len([line for line in (effective_document_text or '').splitlines() if line.strip()]),
             "context_chars_sent": len(context_text or ""),
             "context_note": (
-                "Checklist gerado com o documento inteiro porque o tamanho ainda é seguro para envio direto."
+                "Checklist generated from the full document because the size is still safe for direct submission."
                 if context_mode == "full_document_direct"
-                else "Checklist gerado com contexto recortado do document scan."
+                else "Checklist generated from selected document-scan context."
             ),
             "stages": [
                 {
                     "stage_type": context_mode,
-                    "label": "Entrada de geração do checklist",
+                    "label": "Checklist generation input",
                     "chars_sent": len(context_text or ""),
                     "context_preview": (context_text or "")[:6000],
                     "prompt_preview": prompt[:6000],
@@ -2024,7 +2024,7 @@ class ChecklistTaskHandler(TaskHandler):
             progress_base = 0.38
             progress_span = 0.32
             current_progress = progress_base + progress_span * ((index - 1) / max(total_parts, 1))
-            self._report_progress(request, step="map", progress=current_progress, detail=f"Processando parte {index} de {total_parts}")
+            self._report_progress(request, step="map", progress=current_progress, detail=f"Processing part {index} of {total_parts}")
             self._set_telemetry_value(request, "current_stage", f"checklist_map_part_{index}")
             response_text = self._collect_response_text(provider, request, prompt)
             partial_result = self._parse_with_recovery(
@@ -2037,7 +2037,7 @@ class ChecklistTaskHandler(TaskHandler):
             stage_details.append(
                 {
                     "stage_type": "map",
-                    "label": f"Parte do checklist {index} de {total_parts}",
+                    "label": f"Checklist part {index} of {total_parts}",
                     "chars_sent": len(part),
                     "context_preview": part[:6000],
                     "prompt_preview": prompt[:6000],
@@ -2306,10 +2306,10 @@ Return this JSON structure:
 class CVAnalysisTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         total_started_at = time.perf_counter()
-        self._report_progress(request, step="initializing", progress=0.10, detail="Inicializando análise estruturada de CV")
-        self._report_progress(request, step="grounding", progress=0.22, detail="Preparando grounding do CV/documento")
+        self._report_progress(request, step="initializing", progress=0.10, detail="Initializing structured CV analysis")
+        self._report_progress(request, step="grounding", progress=0.22, detail="Preparing CV/document grounding")
         provider = self._resolve_provider(request)
-        self._report_progress(request, step="provider_ready", progress=0.34, detail="Provider pronto; analisando grounding")
+        self._report_progress(request, step="provider_ready", progress=0.34, detail="Provider ready; analyzing grounding")
         from ..services.document_context import (
             build_retrieval_context,
             get_document_grounding_profile,
@@ -2343,17 +2343,17 @@ class CVAnalysisTaskHandler(TaskHandler):
                 error_message="Low grounding: insufficient CV context. Full CV context is too short or structurally incomplete, so placeholder resume output was blocked.",
             )
 
-        self._report_progress(request, step="prompt_ready", progress=0.50, detail="Grounding pronto; montando prompt da análise")
+        self._report_progress(request, step="prompt_ready", progress=0.50, detail="Grounding ready; building analysis prompt")
         prompt = self._build_cv_analysis_prompt(
             request.input_text,
             primary_context,
             secondary_context=secondary_context,
             use_full_cv_grounding=use_full_cv_grounding,
         )
-        self._report_progress(request, step="model_inference", progress=0.74, detail="Executando análise de CV")
+        self._report_progress(request, step="model_inference", progress=0.74, detail="Running CV analysis")
         self._set_telemetry_value(request, "current_stage", "cv_analysis_single_pass")
         response_text = self._collect_response_text(provider, request, prompt)
-        self._report_progress(request, step="parsing", progress=0.92, detail="Validando análise de CV")
+        self._report_progress(request, step="parsing", progress=0.92, detail="Validating CV analysis")
         parsing_started_at = time.perf_counter()
         result = self._parse_with_recovery(
             provider=provider,
@@ -2368,7 +2368,7 @@ class CVAnalysisTaskHandler(TaskHandler):
         )
         self._record_timing(request, "parsing_s", time.perf_counter() - parsing_started_at)
         self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
-        self._report_progress(request, step="done", progress=1.0, detail="Análise de CV finalizada")
+        self._report_progress(request, step="done", progress=1.0, detail="CV analysis completed")
         return result
 
     def _is_low_grounding_cv_context(self, context_text: str) -> bool:
@@ -2875,19 +2875,19 @@ Important rules:
 class CodeAnalysisTaskHandler(TaskHandler):
     def execute(self, request: TaskExecutionRequest) -> StructuredResult:
         total_started_at = time.perf_counter()
-        self._report_progress(request, step="initializing", progress=0.10, detail="Inicializando análise estruturada de código")
-        self._report_progress(request, step="building_context", progress=0.22, detail="Montando contexto")
+        self._report_progress(request, step="initializing", progress=0.10, detail="Initializing structured code analysis")
+        self._report_progress(request, step="building_context", progress=0.22, detail="Building context")
         provider = self._resolve_provider(request)
-        self._report_progress(request, step="provider_ready", progress=0.34, detail="Provider pronto; preparando contexto")
+        self._report_progress(request, step="provider_ready", progress=0.34, detail="Provider ready; preparing context")
         context_started_at = time.perf_counter()
         context_text = self._build_optional_document_context(request, strategy="document_scan", max_chunks=12)
         self._record_timing(request, "context_build_s", time.perf_counter() - context_started_at)
-        self._report_progress(request, step="prompt_ready", progress=0.50, detail="Contexto pronto; montando prompt da análise")
+        self._report_progress(request, step="prompt_ready", progress=0.50, detail="Context ready; building analysis prompt")
         prompt = self._build_code_analysis_prompt(request.input_text, context_text)
-        self._report_progress(request, step="model_inference", progress=0.74, detail="Executando análise de código")
+        self._report_progress(request, step="model_inference", progress=0.74, detail="Running code analysis")
         self._set_telemetry_value(request, "current_stage", "code_analysis_single_pass")
         response_text = self._collect_response_text(provider, request, prompt)
-        self._report_progress(request, step="parsing", progress=0.92, detail="Validando análise")
+        self._report_progress(request, step="parsing", progress=0.92, detail="Validating analysis")
         parsing_started_at = time.perf_counter()
         result = self._parse_with_recovery(
             provider=provider,
@@ -2902,7 +2902,7 @@ class CodeAnalysisTaskHandler(TaskHandler):
         )
         self._record_timing(request, "parsing_s", time.perf_counter() - parsing_started_at)
         self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
-        self._report_progress(request, step="done", progress=1.0, detail="Análise de código finalizada")
+        self._report_progress(request, step="done", progress=1.0, detail="Code analysis completed")
         return result
 
     def _post_process_code_analysis_result(self, result: StructuredResult, *, source_text: str) -> StructuredResult:
@@ -2925,14 +2925,14 @@ class CodeAnalysisTaskHandler(TaskHandler):
                     "severity": "high",
                     "category": "runtime_failure",
                     "title": "Division by zero on empty input",
-                    "description": "A divisão por `len(...)` pode falhar quando a coleção processada estiver vazia.",
+                    "description": "Division by `len(...)` may fail when the processed collection is empty.",
                     "evidence": "average = total / len(values)",
-                    "recommendation": "Trate entrada vazia antes da divisão e retorne `0.0` quando não houver valores.",
+                    "recommendation": "Handle empty input before division and return `0.0` when there are no values.",
                 },
             )
-            refactor_plan.append("Tratar entrada vazia antes do cálculo da média e retornar `0.0` quando não houver itens.")
-            test_suggestions.append("Adicionar teste para entrada vazia verificando que a média retorna `0.0` sem exceção.")
-            risk_notes.append("Uma entrada vazia pode causar falha em tempo de execução por divisão por zero.")
+            refactor_plan.append("Handle empty input before calculating the average and return `0.0` when there are no items.")
+            test_suggestions.append("Add a test for empty input verifying that the average returns `0.0` without an exception.")
+            risk_notes.append("Empty input may cause a runtime failure due to division by zero.")
 
         if self._detect_input_mutation_pattern(source_text):
             issues = self._append_code_issue_if_missing(
@@ -2941,14 +2941,14 @@ class CodeAnalysisTaskHandler(TaskHandler):
                     "severity": "medium",
                     "category": "input_mutation",
                     "title": "Mutates caller-provided items in place",
-                    "description": "O código altera objetos recebidos do chamador diretamente durante a normalização.",
+                    "description": "The code mutates objects received from the caller directly during normalization.",
                     "evidence": "item[\"score\"] = ...",
-                    "recommendation": "Construir um novo objeto normalizado em vez de mutar o objeto original.",
+                    "recommendation": "Build a new normalized object instead of mutating the original object.",
                 },
             )
-            refactor_plan.append("Evitar mutação in-place construindo novos objetos normalizados para a saída.")
-            test_suggestions.append("Adicionar teste para garantir que os objetos de entrada não sejam modificados in-place.")
-            maintainability.append("Explicitar o contrato de imutabilidade da entrada e preservar esse contrato na implementação.")
+            refactor_plan.append("Avoid in-place mutation by building new normalized objects for the output.")
+            test_suggestions.append("Add a test to ensure that input objects are not modified in-place.")
+            maintainability.append("Make the input immutability contract explicit and preserve it in the implementation.")
 
         if self._detect_heterogeneous_output_pattern(source_text):
             issues = self._append_code_issue_if_missing(
@@ -2957,16 +2957,16 @@ class CodeAnalysisTaskHandler(TaskHandler):
                     "severity": "medium",
                     "category": "api_contract",
                     "title": "Output structure is inconsistent",
-                    "description": "Ramos diferentes retornam itens com formatos diferentes, o que fragiliza o contrato da API.",
+                    "description": "Different branches return items with different formats, which weakens the API contract.",
                     "evidence": "result.append({\"name\": ...}) / result.append(item)",
-                    "recommendation": "Padronizar a estrutura de saída para que todos os itens retornem o mesmo shape.",
+                    "recommendation": "Standardize the output structure so that all items return the same shape.",
                 },
             )
-            refactor_plan.append("Normalizar o schema de saída para que todos os itens retornem a mesma estrutura.")
-            test_suggestions.append("Adicionar teste cobrindo itens sem `score` e verificando que o formato de saída continua consistente.")
-            readability.append("Documentar claramente o schema esperado de entrada e saída.")
-            maintainability.append("Separar a etapa de normalização da etapa de agregação para simplificar o fluxo e o contrato da API.")
-            risk_notes.append("Saídas com formatos mistos podem quebrar consumidores que esperam uma estrutura estável.")
+            refactor_plan.append("Normalize the output schema so that all items return the same structure.")
+            test_suggestions.append("Add a test covering items without `score` and verifying that the output format remains consistent.")
+            readability.append("Clearly document the expected input and output schema.")
+            maintainability.append("Separate the normalization step from the aggregation step to simplify the flow and API contract.")
+            risk_notes.append("Outputs with mixed formats can break consumers that expect a stable structure.")
 
         data["detected_issues"] = issues
         data["refactor_plan"] = self._normalize_code_string_list(refactor_plan)
@@ -3055,23 +3055,23 @@ Code or technical text to analyze:
 Return this JSON structure:
 {{
   "task_type": "code_analysis",
-  "snippet_summary": "Resumo curto do trecho de código",
-  "main_purpose": "Objetivo principal do código",
+  "snippet_summary": "Short summary of the code snippet",
+  "main_purpose": "Main purpose of the code",
   "detected_issues": [
     {{
       "severity": "medium",
       "category": "maintainability",
-      "title": "Lógica duplicada",
-      "description": "Uma mesma regra aparece repetida em mais de um ponto do código.",
+      "title": "Duplicated logic",
+      "description": "The same rule appears repeated in more than one part of the code.",
       "evidence": "Repeated conditional branches in two methods.",
-      "recommendation": "Extraia a lógica comum para uma função auxiliar."
+      "recommendation": "Extract the shared logic into a helper function."
     }}
   ],
-  "readability_improvements": ["Renomear variáveis pouco claras"],
-  "maintainability_improvements": ["Extrair lógica compartilhada"],
-  "refactor_plan": ["Passo 1", "Passo 2"],
-  "test_suggestions": ["Adicionar teste unitário específico para o caso crítico identificado"],
-  "risk_notes": ["Risco concreto observado no comportamento atual"]
+  "readability_improvements": ["Rename unclear variables"],
+  "maintainability_improvements": ["Extract shared logic"],
+  "refactor_plan": ["Step 1", "Step 2"],
+  "test_suggestions": ["Add a specific unit test for the identified critical case"],
+  "risk_notes": ["Concrete risk observed in the current behavior"]
 }}
 """
 
@@ -3083,9 +3083,9 @@ class DocumentAgentTaskHandler(TaskHandler):
 
         total_started_at = time.perf_counter()
         telemetry = self._telemetry_dict(request)
-        self._report_progress(request, step="initializing", progress=0.08, detail="Inicializando o Document Operations Copilot")
+        self._report_progress(request, step="initializing", progress=0.08, detail="Initializing the Document Operations Copilot")
         provider = self._resolve_provider(request)
-        self._report_progress(request, step="intent_routing", progress=0.20, detail="Classificando intenção e selecionando tool")
+        self._report_progress(request, step="intent_routing", progress=0.20, detail="Classifying intent and selecting tool")
 
         document_ids = list(request.source_document_ids or [])
         document_count = len(document_ids)
@@ -3127,7 +3127,7 @@ class DocumentAgentTaskHandler(TaskHandler):
             }
         )
 
-        self._report_progress(request, step="grounding", progress=0.34, detail="Montando grounding documental e fontes")
+        self._report_progress(request, step="grounding", progress=0.34, detail="Building document grounding and sources")
         source_bundle = self._build_document_agent_source_bundle(
             request=request,
             context_strategy=context_strategy,
@@ -3138,7 +3138,7 @@ class DocumentAgentTaskHandler(TaskHandler):
         tool_runs: list[AgentToolExecution] = []
 
         try:
-            self._report_progress(request, step="tool_execution", progress=0.58, detail=f"Executando tool: {describe_document_agent_tool(tool_name)}")
+            self._report_progress(request, step="tool_execution", progress=0.58, detail=f"Running tool: {describe_document_agent_tool(tool_name)}")
             if tool_name == "consult_documents":
                 payload = self._run_consult_documents_tool(
                     provider=provider,
@@ -3152,7 +3152,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success",
-                        detail="Resposta documental gerada com base no contexto selecionado.",
+                        detail="Document response generated based on the selected context.",
                     )
                 )
             elif tool_name == "summarize_document":
@@ -3164,7 +3164,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success" if nested_result.success else "error",
-                        detail="Resumo executivo gerado a partir dos documentos selecionados." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha ao gerar resumo."),
+                        detail="Executive summary generated from the selected documents." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Failed to generate summary."),
                     )
                 )
             elif tool_name == "draft_business_response":
@@ -3179,7 +3179,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success",
-                        detail="Rascunho de resposta documental gerado para revisão humana.",
+                        detail="Document response draft generated for human review.",
                     )
                 )
             elif tool_name == "extract_structured_data":
@@ -3191,7 +3191,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success" if nested_result.success else "error",
-                        detail="Extração estruturada concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na extração estruturada."),
+                        detail="Structured extraction completed." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Structured extraction failed."),
                     )
                 )
             elif tool_name == "generate_operational_checklist":
@@ -3203,7 +3203,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success" if nested_result.success else "error",
-                        detail="Checklist operacional gerado." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha ao gerar checklist."),
+                        detail="Operational checklist generated." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Failed to generate checklist."),
                     )
                 )
             elif tool_name == "review_document_risks":
@@ -3215,7 +3215,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success" if nested_result.success else "error",
-                        detail="Análise de riscos e lacunas concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na análise de riscos."),
+                        detail="Risk and gap analysis completed." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Risk analysis failed."),
                     )
                 )
             elif tool_name == "extract_operational_tasks":
@@ -3227,7 +3227,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success" if nested_result.success else "error",
-                        detail="Extração operacional concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na extração operacional."),
+                        detail="Operational extraction completed." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Operational extraction failed."),
                     )
                 )
             elif tool_name == "review_policy_compliance":
@@ -3239,7 +3239,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success" if nested_result.success else "error",
-                        detail="Revisão de policy/compliance concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na revisão de policy/compliance."),
+                        detail="Policy/compliance review completed." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Policy/compliance review failed."),
                     )
                 )
             elif tool_name == "assist_technical_document":
@@ -3251,7 +3251,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name,
                         status="success" if nested_result.success else "error",
-                        detail="Assistência técnica concluída." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Falha na assistência técnica."),
+                        detail="Technical assistance completed." if nested_result.success else (nested_result.validation_error or nested_result.parsing_error or "Technical assistance failed."),
                     )
                 )
             elif tool_name == "compare_documents":
@@ -3275,7 +3275,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=tool_name or "consult_documents",
                         status="success",
-                        detail="Fallback para consulta documental executado.",
+                        detail="Fallback document consultation executed.",
                     )
                 )
         except Exception as error:
@@ -3368,7 +3368,7 @@ class DocumentAgentTaskHandler(TaskHandler):
         )
 
         self._record_timing(request, "total_s", time.perf_counter() - total_started_at)
-        self._report_progress(request, step="done", progress=1.0, detail="Copiloto documental finalizado")
+        self._report_progress(request, step="done", progress=1.0, detail="Document copilot completed")
         return StructuredResult(
             success=True,
             task_type="document_agent",
@@ -3466,68 +3466,68 @@ class DocumentAgentTaskHandler(TaskHandler):
         document_count = len(request.source_document_ids or [])
 
         if request.use_document_context:
-            guardrails_applied.append("Resposta restrita aos documentos selecionados na base documental.")
+            guardrails_applied.append("Response restricted to documents selected in the document base.")
         else:
-            limitations.append("Nenhum documento foi usado como grounding; a resposta depende apenas do texto do pedido.")
+            limitations.append("No document was used as grounding; the response depends only on the request text.")
 
         if context_strategy == "retrieval":
-            guardrails_applied.append("Grounding montado por retrieval para priorizar trechos mais relevantes à pergunta.")
+            guardrails_applied.append("Grounding assembled via retrieval to prioritize excerpts most relevant to the question.")
         else:
-            guardrails_applied.append("Grounding montado por document scan para priorizar cobertura mais ampla do documento.")
+            guardrails_applied.append("Grounding assembled by document scan to prioritize broader document coverage.")
 
         if payload.sources:
-            guardrails_applied.append("A resposta inclui fontes rastreáveis para auditoria manual.")
-            recommended_actions.append("Abra os trechos-fonte citados para confirmar a interpretação antes de agir.")
+            guardrails_applied.append("The response includes traceable sources for manual auditing.")
+            recommended_actions.append("Open the cited source excerpts to confirm the interpretation before acting.")
         else:
-            limitations.append("Não foram encontradas fontes suficientes para sustentar integralmente a resposta.")
-            recommended_actions.append("Revise manualmente os documentos selecionados antes de usar esta resposta em decisão operacional.")
+            limitations.append("Not enough sources were found to fully support the response.")
+            recommended_actions.append("Manually review the selected documents before using this response in an operational decision.")
 
         if isinstance(retrieval_details, dict):
             fallback_reason = str(retrieval_details.get("retrieval_strategy_fallback_reason") or "").strip()
             backend_message = str(retrieval_details.get("backend_message") or "").strip()
             if fallback_reason:
-                limitations.append(f"A estratégia de retrieval caiu em fallback: {fallback_reason}.")
-                guardrails_applied.append("Fallback de retrieval registrado para reduzir falhas silenciosas.")
+                limitations.append(f"The retrieval strategy fell back: {fallback_reason}.")
+                guardrails_applied.append("Retrieval fallback recorded to reduce silent failures.")
             elif backend_message and "fallback" in backend_message.lower():
-                limitations.append(f"Observação do backend de retrieval: {backend_message}.")
+                limitations.append(f"Retrieval backend note: {backend_message}.")
 
         if tool_name == "compare_documents":
             if document_count > 3:
-                limitations.append("A comparação atual foi limitada a no máximo 3 documentos nesta iteração do agente.")
-                recommended_actions.append("Execute comparações em lotes menores para cobrir todos os documentos selecionados.")
-                guardrails_applied.append("Comparação truncada para evitar sobrecarga e mistura excessiva de contexto.")
-            recommended_actions.append("Valide as diferenças críticas diretamente nos documentos comparados antes de consolidar uma decisão.")
+                limitations.append("The current comparison was limited to at most 3 documents in this agent iteration.")
+                recommended_actions.append("Run comparisons in smaller batches to cover all selected documents.")
+                guardrails_applied.append("Comparison truncated to avoid overload and excessive context mixing.")
+            recommended_actions.append("Validate critical differences directly in the compared documents before consolidating a decision.")
         elif tool_name == "draft_business_response":
-            limitations.append("O rascunho não deve ser enviado automaticamente sem revisão humana do conteúdo e do tom.")
-            recommended_actions.append("Revise destinatário, compromissos, datas e tom antes de enviar a resposta.")
-            recommended_actions.append("Confirme nos trechos-fonte qualquer afirmação regulatória, contratual ou operacional relevante.")
-            guardrails_applied.append("Rascunho produzido apenas com grounding documental e marcado explicitamente para aprovação humana.")
+            limitations.append("The draft should not be sent automatically without human review of content and tone.")
+            recommended_actions.append("Review recipient, commitments, dates, and tone before sending the response.")
+            recommended_actions.append("Confirm any relevant regulatory, contractual, or operational statement in the source excerpts.")
+            guardrails_applied.append("Draft produced only with document grounding and explicitly marked for human approval.")
         elif tool_name == "extract_structured_data":
-            recommended_actions.append("Baixe o JSON estruturado e valide campos críticos antes de integrar a saída em automações.")
-            guardrails_applied.append("Extração limitada a evidências explicitamente presentes no documento.")
+            recommended_actions.append("Download the structured JSON and validate critical fields before integrating the output into automations.")
+            guardrails_applied.append("Extraction limited to evidence explicitly present in the document.")
         elif tool_name == "generate_operational_checklist":
-            recommended_actions.append("Revise o checklist com um responsável do processo antes da execução operacional.")
-            guardrails_applied.append("Checklist gerado sem inferir passos implícitos fora do texto disponível.")
+            recommended_actions.append("Review the checklist with a process owner before operational execution.")
+            guardrails_applied.append("Checklist generated without inferring implicit steps beyond the available text.")
         elif tool_name == "summarize_document":
-            limitations.append("O resumo pode omitir detalhes operacionais finos para ganhar concisão executiva.")
-            recommended_actions.append("Se precisar de detalhe fino, consulte o documento completo ou execute uma pergunta documental específica.")
-            guardrails_applied.append("Resumo comprimido para leitura executiva, preservando apenas os pontos mais relevantes.")
+            limitations.append("The summary may omit fine-grained operational details to gain executive conciseness.")
+            recommended_actions.append("If you need fine detail, consult the full document or ask a specific document question.")
+            guardrails_applied.append("Summary compressed for executive reading, preserving only the most relevant points.")
         else:
-            limitations.append("Perguntas abertas podem exigir leitura humana adicional quando o documento tiver ambiguidade contextual.")
-            guardrails_applied.append("O agente evita afirmar fatos sem grounding forte nos documentos selecionados.")
+            limitations.append("Open-ended questions may require additional human reading when the document has contextual ambiguity.")
+            guardrails_applied.append("The agent avoids stating facts without strong grounding in the selected documents.")
 
         if document_count > 1 and tool_name != "compare_documents":
-            limitations.append("Há múltiplos documentos selecionados; confirme se a resposta não combinou contextos distintos de forma indevida.")
+            limitations.append("Multiple documents are selected; confirm that the response did not improperly combine distinct contexts.")
 
         if payload.needs_review:
-            limitations.append("A resposta foi marcada para revisão humana antes de uso decisório.")
+            limitations.append("The response was marked for human review before decision-making use.")
             if payload.needs_review_reason:
-                limitations.append(f"Motivo da revisão humana: {payload.needs_review_reason}.")
-            recommended_actions.append("Encaminhe o resultado para revisão humana antes de tomar uma decisão final.")
-            guardrails_applied.append("Human-in-the-loop ativado para reduzir risco de uso indevido da resposta.")
+                limitations.append(f"Reason for human review: {payload.needs_review_reason}.")
+            recommended_actions.append("Forward the result for human review before making a final decision.")
+            guardrails_applied.append("Human-in-the-loop enabled to reduce the risk of improper use of the response.")
 
         if isinstance(payload.confidence, float) and payload.confidence < 0.72:
-            limitations.append(f"Confiança estimada abaixo do ideal ({payload.confidence:.0%}).")
+            limitations.append(f"Estimated confidence below ideal ({payload.confidence:.0%}).")
 
         return payload.model_copy(
             update={
@@ -3627,7 +3627,7 @@ class DocumentAgentTaskHandler(TaskHandler):
             intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
             answer_mode=answer_mode,
             tool_used="consult_documents",
-            summary=response_text.strip() or "Não foi possível gerar uma resposta documental.",
+            summary=response_text.strip() or "Could not generate a document response.",
             key_points=key_points,
             structured_response={
                 "response_text": response_text,
@@ -3696,10 +3696,10 @@ class DocumentAgentTaskHandler(TaskHandler):
             ],
             limit=6,
         )
-        summary = payload.main_subject or "Extração estruturada concluída."
+        summary = payload.main_subject or "Structured extraction completed."
         summary = (
-            f"{summary} Foram identificados {len(payload.extracted_fields)} campo(s), {len(payload.entities)} entidade(s), "
-            f"{len(payload.action_items)} ação(ões) e {len(payload.risks)} risco(s)."
+            f"{summary} Identified {len(payload.extracted_fields)} field(s), {len(payload.entities)} entit(y/ies), "
+            f"{len(payload.action_items)} action(s) and {len(payload.risks)} risk(s)."
         )
         confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.8)
         return (
@@ -3741,8 +3741,8 @@ class DocumentAgentTaskHandler(TaskHandler):
         if not draft_highlights:
             draft_highlights = normalize_agent_bullet_points(
                 [
-                    "Rascunho gerado com base nos documentos selecionados.",
-                    "Revise compromissos, datas e destinatário antes do envio.",
+                    "Draft generated based on the selected documents.",
+                    "Review commitments, dates, and recipient before sending.",
                 ],
                 limit=4,
             )
@@ -3751,7 +3751,7 @@ class DocumentAgentTaskHandler(TaskHandler):
             intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
             answer_mode=answer_mode,
             tool_used="draft_business_response",
-            summary=response_text.strip() or "Não foi possível gerar um rascunho de resposta com base no contexto documental.",
+            summary=response_text.strip() or "Could not generate a response draft based on the document context.",
             key_points=draft_highlights,
             structured_response={
                 "draft_text": response_text.strip(),
@@ -3786,7 +3786,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                 intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
                 answer_mode="checklist",
                 tool_used="generate_operational_checklist",
-                summary=f"Checklist operacional gerado com {payload.total_items} item(ns).",
+                summary=f"Operational checklist generated with {payload.total_items} item(s).",
                 key_points=checklist_preview[:5],
                 checklist_preview=checklist_preview,
                 structured_response=payload.model_dump(mode="json"),
@@ -3820,12 +3820,12 @@ class DocumentAgentTaskHandler(TaskHandler):
         if not risks and gaps:
             confidence = min(confidence, 0.69)
 
-        summary_subject = payload.main_subject or "Análise documental"
+        summary_subject = payload.main_subject or "Document analysis"
         top_risk = risks[0] if risks else ""
         top_gap = gaps[0] if gaps else ""
         summary = (
-            f"{summary_subject}: {len(risks)} risco(s), {len(gaps)} lacuna(s) e "
-            f"{len(actions)} ação(ões) de mitigação identificada(s)."
+            f"{summary_subject}: {len(risks)} risk(s), {len(gaps)} gap(s) and "
+            f"{len(actions)} mitigation action(s) identified."
         )
         if top_risk:
             summary += f" Top risk: {top_risk}"
@@ -3886,10 +3886,10 @@ class DocumentAgentTaskHandler(TaskHandler):
         if not actions:
             confidence = min(confidence, 0.67)
 
-        summary_subject = payload.main_subject or "Extração operacional"
+        summary_subject = payload.main_subject or "Operational extraction"
         summary = (
-            f"{summary_subject}: {len(actions)} tarefa(s) acionável(is), {len(deadlines)} prazo(s) e "
-            f"{len(risks)} risco(s) operacional(is) identificado(s)."
+            f"{summary_subject}: {len(actions)} actionable task(s), {len(deadlines)} deadline(s) and "
+            f"{len(risks)} operational risk(s) identified."
         )
 
         return (
@@ -3974,10 +3974,10 @@ class DocumentAgentTaskHandler(TaskHandler):
         if not obligations and not restrictions:
             confidence = min(confidence, 0.68)
 
-        summary_subject = payload.main_subject or "Revisão de policy/compliance"
+        summary_subject = payload.main_subject or "Policy/compliance review"
         summary = (
-            f"{summary_subject}: {len(obligations)} obrigação(ões), "
-            f"{len(restrictions)} restrição(ões) relevante(s), {len(risks)} risco(s) e {len(gaps)} lacuna(s) identificada(s)."
+            f"{summary_subject}: {len(obligations)} obligation(s), "
+            f"{len(restrictions)} relevant restriction(s), {len(risks)} risk(s) and {len(gaps)} gap(s) identified."
         )
 
         return (
@@ -4029,8 +4029,8 @@ class DocumentAgentTaskHandler(TaskHandler):
         high_severity_issues = [item for item in payload.detected_issues if str(item.severity or "").lower() == "high"]
 
         summary = (
-            f"{payload.snippet_summary} Foram identificados {len(payload.detected_issues)} problema(s), "
-            f"{len(refactor_plan)} passo(s) de refatoração e {len(test_suggestions)} sugestão(ões) de teste."
+            f"{payload.snippet_summary} Identified {len(payload.detected_issues)} issue(s), "
+            f"{len(refactor_plan)} refactor step(s) and {len(test_suggestions)} test suggestion(s)."
         )
 
         return (
@@ -4089,7 +4089,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     AgentToolExecution(
                         tool_name=f"summarize_document:{document_id}",
                         status="error",
-                        detail=f"Falha ao resumir o documento {label}.",
+                        detail=f"Failed to summarize document {label}.",
                     )
                 )
                 continue
@@ -4107,7 +4107,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                 AgentToolExecution(
                     tool_name=f"summarize_document:{document_id}",
                     status="success",
-                    detail=f"Resumo gerado para {label}.",
+                    detail=f"Summary generated for {label}.",
                 )
             )
 
@@ -4125,7 +4125,7 @@ class DocumentAgentTaskHandler(TaskHandler):
         findings = [
             ComparisonFinding(
                 finding_type="document_summary",
-                title=f"Resumo de {item['label']}",
+                title=f"Summary of {item['label']}",
                 description=str(item["summary"]),
                 documents=[str(item["label"])],
                 evidence=list(item.get("key_points") or [])[:2],
@@ -4146,7 +4146,7 @@ class DocumentAgentTaskHandler(TaskHandler):
             AgentToolExecution(
                 tool_name="compare_documents",
                 status="success",
-                detail="Comparação documental sintetizada a partir dos resumos individuais.",
+                detail="Document comparison synthesized from the individual summaries.",
             )
         )
 
@@ -4165,7 +4165,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                 intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
                 answer_mode=answer_mode,
                 tool_used="compare_documents",
-                summary=comparison_text.strip() or "Comparação documental concluída.",
+                summary=comparison_text.strip() or "Document comparison completed.",
                 key_points=comparison_points,
                 compared_documents=[str(item["label"]) for item in document_summaries],
                 comparison_findings=findings,
@@ -4225,45 +4225,45 @@ class DocumentAgentTaskHandler(TaskHandler):
     def _short_label_from_text(self, text: str) -> str:
         cleaned = " ".join(str(text or "").split()).strip().rstrip(".?!")
         if not cleaned:
-            return "Achado comparativo"
+            return "Comparison finding"
         words = cleaned.split()
         return " ".join(words[:8]) + ("…" if len(words) > 8 else "")
 
     def _build_document_agent_consult_prompt(self, *, user_query: str, context_text: str) -> str:
         return f"""
-Você é o Document Operations Copilot.
-Responda em português do Brasil.
-Use apenas as informações presentes no contexto documental.
-Se o contexto estiver insuficiente, diga explicitamente que a informação não está clara e peça revisão humana.
-Evite inventar fatos, datas, números ou nomes.
-Primeiro entregue uma resposta curta e objetiva.
-Depois traga bullets curtos com os principais pontos encontrados.
+You are the Document Operations Copilot.
+Respond in English.
+Use only the information present in the document context.
+If the context is insufficient, explicitly say the information is unclear and request human review.
+Do not invent facts, dates, numbers, or names.
+First provide a short, direct response.
+Then provide short bullets with the main points found.
 
-Pedido do usuário:
+User request:
 {user_query}
 
-Contexto documental:
+Document context:
 {context_text}
 """
 
     def _build_business_response_drafting_prompt(self, *, user_query: str, context_text: str) -> str:
         return f"""
-Você é o Document Operations Copilot.
-Redija em português do Brasil um rascunho curto de resposta profissional orientado pelos documentos.
-Use apenas fatos explícitos do contexto documental.
-Não invente compromissos, datas, números, cláusulas, prazos ou aprovações que não estejam sustentados pelas fontes.
-Se faltar informação importante, mantenha a redação conservadora e explicite a necessidade de confirmação humana.
-Evite linguagem excessivamente assertiva quando o contexto estiver parcial.
-Produza uma resposta pronta para revisão humana, não para envio automático.
+You are the Document Operations Copilot.
+Write a short professional response draft in English guided by the documents.
+Use only explicit facts from the document context.
+Do not invent commitments, dates, numbers, clauses, deadlines, or approvals that are not supported by the sources.
+If important information is missing, keep the wording conservative and make the need for human confirmation explicit.
+Avoid overly assertive language when the context is partial.
+Produce a response ready for human review, not for automatic sending.
 
-Formato desejado:
-- um rascunho principal em tom profissional;
-- se necessário, inclua um fechamento curto pedindo validação/revisão interna antes do envio.
+Desired format:
+- a main draft in a professional tone;
+- if necessary, include a short closing asking for internal validation/review before sending.
 
-Pedido do usuário:
+User request:
 {user_query}
 
-Contexto documental:
+Document context:
 {context_text}
 """
 
@@ -4271,24 +4271,24 @@ Contexto documental:
         serialized = []
         for item in document_summaries:
             serialized.append(
-                f"[DOCUMENTO] {item['label']}\n"
-                f"Resumo: {item['summary']}\n"
-                f"Pontos-chave: {'; '.join(item.get('key_points') or [])}"
+                f"[DOCUMENT] {item['label']}\n"
+                f"Summary: {item['summary']}\n"
+                f"Key points: {'; '.join(item.get('key_points') or [])}"
             )
         summary_block = "\n\n".join(serialized)
         return f"""
-Você é o Document Operations Copilot.
-Compare os documentos resumidos abaixo e responda em português do Brasil.
-Use apenas o conteúdo fornecido.
-Não invente diferenças ou semelhanças não sustentadas pelos resumos.
-Entregue:
-1. um parágrafo curto de comparação executiva;
-2. até 6 bullets curtos começando com '-'.
+You are the Document Operations Copilot.
+Compare the summarized documents below and respond in English.
+Use only the content provided.
+Do not invent differences or similarities not supported by the summaries.
+Deliver:
+1. a short executive comparison paragraph;
+2. up to 6 short bullets starting with '-'.
 
-Pedido do usuário:
+User request:
 {user_query}
 
-Resumos dos documentos:
+Document summaries:
 {summary_block}
 """
 

@@ -1,1 +1,1 @@
-"""Módulos compartilhados do projeto AI Workbench Local."""
+"""Shared modules for the AI Workbench Local project."""

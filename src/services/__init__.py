@@ -1,1 +1,1 @@
-"""Serviços de estado e orquestração do chat."""
+"""Chat state and orchestration services."""

@@ -18,10 +18,10 @@ def build_rag_context(chunks: list[dict[str, object]]) -> str:
 
     parts = []
     for index, chunk in enumerate(chunks, start=1):
-        source = chunk.get("source", "documento")
+        source = chunk.get("source", "document")
         chunk_id = chunk.get("chunk_id", index)
         text = chunk.get("text", "")
-        parts.append(f"[Fonte {index} | {source} | chunk {chunk_id}]\n{text}")
+        parts.append(f"[Source {index} | {source} | chunk {chunk_id}]\n{text}")
 
     return "\n\n".join(parts)
 
@@ -44,10 +44,10 @@ def select_chunks_for_prompt_budget(
     used_chars = 0
 
     for index, chunk in enumerate(chunks, start=1):
-        source = chunk.get("source", "documento")
+        source = chunk.get("source", "document")
         chunk_id = chunk.get("chunk_id", index)
         text = str(chunk.get("text", ""))
-        chunk_block = f"[Fonte {index} | {source} | chunk {chunk_id}]\n{text}"
+        chunk_block = f"[Source {index} | {source} | chunk {chunk_id}]\n{text}"
         block_size = len(chunk_block) + (2 if selected_chunks else 0)
 
         if selected_chunks and used_chars + block_size > budget_chars:
@@ -55,7 +55,7 @@ def select_chunks_for_prompt_budget(
         if not selected_chunks and block_size > budget_chars:
             truncated_text = text[: max(budget_chars - 120, 300)]
             selected_chunks.append({**chunk, "text": truncated_text, "snippet": truncated_text[:400]})
-            used_chars = len(f"[Fonte {index} | {source} | chunk {chunk_id}]\n{truncated_text}")
+            used_chars = len(f"[Source {index} | {source} | chunk {chunk_id}]\n{truncated_text}")
             break
 
         selected_chunks.append(chunk)
@@ -103,9 +103,9 @@ def inject_rag_context(
     rag_instruction = {
         "role": "system",
         "content": (
-            "Use o contexto recuperado abaixo para responder com base no documento sempre que ele for relevante. "
-            "Se a resposta não estiver no contexto, diga isso claramente.\n\n"
-            f"Contexto recuperado:\n{context_block}"
+            "Use the retrieved context below to answer based on the document whenever it is relevant. "
+            "If the answer is not in the context, say that clearly.\n\n"
+            f"Retrieved context:\n{context_block}"
         ),
     }
 

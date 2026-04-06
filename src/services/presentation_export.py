@@ -25,7 +25,7 @@ DEFAULT_EXECUTIVE_DECK_CONTRACT_VERSION = "executive_deck_generation.v1"
 BENCHMARK_EVAL_EXECUTIVE_REVIEW_PRODUCT_EXPORT_KIND = "benchmark_eval_executive_review"
 DEFAULT_PRESENTATION_THEME = "executive_premium_minimal"
 DEFAULT_PRESENTATION_TITLE = "AI Workbench Local — Benchmark & Eval Review"
-DEFAULT_PRESENTATION_SUBTITLE = "Resumo executivo da rodada atual"
+DEFAULT_PRESENTATION_SUBTITLE = "Executive summary of the current round"
 DEFAULT_PRESENTATION_AUTHOR = "AI Workbench Local"
 DEFAULT_PRESENTATION_FOOTER = "AI Workbench Local • Benchmark & Eval Review"
 
@@ -398,23 +398,23 @@ def _build_key_highlights(
             highlights.append(cleaned)
 
     if model_snapshot.top_model:
-        add(f"Top benchmark candidate atual: {model_snapshot.top_model}.")
+        add(f"Current top benchmark candidate: {model_snapshot.top_model}.")
     if model_snapshot.success_rate is not None:
         add(
-            f"Benchmark success rate agregado em { _format_percentage(model_snapshot.success_rate) }."
+            f"Aggregate benchmark success rate: { _format_percentage(model_snapshot.success_rate) }."
         )
     if model_snapshot.avg_use_case_fit_score is not None:
         add(
-            f"Use-case fit médio de benchmark em { _format_percentage(model_snapshot.avg_use_case_fit_score) }."
+            f"Average benchmark use-case fit: { _format_percentage(model_snapshot.avg_use_case_fit_score) }."
         )
     if eval_snapshot.top_suite_name:
-        add(f"Suite líder de eval atual: {eval_snapshot.top_suite_name}.")
+        add(f"Current leading eval suite: {eval_snapshot.top_suite_name}.")
     if eval_snapshot.pass_rate is not None:
-        add(f"PASS rate de eval em { _format_percentage(eval_snapshot.pass_rate) }.")
+        add(f"Eval PASS rate: { _format_percentage(eval_snapshot.pass_rate) }.")
     if eval_snapshot.needs_review_rate is not None:
-        add(f"Needs review rate atual em { _format_percentage(eval_snapshot.needs_review_rate) }.")
+        add(f"Current needs-review rate: { _format_percentage(eval_snapshot.needs_review_rate) }.")
     if not highlights:
-        add("Slice pronto para consolidar benchmarks e evals em formato executivo.")
+        add("This slice is ready to consolidate benchmarks and evals in an executive format.")
     return highlights
 
 
@@ -482,23 +482,23 @@ def _build_executive_summary(
     parts: list[str] = []
     if model_snapshot.total_candidates:
         model_part = (
-            f"{model_snapshot.total_candidates} candidatos foram consolidados no benchmark"
+            f"{model_snapshot.total_candidates} candidates were consolidated in the benchmark"
         )
         if model_snapshot.success_rate is not None:
-            model_part += f", com success rate médio de {_format_percentage(model_snapshot.success_rate)}"
+            model_part += f", with an average success rate of {_format_percentage(model_snapshot.success_rate)}"
         if model_snapshot.top_model:
-            model_part += f" e liderança atual de {model_snapshot.top_model}"
+            model_part += f" and current leadership from {model_snapshot.top_model}"
         parts.append(model_part + ".")
     if eval_snapshot.total_runs:
-        eval_part = f"A camada de eval registrou {eval_snapshot.total_runs} runs"
+        eval_part = f"The eval layer recorded {eval_snapshot.total_runs} runs"
         if eval_snapshot.pass_rate is not None:
-            eval_part += f", com PASS rate de {_format_percentage(eval_snapshot.pass_rate)}"
+            eval_part += f", with a PASS rate of {_format_percentage(eval_snapshot.pass_rate)}"
         if eval_snapshot.needs_review_rate is not None:
-            eval_part += f" e needs review de {_format_percentage(eval_snapshot.needs_review_rate)}"
+            eval_part += f" and a needs-review rate of {_format_percentage(eval_snapshot.needs_review_rate)}"
         parts.append(eval_part + ".")
     if not parts:
         parts.append(
-            "Contrato executivo v1 pronto para consolidar benchmark e eval em um payload apresentável."
+            "Executive contract v1 is ready to consolidate benchmark and eval data into a presentable payload."
         )
     return " ".join(parts)
 
@@ -509,16 +509,16 @@ def _build_recommendation(
 ) -> str:
     if model_snapshot.top_model and eval_snapshot.pass_rate is not None:
         return (
-            f"Promover {model_snapshot.top_model} como candidato principal da próxima rodada controlada, "
-            f"mantendo o quality gate apoiado no PASS rate atual de {_format_percentage(eval_snapshot.pass_rate)}."
+            f"Promote {model_snapshot.top_model} as the leading candidate for the next controlled round, "
+            f"keeping the quality gate anchored to the current PASS rate of {_format_percentage(eval_snapshot.pass_rate)}."
         )
     if model_snapshot.top_model:
         return (
-            f"Promover {model_snapshot.top_model} para a próxima rodada controlada e manter comparação contínua "
-            "com os demais candidatos líderes."
+            f"Promote {model_snapshot.top_model} into the next controlled round and keep continuous comparison "
+            "with the other leading candidates."
         )
     return (
-        "Usar este contrato v1 como fundação estável para exportar benchmark e eval em formato executivo."
+        "Use this v1 contract as a stable foundation for exporting benchmark and eval data in an executive format."
     )
 
 
@@ -529,22 +529,22 @@ def _build_watchouts(
     watchouts: list[str] = []
     if model_snapshot.success_rate is not None and model_snapshot.success_rate < 0.8:
         watchouts.append(
-            f"Benchmark success rate ainda abaixo do ideal ({_format_percentage(model_snapshot.success_rate)})."
+            f"Benchmark success rate is still below the ideal threshold ({_format_percentage(model_snapshot.success_rate)})."
         )
     if eval_snapshot.fail_rate is not None and eval_snapshot.fail_rate > 0:
         watchouts.append(
-            f"Ainda existem runs em FAIL ({_format_percentage(eval_snapshot.fail_rate)})."
+            f"There are still runs in FAIL ({_format_percentage(eval_snapshot.fail_rate)})."
         )
     if eval_snapshot.needs_review_rate is not None and eval_snapshot.needs_review_rate > 0.1:
         watchouts.append(
-            f"Needs review rate acima do conforto operacional ({_format_percentage(eval_snapshot.needs_review_rate)})."
+            f"Needs-review rate is above the operational comfort zone ({_format_percentage(eval_snapshot.needs_review_rate)})."
         )
     if model_snapshot.avg_use_case_fit_score is not None and model_snapshot.avg_use_case_fit_score < 0.75:
         watchouts.append(
-            "Use-case fit médio do benchmark ainda pede ajuste antes de promoção ampla."
+            "Average benchmark use-case fit still needs improvement before broader promotion."
         )
     if not watchouts:
-        watchouts.append("Sem watchouts críticos agregados nesta rodada; seguir monitorando qualidade e latência.")
+        watchouts.append("No critical aggregated watchouts in this round; continue monitoring quality and latency.")
     return watchouts[:4]
 
 
@@ -555,13 +555,13 @@ def _build_next_steps(
     next_steps: list[str] = []
     if model_snapshot.top_model:
         next_steps.append(
-            f"Promover {model_snapshot.top_model} para uma rodada shadow/controlada como candidato default."
+            f"Promote {model_snapshot.top_model} into a shadow/controlled round as the default candidate."
         )
     if eval_snapshot.fail_rate is not None and eval_snapshot.fail_rate > 0:
-        next_steps.append("Revisar suites em FAIL/WARN e transformar os achados em gates repetíveis.")
+        next_steps.append("Review FAIL/WARN suites and turn the findings into repeatable gates.")
     if eval_snapshot.needs_review_rate is not None and eval_snapshot.needs_review_rate > 0:
-        next_steps.append("Reduzir backlog de needs_review antes de ampliar o escopo da rodada seguinte.")
-    next_steps.append("Serializar este contrato e chamar o `ppt_creator_app` por API HTTP no próximo slice.")
+        next_steps.append("Reduce the needs-review backlog before expanding the scope of the next round.")
+    next_steps.append("Serialize this contract and call `ppt_creator_app` over HTTP API in the next slice.")
     return next_steps[:6]
 
 
@@ -666,7 +666,7 @@ def build_ppt_creator_payload_from_benchmark_eval_contract(
             title="Executive summary",
             body=normalized.executive_summary,
             bullets=_compact_text_list(normalized.key_highlights, limit=3, max_chars=76),
-            speaker_notes="Resumo executivo consolidado a partir dos agregados de benchmark/eval.",
+            speaker_notes="Executive summary consolidated from the benchmark/eval aggregates.",
         ),
     ]
 
@@ -684,7 +684,7 @@ def build_ppt_creator_payload_from_benchmark_eval_contract(
                     )
                     for item in normalized.key_metrics[:4]
                 ],
-                speaker_notes="Métricas executivas consolidadas para leitura rápida.",
+                speaker_notes="Executive metrics consolidated for quick reading.",
             )
         )
 
@@ -709,7 +709,7 @@ def build_ppt_creator_payload_from_benchmark_eval_contract(
                     ]
                     for item in normalized.model_leaderboard
                 ],
-                speaker_notes="Leaderboard agregado de modelos para o slice benchmark/eval.",
+                speaker_notes="Aggregated model leaderboard for the benchmark/eval slice.",
             )
         )
 
@@ -728,7 +728,7 @@ def build_ppt_creator_payload_from_benchmark_eval_contract(
                     ]
                     for item in normalized.eval_suite_leaderboard
                 ],
-                speaker_notes="Suites de eval ordenadas por qualidade agregada.",
+                speaker_notes="Eval suites ordered by aggregate quality.",
             )
         )
 
@@ -752,7 +752,7 @@ def build_ppt_creator_payload_from_benchmark_eval_contract(
             right_title="Watchouts",
             right_body=watchout_body,
             right_bullets=watchout_bullets,
-            speaker_notes="Comparação entre decisão recomendada e pontos de atenção operacionais.",
+            speaker_notes="Comparison between the recommended decision and operational watchouts.",
         )
     )
 
@@ -762,7 +762,7 @@ def build_ppt_creator_payload_from_benchmark_eval_contract(
                 type="bullets",
                 title="Next steps",
                 bullets=_compact_text_list(normalized.next_steps, limit=4, max_chars=80),
-                speaker_notes="Próximos passos sugeridos para o próximo slice da integração.",
+                speaker_notes="Suggested next steps for the next integration slice.",
             )
         )
 
@@ -1280,7 +1280,7 @@ def build_document_review_deck_contract(
                     title="Top findings",
                     columns=["Type", "Finding", "Owner", "Due", "Evidence"],
                     rows=_normalize_table_rows(finding_rows),
-                    speaker_notes="Findings grounded no payload estruturado/document agent.",
+                    speaker_notes="Findings grounded in the structured/document-agent payload.",
                 )
             )
         action_rows = []
@@ -1304,7 +1304,7 @@ def build_document_review_deck_contract(
                 )
             )
 
-        summary_text = payload.summary or "Executive review grounded no payload do agente documental."
+        summary_text = payload.summary or "Executive review grounded in the document-agent payload."
         highlights = _dedupe_texts(list(payload.key_points or []), limit=6)
         watchouts = _dedupe_texts(list(payload.limitations or []), limit=4)
         if payload.needs_review and payload.needs_review_reason:
@@ -1325,7 +1325,7 @@ def build_document_review_deck_contract(
         )
         recommendation = _recommended_action_or_fallback(
             list(payload.recommended_actions or []),
-            "Consolidar os findings principais e validar os próximos passos com revisão humana antes da execução.",
+            "Consolidate the main findings and validate the next steps with human review before execution.",
         )
         data_sources = ["structured_result", "document_agent"]
     elif isinstance(payload, ExtractionPayload):
@@ -1354,8 +1354,8 @@ def build_document_review_deck_contract(
                 )
             )
         summary_text = (
-            f"{payload.main_subject or 'Documento'}: {len(payload.risks)} risco(s), "
-            f"{len(payload.action_items)} ação(ões) e {len(payload.missing_information)} lacuna(s) identificada(s)."
+            f"{payload.main_subject or 'Document'}: {len(payload.risks)} risk(s), "
+            f"{len(payload.action_items)} action(s), and {len(payload.missing_information)} gap(s) identified."
         )
         highlights = _dedupe_texts([*payload.categories, *payload.important_dates, *payload.important_numbers], limit=6)
         watchouts = _dedupe_texts(list(payload.missing_information or []), limit=4)
@@ -1366,7 +1366,7 @@ def build_document_review_deck_contract(
             _build_metric("Actions", len(payload.action_items)),
             _build_metric("Gaps", len(payload.missing_information)),
         ]
-        recommendation = _recommended_action_or_fallback(next_steps, "Transformar os riscos e gaps mais relevantes em plano de revisão priorizado.")
+        recommendation = _recommended_action_or_fallback(next_steps, "Turn the most relevant risks and gaps into a prioritized review plan.")
         data_sources = ["structured_result", "extraction"]
     elif isinstance(payload, SummaryPayload):
         topic_rows = [
@@ -1389,8 +1389,8 @@ def build_document_review_deck_contract(
             _build_metric("Completeness", _format_ratio(payload.completeness_score)),
             _build_metric("Insights", len(payload.key_insights)),
         ]
-        recommendation = "Usar os tópicos e insights consolidados como base de revisão executiva do documento."
-        watchouts = ["O resumo pode omitir detalhes operacionais finos; consulte o documento completo quando necessário."]
+        recommendation = "Use the consolidated topics and insights as the basis for an executive review of the document."
+        watchouts = ["The summary may omit fine-grained operational details; consult the full document when needed."]
         next_steps = _dedupe_texts(list(payload.key_insights or []), limit=6)
         data_sources = ["structured_result", "summary"]
     else:
@@ -1445,7 +1445,7 @@ def build_policy_contract_comparison_deck_contract(
                 title="Comparison findings",
                 columns=["Type", "Finding", "Documents", "Evidence"],
                 rows=_normalize_table_rows(comparison_rows),
-                speaker_notes="Diferenças e impactos extraídos do fluxo de comparação documental.",
+                speaker_notes="Differences and impacts extracted from the document-comparison flow.",
             )
         )
 
@@ -1469,7 +1469,7 @@ def build_policy_contract_comparison_deck_contract(
             "review_type": review_type or payload.tool_used,
             "compared_documents": list(payload.compared_documents or []),
         },
-        executive_summary=payload.summary or "Comparison review grounded no fluxo de comparação documental.",
+        executive_summary=payload.summary or "Comparison review grounded in the document-comparison flow.",
         key_highlights=_dedupe_texts(list(payload.key_points or []) + [item.title for item in payload.comparison_findings], limit=6),
         key_metrics=[
             _build_metric("Compared docs", len(payload.compared_documents or [])),
@@ -1480,7 +1480,7 @@ def build_policy_contract_comparison_deck_contract(
         tables=tables,
         recommendation=_recommended_action_or_fallback(
             list(payload.recommended_actions or []),
-            "Validar as diferenças críticas e usar o comparativo para suportar a decisão final com revisão humana.",
+            "Validate the critical differences and use the comparison to support the final decision with human review.",
         ),
         watchouts=_dedupe_texts(
             [*(payload.limitations or []), payload.needs_review_reason] if payload.needs_review_reason else list(payload.limitations or []),
@@ -1511,11 +1511,11 @@ def build_action_plan_deck_contract(
         ]
         watchouts = []
         if int(action_summary.get("unassigned_open_actions") or 0) > 0:
-            watchouts.append("Há ações abertas sem owner definido.")
+            watchouts.append("There are open actions without a defined owner.")
         if int(action_summary.get("overdue_actions") or 0) > 0:
-            watchouts.append("Há ações em atraso que merecem repriorização imediata.")
+            watchouts.append("There are overdue actions that require immediate reprioritization.")
         if int(action_summary.get("pending_approval_actions") or 0) > 0:
-            watchouts.append("Há ações sensíveis aguardando aprovação formal.")
+            watchouts.append("There are sensitive actions awaiting formal approval.")
         next_steps = _dedupe_texts(
             [
                 entry.get("description")
@@ -1539,10 +1539,10 @@ def build_action_plan_deck_contract(
                 "review_type_counts": dict(action_summary.get("review_type_counts") or {}),
             },
             executive_summary=(
-                f"O action backlog atual contém {int(action_summary.get('total_actions') or 0)} ação(ões), "
-                f"com {int(action_summary.get('open_actions') or 0)} aberta(s), "
-                f"{int(action_summary.get('review_required_actions') or 0)} sensível(is) e "
-                f"{int(action_summary.get('overdue_actions') or 0)} em atraso."
+                f"The current action backlog contains {int(action_summary.get('total_actions') or 0)} action(s), "
+                f"with {int(action_summary.get('open_actions') or 0)} open, "
+                f"{int(action_summary.get('review_required_actions') or 0)} sensitive, and "
+                f"{int(action_summary.get('overdue_actions') or 0)} overdue."
             ),
             key_highlights=_dedupe_texts(next_steps, limit=6),
             key_metrics=[
@@ -1560,7 +1560,7 @@ def build_action_plan_deck_contract(
             ],
             recommendation=_recommended_action_or_fallback(
                 next_steps,
-                "Priorizar o fechamento das ações abertas com maior criticidade e menor definição operacional.",
+                "Prioritize closing the open actions with the highest criticality and the lowest operational clarity.",
             ),
             watchouts=_dedupe_texts(watchouts, limit=4),
             next_steps=next_steps,
@@ -1612,7 +1612,7 @@ def build_action_plan_deck_contract(
             ],
             recommendation=_recommended_action_or_fallback(
                 next_steps,
-                "Executar o checklist em ordem de prioridade e revisar itens pendentes antes do handoff operacional.",
+                "Execute the checklist in priority order and review pending items before the operational handoff.",
             ),
             watchouts=_dedupe_texts([item.title for item in payload.items if item.status == "skipped"], limit=4),
             next_steps=next_steps,
@@ -1664,7 +1664,7 @@ def build_action_plan_deck_contract(
             ]
             if rows
             else [],
-            recommendation=_recommended_action_or_fallback(next_steps, "Traduzir os próximos passos em owners, prazos e critérios de acompanhamento."),
+            recommendation=_recommended_action_or_fallback(next_steps, "Translate the next steps into owners, timelines, and follow-up criteria."),
             watchouts=_dedupe_texts([*(payload.limitations or []), payload.needs_review_reason] if payload.needs_review_reason else list(payload.limitations or []), limit=4),
             next_steps=next_steps,
             data_sources=["structured_result", "document_agent_action_plan"],
@@ -1747,13 +1747,13 @@ def build_candidate_review_deck_contract(
             "task_type": normalized_result.task_type if normalized_result else None,
             "candidate_name": candidate_name,
             "headline": headline,
-            "location": location or "n/d",
+            "location": location or "n/a",
             "experience_entries": len(payload.experience_entries or []),
         },
         candidate_profile={
             "name": candidate_name,
             "headline": headline,
-            "location": location or "n/d",
+            "location": location or "n/a",
         },
         executive_summary=summary_text,
         key_highlights=_dedupe_texts([*strengths, *(payload.skills or [])], limit=6),
@@ -1832,9 +1832,9 @@ def build_evidence_pack_deck_contract(
         )
     watchouts = []
     if int(action_summary.get("unassigned_open_actions") or 0) > 0:
-        watchouts.append("Há ações abertas sem owner definido no action store.")
+        watchouts.append("There are open actions without a defined owner in the action store.")
     if int(action_summary.get("pending_approval_actions") or 0) > 0:
-        watchouts.append("Há ações sensíveis pendentes de aprovação.")
+        watchouts.append("There are sensitive actions pending approval.")
     watchouts.extend(limitations)
 
     return GenericExecutiveDeckContract(
@@ -1854,9 +1854,9 @@ def build_evidence_pack_deck_contract(
         },
         executive_summary=_clean_text(latest_entry.get("summary"))
         or (
-            f"EvidenceOps consolidou {int(worklog_summary.get('total_findings') or 0)} finding(s), "
-            f"{int(worklog_summary.get('total_action_items') or 0)} action item(ns) e "
-            f"{int(action_summary.get('open_actions') or 0)} ação(ões) aberta(s) no backlog atual."
+            f"EvidenceOps consolidated {int(worklog_summary.get('total_findings') or 0)} finding(s), "
+            f"{int(worklog_summary.get('total_action_items') or 0)} action item(s), and "
+            f"{int(action_summary.get('open_actions') or 0)} open action(s) in the current backlog."
         ),
         key_highlights=_dedupe_texts(
             [
@@ -1874,7 +1874,7 @@ def build_evidence_pack_deck_contract(
         tables=tables,
         recommendation=_recommended_action_or_fallback(
             _dedupe_texts(list(recommended_actions or []), limit=4),
-            "Priorizar o fechamento dos findings críticos e consolidar o handoff executivo do evidence pack.",
+            "Prioritize closing critical findings and consolidate the executive handoff of the evidence pack.",
         ),
         watchouts=_dedupe_texts(watchouts, limit=4),
         next_steps=_dedupe_texts(
@@ -1955,7 +1955,7 @@ def build_ppt_creator_payload_from_executive_deck_contract(
             title="Executive summary",
             body=normalized.executive_summary,
             bullets=_compact_text_list(normalized.key_highlights, limit=3, max_chars=76),
-            speaker_notes="Resumo executivo consolidado a partir dos sinais grounded do produto.",
+            speaker_notes="Executive summary consolidated from the product's grounded signals.",
         ),
     ]
     if normalized.key_metrics:

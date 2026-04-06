@@ -30,7 +30,7 @@ def _sample_model_comparison_entries() -> list[dict[str, object]]:
     return [
         {
             "benchmark_use_case": "executive_summary",
-            "prompt_profile": "neutro",
+            "prompt_profile": "neutral",
             "response_format": "bullet_list",
             "retrieval_strategy": "manual_hybrid",
             "embedding_provider": "ollama",
@@ -113,13 +113,13 @@ def _sample_document_agent_result() -> StructuredResult:
         intent_reason="Document asks for a grounded compliance review.",
         answer_mode="review",
         tool_used="policy_compliance",
-        summary="A política adiciona obrigações novas e ainda depende de validação jurídica final.",
+        summary="The policy adds new obligations and still depends on final legal validation.",
         key_points=[
-            "Nova obrigação de aprovação formal.",
-            "Owner do controle anual ainda não foi definido.",
+            "New formal approval obligation.",
+            "The owner for the annual control has not yet been defined.",
         ],
-        limitations=["Validação jurídica final ainda pendente."],
-        recommended_actions=["Definir owner do controle.", "Revisar cláusulas críticas com jurídico."],
+        limitations=["Final legal validation is still pending."],
+        recommended_actions=["Define the control owner.", "Review critical clauses with legal."],
         guardrails_applied=["Human review required for final policy decision."],
         available_tools=[],
         compared_documents=["Policy 2025", "Policy 2026"],
@@ -136,11 +136,11 @@ def _sample_document_agent_result() -> StructuredResult:
         structured_response={
             "review_type": "policy_compliance",
             "gaps": ["Legal sign-off still missing"],
-            "actions": ["Define owner do controle anual"],
+            "actions": ["Define the annual control owner"],
             "extraction_payload": {
                 "risks": [
                     {
-                        "description": "Owner não definido para o controle anual",
+                        "description": "Owner not defined for the annual control",
                         "owner": "Compliance",
                         "due_date": "2026-04-10",
                         "evidence": "Page 12",
@@ -148,7 +148,7 @@ def _sample_document_agent_result() -> StructuredResult:
                 ],
                 "action_items": [
                     {
-                        "description": "Definir owner do controle anual",
+                        "description": "Define the annual control owner",
                         "owner": "Compliance",
                         "due_date": "2026-04-10",
                         "status": "open",
@@ -215,7 +215,7 @@ def _sample_action_entries() -> list[dict[str, object]]:
     return [
         {
             "action_type": "recommended_action",
-            "description": "Definir owner do controle anual",
+            "description": "Define the annual control owner",
             "owner": "Compliance",
             "due_date": "2026-04-10",
             "status": "open",
@@ -223,7 +223,7 @@ def _sample_action_entries() -> list[dict[str, object]]:
         },
         {
             "action_type": "recommended_action",
-            "description": "Validar sign-off jurídico",
+            "description": "Validate legal sign-off",
             "owner": "Legal",
             "due_date": "2026-04-12",
             "status": "in_progress",
@@ -236,7 +236,7 @@ def _sample_evidenceops_worklog_entries() -> list[dict[str, object]]:
     return [
         {
             "review_type": "risk_gap_review",
-            "summary": "EvidenceOps encontrou findings e ações abertas.",
+            "summary": "EvidenceOps found findings and open actions.",
             "workflow_id": "wf_123",
             "findings": [
                 {
@@ -249,14 +249,14 @@ def _sample_evidenceops_worklog_entries() -> list[dict[str, object]]:
             "action_items": [
                 {
                     "action_type": "recommended_action",
-                    "description": "Atualizar evidence register",
+                    "description": "Update evidence register",
                     "owner": "Compliance",
                     "due_date": "2026-04-12",
                     "status": "open",
                 }
             ],
-            "recommended_actions": ["Atualizar evidence register"],
-            "limitations": ["Uma evidência ainda depende de validação manual"],
+            "recommended_actions": ["Update evidence register"],
+            "limitations": ["One piece of evidence still depends on manual validation"],
         }
     ]
 

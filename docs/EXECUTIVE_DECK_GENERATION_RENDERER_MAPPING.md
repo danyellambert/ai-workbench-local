@@ -1,16 +1,16 @@
 # Executive Deck Generation — mapping contract -> renderer payload
 
-## Objetivo
+## Objective
 
-Definir como os contracts semânticos da capability devem ser convertidos em payload do `ppt_creator`.
+Define how the capability's semantic contracts should be converted into `ppt_creator` payloads.
 
 ---
 
-## Mapeamento base
+## Base mapping
 
 ### Presentation metadata
 
-Mapear diretamente:
+Map directly:
 
 - `presentation.title`
 - `presentation.subtitle`
@@ -19,40 +19,40 @@ Mapear diretamente:
 - `presentation.theme`
 - `presentation.footer_text`
 
-### Blocos semânticos -> tipos de slide
+### Semantic blocks -> slide types
 
-| bloco semântico | slide type preferido |
+| semantic block | preferred slide type |
 |---|---|
-| capa | `title` |
-| resumo executivo | `summary` ou `bullets` |
-| métricas | `metrics` |
-| leaderboard / findings estruturados | `table` |
+| cover | `title` |
+| executive summary | `summary` or `bullets` |
+| metrics | `metrics` |
+| leaderboard / structured findings | `table` |
 | recommendation vs watchouts | `comparison` |
-| próximos passos | `bullets` |
-| timeline / plano de ação | `timeline` |
+| next steps | `bullets` |
+| timeline / action plan | `timeline` |
 | workstreams / highlights | `cards` |
 
 ---
 
-## Regras de truncamento
+## Truncation rules
 
-- evitar parágrafos excessivamente longos em `summary`
-- limitar bullets a quantidade executiva razoável
-- usar `table` quando a leitura comparativa for mais importante que narrativa corrida
+- avoid excessively long paragraphs in `summary`
+- limit bullets to a reasonable executive quantity
+- use `table` when comparative reading is more important than narrative flow
 
 ---
 
-## Regras de fallback
+## Fallback rules
 
-- se faltar dado para `metrics`, rebaixar para `bullets`
-- se faltar dado para `comparison`, usar `bullets` com separação semântica simples
-- se faltar `timeline`, usar `table` ou `bullets` ordenados
+- if data is missing for `metrics`, downgrade to `bullets`
+- if data is missing for `comparison`, use `bullets` with simple semantic separation
+- if `timeline` is missing, use `table` or ordered `bullets`
 
 ---
 
 ## Speaker notes
 
-Recomendação inicial:
+Initial recommendation:
 
-- sempre registrar contexto de origem do slide quando útil
-- usar notes para provenance e guidance de apresentação, não para despejo bruto de dados
+- always record the source context of the slide when useful
+- use notes for provenance and presentation guidance, not for raw data dumping

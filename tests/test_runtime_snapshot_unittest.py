@@ -32,17 +32,17 @@ class RuntimeSnapshotTests(unittest.TestCase):
         route, dependency = summarize_provider_path("ollama", "Ollama (local)", "http://localhost:11434")
 
         self.assertIn("localhost:11434", route)
-        self.assertIn("servidor Ollama", dependency)
+        self.assertIn("Ollama server", dependency)
 
     def test_summarize_provider_path_for_huggingface_server(self) -> None:
         route, dependency = summarize_provider_path(
             "huggingface_server",
-            "Hugging Face server local (Servidor local configurado em `http://127.0.0.1:8788/v1`)",
+            "Hugging Face local server (Local server configured at `http://127.0.0.1:8788/v1`)",
             "http://localhost:11434",
         )
 
         self.assertIn("AI hub local", route)
-        self.assertIn("backend efetivo pode variar", dependency)
+        self.assertIn("effective backend may vary", dependency)
 
     def test_build_runtime_snapshot_aggregates_chat_structured_and_document_metadata(self) -> None:
         structured_result = StructuredResult(
@@ -62,15 +62,15 @@ class RuntimeSnapshotTests(unittest.TestCase):
                 "provider": "ollama",
                 "model": "qwen2.5:7b",
                 "execution_strategy_used": "langgraph_context_retry",
-                "agent_intent": "Pergunta documental",
-                "agent_tool": "Consultar documentos indexados",
+                "agent_intent": "Document question",
+                "agent_tool": "Consult indexed documents",
                 "agent_answer_mode": "friendly",
                 "agent_available_tools": [{"name": "consult_documents", "available": True}],
                 "needs_review": True,
                 "needs_review_reason": "low_agent_confidence",
-                "agent_limitations": ["Confiança estimada abaixo do ideal (68%)."],
-                "agent_recommended_actions": ["Encaminhe o resultado para revisão humana."],
-                "agent_guardrails_applied": ["Resposta restrita aos documentos selecionados."],
+                "agent_limitations": ["Estimated confidence below ideal (68%)."],
+                "agent_recommended_actions": ["Forward the result for human review before making a final decision."],
+                "agent_guardrails_applied": ["Response restricted to documents selected in the document base."],
                 "workflow_attempts": 2,
                 "workflow_context_strategies": ["document_scan", "retrieval"],
                 "context_chars_sent": 1600,
@@ -120,8 +120,8 @@ class RuntimeSnapshotTests(unittest.TestCase):
                     "name": "cv.pdf",
                     "file_type": "pdf",
                     "loader_metadata": {
-                        "loader_strategy_label": "Manual local",
-                        "strategy_label": "Híbrido inteligente",
+                        "loader_strategy_label": "Local manual",
+                        "strategy_label": "Smart hybrid",
                         "source_type": "pdf",
                         "ocr_backend": "ocrmypdf",
                         "evidence_pipeline_used": True,
@@ -160,13 +160,13 @@ class RuntimeSnapshotTests(unittest.TestCase):
         self.assertEqual(snapshot["chat"]["embedding_provider"], "ollama")
         self.assertEqual(snapshot["chat"]["embedding_model"], "embeddinggemma:300m")
         self.assertEqual(snapshot["structured"]["execution_strategy"], "langgraph_context_retry")
-        self.assertEqual(snapshot["structured"]["agent_intent"], "Pergunta documental")
-        self.assertEqual(snapshot["structured"]["agent_tool"], "Consultar documentos indexados")
+        self.assertEqual(snapshot["structured"]["agent_intent"], "Document question")
+        self.assertEqual(snapshot["structured"]["agent_tool"], "Consult indexed documents")
         self.assertEqual(snapshot["structured"]["agent_available_tools"], [{"name": "consult_documents", "available": True}])
         self.assertTrue(snapshot["structured"]["needs_review"])
-        self.assertEqual(snapshot["structured"]["agent_limitations"], ["Confiança estimada abaixo do ideal (68%)."])
-        self.assertEqual(snapshot["structured"]["agent_recommended_actions"], ["Encaminhe o resultado para revisão humana."])
-        self.assertEqual(snapshot["structured"]["agent_guardrails_applied"], ["Resposta restrita aos documentos selecionados."])
+        self.assertEqual(snapshot["structured"]["agent_limitations"], ["Estimated confidence below ideal (68%)."])
+        self.assertEqual(snapshot["structured"]["agent_recommended_actions"], ["Forward the result for human review before making a final decision."])
+        self.assertEqual(snapshot["structured"]["agent_guardrails_applied"], ["Response restricted to documents selected in the document base."])
         self.assertEqual(snapshot["structured"]["workflow_attempts"], 2)
         self.assertEqual(snapshot["structured"]["last_pre_model_prep_s"], 0.6)
         self.assertEqual(snapshot["chat"]["last_prompt_context_used_chunks"], 3)
@@ -174,7 +174,7 @@ class RuntimeSnapshotTests(unittest.TestCase):
         self.assertEqual(snapshot["structured"]["last_context_chars"], 1600)
         self.assertEqual(snapshot["structured"]["last_context_strategy"], "document_scan")
         self.assertEqual(snapshot["documents"]["indexed_documents"], 1)
-        self.assertEqual(snapshot["documents"]["chat_selected_docs"][0]["documento"], "cv.pdf")
+        self.assertEqual(snapshot["documents"]["chat_selected_docs"][0]["document"], "cv.pdf")
         self.assertEqual(snapshot["documents"]["chat_selected_docs"][0]["ocr_backend"], "ocrmypdf")
         self.assertEqual(snapshot["structured"]["task_model_map"]["summary"], "summary-model")
 
@@ -222,7 +222,7 @@ class RuntimeSnapshotTests(unittest.TestCase):
                 log_path,
                 {
                     "timestamp": "2026-03-31T10:00:00",
-                    "query": "Compare os contratos",
+                    "query": "Compare the contracts",
                     "success": True,
                     "user_intent": "document_comparison",
                     "tool_used": "compare_documents",
@@ -241,7 +241,7 @@ class RuntimeSnapshotTests(unittest.TestCase):
                 log_path,
                 {
                     "timestamp": "2026-03-31T10:05:00",
-                    "query": "Revise os riscos",
+                    "query": "Review the risks",
                     "success": False,
                     "user_intent": "document_risk_review",
                     "tool_used": "review_document_risks",
@@ -558,7 +558,7 @@ class RuntimeSnapshotTests(unittest.TestCase):
                     "source_count": 2,
                     "findings": [{"finding_type": "risk"}, {"finding_type": "gap"}],
                     "action_items": [{"owner": "Legal", "status": "open", "due_date": "2026-05-01"}],
-                    "recommended_actions": ["Atualizar cláusula"],
+                    "recommended_actions": ["Update clause"],
                 },
             )
 
@@ -621,21 +621,21 @@ class RuntimeSnapshotTests(unittest.TestCase):
                     "task_type": "document_agent",
                     "review_type": "risk_gap_review",
                     "tool_used": "review_document_risks",
-                    "query": "Liste os riscos",
+                    "query": "List the risks",
                     "confidence": 0.81,
                     "needs_review": False,
                     "document_ids": ["CTR-002"],
                     "source_count": 2,
                     "action_items": [
                         {
-                            "description": "Solicitar redline da cláusula de incidente",
+                            "description": "Request a redline of the incident clause",
                             "owner": "Legal",
                             "due_date": "2026-05-01",
                             "status": "open",
                             "evidence": "notify within 10 business days",
                         }
                     ],
-                    "recommended_actions": ["Atualizar cláusula"],
+                    "recommended_actions": ["Update clause"],
                 },
             )
 
@@ -698,14 +698,14 @@ class RuntimeSnapshotTests(unittest.TestCase):
                     "task_type": "document_agent",
                     "review_type": "risk_gap_review",
                     "tool_used": "review_document_risks",
-                    "query": "Liste os riscos",
+                    "query": "List the risks",
                     "confidence": 0.81,
                     "needs_review": False,
                     "document_ids": ["CTR-002"],
                     "source_count": 2,
                     "action_items": [
                         {
-                            "description": "Solicitar redline da cláusula de incidente",
+                            "description": "Request a redline of the incident clause",
                             "owner": "Legal",
                             "due_date": "2026-05-01",
                             "status": "open",
@@ -722,7 +722,7 @@ class RuntimeSnapshotTests(unittest.TestCase):
                 action_id=int(open_actions[0]["id"]),
                 status="closed",
                 approval_status="approved",
-                approval_reason="Encerramento validado pelo gestor responsável.",
+                approval_reason="Closure validated by the responsible manager.",
                 approved_by="manager",
             )
 
@@ -988,7 +988,7 @@ class RuntimeSnapshotTests(unittest.TestCase):
         snapshot = build_runtime_snapshot(
             selected_provider="huggingface_server",
             selected_provider_label="Hugging Face server local",
-            provider_detail="Servidor local configurado em `http://127.0.0.1:8788/v1`",
+            provider_detail="Local server configured at `http://127.0.0.1:8788/v1`",
             selected_model="service-chat",
             selected_embedding_provider="huggingface_server",
             selected_embedding_model="service-embed",
@@ -1011,7 +1011,7 @@ class RuntimeSnapshotTests(unittest.TestCase):
         )
 
         self.assertIn("AI hub local", snapshot["provider_path"])
-        self.assertIn("backend efetivo pode variar", snapshot["local_dependency"])
+        self.assertIn("effective backend may vary", snapshot["local_dependency"])
 
 
 if __name__ == "__main__":
