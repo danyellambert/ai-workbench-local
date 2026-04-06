@@ -14,7 +14,10 @@ export default function LandingNav() {
         <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
           <Sparkles className="w-4 h-4 text-primary" />
         </div>
-        <span className="text-sm font-semibold text-foreground tracking-tight">AI Decision Studio</span>
+        <div className="flex flex-col leading-tight">
+          <span className="text-sm font-semibold text-foreground tracking-tight">AI Decision Studio</span>
+          <span className="text-[10px] text-muted-foreground">by Danyel Lambert</span>
+        </div>
       </Link>
       <Link
         to="/app"

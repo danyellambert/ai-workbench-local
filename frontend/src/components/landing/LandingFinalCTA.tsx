@@ -50,9 +50,6 @@ export default function LandingFinalCTA() {
         <p className="text-[11px] text-muted-foreground/50">
           AI Decision Studio · Document intelligence for decision workflows
         </p>
-        <p className="mt-2 text-xs text-muted-foreground/70">
-          Built by Danyel Lambert
-        </p>
       </motion.div>
     </section>
   );

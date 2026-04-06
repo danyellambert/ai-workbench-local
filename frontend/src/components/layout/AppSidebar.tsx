@@ -96,7 +96,6 @@ export default function AppSidebar() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
             <h1 className="text-sm font-semibold text-foreground truncate">AI Decision Studio</h1>
             <p className="text-[10px] text-muted-foreground">Local · v2.4</p>
-            <p className="text-[10px] text-primary/80 truncate">Built by Danyel Lambert</p>
           </motion.div>
         )}
       </div>
