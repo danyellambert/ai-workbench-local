@@ -1,18 +1,18 @@
-# Executive Deck Generation — routing e seleção de deck type
+# Executive Deck Generation — routing and deck-type selection
 
-## Objetivo
+## Objective
 
-Definir como o produto decide **qual deck type sugerir, permitir ou bloquear** em cada fluxo.
+Define how the product decides **which deck type to suggest, allow, or block** in each workflow.
 
 ---
 
-## Modos de seleção
+## Selection modes
 
-### 1. Seleção explícita pelo usuário
+### 1. Explicit user selection
 
-Modo preferido para as primeiras versões.
+Preferred mode for early versions.
 
-O usuário escolhe diretamente:
+The user chooses directly:
 
 - benchmark/eval executive review
 - document review
@@ -21,49 +21,49 @@ O usuário escolhe diretamente:
 - candidate review
 - evidence pack
 
-### 2. Sugestão automática pelo fluxo ativo
+### 2. Automatic suggestion based on the active workflow
 
-O sistema pode sugerir um deck default com base no fluxo atual, mas sem esconder a escolha do usuário.
+The system may suggest a default deck based on the current workflow, but without hiding the user's choice.
 
-### 3. Bloqueio por insuficiência de grounding
+### 3. Blocking due to insufficient grounding
 
-Se os sinais necessários não existirem, o produto deve bloquear a geração do deck ou marcá-lo como `needs_review`.
+If the required signals do not exist, the product should block deck generation or mark it as `needs_review`.
 
 ---
 
-## Regras de roteamento por fluxo
+## Workflow routing rules
 
-| fluxo/origem | deck sugerido | condição mínima |
+| workflow/source | suggested deck | minimum condition |
 |---|---|---|
 | benchmark + evals | `benchmark_eval_executive_review` | leaderboards + snapshots agregados disponíveis |
-| summary/extraction sobre documento único | `document_review_deck` | resumo + findings/recommendations mínimas |
-| comparação documental | `policy_contract_comparison_deck` | diff/comparison rows disponíveis |
+| summary/extraction on a single document | `document_review_deck` | summary + minimum findings/recommendations |
+| document comparison | `policy_contract_comparison_deck` | diff/comparison rows available |
 | checklist + owners + due dates | `action_plan_deck` | action items estruturados |
 | `cv_analysis` / evidence_cv | `candidate_review_deck` | profile + strengths/gaps/recommendation |
 | EvidenceOps / audit review | `evidence_pack_deck` | findings + evidence items + actions |
 
 ---
 
-## Policy de bloqueio
+## Blocking policy
 
-O deck **não deve** ser gerado automaticamente quando faltar qualquer um destes itens críticos:
+The deck **must not** be generated automatically when any of these critical items is missing:
 
-- recommendation inexistente em deck de decisão
-- comparison rows inexistentes em comparison deck
-- action items inexistentes em action plan deck
-- evidence items inexistentes em evidence pack deck
+- missing recommendation in a decision deck
+- missing comparison rows in a comparison deck
+- missing action items in an action-plan deck
+- missing evidence items in an evidence-pack deck
 
-Nesses casos, a UI deve:
+In those cases, the UI should:
 
-- informar por que a geração foi bloqueada
-- oferecer download do JSON/resultado bruto se útil
+- explain why generation was blocked
+- offer download of the raw JSON/result if useful
 
 ---
 
-## Policy de `needs_review`
+## `needs_review` policy
 
-Mesmo quando a geração for permitida, o deck deve carregar `needs_review` se:
+Even when generation is allowed, the deck should carry `needs_review` if:
 
-- o grounding estiver parcial
-- a recomendação depender de interpretação ambígua
-- houver dados sensíveis ou incompletos
+- grounding is partial
+- the recommendation depends on ambiguous interpretation
+- there is sensitive or incomplete data

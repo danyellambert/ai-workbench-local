@@ -1,1 +1,1 @@
-"""Camada de persistência simples do projeto."""
+"""Simple persistence layer for the project."""

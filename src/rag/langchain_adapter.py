@@ -7,7 +7,7 @@ from src.config import RagSettings
 
 def describe_retrieval_strategy(strategy: str) -> str:
     labels = {
-        "manual_hybrid": "Manual híbrido",
+        "manual_hybrid": "Manual hybrid",
         "langchain_chroma": "LangChain + Chroma (experimental)",
     }
     return labels.get((strategy or "").strip().lower(), strategy or "manual_hybrid")

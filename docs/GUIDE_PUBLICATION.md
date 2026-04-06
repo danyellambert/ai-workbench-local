@@ -1,40 +1,40 @@
-# Publication Guide — Fase 0.5
+# Publication Guide — Phase 0.5
 
-## Objetivo
+## Objective
 
-Concluir a Fase 0.5 do roadmap preparando o projeto para:
+Complete Phase 0.5 of the roadmap by preparing the project for:
 
-- versionamento local com Git
-- repositório privado no GitHub
-- futura publicação pública com segurança e clareza
+- local version control with Git
+- a private GitHub repository
+- future public release with safety and clarity
 
 ---
 
-## Decisões adotadas nesta fase
+## Decisions adopted in this phase
 
-- Nome recomendado do repositório: `ai-workbench-local`
-- Visibilidade inicial: **privado**
+- Recommended repository name: `ai-workbench-local`
+- Initial visibility: **private**
 - Licença: **MIT**
-- Pasta `materials_local/`: **fora do versionamento**
-- Publicação pública recomendada: **após a Fase 4**
+- Folder `materials_local/`: **excluded from version control**
+- Recommended public release: **after Phase 4**
 
 ---
 
-## O que não deve ir para o repositório público
+## What should not go into the public repository
 
 - `.env`
-- materiais de curso
-- PDF da aula
-- vídeo da aula
-- qualquer gabarito ou resposta pronta que não seja parte autoral do projeto
+- course materials
+- class PDF
+- class video
+- any answer key or pre-made solution that is not an original part of the project
 
-No estado atual do projeto, isso significa manter `materials_local/` fora do versionamento público.
+In the current state of the project, that means keeping `materials_local/` out of public version control.
 
 ---
 
-## Fluxo recomendado
+## Recommended workflow
 
-### Etapa 1 — Git local
+### Step 1 — Local Git
 
 ```bash
 git init -b main
@@ -43,20 +43,20 @@ git commit -m "chore: initialize repository and publication policy"
 git branch dev
 ```
 
-### Etapa 2 — GitHub privado
+### Step 2 — Private GitHub
 
-Se estiver autenticado no GitHub CLI:
+If you are authenticated in the GitHub CLI:
 
 ```bash
 gh auth login
 gh repo create ai-workbench-local --private --source=. --remote=origin --push
 ```
 
-Se preferir pelo site:
+If you prefer using the website:
 
-1. criar um repositório privado chamado `ai-workbench-local`
-2. copiar a URL remota
-3. rodar:
+1. create a private repository named `ai-workbench-local`
+2. copy the remote URL
+3. run:
 
 ```bash
 git remote add origin <URL_DO_REPO>
@@ -66,60 +66,60 @@ git push -u origin dev
 
 ---
 
-## Critério para abrir o repositório ao público
+## Criteria for opening the repository to the public
 
-O projeto só deve ficar público quando:
+The project should only become public when:
 
-- não houver segredo exposto
-- o README estiver forte
-- houver pelo menos um fluxo forte demonstrável
-- os materiais de curso estiverem fora do repositório público
-- a estrutura já parecer autoral e profissional
+- no secrets are exposed
+- the README is strong
+- there is at least one strong demonstrable flow
+- course materials are outside the public repository
+- the structure already looks original and professional
 
-Minha recomendação: tornar público **no fim da Fase 4**.
+My recommendation: make it public **at the end of Phase 4**.
 
 ---
 
-## Checklist da Fase 0.5
+## Phase 0.5 checklist
 
-- [x] Git local inicializado
-- [x] Commit inicial limpo criado
+- [x] Local Git initialized
+- [x] Clean initial commit created
 - [x] Branch `dev` criada
-- [x] Licença adicionada
-- [x] Política de publicação definida
-- [x] `materials_local/` fora do versionamento
-- [x] Repositório GitHub privado criado
-- [x] Remote `origin` configurado
-- [x] Push inicial realizado
+- [x] License added
+- [x] Publication policy defined
+- [x] `materials_local/` excluded from version control
+- [x] Private GitHub repository created
+- [x] `origin` remote configured
+- [x] Initial push completed
 
 ---
 
-## Observação importante
+## Important note
 
-Mesmo com tudo preparado localmente, a criação do repositório remoto no GitHub depende de:
+Even with everything prepared locally, creating the remote GitHub repository depends on:
 
-- autenticação no GitHub (`gh auth login`) **ou**
-- criação manual do repositório pelo site
+- GitHub authentication (`gh auth login`) **or**
+- manual repository creation through the website
 
-Ou seja: a parte local pode ser totalmente automatizada; a parte de conta/remoto depende do acesso ao GitHub.
+In other words: the local part can be fully automated; the account/remote part depends on GitHub access.
 
 ---
 
-## Status atual
+## Current status
 
-Fase 0.5 concluída com sucesso nos itens principais:
+Phase 0.5 was completed successfully for the main items:
 
-- Git inicializado
-- commit inicial criado
-- branch `dev` criada
-- repositório privado criado no GitHub
-- `origin` configurado
-- push inicial realizado
+- Git initialized
+- initial commit created
+- `dev` branch created
+- private repository created on GitHub
+- `origin` configured
+- initial push completed
 
-Próximo passo recomendado:
+Recommended next step:
 
-- iniciar a **Fase 1 — Base do produto com melhor experiência**
+- start **Phase 1 — Product foundation with a better experience**
 
-Repositório remoto atual:
+Current remote repository:
 
 - `https://github.com/danyellambert/ai-workbench-local`

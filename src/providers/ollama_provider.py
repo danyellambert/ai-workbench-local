@@ -216,8 +216,8 @@ class OllamaProvider:
             output["runtime_hint_source"] = "http-only"
 
         output["validation_summary"] = (
-            "Use `/api/chat` para aplicar `num_ctx`, `/api/show` para ver o contexto declarado do modelo "
-            "e `ollama ps` apenas como confirmação auxiliar de runtime."
+            "Use `/api/chat` to apply `num_ctx`, `/api/show` to inspect the model's declared context, "
+            "and `ollama ps` only as an auxiliary runtime confirmation."
         )
         return output
 
@@ -240,8 +240,8 @@ class OllamaProvider:
             output["show_error"] = str(error)
 
         output["validation_summary"] = (
-            "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional "
-            "da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+            "The native `/api/embed` endpoint accepts `truncate` and `options`. The app sends `options.num_ctx` as operational "
+            "control for the embedding window, but effective behavior still depends on the model and the Ollama runtime."
         )
         return output
 
@@ -313,7 +313,7 @@ class OllamaProvider:
             response = self._native_json_request("/api/embed", payload)
             embeddings = response.get("embeddings")
             if not isinstance(embeddings, list):
-                raise RuntimeError("Resposta inválida do endpoint /api/embed do Ollama.")
+                raise RuntimeError("Invalid response from the Ollama /api/embed endpoint.")
             all_embeddings.extend(embeddings)
 
         return all_embeddings
@@ -360,10 +360,10 @@ class OllamaProvider:
 
     def format_error(self, model: str, error: Exception) -> str:
         return (
-            "Não foi possível obter resposta do Ollama.\n\n"
-            "Verifique se:\n"
-            f"- o servidor está ativo em `{self.settings.base_url}`\n"
-            f"- o modelo `{model}` está instalado\n"
-            "- o Ollama está respondendo normalmente\n\n"
-            f"Detalhes técnicos: {error}"
+            "Could not get a response from Ollama.\n\n"
+            "Check whether:\n"
+            f"- the server is active at `{self.settings.base_url}`\n"
+            f"- the model `{model}` is installed\n"
+            "- Ollama is responding normally\n\n"
+            f"Technical details: {error}"
         )

@@ -540,7 +540,7 @@ def _build_adaptation_decision(
             "why_prompt_rag_retrieval_changes_were_not_enough": (
                 "Persistent eval failures remain after prompt/RAG/schema iteration, and benchmark evidence does not show a clearer non-training alternative closing the gap."
                 if not alternatives_remaining
-                else f"Ainda existem alternativas não-treinamento a esgotar antes de adaptação: {', '.join(alternatives_remaining)}."
+                else f"There are still non-training alternatives to exhaust before adaptation: {', '.join(alternatives_remaining)}."
             ),
             "minimal_lora_peft_experiment": _build_minimal_experiment_outline(item),
             "recommended_action": item.get("recommended_action"),

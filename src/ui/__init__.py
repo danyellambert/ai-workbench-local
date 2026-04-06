@@ -1,1 +1,1 @@
-"""Componentes de interface do projeto."""
+"""Project UI components."""

@@ -158,10 +158,10 @@ def normalize_pdf_extraction_mode(mode: str | None) -> str:
 def describe_pdf_extraction_mode(mode: str | None) -> str:
     normalized = normalize_pdf_extraction_mode(mode)
     descriptions = {
-        "basic": "Básico · pypdf apenas · mais rápido",
-        "hybrid": "Híbrido inteligente · pypdf + Docling seletivo",
-        "complete": "Completo por página · cobertura máxima com Docling/OCR",
-        "docling": "Docling documento inteiro · prioriza parsing rico",
+        "basic": "Basic · pypdf only · fastest",
+        "hybrid": "Smart hybrid · pypdf + selective Docling",
+        "complete": "Complete per page · maximum coverage with Docling/OCR",
+        "docling": "Full-document Docling · prioritizes rich parsing",
     }
     return descriptions.get(normalized, descriptions["hybrid"])
 
@@ -216,33 +216,33 @@ def _score_page(text: str, image_count: int, image_area_ratio: float, settings: 
 
     if text_chars <= settings.suspicious_low_text_chars:
         score += 0.35
-        reasons.append("baixo texto extraído")
+        reasons.append("low extracted text")
 
     if image_count >= settings.suspicious_image_count_threshold:
         score += 0.28
-        reasons.append("possui imagens")
+        reasons.append("contains images")
 
     if image_area_ratio >= settings.suspicious_image_area_ratio:
         score += 0.35
-        reasons.append("área visual relevante")
+        reasons.append("relevant visual area")
 
     if caption_markers:
         score += 0.2
-        reasons.append("marcadores de figura/tabela")
+        reasons.append("figure/table markers")
 
     if image_count >= 3:
         score += 0.18
-        reasons.append("múltiplos elementos visuais")
+        reasons.append("multiple visual elements")
 
     if image_count > 0 and text_chars > settings.baseline_chars_per_page_threshold * 2 and caption_markers:
         score += 0.1
-        reasons.append("página mista texto+figura")
+        reasons.append("mixed text+figure page")
 
     return round(score, 4), reasons, caption_markers
 
 
 def _build_page_heading(page_number: int) -> str:
-    return f"[Página {page_number}]"
+    return f"[Page {page_number}]"
 
 
 def _normalize_page_text(text: str) -> str:
@@ -286,7 +286,7 @@ def _docling_components() -> _DoclingAvailability:
 def _create_docling_converter(settings: PdfHybridSettings):
     availability = _docling_components()
     if not availability.available:
-        raise RuntimeError(availability.error or "Docling indisponível.")
+        raise RuntimeError(availability.error or "Docling unavailable.")
 
     pipeline_options = availability.pipeline_options_cls()
     if hasattr(pipeline_options, "do_ocr"):
@@ -549,13 +549,13 @@ def _rasterize_pdf_with_ghostscript(file_bytes: bytes, settings: PdfHybridSettin
                 continue
 
         if not image_bytes:
-            return [], "ghostscript não gerou páginas rasterizadas"
+            return [], "ghostscript did not generate rasterized pages"
         return image_bytes, None
 
 
 def _ocrmypdf_extract_images_text(image_bytes_list: list[bytes], settings: PdfHybridSettings) -> tuple[str, str | None]:
     if not image_bytes_list:
-        return "", "nenhuma imagem disponível para OCR"
+        return "", "no image available for OCR"
 
     pages: list[str] = []
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -659,7 +659,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
                     merged_text, changed = _merge_page_texts(
                         base_text=merged_pages.get(page.page_number, ""),
                         enriched_text=enriched,
-                        heading="Extração completa Docling/OCR",
+                        heading="Complete Docling/OCR extraction",
                     )
                     merged_pages[page.page_number] = merged_text
                     if changed:

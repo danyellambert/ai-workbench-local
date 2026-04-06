@@ -48,7 +48,7 @@ SUPPORTED_LOADER_STRATEGIES = ("manual", "langchain_basic")
 
 def describe_loader_strategy(strategy: str) -> str:
     labels = {
-        "manual": "Manual local",
+        "manual": "Local manual",
         "langchain_basic": "LangChain loaders (experimental)",
     }
     return labels.get((strategy or "").strip().lower(), strategy or "manual")
@@ -677,7 +677,7 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
             text = _extract_txt_text(file_bytes)
         file_type = suffix
     else:
-        raise RuntimeError("Formato não suportado. Use PDF, TXT, CSV, MD ou PY.")
+        raise RuntimeError("Unsupported format. Use PDF, TXT, CSV, MD, or PY.")
 
     metadata = {
         **metadata,
@@ -693,7 +693,7 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
 
     cleaned_text = text.strip()
     if not cleaned_text:
-        raise RuntimeError("Não foi possível extrair conteúdo útil do arquivo enviado.")
+        raise RuntimeError("Could not extract useful content from the uploaded file.")
 
     file_hash = hashlib.sha256(file_bytes).hexdigest()
     return LoadedDocument(

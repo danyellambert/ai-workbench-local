@@ -1,1 +1,1 @@
-"""Módulos de RAG local do projeto."""
+"""Local RAG modules for the project."""

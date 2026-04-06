@@ -55,14 +55,14 @@ def describe_embedding_provider_unavailable_reason(
     provider_data: dict[str, object] | None = None,
 ) -> str:
     if provider_key == "huggingface_server":
-        return "o serviço atual não publicou aliases com suporte a embeddings (`supports_embeddings=true`) no catálogo `/v1/models`."
+        return "The current service did not publish aliases with embedding support (`supports_embeddings=true`) in the `/v1/models` catalog."
     if provider_key == "huggingface_inference":
-        return "configure `HUGGINGFACE_INFERENCE_EMBEDDING_MODEL` para habilitar embeddings nesse runtime remoto."
+        return "Configure `HUGGINGFACE_INFERENCE_EMBEDDING_MODEL` to enable embeddings in that remote runtime."
     if provider_key == "huggingface_local":
-        return "o runtime local de embeddings do ecossistema Hugging Face não está disponível ou não foi configurado neste ambiente."
+        return "The local Hugging Face embedding runtime is unavailable or was not configured in this environment."
     if provider_key == "openai":
-        return "o provider OpenAI não está disponível no ambiente atual ou não foi configurado com chave/modelo adequados."
-    return "este provider não expõe embeddings na configuração atual."
+        return "The OpenAI provider is unavailable in the current environment or was not configured with the appropriate key/model."
+    return "This provider does not expose embeddings in the current configuration."
 
 
 def build_embedding_provider_sidebar_state(
@@ -119,7 +119,7 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
     if openai_settings.api_key and OpenAIProvider is not None:
         registry["openai"] = {
             "label": "OpenAI",
-            "detail": "Provider cloud opcional configurado por variável de ambiente",
+            "detail": "Optional cloud provider configured via environment variable",
             "instance": OpenAIProvider(openai_settings),
             "supports_chat": True,
             "supports_embeddings": True,
@@ -132,9 +132,9 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
         registry["huggingface_local"] = {
             "label": "Hugging Face local (experimental)",
             "detail": (
-                "Runtime local experimental via Transformers"
+                "Experimental local runtime via Transformers"
                 if HuggingFaceLocalProvider.supports_generation_runtime()
-                else "Runtime local experimental configurado, mas `transformers` não está instalado"
+                else "Experimental local runtime configured, but `transformers` is not installed"
             ),
             "instance": HuggingFaceLocalProvider(huggingface_settings),
             "supports_chat": HuggingFaceLocalProvider.supports_generation_runtime(),
@@ -164,7 +164,7 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
                 continue
             available_server_embedding_models = huggingface_server_provider.list_available_embedding_models()
             default_server_model = candidate_setting.model or available_server_models[0]
-            detail_prefix = "Servidor local auto-descoberto em" if autodiscovered else "Servidor local configurado em"
+            detail_prefix = "Local server auto-discovered at" if autodiscovered else "Local server configured at"
             registry["huggingface_server"] = {
                 "label": "Hugging Face server local",
                 "detail": f"{detail_prefix} `{candidate_setting.base_url}`",
@@ -185,7 +185,7 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
     ):
         registry["huggingface_inference"] = {
             "label": "Hugging Face Inference",
-            "detail": f"Endpoint remoto configurado em `{huggingface_inference_settings.base_url}`",
+            "detail": f"Remote endpoint configured at `{huggingface_inference_settings.base_url}`",
             "instance": HuggingFaceInferenceProvider(huggingface_inference_settings),
             "supports_chat": True,
             "supports_embeddings": bool(huggingface_inference_settings.embedding_model),

@@ -55,9 +55,9 @@ class HuggingFaceLocalProvider:
             "prompt_serialization_mode": "tokenizer_chat_template_if_available_else_manual_role_prompt",
             "chat_template_verification": "runtime_checked_during_generation",
             "validation_summary": (
-                "Providers locais baseados em Transformers não expõem um equivalente universal a `num_ctx` do Ollama. "
-                "O valor configurado no app funciona como budget operacional e referência de observabilidade. "
-                "Quando o tokenizer local expõe chat template, o provider passa a usá-lo; caso contrário, faz fallback para serialização manual por papéis."
+                "Local Transformers-based providers do not expose a universal equivalent to Ollama's `num_ctx`. "
+                "The value configured in the app works as an operational budget and observability reference. "
+                "When the local tokenizer exposes a chat template, the provider uses it; otherwise it falls back to manual role-based serialization."
             ),
         }
 
@@ -67,8 +67,8 @@ class HuggingFaceLocalProvider:
             "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
             "model": model,
             "validation_summary": (
-                "Embeddings via ecossistema Hugging Face dependem da implementação concreta do modelo. "
-                "O app registra o valor configurado como metadado operacional, sem assumir um controle universal de contexto."
+                "Embeddings through the Hugging Face ecosystem depend on the concrete model implementation. "
+                "The app records the configured value as operational metadata without assuming universal context control."
             ),
         }
 
@@ -107,7 +107,7 @@ class HuggingFaceLocalProvider:
         if cached is not None:
             return cached
         if not self.supports_generation_runtime():
-            raise RuntimeError("Transformers não está instalado para habilitar o provider Hugging Face local.")
+            raise RuntimeError("Transformers is not installed, so the local Hugging Face provider cannot be enabled.")
         from transformers import pipeline
 
         pipe = pipeline(self.settings.generation_task, model=model)
@@ -169,7 +169,7 @@ class HuggingFaceLocalProvider:
         if not texts:
             return []
         if not self.supports_embedding_runtime():
-            raise RuntimeError("sentence-transformers não está instalado para embeddings via Hugging Face local.")
+            raise RuntimeError("sentence-transformers is not installed for local Hugging Face embeddings.")
         cached = self._embedding_models.get(model)
         if cached is None:
             from sentence_transformers import SentenceTransformer
@@ -191,6 +191,6 @@ class HuggingFaceLocalProvider:
 
     def format_error(self, model: str, error: Exception) -> str:
         return (
-            f"Não foi possível obter resposta do provider Hugging Face local com o modelo `{model}`. "
-            f"Detalhes: {error}"
+            f"Could not get a response from the local Hugging Face provider using model `{model}`. "
+            f"Details: {error}"
         )

@@ -8,9 +8,9 @@ from pathlib import Path
 TEMPLATE = {
     "questions": [
         {
-            "question": "Quais são os pontos centrais do documento X?",
-            "expected_document_ids": ["substitua-pelo-hash-ou-id"],
-            "notes": "Use perguntas que só um documento consiga responder.",
+            "question": "What are the central points of document X?",
+            "expected_document_ids": ["replace-with-hash-or-id"],
+            "notes": "Use questions that only one document can answer.",
         }
     ],
     "runs": [
@@ -32,21 +32,21 @@ TEMPLATE = {
         },
     ],
     "evidence_to_collect": [
-        "screenshots do app com as mesmas perguntas",
-        "latência de retrieval",
-        "fontes retornadas",
-        "qualidade percebida da resposta",
+        "app screenshots with the same questions",
+        "retrieval latency",
+        "returned sources",
+        "perceived response quality",
     ],
 }
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Gera um template local para comparação prática da Fase 4.5.")
-    parser.add_argument("--output", default="docs/phase_4_5_eval_template.json", help="Caminho do template JSON.")
+    parser = argparse.ArgumentParser(description="Generate a local template for practical Phase 4.5 comparison.")
+    parser.add_argument("--output", default="docs/phase_4_5_eval_template.json", help="Path to the JSON template.")
     args = parser.parse_args()
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(TEMPLATE, indent=2, ensure_ascii=False))
-    print(f"[ok] Template de comparação salvo em {output_path}")
-    print("Use esse arquivo para conduzir a rodada local de comparação entre embeddings e tuning fino.")
+    print(f"[ok] Comparison template saved to {output_path}")
+    print("Use this file to run the local comparison round between embeddings and fine-tuning.")
