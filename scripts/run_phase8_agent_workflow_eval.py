@@ -17,12 +17,13 @@ from src.evals.phase8_agent_workflow import (  # noqa: E402
     load_phase8_agent_workflow_cases,
     summarize_phase8_case_results,
 )
+from src.storage.runtime_paths import get_phase8_eval_db_path  # noqa: E402
 from src.storage.phase8_eval_store import append_eval_run  # noqa: E402
 
 
 DEFAULT_CASES_PATH = ROOT_DIR / "phase8_eval" / "fixtures" / "phase8_agent_workflow_eval_cases.json"
 DEFAULT_OUT_PATH = ROOT_DIR / "phase5_eval" / "reports" / "phase8_agent_workflow_eval.json"
-EVAL_DB_PATH = ROOT_DIR / ".phase8_eval_runs.sqlite3"
+EVAL_DB_PATH = get_phase8_eval_db_path(ROOT_DIR)
 
 
 def main() -> int:

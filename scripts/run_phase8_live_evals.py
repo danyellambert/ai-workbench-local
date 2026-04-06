@@ -24,13 +24,14 @@ from src.providers.registry import build_provider_registry, resolve_provider_run
 from src.rag.loaders import load_document  # noqa: E402
 from src.rag.service import upsert_documents_in_rag_index  # noqa: E402
 from src.storage.rag_store import load_rag_store, save_rag_store  # noqa: E402
+from src.storage.runtime_paths import get_phase8_eval_db_path  # noqa: E402
 
 
 DEFAULT_GOLD_MANIFEST = ROOT_DIR / "phase5_eval" / "fixtures" / "11_real_document_gold_sets_manifest.json"
 DEFAULT_CHECKLIST_FIXTURE = ROOT_DIR / "phase5_eval" / "fixtures" / "06_checklist_who_surgical_gold.json"
 DEFAULT_EVIDENCE_GOLD_SET = ROOT_DIR / "phase5_eval" / "fixtures" / "evidence_cv_mini_gold_set.json"
 DEFAULT_OUT_PATH = ROOT_DIR / "phase5_eval" / "reports" / "phase8_live_evals.json"
-DEFAULT_EVAL_DB_PATH = ROOT_DIR / ".phase8_eval_runs.sqlite3"
+DEFAULT_EVAL_DB_PATH = get_phase8_eval_db_path(ROOT_DIR)
 
 
 @dataclass

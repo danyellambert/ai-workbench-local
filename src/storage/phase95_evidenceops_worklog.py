@@ -30,6 +30,7 @@ def load_evidenceops_worklog(path: Path) -> list[dict[str, object]]:
 
 
 def save_evidenceops_worklog(path: Path, entries: list[dict[str, object]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
 
 

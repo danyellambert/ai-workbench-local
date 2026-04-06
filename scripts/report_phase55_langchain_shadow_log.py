@@ -9,6 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from src.storage.runtime_paths import get_phase55_shadow_log_path
 from src.storage.phase55_shadow_log import load_shadow_log, summarize_shadow_log
 
 
@@ -50,7 +51,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate a Phase 5.5 shadow comparison report for manual vs LangChain retrieval.")
     parser.add_argument(
         "--log",
-        default=str(ROOT_DIR / ".phase55_langchain_shadow_log.json"),
+        default=str(get_phase55_shadow_log_path(ROOT_DIR)),
         help="Path to the local shadow log JSON file.",
     )
     parser.add_argument(

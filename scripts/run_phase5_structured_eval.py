@@ -19,6 +19,7 @@ from pypdf import PdfReader
 
 from src.config import get_rag_settings
 from src.evals.phase8_thresholds import STRUCTURED_SMOKE_THRESHOLDS, get_real_document_eval_thresholds
+from src.storage.runtime_paths import get_phase8_eval_db_path
 from src.storage.phase8_eval_store import append_eval_run
 from src.storage.rag_store import load_rag_store
 from src.structured.envelope import TaskExecutionRequest, StructuredResult
@@ -28,7 +29,7 @@ from src.structured.service import structured_service
 FIXTURES_DIR = PROJECT_ROOT / "phase5_eval" / "fixtures"
 REPORTS_DIR = PROJECT_ROOT / "phase5_eval" / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-EVAL_DB_PATH = PROJECT_ROOT / ".phase8_eval_runs.sqlite3"
+EVAL_DB_PATH = get_phase8_eval_db_path(PROJECT_ROOT)
 GOLD_MANIFEST_DEFAULT = FIXTURES_DIR / "11_real_document_gold_sets_manifest.json"
 
 PLACEHOLDER_PATTERNS = [

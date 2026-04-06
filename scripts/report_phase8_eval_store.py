@@ -10,6 +10,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from src.evals.phase8_thresholds import build_phase8_threshold_catalog  # noqa: E402
+from src.storage.runtime_paths import get_phase8_eval_db_path  # noqa: E402
 from src.storage.phase8_eval_store import load_eval_runs, summarize_eval_runs  # noqa: E402
 
 
@@ -17,7 +18,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate a Phase 8 eval summary from the local SQLite store.")
     parser.add_argument(
         "--db",
-        default=str(ROOT_DIR / ".phase8_eval_runs.sqlite3"),
+        default=str(get_phase8_eval_db_path(ROOT_DIR)),
         help="Path to the local Phase 8 eval SQLite database.",
     )
     parser.add_argument(

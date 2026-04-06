@@ -5,6 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..storage.runtime_paths import get_phase8_eval_db_path
 from ..storage.phase8_eval_diagnosis import build_eval_diagnosis
 from ..storage.phase8_eval_store import load_eval_runs, summarize_eval_runs
 from .phase8_5_audit import build_phase8_5_audit
@@ -166,7 +167,7 @@ def build_phase8_5_closure_bundle(
         if resolved_run_dir is not None
         else {"summary": {}, "events": [], "manifest": {}, "preflight": {}}
     )
-    resolved_eval_db = Path(eval_db_path) if eval_db_path else resolved_root / ".phase8_eval_runs.sqlite3"
+    resolved_eval_db = Path(eval_db_path) if eval_db_path else get_phase8_eval_db_path(resolved_root)
     eval_entries = load_eval_runs(resolved_eval_db)
     decision = build_phase8_5_decision_summary(
         benchmark_summary=artifacts.get("summary") if isinstance(artifacts.get("summary"), dict) else {},

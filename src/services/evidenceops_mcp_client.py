@@ -12,6 +12,11 @@ from pathlib import Path
 from typing import Any
 
 from ..mcp.jsonrpc_stdio import read_message, write_message
+from ..storage.runtime_paths import (
+    get_phase95_evidenceops_action_store_path,
+    get_phase95_evidenceops_repository_snapshot_path,
+    get_phase95_evidenceops_worklog_path,
+)
 
 
 DEFAULT_EVIDENCEOPS_MCP_SERVER_KEY = "evidenceops_local"
@@ -27,9 +32,9 @@ def _default_evidenceops_env(project_root: Path | None = None) -> dict[str, str]
     repository_root = resolved_root / "data" / "corpus_revisado" / "option_b_synthetic_premium"
     return {
         "EVIDENCEOPS_REPOSITORY_ROOT": str(repository_root),
-        "EVIDENCEOPS_REPOSITORY_SNAPSHOT_PATH": str(repository_root / ".phase95_evidenceops_repository_snapshot.json"),
-        "EVIDENCEOPS_ACTION_STORE_PATH": str(resolved_root / ".phase95_evidenceops_actions.sqlite3"),
-        "EVIDENCEOPS_WORKLOG_PATH": str(resolved_root / ".phase95_evidenceops_worklog.json"),
+        "EVIDENCEOPS_REPOSITORY_SNAPSHOT_PATH": str(get_phase95_evidenceops_repository_snapshot_path(resolved_root)),
+        "EVIDENCEOPS_ACTION_STORE_PATH": str(get_phase95_evidenceops_action_store_path(resolved_root)),
+        "EVIDENCEOPS_WORKLOG_PATH": str(get_phase95_evidenceops_worklog_path(resolved_root)),
     }
 
 

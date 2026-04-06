@@ -17,6 +17,7 @@ from src.services.phase8_5_decision_gate import (  # noqa: E402
     build_phase8_5_decision_summary,
     render_phase8_5_decision_markdown,
 )
+from src.storage.runtime_paths import get_phase8_eval_db_path  # noqa: E402
 from src.storage.phase8_eval_diagnosis import build_eval_diagnosis  # noqa: E402
 from src.storage.phase8_eval_store import load_eval_runs, summarize_eval_runs  # noqa: E402
 
@@ -30,7 +31,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--eval-db",
-        default=str(ROOT_DIR / ".phase8_eval_runs.sqlite3"),
+        default=str(get_phase8_eval_db_path(ROOT_DIR)),
         help="Path to the local Phase 8 eval SQLite database.",
     )
     parser.add_argument(

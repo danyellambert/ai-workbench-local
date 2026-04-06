@@ -9,6 +9,11 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from src.storage.runtime_paths import (  # noqa: E402
+    get_phase55_langgraph_shadow_log_path,
+    get_phase55_shadow_log_path,
+    get_phase7_model_comparison_log_path,
+)
 from src.storage.phase7_model_comparison_log import (  # noqa: E402
     load_model_comparison_log,
     summarize_model_comparison_log,
@@ -66,7 +71,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate a Phase 7 model comparison report.")
     parser.add_argument(
         "--log",
-        default=str(ROOT_DIR / ".phase7_model_comparison_log.json"),
+        default=str(get_phase7_model_comparison_log_path(ROOT_DIR)),
         help="Path to the local model comparison log JSON file.",
     )
     parser.add_argument(
@@ -79,8 +84,8 @@ def main() -> int:
     log_path = Path(args.log)
     out_path = Path(args.out)
     entries = load_model_comparison_log(log_path)
-    retrieval_shadow_entries = load_shadow_log(ROOT_DIR / ".phase55_langchain_shadow_log.json")
-    langgraph_shadow_entries = load_langgraph_shadow_log(ROOT_DIR / ".phase55_langgraph_shadow_log.json")
+    retrieval_shadow_entries = load_shadow_log(get_phase55_shadow_log_path(ROOT_DIR))
+    langgraph_shadow_entries = load_langgraph_shadow_log(get_phase55_langgraph_shadow_log_path(ROOT_DIR))
     payload = {
         "log_path": str(log_path),
         **_build_report(entries, retrieval_shadow_entries, langgraph_shadow_entries),
