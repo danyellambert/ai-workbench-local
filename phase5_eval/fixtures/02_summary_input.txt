@@ -1,0 +1,6 @@
+Phase 5 progress update:
+The structured outputs foundation has been implemented with task schemas, a registry, JSON parsing, and validation.
+A first UI panel was added to the Streamlit app so users can run extraction, summary, checklist, and CV analysis.
+However, prompt quality is still uneven and some tasks can return placeholder-like content.
+The current priority is to improve grounding, document-context usage, and output quality for real documents.
+The next milestone is to add a lightweight automated evaluation harness and then complete the code-analysis mode.

@@ -1,0 +1,59 @@
+{
+  "name": "Manifest for real-document gold sets used in future structured eval expansion",
+  "gold_sets": [
+    {
+      "task_type": "code_analysis",
+      "document_name": "demo_code_analysis.py",
+      "document_path": "data/materials_demo/code_analysis/demo_code_analysis.py",
+      "gold_path": "phase5_eval/fixtures/07_code_analysis_demo_gold.json"
+    },
+    {
+      "task_type": "cv_analysis",
+      "document_name": "CV - Lucas - gen.pdf",
+      "document_path": "data/materials_demo/cv_analysis/CV - Lucas - gen.pdf",
+      "gold_path": "phase5_eval/fixtures/08_cv_lucas_real_gold.json"
+    },
+    {
+      "task_type": "cv_analysis",
+      "document_name": "Sample-Resume-1-07262023.pdf",
+      "document_path": "data/materials_demo/cv_analysis/Sample-Resume-1-07262023.pdf",
+      "gold_path": "phase5_eval/fixtures/14_cv_sample_resume_1_gold.json"
+    },
+    {
+      "task_type": "cv_analysis",
+      "document_name": "Sample-Resume-2-1.pdf",
+      "document_path": "data/materials_demo/cv_analysis/Sample-Resume-2-1.pdf",
+      "gold_path": "phase5_eval/fixtures/15_cv_sample_resume_2_gold.json"
+    },
+    {
+      "task_type": "cv_analysis",
+      "document_name": "Sample-Resume-3-.pdf",
+      "document_path": "data/materials_demo/cv_analysis/Sample-Resume-3-.pdf",
+      "gold_path": "phase5_eval/fixtures/16_cv_sample_resume_3_gold.json"
+    },
+    {
+      "task_type": "extraction",
+      "document_name": "exhib101.pdf",
+      "document_path": "data/materials_demo/extraction/exhib101.pdf",
+      "gold_path": "phase5_eval/fixtures/09_extraction_exhib101_gold.json"
+    },
+    {
+      "task_type": "summary",
+      "document_name": "fy25-afr-final-tagged.pdf",
+      "document_path": "data/materials_demo/summary/fy25-afr-final-tagged.pdf",
+      "gold_path": "phase5_eval/fixtures/10_summary_fy25_afr_gold.json"
+    },
+    {
+      "task_type": "summary",
+      "document_name": "asap-2025-annual-report-tagged.pdf",
+      "document_path": "data/materials_demo/summary/asap-2025-annual-report-tagged.pdf",
+      "gold_path": "phase5_eval/fixtures/12_summary_asap_2025_annual_report_gold.json"
+    },
+    {
+      "task_type": "extraction",
+      "document_name": "exhibit10-3.pdf",
+      "document_path": "data/materials_demo/extraction/exhibit10-3.pdf",
+      "gold_path": "phase5_eval/fixtures/13_extraction_exhibit10_3_gold.json"
+    }
+  ]
+}

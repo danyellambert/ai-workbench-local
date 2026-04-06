@@ -1,0 +1,11 @@
+pdf_file,json_file,layout_type,difficulty,text_extractable_gt,extracted_chars,task_success,overall_score,status,full_name_score,email_score,location_score,skills_score,languages_score,education_score,experience_titles_score,notes
+0000_simple_classic_one_column_marina.ferreira.pereira.pdf,0000_simple_classic_one_column_marina.ferreira.pereira.json,classic_one_column,simple,True,1458,True,0.9533,PASS,1.0,1.0,1.0,1.0,1.0,1.0,0.6667,
+0001_medium_modern_two_column_gabriel.gomes.almeida.pdf,0001_medium_modern_two_column_gabriel.gomes.almeida.json,modern_two_column,medium,True,2024,True,1.0,PASS,1.0,1.0,1.0,1.0,1.0,1.0,1.0,
+0002_hard_compact_sidebar_marina.gomes.ribeiro.pdf,0002_hard_compact_sidebar_marina.gomes.ribeiro.json,compact_sidebar,hard,True,1635,True,0.8048,PASS,1.0,1.0,1.0,0.9524,1.0,0.0,0.6667,education not captured
+0003_simple_dense_executive_ana.barbosa.pereira.pdf,0003_simple_dense_executive_ana.barbosa.pereira.json,dense_executive,simple,True,1814,True,0.9533,PASS,1.0,1.0,1.0,1.0,1.0,1.0,0.6667,
+0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf,0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.json,scan_like_image_pdf,medium,False,574,True,0.456,WARN,1.0,1.0,1.0,0.0,0.4,0.0,0.0,scan-like layout; weak skills match; education not captured
+0005_hard_classic_one_column_diego.costa.silva.pdf,0005_hard_classic_one_column_diego.costa.silva.json,classic_one_column,hard,True,2127,True,0.9533,PASS,1.0,1.0,1.0,1.0,1.0,1.0,0.6667,
+0006_simple_modern_two_column_lucas.lima.carvalho.pdf,0006_simple_modern_two_column_lucas.lima.carvalho.json,modern_two_column,simple,True,1661,True,0.9253,PASS,1.0,1.0,1.0,1.0,0.8,1.0,0.6667,
+0007_medium_compact_sidebar_ana.ferreira.souza.pdf,0007_medium_compact_sidebar_ana.ferreira.souza.json,compact_sidebar,medium,True,1340,True,1.0,PASS,1.0,1.0,1.0,1.0,1.0,1.0,1.0,
+0008_hard_dense_executive_diego.ferreira.ribeiro.pdf,0008_hard_dense_executive_diego.ferreira.ribeiro.json,dense_executive,hard,True,2394,True,0.9533,PASS,1.0,1.0,1.0,1.0,1.0,1.0,0.6667,
+0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf,0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.json,scan_like_image_pdf,simple,False,290,True,0.14,FAIL,0.0,0.0,0.0,0.0,1.0,0.0,0.0,scan-like layout; weak full_name match; weak skills match; education not captured

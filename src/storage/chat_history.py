@@ -57,6 +57,7 @@ def load_chat_history(history_path: Path) -> list[dict[str, object]]:
 
 
 def save_chat_history(history_path: Path, messages: list[dict[str, object]]) -> None:
+    history_path.parent.mkdir(parents=True, exist_ok=True)
     history_path.write_text(
         json.dumps(messages, ensure_ascii=False, indent=2),
         encoding="utf-8",

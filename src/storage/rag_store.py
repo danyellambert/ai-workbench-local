@@ -15,6 +15,7 @@ def load_rag_store(store_path: Path) -> dict[str, object] | None:
 
 
 def save_rag_store(store_path: Path, data: dict[str, object]) -> None:
+    store_path.parent.mkdir(parents=True, exist_ok=True)
     store_path.write_text(
         json.dumps(data, ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8",
