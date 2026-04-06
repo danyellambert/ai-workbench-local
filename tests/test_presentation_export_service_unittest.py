@@ -362,6 +362,32 @@ class PresentationExportServiceTests(unittest.TestCase):
             self.assertEqual(disabled_result["status"], "disabled_export_kind")
             self.assertIn(DEFAULT_PRESENTATION_EXPORT_KIND, disabled_result["error_message"])
 
+    def test_generate_executive_deck_candidate_review_persists_enriched_contract_and_payload(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            settings = self._service_settings(temp_dir)
+
+            with patch("src.services.presentation_export_service.urllib_request.urlopen", side_effect=self._fake_urlopen):
+                result = generate_executive_deck(
+                    export_kind=CANDIDATE_REVIEW_EXPORT_KIND,
+                    structured_result=self._sample_cv_analysis_result(),
+                    settings=settings,
+                )
+
+            self.assertEqual(result["status"], "completed")
+
+            contract_payload = json.loads(Path(result["local_contract_path"]).read_text(encoding="utf-8"))
+            ppt_payload = json.loads(Path(result["local_payload_path"]).read_text(encoding="utf-8"))
+
+            self.assertEqual(contract_payload["candidate_profile"]["name"], "Jane Doe")
+            self.assertTrue(contract_payload["strengths"])
+            self.assertTrue(contract_payload["gaps"])
+            self.assertTrue(contract_payload["evidence_highlights"])
+
+            slide_titles = [slide.get("title") for slide in ppt_payload["slides"]]
+            self.assertIn("Strengths snapshot", slide_titles)
+            self.assertIn("Evidence highlights", slide_titles)
+            self.assertIn("Gaps vs hiring thesis", slide_titles)
+
 
 if __name__ == "__main__":
     unittest.main()

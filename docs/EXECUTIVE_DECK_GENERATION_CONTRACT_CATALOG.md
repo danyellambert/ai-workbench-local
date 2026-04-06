@@ -42,11 +42,11 @@ Este documento responde:
 | deck_family | product_name | export_kind | priority | source_flows | target_audience | status | contract_doc |
 |---|---|---|---|---|---|---|---|
 | executive_review | Benchmark & Eval Executive Review Deck | `benchmark_eval_executive_review` | P1 | benchmark, evals, readiness | liderança técnica, produto, stakeholder executivo | implemented | `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md` |
-| document_review | Document Review Deck | `document_review_deck` | P2 | summary, extraction, document agent, EvidenceOps | compliance, operações, liderança | implemented_foundation | `docs/DOCUMENT_REVIEW_DECK_CONTRACT_V1.md` |
-| comparison | Policy / Contract Comparison Deck | `policy_contract_comparison_deck` | P2 | comparison findings, structured outputs, document agent | jurídico, compliance, procurement | implemented_foundation | `docs/POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md` |
-| action_plan | Action Plan Deck | `action_plan_deck` | P3 | checklist, findings, owners, due dates | operações, PM, compliance | implemented_foundation | `docs/ACTION_PLAN_DECK_CONTRACT_V1.md` |
-| candidate_review | Candidate Review Deck | `candidate_review_deck` | P3 | `cv_analysis`, evidence_cv, candidate comparison | talent review, hiring panel | implemented_foundation | `docs/CANDIDATE_REVIEW_DECK_CONTRACT_V1.md` |
-| evidence_audit | Evidence Pack / Audit Deck | `evidence_pack_deck` | P3 | EvidenceOps, repository state, action backlog | auditoria, governança, liderança | implemented_foundation | `docs/EVIDENCE_PACK_DECK_CONTRACT_V1.md` |
+| document_review | Document Review Deck | `document_review_deck` | P2 | summary, extraction, document agent, EvidenceOps | compliance, operações, liderança | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md` |
+| comparison | Policy / Contract Comparison Deck | `policy_contract_comparison_deck` | P2 | comparison findings, structured outputs, document agent | jurídico, compliance, procurement | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md` |
+| action_plan | Action Plan Deck | `action_plan_deck` | P3 | checklist, findings, owners, due dates | operações, PM, compliance | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md` |
+| candidate_review | Candidate Review Deck | `candidate_review_deck` | P3 | `cv_analysis`, evidence_cv, candidate comparison | talent review, hiring panel | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_CANDIDATE_REVIEW_DECK_CONTRACT_V1.md` |
+| evidence_audit | Evidence Pack / Audit Deck | `evidence_pack_deck` | P3 | EvidenceOps, repository state, action backlog | auditoria, governança, liderança | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_EVIDENCE_PACK_DECK_CONTRACT_V1.md` |
 
 ---
 

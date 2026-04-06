@@ -34,6 +34,7 @@ from .document_agent import (
 )
 from .envelope import RenderMode, TaskExecutionRequest, StructuredResult
 from .parsers import parse_structured_response
+from ..storage.runtime_paths import get_phase6_document_agent_log_path
 
 
 SUMMARY_FULL_DOCUMENT_TRIGGER_CHARS = 42000
@@ -2374,9 +2375,23 @@ class CVAnalysisTaskHandler(TaskHandler):
         cleaned = (context_text or "").strip()
         if len(cleaned) < 220:
             return True
-        uppercase = cleaned.upper()
+        normalized = _normalize_matching_text(cleaned)
         structural_hits = sum(
-            1 for marker in ("EXPERIENCE", "EDUCATION", "SKILLS", "LANGUAGES", "SUMMARY", "[CV ") if marker in uppercase
+            1
+            for marker in (
+                "experience",
+                "experience professionnelle",
+                "education",
+                "formation",
+                "skills",
+                "competences",
+                "languages",
+                "langues",
+                "summary",
+                "profile",
+                "[cv ",
+            )
+            if marker in normalized
         )
         return structural_hits < 2
 
@@ -2429,7 +2444,8 @@ Return this JSON structure:
   "experience_entries": [],
   "experience_years": 0.0,
   "strengths": [],
-  "improvement_areas": []
+  "improvement_areas": [],
+  "projects": []
 }}
 Important rules:
 - Extract languages explicitly to the top-level "languages" field.
@@ -2443,6 +2459,9 @@ Important rules:
 - If a `CV EDUCATION` block is present, preserve each grounded education line into `education_entries` with separate `degree` and `institution` when they are explicitly available.
 - If a `CV PROJECTS` block is present, preserve those grounded project items explicitly and do not drop them from the final payload.
 - "skills" must be a list of strings only.
+- Populate `strengths` with grounded hiring signals only, such as execution quality, technical depth, leadership, ownership, communication, product thinking, or domain expertise when they are explicitly supported by the CV.
+- Populate `improvement_areas` with grounded validation points or missing signals only. If leadership, scope, product thinking, or production depth are not explicit, prefer calling out the need to validate them instead of inventing weaknesses.
+- Do not turn every missing field into a criticism; focus `improvement_areas` on decision-relevant watchouts for hiring.
 - You may also repeat the same information inside sections for flexibility, but top-level fields must be populated whenever information is present.
 - Never output invented sample employers, schools, cities, or date ranges.
 - If the only possible value would be a guessed placeholder, return null or [] instead.
@@ -3366,7 +3385,7 @@ class DocumentAgentTaskHandler(TaskHandler):
         )
 
     def _get_document_agent_log_path(self) -> Path:
-        return Path(__file__).resolve().parents[2] / ".phase6_document_agent_log.json"
+        return get_phase6_document_agent_log_path(Path(__file__).resolve().parents[2])
 
     def _append_document_agent_log(
         self,
@@ -3802,10 +3821,16 @@ class DocumentAgentTaskHandler(TaskHandler):
             confidence = min(confidence, 0.69)
 
         summary_subject = payload.main_subject or "Análise documental"
+        top_risk = risks[0] if risks else ""
+        top_gap = gaps[0] if gaps else ""
         summary = (
             f"{summary_subject}: {len(risks)} risco(s), {len(gaps)} lacuna(s) e "
             f"{len(actions)} ação(ões) de mitigação identificada(s)."
         )
+        if top_risk:
+            summary += f" Top risk: {top_risk}"
+        if top_gap:
+            summary += f" Main evidence gap: {top_gap}"
 
         return (
             DocumentAgentPayload(
