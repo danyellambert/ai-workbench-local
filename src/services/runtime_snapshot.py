@@ -224,13 +224,21 @@ def summarize_provider_path(provider: str, provider_label: str, ollama_base_url:
         base_url = str(ollama_base_url or "").strip()
         route = f"{provider_label} -> {base_url or 'endpoint not configured'}"
         if any(token in base_url.lower() for token in ["localhost", "127.0.0.1"]):
-            dependency = "Local dependency: the app and Ollama server run on your machine."
+            dependency = (
+                "Dependência local: o app e o servidor Ollama rodam na sua máquina. "
+                "(Local dependency: the app and Ollama server run on your machine.)"
+            )
         else:
             dependency = "Partial local dependency: local app, inference through a remote Ollama-compatible endpoint."
         return route, dependency
     if provider == "huggingface_server":
-        route = f"{provider_label} -> OpenAI-compatible service / local AI hub"
-        dependency = "Local dependency: app + local hub service; the effective backend may vary by alias/model published in the service."
+        route = f"{provider_label} -> OpenAI-compatible service / AI hub local (local AI hub)"
+        dependency = (
+            "Dependência local: app + serviço local; o backend efetivo pode variar "
+            "conforme o alias/model publicado no serviço. "
+            "(Local dependency: app + local hub service; the effective backend may vary "
+            "by alias/model published in the service.)"
+        )
         return route, dependency
     if provider == "openai":
         return f"{provider_label} -> direct cloud API", "Local dependency: local app; remote inference."
