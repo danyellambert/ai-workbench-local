@@ -1,4 +1,4 @@
-# Fase 10.25 — split oficial entre produto em Gradio e AI Lab dashboard
+# Phase 10.25 — split oficial entre produto em Gradio e AI Lab dashboard
 
 ## Objetivo
 
@@ -176,8 +176,8 @@ Ele deve ser lido como:
 ### Usuário-alvo do Streamlit
 
 - você como builder do sistema
-- entrevistador técnico querendo entender profundidade de engenharia
 - operador técnico validando comportamento, custo, routing e qualidade
+- mantenedor técnico inspecionando profundidade de engenharia
 
 ## Navegação proposta do Streamlit adaptado
 
@@ -373,8 +373,8 @@ Saídas esperadas:
 
 Entradas:
 
-- currículo(s)
-- contexto opcional de vaga/perfil-alvo
+- candidate documents
+- optional role profile / evaluation criteria
 
 Saídas esperadas:
 
@@ -504,15 +504,15 @@ Checklist sugerido:
 
 ## Checklist consolidado da mudança
 
-- [ ] mapear tudo o que hoje aparece no app atual entre **produto** e **AI Lab**
-- [ ] definir navegação e home do Streamlit atual como dashboard de engenharia
-- [ ] decidir o que sai da home do Streamlit e vai para o produto em Gradio
-- [ ] formalizar `Decision workflows grounded em documentos` como headline do produto
-- [ ] implementar os 4 workflows principais no Gradio
-- [ ] promover `cv_analysis` para o workflow `Candidate Review`
-- [ ] tratar Executive Deck Generation como capability transversal dos workflows
-- [ ] desacoplar backend/serviços compartilhados das duas superfícies
-- [ ] definir decision gate para saber se o Streamlit atual basta como AI Lab ou se um novo app será necessário
+- [x] mapear tudo o que hoje aparece no app atual entre **produto** e **AI Lab**
+- [x] definir navegação e home do Streamlit atual como dashboard de engenharia
+- [x] decidir o que sai da home do Streamlit e vai para o produto em Gradio
+- [x] formalizar `Decision workflows grounded em documentos` como headline do produto
+- [x] implementar os 4 workflows principais no Gradio
+- [x] promover `cv_analysis` para o workflow `Candidate Review`
+- [x] tratar Executive Deck Generation como capability transversal dos workflows
+- [x] desacoplar backend/serviços compartilhados das duas superfícies
+- [x] definir decision gate para saber se o Streamlit atual basta como AI Lab ou se um novo app será necessário
 
 ---
 
@@ -525,13 +525,13 @@ Checklist sugerido:
 
 ---
 
-## O que preciso saber defender em entrevista
+## Design rationale to preserve
 
-- por que separar produto e laboratório fortalece a narrativa do projeto
-- por que o produto foi organizado em workflows de decisão grounded em documentos
-- por que `Candidate Review` entra no produto, mas `cv_analysis` continua como engine interna
-- por que o Streamlit atual foi reaproveitado primeiro como AI Lab dashboard
-- por que Gradio foi escolhido como superfície intermediária de produto
+- why separating product and lab strengthens the repository structure
+- why the product is organized around document-grounded decision workflows
+- why `Candidate Review` is exposed at the product level while `cv_analysis` remains an internal engine
+- why the current Streamlit app is reused first as the AI Lab dashboard
+- why Gradio is the intermediate product surface
 
 ---
 
@@ -540,4 +540,4 @@ Checklist sugerido:
 - `docs/PROJECT_POSITIONING_TWO_TRACKS.md`
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 - `docs/EXECUTIVE_DECK_GENERATION_UI_EVOLUTION.md`
-- `proximos_passos.md`
+- `ROADMAP.md`

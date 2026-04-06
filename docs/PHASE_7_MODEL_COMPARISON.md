@@ -45,7 +45,7 @@ Phase 7 now supports repeatable benchmark presets for common workloads:
 - `technical_review`
 - `ad_hoc`
 
-This helps avoid benchmark drift caused by arbitrary prompts and improves interview defensibility.
+This helps avoid benchmark drift caused by arbitrary prompts and makes the benchmark layer easier to reproduce and reason about.
 
 ### Quantization interpretation
 
@@ -66,7 +66,7 @@ The project now distinguishes benchmark candidates by runtime bucket:
 - `cloud`: cloud or cloud-like routed models
 - `experimental_local`: experimental local runtime through Hugging Face/Transformers
 
-This makes the benchmark more defendable in interviews because it separates:
+This makes the benchmark more rigorous because it separates:
 
 - model quality
 - runtime class

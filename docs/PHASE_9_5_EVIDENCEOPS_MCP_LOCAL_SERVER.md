@@ -45,7 +45,7 @@ O registro do servidor no Cline é **opcional**.
 - o fluxo principal do projeto continua sendo:
   - MCP server local
   - cliente MCP do app
-  - integração do `main_qwen.py`
+  - integration with `main.py`
 
 Se você não quiser misturar a infraestrutura do projeto com a infraestrutura do assistente, pode deixar o Cline **sem esse registro**.
 

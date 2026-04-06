@@ -38,7 +38,7 @@ O agregado de execuções em `src/storage/runtime_execution_log.py` passou a res
 
 ### 2. Sinais documentais operacionais gravados por execução
 
-O app principal (`main_qwen.py`) agora registra no `runtime_execution_log` sinais locais derivados dos documentos selecionados, incluindo:
+The main app (`main.py`) now records local signals derived from the selected documents in `runtime_execution_log`, including:
 
 - quantos documentos acionaram a trilha `evidence_pipeline`
 - quantos envolveram OCR

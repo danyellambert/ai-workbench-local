@@ -94,7 +94,7 @@ Why this was chosen:
 These items are intentionally **not finished** in this slice and should be treated as the next implementation steps rather than missing bugs in the foundation itself:
 
 1. **UI integration**
-   - no new controls in `main_qwen.py` yet
+   - no new controls in `main.py` yet
    - no user-facing renderer in `src/ui/` yet
    - no selection between JSON/friendly/checklist views yet
 
@@ -127,7 +127,7 @@ The safest next step is **UI wiring + first real render layer**, not more schema
 
 After the initial foundation slice, the project also received a first practical integration pass:
 
-- a Phase 5 panel was added to `main_qwen.py`
+- a Phase 5 panel was added to `main.py`
 - renderers were added in `src/ui/structured_outputs.py`
 - task prompts were upgraded to reduce placeholder-copying behavior
 - CV analysis now supports document-grounded execution via the current RAG selection

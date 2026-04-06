@@ -1,4 +1,4 @@
-# Fase 5 — OCR fallback e benchmark sintético de CVs
+# Phase 5 — OCR fallback e benchmark sintético de CVs
 
 ## Estado consolidado
 

@@ -57,7 +57,7 @@ The closure bundle writes:
 This phase is closed in a **conservative, technical/local sense** when:
 
 - the benchmark workflow supports the Round 1 + Round 2 slices
-- the decision gate can turn benchmark + eval evidence into a defendable recommendation
+- the decision gate can turn benchmark + eval evidence into a clear recommendation
 - the repo explicitly distinguishes:
   - fully supported slices
   - partially supported slices
@@ -89,7 +89,7 @@ That roadmap covers the remaining work around:
 - optional runtime-family expansion only when new clean executable paths are actually added to the repo
 - optional broader OCR / VLM and reranker campaigns beyond the current corrected smoke-backed closure bundle
 
-## Why this is interview-defendable
+## Why this closure model is rigorous
 
 - The phase does not pretend training was justified everywhere.
 - Runtime/model wins are separated from retrieval wins.

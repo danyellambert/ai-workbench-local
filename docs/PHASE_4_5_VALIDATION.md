@@ -33,7 +33,7 @@ Key outcome:
 - `complete` retained as escalation mode
 
 Reference docs:
-- `docs/BENCHMARK_PDF_EXTRACTION_en.md`
+- `docs/BENCHMARK_PDF_EXTRACTION_EN.md`
 - `docs/PHASE_4_5_BENCHMARK_RESULTS.md`
 
 Key visuals:
@@ -154,4 +154,4 @@ Phase 4.5 is considered complete because the project now has all of the followin
 - a chart-rendering script that reproduces the visual evidence
 - documented defaults justified by measured trade-offs
 
-That is enough to move the project from a “functional prototype” to a **benchmarked baseline** that can be defended in portfolio material and in AI Engineer interviews.
+That is enough to move the project from a functional prototype to a **benchmarked baseline** with reproducible evidence and explicit engineering trade-offs.

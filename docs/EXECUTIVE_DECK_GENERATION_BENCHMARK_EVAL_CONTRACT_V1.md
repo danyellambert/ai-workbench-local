@@ -1,4 +1,4 @@
-# Executive deck generation — benchmark/eval executive review contract v1
+# Executive Deck Generation — Benchmark/Eval Executive Review Contract v1
 
 ## Objetivo desta entrega
 
@@ -9,7 +9,7 @@ Documentar e iniciar a implementação do primeiro slice técnico da capability 
 
 > Para a leitura completa de produto, catálogo de decks e roadmap da capability, ver também: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
-> Para a leitura técnica de productização do primeiro slice no ecossistema atual, ver também: `docs/PHASE_10_25_PRESENTATION_EXPORT_PRODUCTIZATION.md`
+> Para a leitura técnica de productização do primeiro slice no ecossistema atual, ver também: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 
 O foco desta rodada continua sendo o caminho:
 
@@ -206,4 +206,4 @@ Para o processo completo da capability dentro do AI Workbench Local, incluindo:
 consultar:
 
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
-- `docs/PHASE_10_25_PRESENTATION_EXPORT_PRODUCTIZATION.md`
+- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
