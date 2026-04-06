@@ -1,0 +1,182 @@
+{
+  "name": "Real document gold set - code_analysis demo_code_analysis.py",
+  "task_type": "code_analysis",
+  "document_name": "demo_code_analysis.py",
+  "document_path": "data/materials_demo/code_analysis/demo_code_analysis.py",
+  "input_text": "Analyze the selected code file. Identify grounded correctness/runtime issues, recommend concrete refactor steps, and suggest targeted tests.",
+  "gold_type": "rubric",
+  "notes": "This gold set is intentionally rubric-based. Future evaluators should score semantic coverage of the expected issues, evidence, refactor actions, tests, snippet summary, and operational risks rather than requiring exact phrasing.",
+  "expected": {
+    "evaluation_guidance": {
+      "core_required_fields": [
+        "snippet_summary",
+        "main_purpose",
+        "detected_issues",
+        "refactor_plan",
+        "test_suggestions"
+      ],
+      "secondary_but_expected_fields": [
+        "readability_improvements",
+        "maintainability_improvements",
+        "risk_notes",
+        "grounded_evidence"
+      ],
+      "minimum_issue_hits": 3,
+      "minimum_refactor_hits": 3,
+      "minimum_test_hits": 3,
+      "notes": "The evaluator should reward outputs that correctly identify the empty-input failure, input mutation, and heterogeneous output shape as the main grounded issues. Narrative fields do not need exact wording, but they should remain consistent with the actual snippet behavior."
+    },
+    "snippet_summary_aliases": [
+      "functions that normalize item scores and compute an aggregate average",
+      "score normalization helper plus processing function that returns normalized items and average",
+      "code that clamps score bounds and calculates an average over processed items"
+    ],
+    "main_purpose_aliases": [
+      "normalize score values and compute an average",
+      "clamp item scores and return processed items with an average",
+      "process a list of scored items and calculate the average"
+    ],
+    "expected_issues": [
+      {
+        "id": "empty_input_division_by_zero",
+        "severity": "high",
+        "category_aliases": [
+          "runtime_failure",
+          "correctness",
+          "error_handling"
+        ],
+        "title_aliases": [
+          "division by zero on empty input",
+          "average computation fails when items is empty",
+          "empty list causes zero division"
+        ],
+        "required_terms": [
+          "average",
+          "len(values)",
+          "empty"
+        ],
+        "evidence_aliases": [
+          "average = total / len(values)",
+          "divides by len(values) without guarding empty input"
+        ]
+      },
+      {
+        "id": "input_mutation_when_clamping_scores",
+        "severity": "medium",
+        "category_aliases": [
+          "input_mutation",
+          "shared_reference",
+          "api_contract"
+        ],
+        "title_aliases": [
+          "mutates caller-provided items in place",
+          "normalize_scores changes the input dictionaries",
+          "in-place score clamping mutates original data"
+        ],
+        "required_terms": [
+          "item[\"score\"]",
+          "mutate",
+          "in place"
+        ],
+        "evidence_aliases": [
+          "item[\"score\"] = 100",
+          "item[\"score\"] = 0"
+        ]
+      },
+      {
+        "id": "heterogeneous_output_shape",
+        "severity": "medium",
+        "category_aliases": [
+          "api_contract",
+          "correctness",
+          "maintainability"
+        ],
+        "title_aliases": [
+          "items without score pass through unchanged",
+          "output structure is inconsistent",
+          "function returns mixed normalized and raw items"
+        ],
+        "required_terms": [
+          "else",
+          "result.append(item)",
+          "inconsistent"
+        ],
+        "evidence_aliases": [
+          "else: result.append(item)",
+          "items lacking score are returned unchanged"
+        ]
+      }
+    ],
+    "expected_refactor_actions": [
+      {
+        "aliases": [
+          "handle empty input before dividing",
+          "return average 0.0 for empty input",
+          "guard against division by zero"
+        ]
+      },
+      {
+        "aliases": [
+          "avoid mutating input items",
+          "build a new normalized object",
+          "copy the item before clamping score"
+        ]
+      },
+      {
+        "aliases": [
+          "normalize the output schema consistently",
+          "always return objects with the same shape",
+          "avoid passing raw items through unchanged"
+        ]
+      }
+    ],
+    "expected_test_suggestions": [
+      {
+        "aliases": [
+          "test empty input",
+          "verify empty list returns average 0.0",
+          "cover the zero-item case"
+        ]
+      },
+      {
+        "aliases": [
+          "test score clamping above 100 and below 0",
+          "verify score bounds normalization",
+          "cover out-of-range score values"
+        ]
+      },
+      {
+        "aliases": [
+          "test that the original input is not mutated",
+          "verify no in-place mutation occurs",
+          "assert output normalization preserves input immutability"
+        ]
+      }
+    ],
+    "expected_readability_or_maintainability_improvements": [
+      {
+        "aliases": [
+          "make the contract for items with missing score explicit",
+          "document or normalize the expected input/output schema",
+          "clarify the shape of returned items"
+        ]
+      },
+      {
+        "aliases": [
+          "separate normalization from aggregation",
+          "extract helper logic for clamping or averaging",
+          "simplify the processing flow for readability"
+        ]
+      }
+    ],
+    "expected_risk_notes": [
+      {
+        "aliases": [
+          "runtime crash on empty input",
+          "downstream callers may observe mutated source objects",
+          "mixed output shape can break consumers expecting consistent schema"
+        ]
+      }
+    ]
+  }
+}

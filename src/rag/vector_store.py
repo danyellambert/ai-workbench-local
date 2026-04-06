@@ -1,4 +1,18 @@
+from __future__ import annotations
+
+import shutil
 from math import sqrt
+from pathlib import Path
+from typing import Any
+
+
+def _normalize_embedding(value: object) -> list[float] | None:
+    if not isinstance(value, list):
+        return None
+    try:
+        return [float(item) for item in value]
+    except (TypeError, ValueError):
+        return None
 
 
 def cosine_similarity(vector_a: list[float], vector_b: list[float]) -> float:
@@ -19,6 +33,21 @@ def cosine_similarity(vector_a: list[float], vector_b: list[float]) -> float:
     return dot_product / (magnitude_a * magnitude_b)
 
 
+def _coerce_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _make_chunk_chroma_id(entry: dict[str, object], fallback_index: int) -> str:
+    document_id = str(entry.get("document_id") or entry.get("file_hash") or "document")
+    chunk_id = _coerce_int(entry.get("chunk_id"), fallback_index)
+    start_char = _coerce_int(entry.get("start_char"), 0)
+    end_char = _coerce_int(entry.get("end_char"), 0)
+    return f"{document_id}::chunk::{chunk_id}::{start_char}::{end_char}"
+
+
 class LocalVectorStore:
     def __init__(self, entries: list[dict[str, object]]):
         self.entries = entries
@@ -35,3 +64,145 @@ class LocalVectorStore:
 
         scored_entries.sort(key=lambda item: item.get("score", 0), reverse=True)
         return scored_entries[:top_k]
+
+
+class ChromaVectorStore:
+    COLLECTION_NAME = "rag_chunks"
+
+    def __init__(self, persist_path: Path):
+        self.persist_path = Path(persist_path)
+
+    def _clear_system_cache(self) -> None:
+        try:
+            from chromadb.api.client import SharedSystemClient
+
+            SharedSystemClient.clear_system_cache()
+        except Exception:
+            pass
+
+    def _get_client(self):
+        import chromadb
+
+        self.persist_path.mkdir(parents=True, exist_ok=True)
+        return chromadb.PersistentClient(path=str(self.persist_path))
+
+    def _get_collection(self):
+        client = self._get_client()
+        return client.get_or_create_collection(
+            name=self.COLLECTION_NAME,
+            metadata={"hnsw:space": "cosine"},
+        )
+
+    def count_entries(self) -> int:
+        if not self.persist_path.exists():
+            return 0
+        collection = self._get_collection()
+        return len(collection.get(include=[]).get("ids") or [])
+
+    def clear(self, remove_persist_dir: bool = False) -> None:
+        if self.persist_path.exists():
+            try:
+                client = self._get_client()
+                client.delete_collection(name=self.COLLECTION_NAME)
+            except Exception:
+                collection = self._get_collection()
+                existing = collection.get(include=[])
+                existing_ids = existing.get("ids") or []
+                if existing_ids:
+                    collection.delete(ids=existing_ids)
+
+        if remove_persist_dir and self.persist_path.exists():
+            self._clear_system_cache()
+            shutil.rmtree(self.persist_path, ignore_errors=True)
+            self._clear_system_cache()
+
+    def rebuild(self, entries: list[dict[str, object]]) -> None:
+        # Rebuild total do espelho persistido para manter JSON canônico e Chroma alinhados.
+        self.clear(remove_persist_dir=False)
+        collection = self._get_collection()
+
+        ids: list[str] = []
+        embeddings: list[list[float]] = []
+        metadatas: list[dict[str, object]] = []
+        documents: list[str] = []
+        seen_ids: set[str] = set()
+
+        for index, entry in enumerate(entries):
+            embedding = _normalize_embedding(entry.get("embedding"))
+            if not embedding:
+                continue
+
+            chunk_chroma_id = _make_chunk_chroma_id(entry, index)
+            if chunk_chroma_id in seen_ids:
+                continue
+            seen_ids.add(chunk_chroma_id)
+
+            ids.append(chunk_chroma_id)
+            embeddings.append(embedding)
+            documents.append(str(entry.get("text", "")))
+            metadatas.append(
+                {
+                    "source": str(entry.get("source", "documento")),
+                    "chunk_id": _coerce_int(entry.get("chunk_id"), index),
+                    "document_id": str(entry.get("document_id") or entry.get("file_hash") or "documento"),
+                    "file_type": str(entry.get("file_type") or ""),
+                    "snippet": str(entry.get("snippet") or ""),
+                    "start_char": _coerce_int(entry.get("start_char"), 0),
+                    "end_char": _coerce_int(entry.get("end_char"), 0),
+                }
+            )
+
+        if ids:
+            collection.add(ids=ids, embeddings=embeddings, metadatas=metadatas, documents=documents)
+
+    def similarity_search(
+        self,
+        query_embedding: list[float],
+        top_k: int,
+        document_ids: list[str] | None = None,
+        file_types: list[str] | None = None,
+    ) -> list[dict[str, object]]:
+        collection = self._get_collection()
+
+        where_clauses: list[dict[str, object]] = []
+        if document_ids:
+            where_clauses.append({"document_id": {"$in": [str(item) for item in document_ids if item]}})
+        if file_types:
+            where_clauses.append({"file_type": {"$in": [str(item) for item in file_types if item]}})
+
+        where: dict[str, object] | None = None
+        if len(where_clauses) == 1:
+            where = where_clauses[0]
+        elif len(where_clauses) > 1:
+            where = {"$and": where_clauses}
+
+        query_kwargs: dict[str, object] = {
+            "query_embeddings": [query_embedding],
+            "n_results": top_k,
+        }
+        if where is not None:
+            query_kwargs["where"] = where
+
+        results = collection.query(**query_kwargs)
+
+        metadatas = (results.get("metadatas") or [[]])[0]
+        documents = (results.get("documents") or [[]])[0]
+        distances = (results.get("distances") or [[]])[0]
+
+        output: list[dict[str, object]] = []
+        for metadata, document, distance in zip(metadatas, documents, distances):
+            score = round(1 - float(distance), 4)
+            output.append(
+                {
+                    "source": metadata.get("source"),
+                    "chunk_id": metadata.get("chunk_id"),
+                    "document_id": metadata.get("document_id"),
+                    "file_type": metadata.get("file_type"),
+                    "snippet": metadata.get("snippet"),
+                    "start_char": metadata.get("start_char"),
+                    "end_char": metadata.get("end_char"),
+                    "text": document,
+                    "score": score,
+                }
+            )
+        return output

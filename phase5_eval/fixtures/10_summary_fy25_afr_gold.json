@@ -1,0 +1,224 @@
+{
+  "name": "Real document gold set - summary fy25-afr-final-tagged.pdf",
+  "task_type": "summary",
+  "document_name": "fy25-afr-final-tagged.pdf",
+  "document_path": "data/materials_demo/summary/fy25-afr-final-tagged.pdf",
+  "input_text": "Summarize the selected report for an executive reader. Preserve the mission-performance view, financial highlights, controls/compliance posture, audit status, and grant-program oversight.",
+  "gold_type": "rubric",
+  "notes": "This summary gold set is rubric-based rather than text-exact. Future evaluators should check whether the summary covers the required themes, executive signals, and facts without hallucinating unsupported claims.",
+  "expected": {
+    "evaluation_guidance": {
+      "core_required_fields": [
+        "topics",
+        "executive_summary",
+        "key_insights"
+      ],
+      "secondary_but_expected_fields": [
+        "report_purpose",
+        "administrator_message",
+        "audit_and_controls_signal",
+        "grant_oversight_signal",
+        "important_numbers"
+      ],
+      "minimum_topic_hits": 4,
+      "minimum_required_fact_hits": 5,
+      "minimum_key_insight_hits": 4,
+      "notes": "The evaluator should reward summaries that read like an executive brief of NASA's FY2025 AFR, not just a table-of-contents paraphrase. It should mention mission/performance, finances, controls/risk, audit posture, and grant/oversight content."
+    },
+    "expected_executive_summary_signals": [
+      "NASA FY 2025 Agency Financial Report",
+      "mission and financial performance",
+      "clean audit opinion",
+      "financial position and net cost",
+      "internal controls or enterprise risk management",
+      "grant oversight or management challenges"
+    ],
+    "expected_key_insights_any": [
+      "clean audit opinion for the 15th consecutive year",
+      "four key performance goals with two green and two yellow ratings",
+      "total assets of 39,579 and liabilities of 7,505",
+      "FY 2025 net cost of operations of 23,699",
+      "1134 expired grants with 14,938 in undisbursed balances"
+    ],
+    "minimum_topics": 4,
+    "expected_topics": [
+      {
+        "id": "mission_performance",
+        "aliases": [
+          "Mission Performance",
+          "Key Performance Results"
+        ],
+        "required_terms": [
+          "mission",
+          "performance"
+        ]
+      },
+      {
+        "id": "financial_performance",
+        "aliases": [
+          "Financial Performance",
+          "Financial Highlights",
+          "Overview of Financial Position",
+          "Results of Operations",
+          "Sources of Funding"
+        ],
+        "required_terms": [
+          "financial",
+          "assets",
+          "liabilities"
+        ]
+      },
+      {
+        "id": "controls_and_compliance",
+        "aliases": [
+          "Internal Control Framework",
+          "Enterprise Risk Management",
+          "Management Assurances"
+        ],
+        "required_terms": [
+          "control",
+          "risk",
+          "assurance"
+        ]
+      },
+      {
+        "id": "audit_and_reporting",
+        "aliases": [
+          "Independent Auditors’ Report",
+          "clean audit opinion",
+          "audit reports"
+        ],
+        "required_terms": [
+          "audit",
+          "opinion"
+        ]
+      },
+      {
+        "id": "administrator_and_report_purpose",
+        "aliases": [
+          "Message from the Administrator",
+          "About this Report",
+          "purpose of the AFR"
+        ],
+        "required_terms": [
+          "transparency",
+          "financial and performance information"
+        ]
+      },
+      {
+        "id": "grants_and_oversight",
+        "aliases": [
+          "Grants Programs Information",
+          "Undisbursed Balances in Expired Grant Accounts",
+          "Top Management and Performance Challenges"
+        ],
+        "required_terms": [
+          "grants",
+          "undisbursed",
+          "challenges"
+        ]
+      }
+    ],
+    "required_facts": [
+      {
+        "id": "clean_audit_opinion",
+        "aliases": [
+          "unmodified clean audit opinion",
+          "15th consecutive year",
+          "no reported material weaknesses"
+        ],
+        "required_terms": [
+          "clean audit opinion",
+          "15th",
+          "material weaknesses"
+        ]
+      },
+      {
+        "id": "mission_performance_status",
+        "aliases": [
+          "four key performance goals",
+          "two were rated Green and two were rated Yellow"
+        ],
+        "required_terms": [
+          "four key performance goals",
+          "Green",
+          "Yellow"
+        ]
+      },
+      {
+        "id": "balance_sheet_assets",
+        "aliases": [
+          "Total Assets $39,579",
+          "NASA’s total asset balance was $39.6 billion"
+        ],
+        "required_terms": [
+          "assets",
+          "39,579"
+        ]
+      },
+      {
+        "id": "balance_sheet_liabilities",
+        "aliases": [
+          "Total Liabilities $7,505",
+          "Total Net Position $32,074",
+          "liabilities were $7.5 billion"
+        ],
+        "required_terms": [
+          "liabilities",
+          "7,505"
+        ]
+      },
+      {
+        "id": "net_cost_of_operations",
+        "aliases": [
+          "FY 2025 net cost of $23.7 billion",
+          "TOTAL NET COST $23,699"
+        ],
+        "required_terms": [
+          "net cost",
+          "23,699"
+        ]
+      },
+      {
+        "id": "grant_program_balances",
+        "aliases": [
+          "1134 expired grants",
+          "$14,938 undisbursed balances",
+          "undisbursed balances in expired grant accounts"
+        ],
+        "required_terms": [
+          "1134",
+          "14,938",
+          "expired grant"
+        ]
+      },
+      {
+        "id": "report_purpose_and_transparency",
+        "aliases": [
+          "commitment to transparency",
+          "performance and financial information",
+          "prepared in accordance with OMB Circular A-136"
+        ],
+        "required_terms": [
+          "transparency",
+          "OMB",
+          "A-136"
+        ]
+      }
+    ],
+    "important_numbers_any": [
+      "$39,579",
+      "$32,074",
+      "$7,505",
+      "$23,699",
+      "$14,938",
+      "1134",
+      "15th consecutive year"
+    ],
+    "prohibited_failures": [
+      "summary based only on table of contents without substantive facts",
+      "omitting the clean audit opinion signal",
+      "omitting both financial highlights and grant oversight"
+    ]
+  }
+}

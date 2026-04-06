@@ -1,0 +1,86 @@
+{
+  "questions": [
+    {
+      "id": "kaur_best_model",
+      "question": "Which method combination achieved the best performance according to the Kaur paper?",
+      "expected_sources": [
+        "kaur-2016-ijca-911367.pdf"
+      ]
+    },
+    {
+      "id": "meng_optimization",
+      "question": "Which algorithm is used to solve the optimization problem in the Meng paper?",
+      "expected_sources": [
+        "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+      ]
+    },
+    {
+      "id": "hb44_intro",
+      "question": "What is the purpose of Handbook 44 according to its introduction?",
+      "expected_sources": [
+        "2025-HB-44-20250106-Final-508.pdf"
+      ]
+    },
+    {
+      "id": "scanner_usb",
+      "question": "How does the scanner manual describe connecting the cradle with USB?",
+      "expected_sources": [
+        "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+      ]
+    }
+  ],
+  "benchmarks": {
+    "embedding_models": {
+      "enabled": true,
+      "runs": [
+        {
+          "label": "bge_m3",
+          "embedding_model": "bge-m3:latest"
+        },
+        {
+          "label": "qwen3_embedding_0_6b",
+          "embedding_model": "qwen3-embedding:0.6b"
+        }
+      ]
+    },
+    "embedding_context_window": {
+      "enabled": true,
+      "base": {
+        "embedding_model": "bge-m3:latest"
+      },
+      "runs": [
+        {
+          "label": "ctx_1024",
+          "embedding_context_window": 1024
+        },
+        {
+          "label": "ctx_2048",
+          "embedding_context_window": 2048
+        }
+      ]
+    },
+    "retrieval_tuning": {
+      "enabled": true,
+      "base": {
+        "embedding_model": "bge-m3:latest",
+        "embedding_context_window": 2048
+      },
+      "runs": [
+        {
+          "label": "baseline",
+          "chunk_size": 1200,
+          "chunk_overlap": 200,
+          "top_k": 4,
+          "rerank_pool_size": 8
+        },
+        {
+          "label": "smaller_chunks",
+          "chunk_size": 800,
+          "chunk_overlap": 120,
+          "top_k": 4,
+          "rerank_pool_size": 8
+        }
+      ]
+    }
+  }
+}

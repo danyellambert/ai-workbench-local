@@ -1,0 +1,220 @@
+{
+  "name": "Real document gold set - cv_analysis Sample-Resume-2-1.pdf",
+  "task_type": "cv_analysis",
+  "document_name": "Sample-Resume-2-1.pdf",
+  "document_path": "data/materials_demo/cv_analysis/Sample-Resume-2-1.pdf",
+  "input_text": "Analyze the selected CV and return grounded personal information, education, work experience, leadership, and interests without hallucinating fields that do not appear.",
+  "gold_type": "rubric",
+  "notes": "Manual gold set reviewed from a student/public-interest/legal/campaign resume. This case expands the public CV coverage with legal support, campaign work, coaching, and campus leadership signals.",
+  "expected": {
+    "evaluation_guidance": {
+      "core_required_fields": [
+        "personal_info",
+        "education_entries",
+        "experience_entries"
+      ],
+      "secondary_but_expected_fields": [
+        "skills",
+        "sections",
+        "interests"
+      ],
+      "minimum_skill_hits": 2,
+      "threshold_overrides": {
+        "pass_ratio": 0.64,
+        "warn_ratio": 0.44
+      }
+    },
+    "expected_personal_info": {
+      "full_name_aliases": [
+        "Nathaly Ortiz"
+      ],
+      "email_aliases": [
+        "nathalyortiz15@gmail.com"
+      ],
+      "location_aliases": [
+        "Claremont, CA",
+        "Los Angeles, CA",
+        "Albuquerque, NM"
+      ],
+      "link_aliases": []
+    },
+    "expected_profile_summary_aliases": [
+      "student with politics and chicanx latinx studies background plus legal campaign debate and student leadership experience",
+      "campus leader with paralegal campaign and coaching experience"
+    ],
+    "expected_languages": [],
+    "expected_skills_any": [
+      "legal research",
+      "pleadings",
+      "motions",
+      "case assessments",
+      "campaign events",
+      "talking points",
+      "CPR certification",
+      "behavioral health training",
+      "teamwork skills",
+      "student advocacy",
+      "budget management"
+    ],
+    "minimum_skill_hits": 2,
+    "expected_interests_any": [
+      "hiking",
+      "camping",
+      "skiing",
+      "outdoors"
+    ],
+    "expected_education": [
+      {
+        "institution_aliases": [
+          "Scripps College"
+        ],
+        "degree_aliases": [
+          "B.A.",
+          "Double major in Politics and Chicanx Latinx Studies"
+        ],
+        "date_aliases": [
+          "Expected 2024"
+        ],
+        "location_aliases": [
+          "Claremont, CA"
+        ],
+        "description_terms": [
+          "double major"
+        ]
+      },
+      {
+        "institution_aliases": [
+          "Scripps College"
+        ],
+        "degree_aliases": [
+          "Senior thesis proposal"
+        ],
+        "date_aliases": [
+          "Expected 2024"
+        ],
+        "location_aliases": [
+          "Claremont, CA"
+        ],
+        "description_terms": [
+          "Gloria Anzaldua",
+          "Latinx activism",
+          "post Trump America"
+        ]
+      }
+    ],
+    "expected_experience": [
+      {
+        "organization_aliases": [
+          "Hamlin, Hamlin & McGill"
+        ],
+        "date_aliases": [
+          "May 2023",
+          "September 2023"
+        ],
+        "title_aliases": [
+          "Litigation Paralegal"
+        ],
+        "bullet_terms": [
+          "legal research",
+          "pleadings",
+          "motions"
+        ],
+        "description_terms": [
+          "case assessments",
+          "calendar hearings"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Camp Acadia"
+        ],
+        "date_aliases": [
+          "Summer 2022"
+        ],
+        "title_aliases": [
+          "Counselor"
+        ],
+        "bullet_terms": [
+          "middle schoolers",
+          "learning disabilities",
+          "CPR certification"
+        ],
+        "description_terms": [
+          "behavioral health training",
+          "teamwork skills"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Karen Bass Mayoral Campaign"
+        ],
+        "date_aliases": [
+          "September 2021",
+          "December 2022"
+        ],
+        "title_aliases": [
+          "Campaign Intern"
+        ],
+        "bullet_terms": [
+          "talking points",
+          "door to door",
+          "rallies"
+        ],
+        "description_terms": [
+          "press releases",
+          "campaign related events"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Jorge D. Mendoza Charter Academy"
+        ],
+        "date_aliases": [
+          "June 2020",
+          "Present"
+        ],
+        "title_aliases": [
+          "Debate Coach"
+        ],
+        "bullet_terms": [
+          "coached",
+          "online programming",
+          "Golden West Debate League"
+        ],
+        "description_terms": [
+          "fifth and sixth graders",
+          "camaraderie"
+        ]
+      },
+      {
+        "organization_aliases": [
+          "Scripps Associated Students",
+          "Outdoor Wilderness Leaders",
+          "OWL"
+        ],
+        "date_aliases": [
+          "September 2023",
+          "September 2021",
+          "Present"
+        ],
+        "title_aliases": [
+          "Senior Class Co-President",
+          "Student Representative",
+          "Co-Manager"
+        ],
+        "bullet_terms": [
+          "administration and trustees",
+          "hiking",
+          "camping",
+          "skiing"
+        ],
+        "description_terms": [
+          "student body interests",
+          "budget management"
+        ]
+      }
+    ],
+    "minimum_experience_entries": 3,
+    "minimum_experience_years": 1.0
+  }
+}
