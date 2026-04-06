@@ -1,20 +1,20 @@
-## Fase 5 — pacote de evidências de funcionamento
+# Phase 5 Evidence Pack
 
-Este documento reúne as evidências mais fortes, reprodutíveis e úteis para mostrar que o módulo de **structured outputs** funciona no projeto, alinhado ao roadmap em `proximos_passos.md`.
+This document gathers the most useful reproducible evidence for the Phase 5 delivery, aligned with the canonical roadmap in `ROADMAP.md`.
 
 ---
 
-## 1. Evidência automatizada principal
+## 1. Primary automated evidence
 
-### Smoke eval local mais recente
+### Latest local smoke evaluation
 
-Comando executado:
+Command:
 
 ```bash
 python scripts/run_phase5_structured_eval.py --task all
 ```
 
-Resultado:
+Result:
 
 ```text
 [PASS] extraction: 5/5
@@ -24,22 +24,22 @@ Resultado:
 [PASS] code_analysis: 5/5
 ```
 
-Relatório gerado:
+Generated report:
 
 - `phase5_eval/reports/phase5_structured_eval_20260319_082813.json`
 
-Por que essa é a melhor evidência base:
+Why this is the strongest baseline evidence:
 
-- é **reprodutível**
-- cobre as 5 tasks estruturadas da fase
-- gera um artefato versionável em JSON
-- prova não só JSON válido, mas utilidade mínima por task
+- it is reproducible
+- it covers the five main structured tasks of the phase
+- it generates a versionable JSON artifact
+- it demonstrates more than schema-valid JSON: it shows minimum task usefulness
 
 ---
 
-## 2. O que o smoke eval prova
+## 2. What the smoke evaluation proves
 
-O relatório mais recente comprova, com `PASS`, que o app consegue executar com sucesso:
+The latest report confirms successful execution for:
 
 1. `extraction`
 2. `summary`
@@ -47,19 +47,19 @@ O relatório mais recente comprova, com `PASS`, que o app consegue executar com 
 4. `cv_analysis`
 5. `code_analysis`
 
-Isso está alinhado com o objetivo da Fase 5 no roadmap:
+That matches the Phase 5 objective:
 
-- outputs estruturados previsíveis
-- validação por schema
-- uso como componente integrável, não apenas chat livre
+- predictable structured outputs
+- schema-based validation
+- model usage as an integrable system component rather than only open-ended chat
 
 ---
 
-## 3. Evidências concretas por task
+## 3. Concrete evidence by task
 
 ### 3.1 Extraction
 
-No relatório recente, `extraction` passou com `5/5` e retornou:
+In the latest report, `extraction` passed `5/5` and produced fields such as:
 
 - `main_subject`
 - `entities`
@@ -68,105 +68,97 @@ No relatório recente, `extraction` passou com `5/5` e retornou:
 - `risks`
 - `action_items`
 
-Arquivo-evidência:
+Evidence file:
 
 - `phase5_eval/reports/phase5_structured_eval_20260319_082813.json`
 
 ### 3.2 Summary
 
-`summary` passou com `5/5` e retornou:
+`summary` passed `5/5` and produced:
 
-- tópicos
+- topic bullets
 - `executive_summary`
 - `key_insights`
 - `reading_time_minutes`
 
-Arquivo-evidência:
+Evidence file:
 
 - `phase5_eval/reports/phase5_structured_eval_20260319_082813.json`
 
 ### 3.3 Checklist
 
-`checklist` passou com `5/5` e retornou:
+`checklist` passed `5/5` and produced:
 
-- título
-- descrição
-- itens estruturados
-- prioridade
-- dependências
-- tempo estimado
+- title
+- description
+- structured checklist items
+- priority
+- dependencies
+- estimated time
 
-Arquivo-evidência:
+Evidence file:
 
 - `phase5_eval/reports/phase5_structured_eval_20260319_082813.json`
 
 ### 3.4 CV analysis
 
-O smoke eval atual também passou com `5/5` em `cv_analysis` para o fixture textual.
+The current smoke evaluation also passed `5/5` for `cv_analysis` on the textual fixture.
 
-Além disso, existe um caso real salvo para referência:
+There is also a saved real-case example:
 
 - `phase5_eval/CV - Lucas -gen.json`
 
-Esse caso real é útil como evidência complementar porque mostra:
+This real case is useful as complementary evidence because it shows:
 
-- uso do fluxo em um CV real
-- saída estruturada com `education_entries` e `experience_entries`
-- limites reais do pipeline atual
+- the flow running on a real CV
+- structured output with `education_entries` and `experience_entries`
+- honest visibility into current system limits
 
-Limitações honestas observáveis nesse JSON real:
+Observable limitations in that JSON include:
 
-- `full_name` ficou `null`
-- `email` saiu truncado (`as.souza-ferreira@student-cs.fr`)
-- há duplicidade em `experience_entries`
+- `full_name = null`
+- truncated email output (`as.souza-ferreira@student-cs.fr`)
+- duplicated `experience_entries`
 
-Isso é bom para portfólio porque permite demonstrar **funcionamento + honestidade técnica**, exatamente como o roadmap pede.
+That makes the evidence more useful because it shows both working behavior and remaining edge cases.
 
-### 3.4.1 Rollout reforçado do `evidence_cv` com gate semântico
+### 3.4.1 Strengthened `evidence_cv` rollout with semantic gate
 
-Além do smoke eval textual, a fase agora também possui evidência de rollout reforçado do parser `evidence_cv` com:
+Beyond the textual smoke evaluation, the phase also includes strengthened rollout evidence for the `evidence_cv` parser with:
 
-- guardrails operacionais
-- promoção automática por etapas
-- semantic gate com CVs mais próximos de casos reais em `data/materials_demo/cv_analysis`
+- operational guardrails
+- staged automatic promotion
+- a semantic gate using more realistic CV-like samples in `data/materials_demo/cv_analysis`
 
-Arquivos-evidência principais:
+Primary evidence files:
 
 - `phase5_eval/reports/evidence_cv_auto_rollout_decision.json`
 - `phase5_eval/reports/evidence_cv_auto_rollout.log`
 
-Leitura atual mais importante:
+Most important current interpretation:
 
-- o rollout reforçado terminou sem falhas operacionais críticas
-- o gate semântico passou com `3/3` amostras reais/demo contendo nome confirmado
-- a correção de nome resolveu os casos `Francis B. Taylor` e `Nathaly Ortiz`, que antes apareciam como `not_found`
+- the strengthened rollout finished without critical operational failures
+- the semantic gate passed with `3/3` real/demo samples containing confirmed names
+- the name-fix path corrected the earlier `Francis B. Taylor` and `Nathaly Ortiz` cases that had previously been marked as `not_found`
 
-Isso fortalece a narrativa da Fase 5 porque o rollout deixa de validar só estabilidade operacional e passa a exigir uma checagem semântica mínima antes de considerar a ativação automática saudável.
+### 3.4.2 Note on empty `sections` in `cv_analysis`
 
-### 3.4.2 Nota sobre `sections` vazio em `cv_analysis`
+During the strengthened rollout investigation, an important behavior appeared in the `cv_analysis` payload: in some cases, `education_entries`, `experience_entries`, `skills`, and `languages` were present while `sections` could still be empty.
 
-Durante a investigação do rollout reforçado, apareceu um comportamento importante no payload de `cv_analysis`: em alguns casos, `education_entries`, `experience_entries`, `skills` e `languages` vinham preenchidos, mas `sections` podia ficar vazio.
+That did not necessarily mean the result was empty or unusable. The pipeline was already structuring useful top-level information, but the model did not always fill `sections` directly.
 
-Isso não significava necessariamente ausência de conteúdo útil. O pipeline já conseguia estruturar dados no topo do payload, mas nem sempre o modelo devolvia `sections` preenchido.
-
-Após o hardening recente, a camada de renderização da UI passa a sintetizar seções derivadas de:
+After later hardening, the UI rendering layer can synthesize section views from:
 
 - `experience`
 - `education`
 - `skills`
 - `languages`
 
-quando esses blocos existirem no payload mesmo que o modelo não tenha preenchido `sections` diretamente.
-
-Na prática, isso melhora a coerência entre:
-
-- métricas da UI (`Sections`)
-- expansores de seção
-- campos top-level como `experience_entries` e `education_entries`
+when those blocks exist in the payload, even if `sections` itself is empty.
 
 ### 3.5 Code analysis
 
-`code_analysis` passou com `5/5` e retornou:
+`code_analysis` passed `5/5` and produced:
 
 - `snippet_summary`
 - `main_purpose`
@@ -174,23 +166,23 @@ Na prática, isso melhora a coerência entre:
 - `refactor_plan`
 - `test_suggestions`
 
-Arquivo-evidência:
+Evidence file:
 
 - `phase5_eval/reports/phase5_structured_eval_20260319_082813.json`
 
 ---
 
-## 4. Evidências visuais recomendadas para UI
+## 4. Recommended visual evidence for the UI
 
-O projeto já possui um guia explícito para capturas:
+The project already includes an explicit guide for screenshots:
 
 - `docs/PHASE_5_UI_EXAMPLES_GUIDE.md`
 
-E também já possui um manifesto de exemplos selecionados:
+It also includes a selected example manifest:
 
 - `phase5_eval/ui_examples_manifest.json`
 
-Os 4 casos mais fortes para screenshot/documentação são:
+The four strongest cases for screenshots and documentation are:
 
 1. **textual_pass**
    - PDF: `0001_medium_modern_two_column_gabriel.gomes.almeida.pdf`
@@ -208,73 +200,73 @@ Os 4 casos mais fortes para screenshot/documentação são:
    - PDF: `0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf`
    - status: `FAIL`
 
-Esses quatro exemplos formam o melhor pacote visual porque mostram:
+Together, these four cases show:
 
-- caso bom textual
-- caso bom visualmente denso
-- caso parcialmente melhorado com OCR/scan-like
-- caso limite ainda difícil
+- a good textual case
+- a good visually dense case
+- a partially improved scan-like case
+- a still-difficult edge case
 
 ---
 
-## 5. Pacote mínimo recomendado para documentar depois
+## 5. Minimal evidence package
 
-Se o objetivo for montar README, docs ou post de LinkedIn depois, o pacote mínimo mais forte é:
+The strongest compact package for this phase is:
 
-### A. Evidência automatizada
+### A. Automated evidence
 
 - `phase5_eval/reports/phase5_structured_eval_20260319_082813.json`
 
-### B. Evidência real complementar
+### B. Complementary real-case evidence
 
 - `phase5_eval/CV - Lucas -gen.json`
 
-### C. Evidência visual da UI
+### C. Visual evidence
 
-- 2 screenshots de casos `PASS`
-- 1 screenshot de `WARN` scan-like
-- 1 screenshot de caso limite
+- two screenshots from `PASS` cases
+- one screenshot from a scan-like `WARN` case
+- one screenshot from a difficult edge case
 
-### D. Seleção pronta dos casos visuais
+### D. Curated screenshot inputs
 
 - `phase5_eval/ui_examples_manifest.json`
 - `docs/PHASE_5_UI_EXAMPLES_GUIDE.md`
 
 ---
 
-## 6. Como eu recomendaria apresentar isso na documentação
+## 6. Suggested documentation summary
 
-### Versão curta
+### Short version
 
-> A Fase 5 foi validada por um smoke eval local reprodutível cobrindo `extraction`, `summary`, `checklist`, `cv_analysis` e `code_analysis`, todos com `PASS`. Além disso, o projeto mantém exemplos reais e um conjunto curado de casos de UI para demonstrar sucesso em documentos textuais, comportamento parcial em scan-like e limites conhecidos do pipeline.
+> Phase 5 was validated through a reproducible local smoke evaluation covering `extraction`, `summary`, `checklist`, `cv_analysis`, and `code_analysis`, all with `PASS`. The repository also preserves real examples and curated UI cases to show success on textual documents, partial behavior on scan-like inputs, and known pipeline boundaries.
 
-### Versão mais forte para portfólio
+### Stronger engineering version
 
-> O módulo de structured outputs não foi avaliado só por “parece funcionar”. Ele possui smoke eval automatizado, casos reais versionados, exemplos de UI selecionados e documentação explícita de limites. Isso permite demonstrar previsibilidade, validação por schema e maturidade de engenharia na transição de chat livre para saídas integráveis.
+> The structured-output layer was not assessed only through manual inspection. It includes automated smoke evaluation, versioned real examples, selected UI cases, and explicit documentation of known limits. That makes the transition from open-ended chat to validated task outputs observable and reproducible.
 
 ---
 
-## 7. Comandos curtos para reproduzir as evidências
+## 7. Short commands to reproduce the evidence
 
-Rodar a smoke eval completa:
+Run the full smoke evaluation:
 
 ```bash
 python scripts/run_phase5_structured_eval.py --task all
 ```
 
-Abrir o relatório recente:
+Open the latest report:
 
 ```bash
 code phase5_eval/reports/phase5_structured_eval_20260319_082813.json
 ```
 
-Abrir o caso real do Lucas:
+Open the saved Lucas case:
 
 ```bash
 code "phase5_eval/CV - Lucas -gen.json"
 ```
 
-Abrir o guia de screenshots da fase:
+Open the screenshot guide:
 
 ```bash
 code docs/PHASE_5_UI_EXAMPLES_GUIDE.md
@@ -282,13 +274,13 @@ code docs/PHASE_5_UI_EXAMPLES_GUIDE.md
 
 ---
 
-## 8. Conclusão
+## 8. Conclusion
 
-Hoje, a melhor evidência de que o aplicativo de estruturado funciona é a combinação de:
+Today, the strongest combined evidence that the Phase 5 structured application layer works is:
 
-1. **smoke eval automatizado com PASS em todas as tasks**
-2. **artefato JSON versionado do relatório**
-3. **caso real versionado (`CV - Lucas -gen.json`)**
-4. **manifesto de exemplos de UI para screenshots reprodutíveis**
+1. an automated smoke evaluation with `PASS` across all main tasks
+2. a versioned JSON report artifact
+3. a versioned real-case output (`CV - Lucas -gen.json`)
+4. a curated UI-example manifest for reproducible screenshots
 
-Esse conjunto é o mais alinhado ao roadmap porque entrega exatamente o que a fase ainda pede para fechar: **evidências reais, screenshots, mini demo e documentação honesta dos limites atuais**.
+This combination gives the phase a strong evidence base while keeping system limits explicit.

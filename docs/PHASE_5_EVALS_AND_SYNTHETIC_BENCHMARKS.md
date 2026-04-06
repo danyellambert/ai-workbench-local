@@ -1,27 +1,29 @@
-# Fase 5 — Evals, benchmark sintético e estado atual
+# Phase 5 — Evaluations and Synthetic CV Benchmark
 
-Este documento registra o que já foi feito na Fase 5 **além do que estava inicialmente documentado no projeto**, com foco em evals, benchmark sintético e implicações arquiteturais.
+This document records the evaluation and synthetic-benchmark layer that was added during Phase 5 in addition to the initial structured-output foundation.
 
-## 1. O que foi consolidado na Fase 5
+It should now be read as an **intermediate appendix inside the completed Phase 5 package**, not as the final closure document for the phase.
 
-Ao longo da implementação da Fase 5, o projeto passou de uma foundation de structured outputs para uma trilha mais completa com:
+## 1. What was consolidated during this stage
 
-- foundation técnica em `src/structured/`
-- UI base para análises estruturadas
-- separação explícita entre:
-  - **chat com RAG**
-  - **análise estruturada**
-- smoke eval automatizado local
-- benchmark sintético inicial para `cv_analysis`
-- geradores de CVs sintéticos com múltiplos layouts para teste
+During this stage, the repository evolved from a structured-output foundation into a broader task-oriented workflow with:
 
-## 2. Smoke eval automatizado da Fase 5
+- technical structured-output modules in `src/structured/`
+- an initial UI for structured analysis
+- explicit separation between:
+  - **chat with RAG**
+  - **structured analysis**
+- automated local smoke evaluation
+- an initial synthetic benchmark for `cv_analysis`
+- multi-layout synthetic CV generators for testing
 
-Foi implementado um smoke eval local para a Fase 5 com:
+## 2. Automated smoke evaluation
+
+Phase 5 introduced a local smoke evaluation through:
 
 - `scripts/run_phase5_structured_eval.py`
 
-Esse smoke eval consolidado passou em:
+That consolidated smoke evaluation passed for:
 
 - `extraction`
 - `summary`
@@ -29,50 +31,53 @@ Esse smoke eval consolidado passou em:
 - `cv_analysis`
 - `code_analysis`
 
-### Interpretação
+### Interpretation
 
-Isso confirmou que a camada estruturada do projeto está funcional em nível de:
-- schema
+This confirmed that the structured layer was already working for:
+
+- schema definition
 - parsing
-- validação
-- execução básica por task
+- validation
+- basic execution per task
 
-Mas esse smoke eval **não substitui** validação com documentos reais ou benchmarks mais ricos de layout.
+At the same time, this smoke evaluation was never meant to replace validation with real documents or richer layout-oriented benchmarks.
 
-## 3. Separação entre chat com RAG e análise estruturada
+## 3. Separation between chat and structured analysis
 
-Foi consolidada uma separação arquitetural importante:
+An important architectural separation was consolidated during this stage:
 
-- **Chat com RAG** como fluxo conversacional
-- **Documento estruturado** como fluxo orientado a tarefa e schema
+- **Chat with RAG** as the conversational flow
+- **Structured analysis** as the task- and schema-oriented flow
 
-A base documental continua compartilhada, mas:
+The document base remained shared, but:
+
 - prompting
-- assembly de contexto
-- execução
-- renderização
+- context assembly
+- execution
+- rendering
 
-foram tratados como pipelines distintos.
+were treated as distinct pipelines.
 
-### Por que isso importa
+### Why this mattered
 
-Essa separação reduz confusão entre:
-- respostas conversacionais abertas
-- artefatos estruturados previsíveis
+This reduced confusion between:
 
-e melhora a narrativa técnica do projeto.
+- open conversational answers
+- predictable structured artifacts
 
-## 4. Benchmark sintético de CVs
+and made the system easier to evolve as an applied AI platform rather than a single mixed interaction mode.
 
-Também foi criada uma trilha de benchmark sintético para `cv_analysis` com:
+## 4. Synthetic CV benchmark
 
-- gerador de CVs sintéticos realistas
-- gerador de CVs multi-layout
-- benchmark automático de pares PDF/JSON
+This stage also introduced a synthetic benchmark path for `cv_analysis` with:
 
-### Layouts sintéticos usados
+- realistic synthetic CV generation
+- multi-layout CV generation
+- automated PDF/JSON pair benchmarking
 
-Os layouts usados no benchmark incluíram:
+### Layouts used
+
+The benchmark used layouts such as:
 
 - `classic_one_column`
 - `modern_two_column`
@@ -80,103 +85,92 @@ Os layouts usados no benchmark incluíram:
 - `dense_executive`
 - `scan_like_image_pdf`
 
-### O que o benchmark revelou
+### What the benchmark revealed
 
-O benchmark mostrou que:
+The benchmark showed that:
 
-- layouts textuais ficaram majoritariamente em `WARN`
-- layouts `scan_like_image_pdf` falharam sem OCR
-- o gargalo de `cv_analysis` não está principalmente no nome/email/localização/skills
-- o gargalo está concentrado em:
+- textual layouts tended to remain mostly in `WARN`
+- `scan_like_image_pdf` layouts failed without OCR
+- the main bottleneck in `cv_analysis` was not concentrated in name, email, location, or skills
+- the harder fields were:
   - `languages`
   - `education`
   - `experience_titles`
 
-## 5. Leitura correta do benchmark sintético
+## 5. How this benchmark should be interpreted
 
-O benchmark não indicou que a Fase 5 está “quebrada”.
+The synthetic benchmark did **not** mean the Phase 5 structured layer was broken.
 
-Ele indicou que:
+Instead, it showed that:
 
-- a base estruturada funciona
-- o `cv_analysis` já extrai bem campos centrais como:
+- the structured foundation was already working
+- `cv_analysis` could already extract core fields such as:
   - `full_name`
   - `email`
   - `location`
   - `skills`
-- mas ainda precisa de refinamento para:
+- but still needed refinement for:
   - `languages`
   - `education`
   - `experience_titles`
 
-### Sobre `scan_like_image_pdf`
+### About `scan_like_image_pdf`
 
-Os casos `scan_like_image_pdf` devem ser tratados como:
+The `scan_like_image_pdf` cases should be interpreted as:
 
-- **OCR-needed**
-- não como falha inesperada do pipeline textual atual
+- **OCR-needed** cases
+- not as unexpected failures of the baseline text-only path
 
-Isso é importante para a narrativa final da fase e para não interpretar erroneamente o benchmark.
+That distinction matters because it points to the correct technical response: improve the document-extraction path rather than misclassify the entire structured pipeline as unstable.
 
-## 6. O que ainda falta para fechar a fase
+## 6. How this appendix fits after Phase 5 closure
 
-Mesmo com a foundation, UI, smoke eval e benchmark sintético já implementados, a Fase 5 ainda não deve ser considerada encerrada.
+At the time this appendix was first written, Phase 5 still required:
 
-Os próximos passos corretos são:
+- UI/UX refinement
+- validation with real documents
+- stronger evidence packaging
 
-1. **polish de UI/UX** da aba de análise estruturada
-2. validação com documentos reais
-3. refinamento do `cv_analysis` com foco em:
-   - `languages`
-   - `education`
-   - `experience_titles`
-4. registro de evidências fortes:
-   - screenshots
-   - exemplos comparativos
-   - mini demo
+Those later steps were completed through the broader Phase 5 package, especially through:
 
-## 7. Como defender isso em entrevista
+- `docs/PHASE_5_SUMMARY.md`
+- `docs/PHASE_5_EVIDENCE_PACK.md`
+- `docs/PHASE_5_EVIDENCE_EVAL_REPORT.md`
+- `docs/PHASE_5_OCR_FIRST_VL_ON_DEMAND_PRODUCTION_READINESS.md`
 
-Hoje a história técnica mais forte da Fase 5 é:
+So this document should now be read as an intermediate engineering checkpoint that captured the first meaningful eval and benchmark layer inside the completed phase.
 
-- o projeto saiu de chat livre para structured outputs
-- as saídas passaram a ser validadas e renderizadas
-- foi criada uma separação clara entre conversa com RAG e análise estruturada
-- a fase já tem smoke eval automatizado
-- a fase já tem benchmark sintético inicial que revela gargalos reais
-- os próximos refinamentos são guiados por evidência, não por tentativa e erro
+## 7. Relevant files and artifacts
 
-## 8. Arquivos e artefatos relevantes
+### Structured foundation
 
-### Estruturados / foundation
 - `src/structured/`
 - `src/ui/structured_outputs.py`
-- `main_qwen.py`
+- `main.py`
 
-### Evals
+### Evaluations
+
 - `scripts/run_phase5_structured_eval.py`
 - `phase5_eval/reports/`
 
-### Benchmark sintético de CV
+### Synthetic CV benchmark
+
 - `scripts/run_synthetic_resume_benchmark.py`
 - `data/synthetic/resumes_multilayout/`
 - `phase5_eval/resume_benchmark*/`
 
-### Geradores sintéticos
-- gerador de resumes com PDF
-- gerador multi-layout
-- benchmark auxiliar com pares PDF/JSON
+### Synthetic generation helpers
 
-## 9. Conclusão
+- synthetic resume generation with PDF output
+- multi-layout generation
+- auxiliary PDF/JSON pair benchmarking
 
-A Fase 5 já está em um estado tecnicamente sólido para:
-- demonstração local
-- iteração guiada por benchmark
-- evolução para uma apresentação mais profissional
+## 8. Conclusion
 
-Mas ela ainda precisa de:
-- polish de UX
-- validação com documentos reais
-- fechamento narrativo e visual
+This appendix records the moment when Phase 5 stopped being only a schema foundation and started to accumulate measurable evidence.
 
-antes de ser tratada como “encerrada” no projeto.
+Its main value is historical and architectural:
+
+- it shows when structured outputs first became measurable
+- it shows how the project started distinguishing conversational and structured flows
+- it shows how synthetic benchmarking identified concrete refinement targets before the broader phase reached closure

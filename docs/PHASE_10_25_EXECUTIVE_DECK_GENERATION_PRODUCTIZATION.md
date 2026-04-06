@@ -1,4 +1,4 @@
-# Fase 10.25 — Productização do primeiro slice de Executive Deck Generation
+# Phase 10.25 — Productização do primeiro slice de Executive Deck Generation
 
 ## Objetivo
 
@@ -58,7 +58,7 @@ Este documento cobre a camada de productização do **P1**:
 
 ---
 
-## Por que isso fortalece o projeto como produto e portfólio
+## Why this strengthens the product capability
 
 Essa feature melhora muito a narrativa profissional do projeto porque fecha um ciclo muito forte:
 
@@ -148,7 +148,7 @@ Já existe fundação concreta para o primeiro slice.
 
 #### Documento-base do slice técnico atual
 
-- `docs/PRESENTATION_EXPORT_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
 #### Serviço de contrato e adapter já implementados
@@ -327,12 +327,12 @@ Objetivo: sair de “payload pronto” para “deck `.pptx` gerado sob demanda�
 
 Entrega mínima:
 
-- [ ] criar `presentation_export_service` no AI Workbench
-- [ ] chamar `GET /health` do `ppt_creator_app` antes do render
-- [ ] chamar `POST /render` com payload do deck executivo
-- [ ] baixar o `.pptx` via `GET /artifact`
-- [ ] salvar artefatos locais do export no AI Workbench
-- [ ] retornar resultado estruturado para a UI
+- [x] criar `presentation_export_service` no AI Workbench
+- [x] chamar `GET /health` do `ppt_creator_app` antes do render
+- [x] chamar `POST /render` com payload do deck executivo
+- [x] baixar o `.pptx` via `GET /artifact`
+- [x] salvar artefatos locais do export no AI Workbench
+- [x] retornar resultado estruturado para a UI
 
 ### Slice 2 — UX no app atual (Streamlit)
 
@@ -340,11 +340,11 @@ Objetivo: transformar a integração em feature visível de produto.
 
 Entrega mínima:
 
-- [ ] botão **Exportar deck executivo**
-- [ ] download do `.pptx`
-- [ ] download do contrato JSON
-- [ ] download do payload JSON
-- [ ] exibir status/erro de forma amigável
+- [x] botão **Exportar deck executivo**
+- [x] download do `.pptx`
+- [x] download do contrato JSON
+- [x] download do payload JSON
+- [x] exibir status/erro de forma amigável
 
 ### Slice 3 — endurecimento do ciclo de artefatos
 
@@ -697,7 +697,7 @@ Isso mostra maturidade de AI Engineer porque demonstra que você sabe:
 
 ### Testes unitários do service
 
-- [ ] `tests/test_presentation_export_service_unittest.py`
+- [x] `tests/test_presentation_export_service_unittest.py`
 
 Deve cobrir pelo menos:
 
@@ -749,7 +749,7 @@ Esses sinais podem entrar em um log leve/versionado do AI Workbench, sem depende
 
 ### Por que isso importa
 
-Isso ajuda a defender em entrevista que a feature não foi “só integrada”, mas sim:
+This makes it clearer that the feature was not added as an isolated integration, but as a capability with an explicit technical boundary:
 
 - monitorada
 - auditável
@@ -824,11 +824,11 @@ Exemplos de blocos futuros:
 
 Podemos considerar a feature tecnicamente integrada quando existir:
 
-- [ ] export síncrono funcionando do AI Workbench para o `ppt_creator_app`
-- [ ] download do `.pptx`
-- [ ] persistência local de contrato/payload/response
-- [ ] testes do service
-- [ ] UI mínima com ação explícita de export
+- [x] export síncrono funcionando do AI Workbench para o `ppt_creator_app`
+- [x] download do `.pptx`
+- [x] persistência local de contrato/payload/response
+- [x] testes do service
+- [x] UI mínima com ação explícita de export
 
 ## Done de produto
 

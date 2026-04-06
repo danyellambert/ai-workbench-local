@@ -1,4 +1,4 @@
-# Fase 5 — exemplos recomendados para capturas de UI
+# Phase 5 — exemplos recomendados para capturas de UI
 
 Use estes quatro tipos de exemplo para montar as evidências da Fase 5:
 

@@ -2,447 +2,556 @@
 
 [![phase8-evals](https://github.com/danyellambert/ai-workbench-local/actions/workflows/phase8-evals.yml/badge.svg)](https://github.com/danyellambert/ai-workbench-local/actions/workflows/phase8-evals.yml)
 
-Plataforma de IA aplicada para experimentar **LLMs locais**, conversar com documentos, comparar estratégias de ingestão e retrieval, avaliar respostas e evoluir um pipeline de **RAG robusto, explicável e orientado a portfólio**.
+> **A local-first applied AI platform for document-grounded decision workflows, structured execution, evaluation, product UX, and executive artifact generation.**
+
+AI Workbench Local is not a generic chatbot demo.
+
+It is a portfolio-grade AI system designed to show how modern AI products should be built when the goal is not only text generation, but **grounded workflows, validated outputs, measurable quality, auditable behavior, and credible product architecture**.
+
+This repository combines two complementary tracks:
+
+- a **Business Workflow track** for document review, policy comparison, extraction, candidate analysis, and executive-ready outputs
+- an **AI Engineering Lab track** for benchmarking, evaluation, routing, runtime analysis, observability, and controlled experimentation
+
+In practical terms, the project already demonstrates how to:
+
+- work with **local models** and optional external provider lanes
+- run **document-grounded workflows** with retrieval and structured outputs
+- validate results with **explicit schemas and execution contracts**
+- compare model/runtime behavior with **repeatable benchmark evidence**
+- persist **evaluation history, logs, and operational state** locally
+- expose **EvidenceOps operations through a real local MCP server**
+- generate **executive deck artifacts** from grounded workflow outputs
 
 ---
 
-## Objetivo
+## Why this repository stands out
 
-Este projeto está sendo evoluído para se tornar um ativo forte de portfólio, demonstrando aplicação prática de IA com foco em:
+Most AI repositories stop at one layer:
 
-- chat com modelos locais
-- RAG com documentos
-- extração robusta de PDFs
-- outputs estruturados
-- benchmarking, avaliação e observabilidade
-- experimentação controlada de arquitetura
+- a thin UI around an API
+- a toy RAG assistant
+- a benchmark notebook
+- a set of scripts without product framing
 
-### Avanços locais recentes
+AI Workbench Local is stronger because it connects the full system:
 
-Além das fases anteriores já consolidadas, o projeto agora também possui uma base local mais forte para:
+1. **Product thinking** — workflows mapped to real decision-making tasks
+2. **Engineering depth** — modular services, multiple surfaces, provider abstraction, guarded execution
+3. **Quality discipline** — evals, benchmarks, logs, regression analysis, and diagnosis
+4. **Operational maturity** — local-first reproducibility, runtime summaries, Docker, and artifact tracking
+5. **Future-facing architecture** — MCP, product API foundations, EvidenceOps, and executive artifact pipelines
 
-- **runtime economics / usage observability**
-- **budget-aware routing auditável**
-- **EvidenceOps worklog com evidence pack estruturado**
+If you are a recruiter, hiring manager, or technical interviewer, the intended signal is not “I can call an LLM API.”
 
-Documentação desta rodada:
+It is:
 
-- `docs/PHASE_9_25_RUNTIME_ECONOMICS_AND_EVIDENCEOPS_LOCAL.md`
-- `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`
-- `docs/PROJECT_POSITIONING_TWO_TRACKS.md` → leitura oficial do projeto em duas trilhas: **Business Workflows** + **AI Engineering Lab**
-- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md` → split oficial entre **produto em Gradio** e **AI Lab dashboard**
+> **I can design and evolve an AI system across product UX, document intelligence, structured workflows, validation, evaluation, and operational concerns.**
 
 ---
 
-## Leitura estratégica atual
+## Product surfaces and entrypoints
 
-Para manter o projeto compreensível como produto e portfólio, a narrativa oficial passa a ser organizada em duas trilhas complementares:
+This is not a single-surface demo. The repository already spans multiple interfaces, each with a different role in the ecosystem.
 
-1. **Business Workflows / produto**
-   - resolve o problema de negócio com **Decision workflows grounded em documentos**
-   - subworkflows principais: **Document Review**, **Policy / Contract Comparison**, **Action Plan / Evidence Review** e **Candidate Review**
-   - **Executive Deck Generation** entra como capability transversal desses workflows
+| Surface | Entrypoint / path | Role | Current status |
+| --- | --- | --- | --- |
+| Main AI Lab | `main.py` | Primary local experimentation and engineering dashboard | Implemented |
+| Web product frontend | `frontend/` | Product north-star UX for workflows, artifacts, history, and AI Lab access | Implemented UI foundation |
+| Product API | `main_product_api.py`, `src/product/api.py` | Dedicated API surface for product workflows and frontend integration | Foundation started |
+| Gradio product surface | `main_gradio.py` | Product-facing workflow surface for faster UX experimentation | Implemented foundation |
+| OpenAI-compatible sample app | `main_openai.py` | Alternate provider-focused app entrypoint | Implemented sample |
+| Provider-specific experiments | `main_qwen.py` and related entrypoints | Focused runtime/provider experiments | Experimental |
+| EvidenceOps MCP server | `scripts/run_evidenceops_mcp_server.py` | Real local MCP tool/resource surface | Implemented |
+| PPT renderer host helper | `scripts/run_ppt_creator_renderer_host.sh` | Host-native integration helper for presentation export | Implemented helper |
 
-2. **AI Engineering Lab**
-   - mede, compara e evolui modelos, retrieval, routing, evals e observabilidade que sustentam o produto
-
-Também passa a valer uma separação explícita de superfícies:
-
-- **Gradio** = produto (`Decision workflows grounded em documentos`)
-- **Streamlit** = AI Lab dashboard
-
-Documento de referência:
-
-- `docs/PROJECT_POSITIONING_TWO_TRACKS.md`
-- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md`
+The web frontend should be read as the **product north star**. Some views are already well defined but still partially backed by mock data while deeper backend integration continues.
 
 ---
 
-## Casos de uso principais
+## Current implementation status
 
-1. **Chat com documentos (RAG)**
-2. **Assistente de código**
-3. **Extração estruturada de informação**
-4. **Benchmark de estratégias de parsing e retrieval**
+The most honest and strongest way to read this repository is to separate **product vision**, **implemented platform foundations**, and **integration work still in progress**.
 
----
-
-## Stack principal
-
-- Python
-- Streamlit
-- Ollama
-- OpenAI-compatible API
-- LangChain
-- LangGraph
-- Chroma
-- SQLite
-- Pydantic
-- PyPDF
-- Docling
-- Matplotlib
+| Layer / surface | Status | What that means today |
+| --- | --- | --- |
+| Web product frontend in `frontend/` | **Implemented UI foundation** | A React/Vite product shell already exists with routes for landing, workflows, documents, deck center, run history, AI Lab, and settings |
+| Frontend data wiring | **Partially mocked** | Several frontend views still rely on mock data while backend integration continues |
+| Product API | **Foundation started** | `main_product_api.py` and `src/product/api.py` define a dedicated HTTP surface for product workflows |
+| Streamlit AI Lab | **Implemented** | `main.py` is the richest currently wired engineering and experimentation surface |
+| Gradio product surface | **Implemented foundation** | Supports workflow-oriented product UX experiments |
+| Core services under `src/` | **Implemented foundation** | Retrieval, structured outputs, document-agent logic, benchmarking, logging, MCP, export, and product modules already exist |
+| End-to-end frontend ↔ backend integration | **In progress** | The product frontend and backend foundations are converging, but not every page is fully live-wired yet |
 
 ---
 
-## Arquivos principais neste momento
+## Core business workflow families
 
-- `main_qwen.py` → app principal local com Ollama
-- `main.py` → versão configurável para provider compatível com OpenAI
-- `proximos_passos.md` → roadmap oficial do projeto
-- `scripts/run_all_phase_4_5_benchmarks.py` → orquestrador completo dos 4 benchmarks da Fase 4.5
-- `scripts/run_phase_4_5_benchmark_suite.py` → suíte de embeddings, embedding context window e retrieval tuning
-- `scripts/run_pdf_extraction_benchmark_en.py` → benchmark automatizado dos modos de extração de PDF
-- `scripts/render_phase_4_5_charts.py` → renderização reprodutível dos gráficos da Fase 4.5
-- `docs/PHASE_4_5_BENCHMARK_RESULTS.md` → resultados completos com tabelas, gráficos e decisões
-- `docs/PHASE_4_5_VALIDATION.md` → fechamento técnico e operacional da Fase 4.5
-- `docs/BENCHMARK_PDF_EXTRACTION_en.md` → benchmark detalhado de extração de PDF
-- `docs/PHASE_9_25_RUNTIME_ECONOMICS_AND_EVIDENCEOPS_LOCAL.md` → fundação local de runtime economics + EvidenceOps
+### Document Review
+
+Turn long or messy documents into:
+
+- concise summaries
+- key findings
+- identified risks and gaps
+- recommended next actions
+- optional executive-ready deliverables
+
+### Policy / Contract Comparison
+
+Compare documents or versions to surface:
+
+- meaningful differences
+- likely impact
+- compliance or risk observations
+- review-ready findings for decision makers
+
+### Action Plan / Evidence Review
+
+Convert grounded findings into:
+
+- checklists
+- action items
+- evidence bundles
+- operational handoff artifacts
+
+### Candidate Review
+
+Use the CV pipeline and structured outputs to produce:
+
+- candidate summaries
+- strengths and gaps
+- relevant experience signals
+- initial recommendations
+- executive-ready review artifacts
+
+### Executive Deck Generation
+
+Generate reusable business artifacts such as:
+
+- benchmark and evaluation review decks
+- document review decks
+- policy comparison decks
+- action plan decks
+- candidate review decks
+- evidence pack / audit decks
 
 ---
 
-## Estrutura atual do projeto
+## Full technology stack
+
+This repository intentionally covers more than “LLM + UI.” It includes product UX, backend orchestration, retrieval, structured validation, evaluation, operations, and executive artifact generation.
+
+| Layer | Technologies used here | Why they matter |
+| --- | --- | --- |
+| Core runtime | **Python 3.11** | Main backend, orchestration, workflows, services, evals, and app surfaces |
+| Product web app | **React 18**, **TypeScript 5**, **Vite 5**, **Tailwind CSS 3**, **React Router 6**, **TanStack Query 5**, **Framer Motion**, **Zustand**, **Recharts**, **React Hook Form**, **Zod**, **Radix UI / shadcn-style primitives** | Defines the product-grade web surface and frontend architecture |
+| Product / lab UI surfaces | **Streamlit**, **Gradio** | Support local experimentation, engineering visibility, and product workflow prototyping |
+| Provider/runtime layer | **Ollama**, **OpenAI SDK / OpenAI-compatible APIs**, **Hugging Face local / server / inference lanes** | Enables local-first runtime operation with controlled multi-provider expansion |
+| AI orchestration | **LangChain Community**, **LangChain Chroma**, **LangChain Text Splitters**, **LangGraph** | Supports retrieval flows, workflow evolution, and controlled orchestration |
+| Retrieval & vector layer | **ChromaDB**, **sentence-transformers** | Powers local vector retrieval and embedding-backed context workflows |
+| Document intelligence | **PyPDF**, **docling**, **Pillow**, **NumPy** | Supports parsing, extraction, OCR/VLM-adjacent flows, and artifact processing heuristics |
+| Structured validation | **Pydantic** | Enforces contracts, validates payloads, and keeps structured execution reliable |
+| Config & environment | **python-dotenv** | Local-first environment-driven configuration |
+| Reporting & artifacts | **ReportLab**, **Matplotlib** | Reporting, charts, and artifact generation |
+| Storage & ops | **SQLite**, **filesystem artifact stores**, JSON/JSONL logs | Local eval history, runtime logs, action state, artifacts, and worklogs |
+| MCP / EvidenceOps | Local MCP server and client integration in `src/mcp/` and `src/services/evidenceops_mcp_client.py` | Real tool/resource integration instead of simulated tooling |
+| Frontend quality | **Vitest**, **Playwright**, **ESLint** | Frontend testing and code-quality foundation |
+| Backend quality | Python test suite under `tests/` | Verifies services, workflows, product foundations, and export logic |
+| Packaging / reproducibility | **Docker**, **pip**, **npm** | Supports reproducible local execution and onboarding |
+
+### Backend dependency snapshot
+
+The Python environment currently includes, among others:
+
+- `streamlit`
+- `gradio`
+- `openai`
+- `python-dotenv`
+- `pydantic`
+- `pypdf`
+- `Pillow`
+- `numpy`
+- `chromadb`
+- `langchain-community`
+- `langchain-chroma`
+- `langchain-text-splitters`
+- `langgraph`
+- `sentence-transformers`
+- `transformers`
+- `docling`
+- `cryptography`
+- `matplotlib`
+- `reportlab`
+
+### Frontend dependency snapshot
+
+The web product surface uses:
+
+- `react`, `react-dom`
+- `vite`
+- `tailwindcss`, `postcss`, `autoprefixer`
+- `react-router-dom`
+- `@tanstack/react-query`
+- `react-hook-form`, `zod`, `@hookform/resolvers`
+- `framer-motion`
+- `recharts`
+- `zustand`
+- `@radix-ui/*` primitives
+- `vitest`, `@testing-library/*`, `@playwright/test`, `eslint`
+
+### Stack reading in one sentence
+
+This is a **full-stack applied AI system** with a Python platform core, a React product frontend, local-first model/runtime support, retrieval and structured execution, and a serious evaluation and operations layer.
+
+---
+
+## Architecture at a glance
+
+```text
+                           AI Workbench Local
+
+                ┌────────────────────────────────────┐
+                │       Product / Workflow Layer     │
+                │ Document Review, Comparison,       │
+                │ Action Plans, Candidate Review,    │
+                │ Executive Deck actions             │
+                └────────────────────────────────────┘
+                               │
+         ┌─────────────────────┼─────────────────────┐
+         │                     │                     │
+         ▼                     ▼                     ▼
+ ┌───────────────┐   ┌──────────────────┐   ┌──────────────────┐
+ │  UI Surfaces  │   │ Domain Services  │   │ AI Engineering   │
+ │ Web Frontend  │   │ retrieval,       │   │ benchmarks, eval │
+ │ Streamlit Lab │   │ structured exec, │   │ diagnosis, logs, │
+ │ Gradio Product│   │ export, MCP      │   │ runtime analysis │
+ └───────────────┘   └──────────────────┘   └──────────────────┘
+                               │
+                               ▼
+                 ┌─────────────────────────────┐
+                 │ Local-first runtime/storage │
+                 │ Ollama, SQLite, filesystem, │
+                 │ Chroma, artifacts, logs     │
+                 └─────────────────────────────┘
+                               │
+                               ▼
+                ┌──────────────────────────────────┐
+                │ Optional external/expansion lanes│
+                │ HF runtimes, OpenAI-compatible,  │
+                │ PPT renderer, external EvidenceOps│
+                └──────────────────────────────────┘
+```
+
+### Architectural principles
+
+- **Local-first by default** for control, reproducibility, and cost discipline
+- **Workflow-driven product design** instead of a generic “ask anything” assistant
+- **Structured contracts** around tasks, outputs, and artifacts
+- **Separated product and lab surfaces** so user-facing workflows and engineering experimentation can evolve at different speeds
+- **Evaluation and observability baked in** instead of added later
+
+---
+
+## Repository structure
 
 ```text
 src/
-  config.py
-  prompt_profiles.py
-  providers/
-  rag/
-  services/
-  storage/
-  ui/
+  app/          # bootstrapping and application assembly
+  evals/        # evaluation logic and thresholds
+  evidence_cv/  # evidence-grounded CV extraction pipeline
+  gradio_ui/    # Gradio product-facing surface
+  mcp/          # local MCP server implementation
+  product/      # product API, models, presenters, workflows
+  providers/    # provider registry and runtime abstractions
+  rag/          # ingestion, chunking, retrieval, PDF paths
+  services/     # orchestration, export, comparison, runtime services
+  storage/      # logs, eval stores, history, persistence
+  structured/   # schemas, parsers, task handlers, workflows
+  ui/           # Streamlit panels and UI components
 
-scripts/
-  run_all_phase_4_5_benchmarks.py
-  run_phase_4_5_benchmark_suite.py
-  run_pdf_extraction_benchmark.py
-  run_pdf_extraction_benchmark_en.py
-  run_embedding_benchmark.py
-  render_phase_4_5_charts.py
-  compare_phase_4_5_configs.py
-  validate_phase_4_5.py
-
-docs/
-  BENCHMARK_PDF_EXTRACTION_en.md
-  PHASE_3_NOTES.md
-  PHASE_4_NOTES.md
-  PHASE_4_5_BENCHMARK_RESULTS.md
-  PHASE_4_5_VALIDATION.md
-  PUBLICATION_GUIDE.md
-  assets/
-    phase_4_5/
-  data/
-    phase_4_5_benchmark_data.json
+frontend/       # React/Vite product surface
+docs/           # canonical plans, contracts, specs, and phase docs
+scripts/        # reports, benchmarks, validators, local helpers
+tests/          # backend unit and integration tests
 ```
 
 ---
 
-## Como rodar localmente
+## Quickstart
 
-### 1. Instale as dependências
+### 1. Install backend dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Revise o arquivo `.env`
-
-Se precisar recriar do zero:
+### 2. Create your environment file
 
 ```bash
 cp .env.example .env
 ```
 
-### 3. Garanta que o Ollama esteja disponível
-
-Exemplo de modelos locais:
-
-- geração: `qwen2.5:7b`
-- embeddings: modelo configurado no `.env`
-
-### 3.1. Suba o renderer de deck em modo host-native
-
-Para o slice atual de **Executive Deck Generation**, o caminho recomendado agora é manter o `ppt_creator_app` rodando nativamente no host, como serviço HTTP local:
-
-```bash
-bash scripts/run_ppt_creator_renderer_host.sh
-```
-
-Cheque rapidamente a saúde do serviço:
-
-```bash
-curl http://127.0.0.1:8787/health
-```
-
-Notas importantes:
-
-- o app principal já está configurado para falar com `PRESENTATION_EXPORT_BASE_URL=http://127.0.0.1:8787`
-- o fluxo atual usa `GET /health`, `POST /render` e `GET /artifact`
-- o caminho **Docker-later** do `ppt_creator_app` foi preparado no repositório irmão, mas o modo host-native continua sendo a operação recomendada agora
-
-### 4. Execute a versão principal
-
-```bash
-streamlit run main_qwen.py
-```
-
-O app principal mantém:
-
-- `ollama` como provider default
-- `huggingface_server` como provider opcional para apontar para um endpoint OpenAI-compatible, como o `hf_local_llm_service`
-- `ppt_creator_app` como renderer HTTP especializado para o P1 de Executive Deck Generation quando o serviço local estiver disponível
-
-### 4.1 Usar o `hf_local_llm_service` como AI hub opcional
-
-No `.env`, configure por exemplo:
-
-```env
-HUGGINGFACE_SERVER_BASE_URL=http://127.0.0.1:8788/v1
-HUGGINGFACE_SERVER_MODEL=
-HUGGINGFACE_SERVER_EMBEDDING_MODEL=
-```
-
-Depois, no app principal (`main_qwen.py`):
-
-- mantenha `ollama` como default para o fluxo atual
-- selecione `huggingface_server` quando quiser usar o serviço como hub multi-provider
-
-Importante:
-
-- os modelos mostrados em `huggingface_server` são aliases publicados pelo serviço
-- o backend real por trás do alias pode ser `ollama`, `huggingface_local`, `huggingface_mlx`, `llama.cpp`, `openai`, etc.
-- para RAG com `huggingface_server`, o serviço precisa publicar pelo menos um alias com suporte a embeddings
-- `huggingface_server` só aparece na seção de embeddings quando o serviço publicar aliases com `supports_embeddings=true`
-- `huggingface_inference` só aparece na seção de embeddings quando `HUGGINGFACE_INFERENCE_EMBEDDING_MODEL` estiver configurado
-
-### 4.1.1 Overrides operacionais do app vs comportamento backend-native
-
-Hoje o app diferencia dois grupos:
-
-- **operacionais do app**: `temperature`, `context_window`, `embedding_context_window`, `truncate`, além de `top_p` e `max_tokens` quando configurados por ambiente
-- **backend-native**: a forma como cada runtime realmente interpreta esses valores
-
-Na prática:
-
-- `ollama` recebe `temperature`, `num_ctx`, `top_p` e `num_predict` no caminho nativo de chat, e `truncate` + `num_ctx` em embeddings
-- `huggingface_server` recebe esses mesmos sinais operacionais via `provider_config` (`temperature`, `ctx_size`, `top_p`, `max_tokens`, `truncate`), mas a aplicação efetiva ainda depende do hub/servidor por trás do alias
-- `huggingface_inference` e `openai` aceitam `temperature`, `top_p` e `max_tokens` quando configurados, mas não expõem um equivalente universal a `num_ctx`
-
-### 4.2 Controles operacionais expostos na sidebar
-
-Além de geração e embeddings, a sidebar do app principal agora também expõe:
-
-- parâmetros de reranking híbrido (`rerank_pool_size`, `rerank_lexical_weight`)
-- backend OCR documental (`EVIDENCE_OCR_BACKEND`)
-- modelo VLM documental (`EVIDENCE_VL_MODEL`)
-
-Esses controles ajudam a separar melhor:
-
-- geração
-- embeddings
-- retrieval/reranking
-- parsing documental / OCR / vision
-
-Além disso, a sidebar mostra explicitamente os providers de embedding indisponíveis como **desabilitados**, com o motivo operacional.
-
-### 5. Execute a versão OpenAI-compatible (opcional)
-
-Preencha `OPENAI_API_KEY` no `.env` e rode:
+### 3. Run the main AI Lab application
 
 ```bash
 streamlit run main.py
 ```
 
-### 6. Rodar via Docker (Fase 10)
+`main.py` is the canonical local entrypoint for the engineering surface.
+
+### 4. Optional: run the OpenAI-compatible sample app
+
+```bash
+streamlit run main_openai.py
+```
+
+### 5. Optional: start the product API
+
+```bash
+python main_product_api.py
+```
+
+### 6. Optional: run the web product frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend runs on `http://localhost:8080` by default.
+
+### 7. Optional: run the Gradio product surface
+
+```bash
+python main_gradio.py
+```
+
+### 8. Optional: start the executive renderer host helper
+
+```bash
+bash scripts/run_ppt_creator_renderer_host.sh
+```
+
+### 9. Optional: start the local EvidenceOps MCP server
+
+```bash
+python scripts/run_evidenceops_mcp_server.py
+```
+
+### 10. Optional: run the containerized baseline
 
 ```bash
 docker build -t ai-workbench-local .
 docker run --rm -p 8501:8501 --env-file .env ai-workbench-local
 ```
 
-### 7. Qualidade de engenharia da Fase 10
+---
 
-Esta fase passou a incluir explicitamente:
+## Product API surface
 
-- `Dockerfile` e `.dockerignore`
-- smoke tests reais das apps Streamlit com `streamlit.testing.v1`
-- logging central da aplicação
-- tratamento padronizado de falhas nos fluxos críticos de UI
-- observabilidade de gargalos de latência em retrieval / geração / prompt build
-- documentação curta das decisões de engenharia
+The dedicated product API is intentionally small and workflow-oriented.
+
+### Product API endpoints
+
+- `GET /health`
+- `GET /api/product/workflows`
+- `GET /api/product/documents`
+- `GET /api/product/grounding-preview`
+- `POST /api/product/run-workflow`
+- `POST /api/product/generate-deck`
+
+### Engineering / export API endpoints
+
+The broader engineering and artifact-facing API surface also exposes:
+
+#### GET
+
+- `/health`
+- `/playground`
+- `/profiles`
+- `/assets`
+- `/workflows`
+- `/marketplace`
+- `/ai/providers`
+- `/ai/status`
+- `/ai/models`
+- `/templates`
+- `/brand-packs`
+- `/artifact`
+
+#### POST
+
+- `/validate`
+- `/render`
+- `/review`
+- `/preview`
+- `/generate`
+- `/generate-and-render`
+- `/preview-pptx`
+- `/review-pptx`
+- `/compare-pptx`
+- `/promote-baseline`
+- `/template`
+- `/workflow-template`
+
+This split matters because the repository already contains both a **product-facing API direction** and a **broader engineering / artifact operations surface**.
 
 ---
 
-## Modos de extração de PDF
+## Configuration themes
 
-O projeto possui **3 modos explícitos de extração**, selecionáveis na interface e benchmarkados na Fase 4.5.
+The `.env.example` file reflects the intended shape of the platform:
 
-### 1. Básico
+- local runtime defaults for **Ollama**
+- optional **OpenAI** and **Hugging Face** lanes
+- RAG chunking, retrieval, reranking, and PDF extraction controls
+- OCR and VLM-assisted evidence extraction settings
+- **Executive Deck Generation** integration settings
+- **EvidenceOps** local and external adapter settings
 
-Usa somente `pypdf`.
-
-Melhor para:
-- PDFs textuais simples
-- ingestão rápida
-- comparação de baseline
-
-### 2. Híbrido inteligente
-
-Usa `pypdf` como baseline e aplica enriquecimento seletivo em páginas suspeitas com Docling/OCR.
-
-Melhor para:
-- apostilas
-- papers com figuras e tabelas
-- documentos mistos
-
-### 3. Completo por página
-
-Modo de cobertura máxima.
-
-Melhor para:
-- scans
-- manuais antigos
-- PDFs image-heavy
-- testes de recall máximo
+That is a good indicator of maturity: configuration is treated as part of the platform design, not just incidental glue.
 
 ---
 
-## Fase 4.5 concluída
+## Quality, evaluation, and operational posture
 
-A Fase 4.5 foi encerrada com **quatro trilhas de benchmark** executadas no mesmo corpus local de quatro PDFs, incluindo **revisão humana** para o benchmark de extração.
+One of the biggest differences between this repository and a typical AI side project is that it does not stop at inference.
 
-### Corpus e métricas usados
+It explicitly invests in:
 
-Corpus fixo da suíte:
+- **quality measurement**
+- **persistent evaluation history**
+- **benchmark evidence**
+- **auditability**
+- **operational logging**
+- **controlled fallbacks**
 
-- `2025-HB-44-20250106-Final-508.pdf`
-- `kaur-2016-ijca-911367.pdf`
-- `Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf`
-- `c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf`
+### Evaluation foundations already present
 
-Métricas usadas:
+- SQLite-backed local eval storage
+- structured smoke evals and regression-oriented validation
+- historical eval reporting and diagnosis scripts
+- benchmark execution layers for model/runtime/retrieval decisions
+- workflow evaluation paths for routing and guardrail behavior
 
-- **PDF extraction:** `manual_score` (0–2), tempo de extração e tempo de indexação
-- **retrieval benchmarks:** `Hit@1`, `Hit@K`, `MRR`, `avg_retrieval_seconds`, `indexing_seconds`
+### Operational and observability foundations already present
 
-### Configuração recomendada após a Fase 4.5
+- runtime execution logs and summaries
+- document-agent audit logs
+- model comparison logs and aggregate reports
+- EvidenceOps worklog and action-store persistence
+- MCP telemetry and repository/action summaries
+- controlled UI error handling and failure reporting
 
-```env
-OLLAMA_EMBEDDING_MODEL=embeddinggemma:300m
-OLLAMA_EMBEDDING_CONTEXT_WINDOW=512
-RAG_CHUNK_SIZE=1200
-RAG_CHUNK_OVERLAP=80
-RAG_TOP_K=4
-RAG_RERANK_POOL_SIZE=8
-RAG_PDF_EXTRACTION_MODE=hybrid
-```
+### Why this matters
 
-### Benchmark highlights
+This gives the repository a much more professional reading.
 
-#### 1) PDF extraction: quality vs extraction cost
+Instead of saying:
 
-![PDF extraction quality vs cost](docs/assets/phase_4_5/02_pdf_extraction_aggregate_quality_vs_cost.png)
+> “I built an AI app.”
 
-`complete` obteve a melhor qualidade média agregada (**1.1094**), mas exigiu **1485.38 s** de extração média, contra **22.0248 s** de `hybrid`. A diferença de qualidade foi pequena demais para justificar esse custo como default.
+the project can credibly say:
 
-#### 2) Embedding models: quality vs retrieval latency
-
-![Embedding models quality vs latency](docs/assets/phase_4_5/09_embedding_models_quality_vs_latency.png)
-
-`embeddinggemma:300m` atingiu **MRR = 1.0** e ficou no melhor ponto de trade-off entre qualidade e latência entre os modelos perfeitos.
-
-#### 3) Embedding context window: practical optimum
-
-![Embedding context retrieval vs window](docs/assets/phase_4_5/13_embedding_ctx_retrieval_vs_window.png)
-
-No trilho vencedor, `embeddinggemma:300m + 512` entregou **MRR = 1.0** com a menor latência média (**0.6932 s**). O benchmark mostrou que contexto maior não foi automaticamente melhor.
-
-#### 4) Retrieval tuning: winner vs baseline
-
-![Retrieval tuning quality vs latency](docs/assets/phase_4_5/17_retrieval_tuning_quality_vs_latency.png)
-
-`lower_overlap` manteve **MRR = 1.0** e melhorou latência e indexação em relação ao baseline. Isso justificou a troca de `chunk_overlap=200` para `80` como default.
-
-#### 5) Executive summary
-
-![Phase 4.5 winner matrix](docs/assets/phase_4_5/21_phase_4_5_winner_matrix.png)
-
-A decisão final foi feita por **trade-off entre qualidade, custo e robustez**, não por score bruto isolado.
-
-### Como regenerar os gráficos da Fase 4.5
-
-```bash
-python scripts/render_phase_4_5_charts.py
-```
-
-Os dados-base versionados usados na renderização estão em:
-
-```text
-docs/data/phase_4_5_benchmark_data.json
-```
-
-Para a análise completa, veja:
-- `docs/PHASE_4_5_BENCHMARK_RESULTS.md`
-- `docs/PHASE_4_5_VALIDATION.md`
-- `docs/BENCHMARK_PDF_EXTRACTION_en.md`
+> “I built an AI platform with product workflows, measurable quality, reproducible local operation, and engineering evidence for how it behaves.”
 
 ---
 
-## Fase 5.5 concluída tecnicamente
+## Concrete implementation evidence
 
-A Fase 5.5 consolidou a transição do projeto de um pipeline puramente manual para uma arquitetura híbrida, auditável e mais próxima da stack de mercado.
+For reviewers who want to verify the claims quickly, here are direct pointers into the codebase and documentation.
 
-### O que foi entregue na prática
+| Capability | Evidence in the repository |
+| --- | --- |
+| Product web surface | `frontend/src/App.tsx`, `frontend/src/pages/`, `frontend/src/components/` |
+| Product API foundation | `main_product_api.py`, `src/product/api.py`, `src/product/service.py`, `src/product/models.py` |
+| Structured outputs | `src/structured/`, `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md` |
+| Document Operations Copilot | `src/structured/document_agent.py`, `docs/PHASE_6_DOCUMENT_OPERATIONS_COPILOT.md` |
+| Model comparison | `src/services/model_comparison.py`, `docs/PHASE_7_MODEL_COMPARISON.md`, `scripts/report_phase7_model_comparison_log.py` |
+| Eval foundation | `docs/PHASE_8_EVAL_FOUNDATION.md`, `scripts/report_phase8_eval_store.py`, `scripts/run_phase8_live_evals.py` |
+| EvidenceOps MCP | `src/mcp/evidenceops_server.py`, `scripts/run_evidenceops_mcp_server.py`, `docs/PHASE_9_5_EVIDENCEOPS_MCP_LOCAL_SERVER.md` |
+| Executive deck generation | `src/services/presentation_export.py`, `docs/EXECUTIVE_DECK_GENERATION_*`, `scripts/run_presentation_export_smoke_suite.py` |
+| Engineering hardening | `Dockerfile`, `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`, smoke/integration tests in `tests/` |
 
-- estratégias experimentais de **loader**, **chunking** e **retrieval** com fallback seguro
-- comparação shadow entre retrieval manual e LangChain + Chroma
-- workflow experimental **LangGraph** para execução estruturada com retry de contexto e guardrails
-- comparação shadow entre `direct` e `langgraph_context_retry`
-- separação explícita entre **provider de geração** e **provider de embeddings**
-- provider local experimental **`huggingface_local`**
-- provider HTTP local **`huggingface_server`**
-- provider remoto **`huggingface_inference`**
-- helpers compartilhados para resolução de runtime multi-provider
-- snapshot operacional consolidado para tornar a UI menos acoplada ao detalhe do runtime
-
-Veja também:
-
-- `docs/HUGGINGFACE_PROVIDER_SETUP.md` → configuração de `huggingface_server` e `huggingface_inference`
-- `../hf_local_llm_service/docs/OLLAMA_DEFAULT_PLUS_HF_SERVICE_ROADMAP.md` → roadmap da convivência entre `ollama` default e `huggingface_server` opcional via AI hub local
-
-### Leitura arquitetural da fase
-
-O projeto agora deixa mais explícita a separação entre:
-
-- geração
-- embeddings
-- reranking
-- workflows estruturados
-- runtime experimental local
-
-Na prática, isso fecha a Fase 5.5 como uma fase de **evolução arquitetural controlada**, sem abandonar a baseline manual que dá sustentação à narrativa técnica do projeto.
+This section exists for a simple reason: a professional README should be impressive, but it should also be easy to defend line by line in a technical interview.
 
 ---
 
-## Próximo passo estratégico
+## Roadmap direction
 
-Com a Fase 5.5 encerrada tecnicamente, o roadmap oficial segue para:
+### Already demonstrated
 
-1. **Fase 6 — Tools e agentes orientados a valor de negócio**
-2. **Fase 7 — Benchmark e comparação entre modelos**
-3. **Fase 8 — Evals**
+- modular architecture evolution across multiple phases
+- document-grounded retrieval foundations
+- structured outputs with validation
+- workflow-oriented document-agent behavior
+- model comparison and benchmark reporting
+- local eval persistence and diagnosis
+- EvidenceOps local MCP foundations
+- executive deck generation foundations
+- Docker, logging, and smoke-test hardening
+
+### Active direction
+
+- wire the **web product frontend** into the product API and backend workflows
+- sharpen the **product vs lab split** between frontend, Gradio, and Streamlit surfaces
+- deepen **Executive Deck Generation** as a reusable product capability
+- continue raising **evaluation and benchmark rigor** for routing, retrieval, OCR/VLM, and runtime choices
+- extend **EvidenceOps** from local-first foundations toward broader external targets
+
+Reference: `ROADMAP.md`
 
 ---
 
-## Valor de portfólio
+## Documentation map
 
-Este projeto não foi fechado como “um chatbot com RAG”. A Fase 4.5 consolidou o repositório como um artefato de portfólio de **AI Engineer**, mostrando:
+### Best starting points
 
-- benchmark de ingestão com validação humana
-- benchmark de representação vetorial
-- benchmark de tuning de contexto de embedding
-- benchmark de retrieval tuning
-- defaults finais escolhidos por evidência
-- assets visuais e script reprodutível de benchmark
+- `ROADMAP.md` — project chronology and direction
+- `docs/INDEX_DOCUMENTATION.md` — organized documentation map
+- `docs/POSITIONING_PROJECT_TWO_TRACKS.md` — official workflow-vs-lab framing
+- `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md` — engineering maturity direction
+- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md` — executive artifact capability direction
+- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md` — rationale for the surface split
 
-Isso aumenta a auditabilidade do projeto e facilita defender as decisões técnicas em entrevista.
+### Important capability clusters
+
+- `docs/PHASE_4_DOCUMENT_RAG_FOUNDATION.md`
+- `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md`
+- `docs/PHASE_6_DOCUMENT_OPERATIONS_COPILOT.md`
+- `docs/PHASE_7_MODEL_COMPARISON.md`
+- `docs/PHASE_8_EVAL_FOUNDATION.md`
+- `docs/PHASE_9_5_EVIDENCEOPS_MCP_LOCAL_SERVER.md`
+- `docs/EXECUTIVE_DECK_GENERATION_*.md`
+
+### Documentation naming conventions
+
+- `PHASE_*` — canonical phase summaries and validation closures
+- `EXECUTIVE_DECK_GENERATION_*` — architecture, contracts, rollout, UX, and governance for the deck capability
+- `GUIDE_*` — practical operating guides for scripts and workflows
+- `REFERENCE_*` — reference-oriented implementation or benchmark material
+
+---
+
+## Why this is a strong portfolio project
+
+This repository is intentionally designed to be defendable in technical interviews.
+
+It shows evidence of ability across:
+
+- **product design** — defining workflows that map to real business problems
+- **software architecture** — layered modules, multiple entrypoints, reusable services
+- **LLM application engineering** — RAG, structured outputs, routing, guardrails, context strategies
+- **AI evaluation** — benchmarks, local eval stores, regression signals, diagnosis
+- **operations** — logs, runtime summaries, local persistence, environment-driven configuration
+- **ecosystem thinking** — MCP, external renderer boundaries, product API evolution, and reusable artifact pipelines
+
+In short, this repository reads like the work of someone building a real AI product system — not just a prompt demo.
+
+---
+
+## License
+
+This repository is distributed under the terms defined in the `LICENSE` file at the project root.

@@ -21,13 +21,13 @@ Este documento existe para responder, de forma operacional, quatro perguntas:
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
 #### Productização técnica do primeiro slice
-- `docs/PHASE_10_25_PRESENTATION_EXPORT_PRODUCTIZATION.md`
+- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 
 #### Contrato concreto do P1
-- `docs/PRESENTATION_EXPORT_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
 
 #### Roadmap principal
-- `proximos_passos.md`
+- `ROADMAP.md`
 
 ### Escopo documental complementar fechado nesta rodada
 
@@ -67,7 +67,7 @@ Este documento existe para responder, de forma operacional, quatro perguntas:
 ## 2. Contratos de dados por deck type
 
 ### P1 — já iniciado
-- `docs/PRESENTATION_EXPORT_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
 
 ### P2/P3/P4/P5/P6 — necessários para capability completa
 - `docs/DOCUMENT_REVIEW_DECK_CONTRACT_V1.md`
@@ -80,7 +80,7 @@ Este documento existe para responder, de forma operacional, quatro perguntas:
 
 ## 3. Arquitetura e integração
 
-- `docs/PHASE_10_25_PRESENTATION_EXPORT_PRODUCTIZATION.md`
+- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 - `docs/EXECUTIVE_DECK_GENERATION_SERVICE_ARCHITECTURE.md`
 - `docs/EXECUTIVE_DECK_GENERATION_API_CONTRACT.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ARTIFACT_LIFECYCLE.md`

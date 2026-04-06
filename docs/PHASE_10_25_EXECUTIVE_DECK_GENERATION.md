@@ -1,4 +1,4 @@
-# Fase 10.25 — Executive Deck Generation como capability do produto
+# Phase 10.25 — Executive Deck Generation como capability do produto
 
 ## Objetivo
 
@@ -337,8 +337,8 @@ Arquivos principais:
 
 - `src/services/presentation_export.py`
 - `tests/test_presentation_export_unittest.py`
-- `docs/PRESENTATION_EXPORT_BENCHMARK_EVAL_CONTRACT_V1.md`
-- `docs/PHASE_10_25_PRESENTATION_EXPORT_PRODUCTIZATION.md`
+- `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 
 ### Ainda falta
 
@@ -464,9 +464,9 @@ Essa capability estará bem definida quando o roadmap deixar claro:
 
 ## Documentos relacionados
 
-- `proximos_passos.md`
-- `docs/PRESENTATION_EXPORT_BENCHMARK_EVAL_CONTRACT_V1.md`
-- `docs/PHASE_10_25_PRESENTATION_EXPORT_PRODUCTIZATION.md`
+- `ROADMAP.md`
+- `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 - `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
 - `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ROUTING.md`

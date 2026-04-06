@@ -1,86 +1,86 @@
-# Fase 10 — Engenharia profissional
+# Phase 10 — Engineering Hardening
 
-## Objetivo
+## Goal
 
-Fechar a trilha de engenharia profissional com um baseline defendível de execução, confiabilidade, smoke validation, observabilidade e manutenção.
+Close the engineering-hardening track with a more reliable baseline for execution, smoke validation, observability, and maintainability.
 
-## O que entrou nesta fase
+## What entered this phase
 
-- `Dockerfile` e `.dockerignore` para execução reproduzível do app principal
-- logging central em `src/services/app_logging.py`
-- padronização mínima de mensagens de erro de UI em `src/services/app_errors.py`
-- smoke tests reais de Streamlit com `streamlit.testing.v1`
-- extração do painel MCP para `src/ui/evidenceops_mcp_panel.py` para reduzir acoplamento em `main_qwen.py`
-- medição agregada de gargalos dominantes de latência no runtime log (`retrieval`, `generation`, `prompt_build`, `other`)
-- workflow de CI cobrindo smoke tests e testes focados de observabilidade
+- `Dockerfile` and `.dockerignore` for reproducible execution of the main application
+- centralized logging in `src/services/app_logging.py`
+- a minimum standard for UI error messages in `src/services/app_errors.py`
+- real Streamlit smoke tests using `streamlit.testing.v1`
+- extraction of the MCP panel into `src/ui/evidenceops_mcp_panel.py` to reduce coupling in `main.py`
+- aggregated measurement of dominant runtime latency bottlenecks (`retrieval`, `generation`, `prompt_build`, `other`)
+- CI coverage for smoke tests and focused observability tests
 
-## Decisões de engenharia
+## Engineering decisions
 
-### 1. Smoke test real da aplicação
+### 1. Real application smoke tests
 
-Em vez de validar só composição estática, a fase agora cobre as duas entradas principais do produto:
+Instead of validating only static composition, this phase covers both main application entrypoints:
 
-- `main.py` com interação mínima de chat e fallback local sem `OPENAI_API_KEY`
-- `main_qwen.py` com renderização completa, tabs operacionais e controles críticos presentes
+- `main.py` with minimal chat interaction and local fallback without `OPENAI_API_KEY`
+- `main.py` with full rendering, operational tabs, and critical controls present
 
-Isso reduz regressões silenciosas de Streamlit, session state e montagem da interface.
+This reduces silent regressions in Streamlit composition, session state, and application assembly.
 
-### 2. Falhas controladas no fluxo estruturado
+### 2. Controlled failures in structured execution
 
-O fluxo de execução estruturada do `main_qwen.py` passou a capturar falhas inesperadas no topo do submit e converter isso em `StructuredResult` controlado via `attempt_controlled_failure`.
+The structured execution flow in `main.py` now captures unexpected failures at the top-level submit boundary and converts them into controlled `StructuredResult` outputs via `attempt_controlled_failure`.
 
-Com isso:
+As a result:
 
-- a UI não quebra inteira em erro inesperado
-- a execução continua auditável
-- o runtime log continua registrando a tentativa
-- a sidebar de observabilidade continua coerente
+- the UI no longer fails completely on unexpected errors
+- execution remains auditable
+- the runtime log still records the attempt
+- the observability surface remains coherent
 
-### 3. Padronização de logs e mensagens
+### 3. Standardized logs and messages
 
-Os pontos críticos do app usam logging central e mensagens de erro consistentes para UI.
+Critical points in the application now use centralized logging and more consistent UI-facing error messages.
 
-Direção adotada:
+Direction adopted:
 
-- log detalhado para engenharia
-- mensagem curta e consistente para usuário
-- fallback explícito quando retrieval / MCP / structured execution falham
+- detailed logs for engineering inspection
+- short, consistent messages for the UI
+- explicit fallback behavior when retrieval, MCP, or structured execution fails
 
-### 4. Clareza estrutural
+### 4. Structural clarity
 
-O painel EvidenceOps MCP foi extraído de `main_qwen.py` para um módulo de UI dedicado.
+The EvidenceOps MCP panel was extracted out of `main.py` into a dedicated UI module.
 
-Benefícios:
+Benefits:
 
-- reduz o acoplamento do entrypoint principal
-- melhora legibilidade do app
-- isola um slice funcional inteiro da UI
-- facilita evolução e testes futuros do console MCP
+- reduced coupling in the main entrypoint
+- improved readability of the application shell
+- isolation of a full functional slice of the UI
+- easier future evolution and testing of the MCP console
 
-### 5. Observabilidade de gargalos
+### 5. Bottleneck observability
 
-O runtime log agora resume a participação relativa das etapas de latência por execução:
+The runtime log now summarizes the relative contribution of latency stages per execution:
 
 - retrieval
 - generation
 - prompt build
 - other
 
-Além da média de latência absoluta, o app exibe qual estágio domina o tempo total com mais frequência.
+In addition to absolute latency averages, the app can highlight which stage most frequently dominates total execution time.
 
-## Evidências desta fase
+## Evidence for this phase
 
-- smoke tests de Streamlit em `tests/test_streamlit_app_smoke_unittest.py`
-- observabilidade de runtime em `src/storage/runtime_execution_log.py` e `src/ui/sidebar.py`
-- documentação desta decisão em `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`
+- Streamlit smoke tests in `tests/test_streamlit_app_smoke_unittest.py`
+- runtime observability in `src/storage/runtime_execution_log.py` and `src/ui/sidebar.py`
+- this phase document in `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`
 
-## Resultado
+## Result
 
-A Fase 10 fecha o projeto com um baseline mais profissional para portfólio:
+Phase 10 establishes a more professional engineering baseline with:
 
-- app executável localmente e via Docker
-- CI com smoke + testes focados
-- falhas críticas tratadas de forma controlada
-- logging centralizado
-- melhor separação entre entrypoint e componentes de UI
-- métricas operacionais úteis para defender performance e manutenção em entrevista
+- local and Docker-based execution
+- CI with smoke tests and focused checks
+- controlled handling of critical failures
+- centralized logging
+- clearer separation between entrypoints and UI components
+- operational metrics useful for performance and maintainability analysis

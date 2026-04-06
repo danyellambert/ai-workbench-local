@@ -75,7 +75,7 @@ Important sections:
 
 ## Markdown report
 
-The markdown report is designed to be interview-defendable.
+The markdown report is designed to be operationally clear, auditable, and reusable.
 
 It includes:
 
@@ -261,12 +261,12 @@ When a task becomes a real candidate, the repo records a **small experiment outl
 
 This is a decision artifact, **not** a training pipeline.
 
-## Interview framing
+## Recommended interpretation
 
-The strongest way to defend this phase is:
+The strongest interpretation of this phase is:
 
-- I did not jump directly to fine-tuning.
-- I first separated runtime/model wins from retrieval wins.
-- I used eval diagnosis to prove where the current stack is sufficient.
-- I only keep adaptation as a narrow, explicit candidate when the simpler levers are not enough.
-- I documented the final chosen stack by use case, because the correct outcome was not “one universal best model,” but a defendable task-specific stack.
+- adaptation was not treated as the default answer
+- runtime/model wins were separated from retrieval wins
+- eval diagnosis was used to identify where the current stack was already sufficient
+- adaptation remains a narrow and explicit candidate only when simpler levers are not enough
+- the final stack is documented by use case because the correct outcome was task-specific rather than a single universal winner
