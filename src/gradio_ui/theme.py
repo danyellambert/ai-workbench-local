@@ -67,6 +67,11 @@ def build_product_css(accent_color: str = "#6ae3ff") -> str:
         background: rgba(255, 255, 255, 0.02);
     }}
 
+    .product-link-pill:hover {{
+        border-color: rgba(106, 227, 255, 0.36);
+        background: rgba(255, 255, 255, 0.06);
+    }}
+
     .product-hero {{
         display: grid;
         grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.9fr);
@@ -106,6 +111,18 @@ def build_product_css(accent_color: str = "#6ae3ff") -> str:
         font-size: 16px;
         line-height: 1.65;
         margin-bottom: 18px;
+    }}
+
+    .product-hero__cta-note {{
+        margin-top: 18px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--product-text-soft);
+    }}
+
+    .product-kpi-grid {{
+        display: grid;
+        gap: 12px;
     }}
 
     .product-chip-row, .product-proof-row {{
@@ -155,12 +172,27 @@ def build_product_css(accent_color: str = "#6ae3ff") -> str:
         border-radius: 22px;
         padding: 18px;
         min-height: 220px;
+        position: relative;
+        overflow: hidden;
     }}
 
     .product-workflow-card--active {{
         border-color: rgba(106, 227, 255, 0.52);
         box-shadow: 0 0 0 1px rgba(106, 227, 255, 0.18) inset;
         background: linear-gradient(180deg, rgba(106, 227, 255, 0.14), rgba(255, 255, 255, 0.04));
+    }}
+
+    .product-workflow-card__icon {{
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 20px;
+        margin-bottom: 14px;
     }}
 
     .product-workflow-card__title {{
@@ -173,7 +205,23 @@ def build_product_css(accent_color: str = "#6ae3ff") -> str:
         color: var(--product-text-soft);
         font-size: 14px;
         line-height: 1.55;
+        margin-bottom: 10px;
+        min-height: 44px;
+    }}
+
+    .product-workflow-card__description {{
+        color: rgba(226, 232, 240, 0.94);
+        font-size: 13px;
+        line-height: 1.6;
         margin-bottom: 14px;
+        min-height: 60px;
+    }}
+
+    .product-workflow-card__cta {{
+        margin-top: 14px;
+        font-size: 12px;
+        color: var(--product-accent);
+        letter-spacing: 0.02em;
     }}
 
     .product-workflow-card__list {{
@@ -220,9 +268,162 @@ def build_product_css(accent_color: str = "#6ae3ff") -> str:
         background: rgba(255, 255, 255, 0.02);
     }}
 
+    .product-how-shell {{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }}
+
+    .product-how-card {{
+        border: 1px solid var(--product-border);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 22px;
+        padding: 18px;
+    }}
+
+    .product-how-card__step {{
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--product-accent-soft);
+        border: 1px solid rgba(106, 227, 255, 0.22);
+        margin-bottom: 12px;
+        font-weight: 700;
+    }}
+
+    .product-how-card__title {{
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }}
+
+    .product-how-card__body {{
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--product-text-soft);
+    }}
+
+    .product-detail-grid {{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+    }}
+
+    .product-detail-section {{
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.02);
+    }}
+
+    .product-result-grid {{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+    }}
+
+    .product-list-card {{
+        border: 1px solid var(--product-border);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 18px;
+        padding: 16px;
+    }}
+
+    .product-list-card__title {{
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }}
+
+    .product-list-card__list {{
+        margin: 0;
+        padding-left: 18px;
+        font-size: 13px;
+        line-height: 1.65;
+        color: white;
+    }}
+
+    .product-list-card__empty {{
+        color: var(--product-text-soft);
+        font-size: 13px;
+        line-height: 1.6;
+    }}
+
+    .product-artifact-list {{
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+    }}
+
+    .product-artifact-item {{
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 12px 14px;
+        background: rgba(255, 255, 255, 0.03);
+    }}
+
+    .product-artifact-item__label {{
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }}
+
+    .product-artifact-item__meta {{
+        color: var(--product-text-soft);
+        font-size: 13px;
+        line-height: 1.5;
+    }}
+
+    .product-shell .gradio-container .gr-button-primary,
+    .product-shell .gradio-container button.primary,
+    .gradio-container button.primary {{
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.92), rgba(59, 130, 246, 0.92));
+        border: none;
+        color: #04111c;
+        box-shadow: 0 14px 40px rgba(34, 211, 238, 0.18);
+    }}
+
+    .gradio-container button.secondary {{
+        border-color: rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.04);
+        color: white;
+    }}
+
+    .gradio-container .tab-nav button {{
+        border-radius: 999px !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        background: rgba(255,255,255,0.03) !important;
+        color: white !important;
+    }}
+
+    .gradio-container .tab-nav button.selected {{
+        border-color: rgba(106,227,255,0.28) !important;
+        background: rgba(106,227,255,0.14) !important;
+        color: white !important;
+    }}
+
+    .gradio-container .gr-json,
+    .gradio-container .gr-dataframe,
+    .gradio-container .gr-file,
+    .gradio-container .gr-textbox,
+    .gradio-container .gr-checkboxgroup,
+    .gradio-container .gr-dropdown,
+    .gradio-container .gr-accordion {{
+        border-radius: 18px !important;
+    }}
+
     @media (max-width: 1120px) {{
         .product-hero,
-        .product-workflow-card-grid {{
+        .product-workflow-card-grid,
+        .product-how-shell,
+        .product-detail-grid,
+        .product-result-grid {{
             grid-template-columns: 1fr;
         }}
     }}

@@ -30,8 +30,14 @@ class ProductWorkflowDefinition(BaseModel):
     required_document_count_max: int | None = None
     supports_optional_prompt: bool = True
     default_export_kind: str | None = None
+    default_export_label: str | None = None
     backend_task_types: list[str] = Field(default_factory=list)
     badge_items: list[str] = Field(default_factory=list)
+    preferred_context_strategy: Literal["document_scan", "retrieval"] = "document_scan"
+    input_placeholder: str = ""
+    example_prompts: list[str] = Field(default_factory=list)
+    expected_outputs: list[str] = Field(default_factory=list)
+    workflow_contract: str | None = None
 
 
 class ProductDocumentRef(BaseModel):
@@ -71,7 +77,7 @@ class ProductWorkflowRequest(BaseModel):
     context_window_mode: Literal["auto", "manual"] = "auto"
     context_window: int | None = None
     use_document_context: bool = True
-    context_strategy: Literal["document_scan", "retrieval"] = "document_scan"
+    context_strategy: Literal["document_scan", "retrieval"] | None = None
 
     @model_validator(mode="after")
     def validate_constraints(self) -> "ProductWorkflowRequest":

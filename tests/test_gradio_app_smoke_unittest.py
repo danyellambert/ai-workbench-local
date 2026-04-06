@@ -1,7 +1,14 @@
 import importlib.util
+import asyncio
+import os
 import unittest
+import warnings
 from pathlib import Path
 from types import SimpleNamespace
+
+
+os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")
+warnings.simplefilter("ignore", ResourceWarning)
 
 
 GRADIO_AVAILABLE = importlib.util.find_spec("gradio") is not None
@@ -11,7 +18,7 @@ GRADIO_AVAILABLE = importlib.util.find_spec("gradio") is not None
 class GradioAppSmokeTests(unittest.TestCase):
     def test_build_gradio_product_app_returns_blocks(self) -> None:
         from src.gradio_ui.app import build_gradio_product_app
-        from src.product.service import build_product_workflow_catalog
+        from src.product.service import build_product_workflow_catalog, build_product_workflow_frontend_contract
 
         fake_provider = SimpleNamespace(list_available_models=lambda: ["qwen2.5:7b"])
         bootstrap = SimpleNamespace(
@@ -57,12 +64,23 @@ class GradioAppSmokeTests(unittest.TestCase):
             },
             presentation_export_settings=SimpleNamespace(enabled=False),
             workspace_root=Path("."),
+            workflow_frontend_contract=build_product_workflow_frontend_contract(),
         )
 
         app = build_gradio_product_app(bootstrap)
 
-        self.assertIsNotNone(app)
-        self.assertIn("AI Workbench Product", app.config.get("title", ""))
+        try:
+            self.assertIsNotNone(app)
+            self.assertIn("AI Workbench Product", app.config.get("title", ""))
+        finally:
+            app.close()
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = None
+            if loop is not None and not loop.is_closed():
+                loop.close()
+            asyncio.set_event_loop(None)
 
 
 if __name__ == "__main__":
