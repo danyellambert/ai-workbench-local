@@ -1,5 +1,22 @@
 # AI Workbench Local
 
+## Live web app
+
+### [Open AI Decision Studio on Vercel](https://ai-workbench-local.vercel.app/)
+
+**Production URL:** https://ai-workbench-local.vercel.app/
+
+This repository now includes a live deployment of the React/Vite product surface on Vercel.
+
+<p align="center">
+  <a href="https://ai-workbench-local.vercel.app/">
+    <img src="data/materials_demo/Screenshot%202026-04-06%20at%2004.42.30.png" alt="AI Decision Studio landing page screenshot" width="49%" />
+  </a>
+  <a href="https://ai-workbench-local.vercel.app/">
+    <img src="data/materials_demo/Screenshot%202026-04-06%20at%2004.43.03.png" alt="AI Decision Studio application screenshot" width="49%" />
+  </a>
+</p>
+
 **AI Workbench Local** is a local-first applied AI platform for **document-grounded decision workflows**, **structured execution**, **evaluation**, and **executive artifact generation**.
 
 This repository is meant to present a complete AI product system — not just a model wrapper, a chatbot demo, or a loose collection of experiments.
