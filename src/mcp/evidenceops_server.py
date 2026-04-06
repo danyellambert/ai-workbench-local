@@ -188,7 +188,7 @@ class EvidenceOpsMcpServer:
         return [
             {
                 "name": "list_documents",
-                "description": "Lista documentos do repository EvidenceOps local com filtros opcionais.",
+                "description": "List documents from the local EvidenceOps repository with optional filters.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -202,7 +202,7 @@ class EvidenceOpsMcpServer:
             },
             {
                 "name": "search_documents",
-                "description": "Busca documentos do repository com scoring local por múltiplos termos.",
+                "description": "Search repository documents with local scoring over multiple terms.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -217,7 +217,7 @@ class EvidenceOpsMcpServer:
             },
             {
                 "name": "get_document",
-                "description": "Resolve um documento específico por document_id ou relative_path.",
+                "description": "Resolve a specific document by document_id or relative_path.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -228,7 +228,7 @@ class EvidenceOpsMcpServer:
             },
             {
                 "name": "summarize_repository",
-                "description": "Retorna o resumo agregado do repository local.",
+                "description": "Return the aggregated summary of the local repository.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -240,12 +240,12 @@ class EvidenceOpsMcpServer:
             },
             {
                 "name": "compare_repository_state",
-                "description": "Compara o estado atual do repository contra o último snapshot persistido e detecta drift.",
+                "description": "Compare the current repository state against the latest persisted snapshot and detect drift.",
                 "inputSchema": {"type": "object", "properties": {}},
             },
             {
                 "name": "register_evidenceops_entry",
-                "description": "Registra uma entrada no worklog e materializa ações derivadas no action store via MCP.",
+                "description": "Register a worklog entry and materialize derived actions in the action store via MCP.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -256,7 +256,7 @@ class EvidenceOpsMcpServer:
             },
             {
                 "name": "list_actions",
-                "description": "Lista ações do action store local com filtros opcionais.",
+                "description": "List actions from the local action store with optional filters.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -269,7 +269,7 @@ class EvidenceOpsMcpServer:
             },
             {
                 "name": "summarize_actions",
-                "description": "Retorna o resumo agregado do action store local.",
+                "description": "Return the aggregated summary of the local action store.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -279,7 +279,7 @@ class EvidenceOpsMcpServer:
             },
             {
                 "name": "update_action",
-                "description": "Atualiza uma ação do action store local, com aprovação obrigatória para updates sensíveis.",
+                "description": "Update a local action-store action, with mandatory approval for sensitive updates.",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -297,7 +297,7 @@ class EvidenceOpsMcpServer:
             },
             {
                 "name": "summarize_worklog",
-                "description": "Retorna o resumo agregado do worklog local do EvidenceOps.",
+                "description": "Return the aggregated summary of the local EvidenceOps worklog.",
                 "inputSchema": {"type": "object", "properties": {}},
             },
         ]
@@ -311,10 +311,10 @@ class EvidenceOpsMcpServer:
                 "description": description,
             }
             for uri, description in [
-                ("evidenceops://repository/summary", "Resumo agregado do repository local."),
-                ("evidenceops://repository/drift", "Último resumo de drift do repository local."),
-                ("evidenceops://actions/summary", "Resumo agregado do action store local."),
-                ("evidenceops://worklog/summary", "Resumo agregado do worklog local."),
+                ("evidenceops://repository/summary", "Aggregated summary of the local repository."),
+                ("evidenceops://repository/drift", "Latest drift summary for the local repository."),
+                ("evidenceops://actions/summary", "Aggregated summary of the local action store."),
+                ("evidenceops://worklog/summary", "Aggregated summary of the local worklog."),
             ]
         ]
 

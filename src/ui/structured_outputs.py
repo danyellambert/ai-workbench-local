@@ -23,27 +23,27 @@ from ..structured.envelope import StructuredResult
 
 
 _FIELD_LABEL_OVERRIDES = {
-    "agreement type": "Tipo do acordo",
-    "classification": "Classificação",
-    "closing date": "Data de fechamento",
-    "confidentiality": "Confidencialidade",
-    "consideration": "Contraprestação",
-    "counterparties": "Contrapartes",
-    "counterparty": "Contraparte",
-    "document type": "Tipo do documento",
-    "effective date": "Data de vigência",
-    "effective dates": "Datas de vigência",
-    "execution date": "Data de assinatura",
-    "governing law": "Lei aplicável",
-    "jurisdiction": "Jurisdição",
-    "parties": "Partes",
-    "party": "Parte",
-    "payment terms": "Condições de pagamento",
-    "purchase price": "Preço",
-    "retention period": "Prazo de retenção",
-    "share value": "Valor da participação",
-    "signature date": "Data de assinatura",
-    "termination date": "Data de término",
+    "agreement type": "Agreement type",
+    "classification": "Classification",
+    "closing date": "Closing date",
+    "confidentiality": "Confidentiality",
+    "consideration": "Consideration",
+    "counterparties": "Counterparties",
+    "counterparty": "Counterparty",
+    "document type": "Document type",
+    "effective date": "Effective date",
+    "effective dates": "Effective dates",
+    "execution date": "Signing date",
+    "governing law": "Governing law",
+    "jurisdiction": "Jurisdiction",
+    "parties": "Parties",
+    "party": "Party",
+    "payment terms": "Payment terms",
+    "purchase price": "Price",
+    "retention period": "Retention period",
+    "share value": "Share value",
+    "signature date": "Signing date",
+    "termination date": "Termination date",
 }
 
 _CHECKLIST_LABEL_STOPWORDS = {
@@ -96,9 +96,9 @@ _CHECKLIST_LABEL_STOPWORDS = {
 }
 
 _CODE_ANALYSIS_SEVERITY_LABELS = {
-    "high": "Alta",
-    "medium": "Média",
-    "low": "Baixa",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
 }
 
 _CODE_ANALYSIS_SEVERITY_ICONS = {
@@ -114,18 +114,18 @@ _CODE_ANALYSIS_SEVERITY_RANK = {
 }
 
 _CODE_ANALYSIS_CATEGORY_LABELS = {
-    "api_contract": "Contrato da API",
+    "api_contract": "API contract",
     "bug": "Bug",
-    "correctness": "Correção",
-    "error_handling": "Tratamento de erro",
-    "input_mutation": "Mutação da entrada",
-    "maintainability": "Manutenibilidade",
+    "correctness": "Correctness",
+    "error_handling": "Error handling",
+    "input_mutation": "Input mutation",
+    "maintainability": "Maintainability",
     "performance": "Performance",
-    "readability": "Legibilidade",
-    "runtime_failure": "Falha em tempo de execução",
-    "shared_reference": "Referência compartilhada",
-    "type_assumption": "Suposição de tipo",
-    "type_validation": "Validação de tipo",
+    "readability": "Readability",
+    "runtime_failure": "Runtime failure",
+    "shared_reference": "Shared reference",
+    "type_assumption": "Type assumption",
+    "type_validation": "Type validation",
 }
 
 
@@ -208,9 +208,9 @@ def _checklist_status_icon(status: str) -> str:
 
 def _checklist_status_label(status: str) -> str:
     return {
-        "completed": "Concluído",
-        "skipped": "Ignorado",
-        "pending": "Pendente",
+        "completed": "Completed",
+        "skipped": "Skipped",
+        "pending": "Pending",
     }.get(status, status.capitalize())
 
 
@@ -221,7 +221,7 @@ def _format_checklist_scan_word(word: str) -> str:
 def _build_checklist_scan_label(text: str | None, fallback: str | None = None) -> str:
     cleaned = _clean_text_value(text or fallback)
     if not cleaned:
-        return "Item do checklist"
+        return "Checklist item"
 
     question_like = cleaned.endswith("?") or bool(
         re.match(r"^(is|are|was|were|do|does|did|has|have|had|can|could|should|would|will|may|might|must)\b", cleaned.lower())
@@ -244,7 +244,7 @@ def _build_checklist_scan_label(text: str | None, fallback: str | None = None) -
 def _group_checklist_items(payload: ChecklistPayload) -> list[tuple[str, list[ChecklistItem]]]:
     ordered_titles: list[str] = []
     grouped: dict[str, list[ChecklistItem]] = {}
-    fallback_title = "Sem fase explícita"
+    fallback_title = "No explicit phase"
     last_valid_title: str | None = None
 
     for item in payload.items:
@@ -304,7 +304,7 @@ def _render_checklist_phase_progress(grouped_items: list[tuple[str, list[Checkli
     if len(grouped_items) <= 1:
         return
 
-    st.subheader("Progresso por fase")
+    st.subheader("Progress by phase")
     columns_count = min(3, len(grouped_items))
     cols = st.columns(columns_count)
 
@@ -317,13 +317,13 @@ def _render_checklist_phase_progress(grouped_items: list[tuple[str, list[Checkli
         with cols[index % columns_count]:
             with st.container(border=True):
                 st.caption(title)
-                st.markdown(f"**{completed}/{total} concluídos**")
+                st.markdown(f"**{completed}/{total} completed**")
                 st.progress(progress)
                 meta_parts: list[str] = []
                 if counts.get("pending", 0):
-                    meta_parts.append(f"{counts['pending']} pendentes")
+                    meta_parts.append(f"{counts['pending']} pending")
                 if skipped:
-                    meta_parts.append(f"{skipped} ignorados")
+                    meta_parts.append(f"{skipped} skipped")
                 if meta_parts:
                     st.caption(" · ".join(meta_parts))
 
@@ -355,7 +355,7 @@ def _render_checklist_item_card(
 
     meta_parts = [_checklist_status_label(current_status)]
     if _clean_text_value(item.priority):
-        meta_parts.append(f"prioridade {item.priority}")
+        meta_parts.append(f"priority {item.priority}")
     if item.estimated_time_minutes is not None:
         meta_parts.append(f"{item.estimated_time_minutes} min")
 
@@ -378,21 +378,21 @@ def _render_checklist_item_card(
             st.caption(" · ".join(meta_parts))
 
         if details_available:
-            with st.expander("Ver detalhes", expanded=False):
+            with st.expander("View details", expanded=False):
                 if full_title_adds_value and item.title:
-                    st.caption("Pergunta / texto completo")
+                    st.caption("Question / full text")
                     st.write(item.title)
                 if description_adds_value and item.description:
-                    st.caption("Descrição")
+                    st.caption("Description")
                     st.write(item.description)
                 if source_adds_value and item.source_text:
-                    st.caption("Trecho do documento")
+                    st.caption("Document excerpt")
                     st.write(item.source_text)
                 if evidence_adds_value and item.evidence:
-                    st.caption("Evidência")
+                    st.caption("Evidence")
                     st.write(item.evidence)
                 if item.dependencies:
-                    st.caption("Dependências")
+                    st.caption("Dependencies")
                     st.write(", ".join(item.dependencies))
 
 
@@ -478,13 +478,13 @@ def _render_checklist_content(
     )
 
     metric_1, metric_2, metric_3, metric_4 = st.columns(4)
-    metric_1.metric("Itens", rendered_payload.total_items)
-    metric_2.metric("Concluídos", counts.get("completed", rendered_payload.completed_items))
-    metric_3.metric("Progresso", f"{rendered_payload.progress_percentage:.0f}%")
-    metric_4.metric("Etapas", f"{completed_groups}/{len(grouped_items)}")
+    metric_1.metric("Items", rendered_payload.total_items)
+    metric_2.metric("Completed", counts.get("completed", rendered_payload.completed_items))
+    metric_3.metric("Progress", f"{rendered_payload.progress_percentage:.0f}%")
+    metric_4.metric("Stages", f"{completed_groups}/{len(grouped_items)}")
 
     if counts.get("skipped", 0):
-        st.caption(f"Itens ignorados: {counts['skipped']}")
+        st.caption(f"Skipped items: {counts['skipped']}")
 
     st.progress(min(max(rendered_payload.progress_percentage / 100.0, 0.0), 1.0))
     st.write(f"**{rendered_payload.title}**")
@@ -494,11 +494,11 @@ def _render_checklist_content(
         prefix = _checklist_state_prefix(execution_id)
         action_col, info_col = st.columns([0.35, 0.65])
         with action_col:
-            if st.button("Resetar checklist", key=f"{prefix}_reset"):
+            if st.button("Reset checklist", key=f"{prefix}_reset"):
                 _reset_checklist_state(payload, execution_id)
                 st.rerun()
         with info_col:
-            st.caption("As marcações ficam salvas localmente na sessão atual da página.")
+            st.caption("Selections are saved locally in the current page session.")
 
     _render_checklist_phase_progress(grouped_items)
 
@@ -508,7 +508,7 @@ def _render_checklist_content(
             section_counts = _count_checklist_statuses(items)
             section_completed = section_counts.get("completed", 0)
             st.subheader(section_title)
-            st.caption(f"{section_completed}/{len(items)} concluídos")
+            st.caption(f"{section_completed}/{len(items)} completed")
 
         for item in items:
             _render_checklist_item_card(
@@ -521,7 +521,7 @@ def _render_checklist_content(
             running_index += 1
 
     if show_debug_table and rendered_payload.items:
-        with st.expander("Ver tabela bruta do checklist", expanded=False):
+        with st.expander("View raw checklist table", expanded=False):
             st.dataframe(_build_checklist_debug_table(rendered_payload), width="stretch")
 
     return rendered_payload
@@ -547,7 +547,7 @@ def _humanize_field_name(name: str | None) -> str:
     override = _FIELD_LABEL_OVERRIDES.get(cleaned.casefold())
     if override:
         return override
-    return cleaned.capitalize() if cleaned else "Campo"
+    return cleaned.capitalize() if cleaned else "Field"
 
 
 def _filter_legal_key_facts_for_display(key_facts: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -659,7 +659,7 @@ def _build_extraction_dates(payload: ExtractionPayload) -> list[dict[str, str]]:
         if item.casefold() in seen:
             continue
         seen.add(item.casefold())
-        items.append({"label": "Data citada", "value": item, "evidence": ""})
+        items.append({"label": "Date mentioned", "value": item, "evidence": ""})
 
     return items
 
@@ -740,19 +740,19 @@ def _build_legal_overview_items(
 
     document_type = _pick_document_type(payload)
     if document_type:
-        items.append({"label": "Tipo do documento", "value": document_type, "evidence": ""})
+        items.append({"label": "Document type", "value": document_type, "evidence": ""})
 
     if parties:
         parties_value = ", ".join(parties[:3])
         if len(parties) > 3:
-            parties_value += " e outras partes"
-        items.append({"label": "Partes", "value": parties_value, "evidence": ""})
+            parties_value += " and other parties"
+        items.append({"label": "Parties", "value": parties_value, "evidence": ""})
 
     primary_date = _pick_primary_date_item(dates)
     if primary_date:
         items.append(
             {
-                "label": "Data principal", 
+                "label": "Primary date", 
                 "value": primary_date.get("value", ""),
                 "evidence": primary_date.get("evidence", ""),
             }
@@ -762,7 +762,7 @@ def _build_legal_overview_items(
     if law_fact:
         items.append(
             {
-                "label": "Lei aplicável / jurisdição",
+                "label": "Governing law / jurisdiction",
                 "value": law_fact.get("value", ""),
                 "evidence": law_fact.get("evidence", ""),
             }
@@ -781,18 +781,18 @@ def _build_legal_summary_sentence(
     parts: list[str] = []
 
     if document_type:
-        parts.append(f"Documento identificado como {document_type}")
+        parts.append(f"Document identified as {document_type}")
 
     if parties:
         if len(parties) == 1:
-            parts.append(f"com foco na parte {parties[0]}")
+            parts.append(f"focused on party {parties[0]}")
         elif len(parties) == 2:
-            parts.append(f"entre {parties[0]} e {parties[1]}")
+            parts.append(f"between {parties[0]} and {parties[1]}")
         else:
-            parts.append(f"entre {', '.join(parties[:2])} e outras partes")
+            parts.append(f"between {', '.join(parties[:2])} and other parties")
 
     if primary_date and primary_date.get("value"):
-        parts.append(f"com data principal em {primary_date['value']}")
+        parts.append(f"with primary date on {primary_date['value']}")
 
     if not parts:
         return None
@@ -874,14 +874,14 @@ def _render_stat_cards(items: list[dict[str, str]], columns_count: int = 2) -> N
                 st.caption(item["label"])
                 st.markdown(f"**{item['value']}**")
                 if item.get("evidence"):
-                    st.caption(f"Base no texto: {item['evidence']}")
+                    st.caption(f"Grounded in text: {item['evidence']}")
 
 
 def _render_bullet_cards(
     items: list[dict[str, str]],
     primary_key: str,
     secondary_keys: list[tuple[str, str]],
-    evidence_label: str = "Trecho do documento",
+    evidence_label: str = "Document excerpt",
     columns_count: int = 2,
 ) -> None:
     if not items:
@@ -955,11 +955,11 @@ def _render_summary_supporting_evidence(evidence_items: list[str]) -> None:
     preview, has_hidden_content, full_items = _build_compact_evidence_preview(evidence_items)
     if not preview:
         return
-    st.caption("Trechos-base")
+    st.caption("Source excerpts")
     for item in preview:
         st.write(f"• {item}")
     if has_hidden_content:
-        with st.expander("Ver evidências completas", expanded=False):
+        with st.expander("View full evidence", expanded=False):
             for item in full_items:
                 st.write(f"- {item}")
 
@@ -967,7 +967,7 @@ def _render_summary_supporting_evidence(evidence_items: list[str]) -> None:
 def _humanize_code_issue_category(category: str | None) -> str:
     cleaned = _clean_text_value(category).replace("_", " ")
     if not cleaned:
-        return "Categoria não informada"
+        return "Category not provided"
     override = _CODE_ANALYSIS_CATEGORY_LABELS.get(cleaned.casefold().replace(" ", "_"))
     if override:
         return override
@@ -977,7 +977,7 @@ def _humanize_code_issue_category(category: str | None) -> str:
 def _code_issue_severity_label(severity: str | None) -> str:
     cleaned = _clean_text_value(severity).lower()
     if not cleaned:
-        return "Nível não informado"
+        return "Level not provided"
     return _CODE_ANALYSIS_SEVERITY_LABELS.get(cleaned, cleaned.capitalize())
 
 
@@ -1009,23 +1009,23 @@ def _render_code_issue_card(issue: CodeIssue, *, expanded: bool = False) -> None
     ):
         st.write(issue.description)
         if issue.evidence:
-            st.caption("Trecho que motivou o achado")
+            st.caption("Excerpt that motivated the finding")
             st.code(issue.evidence, language="text")
         if issue.recommendation:
-            st.caption("Ação sugerida")
+            st.caption("Suggested action")
             st.write(issue.recommendation)
 
 
 def _render_legal_hero(payload: ExtractionPayload, parties: list[str], dates: list[dict[str, str]]) -> None:
     summary_sentence = _build_legal_summary_sentence(payload, parties, dates)
     with st.container(border=True):
-        st.caption("Visão geral rápida")
+        st.caption("Quick overview")
         if summary_sentence:
             st.markdown(f"#### {summary_sentence}")
         elif payload.main_subject:
             st.markdown(f"#### {payload.main_subject}")
         else:
-            st.markdown("#### Documento jurídico identificado")
+            st.markdown("#### Legal document identified")
 
         if payload.main_subject and summary_sentence and payload.main_subject != summary_sentence.rstrip("."):
             st.caption(payload.main_subject)
@@ -1034,14 +1034,14 @@ def _render_legal_hero(payload: ExtractionPayload, parties: list[str], dates: li
 def _render_legal_parties(parties: list[str]) -> None:
     if not parties:
         return
-    st.subheader("Quem está envolvido")
-    _render_simple_list_card("Partes principais", parties, icon="-" )
+    st.subheader("Who is involved")
+    _render_simple_list_card("Main parties", parties, icon="-" )
 
 
 def _render_legal_dates(dates: list[dict[str, str]]) -> None:
     if not dates:
         return
-    st.subheader("Datas e prazos")
+    st.subheader("Dates and deadlines")
     timeline_items = [
         {
             "description": f"{item['label']}: {item['value']}",
@@ -1058,25 +1058,25 @@ def _render_legal_dates(dates: list[dict[str, str]]) -> None:
 def _render_legal_values(value_facts: list[dict[str, str]], important_numbers: list[str]) -> None:
     if not value_facts and not important_numbers:
         return
-    st.subheader("Valores e números relevantes")
+    st.subheader("Relevant values and numbers")
     if value_facts:
         _render_stat_cards(value_facts, columns_count=2)
     remaining_numbers = _unique_preserve_order(important_numbers)
     if remaining_numbers:
-        _render_simple_list_card("Outros números citados", remaining_numbers)
+        _render_simple_list_card("Other numbers mentioned", remaining_numbers)
 
 
 def _render_legal_missing_information(items: list[str]) -> None:
     if not items:
         return
-    st.subheader("O que não ficou claro")
-    _render_simple_list_card("Pontos pendentes ou ambíguos", items, icon="-" )
+    st.subheader("What remains unclear")
+    _render_simple_list_card("Pending or ambiguous points", items, icon="-" )
 
 
 def _group_extraction_actions(payload: ExtractionPayload) -> dict[str, list[dict[str, str]]]:
     grouped: dict[str, list[dict[str, str]]] = {}
     for item in payload.action_items:
-        owner = _clean_text_value(item.owner) or "Parte não identificada"
+        owner = _clean_text_value(item.owner) or "Unidentified party"
         grouped.setdefault(owner, []).append(
             {
                 "description": _clean_text_value(item.description),
@@ -1105,29 +1105,29 @@ def _collect_extraction_evidence(payload: ExtractionPayload) -> list[dict[str, s
     for field in payload.extracted_fields:
         _push(_humanize_field_name(field.name), field.evidence)
     for item in payload.action_items:
-        _push("Obrigação / ação", item.evidence)
+        _push("Obligation / action", item.evidence)
     for item in payload.risks:
-        _push("Risco / atenção", item.evidence)
+        _push("Risk / watchout", item.evidence)
     for item in payload.relationships:
-        _push("Relação", item.evidence)
+        _push("Relationship", item.evidence)
 
     return evidence_items
 
 
 def _render_result_header(result: StructuredResult) -> None:
-    status_label = "Validado" if result.success else "Falhou"
+    status_label = "Validated" if result.success else "Failed"
     status_kind = "success" if result.success else "error"
-    context_label = "com contexto do documento" if result.context_used else "sem contexto do documento"
-    repair_label = "com reparo automático" if result.repair_applied else "sem reparo"
+    context_label = "with document context" if result.context_used else "without document context"
+    repair_label = "with automatic repair" if result.repair_applied else "without repair"
     st.caption(
-        f"Tarefa: `{result.task_type}` · Execução: `{result.execution_id[:8]}` · {status_label} · {context_label} · {repair_label}"
+        f"Task: `{result.task_type}` · Execution: `{result.execution_id[:8]}` · {status_label} · {context_label} · {repair_label}"
     )
 
     if status_kind == "success":
-        st.success("Saída estruturada gerada e validada.")
+        st.success("Structured output generated and validated.")
         if result.quality_score is not None and result.quality_score < 0.65:
             st.warning(
-                f"Este payload passou na validação estrutural, mas a qualidade estimada é baixa ({result.quality_score:.0%}). Revise grounding e possíveis placeholders antes de confiar no resultado."
+                f"This payload passed structural validation, but the estimated quality is low ({result.quality_score:.0%}). Review grounding and possible placeholders before trusting the result."
             )
     else:
         error_message = result.validation_error or result.parsing_error or (result.error.message if result.error else "Unknown error")
@@ -1146,20 +1146,20 @@ def _render_result_header(result: StructuredResult) -> None:
     agent_tool_label = _clean_text_value(metadata.get("agent_tool_label") or metadata.get("agent_tool"))
 
     if execution_strategy:
-        extra_parts = [f"estratégia `{execution_strategy}`"]
+        extra_parts = [f"strategy `{execution_strategy}`"]
         if workflow_id:
             extra_parts.append(f"workflow `{workflow_id}`")
-        st.caption("Execução estruturada: " + " · ".join(extra_parts))
+        st.caption("Structured execution: " + " · ".join(extra_parts))
     if result.task_type == "document_agent":
         agent_parts = []
         if agent_intent_label:
-            agent_parts.append(f"intenção: {agent_intent_label}")
+            agent_parts.append(f"intent: {agent_intent_label}")
         if agent_tool_label:
             agent_parts.append(f"tool: {agent_tool_label}")
         if metadata.get("agent_context_strategy"):
-            agent_parts.append(f"contexto: {metadata.get('agent_context_strategy')}")
+            agent_parts.append(f"context: {metadata.get('agent_context_strategy')}")
         if agent_parts:
-            st.caption("Copiloto documental: " + " · ".join(agent_parts))
+            st.caption("Document copilot: " + " · ".join(agent_parts))
     if workflow_route_decision or workflow_guardrail_decision:
         details = []
         if workflow_route_decision:
@@ -1169,8 +1169,8 @@ def _render_result_header(result: StructuredResult) -> None:
         st.caption("Workflow: " + " · ".join(details))
     if needs_review:
         st.warning(
-            "Resultado marcado para revisão humana"
-            + (f" · motivo: {needs_review_reason}" if needs_review_reason else "")
+            "Result marked for human review"
+            + (f" · reason: {needs_review_reason}" if needs_review_reason else "")
         )
 
     telemetry = metadata.get("telemetry") if isinstance(metadata.get("telemetry"), dict) else {}
@@ -1181,15 +1181,15 @@ def _render_result_header(result: StructuredResult) -> None:
         strategy_label = ", ".join(str(item) for item in strategies if item)
         if parse_recovery.get("final_success"):
             st.info(
-                "Auto-recovery estruturado aplicado"
-                + (f" · tentativas={attempt_count}" if attempt_count is not None else "")
-                + (f" · estratégias={strategy_label}" if strategy_label else "")
+                "Structured auto-recovery applied"
+                + (f" · attempts={attempt_count}" if attempt_count is not None else "")
+                + (f" · strategies={strategy_label}" if strategy_label else "")
             )
         else:
             st.warning(
-                "Auto-recovery estruturado tentou corrigir a saída, mas ainda falhou"
-                + (f" · tentativas={attempt_count}" if attempt_count is not None else "")
-                + (f" · estratégias={strategy_label}" if strategy_label else "")
+                "Structured auto-recovery tried to fix the output, but it still failed"
+                + (f" · attempts={attempt_count}" if attempt_count is not None else "")
+                + (f" · strategies={strategy_label}" if strategy_label else "")
             )
 
     if result.task_type in {"summary", "checklist", "extraction"} and metadata:
@@ -1199,47 +1199,47 @@ def _render_result_header(result: StructuredResult) -> None:
 
         if summary_mode == "full_document_map_reduce":
             st.info(
-                "Modo de resumo: map-reduce com documento completo · o modelo recebeu o documento inteiro em várias partes e depois consolidou uma síntese final."
+                "Summary mode: full-document map-reduce · the model received the entire document in multiple parts and then consolidated a final synthesis."
             )
             cols = st.columns(3)
-            cols[0].metric("Tamanho do documento", metadata.get("full_document_chars", 0))
-            cols[1].metric("Partes", metadata.get("document_parts", 0))
-            cols[2].metric("Resumos parciais", metadata.get("partial_summaries_generated", 0))
+            cols[0].metric("Document size", metadata.get("full_document_chars", 0))
+            cols[1].metric("Parts", metadata.get("document_parts", 0))
+            cols[2].metric("Partial summaries", metadata.get("partial_summaries_generated", 0))
         elif summary_mode == "single_pass_context":
-            st.info("Modo de resumo: contexto em passo único · o modelo resumiu usando apenas o contexto recortado desta estratégia.")
+            st.info("Summary mode: single-pass context · the model summarized using only the context selected by this strategy.")
             cols = st.columns(3)
-            cols[0].metric("Tamanho do documento", metadata.get("full_document_chars", 0))
-            cols[1].metric("Chars do contexto enviados", metadata.get("context_chars_sent", 0))
-            cols[2].metric("Estratégia", str(metadata.get("context_strategy", "-")))
+            cols[0].metric("Document size", metadata.get("full_document_chars", 0))
+            cols[1].metric("Context chars sent", metadata.get("context_chars_sent", 0))
+            cols[2].metric("Strategy", str(metadata.get("context_strategy", "-")))
         elif checklist_mode == "full_document_direct":
-            st.info("Modo de checklist: documento completo direto · o modelo recebeu o documento inteiro para gerar o checklist.")
+            st.info("Checklist mode: direct full document · the model received the entire document to generate the checklist.")
             cols = st.columns(2)
-            cols[0].metric("Tamanho do documento", metadata.get("full_document_chars", 0))
-            cols[1].metric("Chars enviados ao modelo", metadata.get("context_chars_sent", 0))
+            cols[0].metric("Document size", metadata.get("full_document_chars", 0))
+            cols[1].metric("Chars sent to model", metadata.get("context_chars_sent", 0))
             if _should_explain_full_document_match(metadata):
-                st.caption("Como o documento inteiro foi enviado ao modelo, o tamanho do documento e os chars enviados podem coincidir.")
+                st.caption("Because the full document was sent to the model, document size and sent chars may match.")
         elif checklist_mode == "full_document_map_reduce":
-            st.info("Modo de checklist: map-reduce com documento completo · o modelo recebeu o documento inteiro em várias partes e depois consolidou o checklist final.")
+            st.info("Checklist mode: full-document map-reduce · the model received the entire document in multiple parts and then consolidated the final checklist.")
             cols = st.columns(2)
-            cols[0].metric("Tamanho do documento", metadata.get("full_document_chars", 0))
-            cols[1].metric("Chars enviados na síntese final", metadata.get("context_chars_sent", 0))
+            cols[0].metric("Document size", metadata.get("full_document_chars", 0))
+            cols[1].metric("Chars sent in final synthesis", metadata.get("context_chars_sent", 0))
         elif checklist_mode == "document_scan_context":
-            st.info("Modo de checklist: document-scan context · o modelo recebeu contexto recortado do documento para gerar o checklist.")
+            st.info("Checklist mode: document-scan context · the model received selected document context to generate the checklist.")
             cols = st.columns(2)
-            cols[0].metric("Tamanho do documento", metadata.get("full_document_chars", 0))
-            cols[1].metric("Chars do contexto enviados", metadata.get("context_chars_sent", 0))
+            cols[0].metric("Document size", metadata.get("full_document_chars", 0))
+            cols[1].metric("Context chars sent", metadata.get("context_chars_sent", 0))
         elif extraction_mode == "full_document_direct":
-            st.info("Modo de extração: documento completo direto · o modelo recebeu o documento inteiro para extrair campos, entidades, riscos e obrigações.")
+            st.info("Extraction mode: direct full document · the model received the entire document to extract fields, entities, risks, and obligations.")
             cols = st.columns(2)
-            cols[0].metric("Tamanho do documento", metadata.get("full_document_chars", 0))
-            cols[1].metric("Chars enviados ao modelo", metadata.get("context_chars_sent", 0))
+            cols[0].metric("Document size", metadata.get("full_document_chars", 0))
+            cols[1].metric("Chars sent to model", metadata.get("context_chars_sent", 0))
             if _should_explain_full_document_match(metadata):
-                st.caption("Como o documento inteiro foi enviado ao modelo, o tamanho do documento e os chars enviados podem coincidir.")
+                st.caption("Because the full document was sent to the model, document size and sent chars may match.")
         elif extraction_mode == "document_scan_context":
-            st.info("Modo de extração: document-scan context · o modelo recebeu contexto recortado do documento para fazer a extração.")
+            st.info("Extraction mode: document-scan context · the model received selected document context to perform the extraction.")
             cols = st.columns(2)
-            cols[0].metric("Tamanho do documento", metadata.get("full_document_chars", 0))
-            cols[1].metric("Chars do contexto enviados", metadata.get("context_chars_sent", 0))
+            cols[0].metric("Document size", metadata.get("full_document_chars", 0))
+            cols[1].metric("Context chars sent", metadata.get("context_chars_sent", 0))
 
         if metadata.get("context_note"):
             st.caption(str(metadata.get("context_note")))
@@ -1247,8 +1247,8 @@ def _render_result_header(result: StructuredResult) -> None:
         stages = metadata.get("stages") if isinstance(metadata.get("stages"), list) else []
         show_stage_debug = result.task_type != "checklist"
         if stages and show_stage_debug:
-            with st.expander("Ver detalhes técnicos da execução", expanded=False):
-                st.write("**O que foi enviado ao modelo**")
+            with st.expander("View technical execution details", expanded=False):
+                st.write("**What was sent to the model**")
                 for stage in stages:
                     if not isinstance(stage, dict):
                         continue
@@ -1262,13 +1262,13 @@ def _render_result_header(result: StructuredResult) -> None:
                     if duration_s is not None:
                         meta_parts.append(f"time={duration_s}s")
                     if success is not None:
-                        meta_parts.append("ok" if success else "falhou")
+                        meta_parts.append("ok" if success else "failed")
                     title = label + (f" · {' · '.join(meta_parts)}" if meta_parts else "")
                     with st.expander(title, expanded=False):
                         context_preview = stage.get("context_preview")
                         prompt_preview = stage.get("prompt_preview")
                         if context_preview:
-                            st.caption("Prévia do contexto")
+                            st.caption("Context preview")
                             st.text_area(
                                 f"context_preview_{result.execution_id}_{label}",
                                 value=str(context_preview),
@@ -1277,7 +1277,7 @@ def _render_result_header(result: StructuredResult) -> None:
                                 label_visibility="collapsed",
                             )
                         if prompt_preview and prompt_preview != context_preview:
-                            st.caption("Prévia do prompt")
+                            st.caption("Prompt preview")
                             st.text_area(
                                 f"prompt_preview_{result.execution_id}_{label}",
                                 value=str(prompt_preview),
@@ -1287,30 +1287,30 @@ def _render_result_header(result: StructuredResult) -> None:
                             )
 
     if workflow_trace:
-        with st.expander("Traço do workflow LangGraph", expanded=False):
+        with st.expander("LangGraph workflow trace", expanded=False):
             st.dataframe(workflow_trace, width="stretch")
 
     if execution_shadow_summary:
-        st.info("Comparação shadow direct vs LangGraph disponível para esta execução.")
+        st.info("Shadow comparison between direct execution and LangGraph is available for this run.")
         metric_1, metric_2, metric_3, metric_4 = st.columns(4)
-        metric_1.metric("Mesmo sucesso", "Sim" if execution_shadow_summary.get("same_success") else "Não")
+        metric_1.metric("Same success", "Yes" if execution_shadow_summary.get("same_success") else "No")
         metric_2.metric(
-            "Δ qualidade",
+            "Δ quality",
             f"{float(execution_shadow_summary.get('quality_delta')):+.3f}"
             if isinstance(execution_shadow_summary.get("quality_delta"), (int, float))
-            else "n/d",
+            else "n/a",
         )
         metric_3.metric(
-            "Δ latência",
+            "Δ latency",
             f"{float(execution_shadow_summary.get('latency_delta_s')):+.3f}s"
             if isinstance(execution_shadow_summary.get("latency_delta_s"), (int, float))
-            else "n/d",
+            else "n/a",
         )
         metric_4.metric(
-            "Alt evitou review",
-            "Sim" if execution_shadow_summary.get("alternate_avoided_review") else "Não",
+            "Alt avoided review",
+            "Yes" if execution_shadow_summary.get("alternate_avoided_review") else "No",
         )
-        with st.expander("Ver comparação direct vs LangGraph", expanded=False):
+        with st.expander("View direct vs LangGraph comparison", expanded=False):
             st.write(execution_shadow_summary)
 
 
@@ -1324,33 +1324,33 @@ def _render_extraction(payload: ExtractionPayload) -> None:
 
     metric_1, metric_2, metric_3, metric_4 = st.columns(4)
     if legal_view:
-        metric_1.metric("Partes", len(parties))
-        metric_2.metric("Obrigações", len(payload.action_items))
-        metric_3.metric("Riscos", len(payload.risks))
-        metric_4.metric("Datas", len(dates) if dates else len(payload.important_dates))
+        metric_1.metric("Parts", len(parties))
+        metric_2.metric("Obligations", len(payload.action_items))
+        metric_3.metric("Risks", len(payload.risks))
+        metric_4.metric("Dates", len(dates) if dates else len(payload.important_dates))
     else:
-        metric_1.metric("Entidades", len(payload.entities))
-        metric_2.metric("Campos", len(payload.extracted_fields))
-        metric_3.metric("Riscos", len(payload.risks))
-        metric_4.metric("Ações", len(payload.action_items))
+        metric_1.metric("Entities", len(payload.entities))
+        metric_2.metric("Fields", len(payload.extracted_fields))
+        metric_3.metric("Risks", len(payload.risks))
+        metric_4.metric("Actions", len(payload.action_items))
 
     if legal_view:
         _render_legal_hero(payload, parties, dates)
 
         overview_items = _build_legal_overview_items(payload, parties, dates, key_facts)
         if overview_items:
-            st.subheader("Resumo executivo")
+            st.subheader("Executive summary")
             _render_stat_cards(overview_items, columns_count=2)
 
         if payload.categories:
-            st.caption("Temas identificados: " + ", ".join(_unique_preserve_order(payload.categories)))
+            st.caption("Topics identified: " + ", ".join(_unique_preserve_order(payload.categories)))
     else:
         if payload.main_subject:
-            st.write("**Assunto principal**")
+            st.write("**Main subject**")
             st.info(payload.main_subject)
 
         if payload.categories:
-            st.write("**Categorias**")
+            st.write("**Categories**")
             st.write(", ".join(_unique_preserve_order(payload.categories)))
 
     if legal_view and parties:
@@ -1360,30 +1360,30 @@ def _render_extraction(payload: ExtractionPayload) -> None:
         if legal_view:
             immediate_actions, ongoing_actions = _split_action_groups(grouped_actions)
             if immediate_actions:
-                st.subheader("O que precisa acontecer")
+                st.subheader("What needs to happen")
                 _render_bullet_cards(
                     immediate_actions,
                     "description",
-                    [("owner", "parte"), ("due_date", "prazo"), ("status", "status")],
+                    [("owner", "party"), ("due_date", "deadline"), ("status", "status")],
                 )
             if ongoing_actions:
-                st.subheader("O que continua valendo")
+                st.subheader("What still applies")
                 _render_bullet_cards(
                     ongoing_actions,
                     "description",
-                    [("owner", "parte"), ("status", "status")],
+                    [("owner", "party"), ("status", "status")],
                 )
         else:
-            st.subheader("Ações / próximos passos")
+            st.subheader("Actions / next steps")
             flat_items = [{"owner": owner, **item} for owner, items in grouped_actions.items() for item in items]
             _render_bullet_cards(
                 flat_items,
                 "description",
-                [("owner", "owner"), ("due_date", "prazo"), ("status", "status")],
+                [("owner", "owner"), ("due_date", "deadline"), ("status", "status")],
             )
 
     if payload.risks:
-        heading = "Riscos e pontos de atenção" if legal_view else "Riscos"
+        heading = "Risks and watchouts" if legal_view else "Risks"
         st.subheader(heading)
         risk_cards = [
             {
@@ -1398,18 +1398,18 @@ def _render_extraction(payload: ExtractionPayload) -> None:
         _render_bullet_cards(
             risk_cards,
             "description",
-            [("status", "impacto"), ("owner", "responsável"), ("due_date", "prazo")],
+            [("status", "impact"), ("owner", "owner"), ("due_date", "deadline")],
         )
 
     if dates:
         if legal_view:
             _render_legal_dates(dates)
         else:
-            st.subheader("Prazos e datas relevantes")
+            st.subheader("Relevant deadlines and dates")
             for item in dates:
                 st.write(f"- **{item['label']}:** {item['value']}")
                 if item["evidence"]:
-                    st.caption(f"Trecho do documento: {item['evidence']}")
+                    st.caption(f"Document excerpt: {item['evidence']}")
 
     if key_facts:
         if legal_view:
@@ -1418,29 +1418,29 @@ def _render_extraction(payload: ExtractionPayload) -> None:
 
             notable_facts = highlight_facts + other_facts
             if notable_facts:
-                st.subheader("O que este documento estabelece")
+                st.subheader("What this document establishes")
                 _render_stat_cards(notable_facts, columns_count=2)
 
             _render_legal_values(value_facts, payload.important_numbers)
         else:
-            st.write("**Campos extraídos principais**")
+            st.write("**Main extracted fields**")
             for fact in key_facts:
                 st.write(f"- **{fact['label']}:** {fact['value']}")
                 if fact["evidence"]:
-                    st.caption(f"Evidência: {fact['evidence']}")
+                    st.caption(f"Evidence: {fact['evidence']}")
 
     if not legal_view and (payload.important_dates or payload.important_numbers):
         cols = st.columns(2)
         with cols[0]:
             if payload.important_dates and not dates:
-                st.write("**Datas importantes**")
+                st.write("**Important dates**")
                 for item in payload.important_dates:
                     st.write(f"- {item}")
         with cols[1]:
             if payload.important_numbers:
-                label = "Números citados"
+                label = "Numbers mentioned"
                 if legal_view:
-                    label = "Valores, percentuais e números adicionais"
+                    label = "Additional values, percentages, and numbers"
                 st.write(f"**{label}**")
                 for item in _unique_preserve_order(payload.important_numbers):
                     st.write(f"- {item}")
@@ -1449,12 +1449,12 @@ def _render_extraction(payload: ExtractionPayload) -> None:
         if legal_view:
             _render_legal_missing_information(payload.missing_information)
         else:
-            st.subheader("Informações ausentes / ambiguidades")
+            st.subheader("Missing information / ambiguities")
             for item in payload.missing_information:
                 st.write(f"- {item}")
 
     if evidence_items:
-        title = "Trechos de evidência do documento" if legal_view else "Trechos-evidência destacados"
+        title = "Document evidence excerpts" if legal_view else "Highlighted evidence excerpts"
         st.subheader(title)
         evidence_cards = [
             {
@@ -1468,7 +1468,7 @@ def _render_extraction(payload: ExtractionPayload) -> None:
         ]
         _render_bullet_cards(evidence_cards, "description", [], evidence_label="", columns_count=1)
 
-    with st.expander("Ver detalhes técnicos da extração", expanded=False):
+    with st.expander("View technical extraction details", expanded=False):
         if payload.entities:
             entities_table = [
                 {
@@ -1480,11 +1480,11 @@ def _render_extraction(payload: ExtractionPayload) -> None:
                 }
                 for entity in payload.entities
             ]
-            st.write("**Entidades**")
+            st.write("**Entities**")
             st.dataframe(entities_table, width="stretch")
 
         if payload.extracted_fields:
-            st.write("**Campos extraídos**")
+            st.write("**Extracted fields**")
             st.dataframe(
                 [
                     {"name": field.name, "value": field.value, "evidence": field.evidence}
@@ -1494,7 +1494,7 @@ def _render_extraction(payload: ExtractionPayload) -> None:
             )
 
         if payload.relationships:
-            st.write("**Relações**")
+            st.write("**Relationships**")
             st.dataframe(
                 [
                     {
@@ -1510,7 +1510,7 @@ def _render_extraction(payload: ExtractionPayload) -> None:
             )
 
         if payload.action_items and not grouped_actions:
-            st.write("**Ações identificadas**")
+            st.write("**Identified actions**")
             for item in payload.action_items:
                 line = item.description
                 meta = []
@@ -1524,28 +1524,28 @@ def _render_extraction(payload: ExtractionPayload) -> None:
                     line += f" ({' · '.join(meta)})"
                 st.write(f"- {line}")
                 if getattr(item, "evidence", None):
-                    st.caption(f"Evidência: {item.evidence}")
+                    st.caption(f"Evidence: {item.evidence}")
 
 
 def _render_summary(payload: SummaryPayload) -> None:
     insights = _unique_preserve_order(payload.key_insights)
     metric_1, metric_2, metric_3, metric_4 = st.columns(4)
-    metric_1.metric("Temas", len(payload.topics))
-    metric_2.metric("Insights-chave", len(insights))
-    metric_3.metric("Leitura", f"{payload.reading_time_minutes} min")
-    metric_4.metric("Completude estimada", f"{payload.completeness_score:.0%}")
+    metric_1.metric("Topics", len(payload.topics))
+    metric_2.metric("Key insights", len(insights))
+    metric_3.metric("Reading time", f"{payload.reading_time_minutes} min")
+    metric_4.metric("Estimated completeness", f"{payload.completeness_score:.0%}")
 
-    st.write("**Resumo executivo**")
+    st.write("**Executive summary**")
     st.info(payload.executive_summary)
 
     if insights:
-        st.write("**Insights-chave**")
+        st.write("**Key insights**")
         _render_summary_insight_cards(insights)
 
     if payload.topics:
-        st.write("**Tópicos detalhados**")
+        st.write("**Detailed topics**")
         for index, topic in enumerate(payload.topics, start=1):
-            with st.expander(f"{index}. {topic.title} · relevância {topic.relevance_score:.0%}", expanded=False):
+            with st.expander(f"{index}. {topic.title} · relevance {topic.relevance_score:.0%}", expanded=False):
                 for point in topic.key_points:
                     st.write(f"- {point}")
                 if topic.supporting_evidence:
@@ -1666,13 +1666,13 @@ def _format_cv_section_item_text(item: Any) -> str | None:
 def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
     display_sections, sections_are_derived = _build_cv_display_sections(payload)
     metric_1, metric_2, metric_3 = st.columns(3)
-    metric_1.metric("Seções", len(display_sections))
-    metric_2.metric("Habilidades", len(payload.skills))
-    metric_3.metric("Experiência", f"{payload.experience_years:.1f} anos")
+    metric_1.metric("Sections", len(display_sections))
+    metric_2.metric("Skills", len(payload.skills))
+    metric_3.metric("Experience", f"{payload.experience_years:.1f} years")
 
     if payload.personal_info:
         info = payload.personal_info
-        st.write("**Perfil**")
+        st.write("**Profile**")
         if info.full_name:
             st.subheader(info.full_name)
         meta_parts = [part for part in [info.location, info.email, info.phone] if part]
@@ -1682,15 +1682,15 @@ def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
             st.write("Links: " + " · ".join(info.links))
 
     if payload.skills:
-        st.write("**Habilidades**")
+        st.write("**Skills**")
         st.write(", ".join(payload.skills))
 
     if payload.languages:
-        st.write("**Idiomas**")
+        st.write("**Languages**")
         st.write(", ".join(payload.languages))
 
     if payload.education_entries:
-        st.write("**Formação**")
+        st.write("**Education**")
         for entry in payload.education_entries:
             line = entry.description or " | ".join(
                 part for part in [entry.degree, entry.institution, entry.location, entry.date_range] if part
@@ -1699,7 +1699,7 @@ def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
                 st.write(f"- {line}")
 
     if payload.experience_entries:
-        st.write("**Experiências**")
+        st.write("**Experiences**")
         for entry in payload.experience_entries:
             title_line = " | ".join(part for part in [entry.title, entry.organization, entry.location, entry.date_range] if part)
             if title_line:
@@ -1709,21 +1709,21 @@ def _render_cv_analysis(payload: CVAnalysisPayload) -> None:
                     st.caption(f"• {bullet}")
 
     if payload.strengths:
-        st.write("**Pontos fortes**")
+        st.write("**Strengths**")
         for item in payload.strengths:
             st.write(f"- {item}")
 
     if payload.improvement_areas:
-        st.write("**Pontos a melhorar**")
+        st.write("**Areas to improve**")
         for item in payload.improvement_areas:
             st.write(f"- {item}")
 
     if display_sections:
-        st.write("**Seções**")
+        st.write("**Sections**")
         for section in display_sections:
             label = f"{section.title} · {section.section_type}"
             if not sections_are_derived:
-                label += f" · confiança {section.confidence:.0%}"
+                label += f" · confidence {section.confidence:.0%}"
             with st.expander(label, expanded=False):
                 for item in section.content:
                     item_text = _format_cv_section_item_text(item)
@@ -1736,24 +1736,24 @@ def _render_code_analysis(payload: CodeAnalysisPayload) -> None:
     high_severity_count = sum(1 for issue in issues if _clean_text_value(issue.severity).lower() == "high")
 
     metric_1, metric_2, metric_3, metric_4 = st.columns(4)
-    metric_1.metric("Problemas", len(issues))
-    metric_2.metric("Alta severidade", high_severity_count)
-    metric_3.metric("Passos de refatoração", len(payload.refactor_plan))
-    metric_4.metric("Sugestões de teste", len(payload.test_suggestions))
+    metric_1.metric("Issues", len(issues))
+    metric_2.metric("High severity", high_severity_count)
+    metric_3.metric("Refactor steps", len(payload.refactor_plan))
+    metric_4.metric("Test suggestions", len(payload.test_suggestions))
 
-    st.write("**Resumo do trecho**")
+    st.write("**Snippet summary**")
     st.info(payload.snippet_summary)
-    st.write("**Objetivo principal**")
+    st.write("**Main purpose**")
     st.write(payload.main_purpose)
 
     if issues:
         if high_severity_count:
-            st.warning(f"Foram encontrados {high_severity_count} problema(s) de alta severidade que merecem revisão primeiro.")
+            st.warning(f"Found {high_severity_count} high-severity issue(s) that deserve review first.")
         else:
-            st.info("Não foram identificados problemas de alta severidade; os achados parecem mais localizados ou de médio/baixo risco.")
+            st.info("No high-severity issues were identified; the findings appear more localized or medium/low risk.")
 
     if issues:
-        st.write("**Problemas detectados**")
+        st.write("**Detected issues**")
         for index, issue in enumerate(issues):
             _render_code_issue_card(
                 issue,
@@ -1761,11 +1761,11 @@ def _render_code_analysis(payload: CodeAnalysisPayload) -> None:
             )
 
     for heading, items, numbered in [
-        ("Melhorias de legibilidade", payload.readability_improvements, False),
-        ("Melhorias de manutenibilidade", payload.maintainability_improvements, False),
-        ("Plano de refatoração sugerido", payload.refactor_plan, True),
-        ("Sugestões de teste", payload.test_suggestions, False),
-        ("Riscos observados", payload.risk_notes, False),
+        ("Readability improvements", payload.readability_improvements, False),
+        ("Maintainability improvements", payload.maintainability_improvements, False),
+        ("Suggested refactor plan", payload.refactor_plan, True),
+        ("Test suggestions", payload.test_suggestions, False),
+        ("Observed risks", payload.risk_notes, False),
     ]:
         if items:
             st.write(f"**{heading}**")
@@ -1776,36 +1776,36 @@ def _render_code_analysis(payload: CodeAnalysisPayload) -> None:
 
 def _render_document_agent(payload: DocumentAgentPayload) -> None:
     metric_1, metric_2, metric_3, metric_4 = st.columns(4)
-    metric_1.metric("Intenção", describe_document_agent_intent(payload.user_intent))
+    metric_1.metric("Intent", describe_document_agent_intent(payload.user_intent))
     metric_2.metric("Tool", describe_document_agent_tool(payload.tool_used))
-    metric_3.metric("Fontes", len(payload.sources))
-    metric_4.metric("Confiança", f"{payload.confidence:.0%}")
+    metric_3.metric("Sources", len(payload.sources))
+    metric_4.metric("Confidence", f"{payload.confidence:.0%}")
 
-    st.write("**Resumo do copiloto**")
+    st.write("**Copilot summary**")
     st.info(payload.summary)
 
     if payload.key_points:
-        st.write("**Pontos principais**")
+        st.write("**Key points**")
         for item in payload.key_points:
             st.write(f"- {item}")
 
     if payload.recommended_actions:
-        st.write("**Próximos passos sugeridos**")
+        st.write("**Suggested next steps**")
         for item in payload.recommended_actions:
             st.write(f"- {item}")
 
     if payload.limitations:
-        st.write("**Limitações e pontos de atenção**")
+        st.write("**Limitations and watchouts**")
         for item in payload.limitations:
             st.write(f"- {item}")
 
     if payload.guardrails_applied:
-        with st.expander("Guardrails aplicados pelo agente", expanded=False):
+        with st.expander("Guardrails applied by the agent", expanded=False):
             for item in payload.guardrails_applied:
                 st.write(f"- {item}")
 
     if payload.available_tools:
-        with st.expander("Tools avaliadas pelo agente", expanded=False):
+        with st.expander("Tools evaluated by the agent", expanded=False):
             st.dataframe(
                 [
                     {
@@ -1830,19 +1830,19 @@ def _render_document_agent(payload: DocumentAgentPayload) -> None:
         compliance_risks = payload.structured_response.get("risks") if isinstance(payload.structured_response.get("risks"), list) else []
         compliance_gaps = payload.structured_response.get("missing_information") if isinstance(payload.structured_response.get("missing_information"), list) else []
         if obligations:
-            st.write("**Obrigações identificadas**")
+            st.write("**Identified obligations**")
             for item in obligations:
                 st.write(f"- {item}")
         if restrictions:
-            st.write("**Restrições / cláusulas relevantes**")
+            st.write("**Relevant restrictions / clauses**")
             for item in restrictions:
                 st.write(f"- {item}")
         if compliance_risks:
-            st.write("**Riscos de compliance**")
+            st.write("**Compliance risks**")
             for item in compliance_risks:
                 st.write(f"- {item}")
         if compliance_gaps:
-            st.write("**Lacunas para revisão**")
+            st.write("**Gaps for review**")
             for item in compliance_gaps:
                 st.write(f"- {item}")
     elif review_type == "risk_gap_review":
@@ -1850,15 +1850,15 @@ def _render_document_agent(payload: DocumentAgentPayload) -> None:
         gaps = payload.structured_response.get("gaps") if isinstance(payload.structured_response.get("gaps"), list) else []
         actions = payload.structured_response.get("actions") if isinstance(payload.structured_response.get("actions"), list) else []
         if risks:
-            st.write("**Riscos identificados**")
+            st.write("**Identified risks**")
             for item in risks:
                 st.write(f"- {item}")
         if gaps:
-            st.write("**Lacunas e pendências**")
+            st.write("**Gaps and pending items**")
             for item in gaps:
                 st.write(f"- {item}")
         if actions:
-            st.write("**Ações de mitigação sugeridas**")
+            st.write("**Suggested mitigation actions**")
             for item in actions:
                 st.write(f"- {item}")
     elif review_type == "operational_extraction":
@@ -1866,15 +1866,15 @@ def _render_document_agent(payload: DocumentAgentPayload) -> None:
         deadlines = payload.structured_response.get("deadlines") if isinstance(payload.structured_response.get("deadlines"), list) else []
         operational_risks = payload.structured_response.get("risks") if isinstance(payload.structured_response.get("risks"), list) else []
         if actions:
-            st.write("**Tarefas operacionais**")
+            st.write("**Operational tasks**")
             for item in actions:
                 st.write(f"- {item}")
         if deadlines:
-            st.write("**Prazos e datas**")
+            st.write("**Deadlines and dates**")
             for item in deadlines:
                 st.write(f"- {item}")
         if operational_risks:
-            st.write("**Riscos operacionais**")
+            st.write("**Operational risks**")
             for item in operational_risks:
                 st.write(f"- {item}")
     elif review_type == "technical_review":
@@ -1883,7 +1883,7 @@ def _render_document_agent(payload: DocumentAgentPayload) -> None:
         test_suggestions = payload.structured_response.get("test_suggestions") if isinstance(payload.structured_response.get("test_suggestions"), list) else []
         risk_notes = payload.structured_response.get("risk_notes") if isinstance(payload.structured_response.get("risk_notes"), list) else []
         if detected_issues:
-            st.write("**Problemas técnicos identificados**")
+            st.write("**Identified technical issues**")
             for item in detected_issues[:6]:
                 if isinstance(item, dict):
                     severity = item.get("severity")
@@ -1892,41 +1892,41 @@ def _render_document_agent(payload: DocumentAgentPayload) -> None:
                     label = " · ".join(str(part) for part in [severity, category, title] if part)
                     st.write(f"- {label}")
         if refactor_plan:
-            st.write("**Plano de refatoração**")
+            st.write("**Refactor plan**")
             for item in refactor_plan:
                 st.write(f"- {item}")
         if test_suggestions:
-            st.write("**Sugestões de teste**")
+            st.write("**Test suggestions**")
             for item in test_suggestions:
                 st.write(f"- {item}")
         if risk_notes:
-            st.write("**Riscos técnicos**")
+            st.write("**Technical risks**")
             for item in risk_notes:
                 st.write(f"- {item}")
 
     if payload.compared_documents:
-        st.write("**Documentos comparados**")
+        st.write("**Compared documents**")
         st.write(" · ".join(payload.compared_documents))
 
     if payload.checklist_preview:
-        st.write("**Prévia do checklist operacional**")
+        st.write("**Operational checklist preview**")
         for index, item in enumerate(payload.checklist_preview, start=1):
             st.write(f"{index}. {item}")
 
     if payload.comparison_findings:
-        st.write("**Achados da comparação**")
+        st.write("**Comparison findings**")
         for finding in payload.comparison_findings:
             with st.expander(f"{finding.title} · {finding.finding_type}", expanded=False):
                 st.write(finding.description)
                 if finding.documents:
-                    st.caption("Documentos: " + ", ".join(finding.documents))
+                    st.caption("Documents: " + ", ".join(finding.documents))
                 if finding.evidence:
-                    st.caption("Evidências")
+                    st.caption("Evidence")
                     for evidence in finding.evidence:
                         st.write(f"- {evidence}")
 
     if payload.tool_runs:
-        st.write("**Execução das tools**")
+        st.write("**Tool execution**")
         st.dataframe(
             [
                 {
@@ -1940,7 +1940,7 @@ def _render_document_agent(payload: DocumentAgentPayload) -> None:
         )
 
     if payload.sources:
-        st.write("**Fontes consultadas**")
+        st.write("**Consulted sources**")
         st.dataframe(
             [
                 {
@@ -1960,12 +1960,12 @@ def _render_document_agent(payload: DocumentAgentPayload) -> None:
 
     if payload.needs_review:
         st.warning(
-            "O copiloto marcou a resposta para revisão humana"
-            + (f" · motivo: {payload.needs_review_reason}" if payload.needs_review_reason else "")
+            "The copilot marked the response for human review"
+            + (f" · reason: {payload.needs_review_reason}" if payload.needs_review_reason else "")
         )
 
     if payload.structured_response:
-        with st.expander("Ver payload estruturado interno", expanded=False):
+        with st.expander("View internal structured payload", expanded=False):
             st.json(payload.structured_response)
 
 
@@ -2012,11 +2012,11 @@ def render_structured_result(result: StructuredResult, requested_mode: str | Non
             st.code(result.raw_output_text)
 
     if result.source_documents:
-        st.caption(f"Documentos-fonte: {', '.join(result.source_documents)}")
+        st.caption(f"Source documents: {', '.join(result.source_documents)}")
 
     export_payload = payload_json or {"raw_output_text": result.raw_output_text, "task_type": result.task_type}
     st.download_button(
-        "Baixar JSON estruturado",
+        "Download structured JSON",
         data=json.dumps(export_payload, ensure_ascii=False, indent=2),
         file_name=f"structured_{result.task_type}_{result.execution_id[:8]}.json",
         mime="application/json",

@@ -1,12 +1,12 @@
-# Executive Deck Generation — segurança e PII
+# Executive Deck Generation — security and PII
 
-## Objetivo
+## Objective
 
-Definir os cuidados mínimos de segurança e privacidade da capability.
+Define the minimum security and privacy safeguards for the capability.
 
 ---
 
-## Tipos de deck com maior sensibilidade
+## Deck types with higher sensitivity
 
 - candidate review deck
 - document review deck
@@ -15,17 +15,17 @@ Definir os cuidados mínimos de segurança e privacidade da capability.
 
 ---
 
-## Regras mínimas
+## Minimum rules
 
-- registrar origem dos dados usados
-- tratar artefatos locais como persistência sensível quando houver PII
-- evitar exposição desnecessária de dados pessoais em decks sem necessidade de negócio
-- preparar caminho futuro para redaction e retenção diferenciada
+- record the origin of the data used
+- treat local artifacts as sensitive persistence when PII is present
+- avoid unnecessary exposure of personal data in decks without a business need
+- prepare a future path for redaction and differentiated retention
 
 ---
 
-## Direção futura
+## Future direction
 
-- redaction policy explícita
-- retenção por sensibilidade
-- limitação de acesso em ambiente público
+- explicit redaction policy
+- retention by sensitivity level
+- access limitation in public environments

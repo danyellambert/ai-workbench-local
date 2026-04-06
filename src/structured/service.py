@@ -1218,58 +1218,58 @@ class StructuredOutputService:
         strong_issue_titles: set[str] = set()
 
         if re.search(r'/\s*len\(', source_text):
-            strong_issue_titles.add('possível divisão por zero')
-            if not any((issue.title or '').strip().lower() == 'possível divisão por zero' for issue in issues):
+            strong_issue_titles.add('possible division by zero')
+            if not any((issue.title or '').strip().lower() == 'possible division by zero' for issue in issues):
                 issues.append(CodeIssue(
                     severity='high',
                     category='runtime_failure',
-                    title='Possível divisão por zero',
-                    description='O código divide pelo tamanho de uma coleção sem proteger o caso de entrada vazia.',
+                    title='Possible division by zero',
+                    description='The code divides by the size of a collection without protecting the empty-input case.',
                     evidence='average = total / len(values)',
-                    recommendation='Proteja explicitamente o caso de entrada vazia antes da divisão e defina `average = 0.0` quando não houver valores.',
+                    recommendation='Explicitly protect the empty-input case before division and set `average = 0.0` when there are no values.',
                 ))
-            risk_notes.append('Pode ocorrer divisão por zero quando a lista de entrada estiver vazia.')
-            test_suggestions.append('Adicionar teste para entrada vazia e validar explicitamente o comportamento esperado da média.')
+            risk_notes.append('Division by zero can occur when the input list is empty.')
+            test_suggestions.append('Add a test for empty input and explicitly validate the expected average behavior.')
 
         if re.search(r'item\[["\']score["\']\]\s*[<>]', source_text):
-            strong_issue_titles.add('suposição de score numérico')
-            if not any((issue.title or '').strip().lower() == 'suposição de score numérico' for issue in issues):
+            strong_issue_titles.add('numeric score assumption')
+            if not any((issue.title or '').strip().lower() == 'numeric score assumption' for issue in issues):
                 issues.append(CodeIssue(
                     severity='medium',
                     category='type_validation',
-                    title='Suposição de score numérico',
-                    description='O código assume que `score` é numérico ao compará-lo com limites.',
+                    title='Numeric score assumption',
+                    description='The code assumes that `score` is numeric when comparing it against thresholds.',
                     evidence='if item["score"] > 100 / if item["score"] < 0',
-                    recommendation='Valide ou converta `score` antes das comparações numéricas.',
+                    recommendation='Validate or convert `score` before numeric comparisons.',
                 ))
-            risk_notes.append('Valores não numéricos em `score` podem gerar erro de tipo durante a comparação.')
-            test_suggestions.append('Adicionar teste com `score` não numérico para validar o comportamento de erro ou saneamento.')
-            test_suggestions.append('Adicionar testes para `score` acima de 100 e abaixo de 0 para validar o clamp.')
+            risk_notes.append('Non-numeric values in `score` can trigger a type error during comparison.')
+            test_suggestions.append('Add a test with a non-numeric `score` to validate error handling or sanitization behavior.')
+            test_suggestions.append('Add tests for `score` above 100 and below 0 to validate the clamping behavior.')
 
         if re.search(r'item\[["\']score["\']\]\s*=\s*', source_text):
-            strong_issue_titles.add('efeito colateral por mutação da entrada')
-            if not any((issue.title or '').strip().lower() == 'efeito colateral por mutação da entrada' for issue in issues):
+            strong_issue_titles.add('input mutation side effect')
+            if not any((issue.title or '').strip().lower() == 'input mutation side effect' for issue in issues):
                 issues.append(CodeIssue(
                     severity='medium',
                     category='input_mutation',
-                    title='Efeito colateral por mutação da entrada',
-                    description='A função altera os dicionários de entrada em memória ao normalizar os scores.',
+                    title='Input mutation side effect',
+                    description='The function mutates the input dictionaries in memory while normalizing scores.',
                     evidence='item["score"] = 100 / item["score"] = 0',
-                    recommendation='Use `item.copy()` ou construa um novo dicionário antes da normalização para evitar alterar o objeto original.',
+                    recommendation='Use `item.copy()` or build a new dictionary before normalization to avoid changing the original object.',
                 ))
-            risk_notes.append('Mutar itens da entrada em memória pode criar efeitos colaterais para quem reutiliza a lista original.')
-            test_suggestions.append('Adicionar teste que verifique se os dicionários originais são ou não mutados após `normalize_scores`.')
+            risk_notes.append('Mutating input items in memory can create side effects for callers that reuse the original list.')
+            test_suggestions.append('Add a test that verifies whether the original dictionaries are mutated after `normalize_scores`.')
 
         if 'value.get("score", 0)' in source_text or "value.get('score', 0)" in source_text:
-            test_suggestions.append('Adicionar teste para itens sem `score` e validar o comportamento da normalização e da média.')
+            test_suggestions.append('Add a test for items without `score` and validate the normalization and averaging behavior.')
 
         if 'logger.info' in source_text:
-            test_suggestions.append('Adicionar testes com e sem logger para garantir que o logging não altera o resultado retornado.')
+            test_suggestions.append('Add tests with and without a logger to ensure logging does not change the returned result.')
 
         if strong_issue_titles:
             issues = [
                 issue for issue in issues
-                if (issue.title or '').strip().lower() not in {'duplicated logic', 'lógica duplicada'}
+                if (issue.title or '').strip().lower() != 'duplicated logic'
             ]
 
         generic_test_patterns = (
@@ -1313,14 +1313,14 @@ class StructuredOutputService:
             normalized_issue = issue.model_copy(update={'category': category})
 
             if category == 'runtime_failure' and (
-                'divisão por zero' in issue_blob
+                'division by zero' in issue_blob
                 or 'zerodivisionerror' in issue_blob
-                or ('len(values)' in issue_blob and 'vazi' in issue_blob)
+                or ('len(values)' in issue_blob and 'empty' in issue_blob)
             ):
                 normalized_issue = normalized_issue.model_copy(update={
                     'severity': 'high',
                     'category': 'runtime_failure',
-                    'recommendation': 'Adicione verificação para lista vazia antes da divisão e defina `average = 0.0` quando não houver valores para agregar.',
+                    'recommendation': 'Add an explicit empty-input check before division and set `average = 0.0` when there are no values to aggregate.',
                 })
 
             if has_score_guard and 'score' in issue_blob and (
@@ -1333,33 +1333,33 @@ class StructuredOutputService:
                     normalized_issue = issue.model_copy(update={
                         'severity': 'medium',
                         'category': 'type_validation',
-                        'title': 'Suposição de score numérico',
-                        'description': 'O código verifica se a chave `score` existe antes de acessá-la, então o risco principal não é ausência da chave. O problema restante é assumir que `score` é numérico ao compará-lo com os limites.',
+                        'title': 'Numeric score assumption',
+                        'description': 'The code checks whether the `score` key exists before accessing it, so the main risk is not a missing key. The remaining issue is assuming `score` is numeric when comparing it against thresholds.',
                         'evidence': 'if "score" in item ... if item["score"] > 100 / if item["score"] < 0',
-                        'recommendation': 'Valide ou converta `score` antes das comparações numéricas.',
+                        'recommendation': 'Validate or convert `score` before numeric comparisons.',
                     })
                 else:
                     continue
             elif mutates_input_in_place and (
                 category in {'correctness', 'maintainability', 'bug'}
-                or 'muta' in issue_blob
+                or 'mutat' in issue_blob
                 or 'in-place' in issue_blob
-                or 'objeto original' in issue_blob
-                or 'dicionário de entrada' in issue_blob
+                or 'original object' in issue_blob
+                or 'input dictionary' in issue_blob
             ):
                 normalized_issue = normalized_issue.model_copy(update={
                     'severity': 'medium',
                     'category': 'input_mutation',
-                    'recommendation': 'Use `item.copy()` ou construa um novo dicionário com os campos necessários antes de ajustar `score`, evitando alterar o objeto original.',
+                    'recommendation': 'Use `item.copy()` or build a new dictionary with the required fields before adjusting `score`, avoiding changes to the original object.',
                 })
             elif category == 'input_mutation' and not mutates_input_in_place and reuses_original_reference:
                 normalized_issue = issue.model_copy(update={
                     'severity': 'low',
                     'category': 'shared_reference',
-                    'title': 'Reuso da referência original',
-                    'description': 'Para itens sem `score`, a função reaproveita o mesmo dicionário original na saída. Isso pode causar aliasing se esse objeto for modificado depois.',
+                    'title': 'Original reference reuse',
+                    'description': 'For items without `score`, the function reuses the same original dictionary in the output. That can cause aliasing if the object is modified later.',
                     'evidence': 'result.append(item)',
-                    'recommendation': 'Use `item.copy()` se a função precisar sempre retornar objetos independentes.',
+                    'recommendation': 'Use `item.copy()` if the function must always return independent objects.',
                 })
 
             normalized_issue_blob = ' '.join(
@@ -1371,9 +1371,9 @@ class StructuredOutputService:
                 ]
                 if part
             ).lower()
-            if 'cópia profunda' in normalized_issue_blob or 'deep copy' in normalized_issue_blob:
+            if 'deep copy' in normalized_issue_blob:
                 normalized_issue = normalized_issue.model_copy(update={
-                    'recommendation': 'Use `item.copy()` ou construa um novo dicionário com os campos necessários antes de ajustar `score`, evitando alterar o objeto original.',
+                    'recommendation': 'Use `item.copy()` or build a new dictionary with the required fields before adjusting `score`, avoiding changes to the original object.',
                     'category': 'input_mutation' if mutates_input_in_place else normalized_issue.category,
                 })
 
@@ -1391,17 +1391,18 @@ class StructuredOutputService:
             cleaned = ' '.join(str(item or '').split()).strip()
             lowered = cleaned.lower()
             if 'average 0.0 or raises a controlled error' in lowered:
-                cleaned = 'Adicionar teste para entrada vazia e validar explicitamente a política esperada, sem deixar a expectativa ambígua.'
+                cleaned = 'Add a test for empty input and explicitly validate the expected policy without leaving the expectation ambiguous.'
             cleaned = re.sub(r'average\s*=\s*0(?!\.\d)', 'average = 0.0', cleaned, flags=re.I)
             normalized_test_suggestions.append(cleaned)
 
         normalized_refactor_plan: list[str] = []
         for item in payload.refactor_plan:
             cleaned = ' '.join(str(item or '').split()).strip()
-            cleaned = re.sub(r'c[óo]pia profunda', 'cópia rasa (`copy()`) ou um novo dicionário', cleaned, flags=re.I)
-            cleaned = re.sub(r'deep copy', 'shallow copy (`copy()`) ou um novo dicionário', cleaned, flags=re.I)
+            cleaned = re.sub(r'c[óo]pia profunda', 'shallow copy (`copy()`) or a new dictionary', cleaned, flags=re.I)
+            cleaned = re.sub(r'deep copy', 'shallow copy (`copy()`) or a new dictionary', cleaned, flags=re.I)
             cleaned = re.sub(r'average\s*=\s*0(?!\.\d)', 'average = 0.0', cleaned, flags=re.I)
-            cleaned = cleaned.replace('0 ou outro valor padrão', '0.0')
+            cleaned = cleaned.replace('0 or another default value', '0.0')
+            cleaned = cleaned.replace('or another default value', '0.0')
             normalized_refactor_plan.append(cleaned)
 
         return payload.model_copy(update={

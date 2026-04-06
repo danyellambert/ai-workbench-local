@@ -258,7 +258,7 @@ class _RuleBasedWorkflowProvider:
                 ensure_ascii=False,
             )
 
-        if "Compare os documentos" in prompt or "Resumos dos documentos:" in prompt:
+        if "Compare os documentos" in prompt or "Document summaries:" in prompt:
             return (
                 "Both agreements require grounded legal review, but they serve very different operating models. "
                 "The Enron/PGE separation agreement is focused on corporate separation covenants, indemnification and dispute governance, "

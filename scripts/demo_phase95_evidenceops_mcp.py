@@ -155,7 +155,7 @@ def main() -> None:
                             "task_type": "document_agent",
                             "review_type": "risk_gap_review",
                             "tool_used": "review_document_risks",
-                            "query": "Liste os riscos do contrato",
+                            "query": "List the contract risks",
                             "confidence": 0.82,
                             "needs_review": False,
                             "document_ids": ["CTR-001"],
@@ -163,14 +163,14 @@ def main() -> None:
                             "findings": [{"finding_type": "risk"}],
                             "action_items": [
                                 {
-                                    "description": "Solicitar redline da cláusula de incidente",
+                                    "description": "Request a redline of the incident clause",
                                     "owner": "Legal",
                                     "due_date": "2026-05-01",
                                     "status": "open",
                                     "evidence": "notify within 10 business days",
                                 }
                             ],
-                            "recommended_actions": ["Atualizar cláusula"],
+                            "recommended_actions": ["Update clause"],
                         }
                     },
                 },
@@ -212,7 +212,7 @@ def main() -> None:
                         "action_id": open_action_id,
                         "status": "closed",
                         "approval_status": "approved",
-                        "approval_reason": "Encerramento validado pelo gestor responsável.",
+                        "approval_reason": "Closure validated by the responsible manager.",
                         "approved_by": "manager",
                     },
                 },

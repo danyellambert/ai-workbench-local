@@ -1,57 +1,57 @@
-# Executive Deck Generation — evolução de UI
+# Executive Deck Generation — UI evolution
 
-## Objetivo
+## Objective
 
-Descrever como a capability aparece em cada etapa de interface do produto.
-
----
-
-## Etapa 1 — Streamlit atual
-
-Objetivo:
-
-- provar utilidade funcional da capability
-- servir como baseline temporária enquanto a superfície de produto é separada do AI Lab
-
-Capacidades mínimas:
-
-- gerar P1
-- baixar `.pptx`
-- baixar contract/payload
-- ver status/warnings
+Describe how the capability appears in each stage of the product interface.
 
 ---
 
-## Etapa 2 — Gradio
+## Stage 1 — Current Streamlit
 
-Objetivo:
+Objective:
 
-- tornar a demo mais AI-first e orientada a workflows
-- assumir a superfície principal do produto
+- prove the functional value of the capability
+- serve as a temporary baseline while the product surface is separated from the AI Lab
 
-Capacidades desejadas:
+Minimum capabilities:
 
-- seleção do workflow principal (`Document Review`, `Policy / Contract Comparison`, `Action Plan / Evidence Review`, `Candidate Review`)
-- geração de deck como capability transversal dentro de cada workflow
-- preview de inputs grounded
-- flow mais claro por deck family
-
-Observação:
-
-- a leitura recomendada passa a ser **Gradio = produto**
-- o **Streamlit** pode continuar como dashboard do **AI Lab**
+- generate P1
+- download `.pptx`
+- download contract/payload
+- view status/warnings
 
 ---
 
-## Etapa 3 — App web
+## Stage 2 — Gradio
 
-Objetivo:
+Objective:
 
-- capability com cara de produto real
+- make the demo more AI-first and workflow-oriented
+- become the product's main surface
 
-Capacidades desejadas:
+Desired capabilities:
 
-- catálogo explícito de deck types
-- histórico de exports
-- múltiplos fluxos de entrada
-- melhor operação e governança
+- selection of the main workflow (`Document Review`, `Policy / Contract Comparison`, `Action Plan / Evidence Review`, `Candidate Review`)
+- deck generation as a cross-cutting capability within each workflow
+- preview of grounded inputs
+- clearer flow by deck family
+
+Note:
+
+- the recommended interpretation becomes **Gradio = product**
+- **Streamlit** can continue as the **AI Lab** dashboard
+
+---
+
+## Stage 3 — Web app
+
+Objective:
+
+- a capability with the feel of a real product
+
+Desired capabilities:
+
+- explicit deck type catalog
+- export history
+- multiple input flows
+- better operations and governance

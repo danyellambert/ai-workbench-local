@@ -41,8 +41,8 @@ class HuggingFaceInferenceProvider:
             "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
             "model": model,
             "validation_summary": (
-                "O Hugging Face Inference depende do endpoint remoto configurado na sua conta. "
-                "Para chat funcionar bem aqui, o ideal é usar um endpoint compatível com chat completions/OpenAI-style."
+                "Hugging Face Inference depends on the remote endpoint configured in your account. "
+                "For chat to work well here, the ideal setup is an endpoint compatible with chat completions/OpenAI-style APIs."
             ),
         }
 
@@ -53,8 +53,8 @@ class HuggingFaceInferenceProvider:
             "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
             "model": model,
             "validation_summary": (
-                "Embeddings via Hugging Face Inference dependem do endpoint/modelo configurado. "
-                "O app registra esse valor como metadado operacional e só usa embeddings se você configurar explicitamente esse caminho."
+                "Embeddings through Hugging Face Inference depend on the configured endpoint/model. "
+                "The app records this value as operational metadata and only uses embeddings if you explicitly configure that path."
             ),
         }
 
@@ -113,6 +113,6 @@ class HuggingFaceInferenceProvider:
 
     def format_error(self, model: str, error: Exception) -> str:
         return (
-            f"Não foi possível obter resposta do Hugging Face Inference com o modelo `{model}`. "
-            f"Base URL: `{self.settings.base_url}`. Detalhes: {error}"
+            f"Could not get a response from Hugging Face Inference using model `{model}`. "
+            f"Base URL: `{self.settings.base_url}`. Details: {error}"
         )

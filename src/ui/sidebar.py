@@ -4,22 +4,22 @@ import streamlit as st
 def _format_ratio(value: object) -> str:
     if isinstance(value, (int, float)):
         return f"{float(value):.0%}"
-    return "n/d"
+    return "n/a"
 
 
 def _humanize_eval_recommendation(value: object) -> str:
     normalized = str(value or "").strip().lower()
     mapping = {
-        "consider_targeted_adaptation_only_for_specific_tasks": "Considere adaptação direcionada só para tasks específicas.",
-        "prompt_rag_schema_iteration_still_sufficient_globally": "Prompt + RAG + schema ainda parecem suficientes globalmente.",
-        "prompt_rag_stack_currently_sufficient": "Prompt + RAG atuais parecem suficientes para esta task.",
-        "improve_checklist_decomposition_and_source_alignment": "Melhorar decomposição do checklist e alinhamento com o texto-fonte.",
-        "improve_ocr_router_contact_postprocessing_before_model_adaptation": "Melhorar OCR/router/pós-processamento de contatos antes de adaptar modelo.",
-        "improve_grounding_and_field_resolution_before_model_adaptation": "Melhorar grounding e resolução de campos antes de adaptar modelo.",
-        "consider_task_specific_model_adaptation_after_more_eval_cases": "Considere adaptação específica da task após ampliar os casos de eval.",
-        "continue_prompt_grounding_and_schema_iteration": "Continue iterando prompt, grounding e schema.",
-        "expand_eval_cases_and_iterate_prompt_rag_schema": "Expanda os evals e continue iterando prompt + RAG + schema.",
-        "insufficient_eval_data": "Ainda não há dados de eval suficientes.",
+        "consider_targeted_adaptation_only_for_specific_tasks": "Consider targeted adaptation only for specific tasks.",
+        "prompt_rag_schema_iteration_still_sufficient_globally": "Prompt + RAG + schema still seem sufficient overall.",
+        "prompt_rag_stack_currently_sufficient": "Current prompt + RAG seem sufficient for this task.",
+        "improve_checklist_decomposition_and_source_alignment": "Improve checklist decomposition and alignment with the source text.",
+        "improve_ocr_router_contact_postprocessing_before_model_adaptation": "Improve OCR/router/contact post-processing before adapting the model.",
+        "improve_grounding_and_field_resolution_before_model_adaptation": "Improve grounding and field resolution before adapting the model.",
+        "consider_task_specific_model_adaptation_after_more_eval_cases": "Consider task-specific adaptation after expanding the eval cases.",
+        "continue_prompt_grounding_and_schema_iteration": "Continue iterating on prompt, grounding, and schema.",
+        "expand_eval_cases_and_iterate_prompt_rag_schema": "Expand the eval cases and keep iterating on prompt + RAG + schema.",
+        "insufficient_eval_data": "There is still not enough eval data.",
     }
     return mapping.get(normalized, str(value or ""))
 
@@ -27,9 +27,9 @@ def _humanize_eval_recommendation(value: object) -> str:
 def _humanize_adaptation_priority(value: object) -> str:
     normalized = str(value or "").strip().lower()
     mapping = {
-        "high": "Alta",
-        "medium": "Média",
-        "low": "Baixa",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
     }
     return mapping.get(normalized, str(value or ""))
 
@@ -73,21 +73,21 @@ def render_chat_sidebar(
     context_window_supported_providers = {"ollama", "huggingface_server"}
     pdf_mode_options = ["basic", "hybrid", "complete"]
     pdf_mode_labels = {
-        "basic": "Básico · pypdf apenas · mais rápido",
-        "hybrid": "Híbrido inteligente · melhor equilíbrio",
-        "complete": "Completo por página · máxima cobertura",
+        "basic": "Basic · pypdf only · faster",
+        "hybrid": "Smart hybrid · better balance",
+        "complete": "Per-page complete · maximum coverage",
     }
     default_pdf_mode = default_pdf_extraction_mode if default_pdf_extraction_mode in pdf_mode_options else "hybrid"
 
     with st.sidebar:
-        st.header("Configurações operacionais")
-        st.subheader("Geração")
+        st.header("Operational settings")
+        st.subheader("Generation")
         provider_state_key = "phase5_sidebar_provider"
         provider_current = st.session_state.get(provider_state_key, default_provider)
         if provider_current not in provider_keys:
             provider_current = provider_keys[default_provider_index] if provider_keys else default_provider
         selected_provider = st.selectbox(
-            "Provider de geração",
+            "Generation provider",
             provider_keys,
             index=provider_keys.index(provider_current) if provider_current in provider_keys else default_provider_index,
             key=provider_state_key,
@@ -103,7 +103,7 @@ def render_chat_sidebar(
             model_current = default_model if default_model in provider_models else (provider_models[0] if provider_models else "")
 
         selected_model = st.selectbox(
-            "Modelo de geração",
+            "Generation model",
             provider_models,
             index=provider_models.index(model_current) if model_current in provider_models else default_model_index,
             key=model_state_key,
@@ -116,7 +116,7 @@ def render_chat_sidebar(
             else 0
         )
         selected_prompt_profile = st.selectbox(
-            "Perfil de prompt",
+            "Prompt profile",
             prompt_profile_keys,
             index=default_profile_index,
             key="phase5_sidebar_prompt_profile",
@@ -127,28 +127,28 @@ def render_chat_sidebar(
         context_window_mode = "manual"
         if selected_provider in context_window_supported_providers:
             context_window_mode = st.radio(
-                "Modo da janela de contexto",
+                "Context window mode",
                 options=["auto", "manual"],
                 index=0,
                 key="phase5_sidebar_context_window_mode",
-                format_func=lambda value: "Automático" if value == "auto" else "Manual",
-                help="No modo automático, o app escolhe um budget operacional de contexto conforme a task e o tamanho do documento. No manual, usa o valor do slider.",
+                format_func=lambda value: "Automatic" if value == "auto" else "Manual",
+                help="In automatic mode, the app chooses an operational context budget based on the task and document size. In manual mode, it uses the slider value.",
             )
             if context_window_mode == "manual":
                 context_window = int(
                     st.slider(
-                        "Janela de contexto da geração",
+                        "Generation context window",
                         min_value=1000,
                         max_value=256000,
                         value=max(int(context_window), 1024),
                         step=100,
                         key="phase5_sidebar_context_window_value",
-                        help="Controla o budget operacional de contexto usado nesta execução.",
+                        help="Controls the operational context budget used in this execution.",
                     )
                 )
 
         temperature = st.slider(
-            "Temperatura",
+            "Temperature",
             min_value=0.0,
             max_value=1.5,
             value=min(max(default_temperature, 0.0), 1.5),
@@ -173,7 +173,7 @@ def render_chat_sidebar(
                 else default_embedding_provider
             )
         selected_embedding_provider = st.selectbox(
-            "Provider de embeddings",
+            "Embedding provider",
             embedding_provider_keys,
             index=(
                 embedding_provider_keys.index(embedding_provider_current)
@@ -182,7 +182,7 @@ def render_chat_sidebar(
             ),
             key=embedding_provider_state_key,
             format_func=lambda key: embedding_provider_options[key],
-            help="Permite separar o provider de geração do provider usado para embeddings e retrieval.",
+            help="Lets you separate the generation provider from the provider used for embeddings and retrieval.",
         )
 
         embedding_options = embedding_models_by_provider.get(selected_embedding_provider, [])
@@ -196,35 +196,35 @@ def render_chat_sidebar(
         if embedding_model_current not in embedding_options:
             embedding_model_current = default_embedding_model if default_embedding_model in embedding_options else (embedding_options[0] if embedding_options else "")
         selected_embedding_model = st.selectbox(
-            "Modelo de embeddings",
+            "Embedding model",
             embedding_options,
             index=embedding_options.index(embedding_model_current) if embedding_model_current in embedding_options else default_embedding_index,
             key=embedding_model_state_key,
-            help="Trocar o modelo de embedding exige reindexar para manter o espaço vetorial consistente.",
+            help="Changing the embedding model requires reindexing to keep the vector space consistent.",
         )
         selected_embedding_context_window = int(
             st.slider(
-                "Janela de contexto dos embeddings",
+                "Embedding context window",
                 min_value=256,
                 max_value=65536,
                 value=max(int(default_embedding_context_window), 256),
                 step=256,
                 key="phase5_sidebar_embedding_context_window",
-                help="Valor enviado ao endpoint nativo de embeddings do Ollama via `options.num_ctx`. Se mudar, reindexe para manter o índice consistente.",
+                help="Value sent to Ollama's native embedding endpoint via `options.num_ctx`. If it changes, reindex to keep the index consistent.",
             )
         )
         selected_embedding_truncate = st.checkbox(
-            "Permitir truncate nos embeddings",
+            "Allow truncation in embeddings",
             value=bool(default_embedding_truncate),
             key="phase5_sidebar_embedding_truncate",
-            help="Quando ativo, o provider de embeddings pode truncar entradas longas conforme o backend permitir.",
+            help="When enabled, the embedding provider may truncate long inputs if the backend supports it.",
         )
         if embedding_provider_unavailable_items:
-            with st.expander("Providers de embedding indisponíveis agora", expanded=False):
+            with st.expander("Embedding providers currently unavailable", expanded=False):
                 for item in embedding_provider_unavailable_items:
                     provider_label = str(item.get("label") or item.get("provider_key") or "provider")
-                    reason = str(item.get("reason") or "indisponível")
-                    st.caption(f"- **{provider_label}** · desabilitado: {reason}")
+                    reason = str(item.get("reason") or "unavailable")
+                    st.caption(f"- **{provider_label}** · disabled: {reason}")
 
         st.divider()
         st.subheader("Retrieval / RAG")
@@ -236,7 +236,7 @@ def render_chat_sidebar(
                 value=max(int(default_rag_chunk_size), 300),
                 step=100,
                 key="phase5_sidebar_rag_chunk_size",
-                help="Controla o tamanho dos chunks na próxima indexação.",
+                help="Controls chunk size for the next indexing run.",
             )
         )
         rag_chunk_overlap = int(
@@ -247,45 +247,45 @@ def render_chat_sidebar(
                 value=min(int(default_rag_chunk_overlap), max(0, rag_chunk_size // 2)),
                 step=50,
                 key="phase5_sidebar_rag_chunk_overlap",
-                help="Controla a sobreposição entre chunks na próxima indexação.",
+                help="Controls chunk overlap for the next indexing run.",
             )
         )
         rag_top_k = int(
             st.slider(
-                "Top-k da recuperação",
+                "Retrieval top-k",
                 min_value=1,
                 max_value=12,
                 value=max(int(default_rag_top_k), 1),
                 step=1,
                 key="phase5_sidebar_rag_top_k",
-                help="Quantidade de chunks recuperados a cada pergunta.",
+                help="Number of chunks retrieved for each question.",
             )
         )
         selected_rerank_pool_size = int(
             st.slider(
-                "Pool de reranking",
+                "Reranking pool",
                 min_value=max(2, rag_top_k),
                 max_value=32,
                 value=max(int(default_rerank_pool_size), rag_top_k),
                 step=1,
                 key="phase5_sidebar_rerank_pool_size",
-                help="Quantidade de candidatos considerados antes do corte final do top-k após o reranking híbrido.",
+                help="Number of candidates considered before the final top-k cut after hybrid reranking.",
             )
         )
         selected_rerank_lexical_weight = float(
             st.slider(
-                "Peso lexical no reranking",
+                "Lexical weight in reranking",
                 min_value=0.0,
                 max_value=0.9,
                 value=min(max(float(default_rerank_lexical_weight), 0.0), 0.9),
                 step=0.05,
                 key="phase5_sidebar_rerank_lexical_weight",
-                help="Mistura entre score vetorial e score lexical no reranking híbrido. Valores maiores dão mais peso ao matching textual.",
+                help="Mix between vector score and lexical score in hybrid reranking. Higher values give more weight to textual matching.",
             )
         )
         loader_strategy_options = ["manual", "langchain_basic"]
         loader_strategy_labels = {
-            "manual": "Manual local",
+            "manual": "Local manual",
             "langchain_basic": "LangChain loaders (experimental)",
         }
         default_loader_strategy = (
@@ -294,16 +294,16 @@ def render_chat_sidebar(
             else "manual"
         )
         selected_loader_strategy = st.selectbox(
-            "Estratégia de loader",
+            "Loader strategy",
             loader_strategy_options,
             index=loader_strategy_options.index(default_loader_strategy),
             key="phase5_sidebar_loader_strategy",
             format_func=lambda key: loader_strategy_labels[key],
-            help="Micro-slice da Fase 5.5: usa loaders básicos do ecossistema LangChain para TXT/CSV/MD/PY quando o pacote opcional estiver disponível. PDFs continuam no pipeline customizado do projeto.",
+            help="Phase 5.5 micro-slice: uses basic LangChain ecosystem loaders for TXT/CSV/MD/PY when the optional package is available. PDFs still use the project's custom pipeline.",
         )
         chunking_strategy_options = ["manual", "langchain_recursive"]
         chunking_strategy_labels = {
-            "manual": "Manual local",
+            "manual": "Local manual",
             "langchain_recursive": "LangChain Recursive (experimental)",
         }
         default_chunking_strategy = (
@@ -312,16 +312,16 @@ def render_chat_sidebar(
             else "manual"
         )
         selected_chunking_strategy = st.selectbox(
-            "Estratégia de chunking",
+            "Chunking strategy",
             chunking_strategy_options,
             index=chunking_strategy_options.index(default_chunking_strategy),
             key="phase5_sidebar_chunking_strategy",
             format_func=lambda key: chunking_strategy_labels[key],
-            help="Primeiro slice da Fase 5.5: permite testar chunking manual vs splitter compatível com LangChain quando o pacote opcional estiver disponível.",
+            help="First Phase 5.5 slice: lets you test manual chunking vs a LangChain-compatible splitter when the optional package is available.",
         )
         retrieval_strategy_options = ["manual_hybrid", "langchain_chroma"]
         retrieval_strategy_labels = {
-            "manual_hybrid": "Manual híbrido",
+            "manual_hybrid": "Manual hybrid",
             "langchain_chroma": "LangChain + Chroma (experimental)",
         }
         default_retrieval_strategy = (
@@ -330,23 +330,23 @@ def render_chat_sidebar(
             else "manual_hybrid"
         )
         selected_retrieval_strategy = st.selectbox(
-            "Estratégia de retrieval",
+            "Retrieval strategy",
             retrieval_strategy_options,
             index=retrieval_strategy_options.index(default_retrieval_strategy),
             key="phase5_sidebar_retrieval_strategy",
             format_func=lambda key: retrieval_strategy_labels[key],
-            help="Segundo slice da Fase 5.5: permite comparar o retrieval manual atual com um caminho experimental via LangChain + Chroma.",
+            help="Second Phase 5.5 slice: lets you compare the current manual retrieval path with an experimental LangChain + Chroma route.",
         )
 
         st.divider()
         st.subheader("PDF / OCR / Vision")
         selected_pdf_extraction_mode = st.selectbox(
-            "Extração de PDFs",
+            "PDF extraction",
             pdf_mode_options,
             index=pdf_mode_options.index(default_pdf_mode),
             key="phase5_sidebar_pdf_extraction_mode",
             format_func=lambda key: pdf_mode_labels[key],
-            help="Básico = pypdf. Híbrido = rápido com enriquecimento seletivo. Completo = Docling/OCR página a página com cobertura máxima e custo maior.",
+            help="Basic = pypdf. Hybrid = fast with selective enrichment. Complete = page-by-page Docling/OCR with maximum coverage and higher cost.",
         )
         ocr_backend_options = ["ocrmypdf", "docling"]
         ocr_backend_labels = {
@@ -354,64 +354,64 @@ def render_chat_sidebar(
             "docling": "Docling",
         }
         selected_ocr_backend = st.selectbox(
-            "Backend OCR documental",
+            "Document OCR backend",
             ocr_backend_options,
             index=ocr_backend_options.index(default_ocr_backend) if default_ocr_backend in ocr_backend_options else 0,
             key="phase5_sidebar_ocr_backend",
             format_func=lambda key: ocr_backend_labels.get(key, key),
-            help="Backend preferido para a trilha documental/evidence quando OCR for necessário.",
+            help="Preferred backend for the document/evidence path when OCR is needed.",
         )
         selected_vl_model = (
             st.text_input(
-                "Modelo VLM documental",
+                "Document VLM model",
                 value=default_vl_model,
                 key="phase5_sidebar_vlm_model",
-                help="Modelo de visão usado pela trilha documental em casos que exigem leitura visual/regional do documento.",
+                help="Vision model used by the document path in cases that require visual/regional document reading.",
             ).strip()
             or default_vl_model
         )
         debug_retrieval = st.checkbox(
-            "Mostrar debug de retrieval",
+            "Show retrieval debug",
             value=False,
             key="phase5_sidebar_debug_retrieval",
-            help="Exibe detalhes dos chunks recuperados, scores, parâmetros ativos do RAG e uma comparação shadow com a estratégia alternativa de retrieval.",
+            help="Shows details about retrieved chunks, scores, active RAG parameters, and a shadow comparison with the alternative retrieval strategy.",
         )
 
-        clear_requested = st.button("🧹 Limpar conversa", width="stretch")
+        clear_requested = st.button("🧹 Clear conversation", width="stretch")
 
         st.divider()
-        st.metric("Mensagens na conversa", messages_count)
+        st.metric("Messages in conversation", messages_count)
         if last_latency is not None:
-            st.metric("Última resposta", f"{last_latency:.2f}s")
+            st.metric("Last response", f"{last_latency:.2f}s")
 
         detail = provider_details.get(selected_provider)
         if detail:
             st.caption(detail)
         if selected_provider == "huggingface_server":
             st.caption(
-                "Os modelos exibidos neste provider são aliases publicados pelo serviço. O backend real pode ser Ollama, MLX, GGUF, OpenAI ou outro runtime suportado pelo hub."
+                "The models shown for this provider are aliases published by the service. The real backend may be Ollama, MLX, GGUF, OpenAI, or another runtime supported by the hub."
             )
         if selected_provider in context_window_supported_providers:
             if context_window_mode == "auto":
-                st.caption(f"Contexto ativo em {provider_options.get(selected_provider, selected_provider)}: `auto`")
+                st.caption(f"Active context in {provider_options.get(selected_provider, selected_provider)}: `auto`")
             else:
-                st.caption(f"Contexto ativo em {provider_options.get(selected_provider, selected_provider)}: `{context_window}`")
+                st.caption(f"Active context in {provider_options.get(selected_provider, selected_provider)}: `{context_window}`")
         st.caption(
-            f"Embeddings ativos: {embedding_provider_options.get(selected_embedding_provider, selected_embedding_provider)} · {selected_embedding_model} · num_ctx={selected_embedding_context_window} · truncate={selected_embedding_truncate}"
+            f"Active embeddings: {embedding_provider_options.get(selected_embedding_provider, selected_embedding_provider)} · {selected_embedding_model} · num_ctx={selected_embedding_context_window} · truncate={selected_embedding_truncate}"
         )
         st.caption(
-            f"RAG atual: {indexed_documents_count} documento(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap} · rerank_pool={selected_rerank_pool_size} · lexical_weight={selected_rerank_lexical_weight:.2f}"
+            f"Current RAG: {indexed_documents_count} document(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap} · rerank_pool={selected_rerank_pool_size} · lexical_weight={selected_rerank_lexical_weight:.2f}"
         )
-        st.caption(f"Loader ativo: {loader_strategy_labels[selected_loader_strategy]}")
-        st.caption(f"Chunking ativo: {chunking_strategy_labels[selected_chunking_strategy]}")
-        st.caption(f"Retrieval ativo: {retrieval_strategy_labels[selected_retrieval_strategy]}")
-        st.caption(f"Extração PDF ativa: {pdf_mode_labels[selected_pdf_extraction_mode]}")
-        st.caption(f"OCR documental: {ocr_backend_labels.get(selected_ocr_backend, selected_ocr_backend)}")
-        st.caption(f"VLM documental: {selected_vl_model}")
-        st.caption("Pipeline ativo: retrieval vetorial + reranking híbrido + budget de contexto no prompt.")
-        st.caption(f"Histórico local: `{history_filename}`")
+        st.caption(f"Active loader: {loader_strategy_labels[selected_loader_strategy]}")
+        st.caption(f"Active chunking: {chunking_strategy_labels[selected_chunking_strategy]}")
+        st.caption(f"Active retrieval: {retrieval_strategy_labels[selected_retrieval_strategy]}")
+        st.caption(f"Active PDF extraction: {pdf_mode_labels[selected_pdf_extraction_mode]}")
+        st.caption(f"Document OCR: {ocr_backend_labels.get(selected_ocr_backend, selected_ocr_backend)}")
+        st.caption(f"Document VLM: {selected_vl_model}")
+        st.caption("Active pipeline: vector retrieval + hybrid reranking + prompt context budget.")
+        st.caption(f"Local history: `{history_filename}`")
         st.caption(prompt_profiles[selected_prompt_profile]["description"])
-        st.info("RAG Avançado (Base Documental): Fase 4.5 ativa.")
+        st.info("Advanced RAG (Document Base): Phase 4.5 active.")
 
     return (
         selected_provider,
@@ -446,18 +446,18 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
     with st.sidebar:
         st.divider()
-        st.subheader("Mapa operacional")
+        st.subheader("Operational map")
 
         provider_path = snapshot.get("provider_path")
         local_dependency = snapshot.get("local_dependency")
         if provider_path:
-            st.caption(f"Rota ativa: {provider_path}")
+            st.caption(f"Active route: {provider_path}")
         if local_dependency:
             st.caption(str(local_dependency))
 
         chat = snapshot.get("chat")
         if isinstance(chat, dict):
-            with st.expander("Chat com RAG", expanded=False):
+            with st.expander("Chat with RAG", expanded=False):
                 st.write(
                     {
                         "provider": chat.get("provider"),
@@ -488,11 +488,11 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     }
                 )
                 if str(chat.get("budget_alert_status") or "") == "warn":
-                    st.warning("O último chat acionou alertas de budget/runtime. Revise os detalhes antes de repetir o padrão em produção local.")
+                    st.warning("The latest chat triggered budget/runtime alerts. Review the details before repeating this pattern in local production.")
 
         structured = snapshot.get("structured")
         if isinstance(structured, dict):
-            with st.expander("Tasks estruturadas", expanded=False):
+            with st.expander("Structured tasks", expanded=False):
                 st.write(
                     {
                         "current_task": structured.get("current_task"),
@@ -531,10 +531,10 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     }
                 )
                 if str(structured.get("budget_alert_status") or "") == "warn":
-                    st.warning("A última execução estruturada acionou alertas de budget/runtime. Revise os detalhes antes de automatizar esse fluxo.")
+                    st.warning("The latest structured execution triggered budget/runtime alerts. Review the details before automating this flow.")
                 task_model_map = structured.get("task_model_map")
                 if isinstance(task_model_map, dict) and task_model_map:
-                    st.caption("Modelo efetivo por task")
+                    st.caption("Effective model by task")
                     st.dataframe(
                         [
                             {"task": task_name, "model": model_name}
@@ -545,7 +545,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
         documents = snapshot.get("documents")
         if isinstance(documents, dict):
-            with st.expander("Documentos / PDF / OCR / VL", expanded=False):
+            with st.expander("Documents / PDF / OCR / VL", expanded=False):
                 st.write(
                     {
                         "loader_strategy": documents.get("loader_strategy"),
@@ -565,7 +565,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
         document_agent = snapshot.get("document_agent")
         if isinstance(document_agent, dict) and document_agent:
-            with st.expander("Document Operations Copilot · histórico agregado", expanded=False):
+            with st.expander("Document Operations Copilot · aggregate history", expanded=False):
                 st.write(
                     {
                         "log_path": document_agent.get("log_path"),
@@ -578,20 +578,20 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                 if document_agent.get("log_exists") and int(document_agent.get("total_runs") or 0) > 0:
                     metric_col_1, metric_col_2, metric_col_3, metric_col_4 = st.columns(4)
                     metric_col_1.metric("Runs", int(document_agent.get("total_runs") or 0))
-                    metric_col_2.metric("Sucesso", _format_ratio(document_agent.get("success_rate")))
+                    metric_col_2.metric("Success", _format_ratio(document_agent.get("success_rate")))
                     metric_col_3.metric("Needs review", _format_ratio(document_agent.get("needs_review_rate")))
-                    metric_col_4.metric("Confiança média", _format_ratio(document_agent.get("avg_confidence")))
+                    metric_col_4.metric("Average confidence", _format_ratio(document_agent.get("avg_confidence")))
                     st.caption(
-                        "Esse bloco resume o comportamento agregado do copiloto documental: intenções, tools, guardrails e casos recentes que pediram revisão humana."
+                        "This block summarizes the aggregated behavior of the document copilot: intents, tools, guardrails, and recent cases that required human review."
                     )
 
                     runs_with_tool_errors = int(document_agent.get("runs_with_tool_errors") or 0)
                     if runs_with_tool_errors:
-                        st.warning(f"Execuções com erro de tool: {runs_with_tool_errors}")
+                        st.warning(f"Runs with tool errors: {runs_with_tool_errors}")
 
                     for label, field_name, key_name in [
-                        ("Distribuição por intenção", "intent_counts", "intent"),
-                        ("Distribuição por tool", "tool_counts", "tool"),
+                        ("Distribution by intent", "intent_counts", "intent"),
+                        ("Distribution by tool", "tool_counts", "tool"),
                         ("Decision counts · route", "workflow_route_decision_counts", "route_decision"),
                         ("Decision counts · guardrail", "workflow_guardrail_decision_counts", "guardrail_decision"),
                     ]:
@@ -608,12 +608,12 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     needs_review_examples = document_agent.get("needs_review_examples")
                     if isinstance(needs_review_examples, list) and needs_review_examples:
-                        st.caption("Exemplos recentes que pediram revisão humana")
+                        st.caption("Recent examples that required human review")
                         st.dataframe(needs_review_examples, width="stretch")
 
                     recent_entries = document_agent.get("recent_entries")
                     if isinstance(recent_entries, list) and recent_entries:
-                        st.caption("Execuções recentes do copiloto")
+                        st.caption("Recent copilot runs")
                         st.dataframe(
                             [
                                 {
@@ -633,7 +633,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
         evidenceops = snapshot.get("evidenceops")
         if isinstance(evidenceops, dict) and evidenceops:
-            with st.expander("EvidenceOps · worklog operacional", expanded=False):
+            with st.expander("EvidenceOps · operational worklog", expanded=False):
                 st.write(
                     {
                         "log_path": evidenceops.get("log_path"),
@@ -650,16 +650,16 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     metric_col_3.metric("Actions", int(evidenceops.get("total_action_items") or 0))
                     metric_col_4.metric("Needs review", _format_ratio(evidenceops.get("needs_review_rate")))
                     st.caption(
-                        f"Confiança média: {_format_ratio(evidenceops.get('avg_confidence'))} · fontes/run: {float(evidenceops.get('avg_source_count', 0.0)):.1f} · recomendações totais: {int(evidenceops.get('total_recommended_actions') or 0)} · documentos únicos: {int(evidenceops.get('unique_document_count') or 0)}"
+                        f"Average confidence: {_format_ratio(evidenceops.get('avg_confidence'))} · sources/run: {float(evidenceops.get('avg_source_count', 0.0)):.1f} · total recommendations: {int(evidenceops.get('total_recommended_actions') or 0)} · unique documents: {int(evidenceops.get('unique_document_count') or 0)}"
                     )
 
                     for label, field_name, key_name in [
-                        ("Distribuição por review type", "review_type_counts", "review_type"),
-                        ("Distribuição por tool", "tool_counts", "tool"),
-                        ("Distribuição por finding type", "finding_type_counts", "finding_type"),
-                        ("Distribuição por owner", "owner_counts", "owner"),
-                        ("Distribuição por status", "status_counts", "status"),
-                        ("Distribuição por due date", "due_date_counts", "due_date"),
+                        ("Distribution by review type", "review_type_counts", "review_type"),
+                        ("Distribution by tool", "tool_counts", "tool"),
+                        ("Distribution by finding type", "finding_type_counts", "finding_type"),
+                        ("Distribution by owner", "owner_counts", "owner"),
+                        ("Distribution by status", "status_counts", "status"),
+                        ("Distribution by due date", "due_date_counts", "due_date"),
                     ]:
                         rows = evidenceops.get(field_name)
                         if isinstance(rows, dict) and rows:
@@ -671,7 +671,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     recent_entries = evidenceops.get("recent_entries")
                     if isinstance(recent_entries, list) and recent_entries:
-                        st.caption("Entradas recentes do worklog")
+                        st.caption("Recent worklog entries")
                         st.dataframe(
                             [
                                 {
@@ -691,7 +691,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
         evidenceops_actions = snapshot.get("evidenceops_actions")
         if isinstance(evidenceops_actions, dict) and evidenceops_actions:
-            with st.expander("EvidenceOps · action store local", expanded=False):
+            with st.expander("EvidenceOps · local action store", expanded=False):
                 st.write(
                     {
                         "store_path": evidenceops_actions.get("store_path"),
@@ -708,7 +708,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     metric_col_3.metric("Recommended", int(evidenceops_actions.get("recommended_actions") or 0))
                     metric_col_4.metric("Needs review", _format_ratio(evidenceops_actions.get("needs_review_rate")))
                     st.caption(
-                        f"Ações com due date: {int(evidenceops_actions.get('actions_with_due_date') or 0)} · sem owner: {int(evidenceops_actions.get('actions_without_owner') or 0)} · documentos únicos: {int(evidenceops_actions.get('unique_document_count') or 0)}"
+                        f"Actions with due date: {int(evidenceops_actions.get('actions_with_due_date') or 0)} · without owner: {int(evidenceops_actions.get('actions_without_owner') or 0)} · unique documents: {int(evidenceops_actions.get('unique_document_count') or 0)}"
                     )
                     governance_col_1, governance_col_2, governance_col_3, governance_col_4 = st.columns(4)
                     governance_col_1.metric("Review required", int(evidenceops_actions.get("review_required_actions") or 0))
@@ -716,15 +716,15 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     governance_col_3.metric("Pending approval", int(evidenceops_actions.get("pending_approval_actions") or 0))
                     governance_col_4.metric("Overdue", int(evidenceops_actions.get("overdue_actions") or 0))
                     st.caption(
-                        f"Open sem owner: {int(evidenceops_actions.get('unassigned_open_actions') or 0)} · updates sensíveis auditados: {int(evidenceops_actions.get('sensitive_update_count') or 0)}"
+                        f"Open without owner: {int(evidenceops_actions.get('unassigned_open_actions') or 0)} · audited sensitive updates: {int(evidenceops_actions.get('sensitive_update_count') or 0)}"
                     )
 
                     for label, field_name, key_name in [
-                        ("Distribuição por action type", "action_type_counts", "action_type"),
-                        ("Distribuição por status", "status_counts", "status"),
-                        ("Distribuição por owner", "owner_counts", "owner"),
-                        ("Distribuição por review type", "review_type_counts", "review_type"),
-                        ("Distribuição por tool", "tool_counts", "tool"),
+                        ("Distribution by action type", "action_type_counts", "action_type"),
+                        ("Distribution by status", "status_counts", "status"),
+                        ("Distribution by owner", "owner_counts", "owner"),
+                        ("Distribution by review type", "review_type_counts", "review_type"),
+                        ("Distribution by tool", "tool_counts", "tool"),
                     ]:
                         rows = evidenceops_actions.get(field_name)
                         if isinstance(rows, dict) and rows:
@@ -736,7 +736,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     recent_entries = evidenceops_actions.get("recent_entries")
                     if isinstance(recent_entries, list) and recent_entries:
-                        st.caption("Ações recentes")
+                        st.caption("Recent actions")
                         st.dataframe(
                             [
                                 {
@@ -758,7 +758,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
         evidenceops_repository = snapshot.get("evidenceops_repository")
         if isinstance(evidenceops_repository, dict) and evidenceops_repository:
-            with st.expander("EvidenceOps · document repository local", expanded=False):
+            with st.expander("EvidenceOps · local document repository", expanded=False):
                 st.write(
                     {
                         "repository_root": evidenceops_repository.get("repository_root"),
@@ -780,14 +780,14 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                         drift_col_1.metric("New docs", int(drift_summary.get("new_documents_count") or 0))
                         drift_col_2.metric("Changed docs", int(drift_summary.get("changed_documents_count") or 0))
                         drift_col_3.metric("Removed docs", int(drift_summary.get("removed_documents_count") or 0))
-                        drift_col_4.metric("Has drift", "Sim" if drift_summary.get("has_drift") else "Não")
+                        drift_col_4.metric("Has drift", "Yes" if drift_summary.get("has_drift") else "No")
                         st.caption(
-                            f"Snapshot anterior: {drift_summary.get('previous_captured_at') or 'n/d'} · atual: {drift_summary.get('current_captured_at') or 'n/d'}"
+                            f"Previous snapshot: {drift_summary.get('previous_captured_at') or 'n/a'} · current: {drift_summary.get('current_captured_at') or 'n/a'}"
                         )
 
                     for label, field_name, key_name in [
-                        ("Distribuição por categoria", "category_counts", "category"),
-                        ("Distribuição por tipo de arquivo", "suffix_counts", "suffix"),
+                        ("Distribution by category", "category_counts", "category"),
+                        ("Distribution by file type", "suffix_counts", "suffix"),
                     ]:
                         rows = evidenceops_repository.get(field_name)
                         if isinstance(rows, dict) and rows:
@@ -799,13 +799,13 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     recent_documents = evidenceops_repository.get("recent_documents")
                     if isinstance(recent_documents, list) and recent_documents:
-                        st.caption("Documentos recentes do corpus local")
+                        st.caption("Recent documents from the local corpus")
                         st.dataframe(recent_documents[:10], width="stretch")
 
                     for label, field_name in [
-                        ("Novos documentos detectados desde o último snapshot", "new_documents"),
-                        ("Documentos alterados desde o último snapshot", "changed_documents"),
-                        ("Documentos removidos desde o último snapshot", "removed_documents"),
+                        ("New documents detected since the last snapshot", "new_documents"),
+                        ("Changed documents detected since the last snapshot", "changed_documents"),
+                        ("Removed documents detected since the last snapshot", "removed_documents"),
                     ]:
                         rows = evidenceops_repository.get(field_name)
                         if isinstance(rows, list) and rows:
@@ -814,7 +814,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
         runtime_execution = snapshot.get("runtime_execution")
         if isinstance(runtime_execution, dict) and runtime_execution:
-            with st.expander("Observabilidade · histórico agregado de execuções", expanded=False):
+            with st.expander("Observability · aggregate execution history", expanded=False):
                 st.write(
                     {
                         "log_path": runtime_execution.get("log_path"),
@@ -827,26 +827,26 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                 if runtime_execution.get("log_exists") and int(runtime_execution.get("total_runs") or 0) > 0:
                     metric_col_1, metric_col_2, metric_col_3, metric_col_4 = st.columns(4)
                     metric_col_1.metric("Runs", int(runtime_execution.get("total_runs") or 0))
-                    metric_col_2.metric("Sucesso", _format_ratio(runtime_execution.get("success_rate")))
-                    metric_col_3.metric("Erro", _format_ratio(runtime_execution.get("error_rate")))
+                    metric_col_2.metric("Success", _format_ratio(runtime_execution.get("success_rate")))
+                    metric_col_3.metric("Error", _format_ratio(runtime_execution.get("error_rate")))
                     metric_col_4.metric("Needs review", _format_ratio(runtime_execution.get("needs_review_rate")))
 
                     st.caption(
-                        f"Latência média total: {float(runtime_execution.get('avg_latency_s', 0.0)):.2f}s · "
+                        f"Average total latency: {float(runtime_execution.get('avg_latency_s', 0.0)):.2f}s · "
                         f"retrieval: {float(runtime_execution.get('avg_retrieval_latency_s', 0.0)):.2f}s · "
-                        f"geração: {float(runtime_execution.get('avg_generation_latency_s', 0.0)):.2f}s · "
+                        f"generation: {float(runtime_execution.get('avg_generation_latency_s', 0.0)):.2f}s · "
                         f"prompt build: {float(runtime_execution.get('avg_prompt_build_latency_s', 0.0)):.2f}s"
                     )
                     bottleneck_stage_counts = runtime_execution.get("bottleneck_stage_counts")
                     if isinstance(bottleneck_stage_counts, dict) and bottleneck_stage_counts:
                         st.caption(
-                            f"Share médio de latência: retrieval={float(runtime_execution.get('avg_retrieval_share', 0.0)):.0%} · "
-                            f"geração={float(runtime_execution.get('avg_generation_share', 0.0)):.0%} · "
+                            f"Average latency share: retrieval={float(runtime_execution.get('avg_retrieval_share', 0.0)):.0%} · "
+                            f"generation={float(runtime_execution.get('avg_generation_share', 0.0)):.0%} · "
                             f"prompt build={float(runtime_execution.get('avg_prompt_build_share', 0.0)):.0%} · "
-                            f"outros={float(runtime_execution.get('avg_other_latency_share', 0.0)):.0%} · "
-                            f"gargalo dominante médio={float(runtime_execution.get('avg_bottleneck_share', 0.0)):.0%}"
+                            f"other={float(runtime_execution.get('avg_other_latency_share', 0.0)):.0%} · "
+                            f"average dominant bottleneck={float(runtime_execution.get('avg_bottleneck_share', 0.0)):.0%}"
                         )
-                        st.caption("Gargalo dominante por execução")
+                        st.caption("Dominant bottleneck by execution")
                         st.dataframe(
                             [
                                 {"latency_stage": stage_name, "count": count}
@@ -855,55 +855,55 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                             width="stretch",
                         )
                     st.caption(
-                        f"Tokens médios: prompt={float(runtime_execution.get('avg_prompt_tokens', 0.0)):.1f} · "
+                        f"Average tokens: prompt={float(runtime_execution.get('avg_prompt_tokens', 0.0)):.1f} · "
                         f"completion={float(runtime_execution.get('avg_completion_tokens', 0.0)):.1f} · "
                         f"total={float(runtime_execution.get('avg_total_tokens', 0.0)):.1f}"
                     )
                     st.caption(
                         f"Docs/run: {float(runtime_execution.get('avg_selected_documents', 0.0)):.1f} · "
-                        f"chunks recuperados/run: {float(runtime_execution.get('avg_retrieved_chunks_count', 0.0)):.1f} · "
-                        f"pressão média de contexto: {float(runtime_execution.get('avg_context_pressure_ratio', 0.0)):.2f} · "
+                        f"retrieved chunks/run: {float(runtime_execution.get('avg_retrieved_chunks_count', 0.0)):.1f} · "
+                        f"average context pressure: {float(runtime_execution.get('avg_context_pressure_ratio', 0.0)):.2f} · "
                         f"auto-degrade: {_format_ratio(runtime_execution.get('auto_degrade_rate'))} · "
-                        f"truncamento de contexto: {_format_ratio(runtime_execution.get('truncated_prompt_rate'))}"
+                        f"context truncation: {_format_ratio(runtime_execution.get('truncated_prompt_rate'))}"
                     )
                     costed_runs = int(runtime_execution.get("costed_runs") or 0)
                     if costed_runs > 0:
                         st.caption(
-                            f"Custo direto estimado: total=${float(runtime_execution.get('total_cost_usd', 0.0)):.6f} · "
-                            f"média/run=${float(runtime_execution.get('avg_cost_usd', 0.0)):.6f} · runs com pricing={costed_runs}"
+                            f"Estimated direct cost: total=${float(runtime_execution.get('total_cost_usd', 0.0)):.6f} · "
+                            f"avg/run=${float(runtime_execution.get('avg_cost_usd', 0.0)):.6f} · runs with pricing={costed_runs}"
                         )
                     runtime_doc_metric_1, runtime_doc_metric_2, runtime_doc_metric_3, runtime_doc_metric_4 = st.columns(4)
                     runtime_doc_metric_1.metric("Evidence pipeline", int(runtime_execution.get("evidence_pipeline_runs") or 0))
-                    runtime_doc_metric_2.metric("OCR envolvido", int(runtime_execution.get("ocr_involved_runs") or 0))
-                    runtime_doc_metric_3.metric("Docling envolvido", int(runtime_execution.get("docling_involved_runs") or 0))
-                    runtime_doc_metric_4.metric("VL envolvido", int(runtime_execution.get("vl_involved_runs") or 0))
+                    runtime_doc_metric_2.metric("OCR involved", int(runtime_execution.get("ocr_involved_runs") or 0))
+                    runtime_doc_metric_3.metric("Docling involved", int(runtime_execution.get("docling_involved_runs") or 0))
+                    runtime_doc_metric_4.metric("VL involved", int(runtime_execution.get("vl_involved_runs") or 0))
                     mcp_metric_1, mcp_metric_2, mcp_metric_3, mcp_metric_4 = st.columns(4)
                     mcp_metric_1.metric("MCP runs", int(runtime_execution.get("mcp_runs") or 0))
                     mcp_metric_2.metric("MCP calls", int(runtime_execution.get("total_mcp_tool_calls") or 0))
-                    mcp_metric_3.metric("MCP erro", _format_ratio(runtime_execution.get("mcp_error_rate")))
-                    mcp_metric_4.metric("MCP latência", f"{float(runtime_execution.get('avg_mcp_total_latency_s', 0.0)):.2f}s")
+                    mcp_metric_3.metric("MCP error", _format_ratio(runtime_execution.get("mcp_error_rate")))
+                    mcp_metric_4.metric("MCP latency", f"{float(runtime_execution.get('avg_mcp_total_latency_s', 0.0)):.2f}s")
                     if int(runtime_execution.get("mcp_runs") or 0) > 0:
                         st.caption(
                             f"MCP read calls: {int(runtime_execution.get('total_mcp_read_calls') or 0)} · "
                             f"write calls: {int(runtime_execution.get('total_mcp_write_calls') or 0)} · "
-                            f"média de calls/run MCP: {float(runtime_execution.get('avg_mcp_tool_calls_per_run', 0.0)):.2f}"
+                            f"average MCP calls/run: {float(runtime_execution.get('avg_mcp_tool_calls_per_run', 0.0)):.2f}"
                         )
 
                     for label, field_name, key_name in [
-                        ("Distribuição por fluxo", "flow_counts", "flow_type"),
-                        ("Distribuição por task", "task_counts", "task_type"),
-                        ("Distribuição por provider", "provider_counts", "provider"),
-                        ("Distribuição por model", "model_counts", "model"),
-                        ("Distribuição por fonte de usage", "usage_source_counts", "usage_source"),
-                        ("Distribuição por fonte de custo", "cost_source_counts", "cost_source"),
-                        ("Distribuição por budget mode", "budget_mode_counts", "budget_mode"),
-                        ("Distribuição por budget reason", "budget_reason_counts", "budget_reason"),
-                        ("Distribuição por modo de contexto", "context_window_mode_counts", "context_window_mode"),
-                        ("Distribuição por backend OCR", "ocr_backend_counts", "ocr_backend"),
-                        ("Distribuição por server MCP", "mcp_server_counts", "mcp_server"),
-                        ("Distribuição por tool MCP", "mcp_tool_counts", "mcp_tool"),
-                        ("Distribuição por transporte MCP", "mcp_transport_counts", "mcp_transport"),
-                        ("Distribuição por status MCP", "mcp_status_counts", "mcp_status"),
+                        ("Distribution by flow", "flow_counts", "flow_type"),
+                        ("Distribution by task", "task_counts", "task_type"),
+                        ("Distribution by provider", "provider_counts", "provider"),
+                        ("Distribution by model", "model_counts", "model"),
+                        ("Distribution by usage source", "usage_source_counts", "usage_source"),
+                        ("Distribution by cost source", "cost_source_counts", "cost_source"),
+                        ("Distribution by budget mode", "budget_mode_counts", "budget_mode"),
+                        ("Distribution by budget reason", "budget_reason_counts", "budget_reason"),
+                        ("Distribution by context mode", "context_window_mode_counts", "context_window_mode"),
+                        ("Distribution by OCR backend", "ocr_backend_counts", "ocr_backend"),
+                        ("Distribution by MCP server", "mcp_server_counts", "mcp_server"),
+                        ("Distribution by MCP tool", "mcp_tool_counts", "mcp_tool"),
+                        ("Distribution by MCP transport", "mcp_transport_counts", "mcp_transport"),
+                        ("Distribution by MCP status", "mcp_status_counts", "mcp_status"),
                     ]:
                         rows = runtime_execution.get(field_name)
                         if isinstance(rows, dict) and rows:
@@ -918,7 +918,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     recent_entries = runtime_execution.get("recent_entries")
                     if isinstance(recent_entries, list) and recent_entries:
-                        st.caption("Execuções recentes")
+                        st.caption("Recent executions")
                         st.dataframe(
                             [
                                 {
@@ -952,7 +952,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
         evals = snapshot.get("evals")
         if isinstance(evals, dict) and evals:
-            with st.expander("Evals / readiness da Fase 8.5", expanded=False):
+            with st.expander("Evals / Phase 8.5 readiness", expanded=False):
                 global_recommendation = _humanize_eval_recommendation(evals.get("global_recommendation"))
                 st.write(
                     {
@@ -970,14 +970,14 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     metric_col_2.metric("Pass rate", _format_ratio(evals.get("pass_rate")))
                     metric_col_3.metric("Fail rate", _format_ratio(evals.get("fail_rate")))
                     st.caption(
-                        "Esses sinais ajudam a decidir onde continuar em prompt/RAG e onde a Fase 8.5 pode focar em embedding, reranker ou adaptação leve."
+                        "These signals help decide where to continue with prompt/RAG and where Phase 8.5 can focus on embeddings, rerankers, or light adaptation."
                     )
                     if global_recommendation:
                         st.info(global_recommendation)
 
                     suite_counts = evals.get("suite_counts")
                     if isinstance(suite_counts, dict) and suite_counts:
-                        st.caption("Cobertura por suite")
+                        st.caption("Coverage by suite")
                         st.dataframe(
                             [
                                 {"suite_name": name, "runs": count}
@@ -988,7 +988,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     task_counts = evals.get("task_counts")
                     if isinstance(task_counts, dict) and task_counts:
-                        st.caption("Cobertura por task")
+                        st.caption("Coverage by task")
                         st.dataframe(
                             [
                                 {"task_type": name, "runs": count}
@@ -1004,7 +1004,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     adaptation_candidates = evals.get("adaptation_candidates")
                     if isinstance(adaptation_candidates, list) and adaptation_candidates:
-                        st.caption("Candidatos de adaptação")
+                        st.caption("Adaptation candidates")
                         st.dataframe(
                             [
                                 {
@@ -1022,7 +1022,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     next_eval_priorities = evals.get("next_eval_priorities")
                     if isinstance(next_eval_priorities, list) and next_eval_priorities:
-                        st.caption("Próximas prioridades de eval")
+                        st.caption("Next eval priorities")
                         st.dataframe(
                             [
                                 {
@@ -1039,7 +1039,7 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
 
                     healthy_tasks = evals.get("healthy_tasks")
                     if isinstance(healthy_tasks, list) and healthy_tasks:
-                        st.caption("Tasks saudáveis (prompt + RAG parecem suficientes)")
+                        st.caption("Healthy tasks (prompt + RAG seem sufficient)")
                         st.dataframe(
                             [
                                 {

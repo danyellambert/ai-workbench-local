@@ -8,7 +8,7 @@ STRUCTURED_SMOKE_THRESHOLDS: dict[str, Any] = {
     "max_score": 5,
     "pass_min_score": 5,
     "warn_min_score": 3,
-    "notes": "Smoke eval é estrutural e conservador: PASS exige payload validado + sinais mínimos fortes por task.",
+    "notes": "Smoke eval is structural and conservative: PASS requires a validated payload plus strong minimum signals per task.",
 }
 
 
@@ -16,12 +16,12 @@ REAL_DOCUMENT_EVAL_THRESHOLDS: dict[str, dict[str, Any]] = {
     "code_analysis": {
         "pass_ratio": 0.72,
         "warn_ratio": 0.48,
-        "notes": "Code analysis privilegia cobertura semântica de issues, refactor plan e test suggestions grounded.",
+    "notes": "Code analysis prioritizes semantic coverage of issues, refactor plans, and grounded test suggestions.",
     },
     "cv_analysis": {
         "pass_ratio": 0.62,
         "warn_ratio": 0.42,
-        "notes": "CV analysis tolera pequenas variações de wording, mas exige boa cobertura de identidade, educação e experiência.",
+    "notes": "CV analysis tolerates small wording variations, but requires strong coverage of identity, education, and experience.",
     },
     "extraction": {
         "pass_ratio": 0.62,
@@ -31,7 +31,7 @@ REAL_DOCUMENT_EVAL_THRESHOLDS: dict[str, dict[str, Any]] = {
     "summary": {
         "pass_ratio": 0.58,
         "warn_ratio": 0.40,
-        "notes": "Summary real-document privilegia cobertura factual e sinais executivos, não matching textual exato.",
+    "notes": "Real-document summary prioritizes factual coverage and executive signals, not exact text matching.",
     },
 }
 
@@ -48,7 +48,7 @@ CHECKLIST_REGRESSION_THRESHOLDS: dict[str, Any] = {
     "fail_on_collapsed_items": True,
     "warn_on_order_breaks": True,
     "warn_on_unexpected_items": True,
-    "notes": "Checklist regression prioriza atomicidade, grounding e aderência à sequência esperada do documento-fonte.",
+    "notes": "Checklist regression prioritizes atomicity, grounding, and adherence to the expected source-document sequence.",
 }
 
 
@@ -59,21 +59,21 @@ EVIDENCE_CV_GOLD_THRESHOLDS: dict[str, Any] = {
     "phone_f1_target": 0.90,
     "name_f1_target": 1.00,
     "location_f1_target": 1.00,
-    "notes": "Evidence CV gold eval mantém targets altos para contatos e campos de identidade, mas ainda aceita WARN para iteração antes de adaptação.",
+    "notes": "Evidence CV gold eval keeps high targets for contacts and identity fields, but still accepts WARN for iteration before adaptation.",
 }
 
 
 AGENT_ROUTING_THRESHOLDS: dict[str, Any] = {
     "pass_min_ratio": 1.0,
     "warn_min_ratio": 0.75,
-    "notes": "Routing determinístico deve acertar todos os checks no caso ideal; WARN cobre um único desvio em casos limítrofes.",
+    "notes": "Deterministic routing should pass all checks in the ideal case; WARN covers a single deviation in borderline cases.",
 }
 
 
 AGENT_WORKFLOW_THRESHOLDS: dict[str, Any] = {
     "pass_min_ratio": 1.0,
     "warn_min_ratio": 0.75,
-    "notes": "Workflow determinístico de guardrails deve acertar decisão, transição e expectativa de retry/review.",
+    "notes": "The deterministic guardrail workflow should get the decision, transition, and retry/review expectation right.",
 }
 
 
@@ -93,7 +93,7 @@ DIAGNOSIS_THRESHOLDS: dict[str, Any] = {
     "adaptation_medium_min_runs": 5,
     "adaptation_medium_fail_rate": 0.30,
     "adaptation_medium_avg_score_ratio": 0.72,
-    "notes": "Diagnosis thresholds separam tasks saudáveis, tarefas em iteração e candidatas à Fase 8.5.",
+    "notes": "Diagnosis thresholds separate healthy tasks, tasks under iteration, and tasks that are candidates for Phase 8.5.",
 }
 
 
@@ -108,7 +108,7 @@ PHASE8_5_DECISION_THRESHOLDS: dict[str, Any] = {
     "reranker_win_min_mrr_delta": 0.05,
     "reranker_win_min_groundedness_delta": 0.05,
     "reranker_win_max_latency_regression_ratio": 1.75,
-    "notes": "Decision-gate thresholds priorizam ganhos claros e conservadores antes de justificar adaptação leve.",
+    "notes": "Decision-gate thresholds prioritize clear and conservative gains before justifying light adaptation.",
 }
 
 

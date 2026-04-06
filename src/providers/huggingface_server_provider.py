@@ -141,7 +141,7 @@ class HuggingFaceServerProvider:
                 "declared_context_length": self._extract_declared_context_length(show_payload),
                 "backend_provider": (show_payload.get("model_info") or {}).get("hf_local_llm_service.provider") if isinstance(show_payload.get("model_info"), dict) else None,
                 "backend_model_ref": (show_payload.get("model_info") or {}).get("hf_local_llm_service.model_ref") if isinstance(show_payload.get("model_info"), dict) else None,
-                "validation_summary": "O serviço expõe `/api/show`, então o app consegue inspecionar o contexto declarado do alias/modelo do hub.",
+                "validation_summary": "The service exposes `/api/show`, so the app can inspect the declared context of the hub alias/model.",
             }
         except Exception:
             pass
@@ -151,8 +151,8 @@ class HuggingFaceServerProvider:
             "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
             "model": model,
             "validation_summary": (
-                "O runtime Hugging Face via servidor local precisa expor um contrato HTTP compatível com chat completions. "
-                "O valor configurado no app funciona como budget operacional, a menos que o seu servidor implemente controle explícito de contexto."
+                "The Hugging Face runtime through the local server must expose an HTTP contract compatible with chat completions. "
+                "The value configured in the app works as an operational budget unless your server implements explicit context control."
             ),
         }
 
@@ -169,7 +169,7 @@ class HuggingFaceServerProvider:
                 "supports_embeddings": (show_payload.get("model_info") or {}).get("hf_local_llm_service.supports_embeddings") if isinstance(show_payload.get("model_info"), dict) else None,
                 "backend_provider": (show_payload.get("model_info") or {}).get("hf_local_llm_service.provider") if isinstance(show_payload.get("model_info"), dict) else None,
                 "backend_model_ref": (show_payload.get("model_info") or {}).get("hf_local_llm_service.model_ref") if isinstance(show_payload.get("model_info"), dict) else None,
-                "validation_summary": "O serviço expõe `/api/show`, então o app consegue inspecionar se o alias/modelo do hub suporta embeddings.",
+                "validation_summary": "The service exposes `/api/show`, so the app can inspect whether the hub alias/model supports embeddings.",
             }
         except Exception:
             pass
@@ -179,8 +179,8 @@ class HuggingFaceServerProvider:
             "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
             "model": model,
             "validation_summary": (
-                "Embeddings via servidor local dependem do contrato exposto pelo runtime externo. "
-                "O app registra esse valor como metadado operacional e só tenta embeddings se um modelo de embedding estiver configurado."
+                "Embeddings through the local server depend on the contract exposed by the external runtime. "
+                "The app records this value as operational metadata and only attempts embeddings if an embedding model is configured."
             ),
         }
 
@@ -255,6 +255,6 @@ class HuggingFaceServerProvider:
 
     def format_error(self, model: str, error: Exception) -> str:
         return (
-            f"Não foi possível obter resposta do Hugging Face server local com o modelo `{model}`. "
-            f"Base URL: `{self.settings.base_url}`. Detalhes: {error}"
+            f"Could not get a response from the local Hugging Face server using model `{model}`. "
+            f"Base URL: `{self.settings.base_url}`. Details: {error}"
         )

@@ -10,8 +10,8 @@ from .envelope import StructuredResult, TaskExecutionRequest
 
 def describe_structured_execution_strategy(strategy: str) -> str:
     labels = {
-        "direct": "Execução direta",
-        "langgraph_context_retry": "LangGraph · retry de contexto (experimental)",
+        "direct": "Direct execution",
+        "langgraph_context_retry": "LangGraph · context retry (experimental)",
     }
     return labels.get((strategy or "").strip().lower(), strategy or "direct")
 
@@ -85,7 +85,7 @@ def _prepare_request(state: StructuredWorkflowState) -> StructuredWorkflowState:
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="prepare_request",
-            detail="Preparando request inicial para o workflow estruturado",
+            detail="Preparing initial request for the structured workflow",
             attempt=1,
             context_strategy=context_strategy,
         ),
@@ -120,7 +120,7 @@ def _route_context_strategy(state: StructuredWorkflowState) -> StructuredWorkflo
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="route_context_strategy",
-            detail=f"Selecionando estratégia inicial de contexto: {route_decision}",
+            detail=f"Selecting initial context strategy: {route_decision}",
             attempt=int(state.get("attempt", 1)),
             context_strategy=selected_strategy,
         ),
@@ -140,7 +140,7 @@ def _prepare_document_agent_request(state: StructuredWorkflowState) -> Structure
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="prepare_agent_request",
-            detail="Preparando request inicial do agente documental",
+            detail="Preparing initial request for the document agent",
             attempt=1,
             context_strategy=context_strategy,
         ),
@@ -163,7 +163,7 @@ def _classify_document_agent_intent(state: StructuredWorkflowState) -> Structure
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="classify_intent",
-            detail=f"Classificando intenção do agente: {reason}",
+            detail=f"Classifying agent intent: {reason}",
             attempt=int(state.get("attempt", 1)),
             context_strategy=context_strategy,
         ),
@@ -201,7 +201,7 @@ def _select_document_agent_tool_node(state: StructuredWorkflowState) -> Structur
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="select_tool",
-            detail=f"Selecionando tool do agente: {tool_reason}",
+            detail=f"Selecting agent tool: {tool_reason}",
             attempt=int(state.get("attempt", 1)),
             context_strategy=context_strategy,
         ),
@@ -241,7 +241,7 @@ def _route_document_agent_context_strategy(state: StructuredWorkflowState) -> St
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="route_agent_context_strategy",
-            detail=f"Selecionando estratégia de contexto do agente: {route_decision}",
+            detail=f"Selecting agent context strategy: {route_decision}",
             attempt=int(state.get("attempt", 1)),
             context_strategy=selected_strategy,
         ),
@@ -259,7 +259,7 @@ def _execute_task(state: StructuredWorkflowState) -> StructuredWorkflowState:
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="execute_task",
-            detail="Executando structured_service dentro do workflow LangGraph",
+            detail="Executing structured_service within the LangGraph workflow",
             attempt=int(state.get("attempt", 1)),
             context_strategy=context_strategy,
             success=bool(result.success),
@@ -291,7 +291,7 @@ def _evaluate_guardrails(state: StructuredWorkflowState) -> StructuredWorkflowSt
             "workflow_trace": _append_trace(
                 state.get("workflow_trace"),
                 node="evaluate_guardrails",
-                detail="Workflow sem resultado estruturado válido; finalizando",
+                detail="Workflow has no valid structured result; finishing",
                 attempt=int(state.get("attempt", 1)),
                 context_strategy=(effective_request.context_strategy if isinstance(effective_request, TaskExecutionRequest) else "document_scan") or "document_scan",
             ),
@@ -325,11 +325,11 @@ def _evaluate_guardrails(state: StructuredWorkflowState) -> StructuredWorkflowSt
         needs_review_reason = "structured_parse_recovery_was_required"
 
     trace_detail = {
-        "finish_ok": "Resultado aceito sem guardrail adicional",
-        "retry_with_retrieval_after_failure": "Falha na execução; retry controlado com retrieval",
-        "retry_with_retrieval_low_quality": "Qualidade baixa; retry controlado com retrieval",
-        "finish_needs_review_low_quality": "Resultado marcado como needs_review por qualidade baixa",
-        "finish_needs_review_parse_recovery": "Resultado marcado como needs_review porque exigiu parse recovery",
+        "finish_ok": "Result accepted with no additional guardrail",
+        "retry_with_retrieval_after_failure": "Execution failed; controlled retry with retrieval",
+        "retry_with_retrieval_low_quality": "Low quality; controlled retry with retrieval",
+        "finish_needs_review_low_quality": "Result marked as needs_review due to low quality",
+        "finish_needs_review_parse_recovery": "Result marked as needs_review because parse recovery was required",
     }.get(decision, decision)
 
     return {
@@ -359,7 +359,7 @@ def _evaluate_document_agent_guardrails(state: StructuredWorkflowState) -> Struc
             "workflow_trace": _append_trace(
                 state.get("workflow_trace"),
                 node="evaluate_agent_guardrails",
-                detail="Workflow do agente sem resultado válido; finalizando",
+                detail="Agent workflow has no valid result; finishing",
                 attempt=int(state.get("attempt", 1)),
                 context_strategy=(effective_request.context_strategy if isinstance(effective_request, TaskExecutionRequest) else "document_scan") or "document_scan",
             ),
@@ -392,11 +392,11 @@ def _evaluate_document_agent_guardrails(state: StructuredWorkflowState) -> Struc
         review_reason = needs_review_reason or (f"document_agent_confidence_below_review_threshold:{float(confidence):.3f}" if isinstance(confidence, (int, float)) else "document_agent_needs_review")
 
     trace_detail = {
-        "finish_ok": "Resposta do agente aceita sem guardrail adicional",
-        "retry_with_retrieval_after_failure": "Falha no agente documental; retry controlado com retrieval",
-        "retry_with_retrieval_missing_sources": "Resposta sem fontes; retry controlado com retrieval",
-        "retry_with_retrieval_low_confidence": "Confiança baixa; retry controlado com retrieval",
-        "finish_needs_review_agent": "Resposta do agente marcada para revisão humana",
+        "finish_ok": "Agent response accepted with no additional guardrail",
+        "retry_with_retrieval_after_failure": "Document agent failed; controlled retry with retrieval",
+        "retry_with_retrieval_missing_sources": "Response has no sources; controlled retry with retrieval",
+        "retry_with_retrieval_low_confidence": "Low confidence; controlled retry with retrieval",
+        "finish_needs_review_agent": "Agent response marked for human review",
     }.get(decision, decision)
 
     return {
@@ -455,7 +455,7 @@ def _retry_with_retrieval(state: StructuredWorkflowState) -> StructuredWorkflowS
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="retry_with_retrieval",
-            detail=(state.get("retry_reason") or "Retry controlado com context_strategy=retrieval"),
+            detail=(state.get("retry_reason") or "Controlled retry with context_strategy=retrieval"),
             attempt=next_attempt,
             context_strategy="retrieval",
         ),
@@ -488,7 +488,7 @@ def _mark_needs_review(state: StructuredWorkflowState) -> StructuredWorkflowStat
         "workflow_trace": _append_trace(
             state.get("workflow_trace"),
             node="mark_needs_review",
-            detail=(state.get("needs_review_reason") or "Marcando saída para revisão humana"),
+            detail=(state.get("needs_review_reason") or "Marking output for human review"),
             attempt=int(state.get("attempt", 1)),
             context_strategy=(effective_request.context_strategy or "document_scan").strip().lower() or "document_scan",
             success=bool(result.success),
@@ -621,7 +621,7 @@ def run_structured_execution_workflow(
             workflow_trace=[
                 {
                     "node": "direct_execution",
-                    "detail": "Fluxo estruturado executado sem LangGraph",
+                    "detail": "Structured flow executed without LangGraph",
                     "attempt": 1,
                     "context_strategy": (request.context_strategy or "document_scan").strip().lower() or "document_scan",
                     "success": bool(result.success),
@@ -648,7 +648,7 @@ def run_structured_execution_workflow(
                 workflow_trace=[
                     {
                         "node": "direct_execution",
-                        "detail": "LangGraph não retornou resultado final; fallback para execução direta",
+                        "detail": "LangGraph did not return a final result; falling back to direct execution",
                         "attempt": 1,
                         "context_strategy": (request.context_strategy or "document_scan").strip().lower() or "document_scan",
                         "success": bool(result.success),
@@ -684,7 +684,7 @@ def run_structured_execution_workflow(
             workflow_trace=[
                 {
                     "node": "direct_execution",
-                    "detail": "Erro no workflow LangGraph; fallback para execução direta",
+                    "detail": "Error in the LangGraph workflow; falling back to direct execution",
                     "attempt": 1,
                     "context_strategy": (request.context_strategy or "document_scan").strip().lower() or "document_scan",
                     "success": bool(result.success),
