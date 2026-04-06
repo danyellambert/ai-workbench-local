@@ -9,6 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from src.storage.runtime_paths import get_phase8_eval_db_path  # noqa: E402
 from src.storage.phase8_eval_import import import_eval_history_reports  # noqa: E402
 from src.storage.phase8_eval_store import load_eval_runs, summarize_eval_runs  # noqa: E402
 
@@ -22,7 +23,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--db",
-        default=str(ROOT_DIR / ".phase8_eval_runs.sqlite3"),
+        default=str(get_phase8_eval_db_path(ROOT_DIR)),
         help="Path to the Phase 8 eval SQLite database.",
     )
     args = parser.parse_args()

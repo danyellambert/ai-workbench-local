@@ -14,12 +14,13 @@ from src.config import get_rag_settings
 from src.evals.phase8_thresholds import EVIDENCE_CV_GOLD_THRESHOLDS
 from src.evidence_cv.config import build_evidence_config_from_rag_settings
 from src.evidence_cv.pipeline.runner import run_cv_pipeline_from_bytes
+from src.storage.runtime_paths import get_phase8_eval_db_path
 from src.storage.phase8_eval_store import append_eval_run
 from src.rag.loaders import _extract_pdf_text, _extract_pdf_text_with_evidence_pipeline
 
 
 EMAIL_PATTERN = __import__("re").compile(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", __import__("re").I)
-EVAL_DB_PATH = ROOT_DIR / ".phase8_eval_runs.sqlite3"
+EVAL_DB_PATH = get_phase8_eval_db_path(ROOT_DIR)
 
 
 def _normalize_phone(value: str) -> str:

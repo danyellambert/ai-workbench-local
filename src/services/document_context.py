@@ -597,9 +597,10 @@ def _build_cv_grounding_bundle(indexing_payload: dict[str, Any]) -> dict[str, An
 def _get_rag_index() -> dict[str, Any] | None:
     disk_index: dict[str, Any] | None = None
     try:
-        from pathlib import Path
         from ..storage.rag_store import load_rag_store
-        disk_index = load_rag_store(Path(".rag_store.json"))
+        from ..storage.runtime_paths import get_rag_store_path
+
+        disk_index = load_rag_store(get_rag_store_path(get_rag_settings().store_path.parent))
         if isinstance(disk_index, dict):
             return disk_index
     except Exception:

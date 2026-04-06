@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from ..storage.runtime_paths import get_phase8_eval_db_path
 from ..storage.phase8_eval_diagnosis import build_eval_diagnosis
 from ..storage.phase8_eval_store import load_eval_runs, summarize_eval_runs
 from .phase8_5_decision_gate import find_latest_phase8_5_run_dir, load_phase8_5_benchmark_artifacts
@@ -127,7 +128,7 @@ def build_phase8_5_audit(
     selected_groups = [str(item) for item in (preflight.get("selected_groups") or []) if str(item).strip()]
     effective_groups = sorted(set(selected_groups) | set(executed_groups))
 
-    resolved_eval_db = Path(eval_db_path) if eval_db_path else resolved_root / ".phase8_eval_runs.sqlite3"
+    resolved_eval_db = Path(eval_db_path) if eval_db_path else get_phase8_eval_db_path(resolved_root)
     eval_entries = load_eval_runs(resolved_eval_db)
     eval_summary = summarize_eval_runs(eval_entries)
     eval_diagnosis = build_eval_diagnosis(eval_entries)

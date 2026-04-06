@@ -3,6 +3,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
+from src.storage.runtime_paths import (
+    get_artifact_root,
+    get_chat_history_path,
+    get_rag_chroma_path,
+    get_rag_store_path,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -197,6 +203,14 @@ class GradioProductSettings:
 
 
 @dataclass(frozen=True)
+class ProductApiSettings:
+    server_name: str
+    server_port: int
+    enable_web_frontend: bool = True
+    allow_cors: bool = True
+
+
+@dataclass(frozen=True)
 class EvidenceOpsExternalSettings:
     repository_backend: str
     external_sync_enabled: bool
@@ -232,7 +246,7 @@ def get_ollama_settings() -> OllamaSettings:
         default_prompt_profile=os.getenv("DEFAULT_PROMPT_PROFILE", "neutro"),
         available_models_env=available_models_env,
         available_embedding_models_env=available_embedding_models_env,
-        history_path=BASE_DIR / ".chat_history.json",
+        history_path=get_chat_history_path(BASE_DIR),
     )
 
 
@@ -356,7 +370,7 @@ def get_presentation_export_settings() -> PresentationExportSettings:
         local_artifact_dir=Path(
             os.getenv(
                 "PRESENTATION_EXPORT_LOCAL_ARTIFACT_DIR",
-                str(BASE_DIR / "artifacts" / "presentation_exports"),
+                str(get_artifact_root(BASE_DIR) / "presentation_exports"),
             )
         ),
         include_review=os.getenv("PRESENTATION_EXPORT_INCLUDE_REVIEW", "true").strip().lower() not in {"0", "false", "no"},
@@ -379,6 +393,15 @@ def get_gradio_product_settings() -> GradioProductSettings:
         show_ai_lab_entry=os.getenv("GRADIO_PRODUCT_SHOW_AI_LAB_ENTRY", "true").strip().lower() not in {"0", "false", "no"},
         accent_color=os.getenv("GRADIO_PRODUCT_ACCENT_COLOR", "#6ae3ff").strip() or "#6ae3ff",
         default_density=os.getenv("GRADIO_PRODUCT_DEFAULT_DENSITY", "comfortable").strip() or "comfortable",
+    )
+
+
+def get_product_api_settings() -> ProductApiSettings:
+    return ProductApiSettings(
+        server_name=os.getenv("PRODUCT_API_SERVER_NAME", "127.0.0.1").strip() or "127.0.0.1",
+        server_port=int(os.getenv("PRODUCT_API_SERVER_PORT", "8011")),
+        enable_web_frontend=os.getenv("PRODUCT_API_ENABLE_WEB_FRONTEND", "true").strip().lower() not in {"0", "false", "no"},
+        allow_cors=os.getenv("PRODUCT_API_ALLOW_CORS", "true").strip().lower() not in {"0", "false", "no"},
     )
 
 
@@ -468,8 +491,8 @@ def get_rag_settings() -> RagSettings:
         chunk_size=int(os.getenv("RAG_CHUNK_SIZE", "1200")),
         chunk_overlap=int(os.getenv("RAG_CHUNK_OVERLAP", "80")),
         top_k=int(os.getenv("RAG_TOP_K", "6")),
-        store_path=BASE_DIR / ".rag_store.json",
-        chroma_path=BASE_DIR / ".chroma_rag",
+        store_path=get_rag_store_path(BASE_DIR),
+        chroma_path=get_rag_chroma_path(BASE_DIR),
         rerank_pool_size=int(os.getenv("RAG_RERANK_POOL_SIZE", "16")),
         rerank_lexical_weight=float(os.getenv("RAG_RERANK_LEXICAL_WEIGHT", "0.35")),
         evidence_vl_model=os.getenv("EVIDENCE_VL_MODEL", "sorc/qwen3.5-instruct:2b").strip() or "sorc/qwen3.5-instruct:2b",

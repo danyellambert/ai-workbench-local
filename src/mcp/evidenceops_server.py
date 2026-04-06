@@ -31,6 +31,11 @@ from ..services.evidenceops_local_ops import (
     summarize_evidenceops_worklog_entries,
     update_evidenceops_action_item,
 )
+from ..storage.runtime_paths import (
+    get_phase95_evidenceops_action_store_path,
+    get_phase95_evidenceops_repository_snapshot_path,
+    get_phase95_evidenceops_worklog_path,
+)
 
 
 SERVER_NAME = "evidenceops-local-mcp"
@@ -62,19 +67,19 @@ def resolve_evidenceops_paths() -> EvidenceOpsPaths:
     repository_snapshot_path = Path(
         os.getenv(
             "EVIDENCEOPS_REPOSITORY_SNAPSHOT_PATH",
-            str(repository_root / ".phase95_evidenceops_repository_snapshot.json"),
+            str(get_phase95_evidenceops_repository_snapshot_path(project_root)),
         )
     )
     action_store_path = Path(
         os.getenv(
             "EVIDENCEOPS_ACTION_STORE_PATH",
-            str(project_root / ".phase95_evidenceops_actions.sqlite3"),
+            str(get_phase95_evidenceops_action_store_path(project_root)),
         )
     )
     worklog_path = Path(
         os.getenv(
             "EVIDENCEOPS_WORKLOG_PATH",
-            str(project_root / ".phase95_evidenceops_worklog.json"),
+            str(get_phase95_evidenceops_worklog_path(project_root)),
         )
     )
     return EvidenceOpsPaths(

@@ -9,6 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from src.storage.runtime_paths import get_phase6_document_agent_log_path  # noqa: E402
 from src.storage.phase6_document_agent_log import (  # noqa: E402
     load_document_agent_log,
     summarize_document_agent_log,
@@ -48,7 +49,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate a Phase 6 report for Document Operations Copilot executions.")
     parser.add_argument(
         "--log",
-        default=str(ROOT_DIR / ".phase6_document_agent_log.json"),
+        default=str(get_phase6_document_agent_log_path(ROOT_DIR)),
         help="Path to the local Document Operations Copilot log JSON file.",
     )
     parser.add_argument(

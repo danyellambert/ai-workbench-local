@@ -17,6 +17,7 @@ from typing import Any
 
 from src.config import get_rag_settings
 from src.evals.phase8_thresholds import CHECKLIST_REGRESSION_THRESHOLDS
+from src.storage.runtime_paths import get_phase8_eval_db_path
 from src.storage.phase8_eval_store import append_eval_run
 from src.storage.rag_store import load_rag_store
 from src.structured.envelope import TaskExecutionRequest
@@ -26,7 +27,7 @@ from src.structured.service import structured_service
 FIXTURE_DEFAULT = PROJECT_ROOT / "phase5_eval" / "fixtures" / "06_checklist_who_surgical_gold.json"
 REPORTS_DIR = PROJECT_ROOT / "phase5_eval" / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-EVAL_DB_PATH = PROJECT_ROOT / ".phase8_eval_runs.sqlite3"
+EVAL_DB_PATH = get_phase8_eval_db_path(PROJECT_ROOT)
 
 
 def _normalize_text(value: Any) -> str:

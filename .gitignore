@@ -16,11 +16,12 @@ __pycache__/
 .phase95_evidenceops_worklog.json
 .runtime_execution_log.json
 .chroma_rag/
+.runtime/
 artifacts/
 outputs/
 materials_local/
 .vscode/
-old/
+old/auxiliar.py
 benchmark_runs/*
 !benchmark_runs/.gitkeep
 benchmark_pdfs/*
