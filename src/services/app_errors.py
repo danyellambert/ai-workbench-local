@@ -7,4 +7,4 @@ def describe_exception(error: BaseException) -> str:
 
 
 def build_ui_error_message(prefix: str, error: BaseException) -> str:
-    return f"{prefix}. Detalhes: {describe_exception(error)}"
+    return f"{prefix}. Details: {describe_exception(error)}"

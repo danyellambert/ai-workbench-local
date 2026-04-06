@@ -1,87 +1,61 @@
 # AI Workbench Local
 
-[![phase8-evals](https://github.com/danyellambert/ai-workbench-local/actions/workflows/phase8-evals.yml/badge.svg)](https://github.com/danyellambert/ai-workbench-local/actions/workflows/phase8-evals.yml)
+**AI Workbench Local** is a local-first applied AI platform for **document-grounded decision workflows**, **structured execution**, **evaluation**, and **executive artifact generation**.
 
-> **A local-first applied AI platform for document-grounded decision workflows, structured execution, evaluation, product UX, and executive artifact generation.**
+This repository is meant to present a complete AI product system — not just a model wrapper, a chatbot demo, or a loose collection of experiments.
 
-AI Workbench Local is not a generic chatbot demo.
+It is designed to show how an AI application becomes more credible when it combines:
 
-It is a portfolio-grade AI system designed to show how modern AI products should be built when the goal is not only text generation, but **grounded workflows, validated outputs, measurable quality, auditable behavior, and credible product architecture**.
+- **workflow value** for real document-centered use cases
+- **engineering rigor** through evaluation, observability, and structured execution
+- **product direction** across Gradio, Streamlit, API, and web frontend surfaces
 
-This repository combines two complementary tracks:
+## Official product theory
 
-- a **Business Workflow track** for document review, policy comparison, extraction, candidate analysis, and executive-ready outputs
-- an **AI Engineering Lab track** for benchmarking, evaluation, routing, runtime analysis, observability, and controlled experimentation
+It combines two linked layers:
+
+- **Business Workflows** — the product-facing layer for document review, policy comparison, action plans, candidate review, and executive-ready outputs
+- **AI Engineering Lab** — the engineering-facing layer for benchmarking, evaluation, routing, runtime analysis, observability, and controlled experimentation
 
 In practical terms, the project already demonstrates how to:
 
-- work with **local models** and optional external provider lanes
 - run **document-grounded workflows** with retrieval and structured outputs
-- validate results with **explicit schemas and execution contracts**
+- validate outputs with **explicit schemas and execution contracts**
 - compare model/runtime behavior with **repeatable benchmark evidence**
 - persist **evaluation history, logs, and operational state** locally
-- expose **EvidenceOps operations through a real local MCP server**
+- expose **EvidenceOps operations** through a real local MCP server
 - generate **executive deck artifacts** from grounded workflow outputs
 
----
+## Current product reading
 
-## Why this repository stands out
+The current official reading of the repository is:
 
-Most AI repositories stop at one layer:
+- **Gradio** is the main product-facing workflow surface
+- **Streamlit** is the AI Lab and engineering dashboard
+- **Product API** is the backend foundation for workflow-oriented product integration
+- **React/Vite frontend** is the web product shell and long-term product surface under active integration
 
-- a thin UI around an API
-- a toy RAG assistant
-- a benchmark notebook
-- a set of scripts without product framing
+This keeps the repository coherent:
 
-AI Workbench Local is stronger because it connects the full system:
+- the **workflow layer** solves a real business problem
+- the **AI Lab layer** keeps that workflow layer measurable, auditable, and evolvable
+- the **frontend** expresses the long-term product UX without pretending every integration is already complete
 
-1. **Product thinking** — workflows mapped to real decision-making tasks
-2. **Engineering depth** — modular services, multiple surfaces, provider abstraction, guarded execution
-3. **Quality discipline** — evals, benchmarks, logs, regression analysis, and diagnosis
-4. **Operational maturity** — local-first reproducibility, runtime summaries, Docker, and artifact tracking
-5. **Future-facing architecture** — MCP, product API foundations, EvidenceOps, and executive artifact pipelines
+## What is already implemented
 
-If you are a recruiter, hiring manager, or technical interviewer, the intended signal is not “I can call an LLM API.”
+The repository already includes real foundations for:
 
-It is:
+- **local model usage** and optional external provider lanes
+- **document retrieval and RAG**
+- **structured outputs with validation**
+- **workflow-oriented document agents**
+- **model comparison and benchmark reporting**
+- **persistent eval storage and diagnosis**
+- **EvidenceOps MCP tooling**
+- **executive deck generation and presentation export flows**
+- **engineering hardening** through Docker, logging, smoke tests, and artifact tracking
 
-> **I can design and evolve an AI system across product UX, document intelligence, structured workflows, validation, evaluation, and operational concerns.**
-
----
-
-## Product surfaces and entrypoints
-
-This is not a single-surface demo. The repository already spans multiple interfaces, each with a different role in the ecosystem.
-
-| Surface | Entrypoint / path | Role | Current status |
-| --- | --- | --- | --- |
-| Main AI Lab | `main.py` | Primary local experimentation and engineering dashboard | Implemented |
-| Web product frontend | `frontend/` | Product north-star UX for workflows, artifacts, history, and AI Lab access | Implemented UI foundation |
-| Product API | `main_product_api.py`, `src/product/api.py` | Dedicated API surface for product workflows and frontend integration | Foundation started |
-| Gradio product surface | `main_gradio.py` | Product-facing workflow surface for faster UX experimentation | Implemented foundation |
-| OpenAI-compatible sample app | `main_openai.py` | Alternate provider-focused app entrypoint | Implemented sample |
-| Provider-specific experiments | `main_qwen.py` and related entrypoints | Focused runtime/provider experiments | Experimental |
-| EvidenceOps MCP server | `scripts/run_evidenceops_mcp_server.py` | Real local MCP tool/resource surface | Implemented |
-| PPT renderer host helper | `scripts/run_ppt_creator_renderer_host.sh` | Host-native integration helper for presentation export | Implemented helper |
-
-The web frontend should be read as the **product north star**. Some views are already well defined but still partially backed by mock data while deeper backend integration continues.
-
----
-
-## Current implementation status
-
-The most honest and strongest way to read this repository is to separate **product vision**, **implemented platform foundations**, and **integration work still in progress**.
-
-| Layer / surface | Status | What that means today |
-| --- | --- | --- |
-| Web product frontend in `frontend/` | **Implemented UI foundation** | A React/Vite product shell already exists with routes for landing, workflows, documents, deck center, run history, AI Lab, and settings |
-| Frontend data wiring | **Partially mocked** | Several frontend views still rely on mock data while backend integration continues |
-| Product API | **Foundation started** | `main_product_api.py` and `src/product/api.py` define a dedicated HTTP surface for product workflows |
-| Streamlit AI Lab | **Implemented** | `main.py` is the richest currently wired engineering and experimentation surface |
-| Gradio product surface | **Implemented foundation** | Supports workflow-oriented product UX experiments |
-| Core services under `src/` | **Implemented foundation** | Retrieval, structured outputs, document-agent logic, benchmarking, logging, MCP, export, and product modules already exist |
-| End-to-end frontend ↔ backend integration | **In progress** | The product frontend and backend foundations are converging, but not every page is fully live-wired yet |
+Today, the strongest interpretation is not “one finished app,” but rather **one coherent platform with multiple surfaces built on top of the same AI and workflow foundations**.
 
 ---
 
@@ -138,27 +112,58 @@ Generate reusable business artifacts such as:
 
 ---
 
-## Full technology stack
+## Technology stack
 
 This repository intentionally covers more than “LLM + UI.” It includes product UX, backend orchestration, retrieval, structured validation, evaluation, operations, and executive artifact generation.
 
-| Layer | Technologies used here | Why they matter |
-| --- | --- | --- |
-| Core runtime | **Python 3.11** | Main backend, orchestration, workflows, services, evals, and app surfaces |
-| Product web app | **React 18**, **TypeScript 5**, **Vite 5**, **Tailwind CSS 3**, **React Router 6**, **TanStack Query 5**, **Framer Motion**, **Zustand**, **Recharts**, **React Hook Form**, **Zod**, **Radix UI / shadcn-style primitives** | Defines the product-grade web surface and frontend architecture |
-| Product / lab UI surfaces | **Streamlit**, **Gradio** | Support local experimentation, engineering visibility, and product workflow prototyping |
-| Provider/runtime layer | **Ollama**, **OpenAI SDK / OpenAI-compatible APIs**, **Hugging Face local / server / inference lanes** | Enables local-first runtime operation with controlled multi-provider expansion |
-| AI orchestration | **LangChain Community**, **LangChain Chroma**, **LangChain Text Splitters**, **LangGraph** | Supports retrieval flows, workflow evolution, and controlled orchestration |
-| Retrieval & vector layer | **ChromaDB**, **sentence-transformers** | Powers local vector retrieval and embedding-backed context workflows |
-| Document intelligence | **PyPDF**, **docling**, **Pillow**, **NumPy** | Supports parsing, extraction, OCR/VLM-adjacent flows, and artifact processing heuristics |
-| Structured validation | **Pydantic** | Enforces contracts, validates payloads, and keeps structured execution reliable |
-| Config & environment | **python-dotenv** | Local-first environment-driven configuration |
-| Reporting & artifacts | **ReportLab**, **Matplotlib** | Reporting, charts, and artifact generation |
-| Storage & ops | **SQLite**, **filesystem artifact stores**, JSON/JSONL logs | Local eval history, runtime logs, action state, artifacts, and worklogs |
-| MCP / EvidenceOps | Local MCP server and client integration in `src/mcp/` and `src/services/evidenceops_mcp_client.py` | Real tool/resource integration instead of simulated tooling |
-| Frontend quality | **Vitest**, **Playwright**, **ESLint** | Frontend testing and code-quality foundation |
-| Backend quality | Python test suite under `tests/` | Verifies services, workflows, product foundations, and export logic |
-| Packaging / reproducibility | **Docker**, **pip**, **npm** | Supports reproducible local execution and onboarding |
+### Backend and platform core
+
+- **Python 3.11**
+- **Pydantic**
+- **python-dotenv**
+- **SQLite**
+- filesystem-backed artifacts and logs
+
+### UI surfaces
+
+- **Streamlit** for the AI Lab dashboard
+- **Gradio** for the workflow-oriented product surface
+- **React 18 + TypeScript 5 + Vite 5** for the web product shell
+- **Tailwind CSS 3**, **React Router 6**, **TanStack Query 5**, **Framer Motion**, **Zustand**, **Recharts**, **React Hook Form**, **Zod**, and **Radix UI primitives** in the frontend
+
+### Model and provider layer
+
+- **Ollama**
+- **OpenAI SDK / OpenAI-compatible APIs**
+- **Hugging Face local / server / inference lanes**
+
+### Retrieval, orchestration, and document intelligence
+
+- **LangChain Community**
+- **LangChain Chroma**
+- **LangChain Text Splitters**
+- **LangGraph**
+- **ChromaDB**
+- **sentence-transformers**
+- **transformers**
+- **PyPDF**
+- **docling**
+- **Pillow**
+- **NumPy**
+
+### Reporting, artifacts, and operations
+
+- **ReportLab**
+- **Matplotlib**
+- local MCP server and client integration for **EvidenceOps**
+- **Docker**, `pip`, and `npm` for reproducible local execution
+
+### Quality layer
+
+- Python test suite under `tests/`
+- **Vitest**
+- **Playwright**
+- **ESLint**
 
 ### Backend dependency snapshot
 

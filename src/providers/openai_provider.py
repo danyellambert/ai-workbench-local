@@ -35,8 +35,8 @@ class OpenAIProvider:
             "requested_num_ctx": int(requested_context_window) if requested_context_window else None,
             "model": model,
             "validation_summary": (
-                "OpenAI embeddings não expõem um controle equivalente a `num_ctx` do Ollama. "
-                "O valor configurado no app fica registrado como metadado operacional, mas não é aplicado como janela de contexto explícita no provider OpenAI."
+                "OpenAI embeddings do not expose a control equivalent to Ollama's `num_ctx`. "
+                "The value configured in the app is recorded as operational metadata, but it is not applied as an explicit context window in the OpenAI provider."
             ),
         }
 
@@ -51,7 +51,7 @@ class OpenAIProvider:
         think: bool | None = None,
     ):
         if self.client is None:
-            raise RuntimeError("OPENAI_API_KEY não configurada")
+            raise RuntimeError("OPENAI_API_KEY is not configured")
         self.reset_last_usage_metrics()
 
         request_kwargs: dict[str, object] = {
@@ -78,7 +78,7 @@ class OpenAIProvider:
         truncate: bool = True,
     ) -> list[list[float]]:
         if self.client is None:
-            raise RuntimeError("OPENAI_API_KEY não configurada")
+            raise RuntimeError("OPENAI_API_KEY is not configured")
 
         response = self.client.embeddings.create(model=model, input=texts)
         return [item.embedding for item in response.data]
@@ -102,7 +102,7 @@ class OpenAIProvider:
                 yield content
 
     def format_error(self, model: str, error: Exception) -> str:
-        return f"Não foi possível obter resposta do provider OpenAI com o modelo `{model}`. Detalhes: {error}"
+        return f"Could not get a response from the OpenAI provider using model `{model}`. Details: {error}"
 
 
 def create_openai_client(settings: OpenAISettings):
@@ -116,4 +116,4 @@ def create_openai_response(client: OpenAI, messages: list[dict[str, str]], model
 
 
 def format_openai_error(error: Exception) -> str:
-    return f"Erro ao chamar a OpenAI: {error}"
+    return f"Error calling OpenAI: {error}"

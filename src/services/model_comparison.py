@@ -12,51 +12,51 @@ from ..rag.prompting import inject_rag_context
 
 
 MODEL_COMPARISON_FORMAT_OPTIONS = {
-    "plain_text": "Texto livre",
-    "bullet_list": "Lista com bullets",
-    "json": "JSON válido",
+    "plain_text": "Free text",
+    "bullet_list": "Bullet list",
+    "json": "Valid JSON",
 }
 
 MODEL_COMPARISON_USE_CASE_PRESETS = {
     "ad_hoc": {
-        "label": "Ad hoc / livre",
-        "description": "Comparação livre com prompt manual.",
+        "label": "Ad hoc / freeform",
+        "description": "Freeform comparison with a manual prompt.",
         "prompt_text": "",
         "response_format": "plain_text",
         "prompt_profile": "neutro",
     },
     "executive_summary": {
-        "label": "Resumo executivo",
-        "description": "Comparar capacidade de resumir contexto documental com clareza executiva.",
-        "prompt_text": "Resuma os principais pontos, riscos e próximos passos em linguagem executiva e objetiva.",
+        "label": "Executive summary",
+        "description": "Compare how well each model summarizes document context with executive clarity.",
+        "prompt_text": "Summarize the main points, risks, and next steps using concise executive language.",
         "response_format": "bullet_list",
         "prompt_profile": "neutro",
     },
     "risk_review": {
-        "label": "Revisão de riscos",
-        "description": "Comparar qualidade na identificação de riscos, controles e lacunas.",
-        "prompt_text": "Identifique os principais riscos, controles existentes, lacunas e próximos passos recomendados.",
+        "label": "Risk review",
+        "description": "Compare quality in identifying risks, controls, and gaps.",
+        "prompt_text": "Identify the main risks, existing controls, gaps, and recommended next steps.",
         "response_format": "bullet_list",
         "prompt_profile": "neutro",
     },
     "policy_compliance": {
         "label": "Policy / compliance",
-        "description": "Comparar análise documental com foco em obrigações, restrições e necessidade de revisão.",
-        "prompt_text": "Liste obrigações, restrições, pontos de compliance, ambiguidades e itens que exigem revisão humana.",
+        "description": "Compare document analysis focused on obligations, restrictions, and review requirements.",
+        "prompt_text": "List obligations, restrictions, compliance points, ambiguities, and items that require human review.",
         "response_format": "bullet_list",
         "prompt_profile": "neutro",
     },
     "structured_extraction": {
-        "label": "Extração estruturada",
-        "description": "Comparar aderência a formato estruturado em JSON.",
-        "prompt_text": "Extraia os principais campos do conteúdo em JSON com chaves: summary, risks, actions, entities.",
+        "label": "Structured extraction",
+        "description": "Compare adherence to a structured JSON format.",
+        "prompt_text": "Extract the main fields from the content as JSON with keys: summary, risks, actions, entities.",
         "response_format": "json",
         "prompt_profile": "extrator",
     },
     "technical_review": {
-        "label": "Revisão técnica",
-        "description": "Comparar capacidade de explicar problemas técnicos e recomendações.",
-        "prompt_text": "Explique os principais problemas técnicos, impactos e recomendações priorizadas.",
+        "label": "Technical review",
+        "description": "Compare the ability to explain technical issues and recommendations.",
+        "prompt_text": "Explain the main technical issues, impacts, and prioritized recommendations.",
         "response_format": "bullet_list",
         "prompt_profile": "programador",
     },
@@ -337,12 +337,12 @@ def build_model_comparison_ranking(results: list[dict[str, Any]]) -> list[dict[s
 def build_model_comparison_prompt_text(prompt_text: str, response_format: str) -> str:
     cleaned = " ".join(str(prompt_text or "").split()).strip()
     format_instructions = {
-        "plain_text": "Responda em texto livre, com clareza e objetividade.",
-        "bullet_list": "Responda em bullets curtos, cada linha começando com '-'.",
-        "json": "Responda somente com JSON válido, sem markdown e sem texto adicional.",
+        "plain_text": "Respond in free text, with clarity and objectivity.",
+        "bullet_list": "Respond with short bullet points, each line starting with '-'.",
+        "json": "Respond only with valid JSON, without markdown and without extra text.",
     }
     extra_instruction = format_instructions.get(response_format, format_instructions["plain_text"])
-    return f"{cleaned}\n\nFormato desejado: {extra_instruction}".strip()
+    return f"{cleaned}\n\nDesired format: {extra_instruction}".strip()
 
 
 def estimate_response_format_adherence(response_text: str, response_format: str) -> float:
