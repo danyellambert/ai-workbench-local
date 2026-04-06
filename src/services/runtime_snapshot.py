@@ -222,21 +222,21 @@ def extract_last_assistant_metadata(messages: list[dict[str, object]]) -> dict[s
 def summarize_provider_path(provider: str, provider_label: str, ollama_base_url: str | None) -> tuple[str, str]:
     if provider == "ollama":
         base_url = str(ollama_base_url or "").strip()
-        route = f"{provider_label} -> {base_url or 'endpoint não configurado'}"
+        route = f"{provider_label} -> {base_url or 'endpoint not configured'}"
         if any(token in base_url.lower() for token in ["localhost", "127.0.0.1"]):
-            dependency = "Dependência local: app + servidor Ollama rodam na sua máquina."
+            dependency = "Local dependency: the app and Ollama server run on your machine."
         else:
-            dependency = "Dependência local parcial: app local, inferência via endpoint remoto compatível com Ollama."
+            dependency = "Partial local dependency: local app, inference through a remote Ollama-compatible endpoint."
         return route, dependency
     if provider == "huggingface_server":
-        route = f"{provider_label} -> serviço OpenAI-compatible / AI hub local"
-        dependency = "Dependência local: app + serviço hub local; o backend efetivo pode variar por alias/modelo publicado no serviço."
+        route = f"{provider_label} -> OpenAI-compatible service / local AI hub"
+        dependency = "Local dependency: app + local hub service; the effective backend may vary by alias/model published in the service."
         return route, dependency
     if provider == "openai":
-        return f"{provider_label} -> API cloud direta", "Dependência local: app local; inferência remota."
+        return f"{provider_label} -> direct cloud API", "Local dependency: local app; remote inference."
     if provider == "huggingface_local":
-        return f"{provider_label} -> runtime local Transformers", "Dependência local: app + inferência local via ecossistema Hugging Face na sua máquina."
-    return provider_label, "Dependência local não classificada."
+        return f"{provider_label} -> local Transformers runtime", "Local dependency: app + local inference through the Hugging Face ecosystem on your machine."
+    return provider_label, "Unclassified local dependency."
 
 
 def build_document_runtime_rows(

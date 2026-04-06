@@ -26,17 +26,17 @@ def render_chat_message(message: dict[str, object]) -> None:
             if model:
                 info_parts.append(str(model))
             if profile_label:
-                info_parts.append(f"perfil: {profile_label}")
+                info_parts.append(f"profile: {profile_label}")
             if temperature is not None:
                 info_parts.append(f"temp: {temperature}")
             if context_window is not None:
                 info_parts.append(f"ctx: {context_window}")
             if latency is not None:
-                info_parts.append(f"latência: {latency}s")
+                info_parts.append(f"latency: {latency}s")
             if retrieval_latency is not None:
                 info_parts.append(f"retrieval: {retrieval_latency}s")
             if retrieved_chunks_count is not None:
-                info_parts.append(f"chunks rec.: {retrieved_chunks_count}")
+                info_parts.append(f"retrieved chunks: {retrieved_chunks_count}")
             if rag_top_k is not None:
                 info_parts.append(f"top-k: {rag_top_k}")
 
@@ -45,11 +45,11 @@ def render_chat_message(message: dict[str, object]) -> None:
 
             sources = metadata.get("sources")
             if isinstance(sources, list) and sources:
-                with st.expander("Fontes usadas"):
+                with st.expander("Sources used"):
                     for index, source in enumerate(sources, start=1):
                         if not isinstance(source, dict):
                             continue
-                        source_name = source.get("source", "documento")
+                        source_name = source.get("source", "document")
                         score = source.get("score")
                         snippet = source.get("snippet", "")
                         chunk_id = source.get("chunk_id")
