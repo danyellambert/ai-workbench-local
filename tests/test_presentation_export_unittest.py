@@ -278,6 +278,14 @@ class PresentationExportTests(unittest.TestCase):
         candidate_review = build_candidate_review_deck_contract(structured_result=self._sample_cv_analysis_result())
         self.assertEqual(candidate_review.export_kind, CANDIDATE_REVIEW_EXPORT_KIND)
         self.assertIn("Jane Doe", candidate_review.presentation.title)
+        self.assertEqual(candidate_review.candidate_profile["name"], "Jane Doe")
+        self.assertTrue(candidate_review.strengths)
+        self.assertTrue(candidate_review.gaps)
+        self.assertTrue(candidate_review.evidence_highlights)
+        candidate_payload = build_ppt_creator_payload_from_executive_deck_contract(candidate_review)
+        candidate_slide_titles = [slide.get("title") for slide in candidate_payload["slides"]]
+        self.assertIn("Evidence highlights", candidate_slide_titles)
+        self.assertIn("Gaps vs hiring thesis", candidate_slide_titles)
 
         action_plan = build_action_plan_deck_contract(
             evidenceops_action_entries=[
@@ -335,6 +343,38 @@ class PresentationExportTests(unittest.TestCase):
         self.assertTrue(evidence_pack.tables)
         payload = build_ppt_creator_payload_from_executive_deck_contract(evidence_pack)
         self.assertEqual(payload["slides"][0]["type"], "title")
+
+    def test_build_candidate_review_deck_contract_handles_sparse_cv_with_fallbacks(self) -> None:
+        sparse_result = StructuredResult(
+            success=True,
+            task_type="cv_analysis",
+            validated_output=CVAnalysisPayload(
+                task_type="cv_analysis",
+                personal_info=ContactInfo(location="Remote"),
+                skills=[],
+                languages=[],
+                education_entries=[],
+                experience_entries=[],
+                experience_years=0.0,
+                strengths=[],
+                improvement_areas=[],
+            ),
+            source_documents=["cv_sparse"],
+        )
+
+        contract = build_candidate_review_deck_contract(structured_result=sparse_result)
+
+        self.assertEqual(contract.candidate_profile["name"], "Candidate")
+        self.assertEqual(contract.candidate_profile["location"], "Remote")
+        self.assertTrue(contract.evidence_highlights)
+        self.assertEqual(contract.evidence_highlights[0].label, "Grounding status")
+        self.assertTrue(contract.gaps)
+        self.assertTrue(contract.next_steps)
+        self.assertIn("Hold before advancing", contract.recommendation or "")
+        self.assertIn("Primary watchout", contract.executive_summary)
+        sparse_payload = build_ppt_creator_payload_from_executive_deck_contract(contract)
+        sparse_slide_titles = [slide.get("title") for slide in sparse_payload["slides"]]
+        self.assertIn("Evidence highlights", sparse_slide_titles)
 
     def test_normalize_executive_deck_export_kind_accepts_product_alias(self) -> None:
         self.assertEqual(

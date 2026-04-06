@@ -80,56 +80,56 @@ def _build_availability_map(
             "available": bool(model_comparison_entries),
             "source": "Benchmark log + eval store",
             "reason": (
-                "Usa os logs da Fase 7 e os evals persistidos da Fase 8."
+                "Uses the Phase 7 logs and the persisted evals from Phase 8."
                 if model_comparison_entries
-                else "Execute ao menos uma comparação na Fase 7 antes de gerar este deck."
+                else "Run at least one comparison in Phase 7 before generating this deck."
             ),
         },
         DOCUMENT_REVIEW_EXPORT_KIND: {
             "available": task_type in {"document_agent", "extraction", "summary"},
-            "source": "Último resultado estruturado",
+            "source": "Latest structured result",
             "reason": (
-                f"Usará o último structured result da task `{task_type}`."
+                f"Will use the latest structured result from the `{task_type}` task."
                 if task_type in {"document_agent", "extraction", "summary"}
-                else "Execute uma task `document_agent`, `extraction` ou `summary` para gerar este deck."
+                else "Run a `document_agent`, `extraction`, or `summary` task to generate this deck."
             ),
         },
         POLICY_CONTRACT_COMPARISON_EXPORT_KIND: {
             "available": has_comparison_context,
-            "source": "Último document_agent com comparison findings",
+            "source": "Latest document_agent with comparison findings",
             "reason": (
-                "Usará o último `document_agent` com findings de comparação grounded."
+                "Will use the latest `document_agent` with grounded comparison findings."
                 if has_comparison_context
-                else "Execute um `document_agent` com comparação documental antes de gerar este deck."
+                else "Run a `document_agent` with document comparison before generating this deck."
             ),
         },
         ACTION_PLAN_EXPORT_KIND: {
             "available": bool(evidenceops_action_entries) or task_type in {"checklist", "document_agent"},
-            "source": "EvidenceOps action store ou último structured result",
+            "source": "EvidenceOps action store or latest structured result",
             "reason": (
-                "Usará o action store local do EvidenceOps como fonte principal."
+                "Will use the local EvidenceOps action store as the primary source."
                 if evidenceops_action_entries
-                else f"Usará o último structured result da task `{task_type}`."
+                else f"Will use the latest structured result from the `{task_type}` task."
                 if task_type in {"checklist", "document_agent"}
-                else "Execute um checklist/document_agent ou gere ações no EvidenceOps antes de gerar este deck."
+                else "Run a checklist/document_agent flow or generate actions in EvidenceOps before generating this deck."
             ),
         },
         CANDIDATE_REVIEW_EXPORT_KIND: {
             "available": task_type == "cv_analysis",
-            "source": "Último cv_analysis",
+            "source": "Latest cv_analysis",
             "reason": (
-                "Usará o último `cv_analysis` validado."
+                "Will use the latest validated `cv_analysis`."
                 if task_type == "cv_analysis"
-                else "Execute um `cv_analysis` antes de gerar este deck."
+                else "Run a `cv_analysis` before generating this deck."
             ),
         },
         EVIDENCE_PACK_EXPORT_KIND: {
             "available": bool(evidenceops_worklog_entries or evidenceops_action_entries),
             "source": "EvidenceOps worklog + action store",
             "reason": (
-                "Usará o worklog e/ou o action store local do EvidenceOps."
+                "Will use the EvidenceOps worklog and/or local action store."
                 if (evidenceops_worklog_entries or evidenceops_action_entries)
-                else "Execute o Document Operations Copilot com registro em EvidenceOps antes de gerar este deck."
+                else "Run the Document Operations Copilot with EvidenceOps logging before generating this deck."
             ),
         },
     }
@@ -141,8 +141,8 @@ def _build_availability_map(
             if not is_export_kind_enabled(export_kind=export_kind, settings=settings):
                 payload["available"] = False
                 payload["reason"] = (
-                    f"Deck type desabilitado por configuração (`PRESENTATION_EXPORT_ENABLED_EXPORT_KINDS`). "
-                    f"Habilitados agora: {enabled_export_kinds_text}."
+                    f"Deck type disabled by configuration (`PRESENTATION_EXPORT_ENABLED_EXPORT_KINDS`). "
+                    f"Currently enabled: {enabled_export_kinds_text}."
                 )
     return availability_map
 
@@ -177,7 +177,7 @@ def render_executive_deck_generation_panel(
     if normalized_allowed_export_kinds:
         export_kind_options = [item for item in export_kind_options if item in normalized_allowed_export_kinds]
     if not export_kind_options:
-        st.info("Nenhum deck type está habilitado para esta superfície no momento.")
+        st.info("No deck type is enabled for this surface right now.")
         return
     panel_label = surface_label or "Product"
     selected_export_kind = st.selectbox(
@@ -194,25 +194,25 @@ def render_executive_deck_generation_panel(
     st.markdown(f"### Executive Deck Generation · {panel_label}")
     if panel_label.lower() == "ai lab":
         st.caption(
-            "Nesta superfície de AI Lab, o foco é o export executivo de benchmark/evals. Os decks orientados a workflows de negócio migram para a superfície de produto em Gradio."
+            "On the AI Lab surface, the focus is executive export for benchmark/eval review. Workflow-oriented decks move to the product surface in Gradio."
         )
     else:
         st.caption(
-            "Gere todos os slices da capability de Executive Deck Generation usando os sinais já existentes do produto: benchmark/evals, structured outputs, comparison findings, cv_analysis e EvidenceOps."
+            "Generate all Executive Deck Generation slices using the product signals already available: benchmark/evals, structured outputs, comparison findings, cv_analysis, and EvidenceOps."
         )
-    st.caption(f"Renderer configurado: `{settings.base_url or 'n/d'}` · timeout `{settings.timeout_seconds}s` · review `{settings.include_review}`")
+    st.caption(f"Configured renderer: `{settings.base_url or 'n/a'}` · timeout `{settings.timeout_seconds}s` · review `{settings.include_review}`")
     enabled_export_kinds = resolve_enabled_export_kinds(settings)
     if enabled_export_kinds:
-        st.caption(f"Deck types habilitados por configuração: `{', '.join(enabled_export_kinds)}`")
-    with st.expander("Setup recomendado agora — renderer host-native", expanded=False):
+        st.caption(f"Deck types enabled by configuration: `{', '.join(enabled_export_kinds)}`")
+    with st.expander("Recommended setup — host-native renderer", expanded=False):
         st.code("bash scripts/run_ppt_creator_renderer_host.sh", language="bash")
         st.code(f"curl {settings.base_url.rstrip('/')}/health", language="bash")
         st.caption(
-            "O caminho Docker do `ppt_creator_app` foi preparado no repositório irmão, mas a operação recomendada agora continua sendo host-native para preservar todas as capabilities do app de deck."
+            "The Docker path for `ppt_creator_app` was prepared in the sibling repository, but the recommended operating mode right now is still host-native in order to preserve the full deck-app capability set."
         )
     if not settings.enabled:
         st.info(
-            "`PRESENTATION_EXPORT_ENABLED=false`: nesta configuração o app ainda consegue gerar e persistir contract/payload localmente, mas não chamará o renderer remoto até a feature ser habilitada."
+            "`PRESENTATION_EXPORT_ENABLED=false`: in this configuration the app can still generate and persist the contract/payload locally, but it will not call the remote renderer until the feature is enabled."
         )
 
     st.write(
@@ -229,14 +229,14 @@ def render_executive_deck_generation_panel(
 
     can_generate = bool(selected_availability.get("available"))
     if not can_generate:
-        st.caption(str(selected_availability.get("reason") or "Ainda não há insumos suficientes para gerar este deck."))
+        st.caption(str(selected_availability.get("reason") or "There is not enough input yet to generate this deck."))
 
     if st.button(
-        f"Gerar {EXECUTIVE_DECK_EXPORT_KIND_LABELS.get(selected_export_kind, selected_export_kind)}",
+        f"Generate {EXECUTIVE_DECK_EXPORT_KIND_LABELS.get(selected_export_kind, selected_export_kind)}",
         disabled=not can_generate,
         key="phase10_generate_executive_review_deck",
     ):
-        with st.spinner("Gerando contract, chamando renderer e baixando artefatos..."):
+        with st.spinner("Generating contract, calling renderer, and downloading artifacts..."):
             try:
                 result = generate_executive_deck(
                     export_kind=selected_export_kind,
@@ -253,7 +253,7 @@ def render_executive_deck_generation_panel(
                 stored_results[selected_export_kind] = result
                 st.session_state[PRESENTATION_EXPORT_RESULT_STATE_KEY] = stored_results
             except Exception as error:  # pragma: no cover - defensive UI path
-                st.error(build_ui_error_message("Falha ao gerar executive review deck", error))
+                st.error(build_ui_error_message("Failed to generate the executive review deck", error))
 
     stored_results = st.session_state.get(PRESENTATION_EXPORT_RESULT_STATE_KEY)
     stored_result = stored_results.get(selected_export_kind) if isinstance(stored_results, dict) else None
@@ -261,14 +261,14 @@ def render_executive_deck_generation_panel(
         return
 
     status = str(stored_result.get("status") or "unknown")
-    export_id = str(stored_result.get("export_id") or "n/d")
+    export_id = str(stored_result.get("export_id") or "n/a")
     export_kind_label = str(stored_result.get("export_kind_label") or EXECUTIVE_DECK_EXPORT_KIND_LABELS.get(selected_export_kind, selected_export_kind))
     if status == "completed":
-        st.success(f"{export_kind_label} gerado com sucesso. Export ID: `{export_id}`")
+        st.success(f"{export_kind_label} generated successfully. Export ID: `{export_id}`")
     elif status in {"disabled", "service_unavailable", "artifact_download_failed"}:
-        st.warning(f"{export_kind_label} terminou com status `{status}`. Export ID: `{export_id}`")
+        st.warning(f"{export_kind_label} finished with status `{status}`. Export ID: `{export_id}`")
     else:
-        st.error(f"{export_kind_label} falhou com status `{status}`. Export ID: `{export_id}`")
+        st.error(f"{export_kind_label} failed with status `{status}`. Export ID: `{export_id}`")
 
     summary_col_1, summary_col_2, summary_col_3, summary_col_4 = st.columns(4)
     summary_col_1.metric("Status", status)
@@ -276,12 +276,12 @@ def render_executive_deck_generation_panel(
     summary_col_3.metric("Eval runs", int(stored_result.get("eval_entry_count") or 0))
     summary_col_4.metric("Deck size", f"{int(stored_result.get('pptx_size_bytes') or 0)} bytes")
     st.caption(
-        f"Health do renderer: `{stored_result.get('service_health')}` · render={stored_result.get('render_latency_s')}s · download={stored_result.get('artifact_download_latency_s')}s"
+        f"Renderer health: `{stored_result.get('service_health')}` · render={stored_result.get('render_latency_s')}s · download={stored_result.get('artifact_download_latency_s')}s"
     )
     if stored_result.get("remote_output_path"):
-        st.caption(f"Artefato remoto: `{stored_result.get('remote_output_path')}`")
+        st.caption(f"Remote artifact: `{stored_result.get('remote_output_path')}`")
     if stored_result.get("local_artifact_dir"):
-        st.caption(f"Artefatos locais: `{stored_result.get('local_artifact_dir')}`")
+        st.caption(f"Local artifacts: `{stored_result.get('local_artifact_dir')}`")
 
     warnings = stored_result.get("warnings") if isinstance(stored_result.get("warnings"), list) else []
     for warning in warnings:
@@ -289,12 +289,12 @@ def render_executive_deck_generation_panel(
     if stored_result.get("error_message"):
         st.error(str(stored_result.get("error_message")))
 
-    st.markdown("**Downloads do export**")
+    st.markdown("**Export downloads**")
     download_col_1, download_col_2, download_col_3 = st.columns(3)
     pptx_bytes = _safe_read_bytes(stored_result.get("local_pptx_path"))
     if pptx_bytes is not None:
         download_col_1.download_button(
-            "Baixar PPTX",
+            "Download PPTX",
             data=pptx_bytes,
             file_name=Path(str(stored_result.get("local_pptx_path"))).name,
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -303,7 +303,7 @@ def render_executive_deck_generation_panel(
     contract_text = _safe_read_text(stored_result.get("local_contract_path"))
     if contract_text is not None:
         download_col_2.download_button(
-            "Baixar contract.json",
+            "Download contract.json",
             data=contract_text,
             file_name=Path(str(stored_result.get("local_contract_path"))).name,
             mime="application/json",
@@ -312,7 +312,7 @@ def render_executive_deck_generation_panel(
     payload_text = _safe_read_text(stored_result.get("local_payload_path"))
     if payload_text is not None:
         download_col_3.download_button(
-            "Baixar payload.json",
+            "Download payload.json",
             data=payload_text,
             file_name=Path(str(stored_result.get("local_payload_path"))).name,
             mime="application/json",
@@ -323,7 +323,7 @@ def render_executive_deck_generation_panel(
     render_response_text = _safe_read_text(stored_result.get("local_render_response_path"))
     if render_response_text is not None:
         extra_col_1.download_button(
-            "Baixar render_response.json",
+            "Download render_response.json",
             data=render_response_text,
             file_name=Path(str(stored_result.get("local_render_response_path"))).name,
             mime="application/json",
@@ -332,7 +332,7 @@ def render_executive_deck_generation_panel(
     review_text = _safe_read_text(stored_result.get("local_review_path"))
     if review_text is not None:
         extra_col_2.download_button(
-            "Baixar review.json",
+            "Download review.json",
             data=review_text,
             file_name=Path(str(stored_result.get("local_review_path"))).name,
             mime="application/json",
@@ -341,7 +341,7 @@ def render_executive_deck_generation_panel(
     preview_manifest_text = _safe_read_text(stored_result.get("local_preview_manifest_path"))
     if preview_manifest_text is not None:
         extra_col_3.download_button(
-            "Baixar preview_manifest.json",
+            "Download preview_manifest.json",
             data=preview_manifest_text,
             file_name=Path(str(stored_result.get("local_preview_manifest_path"))).name,
             mime="application/json",
@@ -355,5 +355,5 @@ def render_executive_deck_generation_panel(
 
     metadata_text = _safe_read_text(Path(str(stored_result.get("local_artifact_dir") or "")) / "metadata.json")
     if metadata_text is not None:
-        with st.expander("Ver metadata do export", expanded=False):
+        with st.expander("View export metadata", expanded=False):
             st.json(json.loads(metadata_text))

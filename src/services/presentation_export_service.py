@@ -210,8 +210,8 @@ def generate_executive_deck(
             result["status"] = "disabled_export_kind"
             result["service_health"] = "disabled_export_kind"
             result["error_message"] = (
-                f"Export kind `{export_kind}` está desabilitado pela configuração atual. "
-                f"Habilitados: {', '.join(enabled_export_kinds) if enabled_export_kinds else 'todos'}"
+                f"Export kind `{export_kind}` is disabled by the current configuration. "
+                f"Enabled: {', '.join(enabled_export_kinds) if enabled_export_kinds else 'all'}"
             )
             _persist_metadata()
             return result
@@ -243,11 +243,11 @@ def generate_executive_deck(
 
         if export_kind == DEFAULT_PRESENTATION_EXPORT_KIND and not resolved_model_entries:
             result["status"] = "failed"
-            result["error_message"] = "Nenhuma evidência de benchmark/model comparison disponível para gerar o deck executivo."
+            result["error_message"] = "No benchmark/model comparison evidence is available to generate the executive deck."
             _persist_metadata()
             return result
         if export_kind == DEFAULT_PRESENTATION_EXPORT_KIND and not resolved_eval_entries:
-            result["warnings"].append("Nenhuma run de eval disponível; o deck será gerado principalmente com os sinais de benchmark.")
+            result["warnings"].append("No eval run is available; the deck will be generated mainly from the benchmark signals.")
 
         contract = build_executive_deck_contract(
             export_kind=export_kind,
@@ -272,7 +272,7 @@ def generate_executive_deck(
             result["status"] = "disabled"
             result["service_health"] = "disabled"
             result["warnings"].append(
-                "PRESENTATION_EXPORT_ENABLED=false. Contract e payload foram persistidos localmente, mas o renderer não foi chamado."
+                "PRESENTATION_EXPORT_ENABLED=false. The contract and payload were persisted locally, but the renderer was not called."
             )
             _persist_metadata()
             return result
@@ -280,7 +280,7 @@ def generate_executive_deck(
         if not str(resolved_settings.base_url or "").strip():
             result["status"] = "disabled"
             result["service_health"] = "missing_base_url"
-            result["error_message"] = "PRESENTATION_EXPORT_BASE_URL não está configurado."
+            result["error_message"] = "PRESENTATION_EXPORT_BASE_URL is not configured."
             _persist_metadata()
             return result
 
@@ -294,7 +294,7 @@ def generate_executive_deck(
         except Exception as error:
             result["status"] = "service_unavailable"
             result["service_health"] = "unavailable"
-            result["error_message"] = f"Falha ao validar saúde do renderer: {error}"
+            result["error_message"] = f"Failed to validate renderer health: {error}"
             _persist_metadata()
             return result
 
@@ -350,7 +350,7 @@ def generate_executive_deck(
             result["pptx_size_bytes"] = int(local_pptx_path.stat().st_size)
         except Exception as error:
             result["status"] = "artifact_download_failed"
-            result["error_message"] = f"Falha ao baixar o deck gerado: {error}"
+            result["error_message"] = f"Failed to download the generated deck: {error}"
             _persist_metadata()
             return result
 
@@ -367,7 +367,7 @@ def generate_executive_deck(
                 local_preview_manifest_path.write_bytes(preview_manifest_bytes)
                 result["local_preview_manifest_path"] = str(local_preview_manifest_path)
             except Exception as error:
-                result["warnings"].append(f"Falha ao baixar preview manifest: {error}")
+                result["warnings"].append(f"Failed to download preview manifest: {error}")
 
         thumbnail_remote = str(preview_result.get("thumbnail_sheet") or "").strip()
         if thumbnail_remote:
@@ -381,7 +381,7 @@ def generate_executive_deck(
                 local_thumbnail_path.write_bytes(thumbnail_bytes)
                 result["local_thumbnail_sheet_path"] = str(local_thumbnail_path)
             except Exception as error:
-                result["warnings"].append(f"Falha ao baixar thumbnail sheet: {error}")
+                result["warnings"].append(f"Failed to download thumbnail sheet: {error}")
 
         result["status"] = "completed"
         _persist_metadata()

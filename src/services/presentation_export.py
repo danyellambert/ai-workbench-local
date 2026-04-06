@@ -797,8 +797,12 @@ class GenericExecutiveDeckContract(BaseModel):
     deck_family: str
     presentation: PresentationExportMetadata
     context: dict[str, Any] = Field(default_factory=dict)
+    candidate_profile: dict[str, Any] | None = None
     executive_summary: str
     key_highlights: list[str] = Field(default_factory=list)
+    strengths: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+    evidence_highlights: list[ExecutiveDeckMetric] = Field(default_factory=list)
     key_metrics: list[ExecutiveDeckMetric] = Field(default_factory=list)
     tables: list[GenericDeckTableSection] = Field(default_factory=list)
     recommendation: str | None = None
@@ -926,6 +930,223 @@ def _humanize_watchout(value: object) -> str | None:
         "Validação jurídica final ainda pendente.": "Final legal validation is still pending",
     }
     return mapping.get(cleaned, cleaned.replace("_", " ").strip().capitalize())
+
+
+def _candidate_profile_name(payload: CVAnalysisPayload) -> str:
+    return _clean_text(getattr(payload.personal_info, "full_name", None) if payload.personal_info else None) or "Candidate"
+
+
+def _candidate_profile_location(payload: CVAnalysisPayload) -> str | None:
+    return _clean_text(getattr(payload.personal_info, "location", None) if payload.personal_info else None)
+
+
+def _candidate_profile_headline(payload: CVAnalysisPayload) -> str:
+    primary_role = next((_clean_text(item.title) for item in payload.experience_entries if _clean_text(item.title)), None)
+    skills = _dedupe_texts(list(payload.skills or []), limit=3)
+    if primary_role and skills:
+        return f"{primary_role} · {', '.join(skills[:2])}"
+    if primary_role:
+        return primary_role
+    if skills:
+        return ", ".join(skills)
+    return "Profile under review"
+
+
+def _candidate_profile_haystack(payload: CVAnalysisPayload) -> str:
+    parts: list[str] = []
+    for values in (payload.skills, payload.languages, payload.strengths, payload.improvement_areas, payload.projects):
+        parts.extend(str(item or "") for item in (values or []))
+    for item in payload.experience_entries:
+        parts.extend(
+            [
+                str(item.title or ""),
+                str(item.organization or ""),
+                str(item.location or ""),
+                str(item.date_range or ""),
+                str(item.description or ""),
+                *(str(bullet or "") for bullet in (item.bullets or [])),
+            ]
+        )
+    return " ".join(parts).lower()
+
+
+def _candidate_has_keywords(payload: CVAnalysisPayload, keywords: tuple[str, ...]) -> bool:
+    haystack = _candidate_profile_haystack(payload)
+    return any(keyword in haystack for keyword in keywords)
+
+
+def _candidate_strengths(payload: CVAnalysisPayload) -> list[str]:
+    strengths = _dedupe_texts(list(payload.strengths or []), limit=4)
+    if strengths:
+        return strengths
+    fallback: list[object] = []
+    skills = _dedupe_texts(list(payload.skills or []), limit=3)
+    if skills:
+        fallback.append(f"Relevant technical skill evidence includes {', '.join(skills)}.")
+    if float(payload.experience_years or 0.0) >= 5:
+        fallback.append("Grounded experience suggests a solid senior execution profile.")
+    if _candidate_has_keywords(payload, ("lead", "leader", "leadership", "manager", "owner", "ownership")):
+        fallback.append("Leadership or ownership language appears in the current CV.")
+    return _dedupe_texts(fallback, limit=4)
+
+
+def _candidate_gaps(payload: CVAnalysisPayload) -> list[str]:
+    gaps: list[object] = [*(payload.improvement_areas or [])]
+    if not payload.experience_entries:
+        gaps.append("Experience history is sparse or weakly structured in the current CV grounding.")
+    if not payload.skills:
+        gaps.append("The CV exposes limited explicit skill evidence for a confident fit assessment.")
+    if payload.experience_entries and not _candidate_has_keywords(payload, ("lead", "leader", "leadership", "manager", "owner", "ownership")):
+        gaps.append("Leadership and ownership signals are not explicit in the current CV.")
+    if payload.experience_entries and not _candidate_has_keywords(payload, ("product", "stakeholder", "customer", "business", "roadmap", "strategy")):
+        gaps.append("Product thinking / stakeholder management should be validated with concrete examples.")
+    return _dedupe_texts(gaps, limit=4)
+
+
+def _candidate_evidence_highlights(payload: CVAnalysisPayload) -> list[ExecutiveDeckMetric]:
+    metrics: list[ExecutiveDeckMetric] = []
+    years = float(payload.experience_years or 0.0)
+    if years > 0 or payload.experience_entries:
+        metrics.append(
+            ExecutiveDeckMetric(
+                label="Experience",
+                value=(f"{years:.1f} years" if years > 0 else "Not explicit"),
+                detail=f"{len(payload.experience_entries or [])} structured role(s)",
+            )
+        )
+    skills = _dedupe_texts(list(payload.skills or []), limit=3)
+    if skills:
+        metrics.append(
+            ExecutiveDeckMetric(
+                label="Core skills",
+                value=", ".join(skills),
+                detail=f"{len(payload.skills or [])} mapped skill(s)",
+            )
+        )
+    languages = _dedupe_texts(list(payload.languages or []), limit=2)
+    if languages:
+        metrics.append(
+            ExecutiveDeckMetric(
+                label="Languages",
+                value=", ".join(languages),
+                detail=f"{len(payload.languages or [])} language(s)",
+            )
+        )
+    if payload.experience_entries:
+        latest = payload.experience_entries[0]
+        metrics.append(
+            ExecutiveDeckMetric(
+                label="Recent anchor",
+                value=_clean_text(latest.title) or "-",
+                detail=_clean_text(latest.organization) or _clean_text(latest.date_range) or "-",
+            )
+        )
+    elif payload.education_entries:
+        latest_education = payload.education_entries[0]
+        metrics.append(
+            ExecutiveDeckMetric(
+                label="Education",
+                value=_clean_text(latest_education.degree) or "-",
+                detail=_clean_text(latest_education.institution) or "-",
+            )
+        )
+    if not metrics:
+        metrics.append(
+            ExecutiveDeckMetric(
+                label="Grounding status",
+                value="Sparse CV evidence",
+                detail="Manual review required because the current CV exposes few explicit signals.",
+            )
+        )
+    return metrics[:4]
+
+
+def _candidate_next_steps(payload: CVAnalysisPayload, gaps: list[str]) -> list[str]:
+    next_steps: list[object] = []
+    for item in gaps[:2]:
+        normalized = _clean_text(item).rstrip(".")
+        if not normalized:
+            continue
+        lowered = normalized.lower()
+        if lowered.startswith(("validate", "confirm", "probe", "assess", "review")):
+            next_steps.append(normalized)
+        else:
+            next_steps.append(f"Validate {normalized[0].lower() + normalized[1:]}")
+    if _candidate_has_keywords(payload, ("lead", "leader", "leadership", "manager", "owner", "ownership")):
+        next_steps.append("Probe measurable scope, business impact and cross-functional ownership in interview.")
+    else:
+        next_steps.append("Run a focused interview on leadership, ownership and stakeholder management examples.")
+    next_steps.append("Validate delivery depth with concrete examples of architecture, execution and business outcomes.")
+    return _dedupe_texts(next_steps, limit=4)
+
+
+def _candidate_recommendation(payload: CVAnalysisPayload, gaps: list[str]) -> str:
+    strengths = len(payload.strengths or [])
+    skills = len(payload.skills or [])
+    years = float(payload.experience_years or 0.0)
+    experience_entries = len(payload.experience_entries or [])
+    positive_score = 0
+    risk_score = 0
+
+    if years >= 7:
+        positive_score += 2
+    elif years >= 3:
+        positive_score += 1
+    if experience_entries >= 2:
+        positive_score += 1
+    if strengths:
+        positive_score += 1
+    if skills >= 4:
+        positive_score += 1
+    if _candidate_has_keywords(payload, ("lead", "leader", "leadership", "manager", "owner", "ownership", "principal", "staff")):
+        positive_score += 1
+    if _candidate_has_keywords(payload, ("product", "stakeholder", "customer", "business", "roadmap", "strategy")):
+        positive_score += 1
+    if _candidate_has_keywords(payload, ("production", "scale", "architecture", "platform", "mlops", "rag", "eval")):
+        positive_score += 1
+
+    if not payload.experience_entries:
+        risk_score += 2
+    if not payload.skills:
+        risk_score += 1
+    if years > 0 and years < 2:
+        risk_score += 1
+    if len(gaps) >= max(strengths + 2, 3):
+        risk_score += 2
+    if positive_score >= 4 and risk_score <= 1:
+        return "Advance to the next stage with focused validation of leadership, scope and business impact."
+    if positive_score >= 3 and risk_score <= 3:
+        return "Keep the candidate in the active pipeline and run a targeted interview on ownership, stakeholder management and delivery depth."
+    return "Hold before advancing and validate the current gaps with a focused technical and hiring screen."
+
+
+def _candidate_executive_summary(
+    payload: CVAnalysisPayload,
+    *,
+    candidate_name: str,
+    headline: str,
+    location: str | None,
+    strengths: list[str],
+    gaps: list[str],
+) -> str:
+    years = float(payload.experience_years or 0.0)
+    experience_entries = len(payload.experience_entries or [])
+    opening = f"{candidate_name} presents as a hiring profile centered on {headline}"
+    if location:
+        opening += f" from {location}"
+    opening += "."
+    evidence = "The current CV exposes limited explicit duration signals"
+    if years > 0:
+        evidence = f"Grounded evidence suggests about {years:.1f} year(s) of experience"
+    if experience_entries:
+        evidence += f" across {experience_entries} structured role(s)"
+    evidence += "."
+    trailing: list[str] = []
+    if strengths:
+        trailing.append(f"Top strengths: {'; '.join(strengths[:2])}.")
+    if gaps:
+        trailing.append(f"Primary watchout: {gaps[0]}.")
+    return " ".join([opening, evidence, *trailing]).strip()
 
 
 def _build_cards_slide(
@@ -1460,9 +1681,13 @@ def build_candidate_review_deck_contract(
     if not isinstance(payload, CVAnalysisPayload):
         raise ValueError("Candidate review deck requires a cv_analysis structured result.")
 
-    personal_info = payload.personal_info
-    candidate_name = _clean_text(getattr(personal_info, "full_name", None)) or "Candidate"
-    location = _clean_text(getattr(personal_info, "location", None)) or "n/d"
+    candidate_name = _candidate_profile_name(payload)
+    location = _candidate_profile_location(payload)
+    headline = _candidate_profile_headline(payload)
+    strengths = _candidate_strengths(payload)
+    gaps = _candidate_gaps(payload)
+    evidence_highlights = _candidate_evidence_highlights(payload)
+    next_steps = _candidate_next_steps(payload, gaps)
     experience_rows = [
         [
             item.title or "-",
@@ -1498,14 +1723,14 @@ def build_candidate_review_deck_contract(
                 rows=_normalize_table_rows(education_rows),
             )
         )
-    recommendation = (
-        "Advance to the next stage with focused validation of leadership, scope and business ownership."
-        if len(payload.strengths or []) >= len(payload.improvement_areas or [])
-        else "Keep the candidate under review and validate the identified gaps before advancing."
-    )
-    summary_text = (
-        f"{candidate_name} ({location}) apresenta {payload.experience_years:.1f} ano(s) de experiência estimada, "
-        f"{len(payload.skills or [])} skill(s) mapeadas e {len(payload.experience_entries or [])} experiência(s) estruturada(s)."
+    recommendation = _candidate_recommendation(payload, gaps)
+    summary_text = _candidate_executive_summary(
+        payload,
+        candidate_name=candidate_name,
+        headline=headline,
+        location=location,
+        strengths=strengths,
+        gaps=gaps,
     )
     return GenericExecutiveDeckContract(
         export_kind=CANDIDATE_REVIEW_EXPORT_KIND,
@@ -1521,10 +1746,20 @@ def build_candidate_review_deck_contract(
         context={
             "task_type": normalized_result.task_type if normalized_result else None,
             "candidate_name": candidate_name,
-            "location": location,
+            "headline": headline,
+            "location": location or "n/d",
+            "experience_entries": len(payload.experience_entries or []),
+        },
+        candidate_profile={
+            "name": candidate_name,
+            "headline": headline,
+            "location": location or "n/d",
         },
         executive_summary=summary_text,
-        key_highlights=_dedupe_texts([*(payload.strengths or []), *(payload.skills or [])], limit=6),
+        key_highlights=_dedupe_texts([*strengths, *(payload.skills or [])], limit=6),
+        strengths=strengths,
+        gaps=gaps,
+        evidence_highlights=evidence_highlights,
         key_metrics=[
             _build_metric("Experience years", f"{payload.experience_years:.1f}"),
             _build_metric("Skills", len(payload.skills or [])),
@@ -1533,15 +1768,8 @@ def build_candidate_review_deck_contract(
         ],
         tables=tables,
         recommendation=recommendation,
-        watchouts=_dedupe_texts(list(payload.improvement_areas or []), limit=4),
-        next_steps=_dedupe_texts(
-            [
-                "Agendar entrevista técnica focada em product thinking e delivery.",
-                "Validar senioridade, liderança e ownership em cenários reais.",
-                *(payload.improvement_areas or []),
-            ],
-            limit=6,
-        ),
+        watchouts=_dedupe_texts(gaps, limit=4),
+        next_steps=next_steps,
         data_sources=["structured_result", "cv_analysis"],
     )
 
@@ -1932,11 +2160,25 @@ def build_ppt_creator_payload_from_executive_deck_contract(
                 )
             )
     elif normalized.export_kind == CANDIDATE_REVIEW_EXPORT_KIND:
+        strength_source = normalized.strengths or normalized.key_highlights
         strength_cards = [
             PptCreatorCardItem(title=f"Strength {index}", body=item, footer="Positive signal")
-            for index, item in enumerate(_compact_text_list(normalized.key_highlights, limit=3, max_chars=70), start=1)
+            for index, item in enumerate(_compact_text_list(strength_source, limit=3, max_chars=70), start=1)
         ]
         slides.append(_build_cards_slide("Strengths snapshot", strength_cards, speaker_notes="Top candidate strengths."))
+        if normalized.evidence_highlights:
+            slides.append(
+                PptCreatorSlide(
+                    type="table",
+                    title="Evidence highlights",
+                    table_columns=["Signal", "Value", "Detail"],
+                    table_rows=[
+                        [item.label, item.value, item.detail or "-"]
+                        for item in normalized.evidence_highlights[:6]
+                    ],
+                    speaker_notes="Grounded evidence highlights supporting the candidate review.",
+                )
+            )
         if normalized.tables:
             primary_table = normalized.tables[0]
             slides.append(
@@ -1952,8 +2194,8 @@ def build_ppt_creator_payload_from_executive_deck_contract(
             _build_two_column_slide(
                 "Gaps vs hiring thesis",
                 left_title="Gaps / risks",
-                left_body=_humanize_watchout(normalized.watchouts[0]) if normalized.watchouts else "No critical gap surfaced in the structured review.",
-                left_bullets=_compact_text_list([_humanize_watchout(item) for item in normalized.watchouts[1:]], limit=2, max_chars=72),
+                left_body=_humanize_watchout((normalized.gaps or normalized.watchouts)[0]) if (normalized.gaps or normalized.watchouts) else "No critical gap surfaced in the structured review.",
+                left_bullets=_compact_text_list([_humanize_watchout(item) for item in (normalized.gaps or normalized.watchouts)[1:]], limit=2, max_chars=72),
                 right_title="Hiring thesis",
                 right_body=normalized.recommendation or "Proceed to interview with focused validation.",
                 right_bullets=_compact_text_list(normalized.next_steps[:2], limit=2, max_chars=72),
