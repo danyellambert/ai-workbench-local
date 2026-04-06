@@ -19,9 +19,13 @@ from src.providers.registry import filter_registry_by_capability
 from src.rag.loaders import load_document
 
 from .components import (
+    build_artifact_panel_html,
+    build_contract_snapshot_html,
     build_credibility_band_html,
     build_grounding_preview_html,
     build_hero_html,
+    build_how_it_works_html,
+    build_result_panels_html,
     build_result_summary_html,
     build_topbar_html,
     build_workflow_cards_html,
@@ -132,15 +136,37 @@ def _result_artifact_paths(result: ProductWorkflowResult | None) -> list[str]:
     return paths
 
 
+def _workflow_contract_entry(frontend_contract: dict[str, Any], workflow_id: str) -> dict[str, Any]:
+    workflows = frontend_contract.get("workflows") if isinstance(frontend_contract, dict) else []
+    for item in workflows if isinstance(workflows, list) else []:
+        if isinstance(item, dict) and str(item.get("workflow_id") or "") == workflow_id:
+            return item
+    return {}
+
+
+def _deck_button_label(definition: Any) -> str:
+    if not hasattr(definition, "default_export_label") and not hasattr(definition, "default_export_kind"):
+        return "Generate executive deck"
+    label = getattr(definition, "default_export_label", None) or getattr(definition, "default_export_kind", None)
+    return f"Generate {label}" if label else "Generate executive deck"
+
+
 def build_gradio_product_app(bootstrap: ProductBootstrap):
     workflow_catalog = bootstrap.workflow_catalog
     default_workflow = bootstrap.product_settings.default_workflow
     if default_workflow not in workflow_catalog:
         default_workflow = next(iter(workflow_catalog))
-    initial_state = create_initial_product_state(default_workflow)  # type: ignore[arg-type]
     initial_documents = list_product_documents(bootstrap.rag_settings)
     initial_doc_values, initial_doc_labels = _document_choices(initial_documents)
     initial_doc_pairs = _document_choice_pairs(initial_documents)
+    initial_definition = workflow_catalog[default_workflow]
+    initial_state = update_product_state(
+        create_initial_product_state(default_workflow),  # type: ignore[arg-type]
+        indexed_document_ids=list(initial_doc_values),
+    )
+    raw_frontend_contract = getattr(bootstrap, "workflow_frontend_contract", {})
+    frontend_contract = raw_frontend_contract if isinstance(raw_frontend_contract, dict) else {}
+    initial_workflow_contract = _workflow_contract_entry(frontend_contract, default_workflow)
     chat_registry = filter_registry_by_capability(bootstrap.provider_registry, "chat")
     provider_choices = list(chat_registry.keys()) or ["ollama"]
     default_provider = provider_choices[0]
@@ -154,13 +180,24 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
     }
     default_models = {provider: (models[0] if models else "") for provider, models in model_map.items()}
 
-    def _workflow_state_transition(workflow_id: str, state: ProductSessionState):
+    def _workflow_state_transition(workflow_id: str, state: ProductSessionState, selected_document_ids: list[str]):
         definition = workflow_catalog[str(workflow_id)]
-        updated_state = update_product_state(state, selected_workflow=workflow_id, last_error=None)
+        normalized_document_ids = list(selected_document_ids or getattr(state, "indexed_document_ids", []) or [])
+        updated_state = update_product_state(
+            state,
+            selected_workflow=workflow_id,
+            indexed_document_ids=normalized_document_ids,
+            last_error=None,
+        )
         return (
             updated_state,
             build_workflow_cards_html(workflow_catalog, active_workflow=workflow_id),
-            build_workflow_detail_html(definition, selected_documents=len(updated_state.indexed_document_ids)),
+            build_workflow_detail_html(definition, selected_documents=len(normalized_document_ids)),
+            gr.update(placeholder=definition.input_placeholder or "Add workflow instructions for the selected flow."),
+            gr.update(value=definition.preferred_context_strategy),
+            build_contract_snapshot_html(_workflow_contract_entry(frontend_contract, workflow_id)),
+            _workflow_contract_entry(frontend_contract, workflow_id),
+            gr.update(value=_deck_button_label(definition)),
         )
 
     def _update_model_dropdown(provider_key: str):
@@ -169,11 +206,14 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
 
     def _index_documents(upload_value: Any, state: ProductSessionState):
         uploads = _coerce_uploaded_files(upload_value)
+        current_workflow = state.selected_workflow if isinstance(state, ProductSessionState) else default_workflow
+        current_definition = workflow_catalog[str(current_workflow)]
         if not uploads:
             return (
                 build_result_summary_html(None),
                 _document_rows(initial_documents),
-                gr.update(choices=initial_doc_labels, value=initial_doc_values),
+                gr.update(choices=initial_doc_pairs, value=initial_doc_values),
+                build_workflow_detail_html(current_definition, selected_documents=len(initial_doc_values)),
                 state,
             )
         loaded_documents = [load_document(uploaded, bootstrap.rag_settings) for uploaded in uploads[: bootstrap.product_settings.max_upload_files]]
@@ -194,8 +234,15 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
             summary_html,
             _document_rows(indexed_documents),
             gr.update(choices=document_pairs, value=document_values),
+            build_workflow_detail_html(current_definition, selected_documents=len(document_values)),
             updated_state,
         )
+
+    def _document_selection_changed(state: ProductSessionState, document_ids: list[str]):
+        current_workflow = state.selected_workflow if isinstance(state, ProductSessionState) else default_workflow
+        definition = workflow_catalog[str(current_workflow)]
+        updated_state = update_product_state(state, indexed_document_ids=list(document_ids or []), last_error=None)
+        return updated_state, build_workflow_detail_html(definition, selected_documents=len(document_ids or []))
 
     def _preview_grounding(state: ProductSessionState, document_ids: list[str], input_text: str, strategy: str):
         workflow_id = state.selected_workflow if isinstance(state, ProductSessionState) else default_workflow
@@ -238,13 +285,15 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
         updated_state = update_product_state(state, latest_result=result, latest_deck_result=None, last_error=None)
         return (
             build_result_summary_html(result),
-            "\n".join(f"- {item}" for item in sections.get("highlights") or []) or "- No highlights captured yet.",
-            "\n".join(f"- {item}" for item in sections.get("warnings") or []) or "- No active warning.",
+            build_result_panels_html(result),
             primary_title,
             primary_rows,
             secondary_title,
             secondary_rows,
+            build_grounding_preview_html(result.grounding_preview),
+            result.grounding_preview.preview_text if result.grounding_preview is not None else "",
             source_rows,
+            build_artifact_panel_html(result),
             _result_artifact_paths(result),
             updated_state,
         )
@@ -265,7 +314,7 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
             latest_deck_result=export_result,
             last_error=None,
         )
-        return export_result, [artifact.path for artifact in artifacts if artifact.path], updated_state
+        return export_result, build_artifact_panel_html(updated_result, export_result), [artifact.path for artifact in artifacts if artifact.path], updated_state
 
     with gr.Blocks(title=bootstrap.product_settings.app_name) as app:
         gr.HTML(f"<style>{build_product_css(bootstrap.product_settings.accent_color)}</style>")
@@ -274,6 +323,7 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
         gr.HTML(build_hero_html())
 
         workflow_cards = gr.HTML(build_workflow_cards_html(workflow_catalog, active_workflow=default_workflow))
+        gr.HTML(build_how_it_works_html())
         workflow_detail = gr.HTML(build_workflow_detail_html(workflow_catalog[default_workflow], selected_documents=len(initial_doc_values)))
 
         with gr.Row(equal_height=True):
@@ -300,7 +350,7 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
                 input_text = gr.Textbox(
                     label="Workflow instructions (optional)",
                     lines=6,
-                    placeholder="Add business context, comparison criteria, hiring signals or review instructions.",
+                    placeholder=initial_definition.input_placeholder or "Add business context, comparison criteria, hiring signals or review instructions.",
                 )
                 with gr.Accordion("Advanced runtime", open=False):
                     provider_dropdown = gr.Dropdown(label="Generation provider", choices=provider_choices, value=default_provider)
@@ -308,36 +358,47 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
                     temperature_slider = gr.Slider(label="Temperature", minimum=0.0, maximum=1.2, step=0.1, value=0.2)
                     context_mode = gr.Dropdown(label="Context window mode", choices=["auto", "manual"], value="auto")
                     context_window = gr.Slider(label="Manual context window", minimum=1024, maximum=65536, step=512, value=16384)
-                    strategy_dropdown = gr.Dropdown(label="Grounding strategy", choices=["document_scan", "retrieval"], value="document_scan")
+                    strategy_dropdown = gr.Dropdown(
+                        label="Grounding strategy",
+                        choices=["document_scan", "retrieval"],
+                        value=initial_definition.preferred_context_strategy,
+                    )
                 with gr.Row():
                     preview_button = gr.Button("Preview grounding")
                     run_button = gr.Button("Run workflow", variant="primary")
                     deck_button = gr.Button(
-                        "Generate executive deck",
+                        _deck_button_label(initial_definition),
                         variant="secondary",
                         visible=bootstrap.product_settings.enable_deck_generation,
                     )
             with gr.Column(scale=7):
-                grounding_summary = gr.HTML('<div class="product-empty-state">Grounding preview will appear here before execution.</div>')
-                grounding_preview_text = gr.Textbox(label="Grounding preview text", lines=12, interactive=False)
-                result_summary = gr.HTML(build_result_summary_html(None))
-                highlights_md = gr.Markdown("- No highlights yet.")
-                warnings_md = gr.Markdown("- No active warning.")
-                primary_table_title = gr.Markdown("### Primary findings")
-                primary_table = gr.Dataframe(headers=["Col 1", "Col 2", "Col 3", "Col 4"], interactive=False)
-                secondary_table_title = gr.Markdown("### Actionable details")
-                secondary_table = gr.Dataframe(headers=["Col 1", "Col 2", "Col 3", "Col 4"], interactive=False)
-                sources_table = gr.Dataframe(headers=["Source", "Chunk", "Score", "Snippet"], label="Grounded evidence", interactive=False)
-                artifact_files = gr.File(label="Artifacts", file_count="multiple")
-                deck_status = gr.JSON(label="Deck export status")
+                with gr.Tabs():
+                    with gr.Tab("Outcome"):
+                        result_summary = gr.HTML(build_result_summary_html(None))
+                        result_panels = gr.HTML(build_result_panels_html(None))
+                        primary_table_title = gr.Markdown("### Primary findings")
+                        primary_table = gr.Dataframe(headers=["Col 1", "Col 2", "Col 3", "Col 4"], interactive=False)
+                        secondary_table_title = gr.Markdown("### Actionable details")
+                        secondary_table = gr.Dataframe(headers=["Col 1", "Col 2", "Col 3", "Col 4"], interactive=False)
+                    with gr.Tab("Grounding"):
+                        grounding_summary = gr.HTML('<div class="product-empty-state">Grounding preview will appear here before execution.</div>')
+                        grounding_preview_text = gr.Textbox(label="Grounding preview text", lines=12, interactive=False)
+                        sources_table = gr.Dataframe(headers=["Source", "Chunk", "Score", "Snippet"], label="Grounded evidence", interactive=False)
+                    with gr.Tab("Artifacts"):
+                        artifact_summary = gr.HTML(build_artifact_panel_html(None))
+                        artifact_files = gr.File(label="Artifacts", file_count="multiple")
+                        deck_status = gr.JSON(label="Deck export status")
+                    with gr.Tab("Workflow contract"):
+                        workflow_contract_html = gr.HTML(build_contract_snapshot_html(initial_workflow_contract))
+                        workflow_contract_json = gr.JSON(label="Workflow contract snapshot", value=initial_workflow_contract)
 
         gr.HTML(build_credibility_band_html())
 
         for button, workflow_id in zip(workflow_buttons, workflow_catalog.keys()):
             button.click(
-                fn=lambda state, selected=workflow_id: _workflow_state_transition(selected, state),
-                inputs=[workflow_state],
-                outputs=[workflow_state, workflow_cards, workflow_detail],
+                fn=lambda state, selected_document_ids, selected=workflow_id: _workflow_state_transition(selected, state, selected_document_ids),
+                inputs=[workflow_state, document_selector],
+                outputs=[workflow_state, workflow_cards, workflow_detail, input_text, strategy_dropdown, workflow_contract_html, workflow_contract_json, deck_button],
             )
 
         provider_dropdown.change(
@@ -349,7 +410,13 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
         index_button.click(
             fn=_index_documents,
             inputs=[upload_input, workflow_state],
-            outputs=[ingestion_status, document_table, document_selector, workflow_state],
+            outputs=[ingestion_status, document_table, document_selector, workflow_detail, workflow_state],
+        )
+
+        document_selector.change(
+            fn=_document_selection_changed,
+            inputs=[workflow_state, document_selector],
+            outputs=[workflow_state, workflow_detail],
         )
 
         preview_button.click(
@@ -363,13 +430,15 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
             inputs=[workflow_state, document_selector, input_text, provider_dropdown, model_dropdown, temperature_slider, context_mode, context_window, strategy_dropdown],
             outputs=[
                 result_summary,
-                highlights_md,
-                warnings_md,
+                result_panels,
                 primary_table_title,
                 primary_table,
                 secondary_table_title,
                 secondary_table,
+                grounding_summary,
+                grounding_preview_text,
                 sources_table,
+                artifact_summary,
                 artifact_files,
                 workflow_state,
             ],
@@ -378,7 +447,7 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
         deck_button.click(
             fn=_generate_deck,
             inputs=[workflow_state],
-            outputs=[deck_status, artifact_files, workflow_state],
+            outputs=[deck_status, artifact_summary, artifact_files, workflow_state],
         )
 
     return app
