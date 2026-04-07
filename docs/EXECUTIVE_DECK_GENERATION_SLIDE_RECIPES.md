@@ -1,14 +1,14 @@
-# Executive Deck Generation — slide recipes por deck type
+# Executive Deck Generation — slide recipes by deck type
 
-## Objetivo
+## Objective
 
-Definir a sequência padrão de slides de cada deck type prioritário.
+Define the standard slide sequence for each priority deck type.
 
 ---
 
 ## P1 — Benchmark & Eval Executive Review
 
-Sequência recomendada:
+Recommended sequence:
 
 1. title
 2. executive summary
@@ -22,7 +22,7 @@ Sequência recomendada:
 
 ## P2 — Document Review Deck
 
-Sequência recomendada:
+Recommended sequence:
 
 1. title
 2. executive summary
@@ -36,7 +36,7 @@ Sequência recomendada:
 
 ## P2 — Policy / Contract Comparison Deck
 
-Sequência recomendada:
+Recommended sequence:
 
 1. title
 2. comparison summary
@@ -49,7 +49,7 @@ Sequência recomendada:
 
 ## P3 — Action Plan Deck
 
-Sequência recomendada:
+Recommended sequence:
 
 1. title
 2. executive summary
@@ -63,7 +63,7 @@ Sequência recomendada:
 
 ## P3 — Candidate Review Deck
 
-Sequência recomendada:
+Recommended sequence:
 
 1. title / candidate snapshot
 2. executive summary
@@ -77,7 +77,7 @@ Sequência recomendada:
 
 ## P3 — Evidence Pack Deck
 
-Sequência recomendada:
+Recommended sequence:
 
 1. title
 2. executive summary

@@ -1,82 +1,82 @@
 # Phase 9.5 — EvidenceOps vertical slice 1B
 
-## Objetivo desta rodada
+## Objective of this iteration
 
-Fechar o **slice 1B** da Fase 9.5 sem depender de infraestrutura externa, fortalecendo a vertical EvidenceOps em cima de `filesystem + SQLite`.
+Complete **slice 1B** of Phase 9.5 without depending on external infrastructure, strengthening the EvidenceOps vertical on top of `filesystem + SQLite`.
 
-## O que foi adicionado
+## What was added
 
-- **repository search mais forte**
-  - filtros por `category`, `suffix` e `document_id`
-  - scoring local por múltiplos termos
-- **snapshot + drift documental**
-  - snapshot local persistido em `.phase95_evidenceops_repository_snapshot.json`
-  - diff com contagem de documentos `new`, `changed` e `removed`
-- **guardrails auditáveis no action store**
-  - updates sensíveis exigem `approval_status="approved"`, `approval_reason` e `approved_by`
-  - histórico de atualização salvo em `metadata.update_history`
-- **fachada operacional local mais completa**
-  - busca, sumário e comparação de estado do repository
-  - sumário de actions/worklog pronto para futura promoção a adapter MCP/HTTP
-- **observabilidade melhor na sidebar/runtime snapshot**
-  - métricas de drift documental
-  - métricas de governança (`review_required`, `approved`, `pending approval`, `overdue`)
+- **stronger repository search**
+  - filters by `category`, `suffix`, and `document_id`
+  - local scoring for multiple terms
+- **snapshot + document drift**
+  - local snapshot persisted in `.phase95_evidenceops_repository_snapshot.json`
+  - diff with counts of `new`, `changed`, and `removed` documents
+- **auditable guardrails in the action store**
+  - sensitive updates require `approval_status="approved"`, `approval_reason`, and `approved_by`
+  - update history saved in `metadata.update_history`
+- **a more complete local operational facade**
+  - search, summary, and repository state comparison
+  - actions/worklog summary ready for future promotion to an MCP/HTTP adapter
+- **better observability in the sidebar/runtime snapshot**
+  - document drift metrics
+  - governance metrics (`review_required`, `approved`, `pending approval`, `overdue`)
 
-## Leitura arquitetural
+## Architectural reading
 
-Esta entrega **ainda não é o Slice 2**. Ela continua 100% no escopo do **Slice 1**:
+This delivery is **not yet Slice 2**. It remains 100% within the scope of **Slice 1**:
 
-- repositório documental local
-- worklog local
-- action store local
-- governança/human-in-the-loop em writes sensíveis
+- local document repository
+- local worklog
+- local action store
+- human-in-the-loop governance for sensitive writes
 
-O ganho é que a vertical passa a ficar **“MCP-shaped”**:
+The gain is that the vertical becomes more **“MCP-shaped”**:
 
-- contratos locais mais claros
-- observabilidade melhor
-- comparação de estado documental
-- trilha auditável para writes
+- clearer local contracts
+- better observability
+- document state comparison
+- an auditable trail for writes
 
-## Direção oficial do Slice 2
+## Official direction for Slice 2
 
-Depois desta rodada, a direção oficial da Fase 9.5 deixa de ser genérica e passa a ser:
+After this iteration, the official direction of Phase 9.5 is no longer generic. It becomes:
 
-- **`Nextcloud/WebDAV`** para o **Document Repository MCP** externo
-- **`Trello`** para o **Worklog / Action MCP** externo
-- **`Notion`** para **evidence register, dashboard operacional e handoff executivo**
+- **`Nextcloud/WebDAV`** for the external **Document Repository MCP**
+- **`Trello`** for the external **Worklog / Action MCP**
+- **`Notion`** for the **evidence register, operational dashboard, and executive handoff**
 
-Leitura recomendada:
+Recommended reading:
 
-- `filesystem + SQLite` continuam como fundação local auditável
-- a tríade `Nextcloud/WebDAV + Trello + Notion` passa a ser o alvo externo principal
-- `GitHub Issues` deixa de ser o target principal e vira uma alternativa secundária para contextos mais dev-centric
+- `filesystem + SQLite` remain the auditable local foundation
+- the `Nextcloud/WebDAV + Trello + Notion` triad becomes the main external target
+- `GitHub Issues` stops being the primary target and becomes a secondary alternative for more dev-centric contexts
 
-## O que isso prepara para depois
+## What this prepares for next
 
-Com essa base, o próximo passo pode trocar adapters sem reescrever a vertical:
+With this foundation, the next step can swap adapters without rewriting the vertical:
 
 - `filesystem` -> `Nextcloud/WebDAV`
-- `SQLite local` -> `Trello`
-- summaries/evidence packs locais -> `Notion`
-- fachada local -> MCP server/adapter HTTP
+- local `SQLite` -> `Trello`
+- local summaries/evidence packs -> `Notion`
+- local facade -> MCP server/HTTP adapter
 
-## O que ainda depende de credenciais/configuração
+## What still depends on credentials/configuration
 
-O slice 1B fica completo sem depender de serviços externos.
+Slice 1B is complete without depending on external services.
 
-Para promover a vertical ao slice externo final da Fase 9.5, ainda serão necessários:
+To promote the vertical to the final external slice of Phase 9.5, the following will still be required:
 
-- credenciais de `Nextcloud/WebDAV`
-- credenciais e board/list mapping do `Trello`
-- integration token + database/page mapping do `Notion`
+- `Nextcloud/WebDAV` credentials
+- `Trello` credentials plus board/list mapping
+- `Notion` integration token plus database/page mapping
 
-## Evidência de pronto
+## Evidence of readiness
 
-Esta rodada deve permitir demonstrar localmente:
+This iteration should allow the following to be demonstrated locally:
 
-1. busca e listagem do corpus EvidenceOps
-2. detecção de drift documental entre snapshots
-3. registro e atualização auditável de actions
-4. bloqueio de writes sensíveis sem aprovação explícita
-5. exposição desses sinais no runtime snapshot/sidebar
+1. search and listing of the EvidenceOps corpus
+2. detection of document drift between snapshots
+3. auditable registration and updating of actions
+4. blocking of sensitive writes without explicit approval
+5. exposure of those signals in the runtime snapshot/sidebar

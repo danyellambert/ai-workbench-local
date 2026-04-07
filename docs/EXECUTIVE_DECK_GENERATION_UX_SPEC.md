@@ -1,59 +1,59 @@
 # Executive Deck Generation — UX spec
 
-## Objetivo
+## Objective
 
-Definir como a capability deve aparecer para o usuário no produto.
+Define how the capability should appear to the user in the product.
 
 ---
 
-## Princípio de UX
+## UX principle
 
-Na interface, isso deve aparecer como capability do AI Workbench, e não como projeto separado.
+In the interface, this should appear as an AI Workbench capability, not as a separate project.
 
-Naming recomendado:
+Recommended naming:
 
 - **Executive Deck Generation**
 - **Generate executive deck**
 - **Business review decks**
 
-Evitar:
+Avoid:
 
-- “usar ppt_creator_app”
-- “abrir app de PPT”
-
----
-
-## UX mínima do P1 no app atual
-
-### Entrada
-
-O usuário deve conseguir:
-
-- acionar a geração do `Benchmark & Eval Executive Review Deck`
-
-### Ações mínimas
-
-- gerar deck
-- baixar `.pptx`
-- baixar contract JSON
-- baixar payload JSON
-- ver status da operação
-- ver falhas e warnings
-
-### Feedback esperado
-
-- `Gerando contract...`
-- `Chamando renderer...`
-- `Baixando artefatos...`
-- `Deck pronto para download`
+- “use ppt_creator_app”
+- “open the PPT app”
 
 ---
 
-## UX futura da capability
+## Minimum P1 UX in the current app
 
-### Seleção de deck type
+### Input
 
-O usuário poderá escolher entre:
+The user should be able to:
+
+- trigger generation of the `Benchmark & Eval Executive Review Deck`
+
+### Minimum actions
+
+- generate the deck
+- download `.pptx`
+- download contract JSON
+- download payload JSON
+- view operation status
+- view failures and warnings
+
+### Expected feedback
+
+- `Generating contract...`
+- `Calling renderer...`
+- `Downloading artifacts...`
+- `Deck ready for download`
+
+---
+
+## Future UX of the capability
+
+### Deck-type selection
+
+The user will be able to choose among:
 
 - benchmark/eval review
 - document review
@@ -62,39 +62,39 @@ O usuário poderá escolher entre:
 - candidate review
 - evidence pack
 
-### Histórico
+### History
 
-O produto deve exibir:
+The product should display:
 
-- exports recentes
+- recent exports
 - status
 - deck type
-- data/hora
-- downloads disponíveis
+- date/time
+- available downloads
 
-### Entradas futuras por fluxo
+### Future workflow-based inputs
 
-- a partir do fluxo de benchmark/eval
-- a partir do fluxo de document review
-- a partir do fluxo de comparison
-- a partir do fluxo de CV analysis
+- from the benchmark/eval workflow
+- from the document-review workflow
+- from the comparison workflow
+- from the CV-analysis workflow
 
 ---
 
-## Progressão de interface
+## Interface progression
 
-### Streamlit atual
+### Current Streamlit
 
-- primeira UX funcional
-- foco em capability e downloads
+- first functional UX
+- focus on capability and downloads
 
 ### Gradio
 
-- showcase mais AI-first
-- fluxo mais claro por deck type
+- a more AI-first showcase
+- a clearer flow by deck type
 
 ### App web
 
-- catálogo explícito de deck types
-- histórico de exports
-- workflows mais próximos de produto real
+- explicit deck-type catalog
+- export history
+- workflows closer to a real product

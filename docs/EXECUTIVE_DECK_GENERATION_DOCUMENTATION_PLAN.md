@@ -1,59 +1,59 @@
-# Executive Deck Generation — plano documental completo
+# Executive Deck Generation — complete documentation plan
 
-## Objetivo
+## Objective
 
-Consolidar **absolutamente tudo o que precisa ser documentado** para implementar a capability de **Executive Deck Generation** por completo no ecossistema do AI Workbench Local.
+Consolidate **absolutely everything that needs to be documented** to fully implement the **Executive Deck Generation** capability in the AI Workbench Local ecosystem.
 
-Este documento existe para responder, de forma operacional, quatro perguntas:
+This document exists to answer, in operational terms, four questions:
 
-1. o que já está documentado
-2. o que ainda falta documentar
-3. o que é obrigatório antes de implementar o P1
-4. o que pode ser documentado em paralelo à implementação dos próximos deck types
+1. what is already documented
+2. what still needs to be documented
+3. what is mandatory before implementing P1
+4. what can be documented in parallel with the implementation of the next deck types
 
 ---
 
-## Estado atual
+## Current status
 
-### Já documentado
+### Already documented
 
-#### Capability / visão de produto
+#### Capability / product vision
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
-#### Productização técnica do primeiro slice
+#### Technical productization of the first slice
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 
-#### Contrato concreto do P1
+#### Concrete P1 contract
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
 
-#### Roadmap principal
+#### Main roadmap
 - `ROADMAP.md`
 
-### Escopo documental complementar fechado nesta rodada
+### Complementary documentation scope completed in this round
 
-- catálogo oficial de deck types e `export_kind`
-- arquitetura de serviço da capability
-- contrato de API entre AI Workbench e `ppt_creator_app`
-- lifecycle de artefatos
-- UX mínima e progressão de UI
-- estratégia de testes
-- políticas de qualidade, observabilidade, segurança e rollout
-- docs auxiliares de roteamento, versionamento, recipes e mapping
-- contratos dedicados para P2/P3/P4/P5/P6 ainda pendentes de escrita específica
+- official catalog of deck types and `export_kind`
+- capability service architecture
+- API contract between AI Workbench and `ppt_creator_app`
+- artifact lifecycle
+- minimum UX and UI progression
+- test strategy
+- quality, observability, security, and rollout policies
+- supporting docs for routing, versioning, recipes, and mapping
+- dedicated contracts for P2/P3/P4/P5/P6 still pending specific writing
 
 ---
 
-## Pacote documental completo da capability
+## Complete documentation package for the capability
 
-## 1. Capability / produto
+## 1. Capability / product
 
 ### 1.1 Capability map
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
-### 1.2 Plano documental completo
+### 1.2 Complete documentation plan
 - `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
 
-### 1.3 Catálogo oficial de deck types
+### 1.3 Official catalog of deck types
 - `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
 
 ### 1.4 Routing policy
@@ -64,12 +64,12 @@ Este documento existe para responder, de forma operacional, quatro perguntas:
 
 ---
 
-## 2. Contratos de dados por deck type
+## 2. Data contracts by deck type
 
-### P1 — já iniciado
+### P1 — already started
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
 
-### P2/P3/P4/P5/P6 — necessários para capability completa
+### P2/P3/P4/P5/P6 — required for the full capability
 - `docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md`
 - `docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md`
@@ -78,7 +78,7 @@ Este documento existe para responder, de forma operacional, quatro perguntas:
 
 ---
 
-## 3. Arquitetura e integração
+## 3. Architecture and integration
 
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 - `docs/EXECUTIVE_DECK_GENERATION_SERVICE_ARCHITECTURE.md`
@@ -91,7 +91,7 @@ Este documento existe para responder, de forma operacional, quatro perguntas:
 
 ---
 
-## 4. Produto / UX
+## 4. Product / UX
 
 - `docs/EXECUTIVE_DECK_GENERATION_UX_SPEC.md`
 - `docs/EXECUTIVE_DECK_GENERATION_UI_EVOLUTION.md`
@@ -99,7 +99,7 @@ Este documento existe para responder, de forma operacional, quatro perguntas:
 
 ---
 
-## 5. Qualidade, testes e governança
+## 5. Quality, testing, and governance
 
 - `docs/EXECUTIVE_DECK_GENERATION_TEST_STRATEGY.md`
 - `docs/EXECUTIVE_DECK_GENERATION_QUALITY_AND_GOVERNANCE.md`
@@ -109,40 +109,40 @@ Este documento existe para responder, de forma operacional, quatro perguntas:
 
 ---
 
-## O que é obrigatório antes de implementar o P1
+## What is mandatory before implementing P1
 
-Para começar a implementação do **Benchmark & Eval Executive Review Deck** com segurança, o mínimo documental obrigatório é:
+To start implementing the **Benchmark & Eval Executive Review Deck** safely, the minimum required documentation is:
 
 1. capability map
-2. productização técnica do primeiro slice
-3. contrato v1 do P1
-4. catálogo oficial de deck types
-5. arquitetura de serviço
+2. technical productization of the first slice
+3. P1 contract v1
+4. official catalog of deck types
+5. service architecture
 6. API contract
 7. artifact lifecycle
-8. UX spec mínima
+8. minimum UX spec
 9. test strategy
 
-Em outras palavras: o P1 não depende dos contratos completos de todos os decks futuros, mas depende da infraestrutura documental que define a capability como sistema coerente.
+In other words: P1 does not depend on the complete contracts for all future decks, but it does depend on the documentation infrastructure that defines the capability as a coherent system.
 
 ---
 
-## O que pode ser documentado em paralelo ao P1
+## What can be documented in parallel with P1
 
-Os itens abaixo não bloqueiam o início do P1, mas bloqueiam a ideia de **capability completa**:
+The items below do not block the start of P1, but they do block the idea of a **complete capability**:
 
-- contract v1 do `document_review_deck`
-- contract v1 do `policy_contract_comparison_deck`
-- contract v1 do `action_plan_deck`
-- contract v1 do `candidate_review_deck`
-- contract v1 do `evidence_pack_deck`
-- policy completa de quality/governance/PII
+- contract v1 for `document_review_deck`
+- contract v1 for `policy_contract_comparison_deck`
+- contract v1 for `action_plan_deck`
+- contract v1 for `candidate_review_deck`
+- contract v1 for `evidence_pack_deck`
+- full quality/governance/PII policy
 
 ---
 
-## Ordem recomendada de documentação
+## Recommended documentation order
 
-### Fase documental A — obrigatória antes do P1
+### Documentation phase A — mandatory before P1
 
 1. `EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG`
 2. `EXECUTIVE_DECK_GENERATION_SERVICE_ARCHITECTURE`
@@ -151,7 +151,7 @@ Os itens abaixo não bloqueiam o início do P1, mas bloqueiam a ideia de **capab
 5. `EXECUTIVE_DECK_GENERATION_UX_SPEC`
 6. `EXECUTIVE_DECK_GENERATION_TEST_STRATEGY`
 
-### Fase documental B — necessária para capability completa
+### Documentation phase B — required for the full capability
 
 7. `DOCUMENT_REVIEW_DECK_CONTRACT_V1`
 8. `POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1`
@@ -161,25 +161,25 @@ Os itens abaixo não bloqueiam o início do P1, mas bloqueiam a ideia de **capab
 
 ---
 
-## Critério de documentação “done”
+## Documentation “done” criteria
 
-Podemos considerar a capability documentalmente pronta quando:
+We can consider the capability documentation-ready when:
 
-- os deck types P1/P2/P3/P4/P5/P6 estiverem nomeados e catalogados
-- houver contrato concreto para cada deck prioritário
-- houver arquitetura de serviço definida
-- houver API contract explícito com o `ppt_creator_app`
-- houver lifecycle de artefatos/proveniência definido
-- houver UX mínima descrita
-- houver estratégia de testes e política de rollout/qualidade
+- deck types P1/P2/P3/P4/P5/P6 are named and cataloged
+- there is a concrete contract for each priority deck
+- there is a defined service architecture
+- there is an explicit API contract with `ppt_creator_app`
+- there is a defined artifact/provenance lifecycle
+- there is a described minimum UX
+- there is a testing strategy and rollout/quality policy
 
 ---
 
-## Resumo executivo
+## Executive summary
 
-Hoje o projeto já tinha documentação suficiente para o **P1 técnico**.  
-Com este pacote, a meta passa a ser fechar também a documentação necessária para a **capability completa** de Executive Deck Generation.
+Today the project already had enough documentation for the **technical P1**.  
+With this package, the goal becomes closing the documentation needed for the **complete Executive Deck Generation capability** as well.
 
-O princípio central é simples:
+The central principle is simple:
 
-> não basta documentar um export isolado; é preciso documentar o catálogo, os contratos, a arquitetura, a UX, os artefatos, os testes e a governança de uma capability recorrente de produto.
+> it is not enough to document an isolated export; it is necessary to document the catalog, contracts, architecture, UX, artifacts, tests, and governance of a recurring product capability.

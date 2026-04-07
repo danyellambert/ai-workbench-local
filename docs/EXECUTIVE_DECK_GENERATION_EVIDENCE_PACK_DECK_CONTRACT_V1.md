@@ -1,12 +1,12 @@
 # Executive Deck Generation — evidence pack deck contract v1
 
-## Objetivo
+## Objective
 
-Definir o contract v1 do **Evidence Pack / Audit Deck**, focado em reporting executivo de auditoria, compliance e governança documental.
+Define the v1 contract for the **Evidence Pack / Audit Deck**, focused on executive reporting for audit, compliance, and document governance.
 
 ---
 
-## Identidade do contract
+## Contract identity
 
 - `contract_version = "executive_deck_generation.v1"`
 - `export_kind = "evidence_pack_deck"`
@@ -14,7 +14,7 @@ Definir o contract v1 do **Evidence Pack / Audit Deck**, focado em reporting exe
 
 ---
 
-## Fontes típicas do AI Workbench
+## Typical AI Workbench sources
 
 - EvidenceOps
 - evidence packs
@@ -25,7 +25,7 @@ Definir o contract v1 do **Evidence Pack / Audit Deck**, focado em reporting exe
 
 ---
 
-## Estrutura de alto nível
+## High-level structure
 
 ```json
 {
@@ -40,7 +40,7 @@ Definir o contract v1 do **Evidence Pack / Audit Deck**, focado em reporting exe
     "theme": "executive_premium_minimal",
     "footer_text": "AI Workbench Local • Evidence Review"
   },
-  "executive_summary": "Resumo executivo do evidence pack, findings e ações necessárias.",
+  "executive_summary": "Executive summary of the evidence pack, findings, and required actions.",
   "evidence_snapshot": {
     "documents_reviewed": 12,
     "findings_count": 8,
@@ -55,13 +55,13 @@ Definir o contract v1 do **Evidence Pack / Audit Deck**, focado em reporting exe
       "status": "open"
     }
   ],
-  "recommendation": "Tratar findings críticos antes do próximo checkpoint de auditoria.",
+  "recommendation": "Address critical findings before the next audit checkpoint.",
   "watchouts": [
-    "Há ações sem due date definido."
+    "There are actions without a defined due date."
   ],
   "next_steps": [
-    "Fechar owners pendentes.",
-    "Atualizar evidence register."
+    "Close pending owner assignments.",
+    "Update the evidence register."
   ],
   "data_sources": [
     "evidence_pack",
@@ -72,7 +72,7 @@ Definir o contract v1 do **Evidence Pack / Audit Deck**, focado em reporting exe
 
 ---
 
-## Slides mínimos esperados
+## Minimum expected slides
 
 1. title
 2. executive summary
@@ -84,9 +84,9 @@ Definir o contract v1 do **Evidence Pack / Audit Deck**, focado em reporting exe
 
 ---
 
-## Regras mínimas
+## Minimum rules
 
-- `executive_summary` é obrigatória
-- `findings` deve ter pelo menos 1 item
-- `recommendation` é obrigatória
-- se não houver findings, o deck deve ser bloqueado ou tratado como caso especial de status saudável
+- `executive_summary` is required
+- `findings` must contain at least 1 item
+- `recommendation` is required
+- if there are no findings, the deck must be blocked or treated as a special healthy-status case

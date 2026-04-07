@@ -1,16 +1,16 @@
-# Phase 9.5 — EvidenceOps MCP server local
+# Phase 9.5 — Local EvidenceOps MCP server
 
-## O que esta entrega adiciona
+## What this delivery adds
 
-Esta rodada promove a vertical EvidenceOps local para um **MCP server real em stdio**, sem depender de SDK externo e sem sair do stack atual `filesystem + SQLite`.
+This iteration promotes the local EvidenceOps vertical into a **real MCP server over stdio**, without depending on an external SDK and without leaving the current `filesystem + SQLite` stack.
 
-## Onde está o servidor
+## Where the server is
 
-- implementação principal: `src/mcp/evidenceops_server.py`
-- transporte/framing JSON-RPC stdio: `src/mcp/jsonrpc_stdio.py`
-- entrypoint simples: `scripts/run_evidenceops_mcp_server.py`
+- main implementation: `src/mcp/evidenceops_server.py`
+- JSON-RPC stdio transport/framing: `src/mcp/jsonrpc_stdio.py`
+- simple entrypoint: `scripts/run_evidenceops_mcp_server.py`
 
-## Tools expostas
+## Exposed tools
 
 - `list_documents`
 - `search_documents`
@@ -23,53 +23,53 @@ Esta rodada promove a vertical EvidenceOps local para um **MCP server real em st
 - `update_action`
 - `summarize_worklog`
 
-## Resources expostos
+## Exposed resources
 
 - `evidenceops://repository/summary`
 - `evidenceops://repository/drift`
 - `evidenceops://actions/summary`
 - `evidenceops://worklog/summary`
 
-## Como rodar localmente
+## How to run locally
 
 ```bash
 python /Users/danyellambert/Downloads/Aula\ 4\ -\ Criacao\ de\ Chatbot\ com\ IA\ em\ Tempo\ Real/scripts/run_evidenceops_mcp_server.py
 ```
 
-## Registro no Cline
+## Registration in Cline
 
-O registro do servidor no Cline é **opcional**.
+Registering the server in Cline is **optional**.
 
-- ele pode ser útil para debug/manual testing com o Cline como cliente MCP
-- mas **não faz parte do core do produto**
-- o fluxo principal do projeto continua sendo:
-  - MCP server local
-  - cliente MCP do app
+- it can be useful for debugging/manual testing with Cline as the MCP client
+- but it is **not part of the product core**
+- the main project flow remains:
+  - local MCP server
+  - app MCP client
   - integration with `main.py`
 
-Se você não quiser misturar a infraestrutura do projeto com a infraestrutura do assistente, pode deixar o Cline **sem esse registro**.
+If you do not want to mix the project infrastructure with the assistant infrastructure, you can leave Cline **without this registration**.
 
-## Variáveis de ambiente suportadas
+## Supported environment variables
 
 - `EVIDENCEOPS_REPOSITORY_ROOT`
-- `EVIDENCEOPS_REPOSITORY_BACKEND` (`local` ou `nextcloud_webdav`)
+- `EVIDENCEOPS_REPOSITORY_BACKEND` (`local` or `nextcloud_webdav`)
 - `EVIDENCEOPS_REPOSITORY_SNAPSHOT_PATH`
 - `EVIDENCEOPS_ACTION_STORE_PATH`
 - `EVIDENCEOPS_WORKLOG_PATH`
 
-Quando `EVIDENCEOPS_REPOSITORY_BACKEND=nextcloud_webdav`, o **Document Repository MCP** passa a usar o adapter real do Nextcloud/WebDAV para as tools de repository (`list_documents`, `search_documents`, `get_document`, `summarize_repository`, `compare_repository_state`), preservando o fallback local quando o backend continua em `local`.
+When `EVIDENCEOPS_REPOSITORY_BACKEND=nextcloud_webdav`, the **Document Repository MCP** starts using the real Nextcloud/WebDAV adapter for repository tools (`list_documents`, `search_documents`, `get_document`, `summarize_repository`, `compare_repository_state`), preserving the local fallback when the backend remains `local`.
 
-Se não forem definidas, o servidor usa os paths locais padrão do projeto.
+If they are not defined, the server uses the project's default local paths.
 
-## Demo local
+## Local demo
 
-Existe uma demo determinística que sobe o servidor, inicializa o cliente MCP e chama as tools principais:
+There is a deterministic demo that starts the server, initializes the MCP client, and calls the main tools:
 
 ```bash
 python /Users/danyellambert/Downloads/Aula\ 4\ -\ Criacao\ de\ Chatbot\ com\ IA\ em\ Tempo\ Real/scripts/demo_phase95_evidenceops_mcp.py
 ```
 
-Ela demonstra:
+It demonstrates:
 
 1. `initialize`
 2. `tools/list`
@@ -80,58 +80,58 @@ Ela demonstra:
 7. `update_action`
 8. `resources/read`
 
-## Integração atual no produto
+## Current product integration
 
-Além do servidor local em si, a fase agora já tem:
+In addition to the local server itself, the phase now already includes:
 
-- **cliente MCP reutilizável no app** (`src/services/evidenceops_mcp_client.py`)
-- uso do MCP no fluxo principal do `document_agent`
-- **telemetria MCP** no runtime execution log e na sidebar
-- uma aba **"EvidenceOps MCP"** no app para operar repository/actions/worklog via MCP real
+- a **reusable MCP client in the app** (`src/services/evidenceops_mcp_client.py`)
+- use of MCP in the main `document_agent` flow
+- **MCP telemetry** in the runtime execution log and sidebar
+- an **"EvidenceOps MCP"** tab in the app to operate repository/actions/worklog through a real MCP
 
-## Leitura correta desta entrega
+## Correct interpretation of this delivery
 
-Isto ainda continua dentro do **slice 1** da fase 9.5:
+This still remains inside **slice 1** of Phase 9.5:
 
-- o servidor é **MCP real**
-- mas os adapters continuam **locais**
-- ou seja: a engine segue em `filesystem + SQLite`
+- the server is a **real MCP**
+- but the adapters are still **local**
+- in other words: the engine remains on `filesystem + SQLite`
 
-## Arquitetura-alvo oficial da fase 9.5
+## Official target architecture for Phase 9.5
 
-Depois desta rodada, o alvo oficial da fase passa a ser:
+After this iteration, the official target for the phase becomes:
 
-- **`Nextcloud/WebDAV`** para o repository documental externo
-- **`Trello`** para actions, owners, comentários e fluxo humano
-- **`Notion`** para evidence register, dashboard operacional e handoff executivo
+- **`Nextcloud/WebDAV`** for the external document repository
+- **`Trello`** for actions, owners, comments, and the human workflow
+- **`Notion`** for the evidence register, operational dashboard, and executive handoff
 
-Leitura recomendada:
+Recommended reading:
 
-- o baseline local (`filesystem + SQLite`) continua como fallback e trilha de debug
-- a tríade externa (`Nextcloud/WebDAV + Trello + Notion`) vira a direção principal do slice externo da fase
+- the local baseline (`filesystem + SQLite`) remains the fallback and debug trail
+- the external triad (`Nextcloud/WebDAV + Trello + Notion`) becomes the main direction of the external slice of the phase
 
-## O que ainda depende de setup externo
+## What still depends on external setup
 
-Para fechar a fase completa com adapters externos reais, ainda serão necessários:
+To complete the phase with real external adapters, the following will still be required:
 
 - **Nextcloud/WebDAV**
   - base URL
-  - usuário
-  - senha ou app password
-  - pasta/base documental alvo
+  - username
+  - password or app password
+  - target document folder/base
 - **Trello**
   - API key
   - token
-  - board alvo
-  - mapeamento mínimo de listas/status
+  - target board
+  - minimum list/status mapping
 - **Notion**
   - integration token
-  - database IDs ou page IDs
-  - schema mínimo para evidence packs, status, owner, due date e links de origem
+  - database IDs or page IDs
+  - minimum schema for evidence packs, status, owner, due date, and source links
 
-## Próximo passo natural
+## Natural next step
 
-O próximo passo natural já não é mais genérico. Ele passa a ser abrir os adapters externos em ordem:
+The natural next step is no longer generic. It becomes opening the external adapters in order:
 
 1. `Nextcloud/WebDAV`
 2. `Trello`

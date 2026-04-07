@@ -1,28 +1,28 @@
-# Phase 10.25 — Productização do primeiro slice de Executive Deck Generation
+# Phase 10.25 — Productization of the first slice of Executive Deck Generation
 
-## Objetivo
+## Objective
 
-Este documento agora deve ser lido como a **documentação técnica do primeiro slice** da capability maior de **Executive Deck Generation**.
+This document should now be read as the **technical documentation for the first slice** of the broader **Executive Deck Generation** capability.
 
-O contexto oficial e o catálogo da capability estão em:
+The official capability context and catalog are in:
 
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
-Aqui, o foco fica mais estreito:
+Here, the focus is narrower:
 
-- como transformar o `ppt_creator_app` em camada especializada do ecossistema atual
-- como fechar o primeiro deck prioritário
-- como sair do contrato para integração HTTP e UX mínima
+- how to turn `ppt_creator_app` into a specialized layer within the current ecosystem
+- how to complete the first priority deck
+- how to move from the contract to HTTP integration and minimum UX
 
-Neste momento, o slice técnico priorizado continua sendo:
+At this moment, the prioritized technical slice remains:
 
 - **benchmark/eval -> executive review deck**
 
-O `ppt_creator_app` entra como a **camada especializada de renderização executiva** dentro dessa capability maior.
+`ppt_creator_app` enters as the **specialized executive rendering layer** within this broader capability.
 
-> Em resumo: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md` define a capability de produto; este documento detalha a productização técnica do primeiro slice.
+> In short: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md` defines the product capability; this document details the technical productization of the first slice.
 
-Documentos complementares importantes para a implementação completa da capability:
+Important complementary documents for fully implementing the capability:
 
 - `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
 - `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
@@ -35,15 +35,15 @@ Documentos complementares importantes para a implementação completa da capabil
 
 ---
 
-## Relação com a capability maior
+## Relationship to the broader capability
 
-O projeto agora deve ser lido assim:
+The project should now be read like this:
 
-- **AI Workbench Local** = produto principal de IA aplicada
-- **Executive Deck Generation** = capability recorrente do produto
-- **`ppt_creator_app`** = renderer especializado que viabiliza essa capability
+- **AI Workbench Local** = the main applied-AI product
+- **Executive Deck Generation** = a recurring product capability
+- **`ppt_creator_app`** = the specialized renderer that enables this capability
 
-As famílias de decks prioritárias passam a ser:
+The priority deck families now become:
 
 - summary / executive review decks
 - document review decks
@@ -52,7 +52,7 @@ As famílias de decks prioritárias passam a ser:
 - candidate review decks
 - evidence / audit decks
 
-Este documento cobre a camada de productização do **P1**:
+This document covers the productization layer of **P1**:
 
 - **Benchmark & Eval Executive Review Deck**
 
@@ -60,147 +60,147 @@ Este documento cobre a camada de productização do **P1**:
 
 ## Why this strengthens the product capability
 
-Essa feature melhora muito a narrativa profissional do projeto porque fecha um ciclo muito forte:
+This feature significantly improves the repository's professional narrative because it closes a very strong loop:
 
-1. o sistema mede qualidade com benchmark/evals
-2. consolida resultados em contrato estruturado
-3. transforma isso em artefato executivo consumível por negócio
-4. mantém separação clara entre domínio, orquestração e renderização
+1. the system measures quality with benchmark/evals
+2. it consolidates results into a structured contract
+3. it transforms that into an executive artifact consumable by the business
+4. it preserves a clear separation between domain, orchestration, and rendering
 
-Isso ajuda a mostrar que o projeto não é apenas:
+This helps show that the project is not just:
 
-- chat com LLM
-- RAG com documentos
-- outputs estruturados
+- chat with an LLM
+- document-grounded RAG
+- structured outputs
 
-Ele passa a mostrar também:
+It also shows:
 
 - **product thinking**
-- **design de contratos versionados**
-- **integração entre serviços especializados**
-- **geração de artefatos de negócio**
-- **QA e observabilidade de uma feature fim a fim**
+- **versioned contract design**
+- **integration between specialized services**
+- **generation of business artifacts**
+- **end-to-end QA and observability for a feature**
 
-Na prática, isso fortalece a leitura de que você sabe fazer a ponte entre:
+In practice, this strengthens the reading that you know how to bridge:
 
-- camada de IA aplicada
-- camada de software/arquitetura
-- camada de entrega executiva para stakeholder
+- the applied-AI layer
+- the software/architecture layer
+- the executive-delivery layer for stakeholders
 
 ---
 
-## Decisão arquitetural oficial
+## Official architectural decision
 
-Esta é a decisão que melhor preserva a força do projeto.
+This is the decision that best preserves the strength of the project.
 
-### O que continua no AI Workbench Local
+### What remains in AI Workbench Local
 
-O AI Workbench continua sendo a **fonte da verdade** para:
+AI Workbench remains the **source of truth** for:
 
 - benchmark
 - evals
 - EvidenceOps
 - structured outputs
-- consolidação de métricas
-- recomendação executiva
+- metrics consolidation
+- executive recommendation
 
-### O que fica no `ppt_creator_app`
+### What stays in `ppt_creator_app`
 
-O `ppt_creator_app` continua sendo o serviço especializado em:
+`ppt_creator_app` remains the specialized service for:
 
-- validar schema de apresentação
-- renderizar `.pptx`
-- revisar qualidade visual
-- gerar previews
-- comparar artefatos
+- validating the presentation schema
+- rendering `.pptx`
+- reviewing visual quality
+- generating previews
+- comparing artifacts
 
-### O boundary correto
+### The correct boundary
 
-O boundary mais forte é:
+The strongest boundary is:
 
-**AI Workbench Local = inteligência de domínio + orquestração**  
-**`ppt_creator_app` = renderização executiva especializada**
+**AI Workbench Local = domain intelligence + orchestration**  
+**`ppt_creator_app` = specialized executive rendering**
 
-### O que não fazer
+### What not to do
 
-Para preservar essa arquitetura, a direção recomendada é **não**:
+To preserve this architecture, the recommended direction is **not** to:
 
-- copiar o código do `ppt_creator_app` para dentro do AI Workbench
-- acoplar o AI Workbench ao schema cru do renderer cedo demais
-- usar a camada `ppt_creator_ai/` para este slice de benchmark/eval
-- transformar exportação de deck em lógica espalhada pela UI
+- copy the `ppt_creator_app` code into AI Workbench
+- couple AI Workbench to the renderer's raw schema too early
+- use the `ppt_creator_ai/` layer for this benchmark/eval slice
+- turn deck export into logic scattered across the UI
 
-Para este caso de uso, a melhor leitura é **determinística**:
+For this use case, the strongest interpretation is **deterministic**:
 
-**benchmark/eval -> contrato estruturado -> payload de apresentação -> render `.pptx`**
+**benchmark/eval -> structured contract -> presentation payload -> `.pptx` render**
 
-Sem LLM no meio da etapa final de exportação do deck executivo.
+With no LLM in the middle of the final executive-deck export stage.
 
-Isso é importante porque transmite disciplina de engenharia e reduz risco de ruído/hallucination na última milha.
+This matters because it conveys engineering discipline and reduces the risk of noise/hallucination in the last mile.
 
 ---
 
-## Estado atual já existente
+## Current state already in place
 
-### No AI Workbench Local
+### In AI Workbench Local
 
-Já existe fundação concreta para o primeiro slice.
+There is already a concrete foundation for the first slice.
 
-#### Documento-base do slice técnico atual
+#### Base document for the current technical slice
 
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
-#### Serviço de contrato e adapter já implementados
+#### Contract and adapter service already implemented
 
 - `src/services/presentation_export.py`
 
-Hoje ele já entrega:
+Today it already delivers:
 
-- contrato versionado `presentation_export.v1`
+- versioned contract `presentation_export.v1`
 - `export_kind = "benchmark_eval_executive_deck"`
-- builder a partir de agregados/logs do projeto
-- adapter para payload compatível com o `ppt_creator`
+- builder from project aggregates/logs
+- adapter to a `ppt_creator`-compatible payload
 
-Funções já existentes:
+Functions already in place:
 
 - `build_benchmark_eval_contract(...)`
 - `build_benchmark_eval_contract_from_logs(...)`
 - `build_ppt_creator_payload_from_benchmark_eval_contract(...)`
 
-#### Testes já existentes
+#### Existing tests
 
 - `tests/test_presentation_export_unittest.py`
 
-Esses testes já validam:
+These tests already validate:
 
-- criação do contrato concreto a partir dos logs
-- presença de métricas/highlights/leaderboards
-- sequência esperada de slides no payload do `ppt_creator`
+- creation of the concrete contract from logs
+- presence of metrics/highlights/leaderboards
+- expected slide sequence in the `ppt_creator` payload
 
-### No `ppt_creator_app`
+### In `ppt_creator_app`
 
-O projeto irmão já está suficientemente maduro para entrar como serviço especializado.
+The sibling project is already mature enough to enter as a specialized service.
 
-#### Documentação principal
+#### Main documentation
 
 - `/Users/danyellambert/ppt_creator_app/README.md`
 - `/Users/danyellambert/ppt_creator_app/NEXT_STEPS.md`
 
-#### Capabilities já disponíveis
+#### Capabilities already available
 
-- renderer `.pptx`
-- schema com `pydantic`
-- API HTTP local
-- review de qualidade
+- `.pptx` renderer
+- schema with `pydantic`
+- local HTTP API
+- quality review
 - preview
-- compare de `.pptx`
+- `.pptx` comparison
 - artifact serving
-- playground/editor local
+- local playground/editor
 
-#### Endpoints úteis já existentes
+#### Useful existing endpoints
 
-Segundo o `README.md` e `ppt_creator/api.py`, já existem endpoints como:
+According to `README.md` and `ppt_creator/api.py`, endpoints such as these already exist:
 
 - `GET /health`
 - `GET /artifact`
@@ -209,9 +209,9 @@ Segundo o `README.md` e `ppt_creator/api.py`, já existem endpoints como:
 - `POST /preview`
 - `POST /render`
 
-#### Compatibilidade de schema relevante
+#### Relevant schema compatibility
 
-O `ppt_creator/schema.py` já suporta os tipos de slide que o slice atual usa:
+`ppt_creator/schema.py` already supports the slide types used by the current slice:
 
 - `title`
 - `summary`
@@ -220,206 +220,206 @@ O `ppt_creator/schema.py` já suporta os tipos de slide que o slice atual usa:
 - `comparison`
 - `bullets`
 
-Ou seja: a compatibilidade estrutural principal do primeiro slice já existe.
+In other words: the main structural compatibility for the first slice already exists.
 
 ---
 
-## Gap real entre o estado atual e a feature de produto
+## The real gap between the current state and the product feature
 
-Apesar da fundação já existir, ainda faltam camadas importantes para isso virar feature real do AI Workbench.
+Although the foundation already exists, important layers are still missing before this becomes a real AI Workbench feature.
 
-### Gap 1 — integração HTTP ainda não existe
+### Gap 1 — HTTP integration does not exist yet
 
-Hoje o AI Workbench:
+Today AI Workbench:
 
-- gera contrato
-- gera payload
+- generates the contract
+- generates the payload
 
-Mas ainda **não chama** o `ppt_creator_app` por HTTP.
+But it still **does not call** `ppt_creator_app` over HTTP.
 
-### Gap 2 — configuração ainda não existe
+### Gap 2 — configuration does not exist yet
 
-Ainda não há no projeto atual uma configuração explícita para presentation export, por exemplo:
+There is still no explicit configuration in the current project for presentation export, for example:
 
-- base URL do serviço
+- service base URL
 - timeout
-- diretórios remotos de output/preview
-- política de artefatos
+- remote output/preview directories
+- artifact policy
 
-### Gap 3 — UX ainda não existe
+### Gap 3 — UX does not exist yet
 
-Ainda não existe no app principal:
+The main app still does not have:
 
-- ação explícita de exportar deck executivo
-- download do `.pptx`
-- visualização do status do export
-- fallback quando o serviço de decks estiver offline
+- an explicit action to export an executive deck
+- `.pptx` download
+- export-status visualization
+- fallback when the deck service is offline
 
-### Gap 4 — ciclo de artefato ainda não existe
+### Gap 4 — artifact lifecycle does not exist yet
 
-Ainda não existe fluxo padrão para persistir:
+There is still no standard flow to persist:
 
-- contrato JSON
-- payload enviado ao renderer
-- resposta do renderer
-- `.pptx` final
-- review/previews relacionados
+- the JSON contract
+- the payload sent to the renderer
+- the renderer response
+- the final `.pptx`
+- related review/previews
 
-### Gap 5 — observabilidade específica da feature ainda não existe
+### Gap 5 — feature-specific observability does not exist yet
 
-Ainda faltam sinais operacionais da exportação, como:
+Operational export signals are still missing, such as:
 
-- sucesso/falha por export
-- latência do renderer
-- tamanho do artefato
-- quantos previews foram gerados
-- taxa de indisponibilidade do serviço
+- success/failure per export
+- renderer latency
+- artifact size
+- how many previews were generated
+- service unavailability rate
 
-### Gap 6 — integração de produto ainda não existe
+### Gap 6 — product integration does not exist yet
 
-A feature ainda não foi encaixada de forma clara na trilha:
+The feature has still not been clearly fitted into the path across:
 
-- Streamlit atual
-- futura UI em Gradio
-- futuro app web/backend HTTP da Fase 10.25
-
----
-
-## Tese oficial da feature
-
-O `ppt_creator_app` **não** deve aparecer como um produto paralelo dentro do AI Workbench.
-
-Ele deve ser posicionado como uma capability do produto:
-
-> O AI Workbench Local transforma sinais de benchmark, eval, EvidenceOps e outputs estruturados em artefatos executivos reproduzíveis.
-
-No primeiro slice, isso significa:
-
-> A partir dos logs e agregados de benchmark/eval, o sistema gera um deck executivo `.pptx` pronto para revisão, compartilhamento e demonstração.
-
-Essa tese é forte porque mostra que o projeto sabe:
-
-- medir qualidade
-- consolidar evidências
-- traduzir sinais técnicos em narrativa executiva
-- gerar entregável de negócio reutilizável
+- the current Streamlit app
+- the future Gradio UI
+- the future Phase 10.25 web app / HTTP backend
 
 ---
 
-## Ordem recomendada de implementação
+## Official thesis of the feature
 
-Esta é a ordem mais forte para produto, engenharia e portfólio.
+`ppt_creator_app` **must not** appear as a parallel product inside AI Workbench.
 
-### Slice 0 — fundação de contrato e adapter
+It should be positioned as a product capability:
 
-**Status:** já entregue.
+> AI Workbench Local transforms benchmark, eval, EvidenceOps, and structured-output signals into reproducible executive artifacts.
 
-- [x] contrato versionado
-- [x] builder no AI Workbench
-- [x] adapter para payload compatível com `ppt_creator`
-- [x] testes unitários da fundação
+In the first slice, that means:
 
-### Slice 1 — integração síncrona por HTTP
+> From benchmark/eval logs and aggregates, the system generates an executive `.pptx` deck ready for review, sharing, and demonstration.
 
-**Próximo passo recomendado.**
+This thesis is strong because it shows that the project knows how to:
 
-Objetivo: sair de “payload pronto” para “deck `.pptx` gerado sob demanda”.
+- measure quality
+- consolidate evidence
+- translate technical signals into an executive narrative
+- generate a reusable business deliverable
 
-Entrega mínima:
+---
 
-- [x] criar `presentation_export_service` no AI Workbench
-- [x] chamar `GET /health` do `ppt_creator_app` antes do render
-- [x] chamar `POST /render` com payload do deck executivo
-- [x] baixar o `.pptx` via `GET /artifact`
-- [x] salvar artefatos locais do export no AI Workbench
-- [x] retornar resultado estruturado para a UI
+## Recommended implementation order
 
-### Slice 2 — UX no app atual (Streamlit)
+This is the strongest order for product, engineering, and portfolio value.
 
-Objetivo: transformar a integração em feature visível de produto.
+### Slice 0 — contract and adapter foundation
 
-Entrega mínima:
+**Status:** already delivered.
 
-- [x] botão **Exportar deck executivo**
-- [x] download do `.pptx`
-- [x] download do contrato JSON
-- [x] download do payload JSON
-- [x] exibir status/erro de forma amigável
+- [x] versioned contract
+- [x] builder in AI Workbench
+- [x] adapter for a `ppt_creator`-compatible payload
+- [x] foundation unit tests
 
-### Slice 3 — endurecimento do ciclo de artefatos
+### Slice 1 — synchronous HTTP integration
 
-Objetivo: tornar a feature auditável e reaproveitável.
+**Recommended next step.**
 
-Entrega mínima:
+Objective: move from a “ready payload” to an “on-demand generated `.pptx` deck.”
 
-- [ ] diretório/versionamento local por `export_id`
-- [ ] persistência de metadados do export
-- [ ] retention/limpeza de artefatos antigos
-- [ ] log operacional da feature
+Minimum delivery:
 
-### Slice 4 — integração na Fase 10.25
+- [x] create `presentation_export_service` in AI Workbench
+- [x] call `GET /health` on `ppt_creator_app` before rendering
+- [x] call `POST /render` with the executive deck payload
+- [x] download the `.pptx` through `GET /artifact`
+- [x] save local export artifacts in AI Workbench
+- [x] return a structured result to the UI
 
-Objetivo: encaixar a feature no backend HTTP e na evolução Streamlit -> Gradio -> app web.
+### Slice 2 — UX in the current app (Streamlit)
 
-Entrega mínima:
+Objective: turn the integration into a visible product feature.
 
-- [ ] endpoint de export no backend do AI Workbench
-- [ ] exposição da capability na UI intermediária
-- [ ] ação explícita no futuro app web
+Minimum delivery:
 
-### Slice 5 — expansão de `export_kind`
+- [x] **Export executive deck** button
+- [x] `.pptx` download
+- [x] contract JSON download
+- [x] payload JSON download
+- [x] friendly status/error display
 
-Depois do slice benchmark/eval estar sólido, ampliar para novos decks.
+### Slice 3 — artifact lifecycle hardening
 
-Ordem sugerida:
+Objective: make the feature auditable and reusable.
+
+Minimum delivery:
+
+- [ ] local directory/versioning per `export_id`
+- [ ] persistence of export metadata
+- [ ] retention/cleanup of old artifacts
+- [ ] operational feature log
+
+### Slice 4 — integration into Phase 10.25
+
+Objective: fit the feature into the HTTP backend and into the Streamlit -> Gradio -> web app evolution.
+
+Minimum delivery:
+
+- [ ] export endpoint in the AI Workbench backend
+- [ ] exposure of the capability in the intermediate UI
+- [ ] explicit action in the future web app
+
+### Slice 5 — `export_kind` expansion
+
+After the benchmark/eval slice is solid, expand to new decks.
+
+Suggested order:
 
 1. `benchmark_eval_executive_deck`
 2. `evidenceops_document_review_deck`
 3. `phase_closure_or_project_review_deck`
 
-### Slice 6 — endurecimento operacional
+### Slice 6 — operational hardening
 
-Só depois da feature já ser útil e estável:
+Only after the feature is already useful and stable:
 
-- [ ] Docker/compose do `ppt_creator_app`
-- [ ] timeouts e retries mais fortes
-- [ ] fila assíncrona para renders pesados
-- [ ] estratégia de deploy híbrido
+- [ ] Docker/compose for `ppt_creator_app`
+- [ ] stronger timeouts and retries
+- [ ] asynchronous queue for heavy renders
+- [ ] hybrid deployment strategy
 
 ---
 
-## O menor slice demonstrável com melhor custo/benefício
+## The smallest demonstrable slice with the best cost/benefit
 
-Se a meta for fechar o **melhor MVP demonstrável** dessa feature sem abrir escopo demais, a recomendação é:
+If the goal is to deliver the **best demonstrable MVP** of this feature without opening the scope too much, the recommendation is:
 
-1. manter o contrato v1 atual
-2. criar `presentation_export_service`
-3. fazer export síncrono do deck de benchmark/eval
-4. salvar localmente:
-   - contrato
+1. keep the current v1 contract
+2. create `presentation_export_service`
+3. perform synchronous export of the benchmark/eval deck
+4. save locally:
+   - contract
    - payload
-   - resposta do render
+   - render response
    - `.pptx`
-5. expor um botão na UI atual
-6. adicionar testes focados do service
+5. expose a button in the current UI
+6. add focused service tests
 
-Esse slice já é suficiente para demonstrar:
+This slice is already enough to demonstrate:
 
-- design de contrato
-- integração entre serviços
-- geração de artefato real
-- UX de produto
-- capacidade de traduzir benchmark/eval em deck executivo
+- contract design
+- service-to-service integration
+- generation of a real artifact
+- product UX
+- the ability to translate benchmark/eval into an executive deck
 
 ---
 
-## Design recomendado da integração no AI Workbench
+## Recommended integration design in AI Workbench
 
-## 1. Camada de configuração
+## 1. Configuration layer
 
-Adicionar uma configuração dedicada para a feature.
+Add dedicated configuration for the feature.
 
-### Variáveis sugeridas
+### Suggested variables
 
 ```env
 PRESENTATION_EXPORT_ENABLED=true
@@ -434,76 +434,76 @@ PRESENTATION_EXPORT_REQUIRE_REAL_PREVIEWS=false
 PRESENTATION_EXPORT_FAIL_ON_REGRESSION=false
 ```
 
-### Onde isso entra
+### Where this goes
 
 - `src/config.py`
 - `.env.example`
 
-### Por que isso importa
+### Why this matters
 
-Isso transforma exportação executiva em **parte do produto**, e não em detalhe hardcoded da máquina local.
+This turns executive export into **part of the product**, rather than a hardcoded detail of a local machine.
 
 ---
 
-## 2. Camada de serviço
+## 2. Service layer
 
-Criar um serviço dedicado no AI Workbench, por exemplo:
+Create a dedicated service in AI Workbench, for example:
 
 - `src/services/presentation_export_service.py`
 
-### Responsabilidades desse serviço
+### Responsibilities of this service
 
-- validar se a feature está habilitada
-- verificar saúde do `ppt_creator_app`
-- montar contrato e payload
-- decidir nomes/diretórios remotos dos artefatos
-- chamar o renderer por HTTP
-- baixar artefatos relevantes
-- persistir cópias locais e metadados
-- devolver resultado estruturado para a UI e para futuros endpoints
+- validate whether the feature is enabled
+- check the health of `ppt_creator_app`
+- build the contract and payload
+- decide remote artifact names/directories
+- call the renderer over HTTP
+- download relevant artifacts
+- persist local copies and metadata
+- return a structured result for the UI and future endpoints
 
-### Recomendação de boundary
+### Boundary recommendation
 
-O service **não** deve saber montar slides “na mão”.
+The service **should not** know how to assemble slides “by hand.”
 
-Ele deve delegar isso para o fluxo já existente:
+It should delegate that to the existing flow:
 
 - `build_benchmark_eval_contract_from_logs(...)`
 - `build_ppt_creator_payload_from_benchmark_eval_contract(...)`
 
-### Recomendação de cliente HTTP
+### HTTP client recommendation
 
-Preferir uma implementação leve e consistente com o resto do projeto.
+Prefer a lightweight implementation that is consistent with the rest of the project.
 
-Como o repositório já usa `urllib` em outras integrações, a escolha mais coerente para o primeiro slice é:
+Since the repository already uses `urllib` in other integrations, the most coherent choice for the first slice is:
 
 - `urllib.request`
 
-Isso evita adicionar dependência nova só para essa feature.
+This avoids adding a new dependency just for this feature.
 
 ---
 
-## 3. Estratégia de paths e artefatos
+## 3. Path and artifact strategy
 
-Esse ponto é importante.
+This point is important.
 
-Pelo comportamento atual do `ppt_creator/api.py`, o fluxo mais natural é:
+Based on the current behavior of `ppt_creator/api.py`, the most natural flow is:
 
-1. o AI Workbench pede render com `output_path` remoto
-2. o `ppt_creator_app` salva o arquivo dentro do workspace dele
-3. o AI Workbench baixa o artefato via `GET /artifact`
-4. o AI Workbench persiste uma cópia local como artefato próprio
+1. AI Workbench requests rendering with a remote `output_path`
+2. `ppt_creator_app` saves the file inside its own workspace
+3. AI Workbench downloads the artifact through `GET /artifact`
+4. AI Workbench persists a local copy as its own artifact
 
-### Por que essa estratégia é a melhor para o primeiro slice
+### Why this strategy is best for the first slice
 
-Porque ela:
+Because it:
 
-- reaproveita a API já existente
-- evita shared volume cedo demais
-- evita mudar o renderer para retornar bytes agora
-- preserva o boundary HTTP-first definido no roadmap
+- reuses the existing API
+- avoids a shared volume too early
+- avoids changing the renderer to return bytes right now
+- preserves the HTTP-first boundary defined in the roadmap
 
-### Estrutura remota sugerida no `ppt_creator_app`
+### Suggested remote structure in `ppt_creator_app`
 
 ```text
 outputs/ai_workbench_exports/
@@ -512,7 +512,7 @@ outputs/ai_workbench_exports/
     previews/
 ```
 
-### Estrutura local sugerida no AI Workbench
+### Suggested local structure in AI Workbench
 
 ```text
 artifacts/presentation_exports/
@@ -526,39 +526,39 @@ artifacts/presentation_exports/
     thumbnail_sheet.png
 ```
 
-### Resultado
+### Result
 
-Assim, o AI Workbench passa a ter rastreabilidade completa da feature sem depender do filesystem interno do serviço de decks.
+This gives AI Workbench full traceability for the feature without depending on the internal filesystem of the deck service.
 
 ---
 
-## 4. Fluxo HTTP recomendado
+## 4. Recommended HTTP flow
 
 ### Preflight
 
-Primeiro, o AI Workbench consulta:
+First, AI Workbench calls:
 
 - `GET /health`
 
-Se o serviço estiver offline:
+If the service is offline:
 
-- a UI deve falhar de forma amigável
-- o usuário ainda deve poder baixar `contract.json` e `payload.json`
+- the UI should fail gracefully
+- the user should still be able to download `contract.json` and `payload.json`
 
 ### Render
 
-Depois, chama:
+Then it calls:
 
 - `POST /render`
 
-Payload recomendado para o primeiro slice:
+Recommended payload for the first slice:
 
 ```json
 {
   "spec": {
     "presentation": {
       "title": "AI Workbench Local — Benchmark & Eval Review",
-      "subtitle": "Resumo executivo da rodada atual",
+      "subtitle": "Executive summary of the current round",
       "author": "AI Workbench Local",
       "date": "2026-04-05",
       "theme": "executive_premium_minimal",
@@ -575,21 +575,21 @@ Payload recomendado para o primeiro slice:
 }
 ```
 
-### Download dos artefatos
+### Artifact download
 
-Depois do render:
+After rendering:
 
-- baixar o `.pptx` via `GET /artifact?path=...`
-- persistir `render_response.json`
-- se existirem caminhos de preview/manifest/thumbnail relevantes, salvá-los também
+- download the `.pptx` through `GET /artifact?path=...`
+- persist `render_response.json`
+- if relevant preview/manifest/thumbnail paths exist, save them as well
 
 ---
 
-## 5. Resultado estruturado da feature
+## 5. Structured result of the feature
 
-O `presentation_export_service` deve devolver algo estruturado, e não um dicionário cru da API.
+`presentation_export_service` should return something structured, not a raw API dictionary.
 
-Exemplo de campos úteis do resultado:
+Example useful result fields:
 
 - `export_id`
 - `export_kind`
@@ -608,129 +608,129 @@ Exemplo de campos úteis do resultado:
 - `warnings`
 - `error_message`
 
-Isso ajuda muito a evitar acoplamento da UI a detalhes internos da chamada HTTP.
+This helps a lot to avoid coupling the UI to internal details of the HTTP call.
 
 ---
 
-## Como a feature deve aparecer na UI
+## How the feature should appear in the UI
 
-## Princípio de produto
+## Product principle
 
-Na UI, a capability deve aparecer como algo do produto, por exemplo:
+In the UI, the capability should appear as part of the product, for example:
 
-- **Exportar deck executivo**
+- **Export executive deck**
 - **Executive artifacts**
 
-E não como:
+And not as:
 
-- “abrir ppt_creator_app”
-- “usar projeto irmão”
+- “open ppt_creator_app”
+- “use sibling project”
 
-### Melhor ponto de entrada inicial
+### Best initial entry point
 
-Pelo estado atual do projeto, o melhor ponto de entrada inicial é perto da área onde benchmark/evals já são lidos como sinais executivos.
+Given the current state of the project, the best initial entry point is near the area where benchmark/evals are already read as executive signals.
 
-Como `src/ui/sidebar.py` já expõe sinais agregados de eval/readiness, o primeiro encaixe forte pode ser:
+Since `src/ui/sidebar.py` already exposes aggregated eval/readiness signals, the strongest first fit could be:
 
-- um expander/painel dedicado de exportação executiva
-- ou um painel visual separado no fluxo de benchmark/evals
+- an expander/dedicated panel for executive export
+- or a separate visual panel inside the benchmark/evals flow
 
-### Ações mínimas da UI
+### Minimum UI actions
 
-No primeiro slice, a UI deve permitir:
+In the first slice, the UI should allow:
 
-- gerar deck
-- baixar `.pptx`
-- baixar contrato
-- baixar payload
-- ver status do export
-- ver warnings/fallbacks
+- generate the deck
+- download `.pptx`
+- download the contract
+- download the payload
+- view export status
+- view warnings/fallbacks
 
-### Ações desejáveis depois
+### Desirable actions later
 
-- abrir thumbnail sheet
-- baixar review do deck
-- listar exports recentes
-- reexecutar export do mesmo snapshot
-
----
-
-## Por que não usar `ppt_creator_ai/` neste slice
-
-Isso é uma decisão importante.
-
-O `ppt_creator_app` tem uma camada opcional `ppt_creator_ai/`, mas **ela não deve ser parte do primeiro slice do AI Workbench**.
-
-### Motivo
-
-Neste caso de uso, o AI Workbench já tem os dados e a inteligência de domínio.
-
-Ele já sabe:
-
-- qual é o top model
-- qual é o PASS rate
-- quais watchouts existem
-- quais são os próximos passos
-
-Logo, o caminho mais forte é:
-
-**determinístico e auditável**, não generativo.
-
-### Benefício profissional
-
-Isso mostra maturidade de AI Engineer porque demonstra que você sabe:
-
-- onde usar LLM
-- onde **não** usar LLM
-- quando preferir contrato estruturado e render determinístico
+- open the thumbnail sheet
+- download the deck review
+- list recent exports
+- rerun export from the same snapshot
 
 ---
 
-## Testes necessários para a feature completa
+## Why not use `ppt_creator_ai/` in this slice
 
-## O que já existe
+This is an important decision.
 
-- [x] teste do builder do contrato
-- [x] teste do adapter para payload
+`ppt_creator_app` has an optional `ppt_creator_ai/` layer, but **it should not be part of the first AI Workbench slice**.
 
-## O que ainda precisa existir
+### Reason
 
-### Testes unitários do service
+In this use case, AI Workbench already has the data and the domain intelligence.
+
+It already knows:
+
+- what the top model is
+- what the PASS rate is
+- what the watchouts are
+- what the next steps are
+
+Therefore, the strongest path is:
+
+**deterministic and auditable**, not generative.
+
+### Professional benefit
+
+This shows AI Engineer maturity because it demonstrates that you know:
+
+- where to use an LLM
+- where **not** to use an LLM
+- when to prefer a structured contract and deterministic rendering
+
+---
+
+## Tests required for the complete feature
+
+## What already exists
+
+- [x] contract builder test
+- [x] payload adapter test
+
+## What still needs to exist
+
+### Service unit tests
 
 - [x] `tests/test_presentation_export_service_unittest.py`
 
-Deve cobrir pelo menos:
+It should cover at least:
 
-- montagem de paths remotos
-- render request correto
-- tratamento de indisponibilidade do serviço
-- timeout HTTP
-- persistência local de artefatos
-- fallback quando `/health` falha
+- remote path assembly
+- correct render request
+- handling service unavailability
+- HTTP timeout
+- local artifact persistence
+- fallback when `/health` fails
 
-### Testes de integração opcionais
+### Optional integration tests
 
-- [ ] smoke test com `ppt_creator_app` rodando localmente
+- [ ] smoke test with `ppt_creator_app` running locally
 
-Esse teste não precisa rodar sempre no CI principal se o serviço irmão não fizer parte do ambiente padrão. Mas deve existir como trilha reproduzível local.
+This test does not need to run all the time in the main CI if the sibling service is not part of the default environment. But it should exist as a reproducible local path.
 
-### Testes de UI
+### UI tests
 
-- [ ] smoke test do painel de exportação executiva
+- [ ] smoke test for the executive export panel
 
-O objetivo não é testar rendering real do `.pptx` na UI, e sim:
+The goal is not to test real `.pptx` rendering in the UI, but rather:
 
-- botão presente
-- status tratado
-- download/fallback coerentes
+- button present
+- status handled
+- coherent download/fallback behavior
 
 ---
 
-## Observabilidade da feature
+## Feature observability
 
-Para essa capability ficar profissional, é importante instrumentar a exportação.
+To make this capability feel professional, it is important to instrument the export flow.
 
-### Sinais mínimos
+### Minimum signals
 
 - `export_id`
 - `export_kind`
@@ -743,61 +743,61 @@ Para essa capability ficar profissional, é importante instrumentar a exportaç�
 - `export_status`
 - `error_type`
 
-### Onde registrar
+### Where to record it
 
-Esses sinais podem entrar em um log leve/versionado do AI Workbench, sem depender de observabilidade pesada nesta fase.
+These signals can go into a lightweight/versioned AI Workbench log, without depending on heavy observability at this phase.
 
-### Por que isso importa
+### Why this matters
 
 This makes it clearer that the feature was not added as an isolated integration, but as a capability with an explicit technical boundary:
 
-- monitorada
-- auditável
-- preparada para crescer
+- monitored
+- auditable
+- ready to grow
 
 ---
 
-## Como essa feature se encaixa na Fase 10.25
+## How this feature fits into Phase 10.25
 
-No roadmap, a Fase 10.25 é a evolução:
+In the roadmap, Phase 10.25 is the evolution toward:
 
 - Streamlit -> Gradio -> app web
 
-O export executivo entra muito bem aqui porque ele é uma capability transversal de interface e backend.
+Executive export fits very well here because it is a cross-cutting interface and backend capability.
 
-### Leitura correta
+### Correct interpretation
 
-Essa feature é mais forte quando evolui assim:
+This feature is strongest when it evolves like this:
 
-1. **primeiro**: export no app atual, com UX simples e comprovada
-2. **depois**: endpoint interno do AI Workbench para export
-3. **depois**: superfície em Gradio/web
-4. **só depois**: Docker/deploy híbrido do serviço especializado
+1. **first**: export in the current app, with simple and proven UX
+2. **later**: internal AI Workbench export endpoint
+3. **later**: Gradio/web surface
+4. **only then**: Docker/hybrid deployment of the specialized service
 
-### Por que essa ordem é a melhor
+### Why this order is best
 
-Porque ela preserva a narrativa de engenharia madura:
+Because it preserves a mature engineering narrative:
 
-- primeiro fundação de domínio
-- depois integração entre serviços
-- depois UX
-- depois deploy
+- first the domain foundation
+- then service integration
+- then UX
+- then deployment
 
 ---
 
-## Expansão futura recomendada de `export_kind`
+## Recommended future expansion of `export_kind`
 
-Depois do slice benchmark/eval, a direção mais forte é reaproveitar a mesma fundação para novos artefatos.
+After the benchmark/eval slice, the strongest direction is to reuse the same foundation for new artifacts.
 
 ### 1. `benchmark_eval_executive_deck`
 
-Primeiro porque já existe base pronta.
+First because the foundation already exists.
 
 ### 2. `evidenceops_document_review_deck`
 
-Muito forte para demonstração de produto empresarial.
+Very strong for an enterprise product demonstration.
 
-Exemplos de blocos futuros:
+Examples of future blocks:
 
 - executive summary
 - risks and obligations
@@ -807,80 +807,80 @@ Exemplos de blocos futuros:
 
 ### 3. `project_phase_closure_deck`
 
-Útil para mostrar o próprio projeto como caso de engenharia profissional.
+Useful to show the project itself as a professional engineering case.
 
-Exemplos de blocos futuros:
+Examples of future blocks:
 
-- entregas concluídas
-- benchmarks/evals da fase
+- completed deliveries
+- phase benchmarks/evals
 - trade-offs
-- próximos passos
+- next steps
 
 ---
 
-## Critério de done por nível
+## Done criteria by level
 
-## Done técnico mínimo
+## Minimum technical done
 
-Podemos considerar a feature tecnicamente integrada quando existir:
+We can consider the feature technically integrated when the following exist:
 
-- [x] export síncrono funcionando do AI Workbench para o `ppt_creator_app`
-- [x] download do `.pptx`
-- [x] persistência local de contrato/payload/response
-- [x] testes do service
-- [x] UI mínima com ação explícita de export
+- [x] synchronous export working from AI Workbench to `ppt_creator_app`
+- [x] `.pptx` download
+- [x] local persistence of contract/payload/response
+- [x] service tests
+- [x] minimum UI with an explicit export action
 
-## Done de produto
+## Product done
 
-A feature começa a ter cara de produto quando existir:
+The feature starts to look like a real product when the following exist:
 
-- [ ] naming correto de capability
-- [ ] UX clara de sucesso/falha/download
-- [ ] exports recentes ou artefatos organizados
-- [ ] documentação da feature no repositório
+- [ ] correct capability naming
+- [ ] clear success/failure/download UX
+- [ ] recent exports or organized artifacts
+- [ ] feature documentation in the repository
 
-## Done de portfólio
+## Portfolio done
 
-A feature vira evidência forte de AI Engineer quando existir:
+The feature becomes strong AI Engineer evidence when the following exist:
 
-- [ ] screenshot/GIF do export acontecendo
-- [ ] deck real gerado a partir de benchmark/eval
-- [ ] diagrama da arquitetura `domain contract -> renderer service`
-- [ ] write-up curto explicando o porquê da separação entre AI Workbench e `ppt_creator_app`
-
----
-
-## O que essa feature prova sobre você como AI Engineer
-
-Se implementada nessa direção, essa feature ajuda a provar que você sabe:
-
-- transformar sinais técnicos em artefatos de negócio
-- projetar contratos versionados entre serviços
-- evitar acoplamento precoce entre domínio e renderer
-- escolher caminho determinístico quando isso é melhor que usar LLM
-- encaixar uma capability nova na evolução de produto e interface
-- pensar em observabilidade, QA e lifecycle de artefatos
-
-Em outras palavras, a leitura desejada passa a ser:
-
-> esta pessoa não só constrói pipelines de IA e mede qualidade; ela também sabe empacotar os resultados em uma capability de produto clara, defensável e útil para stakeholders.
+- [ ] screenshot/GIF of the export happening
+- [ ] real deck generated from benchmark/eval
+- [ ] architecture diagram for `domain contract -> renderer service`
+- [ ] short write-up explaining why AI Workbench and `ppt_creator_app` are separated
 
 ---
 
-## Resumo executivo da recomendação
+## What this feature proves about you as an AI Engineer
 
-O caminho mais forte é manter o que já foi decidido:
+If implemented in this direction, this feature helps prove that you know how to:
 
-- **AI Workbench Local** continua como cérebro e fonte da verdade
-- **`ppt_creator_app`** entra como serviço especializado de artefatos executivos
-- o primeiro slice oficial continua sendo **benchmark/eval -> executive deck**
-- a implementação correta é **HTTP first**, **Docker depois**
-- o primeiro caminho de produto deve ser **determinístico**, sem depender de `ppt_creator_ai/`
+- transform technical signals into business artifacts
+- design versioned contracts between services
+- avoid early coupling between domain and renderer
+- choose a deterministic path when it is better than using an LLM
+- fit a new capability into product and interface evolution
+- think about observability, QA, and artifact lifecycle
 
-### Próxima entrega recomendada
+In other words, the desired reading becomes:
 
-Se for escolher apenas uma próxima entrega concreta, a melhor é:
+> this person not only builds AI pipelines and measures quality; they also know how to package the results into a clear, defensible, and useful product capability for stakeholders.
 
-> implementar `presentation_export_service` + botão de exportação executiva no app atual + persistência local dos artefatos do render.
+---
 
-Esse é o menor slice que já transforma a fundação atual em uma feature real, demonstrável e muito forte para portfólio.
+## Executive summary of the recommendation
+
+The strongest path is to keep what has already been decided:
+
+- **AI Workbench Local** remains the brain and source of truth
+- **`ppt_creator_app`** enters as the specialized executive-artifact service
+- the first official slice remains **benchmark/eval -> executive deck**
+- the correct implementation is **HTTP first**, **Docker later**
+- the first product path should be **deterministic**, without depending on `ppt_creator_ai/`
+
+### Recommended next delivery
+
+If you choose only one next concrete delivery, the best one is:
+
+> implement `presentation_export_service` + an executive-export button in the current app + local persistence for render artifacts.
+
+This is the smallest slice that already turns the current foundation into a real, demonstrable feature with strong portfolio value.

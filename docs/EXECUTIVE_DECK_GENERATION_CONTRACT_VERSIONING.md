@@ -1,29 +1,29 @@
-# Executive Deck Generation — versionamento e naming de contracts
+# Executive Deck Generation — contract versioning and naming
 
-## Objetivo
+## Objective
 
-Definir como versionar e nomear contracts da capability.
+Define how to version and name the capability's contracts.
 
 ---
 
-## Convenções principais
+## Main conventions
 
 ### `contract_version`
 
-Direção recomendada para a capability:
+Recommended direction for the capability:
 
 - `executive_deck_generation.v1`
 
 ### `export_kind`
 
-Deve ser:
+It should be:
 
-- estável
-- descritivo
-- em `snake_case`
-- orientado ao objetivo do deck
+- stable
+- descriptive
+- in `snake_case`
+- aligned with the deck's objective
 
-Exemplos:
+Examples:
 
 - `benchmark_eval_executive_review`
 - `document_review_deck`
@@ -31,45 +31,45 @@ Exemplos:
 
 ---
 
-## Naming legado do P1
+## P1 legacy naming
 
-O primeiro slice já implementado no repositório usa:
+The first slice already implemented in the repository uses:
 
 - `contract_version = "presentation_export.v1"`
 - `export_kind = "benchmark_eval_executive_deck"`
 
-Isso deve ser tratado como:
+This should be treated as:
 
-- **naming legado compatível**
-- base técnica já existente
-- ainda aceitável até a migração explícita
-
----
-
-## Regras de versionamento
-
-### Mudança compatível
-
-Pode manter a mesma major version quando houver:
-
-- campo opcional novo
-- melhoria documental
-- expansão sem quebrar consumers existentes
-
-### Mudança incompatível
-
-Deve subir major version quando houver:
-
-- renomeação de campos obrigatórios
-- remoção de campos consumidos
-- mudança estrutural na semântica do contract
+- **compatible legacy naming**
+- an already existing technical base
+- still acceptable until an explicit migration happens
 
 ---
 
-## Policy de migração futura do P1
+## Versioning rules
 
-Quando o P1 for migrado para o naming oficial, a direção recomendada é:
+### Compatible change
 
-- manter alias de leitura do naming legado
-- documentar depreciação explícita
-- só remover compatibilidade depois de estabilização do service
+It may keep the same major version when there is:
+
+- a new optional field
+- documentation improvement
+- expansion without breaking existing consumers
+
+### Incompatible change
+
+It must bump the major version when there is:
+
+- renaming of required fields
+- removal of consumed fields
+- structural change in the contract's semantics
+
+---
+
+## Future P1 migration policy
+
+When P1 is migrated to the official naming, the recommended direction is:
+
+- keep a read alias for the legacy naming
+- document explicit deprecation
+- remove compatibility only after the service is stable

@@ -1,64 +1,64 @@
-# Phase 10.25 — Executive Deck Generation como capability do produto
+# Phase 10.25 — Executive Deck Generation as a product capability
 
-## Objetivo
+## Objective
 
-Definir com clareza a nova direção do projeto: o ecossistema atual não terá apenas uma feature de **presentation export** isolada, mas uma capability recorrente de **Executive Deck Generation**.
+Clearly define the project's new direction: the current ecosystem will no longer have just an isolated **presentation export** feature, but a recurring **Executive Deck Generation** capability.
 
-Na prática, isso significa que o AI Workbench Local passa a poder gerar, continuamente, **decks executivos grounded** em:
+In practice, this means that AI Workbench Local can continuously generate **grounded executive decks** based on:
 
-- documentos
+- documents
 - structured outputs
-- comparações documentais
+- document comparisons
 - benchmark/evals
-- EvidenceOps e action plans
+- EvidenceOps and action plans
 
-Essa capability deve ser entendida como um dos produtos internos do ecossistema, e não como um side-project desconectado.
-
----
-
-## Tese oficial
-
-> O AI Workbench Local não apenas conversa com documentos, extrai informação e avalia qualidade. Ele também entrega **decks executivos recorrentes** para review, decisão, operação e comunicação com stakeholders.
-
-Essa é a leitura de produto mais forte porque aproxima o projeto de um caso real de negócio:
-
-1. documentos e sinais entram
-2. IA analisa, resume, compara e estrutura
-3. o sistema gera um artefato executivo utilizável no fluxo real de trabalho
+This capability should be understood as one of the ecosystem's internal products, not as a disconnected side project.
 
 ---
 
-## O que é essa capability
+## Official thesis
 
-### O que ela é
+> AI Workbench Local does not just converse with documents, extract information, and evaluate quality. It also delivers **recurring executive decks** for review, decision-making, operations, and stakeholder communication.
 
-Executive Deck Generation é a capability de transformar outputs grounded do AI Workbench em apresentações executivas recorrentes.
+This is the strongest product framing because it brings the project closer to a real business use case:
 
-### O que ela não é
+1. documents and signals come in
+2. AI analyzes, summarizes, compares, and structures
+3. the system generates an executive artifact that can be used in the real workflow
 
-Ela **não** deve ser posicionada como:
+---
 
-- gerador genérico de slides sem contexto
-- produto separado competindo com o AI Workbench
-- camada puramente cosmética de exportação
+## What this capability is
 
-O posicionamento correto é:
+### What it is
+
+Executive Deck Generation is the capability of transforming grounded AI Workbench outputs into recurring executive presentations.
+
+### What it is not
+
+It should **not** be positioned as:
+
+- a generic slide generator with no context
+- a separate product competing with AI Workbench
+- a purely cosmetic export layer
+
+The correct positioning is:
 
 **grounded deck generation for business workflows**
 
-Ou em PT-BR:
+In plain English:
 
-**geração de decks executivos grounded em documentos, análises estruturadas e decisões operacionais**
+**grounded executive deck generation based on documents, structured analysis, and operational decisions**
 
 ---
 
-## Boundary arquitetural
+## Architectural boundary
 
 ### AI Workbench Local
 
-Continua sendo a fonte da verdade para:
+It remains the source of truth for:
 
-- ingestão documental
+- document ingestion
 - RAG
 - structured outputs
 - agents/workflows
@@ -68,58 +68,58 @@ Continua sendo a fonte da verdade para:
 
 ### `ppt_creator_app`
 
-Entra como camada especializada de:
+It acts as the specialized layer for:
 
-- validação de schema de apresentação
-- renderização `.pptx`
-- preview/review visual
-- comparação de artefatos
-- packaging final do deck
+- presentation schema validation
+- `.pptx` rendering
+- visual preview/review
+- artifact comparison
+- final deck packaging
 
-### Regra de separação
+### Separation rule
 
-**AI Workbench Local = inteligência, grounding e orquestração**  
-**`ppt_creator_app` = renderização executiva especializada**
+**AI Workbench Local = intelligence, grounding, and orchestration**  
+**`ppt_creator_app` = specialized executive rendering**
 
-Essa separação é importante porque mostra maturidade de produto e engenharia:
+This separation is important because it demonstrates product and engineering maturity:
 
-- o domínio não fica acoplado ao renderer
-- o renderer não precisa conhecer a lógica de negócio profunda
-- a capability pode crescer por catálogo de decks, não por hacks específicos
+- the domain does not become coupled to the renderer
+- the renderer does not need to know the deep business logic
+- the capability can grow through a catalog of decks, not through specific hacks
 
 ---
 
-## Famílias de decks que o produto pode gerar continuamente
+## Deck families the product can generate continuously
 
-O jeito mais forte de pensar essa capability é por **famílias recorrentes de decks**.
+The strongest way to think about this capability is in terms of **recurring deck families**.
 
 ## 1. Summary decks
 
-Decks para síntese executiva de um ou mais documentos.
+Decks for executive synthesis of one or more documents.
 
-Exemplos:
+Examples:
 
 - executive summary deck
 - leadership briefing deck
 - monthly/weekly review deck
 
-Inputs típicos:
+Typical inputs:
 
-- documento longo
-- corpus documental
-- summary estruturado
+- long document
+- document corpus
+- structured summary
 
 ## 2. Review decks
 
-Decks para revisão de documentos, políticas, contratos ou conjuntos documentais.
+Decks for reviewing documents, policies, contracts, or document sets.
 
-Exemplos:
+Examples:
 
 - document review deck
 - compliance review deck
 - risk review deck
 
-Inputs típicos:
+Typical inputs:
 
 - findings
 - risks
@@ -128,31 +128,31 @@ Inputs típicos:
 
 ## 3. Comparison decks
 
-Decks para comparar versões, opções ou candidatos.
+Decks for comparing versions, options, or candidates.
 
-Exemplos:
+Examples:
 
 - policy/contract comparison deck
 - option comparison deck
 - candidate comparison deck
 
-Inputs típicos:
+Typical inputs:
 
-- comparação estruturada
-- diff documental
-- scorecards lado a lado
+- structured comparison
+- document diff
+- side-by-side scorecards
 
 ## 4. Decision decks
 
-Decks cuja pergunta principal é: **o que devemos fazer?**
+Decks whose main question is: **what should we do?**
 
-Exemplos:
+Examples:
 
 - decision memo deck
 - recommendation deck
 - model/runtime decision deck
 
-Inputs típicos:
+Typical inputs:
 
 - trade-offs
 - recommendation
@@ -161,15 +161,15 @@ Inputs típicos:
 
 ## 5. Action-plan decks
 
-Decks operacionais com foco em owner, prazo, prioridade e execução.
+Operational decks focused on owners, timelines, priorities, and execution.
 
-Exemplos:
+Examples:
 
 - action plan deck
 - remediation plan deck
 - operational handoff deck
 
-Inputs típicos:
+Typical inputs:
 
 - checklist
 - action items
@@ -178,15 +178,15 @@ Inputs típicos:
 
 ## 6. Evidence / audit decks
 
-Decks para auditoria, compliance, repositório de evidências e reporting executivo.
+Decks for audit, compliance, evidence repositories, and executive reporting.
 
-Exemplos:
+Examples:
 
 - evidence pack deck
 - audit review deck
 - EvidenceOps operating review deck
 
-Inputs típicos:
+Typical inputs:
 
 - evidence packs
 - findings
@@ -195,15 +195,15 @@ Inputs típicos:
 
 ## 7. Candidate / talent decks
 
-Decks de people intelligence usando a trilha de CV e structured extraction.
+People intelligence decks using the CV track and structured extraction.
 
-Exemplos:
+Examples:
 
 - candidate review deck
 - candidate comparison deck
 - hiring decision deck
 
-Inputs típicos:
+Typical inputs:
 
 - CV structured extraction
 - comparison findings
@@ -211,97 +211,97 @@ Inputs típicos:
 
 ---
 
-## Catálogo inicial recomendado da capability
+## Recommended initial catalog for the capability
 
-Para o roadmap ficar objetivo, a capability deve começar com um catálogo explícito de tipos prioritários.
+To keep the roadmap focused, the capability should start with an explicit catalog of priority types.
 
 ### P1 — Benchmark & Eval Executive Review Deck
 
-Primeiro deck a fechar porque já existe base estruturada e contrato em andamento.
+The first deck to finalize because a structured foundation already exists and a contract is already underway.
 
-Objetivo:
+Objective:
 
-- traduzir benchmark/evals em visão executiva
-- mostrar recomendação, watchouts e próximos passos
+- translate benchmark/evals into an executive view
+- show recommendation, watchouts, and next steps
 
 ### P2 — Document Review Deck
 
-Primeiro deck fortemente enterprise.
+The first strongly enterprise-oriented deck.
 
-Objetivo:
+Objective:
 
-- resumir documento
-- destacar riscos/lacunas
-- organizar recomendações
+- summarize the document
+- highlight risks/gaps
+- organize recommendations
 
 ### P3 — Policy / Contract Comparison Deck
 
-Extensão natural do produto documental.
+A natural extension of the document product.
 
-Objetivo:
+Objective:
 
-- mostrar diferenças relevantes
-- destacar impacto de negócio
-- apoiar decisão/revisão humana
+- show relevant differences
+- highlight business impact
+- support human decision/review
 
 ### P4 — Action Plan Deck
 
-Objetivo:
+Objective:
 
-- transformar findings e checklists em plano operacional executável
+- turn findings and checklists into an executable operational plan
 
 ### P5 — Candidate Review Deck
 
-Objetivo:
+Objective:
 
-- aproveitar a trilha `cv_analysis` para gerar deck executivo de avaliação de candidato
+- leverage the `cv_analysis` track to generate an executive candidate evaluation deck
 
 ### P6 — Evidence Pack / Audit Deck
 
-Objetivo:
+Objective:
 
-- transformar outputs do EvidenceOps em handoff executivo de auditoria/compliance
+- turn EvidenceOps outputs into an executive audit/compliance handoff
 
 ---
 
-## Prioridade realista para o roadmap
+## Realistic roadmap priority
 
-### Agora
+### Now
 
 1. **Benchmark & Eval Executive Review Deck**
 
-### Em seguida
+### Next
 
 2. **Document Review Deck**
 3. **Policy / Contract Comparison Deck**
 
-### Depois
+### Later
 
 4. **Action Plan Deck**
 5. **Candidate Review Deck**
 6. **Evidence Pack / Audit Deck**
 
-Essa ordem é a mais forte porque vai de:
+This order is the strongest because it moves from:
 
-- dados mais estruturados e fáceis de consolidar
-- para casos enterprise mais ricos
-- e depois para famílias mais premium do catálogo
+- more structured data that is easier to consolidate
+- to richer enterprise use cases
+- and then to more premium catalog families
 
 ---
 
-## Modelo de contratos da capability
+## Capability contract model
 
-O produto deve crescer por **catálogo de contratos/versionamentos**, não por lógica solta na UI.
+The product should grow through a **catalog of contracts/versioning**, not through loose UI logic.
 
-### Conceitos principais
+### Main concepts
 
 - `contract_version`
 - `export_kind`
 - `deck_family`
 
-### Catálogo-alvo de `export_kind`
+### Target catalog for `export_kind`
 
-Sugestão de direção oficial:
+Suggested official direction:
 
 - `benchmark_eval_executive_review`
 - `document_review_deck`
@@ -310,159 +310,159 @@ Sugestão de direção oficial:
 - `candidate_review_deck`
 - `evidence_pack_deck`
 
-### Importante sobre o estado atual
+### Important note about the current state
 
-Hoje, o primeiro slice técnico já implementado no repositório ainda usa a nomenclatura:
+Today, the first technical slice already implemented in the repository still uses the naming:
 
 - `contract_version = "presentation_export.v1"`
 - `export_kind = "benchmark_eval_executive_deck"`
 
-Isso deve ser lido como **fundação técnica já existente** do P1, não como naming final da capability inteira.
+This should be understood as the **technical foundation already in place** for P1, not as the final naming of the capability as a whole.
 
 ---
 
-## Estado atual do repositório
+## Current state of the repository
 
-Hoje o projeto já tem fundação concreta para o primeiro tipo de deck.
+Today the project already has a concrete foundation for the first type of deck.
 
-### Já existe
+### Already in place
 
-- contrato técnico do slice benchmark/eval
-- builder de contrato no AI Workbench
-- adapter para payload compatível com o `ppt_creator`
-- testes unitários focados
-- documentação inicial de productização do primeiro slice
+- technical contract for the benchmark/eval slice
+- contract builder in AI Workbench
+- adapter for a payload compatible with `ppt_creator`
+- focused unit tests
+- initial productization documentation for the first slice
 
-Arquivos principais:
+Main files:
 
 - `src/services/presentation_export.py`
 - `tests/test_presentation_export_unittest.py`
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 
-### Ainda falta
+### Still missing
 
-- service HTTP real para o renderer
-- UX explícita no app principal
-- catálogo oficial de `export_kind`s
-- lifecycle de artefatos por export
-- observabilidade específica da capability
-- expansão para famílias além de benchmark/eval
+- real HTTP service for the renderer
+- explicit UX in the main app
+- official catalog of `export_kind`s
+- artifact lifecycle per export
+- capability-specific observability
+- expansion to families beyond benchmark/eval
 
 ---
 
-## Roadmap da capability
+## Capability roadmap
 
-## Slice 0 — Foundation do primeiro deck
+## Slice 0 — Foundation of the first deck
 
-**Status: já iniciado / parcialmente entregue**
+**Status: already started / partially delivered**
 
-- contrato do benchmark/eval
+- benchmark/eval contract
 - builder
 - adapter
-- testes de fundação
+- foundation tests
 
-## Slice 1 — Primeiro deck operacional
+## Slice 1 — First operational deck
 
-Fechar o **Benchmark & Eval Executive Review Deck** como primeira capability utilizável no produto.
+Complete the **Benchmark & Eval Executive Review Deck** as the first usable capability in the product.
 
-Entregas:
+Deliverables:
 
 - `presentation_export_service`
-- chamada HTTP ao `ppt_creator_app`
-- persistência local dos artefatos
-- UX mínima no app atual
+- HTTP call to `ppt_creator_app`
+- local artifact persistence
+- minimum UX in the current app
 
-## Slice 2 — Primeiro deck enterprise documental
+## Slice 2 — First enterprise document deck
 
-Fechar o **Document Review Deck**.
+Complete the **Document Review Deck**.
 
-Entregas:
+Deliverables:
 
-- contrato dedicado
-- mapping de findings/riscos/recommendations
-- deck executivo de review
+- dedicated contract
+- mapping of findings/risks/recommendations
+- executive review deck
 
 ## Slice 3 — Comparison / decision layer
 
-Fechar o **Policy / Contract Comparison Deck** e preparar a base para **Decision Decks**.
+Complete the **Policy / Contract Comparison Deck** and prepare the foundation for **Decision Decks**.
 
 ## Slice 4 — Operational action layer
 
-Fechar o **Action Plan Deck**.
+Complete the **Action Plan Deck**.
 
 ## Slice 5 — Talent / EvidenceOps expansion
 
-Fechar:
+Complete:
 
 - Candidate Review Deck
 - Evidence Pack / Audit Deck
 
-## Slice 6 — UI e recorrência do produto
+## Slice 6 — UI and recurring product usage
 
-Transformar a capability em superfície real do produto:
+Turn the capability into a real product surface:
 
-- catálogo visível de deck types
-- acionamento por fluxo
-- histórico de decks gerados
-- integração com Gradio / app web
+- visible catalog of deck types
+- flow-based triggering
+- history of generated decks
+- integration with Gradio / web app
 
 ---
 
-## UX esperada do produto
+## Expected product UX
 
-Na UI, isso não deve aparecer como “usar projeto de PPT”.
+In the UI, this should not appear as “use the PPT project.”
 
-Deve aparecer como capability do AI Workbench, por exemplo:
+It should appear as an AI Workbench capability, for example:
 
 - **Executive Deck Generation**
 - **Generate executive deck**
 - **Business review decks**
 
-### O que a UX deve permitir no futuro
+### What the UX should allow in the future
 
-- escolher o tipo de deck
-- revisar o input grounded
-- gerar o deck
-- baixar `.pptx`
-- baixar contrato/payload
-- consultar exports recentes
+- choose the deck type
+- review the grounded input
+- generate the deck
+- download `.pptx`
+- download contract/payload
+- view recent exports
 
 ---
 
-## Por que isso fortalece o projeto como produto de AI para negócios
+## Why this strengthens the project as an AI product for business
 
-Porque negócio não quer só:
+Because the business does not want only:
 
 - chat
 - JSON
-- análise técnica crua
+- raw technical analysis
 
-Negócio quer:
+The business wants:
 
-- síntese executiva
+- executive synthesis
 - recommendation
 - decision support
 - action plan
-- handoff apresentável
+- presentable handoff
 
-Executive Deck Generation fecha exatamente essa lacuna.
-
----
-
-## Critério de sucesso
-
-Essa capability estará bem definida quando o roadmap deixar claro:
-
-1. quais famílias de decks existem
-2. quais são P1, P2 e P3
-3. qual é o boundary entre AI Workbench e `ppt_creator_app`
-4. como os contratos crescem por `export_kind`
-5. como isso vira produto recorrente, e não apenas export isolado
+Executive Deck Generation closes exactly that gap.
 
 ---
 
-## Documentos relacionados
+## Success criterion
+
+This capability will be well defined when the roadmap makes clear:
+
+1. which deck families exist
+2. which are P1, P2, and P3
+3. what the boundary is between AI Workbench and `ppt_creator_app`
+4. how contracts grow through `export_kind`
+5. how this becomes a recurring product surface rather than just an isolated export
+
+---
+
+## Related documents
 
 - `ROADMAP.md`
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`

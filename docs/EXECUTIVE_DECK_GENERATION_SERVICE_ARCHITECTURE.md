@@ -1,139 +1,139 @@
-# Executive Deck Generation — arquitetura de serviço
+# Executive Deck Generation — service architecture
 
-## Objetivo
+## Objective
 
-Descrever como a capability de **Executive Deck Generation** deve ser implementada no ecossistema atual.
+Describe how the **Executive Deck Generation** capability should be implemented in the current ecosystem.
 
 ---
 
-## Princípio arquitetural
+## Architectural principle
 
 ### AI Workbench Local
 
-Responsável por:
+Responsible for:
 
 - grounding
-- consolidação de sinais
-- montagem de contracts
-- orquestração da capability
-- persistência local de artefatos e logs
+- signal consolidation
+- contract assembly
+- capability orchestration
+- local persistence of artifacts and logs
 
 ### `ppt_creator_app`
 
-Responsável por:
+Responsible for:
 
-- validação do spec de apresentação
-- renderização `.pptx`
-- preview/review visual
+- presentation spec validation
+- `.pptx` rendering
+- visual preview/review
 - artifact serving
 
 ---
 
-## Componentes principais no AI Workbench
+## Main components in AI Workbench
 
 ### 1. Contract builders
 
-Responsáveis por transformar sinais do produto em contracts por `export_kind`.
+Responsible for transforming product signals into contracts by `export_kind`.
 
-Exemplo inicial já existente:
+Existing initial example:
 
 - `src/services/presentation_export.py`
 
 ### 2. Renderer adapters
 
-Responsáveis por transformar contract do domínio em payload compatível com o `ppt_creator`.
+Responsible for transforming a domain contract into a payload compatible with `ppt_creator`.
 
 ### 3. `presentation_export_service`
 
-Componente orquestrador da capability.
+Capability orchestration component.
 
-Responsabilidades:
+Responsibilities:
 
-- verificar feature flag/config
-- verificar saúde do renderer
-- montar contract
-- montar payload
-- chamar API do `ppt_creator_app`
-- baixar artefatos
-- persistir cópias locais
-- devolver resultado estruturado para UI/backend
+- verify feature flags/config
+- verify renderer health
+- build the contract
+- build the payload
+- call the `ppt_creator_app` API
+- download artifacts
+- persist local copies
+- return structured results to the UI/backend
 
-### 4. Artifact store local
+### 4. Local artifact store
 
-Diretório/versionamento local com:
+Local directory/versioning containing:
 
 - contract
 - payload
 - render response
 - `.pptx`
-- review/previews relacionados
+- related review/previews
 
 ### 5. UI integration layer
 
-Camada que expõe a capability para:
+Layer that exposes the capability to:
 
-- Streamlit atual
-- futura UI em Gradio
-- futuro app web
-
----
-
-## Fluxo síncrono recomendado para o P1
-
-1. usuário aciona geração do deck
-2. AI Workbench resolve `export_kind`
-3. builder gera contract
-4. adapter gera payload do renderer
-5. `presentation_export_service` chama `GET /health`
-6. `presentation_export_service` chama `POST /render`
-7. AI Workbench baixa o `.pptx` via `GET /artifact`
-8. AI Workbench persiste artefatos locais
-9. UI recebe resultado estruturado e downloads
+- current Streamlit
+- future Gradio UI
+- future web app
 
 ---
 
-## Evolução arquitetural recomendada
+## Recommended synchronous flow for P1
 
-### Fase 1
-
-- fluxo síncrono
-- um deck type principal
-- artifact store local
-
-### Fase 2
-
-- múltiplos `export_kind`
-- histórico de exports
-- integração mais clara ao backend HTTP do produto
-
-### Fase 3
-
-- jobs assíncronos se necessário
-- preview/review mais forte
-- recorrência / geração programada
+1. the user triggers deck generation
+2. AI Workbench resolves `export_kind`
+3. the builder generates the contract
+4. the adapter generates the renderer payload
+5. `presentation_export_service` calls `GET /health`
+6. `presentation_export_service` calls `POST /render`
+7. AI Workbench downloads the `.pptx` via `GET /artifact`
+8. AI Workbench persists local artifacts
+9. the UI receives structured results and downloads
 
 ---
 
-## Boundary de código recomendado
+## Recommended architectural evolution
+
+### Phase 1
+
+- synchronous flow
+- one primary deck type
+- local artifact store
+
+### Phase 2
+
+- multiple `export_kind` values
+- export history
+- clearer integration with the product HTTP backend
+
+### Phase 3
+
+- asynchronous jobs if needed
+- stronger preview/review
+- recurrence / scheduled generation
+
+---
+
+## Recommended code boundary
 
 ### AI Workbench
 
-Arquivos/áreas alvo:
+Target files/areas:
 
-- `src/services/presentation_export.py` — builders/adapters atuais
-- `src/services/presentation_export_service.py` — novo service
-- `src/config.py` — configuração da capability
-- `src/ui/...` — superfície de produto
+- `src/services/presentation_export.py` — current builders/adapters
+- `src/services/presentation_export_service.py` — new service
+- `src/config.py` — capability configuration
+- `src/ui/...` — product surface
 
 ### `ppt_creator_app`
 
-Reaproveitar endpoints já existentes. Evitar mover lógica de domínio para o renderer.
+Reuse the existing endpoints. Avoid moving domain logic into the renderer.
 
 ---
 
-## O que não fazer
+## What not to do
 
-- copiar renderer para dentro do AI Workbench
-- misturar lógica do deck diretamente na UI
-- acoplar domínio ao schema cru do renderer cedo demais
-- usar LLM no último passo do P1 quando o caminho pode ser determinístico
+- copy the renderer into AI Workbench
+- mix deck logic directly into the UI
+- couple the domain to the raw renderer schema too early
+- use an LLM in the last P1 step when the path can be deterministic

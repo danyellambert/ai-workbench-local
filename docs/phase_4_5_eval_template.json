@@ -1,11 +1,11 @@
 {
   "questions": [
     {
-      "question": "Quais são os pontos centrais do documento X?",
+      "question": "What are the main points of document X?",
       "expected_document_ids": [
-        "substitua-pelo-hash-ou-id"
+        "replace-with-hash-or-id"
       ],
-      "notes": "Use perguntas que só um documento consiga responder."
+      "notes": "Use questions that only one document can answer."
     }
   ],
   "runs": [
@@ -27,9 +27,9 @@
     }
   ],
   "evidence_to_collect": [
-    "screenshots do app com as mesmas perguntas",
-    "latência de retrieval",
-    "fontes retornadas",
-    "qualidade percebida da resposta"
+    "app screenshots using the same questions",
+    "retrieval latency",
+    "returned sources",
+    "perceived response quality"
   ]
 }

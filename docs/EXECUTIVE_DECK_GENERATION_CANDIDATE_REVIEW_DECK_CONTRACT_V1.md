@@ -41,7 +41,7 @@ Define the v1 contract for the **Candidate Review Deck**, using the `cv_analysis
   "candidate_profile": {
     "name": "Candidate Name",
     "headline": "Senior Machine Learning Platform Specialist",
-    "location": "São Paulo"
+    "location": "Sao Paulo"
   },
   "executive_summary": "Executive summary of the profile, major strengths, and key review points.",
   "strengths": [

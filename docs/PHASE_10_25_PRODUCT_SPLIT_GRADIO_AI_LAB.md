@@ -1,449 +1,449 @@
-# Phase 10.25 — split oficial entre produto em Gradio e AI Lab dashboard
+# Phase 10.25 — official split between the product in Gradio and the AI Lab dashboard
 
-## Objetivo
+## Objective
 
-Formalizar a próxima evolução do projeto como um **split de superfícies**:
+Formalize the next evolution of the project as a **surface split**:
 
-- **Gradio** para a superfície de **produto**
-- **Streamlit** para a superfície de **AI Lab / dashboard de engenharia**
+- **Gradio** for the **product** surface
+- **Streamlit** for the **AI Lab / engineering dashboard** surface
 
-Esta decisão existe para resolver um problema de posicionamento e de UX:
+This decision exists to solve a positioning and UX problem:
 
-- o produto não deve continuar parecendo um laboratório genérico
-- o laboratório não deve competir com a narrativa de negócio
-- a interface precisa refletir a separação entre **resolver uma dor real** e **medir/evoluir o sistema**
-
----
-
-## Decisão oficial da fase
-
-### Superfícies do ecossistema
-
-O ecossistema passa a ser lido assim:
-
-- **Produto principal** = interface em **Gradio**
-- **AI Lab dashboard** = interface em **Streamlit**
-- **serviços compartilhados / backend do domínio** = camada comum entre as duas superfícies
-
-### Regra arquitetural
-
-- **Gradio** mostra workflows de negócio
-- **Streamlit** mostra benchmark, evals, observabilidade, model comparison, MCP/ops console e superfícies avançadas de engenharia
-- a lógica de negócio não deve ficar presa a nenhuma dessas UIs
+- the product should no longer look like a generic lab
+- the lab should not compete with the business narrative
+- the interface needs to reflect the separation between **solving a real pain point** and **measuring/evolving the system**
 
 ---
 
-## Produto principal
+## Official phase decision
 
-### Definição oficial
+### Ecosystem surfaces
 
-> **Decision workflows grounded em documentos**
+The ecosystem should now be understood like this:
 
-Essa passa a ser a definição principal do produto.
+- **Main product** = interface in **Gradio**
+- **AI Lab dashboard** = interface in **Streamlit**
+- **shared services / domain backend** = common layer between the two surfaces
 
-### Subworkflows principais do produto
+### Architectural rule
 
-O produto em Gradio deve nascer com quatro workflows principais:
+- **Gradio** shows business workflows
+- **Streamlit** shows benchmark, evals, observability, model comparison, MCP/ops console, and advanced engineering surfaces
+- the business logic must not be tied to either of these UIs
+
+---
+
+## Main product
+
+### Official definition
+
+> **Decision workflows grounded in documents**
+
+This becomes the product's main definition.
+
+### Main product subworkflows
+
+The product in Gradio should launch with four primary workflows:
 
 1. **Document Review**
 2. **Policy / Contract Comparison**
 3. **Action Plan / Evidence Review**
 4. **Candidate Review**
 
-### Capability transversal do produto
+### Transversal product capability
 
-Além dos quatro workflows, o produto passa a tratar **Executive Deck Generation** como capability transversal.
+In addition to the four workflows, the product should treat **Executive Deck Generation** as a transversal capability.
 
-Isso significa:
+This means:
 
-- não é um workflow separado competindo pela narrativa principal
-- é uma ação/capability que pode aparecer dentro dos workflows principais
+- it is not a separate workflow competing with the main narrative
+- it is an action/capability that can appear inside the main workflows
 
-Exemplos:
+Examples:
 
-- `Document Review` -> gerar document review deck
-- `Policy / Contract Comparison` -> gerar comparison / decision deck
-- `Action Plan / Evidence Review` -> gerar action plan deck ou evidence pack deck
-- `Candidate Review` -> gerar candidate review deck
+- `Document Review` -> generate a document review deck
+- `Policy / Contract Comparison` -> generate a comparison / decision deck
+- `Action Plan / Evidence Review` -> generate an action plan deck or evidence pack deck
+- `Candidate Review` -> generate a candidate review deck
 
 ---
 
-## Onde `cv_analysis` entra nessa nova leitura
+## Where `cv_analysis` fits in this new interpretation
 
-`cv_analysis` deixa de ser tratado como surface principal de produto.
+`cv_analysis` stops being treated as a main product surface.
 
-Leitura recomendada:
+Recommended reading:
 
-- `cv_analysis` = **engine interna / capability de base**
-- `Candidate Review` = **workflow de negócio exposto no produto**
+- `cv_analysis` = **internal engine / foundational capability**
+- `Candidate Review` = **business workflow exposed in the product**
 
-Na prática:
+In practice:
 
-- o nome técnico `cv_analysis` pode continuar existindo internamente
-- a interface de produto deve falar em **Candidate Review**, não em `cv_analysis`
+- the technical name `cv_analysis` may continue to exist internally
+- the product interface should speak in terms of **Candidate Review**, not `cv_analysis`
 
-### O que `Candidate Review` deve entregar
+### What `Candidate Review` should deliver
 
 - profile summary
 - strengths
 - gaps
-- experiência relevante
-- sinais de senioridade / aderência
-- recommendation inicial
-- deck executivo quando fizer sentido
+- relevant experience
+- seniority / fit signals
+- initial recommendation
+- executive deck when appropriate
 
 ---
 
-## O que entra no AI Lab dashboard
+## What belongs in the AI Lab dashboard
 
-O dashboard em Streamlit deve concentrar a leitura de engenharia do projeto, incluindo:
+The Streamlit dashboard should concentrate the engineering reading of the project, including:
 
 - model comparison
-- benchmark de parsing / retrieval / embeddings / reranking
-- evals e diagnosis
+- parsing / retrieval / embeddings / reranking benchmarks
+- evals and diagnosis
 - runtime economics
 - routing / guardrails / workflow traces
-- observabilidade
-- EvidenceOps MCP console e superfícies operacionais avançadas
-- experimentação controlada de providers e runtimes
+- observability
+- EvidenceOps MCP console and advanced operational surfaces
+- controlled experimentation across providers and runtimes
 
-### Regra de UX
+### UX rule
 
-O AI Lab não deve ser a homepage do produto.
+The AI Lab must not be the product homepage.
 
-Ele existe para:
+It exists to:
 
-- desenvolver
-- inspecionar
-- validar
-- comparar
-- auditar
-
----
-
-## Decisão recomendada sobre o Streamlit do lab
-
-## Recomendação oficial agora
-
-**Adaptar o Streamlit atual** para virar o primeiro **AI Lab dashboard**.
-
-### Por que essa é a recomendação mais forte agora
-
-- reaproveita a superfície que já concentra controles, benchmark, evals e observabilidade
-- evita abrir duas frentes de reconstrução ao mesmo tempo
-- reduz custo de transição enquanto o Gradio nasce como superfície de produto
-- preserva o valor do app atual como console de engenharia
-
-### O que isso significa na prática
-
-No curto prazo, a direção recomendada é:
-
-- **não criar imediatamente um novo Streamlit do zero**
-- reorganizar o Streamlit atual para ele assumir explicitamente o papel de **AI Lab dashboard**
-
-## Quando considerar um novo Streamlit separado
-
-Um novo Streamlit específico para lab só deve ser aberto se, depois da refatoração inicial, aparecer pelo menos um destes sinais:
-
-- o app atual continuar excessivamente misturado entre produto e laboratório
-- a navegação continuar confusa mesmo após reposicionamento
-- o acoplamento de estado e componentes atrapalhar a evolução do Gradio
-- o custo de manter a superfície atual ficar maior do que separar um app novo
-
-### Decision gate recomendado
-
-Primeiro:
-
-1. adaptar o Streamlit atual
-2. validar a separação de superfícies
-3. só então decidir se o lab merece um app Streamlit dedicado
+- develop
+- inspect
+- validate
+- compare
+- audit
 
 ---
 
-## Como ficará o Streamlit adaptado
+## Recommended decision for the Streamlit lab surface
 
-## Papel oficial
+## Official recommendation right now
 
-O Streamlit adaptado passa a ser o **AI Lab dashboard** do ecossistema.
+**Adapt the current Streamlit app** so it becomes the first **AI Lab dashboard**.
 
-Ele deve ser lido como:
+### Why this is the strongest recommendation right now
 
-- console de engenharia
-- superfície de benchmark/evals/observabilidade
-- ambiente de inspeção operacional
-- painel para workflows avançados, experimentais ou diagnósticos
+- it reuses the surface that already concentrates controls, benchmarks, evals, and observability
+- it avoids opening two reconstruction fronts at the same time
+- it reduces transition cost while Gradio is born as the product surface
+- it preserves the value of the current app as an engineering console
 
-### Usuário-alvo do Streamlit
+### What this means in practice
 
-- você como builder do sistema
-- operador técnico validando comportamento, custo, routing e qualidade
-- mantenedor técnico inspecionando profundidade de engenharia
+In the short term, the recommended direction is:
 
-## Navegação proposta do Streamlit adaptado
+- **do not immediately create a brand-new Streamlit app from scratch**
+- reorganize the current Streamlit app so it explicitly takes on the role of the **AI Lab dashboard**
+
+## When to consider a separate new Streamlit app
+
+A separate Streamlit app specifically for the lab should only be created if, after the initial refactor, at least one of these signs appears:
+
+- the current app remains excessively mixed between product and lab
+- navigation remains confusing even after repositioning
+- state and component coupling starts to block Gradio evolution
+- the cost of maintaining the current surface becomes higher than separating a new app
+
+### Recommended decision gate
+
+First:
+
+1. adapt the current Streamlit app
+2. validate the surface split
+3. only then decide whether the lab deserves its own dedicated Streamlit app
+
+---
+
+## What the adapted Streamlit will become
+
+## Official role
+
+The adapted Streamlit becomes the ecosystem's **AI Lab dashboard**.
+
+It should be understood as:
+
+- an engineering console
+- a benchmark/evals/observability surface
+- an operational inspection environment
+- a panel for advanced, experimental, or diagnostic workflows
+
+### Target user of Streamlit
+
+- you as the system builder
+- a technical operator validating behavior, cost, routing, and quality
+- a technical maintainer inspecting engineering depth
+
+## Proposed navigation for the adapted Streamlit
 
 ### 1. Lab Overview
 
-Objetivo:
+Objective:
 
-- abrir o AI Lab com uma visão resumida do estado atual do sistema
+- open the AI Lab with a summarized view of the current system state
 
-Conteúdo sugerido:
+Suggested content:
 
-- status geral dos runtimes
-- resumo recente de benchmark/evals
-- snapshot de observabilidade
-- alertas operacionais principais
-- atalhos para diagnosis e MCP
+- overall runtime status
+- recent benchmark/evals summary
+- observability snapshot
+- main operational alerts
+- shortcuts for diagnosis and MCP
 
 ### 2. Benchmarks & Model Comparison
 
-Objetivo:
+Objective:
 
-- concentrar tudo que é comparação de modelo, runtime e estratégia
+- concentrate everything related to model, runtime, and strategy comparison
 
-Conteúdo sugerido:
+Suggested content:
 
 - model comparison
-- benchmark de parsing/retrieval/embeddings/reranking
-- relatórios agregados de benchmark
-- comparação entre providers e quantizações
+- parsing/retrieval/embeddings/reranking benchmark
+- aggregated benchmark reports
+- comparison between providers and quantizations
 
 ### 3. Evals & Diagnosis
 
-Objetivo:
+Objective:
 
-- transformar medições em leitura operacional de qualidade
+- turn measurements into an operational reading of quality
 
-Conteúdo sugerido:
+Suggested content:
 
-- suites de eval
-- histórico e tendências
-- diagnosis / falhas persistentes
+- eval suites
+- history and trends
+- diagnosis / persistent failures
 - quality gates
-- sinais para adaptação ou refatoração de pipeline
+- signals for pipeline adaptation or refactoring
 
 ### 4. Runtime & Observability
 
-Objetivo:
+Objective:
 
-- mostrar latência, custo, routing e traces
+- show latency, cost, routing, and traces
 
-Conteúdo sugerido:
+Suggested content:
 
 - runtime economics
 - budget-aware routing
-- latência por fluxo
+- latency by flow
 - workflow traces
-- gargalos de execução
+- execution bottlenecks
 
 ### 5. Document Agent & Workflow Inspector
 
-Objetivo:
+Objective:
 
-- inspecionar o comportamento interno do agente documental
+- inspect the internal behavior of the document agent
 
-Conteúdo sugerido:
+Suggested content:
 
 - intent routing
 - tool selection
 - guardrails
 - needs review
-- exemplos recentes de execução do workflow
+- recent examples of workflow execution
 
 ### 6. EvidenceOps / MCP / Ops Console
 
-Objetivo:
+Objective:
 
-- concentrar a superfície operacional avançada do projeto
+- concentrate the project's advanced operational surface
 
-Conteúdo sugerido:
+Suggested content:
 
 - repository state
 - actions/worklog
 - MCP health
-- tools/resources MCP
-- operações locais e externas do EvidenceOps
+- MCP tools/resources
+- local and external EvidenceOps operations
 
 ### 7. Structured / Advanced Experiments
 
-Objetivo:
+Objective:
 
-- manter playgrounds técnicos e superfícies experimentais fora da vitrine principal do produto
+- keep technical playgrounds and experimental surfaces away from the main product showcase
 
-Conteúdo sugerido:
+Suggested content:
 
 - extraction playground
 - code analysis
 - structured debugging
 - OCR/VLM experiments
-- shadow workflows e comparações experimentais
+- shadow workflows and experimental comparisons
 
-## O que deve sair da home do Streamlit
+## What should leave the Streamlit homepage
 
-Para o Streamlit assumir de vez o papel de AI Lab, a home dele não deve mais parecer a homepage do produto.
+For Streamlit to fully assume the AI Lab role, its home page should no longer look like the product homepage.
 
-Deixar de protagonizar:
+It should stop emphasizing:
 
-- CTA principal de uso de negócio
-- linguagem de produto final
-- fluxos hero de `Document Review`, `Policy / Contract Comparison`, `Action Plan / Evidence Review` e `Candidate Review`
-- geração de decks como call-to-action principal de usuário final
+- the main business-use CTA
+- final-product language
+- hero flows for `Document Review`, `Policy / Contract Comparison`, `Action Plan / Evidence Review`, and `Candidate Review`
+- deck generation as the main end-user call to action
 
-Esses elementos devem migrar para o **Gradio**.
+These elements should move to **Gradio**.
 
 ---
 
-## Como ficará o Gradio
+## What Gradio will become
 
-## Papel oficial
+## Official role
 
-O Gradio passa a ser a **superfície principal do produto**.
+Gradio becomes the **main product surface**.
 
-Leitura recomendada:
+Recommended reading:
 
-- experiência AI-first
-- interface limpa para workflow de negócio
-- superfície demonstrável para usuário não técnico
+- AI-first experience
+- clean interface for business workflows
+- demonstrable surface for non-technical users
 
-### Usuário-alvo do Gradio
+### Target user of Gradio
 
-- analista de negócio
-- reviewer documental
-- gestor/decisor
+- business analyst
+- document reviewer
+- manager / decision-maker
 - hiring manager
 
-## Shell comum do produto em Gradio
+## Common product shell in Gradio
 
-Independentemente do workflow escolhido, a estrutura base do produto deve ser parecida:
+Regardless of the selected workflow, the base structure of the product should look similar:
 
-1. **home do produto** com os 4 workflows principais
-2. **seleção do workflow**
-3. **entrada documental** (upload, seleção de corpus ou contexto)
-4. **preview grounded** dos insumos
+1. **product home** with the 4 main workflows
+2. **workflow selection**
+3. **document input** (upload, corpus selection, or context selection)
+4. **grounded preview** of the inputs
 5. **findings / recommendation / action output**
-6. **ações finais** (download, export, deck, handoff)
+6. **final actions** (download, export, deck, handoff)
 
-## Workflows principais do Gradio
+## Main Gradio workflows
 
 ### 1. Document Review
 
-Entradas:
+Inputs:
 
-- um ou mais documentos
+- one or more documents
 
-Saídas esperadas:
+Expected outputs:
 
-- summary grounded
+- grounded summary
 - risks/gaps
-- findings estruturados
-- ações recomendadas
-- document review deck opcional
+- structured findings
+- recommended actions
+- optional document review deck
 
 ### 2. Policy / Contract Comparison
 
-Entradas:
+Inputs:
 
-- dois documentos ou duas versões relacionadas
+- two documents or two related versions
 
-Saídas esperadas:
+Expected outputs:
 
-- diferenças relevantes
-- impacto de negócio
+- relevant differences
+- business impact
 - watchouts
 - recommendation
-- comparison / decision deck opcional
+- optional comparison / decision deck
 
 ### 3. Action Plan / Evidence Review
 
-Entradas:
+Inputs:
 
-- findings existentes
+- existing findings
 - evidence packs
-- documentos operacionais
+- operational documents
 
-Saídas esperadas:
+Expected outputs:
 
 - owners
-- tarefas
-- prazos
-- backlog operacional
-- action plan deck ou evidence pack deck opcional
+- tasks
+- deadlines
+- operational backlog
+- optional action plan deck or evidence pack deck
 
 ### 4. Candidate Review
 
-Entradas:
+Inputs:
 
 - candidate documents
 - optional role profile / evaluation criteria
 
-Saídas esperadas:
+Expected outputs:
 
 - candidate summary
 - strengths
 - gaps
-- sinais de aderência
-- recommendation inicial
-- candidate review deck opcional
+- fit signals
+- initial recommendation
+- optional candidate review deck
 
-### Nota importante sobre `cv_analysis`
+### Important note about `cv_analysis`
 
-No Gradio, o usuário não interage com uma task chamada `cv_analysis`.
+In Gradio, the user does not interact with a task called `cv_analysis`.
 
-O correto é:
+The correct approach is:
 
-- `cv_analysis` permanece no backend como engine interna
-- a surface do produto mostra apenas **Candidate Review**
+- `cv_analysis` remains in the backend as an internal engine
+- the product surface shows only **Candidate Review**
 
-## O que não deve entrar no Gradio como protagonista
+## What should not be front and center in Gradio
 
-Para o Gradio manter cara de produto, não deve exibir como superfície principal:
+For Gradio to keep a product feel, it should not present the following as its main surface:
 
 - benchmark matrix
-- model comparison detalhado
-- provider knobs avançados
+- detailed model comparison
+- advanced provider knobs
 - OCR/VLM debug
-- workflow trace técnico
-- MCP console operacional
+- technical workflow traces
+- operational MCP console
 - shadow logs
 
-### Exceção controlada
+### Controlled exception
 
-Elementos como grounding, status e warnings podem aparecer, desde que apresentados com linguagem de produto e não com cara de console técnico.
+Elements such as grounding, status, and warnings may appear, as long as they are presented in product language rather than looking like a technical console.
 
-## Papel do chat livre após o split
+## Role of free-form chat after the split
 
-O chat livre com documentos pode continuar existindo, mas não deve mais ser a homepage do produto.
+Free-form chat with documents may continue to exist, but it should no longer be the product homepage.
 
-Leitura recomendada:
+Recommended reading:
 
-- modo assistivo secundário dentro de workflows
-- ou utilidade avançada preservada no AI Lab
+- secondary assistive mode inside workflows
+- or advanced utility preserved in the AI Lab
 
 ---
 
-## Mapa inicial de migração das superfícies
+## Initial surface migration map
 
-### Vai para o Streamlit adaptado
+### Goes to the adapted Streamlit
 
 - model comparison
 - benchmark reports
-- eval suites e diagnosis
+- eval suites and diagnosis
 - runtime economics
 - workflow traces
 - MCP / EvidenceOps console
-- superfícies avançadas de structured/debug
-- code analysis e experimentação técnica adjacente
+- advanced structured/debug surfaces
+- code analysis and adjacent technical experimentation
 
-### Vai para o Gradio
+### Goes to Gradio
 
 - Document Review
 - Policy / Contract Comparison
 - Action Plan / Evidence Review
 - Candidate Review
-- downloads e artefatos finais dos workflows
-- Executive Deck Generation como ação transversal do produto
+- downloads and final workflow artifacts
+- Executive Deck Generation as a transversal product action
 
-### Permanece no backend compartilhado
+### Remains in the shared backend
 
 - document ingestion
 - grounding / retrieval
@@ -455,73 +455,73 @@ Leitura recomendada:
 
 ---
 
-## Roadmap recomendado dentro da fase 10.25
+## Recommended roadmap inside Phase 10.25
 
-## Slice 10.25A — split de superfícies e reposicionamento
+## Slice 10.25A — surface split and repositioning
 
-Objetivo:
+Objective:
 
-- separar oficialmente produto e lab
-- definir o papel do Streamlit atual
-- preparar contratos e boundaries para o Gradio
+- officially separate product and lab
+- define the role of the current Streamlit app
+- prepare contracts and boundaries for Gradio
 
-Checklist sugerido:
+Suggested checklist:
 
-- classificar telas/controles atuais entre **produto** e **AI Lab**
-- transformar o Streamlit atual em baseline oficial do AI Lab dashboard
-- remover da narrativa principal do Streamlit os fluxos que devem migrar para o produto em Gradio
-- extrair serviços compartilhados para evitar duplicação entre UIs
-- formalizar o contract de cada workflow de negócio
+- classify current screens/controls into **product** and **AI Lab**
+- turn the current Streamlit app into the official baseline AI Lab dashboard
+- remove from the main Streamlit narrative the flows that should move to the Gradio product
+- extract shared services to avoid UI duplication
+- formalize the contract of each business workflow
 
-## Slice 10.25B — produto em Gradio
+## Slice 10.25B — product in Gradio
 
-Objetivo:
+Objective:
 
-- criar a primeira superfície de produto clara e AI-first
+- create the first clear, AI-first product surface
 
-Checklist sugerido:
+Suggested checklist:
 
-- construir a home do produto em torno de **Decision workflows grounded em documentos**
-- expor os quatro workflows principais
-- integrar capability transversal de Executive Deck Generation
-- promover `cv_analysis` para engine interna de `Candidate Review`
-- manter feedback de status, grounding e downloads de artefatos
+- build the product home around **Decision workflows grounded in documents**
+- expose the four main workflows
+- integrate Executive Deck Generation as a transversal capability
+- promote `cv_analysis` to an internal engine behind `Candidate Review`
+- preserve status feedback, grounding, and artifact downloads
 
-## Slice 10.25C — backend HTTP e app web
+## Slice 10.25C — HTTP backend and web app
 
-Objetivo:
+Objective:
 
-- desacoplar definitivamente UI, backend e serviços especializados
+- definitively decouple UI, backend, and specialized services
 
-Checklist sugerido:
+Suggested checklist:
 
-- definir contratos HTTP claros entre frontend e backend
-- mover integrações de deck generation para services de backend
-- preparar a evolução de Gradio para app web
-- manter o AI Lab como superfície paralela de engenharia
-
----
-
-## Checklist consolidado da mudança
-
-- [x] mapear tudo o que hoje aparece no app atual entre **produto** e **AI Lab**
-- [x] definir navegação e home do Streamlit atual como dashboard de engenharia
-- [x] decidir o que sai da home do Streamlit e vai para o produto em Gradio
-- [x] formalizar `Decision workflows grounded em documentos` como headline do produto
-- [x] implementar os 4 workflows principais no Gradio
-- [x] promover `cv_analysis` para o workflow `Candidate Review`
-- [x] tratar Executive Deck Generation como capability transversal dos workflows
-- [x] desacoplar backend/serviços compartilhados das duas superfícies
-- [x] definir decision gate para saber se o Streamlit atual basta como AI Lab ou se um novo app será necessário
+- define clear HTTP contracts between frontend and backend
+- move deck-generation integrations into backend services
+- prepare the evolution from Gradio to a web app
+- keep the AI Lab as a parallel engineering surface
 
 ---
 
-## Entregáveis esperados
+## Consolidated checklist of the change
 
-- **AI Lab dashboard** em Streamlit, com foco em engenharia
-- **produto em Gradio**, com foco em workflows de negócio
-- boundary claro entre produto, lab e backend compartilhado
-- roadmap explícito para a evolução posterior para app web
+- [x] map everything that appears today in the current app between **product** and **AI Lab**
+- [x] define navigation and the home of the current Streamlit app as the engineering dashboard
+- [x] decide what leaves the Streamlit home and moves to the Gradio product
+- [x] formalize `Decision workflows grounded in documents` as the product headline
+- [x] implement the 4 main workflows in Gradio
+- [x] promote `cv_analysis` to the `Candidate Review` workflow
+- [x] treat Executive Deck Generation as a transversal capability across workflows
+- [x] decouple shared backend/services from the two surfaces
+- [x] define the decision gate for whether the current Streamlit app is enough as AI Lab or whether a new app will be required
+
+---
+
+## Expected deliverables
+
+- **AI Lab dashboard** in Streamlit, focused on engineering
+- **product in Gradio**, focused on business workflows
+- a clear boundary between product, lab, and the shared backend
+- an explicit roadmap for the later evolution into a web app
 
 ---
 
@@ -535,7 +535,7 @@ Checklist sugerido:
 
 ---
 
-## Documentos relacionados
+## Related documents
 
 - `docs/PROJECT_POSITIONING_TWO_TRACKS.md`
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`

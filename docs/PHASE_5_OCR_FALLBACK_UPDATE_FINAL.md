@@ -1,50 +1,50 @@
-# Phase 5 — OCR fallback e benchmark sintético de CVs
+# Phase 5 — OCR fallback and synthetic CV benchmark
 
-## Estado consolidado
+## Consolidated status
 
-A Fase 5 está forte para documentos textuais e agora possui fallback OCR inicial para documentos scan-like.
+Phase 5 is strong for text-based documents and now has an initial OCR fallback for scan-like documents.
 
-## O que já está validado
+## What is already validated
 
-- smoke eval da Fase 5 com PASS em:
+- Phase 5 smoke eval with PASS on:
   - extraction
   - summary
   - checklist
   - cv_analysis
   - code_analysis
-- benchmark sintético multilayout com PASS consistente nos layouts textuais:
+- synthetic multi-layout benchmark with consistent PASS results on text-based layouts:
   - classic_one_column
   - modern_two_column
   - compact_sidebar
   - dense_executive
-- casos scan-like agora passam por OCR fallback quando o texto inicial é insuficiente
+- scan-like cases now go through OCR fallback when the initial text is insufficient
 
-## Leitura correta do estado atual
+## Correct interpretation of the current state
 
-### Forte
-- structured outputs em documentos textuais
-- cv_analysis em layouts textuais
-- separação entre chat com RAG e documento estruturado
-- benchmark sintético multilayout
-- observabilidade de OCR fallback
+### Strong
+- structured outputs on text-based documents
+- cv_analysis on text-based layouts
+- separation between RAG chat and structured-document processing
+- synthetic multi-layout benchmark
+- OCR-fallback observability
 
-### Parcialmente forte
-- scan-like / image-based PDFs com OCR fallback
+### Partially strong
+- scan-like / image-based PDFs with OCR fallback
 
-### Limitação conhecida
-- alguns scan-like continuam fracos mesmo com OCR
-- OCR melhora parte dos casos, mas não resolve todos os scans difíceis
-- isso deve ser tratado como limitação conhecida, não como erro silencioso
+### Known limitation
+- some scan-like cases remain weak even with OCR
+- OCR improves part of the cases, but it does not solve every difficult scan
+- this should be treated as a known limitation, not as a silent error
 
-## Narrativa recomendada
+## Recommended narrative
 
-> O sistema é robusto para documentos com texto extraível.
-> Para documentos image-based, o pipeline tenta OCR fallback.
-> Parte desses casos melhora e passa a ser analisável, mas a qualidade ainda depende do tipo de scan e da qualidade do OCR.
+> The system is robust for documents with extractable text.
+> For image-based documents, the pipeline attempts OCR fallback.
+> Some of those cases improve and become analyzable, but quality still depends on the scan type and OCR quality.
 
-## Próximos passos restantes da Fase 5
+## Remaining Phase 5 next steps
 
-- validar com documentos reais além dos fixtures e resumes sintéticos
-- registrar evidências visuais fortes da fase
-- documentar claramente o limite atual do OCR fallback
-- decidir depois se vale uma trilha OCR mais forte
+- validate with real documents beyond fixtures and synthetic resumes
+- record strong visual evidence from the phase
+- clearly document the current OCR fallback limit
+- decide later whether a stronger OCR track is worth it

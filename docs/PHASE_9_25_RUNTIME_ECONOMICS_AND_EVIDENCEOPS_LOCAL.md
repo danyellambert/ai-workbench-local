@@ -1,59 +1,59 @@
-# Phase 9.25 + Phase 9.5 (local) — Runtime economics e EvidenceOps foundation
+# Phase 9.25 + Phase 9.5 (local) — Runtime economics and EvidenceOps foundation
 
-## Objetivo desta rodada
+## Objective of this iteration
 
-Adiantar o que já dava para fechar **sem depender** de MCP externo, deploy público, Oracle, Gradio ou integrações adicionais.
+Advance what could already be completed **without depending on** an external MCP, public deployment, Oracle, Gradio, or additional integrations.
 
-O foco desta implementação foi fortalecer duas trilhas locais:
+The focus of this implementation was to strengthen two local tracks:
 
-- **Fase 9.25** → runtime economics, usage observability e budget-aware routing
-- **Fase 9.5 (fundação local)** → EvidenceOps worklog + evidence pack reaproveitável
+- **Phase 9.25** → runtime economics, usage observability, and budget-aware routing
+- **Phase 9.5 (local foundation)** → reusable EvidenceOps worklog + evidence pack
 
 ---
 
-## O que foi implementado
+## What was implemented
 
-### 1. Runtime execution log mais rico
+### 1. Richer runtime execution log
 
-O agregado de execuções em `src/storage/runtime_execution_log.py` passou a resumir também:
+The aggregate execution view in `src/storage/runtime_execution_log.py` now also summarizes:
 
 - `prompt_build_latency_s`
-- média de documentos selecionados por run
-- média de chunks recuperados por run
-- chunks usados vs descartados no contexto final
-- taxa de truncamento do contexto
-- taxa de auto-degrade do budget routing
-- pressão média e máxima de contexto
-- contagem de runs com:
+- average number of selected documents per run
+- average number of retrieved chunks per run
+- chunks used vs. discarded in the final context
+- context truncation rate
+- budget-routing auto-degrade rate
+- average and maximum context pressure
+- count of runs with:
   - `evidence_pipeline`
   - OCR
   - Docling
   - VLM
-- distribuições agregadas por:
+- aggregate distributions by:
   - `cost_source`
   - `budget_mode`
   - `budget_reason`
   - `context_window_mode`
   - `ocr_backend`
 
-### 2. Sinais documentais operacionais gravados por execução
+### 2. Operational document signals recorded per execution
 
 The main app (`main.py`) now records local signals derived from the selected documents in `runtime_execution_log`, including:
 
-- quantos documentos acionaram a trilha `evidence_pipeline`
-- quantos envolveram OCR
-- quantos envolveram Docling
-- quantos envolveram VLM
-- total de páginas suspeitas
-- total de páginas processadas com Docling
-- total de regiões VL tentadas / bem-sucedidas
-- distribuição de backends OCR usados
+- how many documents triggered the `evidence_pipeline` path
+- how many involved OCR
+- how many involved Docling
+- how many involved VLM
+- total suspicious pages
+- total pages processed with Docling
+- total VL regions attempted / successful
+- distribution of OCR backends used
 
-Esses sinais entram tanto no fluxo de **chat com RAG** quanto no fluxo **structured**.
+These signals are included in both the **chat with RAG** flow and the **structured** flow.
 
-### 3. Runtime snapshot expandido
+### 3. Expanded runtime snapshot
 
-O `src/services/runtime_snapshot.py` agora expõe melhor o estado operacional recente:
+`src/services/runtime_snapshot.py` now exposes the recent operational state more clearly:
 
 #### Chat
 
@@ -71,24 +71,24 @@ O `src/services/runtime_snapshot.py` agora expõe melhor o estado operacional re
 - `last_context_strategy`
 - `last_total_tokens`
 - `last_cost_usd`
-- sinais de budget routing da execução estruturada
+- budget-routing signals for the structured execution
 
-### 4. Sidebar operacional mais explicável
+### 4. More explainable operational sidebar
 
-O painel lateral (`src/ui/sidebar.py`) passou a mostrar melhor:
+The sidebar panel (`src/ui/sidebar.py`) now shows more clearly:
 
-- sinais recentes de contexto no chat
-- sinais recentes de contexto na execução estruturada
-- métricas agregadas de runtime economics
-- taxa de auto-degrade e truncamento
-- métricas de OCR / Docling / VL
-- novas distribuições agregadas de custo, budget e OCR backend
+- recent context signals in chat
+- recent context signals in structured execution
+- aggregate runtime economics metrics
+- auto-degrade and truncation rate
+- OCR / Docling / VL metrics
+- new aggregate distributions for cost, budget, and OCR backend
 
-### 5. EvidenceOps worklog com evidence pack local
+### 5. EvidenceOps worklog with local evidence pack
 
-O `src/services/evidenceops_worklog.py` agora gera um bloco `evidence_pack` dentro da entrada do worklog.
+`src/services/evidenceops_worklog.py` now generates an `evidence_pack` block inside each worklog entry.
 
-Esse pack inclui:
+That pack includes:
 
 - `review_type`
 - `summary`
@@ -106,127 +106,127 @@ Esse pack inclui:
 - `needs_review`
 - `needs_review_reason`
 
-Além disso, a entrada principal do worklog agora expõe:
+In addition, the main worklog entry now exposes:
 
 - `source_document_count`
 - `finding_count`
 - `action_item_count`
 - `evidence_pack`
 
-### 6. Sumário agregado do EvidenceOps mais útil
+### 6. More useful aggregate EvidenceOps summary
 
-O agregado em `src/storage/phase95_evidenceops_worklog.py` agora também calcula:
+The aggregate in `src/storage/phase95_evidenceops_worklog.py` now also calculates:
 
 - `unique_document_count`
 - `finding_type_counts`
 - `due_date_counts`
 
-Isso melhora a leitura operacional do histórico local mesmo antes de existir um MCP externo.
+This improves the operational readability of the local history even before an external MCP exists.
 
-### 7. Foundation local da Fase 9.5 para repository + action store
+### 7. Local Phase 9.5 foundation for repository + action store
 
-Além do worklog, esta rodada passou a expor melhor a espinha dorsal local do `EvidenceOps`:
+In addition to the worklog, this iteration also exposed the local backbone of `EvidenceOps` more clearly:
 
 - `src/services/evidenceops_repository.py`
-  - listagem local do corpus por `filesystem`
-  - classificação por categoria (`policies`, `contracts`, `audit`, `templates`)
-  - extração de `document_id`, título, extensão, tamanho e caminho relativo
-  - sumário agregado do corpus local
+  - local corpus listing via `filesystem`
+  - classification by category (`policies`, `contracts`, `audit`, `templates`)
+  - extraction of `document_id`, title, extension, size, and relative path
+  - aggregate summary of the local corpus
 
 - `src/storage/phase95_evidenceops_action_store.py`
-  - update local de ações já persistidas no `SQLite`
-  - patch incremental de metadata para trilha auditável
+  - local update of actions already persisted in `SQLite`
+  - incremental metadata patching for an auditable trail
 
 - `src/services/evidenceops_local_ops.py`
-  - camada de consulta local reaproveitável para futuro MCP/adapter HTTP
-  - listagem e resolução de documentos do repositório local
-  - listagem filtrável de ações por `status`, `owner` e `review_type`
-  - atualização local de ação (`status`, `owner`, `due_date`, metadata)
+  - reusable local query layer for a future MCP/HTTP adapter
+  - listing and resolution of documents in the local repository
+  - filterable action listing by `status`, `owner`, and `review_type`
+  - local action update (`status`, `owner`, `due_date`, metadata)
 
 - `src/services/runtime_snapshot.py`
-  - novo resumo agregado de `evidenceops_actions`
-  - novo resumo agregado de `evidenceops_repository`
+  - new aggregate summary for `evidenceops_actions`
+  - new aggregate summary for `evidenceops_repository`
 
 - `src/ui/sidebar.py`
-  - novo painel para o `action store local`
-  - novo painel para o `document repository local`
+  - new panel for the local `action store`
+  - new panel for the local `document repository`
 
-Na prática, isso fecha um primeiro slice local de **Document Repository + Action Store foundation**, ainda sem MCP server real, mas já pronto para ser promovido a adapter externo depois.
+In practice, this closes a first local slice of the **Document Repository + Action Store foundation**, still without a real MCP server, but already ready to be promoted to an external adapter later.
 
 ---
 
-## Testes adicionados / atualizados
+## Tests added / updated
 
-Foram atualizados testes focados para cobrir as mudanças:
+Focused tests were updated to cover the changes:
 
 - `tests/test_runtime_execution_log_unittest.py`
 - `tests/test_phase95_evidenceops_worklog.py`
 - `tests/test_runtime_snapshot_unittest.py`
 - `tests/test_phase95_evidenceops_local_ops.py`
 
-Esses testes agora validam:
+These tests now validate:
 
-- novas agregações de runtime economics
-- evidence pack e contagens adicionais do EvidenceOps
-- exposição dos novos sinais no runtime snapshot
-- listagem/consulta do repositório local de documentos
-- listagem/atualização do action store local
-
----
-
-## O que foi documentado como entregue parcialmente no roadmap
-
-### Fase 9.25
-
-Entregue nesta rodada:
-
-- camada local mais unificada de métricas por execução
-- registro de chars de contexto, chunks usados/descartados e truncamento
-- registro de acionamento de OCR / Docling / VLM em nível operacional local
-- visão agregada por provider/modelo no histórico agregado
-
-### Fase 9.5 (fundação local)
-
-Entregue nesta rodada:
-
-- evidence pack estruturado reaproveitável em nível local
-- action store local em `SQLite` com leitura, atualização e trilha auditável
-- document repository local em `filesystem` sobre o corpus sintético de negócio
-- camada de serviços locais pronta para futura exposição via MCP/HTTP
-- snapshot/sidebar com leitura operacional do repository e do action store
+- new runtime economics aggregations
+- the evidence pack and additional EvidenceOps counts
+- exposure of the new signals in the runtime snapshot
+- listing/querying of the local document repository
+- listing/updating of the local action store
 
 ---
 
-## O que **não** foi implementado ainda
+## What was documented as partially delivered in the roadmap
 
-Estas partes continuam pendentes e foram mantidas como trabalho futuro:
+### Phase 9.25
+
+Delivered in this iteration:
+
+- a more unified local layer of per-execution metrics
+- recording of context chars, used/discarded chunks, and truncation
+- recording of OCR / Docling / VLM activation at the local operational level
+- aggregate historical view by provider/model
+
+### Phase 9.5 (local foundation)
+
+Delivered in this iteration:
+
+- a reusable structured evidence pack at the local level
+- local action store in `SQLite` with reading, updating, and an auditable trail
+- local document repository in `filesystem` over the synthetic business corpus
+- local service layer ready for future exposure via MCP/HTTP
+- snapshot/sidebar with an operational view of the repository and action store
+
+---
+
+## What has **not** been implemented yet
+
+These parts remain pending and were kept as future work:
 
 ### Runtime economics / budget-aware routing
 
-- capturar tokens nativos quando o provider expuser telemetria real, em vez de depender principalmente de estimativa por caracteres
-- budgets por task com thresholds explícitos de alerta
-- política automática de fallback local/cloud orientada a custo
-- validação sistemática do budget-aware routing contra evals
-- visão agregada completa incluindo também o fluxo de `comparison`
+- capturing native tokens when the provider exposes real telemetry, instead of depending mainly on character-based estimation
+- per-task budgets with explicit warning thresholds
+- automatic local/cloud fallback policy guided by cost
+- systematic validation of budget-aware routing against evals
+- a complete aggregate view also including the `comparison` flow
 
 ### EvidenceOps / Phase 9.5
 
-- MCP externo real (`Document Repository MCP`, `Worklog / Action MCP` etc.)
-- MCP server local real em stdio/configuração externa
-- busca documental externa via MCP
-- comparação de versões via MCP
-- permissões e human-in-the-loop para ações sensíveis em integração externa
-- diff/versionamento documental mais forte dentro do repository adapter
+- real external MCP (`Document Repository MCP`, `Worklog / Action MCP`, etc.)
+- real local MCP server over stdio/external configuration
+- external document search via MCP
+- version comparison via MCP
+- permissions and human-in-the-loop for sensitive actions in external integration
+- stronger diff/versioning inside the repository adapter
 
 ---
 
-## Leitura arquitetural correta desta rodada
+## Correct architectural reading of this iteration
 
-O que existe agora é uma **fundação local forte** para as fases 9.25 e 9.5.
+What exists now is a **strong local foundation** for Phases 9.25 and 9.5.
 
-Ainda não é a fase MCP completa, mas já existe uma base prática para:
+It is not yet the full MCP phase, but there is already a practical base for:
 
-- observar custo/uso de forma mais útil
-- auditar melhor o comportamento documental
-- reaproveitar evidence packs no futuro
-- preparar a transição para integrações operacionais reais sem perder rastreabilidade
+- observing cost/usage in a more useful way
+- auditing document behavior more effectively
+- reusing evidence packs in the future
+- preparing the transition to real operational integrations without losing traceability

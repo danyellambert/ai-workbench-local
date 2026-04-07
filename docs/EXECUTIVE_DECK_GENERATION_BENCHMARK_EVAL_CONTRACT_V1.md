@@ -1,26 +1,26 @@
 # Executive Deck Generation — Benchmark/Eval Executive Review Contract v1
 
-## Objetivo desta entrega
+## Objective of this deliverable
 
-Documentar e iniciar a implementação do primeiro slice técnico da capability de **Executive Deck Generation** entre:
+Document and begin implementation of the first technical slice of the **Executive Deck Generation** capability between:
 
 - **AI Workbench Local**
 - **`ppt_creator_app`**
 
-> Para a leitura completa de produto, catálogo de decks e roadmap da capability, ver também: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+> For the complete product reading, deck catalog, and capability roadmap, also see: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
-> Para a leitura técnica de productização do primeiro slice no ecossistema atual, ver também: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
+> For the technical productization reading of the first slice in the current ecosystem, also see: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
 
-O foco desta rodada continua sendo o caminho:
+The focus of this round remains the path:
 
-**benchmark/eval -> contrato estruturado -> payload compatível com `ppt_creator`**
+**benchmark/eval -> structured contract -> payload compatible with `ppt_creator`**
 
-Este documento deve ser lido como:
+This document should be read as:
 
-- o **P1 técnico** da capability de Executive Deck Generation
-- especificamente o deck de **benchmark/eval executive review**
+- the **technical P1** of the Executive Deck Generation capability
+- specifically the **benchmark/eval executive review** deck
 
-As próximas famílias de decks previstas pela capability maior incluem:
+The next deck families planned by the broader capability include:
 
 - document review deck
 - policy/contract comparison deck
@@ -28,51 +28,51 @@ As próximas famílias de decks previstas pela capability maior incluem:
 - candidate review deck
 - evidence pack deck
 
-## O que vamos fazer nesta rodada
+## What we will do in this round
 
-### Escopo incluído agora
+### Scope included now
 
-1. criar um **contrato JSON v1** para o slice `benchmark/eval -> executive deck`
-2. criar um **builder** que converte agregados do projeto atual em um contrato estável
-3. criar um **adapter** que transforma esse contrato em um payload compatível com o schema esperado pelo `ppt_creator`
-4. adicionar **testes unitários focados** para garantir estabilidade da fundação
+1. create a **JSON contract v1** for the `benchmark/eval -> executive deck` slice
+2. create a **builder** that converts aggregates from the current project into a stable contract
+3. create an **adapter** that transforms this contract into a payload compatible with the schema expected by `ppt_creator`
+4. add **focused unit tests** to guarantee foundation stability
 
-### Escopo explicitamente fora desta rodada
+### Scope explicitly out of this round
 
-Ainda **não** entra agora:
+Still **not included** now:
 
-- chamada HTTP real para o `ppt_creator_app`
-- Docker / porta / volume compartilhado
-- UI para exportar deck pelo app principal
-- fila assíncrona de renderização
-- preview real / review remoto / download de artefatos
+- a real HTTP call to `ppt_creator_app`
+- Docker / port / shared volume
+- UI to export the deck from the main app
+- asynchronous rendering queue
+- real preview / remote review / artifact download
 
-Esses pontos ficam para o próximo slice, quando o contrato já estiver estável.
+These points are left for the next slice, when the contract is already stable.
 
-## Leitura arquitetural
+## Architectural reading
 
-Nesta fase, a separação fica assim:
+At this stage, the separation is as follows:
 
 - **AI Workbench Local**
-  - continua como fonte da verdade dos benchmarks/evals
-  - consolida os agregados do domínio
-  - gera o contrato intermediário de apresentação
+  - remains the source of truth for benchmarks/evals
+  - consolidates the domain aggregates
+  - generates the intermediate presentation contract
 - **`ppt_creator_app`**
-  - continua como serviço/renderizador especializado
-  - receberá depois um payload já estruturado para `.pptx`
+  - remains the specialized service/renderer
+  - will later receive a pre-structured payload for `.pptx`
 
-Ou seja: **a fundação entra primeiro no domínio e só depois sobe para API/Docker**.
+In other words: **the foundation lands in the domain first and only later moves up to API/Docker**.
 
-## Contrato JSON v1
+## JSON contract v1
 
-### Nome do contrato
+### Contract name
 
-> Nota de honestidade técnica: o slice já implementado em código ainda usa o naming de fundação `presentation_export.v1` / `benchmark_eval_executive_deck`. Isso continua válido como base atual, mesmo com a capability maior agora posicionada como **Executive Deck Generation**.
+> Technical honesty note: the slice already implemented in code still uses the foundation naming `presentation_export.v1` / `benchmark_eval_executive_deck`. This remains valid as the current base, even with the broader capability now positioned as **Executive Deck Generation**.
 
 - `contract_version = "presentation_export.v1"`
 - `export_kind = "benchmark_eval_executive_deck"`
 
-### Estrutura de alto nível
+### High-level structure
 
 ```json
 {
@@ -80,7 +80,7 @@ Ou seja: **a fundação entra primeiro no domínio e só depois sobe para API/Do
   "export_kind": "benchmark_eval_executive_deck",
   "presentation": {
     "title": "AI Workbench Local — Benchmark & Eval Review",
-    "subtitle": "Resumo executivo da rodada atual",
+    "subtitle": "Executive summary of the current round",
     "author": "AI Workbench Local",
     "date": "2026-04-04",
     "theme": "executive_premium_minimal",
@@ -108,8 +108,8 @@ Ou seja: **a fundação entra primeiro no domínio e só depois sobe para API/Do
   },
   "executive_summary": "Top candidate and eval health in one executive package.",
   "key_highlights": [
-    "Top benchmark candidate atual: qwen2.5:7b.",
-    "PASS rate de eval acima de 75% na rodada atual."
+    "Current top benchmark candidate: qwen2.5:7b.",
+    "Eval PASS rate above 75% in the current round."
   ],
   "key_metrics": [
     {
@@ -141,13 +141,13 @@ Ou seja: **a fundação entra primeiro no domínio e só depois sobe para API/Do
       "total_runs": 6
     }
   ],
-  "recommendation": "Promover o candidato líder para a próxima rodada controlada.",
+  "recommendation": "Promote the leading candidate to the next controlled round.",
   "watchouts": [
-    "Ainda existem suites em WARN/FAIL que exigem hardening."
+    "There are still suites in WARN/FAIL that require hardening."
   ],
   "next_steps": [
-    "Revisar suites WARN/FAIL.",
-    "Serializar este contrato e chamar o serviço de decks via API."
+    "Review WARN/FAIL suites.",
+    "Serialize this contract and call the deck service through the API."
   ],
   "data_sources": [
     "phase7_model_comparison_log",
@@ -156,54 +156,54 @@ Ou seja: **a fundação entra primeiro no domínio e só depois sobe para API/Do
 }
 ```
 
-## Mapeamento para o `ppt_creator`
+## Mapping to `ppt_creator`
 
-O adapter desta rodada vai transformar o contrato acima em um payload de apresentação com os seguintes blocos:
+The adapter for this round will transform the contract above into a presentation payload with the following blocks:
 
 1. `title`
 2. `summary`
 3. `metrics`
-4. `table` de leaderboard de modelos
-5. `table` de leaderboard de eval suites
-6. `comparison` com recomendação vs watchouts
-7. `bullets` com próximos passos
+4. model leaderboard `table`
+5. eval suite leaderboard `table`
+6. `comparison` with recommendation vs. watchouts
+7. `bullets` with next steps
 
-## Por que esse desenho
+## Why this design
 
-Esse formato é forte porque:
+This format is strong because:
 
-- preserva um contrato de domínio claro no AI Workbench
-- evita acoplar cedo demais o projeto ao schema cru do `ppt_creator`
-- já deixa o payload suficientemente próximo do renderizador final
-- facilita a próxima etapa de integração por API HTTP
+- it preserves a clear domain contract in AI Workbench
+- it avoids coupling the project too early to the raw `ppt_creator` schema
+- it already leaves the payload close enough to the final renderer
+- it makes the next HTTP API integration stage easier
 
-## Próximo slice depois desta entrega
+## Next slice after this delivery
 
-Depois que esse contrato estiver estável e coberto por testes, o próximo passo recomendado é:
+After this contract is stable and covered by tests, the recommended next step is:
 
-1. criar um `presentation_export_service`
-2. chamar o `ppt_creator_app` por HTTP
-3. externalizar URL/timeouts por configuração
-4. decidir estratégia de artefato (`bytes` vs `volume/path`)
-5. só então subir o `ppt_creator_app` em Docker como serviço separado
+1. create a `presentation_export_service`
+2. call `ppt_creator_app` over HTTP
+3. externalize URL/timeouts through configuration
+4. decide the artifact strategy (`bytes` vs `volume/path`)
+5. only then run `ppt_creator_app` in Docker as a separate service
 
-## Documento complementar
+## Complementary document
 
-Este documento continua propositalmente focado no **primeiro slice técnico** (`benchmark/eval -> contrato -> payload compatível com o renderer`).
+This document remains intentionally focused on the **first technical slice** (`benchmark/eval -> contract -> payload compatible with the renderer`).
 
-Para o processo completo da capability dentro do AI Workbench Local, incluindo:
+For the complete capability process inside AI Workbench Local, including:
 
-- posicionamento de produto
-- catálogo de famílias de deck
-- priorização P1/P2/P3
-- boundary arquitetural
-- integração HTTP
+- product positioning
+- deck family catalog
+- P1/P2/P3 prioritization
+- architectural boundary
+- HTTP integration
 - UX
-- artefatos
-- observabilidade
-- encaixe na Fase 10.25
+- artifacts
+- observability
+- fit within Phase 10.25
 
-consultar:
+see:
 
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`

@@ -1,112 +1,112 @@
 # Phase 9.5 — External target architecture
 
-## Decisão oficial desta fase
+## Official decision for this phase
 
-O alvo oficial para o fechamento externo da Fase 9.5 passa a ser:
+The official target for the external completion of Phase 9.5 is now:
 
-- **Nextcloud/WebDAV** para o repositório documental externo
-- **Trello** para a fila operacional de actions/worklog humano
-- **Notion** para evidence register, dashboard operacional e handoff executivo
+- **Nextcloud/WebDAV** for the external document repository
+- **Trello** for the operational queue of human actions/worklog
+- **Notion** for the evidence register, operational dashboard, and executive handoff
 
-O corpus principal oficial da demo passa a ser:
+The official main corpus for the demo is now:
 
 - **`data/corpus_revisado/option_b_synthetic_premium`**
 
-O corpus complementar/canônico passa a ser:
+The complementary/canonical corpus is now:
 
 - **`data/corpus_revisado/option_a_public_corpus_v2`**
 
-## Papel de cada integração
+## Role of each integration
 
 ### 1. Nextcloud/WebDAV
 
-Responsável por:
+Responsible for:
 
-- armazenar `policies`, `contracts`, `audit`, `templates` e artefatos correlatos
-- servir como base do **Document Repository MCP**
-- permitir busca documental externa, leitura de metadados e comparação de drift/versão
+- storing `policies`, `contracts`, `audit`, `templates`, and related artifacts
+- serving as the foundation of the **Document Repository MCP**
+- enabling external document search, metadata reading, and drift/version comparison
 
 ### 2. Trello
 
-Responsável por:
+Responsible for:
 
-- representar `action_items` fora do app
-- dar owner, comentários, status e trilha humana às ações
-- servir como base do **Worklog / Action MCP**
+- representing `action_items` outside the app
+- providing owner, comments, status, and a human trail for actions
+- serving as the foundation of the **Worklog / Action MCP**
 
 ### 3. Notion
 
-Responsável por:
+Responsible for:
 
-- guardar evidence packs, dashboards e visões executivas
-- funcionar como camada legível para revisão humana e handoff
-- concentrar a visão de status, evidências, responsáveis e links para documentos/ações
+- storing evidence packs, dashboards, and executive views
+- functioning as a readable layer for human review and handoff
+- concentrating the view of status, evidence, owners, and links to documents/actions
 
-## Leitura arquitetural final
+## Final architectural reading
 
-### O que continua local
+### What remains local
 
 - `filesystem + SQLite`
-- MCP server local
-- cliente MCP do app
-- observabilidade MCP
-- demo end-to-end local
+- local MCP server
+- app MCP client
+- MCP observability
+- local end-to-end demo
 
-### O que sobe para camada externa
+### What moves to the external layer
 
 - documents: `Nextcloud/WebDAV`
-- actions/workflow humano: `Trello`
-- register/dashboard executivo: `Notion`
+- human actions/workflow: `Trello`
+- executive register/dashboard: `Notion`
 
-## Ordem recomendada de implementação
+## Recommended implementation order
 
 1. **Nextcloud/WebDAV**
-   - listar documentos
-   - buscar documentos
-   - ler metadados
-   - comparar drift/versões
+   - list documents
+   - search documents
+   - read metadata
+   - compare drift/versions
 
 2. **Trello**
-   - criar ação
-   - atualizar status
-   - atribuir owner
-   - comentar aprovação/rejeição
+   - create action
+   - update status
+   - assign owner
+   - comment on approval/rejection
 
 3. **Notion**
-   - registrar evidence packs
-   - gerar visão operacional resumida
-   - consolidar links de documentos, ações e evidências
+   - register evidence packs
+   - generate a summarized operational view
+   - consolidate links to documents, actions, and evidence
 
-## O que ainda depende do usuário
+## What still depends on the user
 
 ### Nextcloud/WebDAV
 
 - base URL
-- usuário
-- senha ou app password
-- pasta/base documental alvo
+- username
+- password or app password
+- target document folder/base
 
 ### Trello
 
 - API key
 - token
-- board alvo
-- listas/estados mínimos
+- target board
+- minimum lists/statuses
 
 ### Notion
 
 - integration token
-- database IDs ou page IDs
-- schema mínimo das tabelas/páginas alvo
+- database IDs or page IDs
+- minimum schema for the target tables/pages
 
-## Definição prática de “fase 9.5 completa”
+## Practical definition of a “complete Phase 9.5”
 
-Considerar a fase 9.5 completa quando houver:
+Consider Phase 9.5 complete when there is:
 
-1. **MCP local real** funcionando
-2. **app usando MCP** no fluxo principal
-3. **observabilidade MCP** no runtime
-4. **Nextcloud/WebDAV** conectado como repository externo
-5. **Trello** conectado como action/worklog externo
-6. **Notion** conectado como camada de evidence register/dashboard
-7. **demo end-to-end** mostrando documento externo -> análise -> evidence pack -> action -> dashboard
+1. a working **real local MCP**
+2. the **app using MCP** in the main flow
+3. **MCP observability** in the runtime
+4. **Nextcloud/WebDAV** connected as the external repository
+5. **Trello** connected as the external action/worklog layer
+6. **Notion** connected as the evidence register/dashboard layer
+7. an **end-to-end demo** showing external document -> analysis -> evidence pack -> action -> dashboard

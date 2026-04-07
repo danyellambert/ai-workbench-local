@@ -1,14 +1,14 @@
-# Executive Deck Generation — lifecycle de artefatos
+# Executive Deck Generation — artifact lifecycle
 
-## Objetivo
+## Objective
 
-Definir como os artefatos da capability devem ser criados, organizados, persistidos e rastreados.
+Define how the capability's artifacts should be created, organized, persisted, and tracked.
 
 ---
 
-## Identidade do export
+## Export identity
 
-Cada execução deve gerar um identificador único:
+Each execution must generate a unique identifier:
 
 - `export_id`
 
@@ -18,7 +18,7 @@ Exemplo:
 
 ---
 
-## Estrutura remota sugerida no `ppt_creator_app`
+## Suggested remote structure in `ppt_creator_app`
 
 ```text
 outputs/ai_workbench_exports/
@@ -29,7 +29,7 @@ outputs/ai_workbench_exports/
 
 ---
 
-## Estrutura local sugerida no AI Workbench
+## Suggested local structure in AI Workbench
 
 ```text
 artifacts/presentation_exports/
@@ -46,9 +46,9 @@ artifacts/presentation_exports/
 
 ---
 
-## Proveniência mínima
+## Minimum provenance
 
-Cada export deve registrar:
+Each export must record:
 
 - `export_id`
 - `export_kind`
@@ -62,7 +62,7 @@ Cada export deve registrar:
 
 ---
 
-## Estados do lifecycle
+## Lifecycle states
 
 - `created`
 - `contract_built`
@@ -76,26 +76,26 @@ Cada export deve registrar:
 
 ---
 
-## Política mínima de retenção
+## Minimum retention policy
 
-### Inicial
+### Initial
 
-- manter exports locais recentes
-- não apagar automaticamente enquanto a capability estiver amadurecendo
+- keep recent local exports
+- do not delete them automatically while the capability is still maturing
 
-### Futuro
+### Future
 
-- retenção por quantidade ou idade
-- limpeza administrativa explícita
-- proteção extra para exports marcados como baseline/demo/reference
+- retention by quantity or age
+- explicit administrative cleanup
+- extra protection for exports marked as baseline/demo/reference
 
 ---
 
-## Falhas parciais aceitáveis
+## Acceptable partial failures
 
-Exemplos:
+Examples:
 
-- `.pptx` gerado, mas preview não baixado
-- contrato e payload salvos, mas renderer indisponível
+- `.pptx` generated, but preview not downloaded
+- contract and payload saved, but the renderer is unavailable
 
-Nesses casos, o export não deve “sumir”; ele deve ficar marcado como `partial` ou `failed` com metadados úteis.
+In these cases, the export must not “disappear”; it should remain marked as `partial` or `failed` with useful metadata.

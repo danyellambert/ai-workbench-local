@@ -1,23 +1,23 @@
 # Phase 9.5 — Official demo corpus mapping
 
-## Decisão oficial
+## Official decision
 
-O corpus oficial da demo da Fase 9.5 passa a ser:
+The official corpus for the Phase 9.5 demo is now:
 
 - **`data/corpus_revisado/option_b_synthetic_premium`**
 
-O corpus complementar/canônico de validação pública continua sendo:
+The complementary/canonical public validation corpus remains:
 
 - **`data/corpus_revisado/option_a_public_corpus_v2`**
 
-## Papel de cada corpus
+## Role of each corpus
 
 ### `option_b_synthetic_premium`
 
-Usar como base principal para:
+Use as the primary base for:
 
-- demo do `EvidenceOps MCP`
-- comparação de policies
+- the `EvidenceOps MCP` demo
+- policy comparison
 - `contract gap detection`
 - `compliance review`
 - `evidence chaining`
@@ -25,18 +25,18 @@ Usar como base principal para:
 
 ### `option_a_public_corpus_v2`
 
-Usar como base complementar para:
+Use as a complementary base for:
 
-- benchmark com artefatos públicos reais
-- validação externa/canônica
-- referências e frameworks públicos
-- comparação de realismo documental
+- benchmarking with real public artifacts
+- external/canonical validation
+- public references and frameworks
+- comparison of document realism
 
-## Mapeamento para adapters externos
+## Mapping for external adapters
 
 ### Nextcloud / WebDAV
 
-Subir principalmente:
+Primarily upload:
 
 - `policies/`
 - `contracts/`
@@ -44,7 +44,7 @@ Subir principalmente:
 - `templates/`
 - `metadata/`
 
-Estrutura remota sugerida:
+Suggested remote structure:
 
 - `/EvidenceOpsDemo/policies`
 - `/EvidenceOpsDemo/contracts`
@@ -54,7 +54,7 @@ Estrutura remota sugerida:
 
 ### Trello
 
-Usar as `storylines` como cards-base de operação:
+Use the `storylines` as the base operational cards:
 
 - `SB-01` Policy Change Detection
 - `SB-02` Contract Gap Detection
@@ -62,7 +62,7 @@ Usar as `storylines` como cards-base de operação:
 - `SB-04` Evidence Chaining and NCR Escalation
 - `SB-05` Remediation Workflow and Closure Readiness
 
-Listas sugeridas:
+Suggested lists:
 
 - `Open`
 - `Review`
@@ -71,18 +71,18 @@ Listas sugeridas:
 
 ### Notion
 
-Usar como register/dashboards de:
+Use as the register/dashboards for:
 
 - storylines
 - document register
 - evidence packs / findings / actions
 
-## Critério prático
+## Practical criterion
 
-Se o projeto precisar escolher um único corpus para a demo empresarial da Fase 9.5, usar:
+If the project needs to choose a single corpus for the enterprise demo of Phase 9.5, use:
 
 - **`option_b_synthetic_premium`**
 
-Se precisar complementar com fontes públicas/realistas, usar:
+If it needs to be complemented with public/realistic sources, use:
 
 - **`option_a_public_corpus_v2`**

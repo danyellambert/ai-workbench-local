@@ -1,36 +1,36 @@
-# Executive Deck Generation — contrato de API
+# Executive Deck Generation — API contract
 
-## Objetivo
+## Objective
 
-Definir o contrato de integração entre:
+Define the integration contract between:
 
 - AI Workbench Local
 - `ppt_creator_app`
 
-e antecipar o contrato interno futuro da capability no backend do produto.
+and anticipate the capability's future internal contract in the product backend.
 
 ---
 
-## API externa atual usada no `ppt_creator_app`
+## Current external API used in `ppt_creator_app`
 
 ### 1. `GET /health`
 
-Uso:
+Usage:
 
-- verificar disponibilidade do serviço antes do render
+- verify service availability before rendering
 
-Expectativa mínima do AI Workbench:
+Minimum expectation for AI Workbench:
 
-- HTTP 200 quando o serviço estiver saudável
-- falha clara quando o serviço estiver indisponível
+- HTTP 200 when the service is healthy
+- a clear failure when the service is unavailable
 
 ### 2. `POST /render`
 
-Uso:
+Usage:
 
-- renderização principal do deck
+- main deck rendering
 
-Payload mínimo esperado:
+Minimum expected payload:
 
 ```json
 {
@@ -49,34 +49,34 @@ Payload mínimo esperado:
 
 ### 3. `GET /artifact`
 
-Uso:
+Usage:
 
-- baixar o `.pptx`
-- baixar `preview_manifest`
-- baixar `thumbnail_sheet`
-- baixar artefatos visuais adicionais quando existirem
+- download the `.pptx`
+- download `preview_manifest`
+- download `thumbnail_sheet`
+- download additional visual artifacts when they exist
 
 ### 4. `POST /review`
 
-Uso futuro/opcional:
+Future/optional usage:
 
-- review explícito do spec ou do deck gerado
+- explicit review of the spec or the generated deck
 
 ### 5. `POST /preview`
 
-Uso futuro/opcional:
+Future/optional usage:
 
-- preview explícito quando necessário fora do render principal
+- explicit preview when needed outside the main render flow
 
 ---
 
-## Contrato interno futuro do AI Workbench
+## Future internal AI Workbench contract
 
-### Endpoint recomendado
+### Recommended endpoint
 
 - `POST /api/executive-decks/generate`
 
-Payload conceitual:
+Conceptual payload:
 
 ```json
 {
@@ -91,7 +91,7 @@ Payload conceitual:
 }
 ```
 
-Resposta conceitual:
+Conceptual response:
 
 ```json
 {
@@ -109,9 +109,9 @@ Resposta conceitual:
 
 ---
 
-## Modelo de erros recomendado
+## Recommended error model
 
-Campos padrão:
+Standard fields:
 
 - `error_type`
 - `message`
@@ -119,7 +119,7 @@ Campos padrão:
 - `export_id`
 - `service_status`
 
-Tipos principais:
+Main types:
 
 - `service_unavailable`
 - `healthcheck_failed`
@@ -131,23 +131,23 @@ Tipos principais:
 
 ---
 
-## Timeouts e política de retry
+## Timeouts and retry policy
 
 ### Healthcheck
-- timeout curto
-- retry opcional e conservador
+- short timeout
+- optional and conservative retry
 
 ### Render
-- timeout maior
-- retry automático apenas se a operação for comprovadamente segura
+- longer timeout
+- automatic retry only if the operation is proven safe
 
 ### Download de artefato
-- retry leve para falhas transitórias
+- lightweight retry for transient failures
 
 ---
 
-## Idempotência e naming
+## Idempotency and naming
 
-Cada chamada de geração deve produzir um `export_id` explícito.
+Each generation call must produce an explicit `export_id`.
 
-O `output_path` remoto deve ser derivado desse `export_id` para evitar colisões.
+The remote `output_path` should be derived from that `export_id` to avoid collisions.

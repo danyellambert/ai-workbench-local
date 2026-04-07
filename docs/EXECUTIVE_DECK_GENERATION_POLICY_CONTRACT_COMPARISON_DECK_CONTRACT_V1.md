@@ -1,12 +1,12 @@
 # Executive Deck Generation — policy / contract comparison deck contract v1
 
-## Objetivo
+## Objective
 
-Definir o contract v1 do **Policy / Contract Comparison Deck**, voltado para comparação executiva entre dois documentos ou versões.
+Define the v1 contract for the **Policy / Contract Comparison Deck**, focused on executive comparison between two documents or versions.
 
 ---
 
-## Identidade do contract
+## Contract identity
 
 - `contract_version = "executive_deck_generation.v1"`
 - `export_kind = "policy_contract_comparison_deck"`
@@ -14,25 +14,25 @@ Definir o contract v1 do **Policy / Contract Comparison Deck**, voltado para com
 
 ---
 
-## Público-alvo
+## Target audience
 
-- jurídico
+- legal
 - compliance
 - procurement
-- liderança de decisão
+- decision leadership
 
 ---
 
-## Fontes típicas do AI Workbench
+## Typical AI Workbench sources
 
-- comparação documental estruturada
-- findings de diferença
+- structured document comparison
+- difference findings
 - change summary
 - impact assessment
 
 ---
 
-## Estrutura de alto nível
+## High-level structure
 
 ```json
 {
@@ -52,26 +52,26 @@ Definir o contract v1 do **Policy / Contract Comparison Deck**, voltado para com
     "right_document": "Policy 2026",
     "comparison_scope": "supplier approval controls"
   },
-  "executive_summary": "Resumo executivo das diferenças mais relevantes e do impacto operacional.",
+  "executive_summary": "Executive summary of the most relevant differences and their operational impact.",
   "comparison_highlights": [
-    "Nova exigência de aprovação formal no documento 2026.",
-    "Prazo de revisão foi reduzido."
+    "A new formal-approval requirement appears in the 2026 document.",
+    "The review deadline was reduced."
   ],
   "comparison_rows": [
     {
-      "topic": "Aprovação de fornecedor",
+      "topic": "Supplier approval",
       "left_value": "Opcional",
-      "right_value": "Obrigatória",
-      "impact": "Maior controle, mais atrito operacional"
+      "right_value": "Required",
+      "impact": "More control, more operational friction"
     }
   ],
-  "recommendation": "Adotar a nova política com plano de adequação operacional.",
+  "recommendation": "Adopt the new policy with an operational adaptation plan.",
   "watchouts": [
-    "Mudança de prazo pode exigir ajuste de processo."
+    "The deadline change may require a process adjustment."
   ],
   "next_steps": [
-    "Validar impacto operacional.",
-    "Ajustar owners e SLA."
+    "Validate the operational impact.",
+    "Adjust owners and SLA."
   ],
   "data_sources": [
     "document_comparison",
@@ -82,7 +82,7 @@ Definir o contract v1 do **Policy / Contract Comparison Deck**, voltado para com
 
 ---
 
-## Slides mínimos esperados
+## Minimum expected slides
 
 1. title
 2. comparison summary
@@ -93,9 +93,9 @@ Definir o contract v1 do **Policy / Contract Comparison Deck**, voltado para com
 
 ---
 
-## Regras mínimas
+## Minimum rules
 
-- `comparison_context.left_document` e `right_document` são obrigatórios
-- `comparison_rows` deve ter pelo menos 1 linha
-- `recommendation` é obrigatória
-- sem `comparison_rows`, o deck deve ser bloqueado
+- `comparison_context.left_document` and `right_document` are required
+- `comparison_rows` must contain at least 1 row
+- `recommendation` is required
+- without `comparison_rows`, the deck must be blocked

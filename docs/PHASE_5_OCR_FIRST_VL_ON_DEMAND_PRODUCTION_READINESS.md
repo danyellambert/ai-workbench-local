@@ -1,53 +1,53 @@
 # OCR-first / VL-on-demand Production Readiness for CV Parsing
 
-## 1. Resumo executivo
+## 1. Executive summary
 
-O pipeline `evidence_cv` atingiu um estado de **readiness para rollout controlado** em produção para parsing de CVs, com arquitetura OCR-first, acionamento seletivo de VL, política híbrida conservadora de consumo no produto, observabilidade suficiente e fallback operacional seguro.
+The `evidence_cv` pipeline has reached a state of **readiness for controlled rollout** in production for CV parsing, with an OCR-first architecture, selective VL triggering, a conservative hybrid consumption policy in the product, sufficient observability, and safe operational fallback.
 
-Síntese da decisão final:
-- usar OCR/native extraction como caminho principal
-- chamar VL apenas sob necessidade real
-- manter consumo automático restrito a `confirmed`
-- usar merge híbrido conservador para contatos
-- ativar rollout primeiro para CV-like PDFs e scan-like fortes
+Summary of the final decision:
+- use OCR/native extraction as the main path
+- call VL only when there is a real need
+- keep automatic consumption restricted to `confirmed`
+- use conservative hybrid merge for contacts
+- enable rollout first for CV-like PDFs and strong scan-like cases
 
-## 2. Arquitetura final do pipeline
+## 2. Final pipeline architecture
 
-Fluxo final:
-1. extração native text + OCR
-2. reconciliação evidencial básica
-3. roteador OCR-first / VL-on-demand
-4. VL seletivo por região somente quando necessário
-5. normalização, dedupe e ranking
-6. política de consumo do produto
-7. shadow rollout / observabilidade / fallback
+Final flow:
+1. native text extraction + OCR
+2. basic evidential reconciliation
+3. OCR-first / VL-on-demand router
+4. region-selective VL only when necessary
+5. normalization, dedupe, and ranking
+6. product consumption policy
+7. shadow rollout / observability / fallback
 
-Arquivos centrais:
+Core files:
 - `src/evidence_cv/pipeline/runner.py`
 - `src/evidence_cv/vision/ollama_vl.py`
 - `src/rag/loaders.py`
 - `src/evidence_cv/config.py`
 
-## 3. Política OCR-first / VL-on-demand
+## 3. OCR-first / VL-on-demand policy
 
-### Princípio
-OCR/native extraction sempre vem primeiro.
-VL não é chamado por default em todo CV.
+### Principle
+OCR/native extraction always comes first.
+VL is not called by default on every CV.
 
-### Regra final do roteador
+### Final router rule
 
-#### Em `digital_pdf`
-VL só pode ser chamado quando houver:
+#### For `digital_pdf`
+VL may only be called when there is:
 - `missing_contacts_after_ocr`
-- ou problema estrutural forte no topo/header
+- or a strong structural problem in the top/header area
 
-Na calibração final, isso reduziu drasticamente chamadas desnecessárias de VL em PDFs digitais bons.
+In the final calibration, this drastically reduced unnecessary VL calls in good digital PDFs.
 
-#### Em `scanned_pdf` e `mixed_pdf`
-O roteador permanece mais permissivo, já que o ganho de VL tende a ser mais real nesses documentos.
+#### For `scanned_pdf` and `mixed_pdf`
+The router remains more permissive, since VL gains tend to be more real in these documents.
 
-### Telemetria do roteador
-Metadata por arquivo:
+### Router telemetry
+Per-file metadata:
 - `vl_router.enabled`
 - `vl_router.decision`
 - `vl_router.reasons`
@@ -55,94 +55,94 @@ Metadata por arquivo:
 - `vl_router.regions_selected`
 - `vl_router.skipped_because`
 
-## 4. Resultados do benchmark multilayout de 60 CVs
+## 4. Results of the 60-CV multilayout benchmark
 
-Arquivo base:
+Base file:
 - `phase5_eval/reports/evidence_cv_multilayout_router_benchmark.json`
 
-### Totais principais
+### Main totals
 - `files_processed = 60`
 - `vl_called = 12`
 - `vl_skipped = 48`
 
-### Distribuição por tipo
+### Distribution by type
 - `digital_pdf = 48`
 - `scanned_pdf = 12`
 
-### Leitura econômica
-O roteador ficou economicamente aceitável:
-- VL foi pulado na maior parte dos digitais
-- VL foi reservado principalmente para scans difíceis
+### Economic reading
+The router was economically acceptable:
+- VL was skipped in most digital documents
+- VL was reserved mainly for difficult scans
 
-## 5. Resultados dos casos com VL chamado
+## 5. Results of cases where VL was called
 
-Arquivo específico:
+Specific file:
 - `phase5_eval/reports/evidence_cv_vl_called_cases_report.json`
 
-Casos com VL chamado:
+Cases with VL called:
 - `vl_called_cases = 12`
 
-Distribuição semântica final:
+Final semantic distribution:
 - `vl_called_and_added_value = 8`
 - `vl_called_and_added_partial_value = 4`
 - `vl_called_but_review_only = 0`
 - `vl_called_and_added_noise = 0`
 - `vl_called_and_false_positive = 0`
 
-### Interpretação
-- a maioria dos casos com VL chamado trouxe ganho real
-- os demais trouxeram ganho parcial com ruído residual controlado
-- casos semanticamente ruins deixaram de ser promovidos como ganho pleno
+### Interpretation
+- most cases in which VL was called brought real gains
+- the others brought partial gains with controlled residual noise
+- semantically bad cases stopped being promoted as full gains
 
-## 6. Política final por campo
+## 6. Final field policy
 
 ### `emails`
-- usar merge híbrido
-- legado confirmado tem precedência
-- evidence `confirmed` apenas complementa lacunas
+- use hybrid merge
+- confirmed legacy data takes precedence
+- evidence `confirmed` only fills gaps
 
 ### `phones`
-- usar merge híbrido
-- legado confirmado tem precedência
-- evidence `confirmed` apenas complementa lacunas
+- use hybrid merge
+- confirmed legacy data takes precedence
+- evidence `confirmed` only fills gaps
 
 ### `name`
-- usar apenas `confirmed`
+- use only `confirmed`
 
 ### `location`
-- usar apenas `confirmed`
+- use only `confirmed`
 
-## 7. Comportamento de status
+## 7. Status behavior
 
 ### `confirmed`
-- consumível automaticamente
+- automatically consumable
 
 ### `visual_candidate`
-- não consumir automaticamente
-- expor para revisão futura / UX assistida
+- do not consume automatically
+- expose for future review / assisted UX
 
 ### `needs_review`
-- não consumir automaticamente
+- do not consume automatically
 
 ### `not_found`
-- tratar como ausente
+- treat as absent
 
-## 8. Resiliência operacional e fallback
+## 8. Operational resilience and fallback
 
-### Backend VL/Ollama
-- timeout mantido em `600s`
-- erro estruturado via `VLInspectionError`
-- retry curto e conservador para falhas transitórias
+### VL/Ollama backend
+- timeout kept at `600s`
+- structured error via `VLInspectionError`
+- short, conservative retry for transient failures
 
 ### Runner
-- falha por região não derruba o PDF inteiro
-- se todas as regiões falharem, segue sem enriquecimento VL
+- failure in one region does not bring down the entire PDF
+- if all regions fail, processing continues without VL enrichment
 
 ### Script/benchmark
-- falha de um arquivo não derruba o relatório inteiro
-- JSON final continua sendo produzido
+- failure in one file does not bring down the entire report
+- the final JSON is still produced
 
-### Metadata operacional
+### Operational metadata
 - `vl_runtime.enabled`
 - `vl_runtime.model`
 - `vl_runtime.regions_attempted`
@@ -152,45 +152,45 @@ Distribuição semântica final:
 - `vl_runtime.fallback_used`
 - `vl_runtime.warnings`
 
-## 9. Recomendação de rollout controlado
+## 9. Controlled rollout recommendation
 
-### Recomendação objetiva
-Ativar primeiro para:
+### Objective recommendation
+Enable first for:
 - CV-like PDFs
-- scan-like fortes
+- strong scan-like cases
 
-### Comportamento em produção
-- manter OCR-first como padrão
-- usar VL-on-demand apenas quando o roteador mandar
-- manter merge híbrido para contatos
-- manter `visual_candidate` fora do consumo automático
+### Production behavior
+- keep OCR-first as the default
+- use VL-on-demand only when the router decides to
+- keep hybrid merge for contacts
+- keep `visual_candidate` out of automatic consumption
 
-### Decisão de readiness
-**Recomendação: pronto para rollout controlado.**
+### Readiness decision
+**Recommendation: ready for controlled rollout.**
 
-Não é um parser universal “resolvido”, mas já está maduro o suficiente para produção controlada com telemetria, fallback e política conservadora.
+It is not a universally “solved” parser, but it is already mature enough for controlled production with telemetry, fallback, and conservative policy.
 
-## 10. Próximos passos sugeridos
+## 10. Suggested next steps
 
-### 10.1 Rollout / produto
-- ativar rollout por feature flag para subset de uploads CV-like
-- acompanhar shadow rollout e conflitos reais em produção
-- monitorar custo/latência por tipo de documento
-- manter dashboard de `vl_called`, `vl_skipped`, `fallback_used`, `timeouts`
+### 10.1 Rollout / product
+- activate rollout through a feature flag for a subset of CV-like uploads
+- monitor shadow rollout and real conflicts in production
+- monitor cost/latency by document type
+- maintain a dashboard for `vl_called`, `vl_skipped`, `fallback_used`, `timeouts`
 
-### 10.2 Futuras melhorias do parser
-- reduzir ruído residual em scans difíceis com ganho parcial
-- melhorar semântica de `location` em casos internacionais
-- melhorar dedupe e validação de contatos visuais quase duplicados
-- só depois considerar expansão para `experience` / `education`
+### 10.2 Future parser improvements
+- reduce residual noise in difficult scans with partial gains
+- improve `location` semantics in international cases
+- improve dedupe and validation of near-duplicate visual contacts
+- only then consider expanding to `experience` / `education`
 
-## Conclusão final
+## Final conclusion
 
-O pipeline final recomendado para CVs é:
+The final recommended pipeline for CVs is:
 - OCR-first
-- VL-on-demand econômico
-- merge híbrido conservador para contatos
-- consumo automático apenas de `confirmed`
-- fallback seguro e observabilidade suficiente
+- economical VL-on-demand
+- conservative hybrid merge for contacts
+- automatic consumption only of `confirmed`
+- safe fallback and sufficient observability
 
-Em termos práticos: o sistema já está pronto para um rollout controlado e medido em produção.
+In practical terms: the system is already ready for a controlled and measured rollout in production.

@@ -1,24 +1,24 @@
-# Hugging Face providers no projeto
+# Hugging Face providers in the project
 
-O projeto agora pode trabalhar com 3 trilhas principais de provider:
+The project can now work with 3 main provider tracks:
 
 1. `ollama`
 2. `huggingface_server`
 3. `huggingface_inference`
 
-`huggingface_local` continua existindo como trilha experimental in-process, mas a recomendação para comparação séria de providers é priorizar os providers HTTP.
+`huggingface_local` still exists as an experimental in-process track, but the recommendation for serious provider comparison is to prioritize HTTP providers.
 
 ---
 
 ## 1. `huggingface_server`
 
-Use este provider quando você tiver um servidor local persistido fora do projeto, exposto por HTTP.
+Use this provider when you have a persistent local server outside the project exposed over HTTP.
 
-### Recomendação
+### Recommendation
 
-O servidor deve idealmente expor um contrato **OpenAI-compatible / chat completions compatible**.
+The server should ideally expose an **OpenAI-compatible / chat-completions-compatible** contract.
 
-### Variáveis
+### Variables
 
 ```env
 HUGGINGFACE_SERVER_BASE_URL=http://127.0.0.1:8010/v1
@@ -28,27 +28,27 @@ HUGGINGFACE_SERVER_AVAILABLE_MODELS=Qwen/Qwen2.5-7B-Instruct
 HUGGINGFACE_SERVER_CONTEXT_WINDOW=8192
 ```
 
-### Observações
+### Notes
 
-- mantenha os pesos/cache fora do repositório
-- o endpoint só fica disponível enquanto o servidor estiver rodando
-- isso é o caminho mais próximo de usar Hugging Face “como se fosse Ollama”
-- o app encaminha `temperature`, `ctx_size`, `top_p` e `max_tokens` como overrides operacionais via `provider_config`, mas a aplicação real desses parâmetros depende do serviço/hub por trás do alias
+- keep weights/cache outside the repository
+- the endpoint is only available while the server is running
+- this is the closest path to using Hugging Face “as if it were Ollama”
+- the app forwards `temperature`, `ctx_size`, `top_p`, and `max_tokens` as operational overrides via `provider_config`, but the actual application of those parameters depends on the service/hub behind the alias
 
 ---
 
 ## 2. `huggingface_inference`
 
-Use este provider para chamar um endpoint remoto da sua conta Hugging Face.
+Use this provider to call a remote endpoint from your Hugging Face account.
 
-### Passo a passo
+### Step by step
 
-1. entre na sua conta da Hugging Face
-2. gere um token de acesso
-3. confirme qual endpoint/contrato você vai usar
-4. preencha o `.env`
+1. sign in to your Hugging Face account
+2. generate an access token
+3. confirm which endpoint/contract you will use
+4. fill in the `.env`
 
-### Variáveis
+### Variables
 
 ```env
 HUGGINGFACE_INFERENCE_API_KEY=hf_xxx
@@ -58,46 +58,46 @@ HUGGINGFACE_INFERENCE_AVAILABLE_MODELS=meta-llama/Llama-3.1-8B-Instruct,Qwen/Qwe
 HUGGINGFACE_INFERENCE_CONTEXT_WINDOW=8192
 ```
 
-### Observações
+### Notes
 
-- o endpoint ideal é compatível com chat completions
-- isso é especialmente útil para deploy em VPS com pouca memória
-- para Oracle VPS, este provider faz mais sentido do que tentar subir modelos grandes localmente na VM
-- o app pode encaminhar `temperature`, `top_p` e `max_tokens`, mas não assume um equivalente universal de `num_ctx` nesse caminho
+- the ideal endpoint is compatible with chat completions
+- this is especially useful for deployment on VPS machines with limited memory
+- for Oracle VPS, this provider makes more sense than trying to run large local models on the VM
+- the app can forward `temperature`, `top_p`, and `max_tokens`, but it does not assume a universal `num_ctx` equivalent on this path
 
 ---
 
-## 3. Quando usar cada provider
+## 3. When to use each provider
 
 ### `ollama`
-- baseline principal
-- desenvolvimento local
-- comparação local-first
+- main baseline
+- local development
+- local-first comparison
 
 ### `huggingface_server`
-- comparar com modelos que o Ollama não oferece
-- manter pesos fora do projeto
-- fazer benchmark local por API
-- publicar no catálogo apenas aliases realmente funcionais nesse caminho; se um alias como DeepSeek R1 estiver falhando via `huggingface_server`, é melhor deixá-lo temporariamente fora do catálogo até corrigir o provider path
+- compare with models that Ollama does not offer
+- keep weights outside the project
+- run local API-based benchmarks
+- publish in the catalog only aliases that truly work on this path; if an alias such as DeepSeek R1 is failing via `huggingface_server`, it is better to temporarily leave it out of the catalog until the provider path is fixed
 
 ### `huggingface_inference`
-- comparar provider remoto
-- usar na VPS/Oracle quando a máquina não comportar os modelos
-- fallback remoto/produção leve
+- compare a remote provider
+- use it on VPS/Oracle when the machine cannot support the models
+- lightweight remote/production fallback
 
 ---
 
-## 4. Nota importante sobre embeddings
+## 4. Important note about embeddings
 
-Os providers `huggingface_server` e `huggingface_inference` só entram como providers de embedding se você configurar explicitamente um modelo de embedding para eles.
+The `huggingface_server` and `huggingface_inference` providers only become embedding providers if you explicitly configure an embedding model for them.
 
-Na UI principal:
+In the main UI:
 
-- `huggingface_server` aparece em Embeddings quando o serviço publica aliases com `supports_embeddings=true`
-- `huggingface_inference` aparece em Embeddings quando `HUGGINGFACE_INFERENCE_EMBEDDING_MODEL` estiver configurado
-- quando não estiverem disponíveis, o app os mostra como desabilitados com uma explicação operacional
+- `huggingface_server` appears in Embeddings when the service publishes aliases with `supports_embeddings=true`
+- `huggingface_inference` appears in Embeddings when `HUGGINGFACE_INFERENCE_EMBEDDING_MODEL` is configured
+- when they are not available, the app shows them as disabled with an operational explanation
 
-Se você não configurar isso, o caminho mais simples continua sendo:
+If you do not configure this, the simplest path remains:
 
-- geração via `ollama` / `huggingface_server` / `huggingface_inference`
+- generation via `ollama` / `huggingface_server` / `huggingface_inference`
 - embeddings via `ollama`

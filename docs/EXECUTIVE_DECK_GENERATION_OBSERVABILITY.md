@@ -1,12 +1,12 @@
-# Executive Deck Generation — observabilidade
+# Executive Deck Generation — observability
 
-## Objetivo
+## Objective
 
-Definir o que a capability deve registrar para ficar auditável e defendível.
+Define what the capability should record so it becomes auditable and defensible.
 
 ---
 
-## Métricas mínimas por export
+## Minimum metrics per export
 
 - `export_id`
 - `export_kind`
@@ -21,24 +21,24 @@ Definir o que a capability deve registrar para ficar auditável e defendível.
 
 ---
 
-## Eventos principais
+## Main events
 
-- export criado
-- contract gerado
-- payload gerado
-- renderer chamado
-- render concluído
-- artefatos baixados
-- export falhou
-- export parcial
+- export created
+- contract generated
+- payload generated
+- renderer called
+- render completed
+- artifacts downloaded
+- export failed
+- partial export
 
 ---
 
-## Objetivo operacional
+## Operational objective
 
-Permitir responder:
+Make it possible to answer:
 
-- quantos decks foram gerados
-- quais deck types mais falham
-- qual etapa mais falha
-- quanto tempo cada export leva
+- how many decks were generated
+- which deck types fail most often
+- which stage fails most often
+- how long each export takes

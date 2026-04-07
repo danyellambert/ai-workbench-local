@@ -1,24 +1,24 @@
-# Phase 5 — exemplos recomendados para capturas de UI
+# Phase 5 — recommended examples for UI screenshots
 
-Use estes quatro tipos de exemplo para montar as evidências da Fase 5:
+Use these four types of examples to assemble the evidence for Phase 5:
 
-## 1. Exemplo textual limpo com PASS
-Objetivo: mostrar que o `cv_analysis` funciona bem em PDF textual.
+## 1. Clean text-based example with PASS
+Objective: show that `cv_analysis` works well on a text-based PDF.
 
-Exemplo recomendado:
-- `modern_two_column` com status `PASS`
+Recommended example:
+- `modern_two_column` with `PASS` status
 
-Procure um arquivo como:
+Look for a file such as:
 - `0001_medium_modern_two_column_*.pdf`
 
-O que mostrar na UI:
-- documento selecionado
-- aba **Documento estruturado**
-- task `cv_analysis`
+What to show in the UI:
+- selected document
+- **Structured document** tab
+- `cv_analysis` task
 - `Use selected documents`
 - `document_scan`
-- output com:
-  - nome
+- output with:
+  - name
   - email
   - location
   - skills
@@ -26,65 +26,65 @@ O que mostrar na UI:
   - education
   - experience
 
-## 2. Exemplo textual visualmente mais denso com PASS
-Objetivo: mostrar robustez além do layout simples.
+## 2. More visually dense text-based example with PASS
+Objective: show robustness beyond a simple layout.
 
-Exemplo recomendado:
-- `compact_sidebar` com status `PASS`
-ou
-- `dense_executive` com status `PASS`
+Recommended example:
+- `compact_sidebar` with `PASS` status
+or
+- `dense_executive` with `PASS` status
 
-Procure um arquivo como:
+Look for a file such as:
 - `0007_medium_compact_sidebar_*.pdf`
 - `0003_simple_dense_executive_*.pdf`
 
-O que mostrar:
-- mesmo fluxo acima
-- destaque que o layout é mais difícil, mas o resultado continua bom
+What to show:
+- the same flow as above
+- highlight that the layout is more difficult, but the result remains good
 
-## 3. Exemplo scan-like com OCR fallback e melhoria
-Objetivo: mostrar que o OCR fallback está funcionando.
+## 3. Scan-like example with OCR fallback and improvement
+Objective: show that the OCR fallback is working.
 
-Exemplo recomendado:
-- `scan_like_image_pdf` com status `WARN`
+Recommended example:
+- `scan_like_image_pdf` with `WARN` status
 
-Procure um arquivo como:
+Look for a file such as:
 - `0004_medium_scan_like_image_pdf_*.pdf`
-ou
+or
 - `0014_hard_scan_like_image_pdf_*.pdf`
 
-O que mostrar:
-- documento scan-like selecionado
-- resultado estruturado parcial
-- observação de que houve OCR fallback
-- deixar claro que é um caso image-based
+What to show:
+- selected scan-like document
+- partial structured result
+- a note that OCR fallback was triggered
+- make it clear that this is an image-based case
 
-## 4. Exemplo scan-like ainda difícil
-Objetivo: documentar limitação conhecida de forma honesta.
+## 4. Still-difficult scan-like example
+Objective: document a known limitation honestly.
 
-Exemplo recomendado:
-- `scan_like_image_pdf` com status `FAIL` ou score baixo
+Recommended example:
+- `scan_like_image_pdf` with `FAIL` status or a low score
 
-Procure um arquivo como:
+Look for a file such as:
 - `0009_simple_scan_like_image_pdf_*.pdf`
 
-O que mostrar:
-- que o pipeline tentou lidar com o caso
-- que ainda existe limite em scans difíceis
-- que isso é documentado como limitação conhecida
+What to show:
+- that the pipeline attempted to handle the case
+- that difficult scans still have limitations
+- that this is documented as a known limitation
 
-## Pacote mínimo de evidências
+## Minimum evidence package
 
-Eu recomendo salvar:
+I recommend saving:
 
-- 2 screenshots de casos textuais em PASS
-- 1 screenshot de caso scan-like melhorado via OCR
-- 1 screenshot de caso scan-like ainda difícil
-- 2 JSONs bons exportados pelo app
-- 1 trecho do benchmark sintético
-- 1 trecho do smoke eval da Fase 5
+- 2 screenshots of text-based PASS cases
+- 1 screenshot of a scan-like case improved via OCR
+- 1 screenshot of a scan-like case that is still difficult
+- 2 good JSON files exported by the app
+- 1 excerpt from the synthetic benchmark
+- 1 excerpt from the Phase 5 smoke eval
 
-## Nomes sugeridos dos arquivos
+## Suggested file names
 
 - `phase5_ui_01_textual_pass.png`
 - `phase5_ui_02_visual_pass.png`

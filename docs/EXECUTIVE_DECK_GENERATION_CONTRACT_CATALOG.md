@@ -1,22 +1,22 @@
-# Executive Deck Generation — catálogo oficial de deck types e contracts
+# Executive Deck Generation — official catalog of deck types and contracts
 
-## Objetivo
+## Objective
 
-Formalizar o catálogo oficial da capability de **Executive Deck Generation**.
+Formalize the official catalog of the **Executive Deck Generation** capability.
 
-Este documento responde:
+This document answers:
 
-- quais deck types existem oficialmente
-- qual `export_kind` cada um usa
-- qual prioridade cada um tem
-- quais fontes do projeto alimentam cada deck
-- qual o status documental/implementação de cada contract
+- which deck types officially exist
+- which `export_kind` each one uses
+- which priority each one has
+- which project sources feed each deck
+- what the documentation/implementation status of each contract is
 
 ---
 
-## Convenções
+## Conventions
 
-### Campos oficiais do catálogo
+### Official catalog fields
 
 - `deck_family`
 - `product_name`
@@ -27,7 +27,7 @@ Este documento responde:
 - `status`
 - `contract_doc`
 
-### Status possíveis
+### Possible statuses
 
 - `foundation_exists`
 - `planned`
@@ -37,77 +37,77 @@ Este documento responde:
 
 ---
 
-## Catálogo oficial
+## Official catalog
 
 | deck_family | product_name | export_kind | priority | source_flows | target_audience | status | contract_doc |
 |---|---|---|---|---|---|---|---|
-| executive_review | Benchmark & Eval Executive Review Deck | `benchmark_eval_executive_review` | P1 | benchmark, evals, readiness | liderança técnica, produto, stakeholder executivo | implemented | `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md` |
-| document_review | Document Review Deck | `document_review_deck` | P2 | summary, extraction, document agent, EvidenceOps | compliance, operações, liderança | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md` |
-| comparison | Policy / Contract Comparison Deck | `policy_contract_comparison_deck` | P2 | comparison findings, structured outputs, document agent | jurídico, compliance, procurement | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md` |
-| action_plan | Action Plan Deck | `action_plan_deck` | P3 | checklist, findings, owners, due dates | operações, PM, compliance | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md` |
+| executive_review | Benchmark & Eval Executive Review Deck | `benchmark_eval_executive_review` | P1 | benchmark, evals, readiness | technical leadership, product, executive stakeholder | implemented | `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md` |
+| document_review | Document Review Deck | `document_review_deck` | P2 | summary, extraction, document agent, EvidenceOps | compliance, operations, leadership | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md` |
+| comparison | Policy / Contract Comparison Deck | `policy_contract_comparison_deck` | P2 | comparison findings, structured outputs, document agent | legal, compliance, procurement | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md` |
+| action_plan | Action Plan Deck | `action_plan_deck` | P3 | checklist, findings, owners, due dates | operations, PM, compliance | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md` |
 | candidate_review | Candidate Review Deck | `candidate_review_deck` | P3 | `cv_analysis`, evidence_cv, candidate comparison | talent review, hiring panel | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_CANDIDATE_REVIEW_DECK_CONTRACT_V1.md` |
-| evidence_audit | Evidence Pack / Audit Deck | `evidence_pack_deck` | P3 | EvidenceOps, repository state, action backlog | auditoria, governança, liderança | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_EVIDENCE_PACK_DECK_CONTRACT_V1.md` |
+| evidence_audit | Evidence Pack / Audit Deck | `evidence_pack_deck` | P3 | EvidenceOps, repository state, action backlog | audit, governance, leadership | implemented_foundation | `docs/EXECUTIVE_DECK_GENERATION_EVIDENCE_PACK_DECK_CONTRACT_V1.md` |
 
 ---
 
-## Nota sobre o naming legado do P1
+## Note on P1 legacy naming
 
-O código atual já implementado usa a fundação:
+The currently implemented code uses the foundation:
 
 - `contract_version = "presentation_export.v1"`
 - `export_kind = "benchmark_eval_executive_deck"`
 
-Esse naming continua aceito como **base técnica existente do P1**.
+This naming continues to be accepted as the **existing technical base of P1**.
 
-Estado atual do código:
+Current code status:
 
-- o service aceita o alias de produto `benchmark_eval_executive_review`
-- a implementação interna continua compatível com o naming legado `benchmark_eval_executive_deck`
+- the service accepts the product alias `benchmark_eval_executive_review`
+- the internal implementation remains compatible with the legacy naming `benchmark_eval_executive_deck`
 
-Direção recomendada de longo prazo:
+Recommended long-term direction:
 
-- capability/catálogo usam o naming de produto acima
-- a implementação pode manter compatibilidade com o naming legado até o momento de uma migração explícita
+- the capability/catalog use the product naming above
+- the implementation may keep compatibility with the legacy naming until an explicit migration occurs
 
 ---
 
-## Critério para promover um deck type de `planned` para `contract_defined`
+## Criteria to promote a deck type from `planned` to `contract_defined`
 
-Um deck type só deve ser tratado como realmente pronto para implementação quando houver:
+A deck type should only be treated as truly ready for implementation when there is:
 
-1. objetivo de produto claro
+1. a clear product objective
 2. `export_kind` definido
-3. input sources explícitas
-4. JSON contract v1 documentado
-5. slide recipe inicial documentada
-6. critérios mínimos de qualidade/review
+3. explicit input sources
+4. a documented v1 JSON contract
+5. an initial documented slide recipe
+6. minimum quality/review criteria
 
-## Estado real atual da implementação
+## Current real implementation state
 
-Hoje já existe no código:
+The codebase already contains:
 
-- builders multi-deck em `src/services/presentation_export.py`
-- service genérico em `src/services/presentation_export_service.py`
-- UI Streamlit com seleção de deck type em `src/ui/executive_deck_generation.py`
-- unit tests de builders/adapters em `tests/test_presentation_export_unittest.py`
+- multi-deck builders in `src/services/presentation_export.py`
+- a generic service in `src/services/presentation_export_service.py`
+- Streamlit UI with deck-type selection in `src/ui/executive_deck_generation.py`
+- builder/adapter unit tests in `tests/test_presentation_export_unittest.py`
 
-Leitura recomendada dos status:
+Recommended interpretation of the statuses:
 
-- `implemented` = deck type com fluxo principal já consolidado no produto atual
-- `implemented_foundation` = deck type já presente em código, UI e testes unitários, mas ainda pedindo smoke tests/hardening operacional antes de ser tratado como totalmente fechado
+- `implemented` = a deck type whose main flow is already consolidated in the current product
+- `implemented_foundation` = a deck type already present in code, UI, and unit tests, but still needing smoke tests/operational hardening before being treated as fully closed
 
 ---
 
-## Ordem recomendada de fechamento do catálogo
+## Recommended order for closing the catalog
 
-### Agora
+### Now
 - `benchmark_eval_executive_review`
 
-### Em seguida
+### Next
 - `document_review_deck`
 - `policy_contract_comparison_deck`
 
-### Depois
+### Later
 - `action_plan_deck`
 - `candidate_review_deck`
 - `evidence_pack_deck`

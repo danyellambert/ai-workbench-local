@@ -1,12 +1,12 @@
 # Executive Deck Generation — document review deck contract v1
 
-## Objetivo
+## Objective
 
-Definir o contract v1 do **Document Review Deck**, voltado para transformar a análise de um documento em um deck executivo de review.
+Define the v1 contract for the **Document Review Deck**, designed to turn document analysis into an executive review deck.
 
 ---
 
-## Identidade do contract
+## Contract identity
 
 - `contract_version = "executive_deck_generation.v1"`
 - `export_kind = "document_review_deck"`
@@ -14,27 +14,27 @@ Definir o contract v1 do **Document Review Deck**, voltado para transformar a an
 
 ---
 
-## Público-alvo
+## Target audience
 
-- liderança
+- leadership
 - compliance
-- operações
-- reviewers humanos
+- operations
+- human reviewers
 
 ---
 
-## Fontes típicas do AI Workbench
+## Typical AI Workbench sources
 
 - `summary`
 - `extraction`
 - `document_agent`
-- findings estruturados
+- structured findings
 - recommendations
 - evidence metadata
 
 ---
 
-## Estrutura de alto nível
+## High-level structure
 
 ```json
 {
@@ -55,7 +55,7 @@ Definir o contract v1 do **Document Review Deck**, voltado para transformar a an
     "source_count": 1,
     "source_refs": ["repository://policy/supplier_policy_2026.pdf"]
   },
-  "executive_summary": "Resumo executivo do documento e do que realmente importa para decisão.",
+  "executive_summary": "Executive summary of the document and what truly matters for decision-making.",
   "risk_snapshot": {
     "critical_count": 1,
     "high_count": 2,
@@ -63,24 +63,24 @@ Definir o contract v1 do **Document Review Deck**, voltado para transformar a an
     "needs_review": true
   },
   "key_highlights": [
-    "Documento introduz obrigações novas de aprovação.",
-    "Há lacuna de owner em controles críticos."
+    "The document introduces new approval obligations.",
+    "There is an owner gap in critical controls."
   ],
   "top_findings": [
     {
-      "title": "Owner não definido para revisão anual",
+      "title": "Owner not defined for the annual review",
       "severity": "high",
-      "impact": "Pode bloquear execução consistente do controle.",
+      "impact": "It may block consistent execution of the control.",
       "evidence_ref": "page:12"
     }
   ],
-  "recommendation": "Aprovar somente após definição de owners e ajuste das cláusulas críticas.",
+  "recommendation": "Approve only after owners are defined and critical clauses are adjusted.",
   "watchouts": [
-    "Há trechos que exigem validação jurídica adicional."
+    "Some sections require additional legal validation."
   ],
   "next_steps": [
-    "Definir owners dos controles.",
-    "Revisar cláusulas críticas com jurídico."
+    "Define control owners.",
+    "Review critical clauses with legal.",
   ],
   "data_sources": [
     "structured_summary",
@@ -92,7 +92,7 @@ Definir o contract v1 do **Document Review Deck**, voltado para transformar a an
 
 ---
 
-## Slides mínimos esperados
+## Minimum expected slides
 
 1. title
 2. executive summary
@@ -103,10 +103,10 @@ Definir o contract v1 do **Document Review Deck**, voltado para transformar a an
 
 ---
 
-## Regras mínimas
+## Minimum rules
 
-- `executive_summary` é obrigatório
-- `document_context.document_title` é obrigatório
-- `top_findings` deve ter pelo menos 1 item para o deck ser plenamente útil
-- `recommendation` é obrigatória
-- se `top_findings` não existir, o deck deve ser bloqueado ou marcado como `needs_review`
+- `executive_summary` is required
+- `document_context.document_title` is required
+- `top_findings` must contain at least 1 item for the deck to be fully useful
+- `recommendation` is required
+- if `top_findings` does not exist, the deck must be blocked or marked as `needs_review`

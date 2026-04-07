@@ -1,64 +1,64 @@
-# Executive Deck Generation — branding e política visual
+# Executive Deck Generation — branding and visual policy
 
-## Objetivo
+## Objective
 
-Definir a política visual mínima da capability.
+Define the minimum visual policy for the capability.
 
 ---
 
-## Tema default
+## Default theme
 
-Tema recomendado inicial:
+Initial recommended theme:
 
 - `executive_premium_minimal`
 
-Motivos:
+Reasons:
 
-- mais adequado para review executivo
-- coerente com leitura enterprise
-- já suportado pelo `ppt_creator_app`
+- better suited for executive review
+- consistent with enterprise-style reading
+- already supported by `ppt_creator_app`
 
 ---
 
-## Temas por família de deck
+## Themes by deck family
 
 ### Executive review / decision decks
 - `executive_premium_minimal`
 
 ### Review / evidence / audit decks
 - `executive_premium_minimal`
-- opcionalmente `consulting_clean`
+- optionally `consulting_clean`
 
 ### Candidate / talent decks
 - `executive_premium_minimal`
-- evitar visual excessivamente comercial
+- avoid an excessively commercial visual style
 
 ---
 
-## Regra de branding
+## Branding rule
 
-O deck deve preservar:
+The deck should preserve:
 
-- sobriedade
-- legibilidade
-- foco em decisão
-- baixo ruído visual
+- sobriety
+- readability
+- decision focus
+- low visual noise
 
-Evitar:
+Avoid:
 
-- excesso de cores
-- linguagem visual promocional demais
-- slides lotados
+- excessive colors
+- overly promotional visual language
+- overcrowded slides
 
 ---
 
-## Branding por cliente/time
+## Branding by client/team
 
-Pode entrar futuramente via:
+This may be introduced in the future through:
 
 - `primary_color`
 - `secondary_color`
 - `footer_text`
 - `client_name`
 
-Sem quebrar a estrutura do contract semântico.
+Without breaking the semantic contract structure.

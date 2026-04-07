@@ -1,12 +1,12 @@
 # Executive Deck Generation — action plan deck contract v1
 
-## Objetivo
+## Objective
 
-Definir o contract v1 do **Action Plan Deck**, focado em owners, prioridades, prazos e sequência de execução.
+Define the v1 contract for the **Action Plan Deck**, focused on owners, priorities, deadlines, and execution sequence.
 
 ---
 
-## Identidade do contract
+## Contract identity
 
 - `contract_version = "executive_deck_generation.v1"`
 - `export_kind = "action_plan_deck"`
@@ -14,7 +14,7 @@ Definir o contract v1 do **Action Plan Deck**, focado em owners, prioridades, pr
 
 ---
 
-## Fontes típicas do AI Workbench
+## Typical AI Workbench sources
 
 - checklist
 - action items
@@ -24,7 +24,7 @@ Definir o contract v1 do **Action Plan Deck**, focado em owners, prioridades, pr
 
 ---
 
-## Estrutura de alto nível
+## High-level structure
 
 ```json
 {
@@ -39,7 +39,7 @@ Definir o contract v1 do **Action Plan Deck**, focado em owners, prioridades, pr
     "theme": "executive_premium_minimal",
     "footer_text": "AI Workbench Local • Action Plan"
   },
-  "executive_summary": "Plano executivo de ação derivado dos findings e checklists estruturados.",
+  "executive_summary": "Executive action plan derived from findings and structured checklists.",
   "priority_snapshot": {
     "p0_count": 1,
     "p1_count": 3,
@@ -48,7 +48,7 @@ Definir o contract v1 do **Action Plan Deck**, focado em owners, prioridades, pr
   },
   "actions": [
     {
-      "title": "Definir owner do controle anual",
+      "title": "Define the owner of the annual control",
       "priority": "P0",
       "owner": "Compliance Lead",
       "due_date": "2026-04-12",
@@ -56,11 +56,11 @@ Definir o contract v1 do **Action Plan Deck**, focado em owners, prioridades, pr
     }
   ],
   "blockers": [
-    "Owner final ainda não confirmado."
+    "Final owner has not been confirmed yet."
   ],
   "next_steps": [
-    "Aprovar owners.",
-    "Executar plano em 2 semanas."
+    "Approve owners.",
+    "Execute the plan within 2 weeks."
   ],
   "data_sources": [
     "structured_checklist",
@@ -71,7 +71,7 @@ Definir o contract v1 do **Action Plan Deck**, focado em owners, prioridades, pr
 
 ---
 
-## Slides mínimos esperados
+## Minimum expected slides
 
 1. title
 2. executive summary
@@ -82,8 +82,8 @@ Definir o contract v1 do **Action Plan Deck**, focado em owners, prioridades, pr
 
 ---
 
-## Regras mínimas
+## Minimum rules
 
-- `actions` deve ter pelo menos 1 item
-- `owner` e `priority` devem existir nos itens críticos
-- se `actions` não existir, o deck deve ser bloqueado
+- `actions` must contain at least 1 item
+- `owner` and `priority` must exist for critical items
+- if `actions` does not exist, the deck must be blocked

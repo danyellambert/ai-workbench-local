@@ -1,80 +1,80 @@
-# Executive Deck Generation — failure modes e fallback strategy
+# Executive Deck Generation — failure modes and fallback strategy
 
-## Objetivo
+## Objective
 
-Definir falhas esperadas e como a capability deve reagir.
+Define expected failures and how the capability should react.
 
 ---
 
-## Falhas principais
+## Main failure modes
 
 ### 1. `service_unavailable`
 
-Situação:
+Situation:
 
 - `ppt_creator_app` offline
 
-Comportamento:
+Behavior:
 
-- falhar de forma amigável
-- permitir baixar contract/payload quando possível
+- fail gracefully
+- allow downloading the contract/payload when possible
 
 ### 2. `healthcheck_failed`
 
-Situação:
+Situation:
 
-- `GET /health` não responde como esperado
+- `GET /health` does not respond as expected
 
-Comportamento:
+Behavior:
 
-- bloquear render
-- registrar erro operacional
+- block rendering
+- record an operational error
 
 ### 3. `invalid_contract`
 
-Situação:
+Situation:
 
-- contract do domínio inconsistente
+- inconsistent domain contract
 
-Comportamento:
+Behavior:
 
-- não chamar o renderer
-- expor mensagem clara de erro
+- do not call the renderer
+- expose a clear error message
 
 ### 4. `render_failed`
 
-Situação:
+Situation:
 
-- `POST /render` falhou
+- `POST /render` failed
 
-Comportamento:
+Behavior:
 
-- salvar request/response útil para debug
-- marcar export como `failed`
+- save useful request/response data for debugging
+- mark the export as `failed`
 
 ### 5. `artifact_download_failed`
 
-Situação:
+Situation:
 
-- render terminou, mas download do `.pptx` falhou
+- rendering finished, but the `.pptx` download failed
 
-Comportamento:
+Behavior:
 
-- marcar export como `partial`
+- mark the export as `partial`
 
 ### 6. `preview_failed`
 
-Situação:
+Situation:
 
-- `.pptx` gerado, preview/review não pôde ser baixado
+- `.pptx` was generated, but the preview/review could not be downloaded
 
-Comportamento:
+Behavior:
 
-- manter deck disponível
-- marcar warning
+- keep the deck available
+- mark a warning
 
 ---
 
-## Política de partial success
+## Partial-success policy
 
-Se o `.pptx` existir, o export não deve ser tratado como perda total, mesmo que previews/review falhem.
+If the `.pptx` exists, the export should not be treated as a total loss, even if previews/review fail.

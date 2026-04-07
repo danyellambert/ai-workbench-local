@@ -35,10 +35,10 @@ If the required signals do not exist, the product should block deck generation o
 
 | workflow/source | suggested deck | minimum condition |
 |---|---|---|
-| benchmark + evals | `benchmark_eval_executive_review` | leaderboards + snapshots agregados disponíveis |
+| benchmark + evals | `benchmark_eval_executive_review` | aggregated leaderboards + snapshots available |
 | summary/extraction on a single document | `document_review_deck` | summary + minimum findings/recommendations |
 | document comparison | `policy_contract_comparison_deck` | diff/comparison rows available |
-| checklist + owners + due dates | `action_plan_deck` | action items estruturados |
+| checklist + owners + due dates | `action_plan_deck` | structured action items |
 | `cv_analysis` / evidence_cv | `candidate_review_deck` | profile + strengths/gaps/recommendation |
 | EvidenceOps / audit review | `evidence_pack_deck` | findings + evidence items + actions |
 

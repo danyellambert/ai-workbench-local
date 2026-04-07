@@ -1,53 +1,53 @@
-# Executive Deck Generation — estratégia de testes
+# Executive Deck Generation — test strategy
 
-## Objetivo
+## Objective
 
-Definir a estratégia mínima de testes para a capability.
+Define the minimum testing strategy for the capability.
 
 ---
 
-## Camadas de teste
+## Test layers
 
-## 1. Unit tests de builders e adapters
+## 1. Unit tests for builders and adapters
 
-Cobrir:
+Cover:
 
 - contract builders
 - payload adapters
-- validação de campos obrigatórios
+- validation of required fields
 
-Situação atual:
+Current status:
 
-- builders e adapters do P1/P2/P3 já possuem cobertura em `tests/test_presentation_export_unittest.py`
+- P1/P2/P3 builders and adapters are already covered in `tests/test_presentation_export_unittest.py`
 
 ---
 
 ## 2. Service tests
 
-Arquivo sugerido:
+Suggested file:
 
 - `tests/test_presentation_export_service_unittest.py`
 
-Cobrir:
+Cover:
 
 - healthcheck
 - render request
 - timeouts
 - artifact downloads
-- persistência local
-- falhas parciais
+- local persistence
+- partial failures
 
-Situação atual:
+Current status:
 
-- `tests/test_presentation_export_service_unittest.py` já cobre o P1
-- o mesmo arquivo agora também cobre os deck types `document_review_deck`, `policy_contract_comparison_deck`, `action_plan_deck`, `candidate_review_deck` e `evidence_pack_deck`
-- também existe cobertura para alias de naming do P1 e feature flag por `export_kind`
+- `tests/test_presentation_export_service_unittest.py` already covers P1
+- the same file now also covers the deck types `document_review_deck`, `policy_contract_comparison_deck`, `action_plan_deck`, `candidate_review_deck`, and `evidence_pack_deck`
+- there is also coverage for the P1 naming alias and the feature flag by `export_kind`
 
 ---
 
-## 3. Contract tests por deck type
+## 3. Contract tests by deck type
 
-Cada contract v1 novo deve ter testes focados:
+Each new v1 contract should have focused tests:
 
 - `document_review_deck`
 - `policy_contract_comparison_deck`
@@ -55,65 +55,65 @@ Cada contract v1 novo deve ter testes focados:
 - `candidate_review_deck`
 - `evidence_pack_deck`
 
-Situação atual:
+Current status:
 
-- esses deck types já possuem cobertura unitária de builder/adapter em `tests/test_presentation_export_unittest.py`
+- these deck types already have builder/adapter unit-test coverage in `tests/test_presentation_export_unittest.py`
 
 ---
 
-## 4. Smoke tests com `ppt_creator_app`
+## 4. Smoke tests with `ppt_creator_app`
 
-Testes opcionais/reproduzíveis localmente:
+Optional tests that can be reproduced locally:
 
-- serviço sobe
-- `GET /health` responde
-- `POST /render` responde
-- `.pptx` é baixado com sucesso
+- the service starts
+- `GET /health` responds
+- `POST /render` responds
+- `.pptx` downloads successfully
 
-Situação atual:
+Current status:
 
-- ainda pendente como smoke/integration test manual reproduzível com o `ppt_creator_app` rodando de verdade
+- still pending as a reproducible manual smoke/integration test with the real `ppt_creator_app` running
 
 ---
 
 ## 5. UI smoke tests
 
-Cobrir:
+Cover:
 
-- presença do entrypoint da capability
-- botão de geração
-- estado de loading
-- erro amigável
-- downloads presentes quando sucesso
+- presence of the capability entry point
+- generation button
+- loading state
+- friendly error state
+- available downloads on success
 
-Situação atual:
+Current status:
 
-- a UI Streamlit já expõe seleção de deck type, geração e downloads
-- smoke tests específicos da capability ainda seguem como trilha pendente
-
----
-
-## 6. Artefatos e regressão
-
-Para evolução posterior:
-
-- golden payloads por deck type
-- comparação de manifest/review response
-- opcionalmente regressão visual reaproveitando capacidades do `ppt_creator_app`
+- the Streamlit UI already exposes deck-type selection, generation, and downloads
+- capability-specific smoke tests are still a pending track
 
 ---
 
-## Critério mínimo para considerar um deck type testado
+## 6. Artifacts and regression
 
-Um deck type só deve ser tratado como implementado quando houver:
+For later evolution:
+
+- golden payloads by deck type
+- manifest/review-response comparison
+- optionally visual regression by reusing `ppt_creator_app` capabilities
+
+---
+
+## Minimum criteria to consider a deck type tested
+
+A deck type should only be treated as implemented when it has:
 
 1. unit test do contract builder
-2. unit test do payload adapter
-3. service test do fluxo de geração
-4. smoke/integration test local reproduzível
+2. a unit test for the payload adapter
+3. a service test for the generation flow
+4. a reproducible local smoke/integration test
 
-## Estado atual resumido
+## Current summarized status
 
-- **já feito:** unit tests de builders/adapters multi-deck
-- **já feito:** service tests do fluxo de geração para os deck types atualmente suportados
-- **ainda faltando:** smoke test real com `ppt_creator_app` e smoke tests específicos da UI da capability
+- **already done:** multi-deck builder/adapter unit tests
+- **already done:** generation-flow service tests for the currently supported deck types
+- **still missing:** a real smoke test with `ppt_creator_app` and capability-specific UI smoke tests

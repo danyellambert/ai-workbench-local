@@ -1,16 +1,16 @@
 # Phase 5 Evidence CV Evaluation Report
 
-## Objetivo
+## Objective
 
-Consolidar a avaliação do pipeline `evidence_cv` com métricas por campo e orientar decisão de rollout.
+Consolidate the evaluation of the `evidence_cv` pipeline with per-field metrics and guide the rollout decision.
 
-## Comparação avaliada
+## Evaluated comparison
 
-- legado
-- evidence sem VL
-- evidence com VL
+- legacy
+- evidence without VL
+- evidence with VL
 
-Campos avaliados:
+Evaluated fields:
 - `name`
 - `emails`
 - `phones`
@@ -18,189 +18,189 @@ Campos avaliados:
 
 ## Evaluation hardening for contacts
 
-Esta fase focou em alinhar corretamente a avaliação de `emails` e `phones` entre:
-- valores previstos
-- gold set manual
-- normalização usada na comparação
-- métricas agregadas e por arquivo
+This phase focused on correctly aligning the evaluation of `emails` and `phones` across:
+- predicted values
+- manual gold set
+- normalization used in the comparison
+- aggregate and per-file metrics
 
-### Forma canônica final para emails
-- comparação case-insensitive
-- trim de espaços
-- remoção de duplicatas pela forma normalizada
-- emails inválidos/incompletos são descartados da comparação
+### Final canonical form for emails
+- case-insensitive comparison
+- trimmed whitespace
+- duplicates removed through normalized form
+- invalid/incomplete emails discarded from comparison
 
-Forma usada para comparar:
-- `local@domain.tld` em lowercase
+Comparison form used:
+- `local@domain.tld` in lowercase
 
-### Forma canônica final para telefones
-- comparação por dígitos normalizados
-- remoção de espaços, parênteses, hífens e símbolos decorativos
-- deduplicação por sequência numérica final
-- sequências curtas/implausíveis são descartadas
+### Final canonical form for phones
+- comparison by normalized digits
+- removal of spaces, parentheses, hyphens, and decorative symbols
+- deduplication by the final numeric sequence
+- short/implausible sequences discarded
 
-Forma usada para comparar:
-- string apenas com dígitos
-- aceitando DDI/DDDs quando presentes no documento
+Comparison form used:
+- digits-only string
+- accepting country/area codes when they are present in the document
 
-### O que estava desalinhado antes
-- diferenças cosméticas entravam como erro
-- o relatório de contatos não mostrava claramente TP/FP/FN por arquivo
-- havia pouco material de debug para inspeção rápida
+### What was misaligned before
+- cosmetic differences counted as errors
+- the contact report did not clearly show TP/FP/FN per file
+- there was little debug material for quick inspection
 
-### O que foi corrigido
-- normalização explícita e consistente nos dois lados
-- debug por arquivo com contatos previstos, gold normalizado, matches, falsos positivos e falsos negativos
-- métricas agregadas de `predicted_total`, `gold_total`, `tp`, `fp`, `fn`, `precision`, `recall`
+### What was fixed
+- explicit and consistent normalization on both sides
+- per-file debug with predicted contacts, normalized gold, matches, false positives, and false negatives
+- aggregate metrics for `predicted_total`, `gold_total`, `tp`, `fp`, `fn`, `precision`, `recall`
 
-### Leitura prática do estado atual
-- a avaliação agora está mais coerente e reproduzível
-- ainda existe desalinhamento entre corpus sintético e valores de contato previstos em alguns documentos
-- isso indica que a infraestrutura de avaliação está melhor, mas parte do ruído agora é realmente de extração/dados, não apenas de comparação
+### Practical reading of the current state
+- the evaluation is now more coherent and reproducible
+- there is still misalignment between the synthetic corpus and predicted contact values in some documents
+- this indicates that the evaluation infrastructure is better, but some of the noise is now truly extraction/data noise, not just comparison noise
 
-### Conclusão desta fase
-Para rollout controlado:
-- `confirmed` continua pronto para consumo automático
-- `visual_candidate` continua devendo revisão
-- a avaliação de contatos já está significativamente mais auditável
-- porém ainda não deve ser tratada como totalmente resolvida enquanto houver divergência forte entre contatos previstos e gold set em parte do corpus sintético
+### Conclusion of this phase
+For a controlled rollout:
+- `confirmed` remains ready for automatic consumption
+- `visual_candidate` still requires review
+- contact evaluation is now significantly more auditable
+- however, it still should not be treated as fully resolved while strong divergence remains between predicted contacts and the gold set in part of the synthetic corpus
 
-## Adjudicação dos casos divergentes de contatos
+## Adjudication of divergent contact cases
 
-Arquivo gerado:
+Generated file:
 - `phase5_eval/reports/evidence_cv_contact_adjudication.json`
 
-### Causas raiz encontradas
+### Root causes found
 
-Após inspeção dos casos divergentes:
+After inspecting the divergent cases:
 
-- `gold_set_incorrect`: **6** divergências de contato
+- `gold_set_incorrect`: **6** contact divergences
 - `corpus_inconsistent`: **0**
 - `pipeline_false_positive`: **2**
 - `pipeline_false_negative`: **0**
 - `normalization_mismatch`: **0**
 - `ambiguous_document`: **0**
 
-### Leitura objetiva
+### Objective reading
 
-Os casos de Gabriel, Marina e Beatriz mostraram que a maior parte do erro anterior estava no **gold set**, não na comparação nem necessariamente no pipeline.
+The Gabriel, Marina, and Beatriz cases showed that most of the earlier error was in the **gold set**, not in the comparison and not necessarily in the pipeline.
 
-O caso de Matheus continua sendo o principal exemplo de **falso positivo do pipeline** em scan-like difícil, especialmente quando o VL entra e propõe contatos não sustentados pelo documento.
+The Matheus case remains the main example of a **pipeline false positive** in a difficult scan-like document, especially when VL steps in and proposes contacts not supported by the document.
 
-### Métricas finais após adjudicação
+### Final metrics after adjudication
 
 #### Legacy
 - emails: precision **1.0**, recall **1.0**
 - phones: precision **1.0**, recall **1.0**
 
-#### Evidence sem VL
+#### Evidence without VL
 - emails: precision **1.0**, recall **0.6**
 - phones: precision **0.2727**, recall **0.6**
 
-#### Evidence com VL
+#### Evidence with VL
 - emails: precision **0.7143**, recall **1.0**
 - phones: precision **0.8333**, recall **1.0**
 
-### Conclusão de rollout para contatos
+### Rollout conclusion for contacts
 
-Com adjudicação aplicada:
-- a avaliação de contatos ficou suficientemente confiável para orientar rollout
-- o ganho do caminho VL em **recall** de contatos é real
-- o principal risco residual está concentrado em scan-like difíceis como Matheus
+With adjudication applied:
+- contact evaluation became sufficiently trustworthy to guide rollout
+- the gain from the VL path in contact **recall** is real
+- the main residual risk is concentrated in difficult scan-like cases such as Matheus
 
-Recomendação prática:
-- manter rollout controlado do pipeline evidence para **CV-like PDFs** e **scan-like fortes**
-- continuar consumindo automaticamente apenas `confirmed`
-- manter `visual_candidate` fora do consumo automático até nova rodada de refinamento de precisão para casos extremos
+Practical recommendation:
+- keep a controlled rollout of the evidence pipeline for **CV-like PDFs** and **strong scan-like cases**
+- continue automatically consuming only `confirmed`
+- keep `visual_candidate` out of automatic consumption until a new precision-refinement round for edge cases
 
-## Uso no produto
+## Product usage
 
-Política recomendada nesta fase:
-- usar automaticamente apenas `confirmed`
-- manter `visual_candidate` e `needs_review` fora do consumo automático
-- expor esses estados apenas como metadata/revisão
+Recommended policy in this phase:
+- automatically use only `confirmed`
+- keep `visual_candidate` and `needs_review` out of automatic consumption
+- expose those states only as metadata/review
 
-## Onde o VL agrega mais valor
+## Where VL adds the most value
 
-Melhor custo/benefício atual:
-- PDFs `scanned_pdf`
-- scan-like médios
-- documentos com header/contact difíceis para OCR puro
+Current best cost/benefit:
+- `scanned_pdf` PDFs
+- medium scan-like documents
+- documents with headers/contacts that are difficult for pure OCR
 
-Menor benefício atual:
-- PDFs digitais já legíveis
-- documentos em que OCR/native text já recuperam contato com boa qualidade
+Current lowest benefit:
+- already readable digital PDFs
+- documents where OCR/native text already recovers contact information with good quality
 
-## Onde ainda há ruído
+## Where noise still exists
 
-Casos mais difíceis ainda apresentam:
-- `visual_candidate` extras
-- falso positivo residual em contato
-- localização incerta em scans degradados
+The hardest cases still present:
+- extra `visual_candidate` items
+- residual false positive contacts
+- uncertain location in degraded scans
 
-## Recomendação objetiva de rollout
+## Objective rollout recommendation
 
-Ativar por padrão primeiro para:
+Enable by default first for:
 - CV-like PDFs
-- scan-like fortes
+- strong scan-like cases
 
-Manter desligado por padrão para todos os PDFs genéricos até nova rodada de refinamento.
+Keep it disabled by default for all generic PDFs until the next refinement round.
 
-## Política híbrida de consumo e shadow rollout
+## Hybrid consumption policy and shadow rollout
 
-Nesta fase, o produto passa a operar com política híbrida para contatos:
+In this phase, the product starts operating with a hybrid policy for contacts:
 
-### Merge híbrido para contatos
+### Hybrid merge for contacts
 - `emails`:
-  - legado confirmado tem precedência
-  - evidence `confirmed` entra apenas para preencher lacunas
+  - confirmed legacy data takes precedence
+  - evidence `confirmed` only fills gaps
 - `phones`:
-  - legado confirmado tem precedência
-  - evidence `confirmed` entra apenas para preencher lacunas
+  - confirmed legacy data takes precedence
+  - evidence `confirmed` only fills gaps
 
-### Campos singulares
-- `name`: consumir apenas `evidence confirmed`
-- `location`: consumir apenas `evidence confirmed`
+### Singular fields
+- `name`: consume only `evidence confirmed`
+- `location`: consume only `evidence confirmed`
 
 ### Shadow rollout
-O metadata agora registra:
-- quando legado e evidence concordam
-- quando evidence apenas complementa
-- quando há conflito
+The metadata now records:
+- when legacy and evidence agree
+- when evidence only complements
+- when there is a conflict
 
-Campos disponíveis no upload pipeline:
+Fields available in the upload pipeline:
 - `metadata.hybrid_contact_policy`
 - `metadata.shadow_rollout`
 
-## Recomendação final de rollout por campo
+## Final field-by-field rollout recommendation
 
-- `emails`: usar merge híbrido
-- `phones`: usar merge híbrido
-- `name`: manter conservador, só `confirmed`
-- `location`: manter conservador, só `confirmed`
+- `emails`: use hybrid merge
+- `phones`: use hybrid merge
+- `name`: remain conservative, only `confirmed`
+- `location`: remain conservative, only `confirmed`
 
-## Relatório de shadow rollout
+## Shadow rollout report
 
 Script:
 - `scripts/report_evidence_shadow_rollout.py`
 
-Saída padrão:
+Default output:
 - `phase5_eval/reports/evidence_cv_shadow_rollout_report.json`
 
-## Observabilidade final do shadow rollout
+## Final shadow rollout observability
 
-Após ajustar a propagação dos metadados e alinhar o script com o mesmo caminho de carga/extração do fluxo real, o relatório de shadow rollout passou a refletir quantitativamente o comportamento híbrido.
+After adjusting metadata propagation and aligning the script with the same load/extraction path used by the real flow, the shadow rollout report started quantitatively reflecting hybrid behavior.
 
-### Totais atuais
+### Current totals
 - `agreements`: **2**
 - `email_complements`: **5**
 - `phone_complements`: **5**
 - `email_conflicts`: **0**
 - `phone_conflicts`: **0**
 
-### Exemplos concretos
+### Concrete examples
 
-#### Complemento
+#### Complement
 - `0001_medium_modern_two_column_gabriel.gomes.almeida.pdf`
   - email_complement = 1
   - phone_complement = 1
@@ -216,15 +216,15 @@ Após ajustar a propagação dos metadados e alinhar o script com o mesmo caminh
 #### Agreement
 - `0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf`
   - agreements = 2
-  - nenhum contato foi promovido pelo merge híbrido
+  - no contact was promoted by the hybrid merge
 
 #### Conflict
-- nesta rodada de shadow rollout: **nenhum conflito quantitativo apareceu**
+- in this shadow rollout round: **no quantitative conflict appeared**
 
-### Conclusão desta etapa
-A telemetria de shadow rollout agora está **completa e confiável** para:
+### Conclusion of this stage
+The shadow rollout telemetry is now **complete and trustworthy** for:
 - agreement
 - complement
 - conflict
 
-Isso fecha a observabilidade mínima necessária para rollout controlado da política híbrida no produto.
+This closes the minimum observability needed for a controlled rollout of the hybrid policy in the product.

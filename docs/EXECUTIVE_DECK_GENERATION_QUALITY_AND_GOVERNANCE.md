@@ -1,71 +1,71 @@
-# Executive Deck Generation — qualidade, grounding e governança
+# Executive Deck Generation — quality, grounding, and governance
 
-## Objetivo
+## Objective
 
-Definir as políticas mínimas de qualidade e governança da capability.
+Define the minimum quality and governance policies for the capability.
 
 ---
 
-## Regra principal
+## Main rule
 
 Decks executivos do AI Workbench devem ser **grounded first**.
 
-Isso significa:
+That means:
 
-- usar inputs estruturados e auditáveis quando possível
-- evitar geração livre na última milha dos decks prioritários
-- exigir evidência para claims relevantes
-
----
-
-## Determinístico vs generativo
-
-### Caminho recomendado para P1/P2/P3
-
-- preferir caminho determinístico
-- contract estruturado
-- payload estruturado
-- renderizador especializado
-
-### Quando considerar camada generativa
-
-Somente quando houver:
-
-- hipótese clara de ganho
-- avaliação específica
-- guardrails explícitos
+- use structured and auditable inputs whenever possible
+- avoid free-form generation in the last mile of priority decks
+- require evidence for relevant claims
 
 ---
 
-## Policy de `needs_review`
+## Deterministic vs generative
 
-Um deck deve ser marcado como `needs_review` quando houver:
+### Recommended path for P1/P2/P3
 
-- falta de evidência suficiente
-- dados críticos ausentes
-- comparação inconclusiva
-- risco alto de interpretação errada
+- prefer a deterministic path
+- structured contract
+- structured payload
+- specialized renderer
+
+### When to consider a generative layer
+
+Only when there is:
+
+- a clear gain hypothesis
+- specific evaluation
+- explicit guardrails
 
 ---
 
-## Policy de PII / sensibilidade
+## `needs_review` policy
 
-Especialmente importante para:
+A deck should be marked as `needs_review` when there is:
+
+- insufficient evidence
+- missing critical data
+- inconclusive comparison
+- high risk of incorrect interpretation
+
+---
+
+## PII / sensitivity policy
+
+Especially important for:
 
 - CVs
-- contratos
-- documentos internos
-- findings sensíveis
+- contracts
+- internal documents
+- sensitive findings
 
-Direção mínima:
+Minimum direction:
 
-- registrar origem do dado
-- permitir redaction no futuro
-- não tratar decks contendo PII como artefatos descartáveis sem governança
+- record the origin of the data
+- allow future redaction
+- do not treat decks containing PII as disposable artifacts without governance
 
 ---
 
-## Policy de rollout
+## Rollout policy
 
 ### P1
 
@@ -84,12 +84,12 @@ Direção mínima:
 
 ---
 
-## Critério de done por deck type
+## Done criteria by deck type
 
-Cada deck type só deve ser promovido para uso real quando houver:
+Each deck type should only be promoted to real usage when there is:
 
-1. contract documentado
-2. slide recipe estável
-3. testes mínimos
-4. fallback behavior definido
-5. UX mínima definida
+1. a documented contract
+2. a stable slide recipe
+3. minimum tests
+4. defined fallback behavior
+5. a minimum UX definition

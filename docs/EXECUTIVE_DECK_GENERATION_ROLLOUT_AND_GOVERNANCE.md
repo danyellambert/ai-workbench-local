@@ -1,12 +1,12 @@
-# Executive Deck Generation — rollout e governança
+# Executive Deck Generation — rollout and governance
 
-## Objetivo
+## Objective
 
-Definir como a capability cresce com controle.
+Define how the capability grows in a controlled way.
 
 ---
 
-## Fases de rollout
+## Rollout phases
 
 ### P1
 - benchmark/eval executive review
@@ -22,29 +22,29 @@ Definir como a capability cresce com controle.
 
 ---
 
-## Critério para liberar novo deck type
+## Criteria to release a new deck type
 
-Cada novo deck type deve ter:
+Each new deck type must have:
 
-1. contract documentado
-2. slide recipe definida
-3. service mapping definido
-4. UX mínima definida
-5. testes mínimos definidos
+1. a documented contract
+2. a defined slide recipe
+3. a defined service mapping
+4. a minimum UX definition
+5. minimum tests defined
 
 ---
 
-## Feature flags recomendadas
+## Recommended feature flags
 
 - capability global on/off
 - enable por `export_kind`
 - review/previews opcionais
 
-## Estado atual das feature flags
+## Current feature-flag status
 
-- capability global on/off — **implementado** via `PRESENTATION_EXPORT_ENABLED`
-- review/previews opcionais — **implementado** via `PRESENTATION_EXPORT_INCLUDE_REVIEW`, `PRESENTATION_EXPORT_PREVIEW_BACKEND`, `PRESENTATION_EXPORT_REQUIRE_REAL_PREVIEWS` e `PRESENTATION_EXPORT_FAIL_ON_REGRESSION`
-- enable por `export_kind` — **implementado** via `PRESENTATION_EXPORT_ENABLED_EXPORT_KINDS`
+- global capability on/off — **implemented** via `PRESENTATION_EXPORT_ENABLED`
+- optional review/previews — **implemented** via `PRESENTATION_EXPORT_INCLUDE_REVIEW`, `PRESENTATION_EXPORT_PREVIEW_BACKEND`, `PRESENTATION_EXPORT_REQUIRE_REAL_PREVIEWS`, and `PRESENTATION_EXPORT_FAIL_ON_REGRESSION`
+- enablement by `export_kind` — **implemented** via `PRESENTATION_EXPORT_ENABLED_EXPORT_KINDS`
 
 Exemplo:
 
@@ -52,12 +52,12 @@ Exemplo:
 PRESENTATION_EXPORT_ENABLED_EXPORT_KINDS=benchmark_eval_executive_review,document_review_deck
 ```
 
-Observação:
+Note:
 
-- o service aceita tanto o alias de produto `benchmark_eval_executive_review` quanto o naming legado compatível `benchmark_eval_executive_deck`
+- the service accepts both the product alias `benchmark_eval_executive_review` and the compatible legacy naming `benchmark_eval_executive_deck`
 
 ---
 
-## Governança de naming legado
+## Legacy naming governance
 
-O naming legado do P1 deve permanecer compatível até migração explícita.
+The P1 legacy naming must remain compatible until an explicit migration happens.

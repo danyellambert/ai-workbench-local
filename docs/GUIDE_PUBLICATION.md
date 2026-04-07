@@ -14,7 +14,7 @@ Complete Phase 0.5 of the roadmap by preparing the project for:
 
 - Recommended repository name: `ai-workbench-local`
 - Initial visibility: **private**
-- Licença: **MIT**
+- License: **MIT**
 - Folder `materials_local/`: **excluded from version control**
 - Recommended public release: **after Phase 4**
 
@@ -59,7 +59,7 @@ If you prefer using the website:
 3. run:
 
 ```bash
-git remote add origin <URL_DO_REPO>
+git remote add origin <REPO_URL>
 git push -u origin main
 git push -u origin dev
 ```
@@ -84,7 +84,7 @@ My recommendation: make it public **at the end of Phase 4**.
 
 - [x] Local Git initialized
 - [x] Clean initial commit created
-- [x] Branch `dev` criada
+- [x] Branch `dev` created
 - [x] License added
 - [x] Publication policy defined
 - [x] `materials_local/` excluded from version control
