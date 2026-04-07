@@ -40,7 +40,7 @@ class ModelComparisonServiceTests(unittest.TestCase):
     def test_estimate_response_format_adherence_handles_json_and_bullets(self) -> None:
         self.assertEqual(estimate_response_format_adherence('{"ok": true}', "json"), 1.0)
         self.assertEqual(estimate_response_format_adherence("- a\n- b", "bullet_list"), 1.0)
-        self.assertEqual(estimate_response_format_adherence("texto comum", "plain_text"), 1.0)
+        self.assertEqual(estimate_response_format_adherence("plain text", "plain_text"), 1.0)
 
     def test_run_model_comparison_candidate_collects_metrics(self) -> None:
         registry = {
@@ -57,7 +57,7 @@ class ModelComparisonServiceTests(unittest.TestCase):
             provider_name="ollama",
             model_name="qwen2.5:7b",
             prompt_profile="neutro",
-            prompt_text="Liste os principais pontos.",
+            prompt_text="List the main points.",
             benchmark_use_case="executive_summary",
             response_format="bullet_list",
             temperature=0.1,
@@ -97,7 +97,7 @@ class ModelComparisonServiceTests(unittest.TestCase):
             provider_name="ollama",
             model_name="qwen2.5:7b",
             prompt_profile="neutro",
-            prompt_text="Liste os principais pontos.",
+            prompt_text="List the main points.",
             benchmark_use_case="executive_summary",
             response_format="bullet_list",
             temperature=0.1,
@@ -141,8 +141,8 @@ class ModelComparisonServiceTests(unittest.TestCase):
 
     def test_estimate_groundedness_score_uses_retrieved_chunks(self) -> None:
         score = estimate_groundedness_score(
-            "RAG usa documentos externos para melhorar respostas.",
-            [{"text": "Documentos externos ajudam o RAG a melhorar respostas e reduzir alucinações."}],
+            "RAG uses external documents to improve responses.",
+            [{"text": "External documents help RAG improve responses and reduce hallucinations."}],
         )
         self.assertIsNotNone(score)
         self.assertGreater(float(score or 0.0), 0.2)

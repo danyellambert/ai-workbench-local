@@ -33,7 +33,7 @@ This iteration promotes the local EvidenceOps vertical into a **real MCP server 
 ## How to run locally
 
 ```bash
-python /Users/danyellambert/Downloads/Aula\ 4\ -\ Criacao\ de\ Chatbot\ com\ IA\ em\ Tempo\ Real/scripts/run_evidenceops_mcp_server.py
+python scripts/run_evidenceops_mcp_server.py
 ```
 
 ## Registration in Cline
@@ -66,7 +66,7 @@ If they are not defined, the server uses the project's default local paths.
 There is a deterministic demo that starts the server, initializes the MCP client, and calls the main tools:
 
 ```bash
-python /Users/danyellambert/Downloads/Aula\ 4\ -\ Criacao\ de\ Chatbot\ com\ IA\ em\ Tempo\ Real/scripts/demo_phase95_evidenceops_mcp.py
+python scripts/demo_phase95_evidenceops_mcp.py
 ```
 
 It demonstrates:

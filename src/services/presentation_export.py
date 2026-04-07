@@ -923,11 +923,11 @@ def _humanize_watchout(value: object) -> str | None:
     mapping = {
         "legal_signoff_missing": "Legal sign-off still missing",
         "risk_review_has_gaps_without_grounded_risks": "Grounded evidence is still insufficient for a final decision",
-        "Há ações abertas sem owner definido.": "Open actions still lack named owners",
-        "Há ações abertas sem owner definido no action store.": "Open actions still lack named owners",
-        "Há ações sensíveis pendentes de aprovação.": "Some sensitive actions still require formal approval",
-        "Há ações em atraso que merecem repriorização imediata.": "Some actions are overdue and need reprioritization",
-        "Validação jurídica final ainda pendente.": "Final legal validation is still pending",
+        "Open actions still lack named owners.": "Open actions still lack named owners",
+        "Open actions still lack named owners in the action store.": "Open actions still lack named owners",
+        "Some sensitive actions still require formal approval.": "Some sensitive actions still require formal approval",
+        "Some actions are overdue and need immediate reprioritization.": "Some actions are overdue and need reprioritization",
+        "Final legal validation is still pending.": "Final legal validation is still pending",
     }
     return mapping.get(cleaned, cleaned.replace("_", " ").strip().capitalize())
 

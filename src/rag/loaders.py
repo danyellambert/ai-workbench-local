@@ -341,7 +341,7 @@ def _apply_hybrid_contact_policy(legacy_metadata: dict[str, object], evidence_me
 
 def _looks_like_cv_filename(filename: str) -> bool:
     lowered = filename.lower()
-    return any(token in lowered for token in ["cv", "resume", "curriculo", "currículo"])
+    return any(token in lowered for token in ["cv", "resume"])
 
 
 def _compute_evidence_rollout_bucket(file_bytes: bytes, filename: str) -> int:

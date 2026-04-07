@@ -20,8 +20,8 @@ class HuggingFaceLocalProviderTests(unittest.TestCase):
         self.assertEqual(provider.list_available_models(), ["local-model-a", "local-model-b"])
 
     def test_iter_stream_text_yields_strings_from_simple_iterable(self) -> None:
-        stream = ["parte 1", "parte 2"]
-        self.assertEqual(list(HuggingFaceLocalProvider.iter_stream_text(stream)), ["parte 1", "parte 2"])
+        stream = ["part 1", "part 2"]
+        self.assertEqual(list(HuggingFaceLocalProvider.iter_stream_text(stream)), ["part 1", "part 2"])
 
     def test_format_messages_as_prompt_falls_back_to_manual_role_prompt(self) -> None:
         provider = HuggingFaceLocalProvider(
@@ -36,9 +36,9 @@ class HuggingFaceLocalProviderTests(unittest.TestCase):
             )
         )
 
-        prompt, metadata = provider._format_messages_as_prompt([{"role": "user", "content": "Olá"}], tokenizer=None)
+        prompt, metadata = provider._format_messages_as_prompt([{"role": "user", "content": "Hello"}], tokenizer=None)
 
-        self.assertIn("USER: Olá", prompt)
+        self.assertIn("USER: Hello", prompt)
         self.assertEqual(metadata["prompt_serialization_mode"], "manual_role_prompt")
         self.assertFalse(metadata["chat_template_used"])
 

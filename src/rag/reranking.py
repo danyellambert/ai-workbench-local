@@ -9,7 +9,7 @@ TOKEN_PATTERN = re.compile(r"[\w\-]{3,}", re.UNICODE)
 def chunk_key(chunk: dict[str, object]) -> str:
     return "::".join(
         [
-            str(chunk.get("document_id") or chunk.get("file_hash") or "documento"),
+            str(chunk.get("document_id") or chunk.get("file_hash") or "document"),
             str(chunk.get("chunk_id") or 0),
             str(chunk.get("start_char") or 0),
             str(chunk.get("end_char") or 0),

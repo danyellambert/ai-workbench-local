@@ -22,18 +22,18 @@ class Phase95EvidenceOpsWorklogTests(unittest.TestCase):
             user_intent="document_risk_review",
             answer_mode="friendly",
             tool_used="review_document_risks",
-            summary="Contrato analisado com riscos relevantes.",
-            recommended_actions=["Atualizar cláusula de incidente", "Revisar subprocessor list"],
-            limitations=["Falta evidência para um controle"],
+            summary="Contract analyzed with relevant risks.",
+            recommended_actions=["Update incident clause", "Review subprocessor list"],
+            limitations=["Evidence is missing for one control"],
             guardrails_applied=["Grounded only"],
             structured_response={
                 "review_type": "risk_gap_review",
-                "gaps": ["Prazo de deleção não está explícito"],
+                "gaps": ["Deletion deadline is not explicit"],
                 "extraction_payload": {
                     "risks": [
                         {
-                            "description": "Notificação de incidente está fraca",
-                            "impact": "Resposta tardia",
+                            "description": "Incident notification is weak",
+                            "impact": "Late response",
                             "owner": "Legal",
                             "due_date": "2026-05-01",
                             "evidence": "notify within 10 business days",
@@ -41,7 +41,7 @@ class Phase95EvidenceOpsWorklogTests(unittest.TestCase):
                     ],
                     "action_items": [
                         {
-                            "description": "Solicitar redline da cláusula de incidente",
+                            "description": "Request redline for the incident clause",
                             "owner": "Legal",
                             "due_date": "2026-05-01",
                             "status": "open",
@@ -57,7 +57,7 @@ class Phase95EvidenceOpsWorklogTests(unittest.TestCase):
 
         entry = build_evidenceops_worklog_entry(
             payload=payload,
-            query="Liste os riscos do contrato",
+            query="List the contract risks",
             document_ids=["CTR-002"],
             execution_metadata={"workflow_id": "wf-123", "execution_strategy_used": "langgraph_context_retry"},
         )
@@ -128,7 +128,7 @@ class Phase95EvidenceOpsWorklogTests(unittest.TestCase):
                     "tool_used": "compare_documents",
                     "findings": [{"finding_type": "comparison"}],
                     "action_items": [],
-                    "recommended_actions": ["Revisar cláusulas"],
+                    "recommended_actions": ["Review clauses"],
                 },
             )
 

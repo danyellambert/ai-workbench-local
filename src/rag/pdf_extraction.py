@@ -210,7 +210,7 @@ def _score_page(text: str, image_count: int, image_area_ratio: float, settings: 
     lowered = text.lower()
     text_chars = len(text.strip())
 
-    for marker in ("figura", "figure", "gráfico", "grafico", "table", "tabela", "esquema", "fluxograma", "chart"):
+    for marker in ("figure", "graph", "table", "diagram", "flowchart", "chart"):
         if marker in lowered:
             caption_markers.append(marker)
 
@@ -476,7 +476,7 @@ def _ocrmypdf_extract_pdf_text(file_bytes: bytes, settings: PdfHybridSettings) -
         processed_bytes = output_path.read_bytes()
         return _extract_pdf_text_with_pypdf(processed_bytes), None
     except FileNotFoundError as error:
-        return "", f"ocrmypdf indisponível: {error}"
+        return "", f"ocrmypdf unavailable: {error}"
     except subprocess.TimeoutExpired as error:
         return "", f"ocrmypdf timeout: {error}"
     except subprocess.CalledProcessError as error:
@@ -528,7 +528,7 @@ def _rasterize_pdf_with_ghostscript(file_bytes: bytes, settings: PdfHybridSettin
                 timeout=settings.ocr_fallback_timeout_seconds,
             )
         except FileNotFoundError as error:
-            return [], f"ghostscript indisponível: {error}"
+            return [], f"ghostscript unavailable: {error}"
         except subprocess.TimeoutExpired as error:
             return [], f"ghostscript timeout: {error}"
         except subprocess.CalledProcessError as error:
@@ -593,7 +593,7 @@ def _ocrmypdf_extract_images_text(image_bytes_list: list[bytes], settings: PdfHy
                 page_text = sidecar_path.read_text(encoding="utf-8", errors="ignore").strip() if sidecar_path.exists() else ""
                 pages.append((_build_page_heading(index) + "\n" + page_text).strip() if page_text else "")
             except FileNotFoundError as error:
-                return "", f"ocrmypdf indisponível: {error}"
+                return "", f"ocrmypdf unavailable: {error}"
             except subprocess.TimeoutExpired as error:
                 return "", f"ocrmypdf timeout: {error}"
             except subprocess.CalledProcessError as error:
@@ -668,7 +668,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
                 normalized_complete = _normalize_page_text(complete_docling_text)
                 normalized_baseline = _normalize_page_text(baseline_text)
                 if normalized_complete and normalized_complete not in normalized_baseline and len(normalized_complete) > len(normalized_baseline) * 0.55:
-                    baseline_text = f"{baseline_text}\n\n[Docling documento completo]\n{normalized_complete}".strip()
+                    baseline_text = f"{baseline_text}\n\n[Full-document Docling]\n{normalized_complete}".strip()
                     for page in page_analyses:
                         page.used_docling = True
             elif resolved_mode == "docling" or _should_run_full_docling(page_analyses, effective_settings):
@@ -690,7 +690,7 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
                     merged_text, changed = _merge_page_texts(
                         base_text=merged_pages.get(page.page_number, ""),
                         enriched_text=enriched,
-                        heading="Enriquecimento visual/OCR",
+                        heading="Visual enrichment/OCR",
                     )
                     merged_pages[page.page_number] = merged_text
                     if changed:

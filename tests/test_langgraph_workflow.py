@@ -19,7 +19,7 @@ class LanggraphWorkflowTests(unittest.TestCase):
     def test_select_initial_context_strategy_prefers_retrieval_for_query_driven_summary(self) -> None:
         request = TaskExecutionRequest(
             task_type="summary",
-            input_text="Faça um resumo focando nos pontos financeiros e de governança do documento.",
+            input_text="Create a summary focused on the document's financial and governance points.",
             use_document_context=True,
             source_document_ids=["doc-1"],
             context_strategy="",
@@ -50,7 +50,7 @@ class LanggraphWorkflowTests(unittest.TestCase):
     def test_evaluate_guardrails_marks_needs_review_on_low_quality_without_retry(self) -> None:
         request = TaskExecutionRequest(
             task_type="summary",
-            input_text="Resumo do documento",
+            input_text="Document summary",
             use_document_context=True,
             source_document_ids=["doc-1"],
             context_strategy="retrieval",
@@ -69,7 +69,7 @@ class LanggraphWorkflowTests(unittest.TestCase):
     def test_evaluate_document_agent_guardrails_requests_retry_when_sources_are_missing(self) -> None:
         request = TaskExecutionRequest(
             task_type="document_agent",
-            input_text="Quais riscos aparecem no contrato?",
+            input_text="What risks appear in the contract?",
             use_document_context=True,
             source_document_ids=["doc-1"],
             context_strategy="document_scan",
@@ -93,7 +93,7 @@ class LanggraphWorkflowTests(unittest.TestCase):
         self.assertEqual(updated["retry_reason"], "document_agent_returned_no_grounded_sources")
 
     def test_build_langgraph_app_for_document_agent_uses_agent_graph(self) -> None:
-        request = TaskExecutionRequest(task_type="document_agent", input_text="Compare os documentos")
+        request = TaskExecutionRequest(task_type="document_agent", input_text="Compare the documents")
         with patch.object(workflow, "_build_document_agent_langgraph_app", return_value="agent_graph") as agent_builder, patch.object(
             workflow,
             "_build_langgraph_app",
@@ -105,7 +105,7 @@ class LanggraphWorkflowTests(unittest.TestCase):
         agent_builder.assert_called_once()
 
     def test_run_structured_execution_workflow_records_direct_timing_and_metadata(self) -> None:
-        request = TaskExecutionRequest(task_type="summary", input_text="Resumo")
+        request = TaskExecutionRequest(task_type="summary", input_text="Summary")
         with patch("src.structured.service.structured_service.execute_task", return_value=_make_result()):
             result = workflow.run_structured_execution_workflow(request, strategy="direct")
 
@@ -114,7 +114,7 @@ class LanggraphWorkflowTests(unittest.TestCase):
         self.assertGreaterEqual(result.execution_metadata["workflow_node_count"], 1)
 
     def test_run_structured_execution_workflow_records_fallback_when_langgraph_not_available(self) -> None:
-        request = TaskExecutionRequest(task_type="summary", input_text="Resumo")
+        request = TaskExecutionRequest(task_type="summary", input_text="Summary")
         with patch.object(
             workflow,
             "resolve_structured_execution_strategy",
@@ -128,7 +128,7 @@ class LanggraphWorkflowTests(unittest.TestCase):
         self.assertEqual(result.execution_metadata["execution_strategy_fallback_reason"], "langgraph_not_installed")
 
     def test_run_structured_execution_workflow_annotates_langgraph_state_from_fake_app(self) -> None:
-        request = TaskExecutionRequest(task_type="summary", input_text="Resumo")
+        request = TaskExecutionRequest(task_type="summary", input_text="Summary")
         fake_result = _make_result(success=True, quality_score=0.92)
 
         class FakeApp:

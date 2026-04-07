@@ -117,7 +117,7 @@ class ChromaVectorStore:
             self._clear_system_cache()
 
     def rebuild(self, entries: list[dict[str, object]]) -> None:
-        # Rebuild total do espelho persistido para manter JSON canônico e Chroma alinhados.
+        # Full rebuild of the persisted mirror to keep canonical JSON and Chroma aligned.
         self.clear(remove_persist_dir=False)
         collection = self._get_collection()
 
@@ -142,9 +142,9 @@ class ChromaVectorStore:
             documents.append(str(entry.get("text", "")))
             metadatas.append(
                 {
-                    "source": str(entry.get("source", "documento")),
+                    "source": str(entry.get("source", "document")),
                     "chunk_id": _coerce_int(entry.get("chunk_id"), index),
-                    "document_id": str(entry.get("document_id") or entry.get("file_hash") or "documento"),
+                    "document_id": str(entry.get("document_id") or entry.get("file_hash") or "document"),
                     "file_type": str(entry.get("file_type") or ""),
                     "snippet": str(entry.get("snippet") or ""),
                     "start_char": _coerce_int(entry.get("start_char"), 0),

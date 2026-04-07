@@ -40,7 +40,7 @@ class Phase95EvidenceOpsMcpClientTests(unittest.TestCase):
                     "task_type": "document_agent",
                     "review_type": "risk_gap_review",
                     "tool_used": "review_document_risks",
-                    "query": "Liste os riscos do contrato",
+                    "query": "List the contract risks",
                     "confidence": 0.82,
                     "needs_review": False,
                     "document_ids": ["POL-001"],
@@ -48,14 +48,14 @@ class Phase95EvidenceOpsMcpClientTests(unittest.TestCase):
                     "findings": [{"finding_type": "risk"}],
                     "action_items": [
                         {
-                            "description": "Solicitar redline da cláusula de incidente",
+                            "description": "Request redline for the incident clause",
                             "owner": "Legal",
                             "due_date": "2026-05-01",
                             "status": "open",
                             "evidence": "notify within 10 business days",
                         }
                     ],
-                    "recommended_actions": ["Atualizar cláusula"],
+                    "recommended_actions": ["Update clause"],
                 },
                 config=config,
             )

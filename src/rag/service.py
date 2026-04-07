@@ -73,7 +73,7 @@ def _coerce_rag_index(rag_index: dict[str, object] | None, settings: RagSettings
             if isinstance(embedding, list):
                 normalized_chunk["embedding"] = _compress_embedding(embedding)
 
-            source_name = str(normalized_chunk.get("source") or "documento")
+            source_name = str(normalized_chunk.get("source") or "document")
             document_id = str(normalized_chunk.get("document_id") or normalized_chunk.get("file_hash") or source_name)
             file_type = normalized_chunk.get("file_type")
 
@@ -227,7 +227,7 @@ def sync_chroma_from_rag_index(
                 "chunks_in_json": len(chunks),
                 "chunks_in_chroma": collection_count,
                 "persist_dir_exists": settings.chroma_path.exists(),
-                "message": f"Chroma sincronizado com {collection_count} chunk(s).",
+                "message": f"Chroma synchronized with {collection_count} chunk(s).",
             }
 
         chroma_store.clear(remove_persist_dir=False)
@@ -237,7 +237,7 @@ def sync_chroma_from_rag_index(
             "chunks_in_json": 0,
             "chunks_in_chroma": 0,
             "persist_dir_exists": settings.chroma_path.exists(),
-            "message": "Chroma limpo logicamente; o diretório persistido foi mantido para evitar erro de banco readonly durante a mesma sessão.",
+            "message": "Chroma was cleared logically; the persisted directory was kept to avoid a readonly database error during the same session.",
         }
     except Exception as error:
         if not chunks:
@@ -247,16 +247,16 @@ def sync_chroma_from_rag_index(
                 "chunks_in_json": 0,
                 "chunks_in_chroma": None,
                 "persist_dir_exists": settings.chroma_path.exists(),
-                "message": f"Falha ao limpar logicamente o Chroma nesta sessão: {error}",
+                "message": f"Failed to clear Chroma logically in this session: {error}",
             }
-        logger.warning("Falha ao sincronizar Chroma; mantendo fallback local: %s", error)
+        logger.warning("Failed to sync Chroma; keeping local fallback: %s", error)
         return {
             "ok": False,
             "backend": "local_fallback",
             "chunks_in_json": len(chunks),
             "chunks_in_chroma": None,
             "persist_dir_exists": settings.chroma_path.exists(),
-            "message": f"Falha ao sincronizar Chroma: {error}",
+            "message": f"Failed to synchronize Chroma: {error}",
         }
 
 
@@ -269,7 +269,7 @@ def clear_persisted_rag_index(settings: RagSettings) -> dict[str, object]:
             "ok": True,
             "backend": "chroma",
             "persist_dir_exists": settings.chroma_path.exists(),
-            "message": "Índice lógico do Chroma limpo com sucesso. O diretório persistido foi mantido para evitar o erro de banco readonly na mesma sessão do app.",
+            "message": "The logical Chroma index was cleared successfully. The persisted directory was kept to avoid the readonly database error in the same app session.",
         }
     except Exception as error:
         return {
@@ -277,8 +277,8 @@ def clear_persisted_rag_index(settings: RagSettings) -> dict[str, object]:
             "backend": "local_fallback",
             "persist_dir_exists": settings.chroma_path.exists(),
             "message": (
-                "Falha ao limpar logicamente o Chroma nesta sessão. "
-                f"Detalhes: {error}"
+                "Failed to clear Chroma logically in this session. "
+                f"Details: {error}"
             ),
         }
 
@@ -293,7 +293,7 @@ def reset_chroma_persist_directory(settings: RagSettings) -> dict[str, object]:
             "ok": True,
             "backend": "chroma",
             "persist_dir_exists": settings.chroma_path.exists(),
-            "message": "Persistência física do Chroma removida. Reinicie o app antes de reindexar para evitar cache/handles antigos do SQLite.",
+            "message": "Chroma physical persistence was removed. Restart the app before reindexing to avoid stale SQLite cache/handles.",
         }
     except Exception as error:
         _remove_chroma_persist_dir(settings.chroma_path)
@@ -302,8 +302,8 @@ def reset_chroma_persist_directory(settings: RagSettings) -> dict[str, object]:
             "backend": "local_fallback",
             "persist_dir_exists": settings.chroma_path.exists(),
             "message": (
-                "Persistência física do Chroma removida com fallback. Reinicie o app antes de reindexar. "
-                f"Detalhes: {error}"
+                "Chroma physical persistence was removed with fallback. Restart the app before reindexing. "
+                f"Details: {error}"
             ),
         }
 
@@ -322,35 +322,35 @@ def inspect_vector_backend_status(
         "backend_ready": False,
         "persist_dir": str(settings.chroma_path),
         "persist_dir_exists": persist_dir_exists,
-        "status": "sem_indice" if not json_chunks else "desconhecido",
-        "message": "Nenhum índice documental carregado." if not json_chunks else "Status do backend ainda não confirmado.",
+        "status": "no_index" if not json_chunks else "unknown",
+        "message": "No document index is loaded." if not json_chunks else "Backend status has not been confirmed yet.",
     }
 
     if not json_chunks:
         if persist_dir_exists:
-            status["message"] = "Sem índice canônico carregado; persistência local do Chroma ainda existe em disco."
+            status["message"] = "No canonical index is loaded; local Chroma persistence still exists on disk."
         return status
 
     try:
         if not persist_dir_exists:
-            status["status"] = "fallback_local"
-            status["message"] = "Persistência do Chroma ausente; retrieval deve usar fallback local a partir do JSON canônico."
+            status["status"] = "local_fallback"
+            status["message"] = "Chroma persistence is missing; retrieval must use local fallback from the canonical JSON."
             return status
 
         chroma_store = ChromaVectorStore(settings.chroma_path)
         chroma_chunks = chroma_store.count_entries()
         status["chroma_chunks"] = chroma_chunks
         status["backend_ready"] = chroma_chunks == len(json_chunks)
-        status["status"] = "sincronizado" if chroma_chunks == len(json_chunks) else "dessincronizado"
+        status["status"] = "synchronized" if chroma_chunks == len(json_chunks) else "out_of_sync"
         status["message"] = (
-            "JSON canônico e Chroma persistido estão alinhados."
+            "Canonical JSON and persisted Chroma are aligned."
             if chroma_chunks == len(json_chunks)
-            else "JSON canônico e Chroma persistido ainda não estão alinhados."
+            else "Canonical JSON and persisted Chroma are not aligned yet."
         )
         return status
     except Exception as error:
-        status["status"] = "fallback_local"
-        status["message"] = f"Chroma indisponível; retrieval deve usar fallback local. Detalhes: {error}"
+        status["status"] = "local_fallback"
+        status["message"] = f"Chroma is unavailable; retrieval must use local fallback. Details: {error}"
         return status
 
 
@@ -371,8 +371,8 @@ def inspect_embedding_configuration_compatibility(
     if not normalized.get("chunks"):
         return {
             "compatible": True,
-            "status": "sem_indice",
-            "message": "Nenhum índice ativo para comparar embedding.",
+            "status": "no_index",
+            "message": "There is no active index to compare embedding settings against.",
             "current_embedding_provider": current_embedding_provider,
             "current_embedding_model": current_embedding_model,
             "current_embedding_context_window": current_embedding_context_window,
@@ -389,11 +389,11 @@ def inspect_embedding_configuration_compatibility(
     )
     return {
         "compatible": compatible,
-        "status": "compativel" if compatible else "incompativel",
+        "status": "compatible" if compatible else "incompatible",
         "message": (
-            "Embedding atual compatível com o índice carregado."
+            "The current embedding configuration is compatible with the loaded index."
             if compatible
-            else "O índice foi criado com outro provider/modelo de embedding ou outra janela de contexto do embedding. Reindexe antes de usar o RAG."
+            else "The index was created with a different embedding provider/model or a different embedding context window. Reindex before using RAG."
         ),
         "current_embedding_provider": current_embedding_provider,
         "current_embedding_model": current_embedding_model,
@@ -452,7 +452,7 @@ def upsert_documents_in_rag_index(
         )
 
         if not chunks:
-            raise RuntimeError(f"Não foi possível gerar chunks a partir do documento `{document.name}`.")
+            raise RuntimeError(f"Could not generate chunks from document `{document.name}`.")
 
         embeddings = embedding_provider.create_embeddings(
             [chunk["text"] for chunk in chunks],
@@ -563,7 +563,7 @@ def retrieve_relevant_chunks_detailed(
         return {
             "chunks": [],
             "backend_used": "none",
-            "backend_message": "Índice documental vazio.",
+            "backend_message": "The document index is empty.",
             "filtered_chunks_available": 0,
             "candidate_pool_size": 0,
             "reranking_applied": False,
@@ -575,7 +575,7 @@ def retrieve_relevant_chunks_detailed(
         return {
             "chunks": [],
             "backend_used": "none",
-            "backend_message": "Nenhum chunk disponível após aplicar filtros.",
+            "backend_message": "No chunks are available after applying the filters.",
             "filtered_chunks_available": 0,
             "candidate_pool_size": 0,
             "reranking_applied": False,
@@ -590,7 +590,7 @@ def retrieve_relevant_chunks_detailed(
     )
     vector_candidates: list[dict[str, object]] = []
     backend_used = "local_fallback"
-    backend_message = "Retrieval servido por fallback local a partir do JSON canônico."
+    backend_message = "Retrieval served by local fallback from the canonical JSON."
     requested_retrieval_strategy, effective_retrieval_strategy, retrieval_strategy_fallback_reason = resolve_retrieval_strategy(settings.retrieval_strategy)
 
     if effective_retrieval_strategy == "langchain_chroma":
@@ -604,7 +604,7 @@ def retrieve_relevant_chunks_detailed(
         )
         if langchain_results:
             backend_used = "langchain_chroma"
-            backend_message = "Retrieval servido pelo adaptador experimental LangChain + Chroma."
+            backend_message = "Retrieval served by the experimental LangChain + Chroma adapter."
             vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in langchain_results]
         else:
             retrieval_strategy_fallback_reason = langchain_error or "langchain_returned_no_results"
@@ -628,18 +628,18 @@ def retrieve_relevant_chunks_detailed(
             )
             if chroma_results:
                 backend_used = "chroma"
-                backend_message = "Retrieval servido pelo Chroma persistido sincronizado."
+                backend_message = "Retrieval served by synchronized persisted Chroma."
                 vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in chroma_results]
                 effective_retrieval_strategy = "manual_hybrid"
             else:
-                logger.warning("Chroma não retornou resultados; usando fallback local.")
+                logger.warning("Chroma returned no results; using local fallback.")
         except Exception as error:
-            logger.warning("Chroma falhou na busca; usando fallback local: %s", error)
+            logger.warning("Chroma search failed; using local fallback: %s", error)
             vector_backend_status = {
                 **vector_backend_status,
-                "status": "fallback_local",
+                "status": "local_fallback",
                 "backend_ready": False,
-                "message": f"Falha de retrieval no Chroma: {error}",
+                "message": f"Chroma retrieval failure: {error}",
             }
 
     if not vector_candidates:
@@ -647,7 +647,7 @@ def retrieve_relevant_chunks_detailed(
         local_results = store.similarity_search(query_embedding, candidate_pool_size)
         vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in local_results]
         backend_used = "local_fallback"
-        backend_message = "Retrieval servido por fallback local a partir do JSON canônico."
+        backend_message = "Retrieval served by local fallback from the canonical JSON."
         effective_retrieval_strategy = "manual_hybrid"
 
     lexical_candidates = rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)

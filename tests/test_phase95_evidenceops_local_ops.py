@@ -89,21 +89,21 @@ class Phase95EvidenceOpsLocalOpsTests(unittest.TestCase):
                     "task_type": "document_agent",
                     "review_type": "risk_gap_review",
                     "tool_used": "review_document_risks",
-                    "query": "Liste os riscos",
+                    "query": "List the risks",
                     "confidence": 0.81,
                     "needs_review": False,
                     "document_ids": ["CTR-002"],
                     "source_count": 2,
                     "action_items": [
                         {
-                            "description": "Solicitar redline da cláusula de incidente",
+                            "description": "Request redline for the incident clause",
                             "owner": "Legal",
                             "due_date": "2026-05-01",
                             "status": "open",
                             "evidence": "notify within 10 business days",
                         }
                     ],
-                    "recommended_actions": ["Atualizar cláusula"],
+                    "recommended_actions": ["Update clause"],
                 },
             )
 
@@ -138,14 +138,14 @@ class Phase95EvidenceOpsLocalOpsTests(unittest.TestCase):
                     "task_type": "document_agent",
                     "review_type": "risk_gap_review",
                     "tool_used": "review_document_risks",
-                    "query": "Liste os riscos",
+                    "query": "List the risks",
                     "confidence": 0.81,
                     "needs_review": False,
                     "document_ids": ["CTR-002"],
                     "source_count": 2,
                     "action_items": [
                         {
-                            "description": "Solicitar redline da cláusula de incidente",
+                            "description": "Request redline for the incident clause",
                             "owner": "Legal",
                             "due_date": "2026-05-01",
                             "status": "open",
@@ -168,7 +168,7 @@ class Phase95EvidenceOpsLocalOpsTests(unittest.TestCase):
                 action_id=int(open_actions[0]["id"]),
                 status="closed",
                 approval_status="approved",
-                approval_reason="Encerramento validado pelo gestor responsável.",
+                approval_reason="Closure validated by the responsible manager.",
                 approved_by="manager",
             )
             summary = summarize_evidenceops_action_items(store_path)

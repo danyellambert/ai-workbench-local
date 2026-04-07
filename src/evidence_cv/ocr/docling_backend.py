@@ -16,7 +16,7 @@ class DoclingBackend:
             from docling.datamodel.pipeline_options import PdfPipelineOptions
             from docling.document_converter import DocumentConverter, PdfFormatOption
         except Exception as exc:  # pragma: no cover
-            raise RuntimeError(f"Docling indisponível: {exc}")
+            raise RuntimeError(f"Docling unavailable: {exc}")
 
         pipeline_options = PdfPipelineOptions()
         if hasattr(pipeline_options, "do_ocr"):

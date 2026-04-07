@@ -15,7 +15,7 @@ class Phase8AgentWorkflowEvalTests(unittest.TestCase):
         result = evaluate_routing_case(
             {
                 "case_id": "comparison",
-                "input_text": "Compare estes dois contratos e destaque as diferenças.",
+                "input_text": "Compare these two contracts and highlight the differences.",
                 "document_count": 2,
                 "expected_intent": "document_comparison",
                 "expected_tool": "compare_documents",
@@ -31,7 +31,7 @@ class Phase8AgentWorkflowEvalTests(unittest.TestCase):
         result = evaluate_routing_case(
             {
                 "case_id": "draft_reply",
-                "input_text": "Redija um e-mail de resposta para o cliente com base neste contrato.",
+                "input_text": "Draft a response email to the client based on this contract.",
                 "document_count": 1,
                 "expected_intent": "business_response_drafting",
                 "expected_tool": "draft_business_response",
@@ -48,7 +48,7 @@ class Phase8AgentWorkflowEvalTests(unittest.TestCase):
                 "case_id": "structured_failed_scan_retry",
                 "workflow_type": "structured",
                 "task_type": "extraction",
-                "input_text": "Extraia os campos",
+                "input_text": "Extract the fields",
                 "document_count": 1,
                 "context_strategy": "document_scan",
                 "result": {"success": False, "quality_score": 0.0},
@@ -66,7 +66,7 @@ class Phase8AgentWorkflowEvalTests(unittest.TestCase):
         result = evaluate_routing_case(
             {
                 "case_id": "comparison_single_doc",
-                "input_text": "Compare estes dois contratos e destaque as diferenças.",
+                "input_text": "Compare these two contracts and highlight the differences.",
                 "document_count": 1,
                 "expected_intent": "document_question",
                 "expected_tool": "consult_documents",
@@ -85,7 +85,7 @@ class Phase8AgentWorkflowEvalTests(unittest.TestCase):
                 "case_id": "agent_low_conf_final",
                 "workflow_type": "document_agent",
                 "task_type": "document_agent",
-                "input_text": "Quais riscos aparecem no contrato?",
+                "input_text": "What risks appear in the contract?",
                 "document_count": 1,
                 "context_strategy": "retrieval",
                 "attempt": 2,
