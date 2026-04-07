@@ -468,14 +468,6 @@
       ],
       "cases": [
         {
-          "case_name": "cv_lucas_real_document",
-          "label": "Real CV Lucas with OCR/VLM fallback slices",
-          "document_type": "cv_resume",
-          "pdf_path": "data/materials_demo/cv_analysis/CV - Lucas - gen.pdf",
-          "gold_path": "phase5_eval/fixtures/08_cv_lucas_real_gold.json",
-          "support_status": "partially_supported"
-        },
-        {
           "case_name": "cv_sample_resume_1",
           "label": "Sample Resume 1 OCR/VLM fallback slice",
           "document_type": "cv_resume",

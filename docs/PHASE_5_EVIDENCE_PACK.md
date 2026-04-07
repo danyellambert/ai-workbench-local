@@ -104,17 +104,13 @@ Evidence file:
 
 The current smoke evaluation also passed `5/5` for `cv_analysis` on the textual fixture.
 
-There is also a saved real-case example:
-
-- `phase5_eval/CV - Lucas -gen.json`
-
-This real case is useful as complementary evidence because it shows:
+Complementary real-case evidence is also useful because it shows:
 
 - the flow running on a real CV
 - structured output with `education_entries` and `experience_entries`
 - honest visibility into current system limits
 
-Observable limitations in that JSON include:
+Observable limitations in those real-case outputs include:
 
 - `full_name = null`
 - truncated email output (`as.souza-ferreira@student-cs.fr`)
@@ -219,7 +215,7 @@ The strongest compact package for this phase is:
 
 ### B. Complementary real-case evidence
 
-- `phase5_eval/CV - Lucas -gen.json`
+- versioned real-case output artifacts preserved in `phase5_eval/reports/`
 
 ### C. Visual evidence
 
@@ -260,12 +256,6 @@ Open the latest report:
 code phase5_eval/reports/phase5_structured_eval_20260319_082813.json
 ```
 
-Open the saved Lucas case:
-
-```bash
-code "phase5_eval/CV - Lucas -gen.json"
-```
-
 Open the screenshot guide:
 
 ```bash
@@ -280,7 +270,7 @@ Today, the strongest combined evidence that the Phase 5 structured application l
 
 1. an automated smoke evaluation with `PASS` across all main tasks
 2. a versioned JSON report artifact
-3. a versioned real-case output (`CV - Lucas -gen.json`)
+3. complementary real-case output artifacts preserved in reports
 4. a curated UI-example manifest for reproducible screenshots
 
 This combination gives the phase a strong evidence base while keeping system limits explicit.

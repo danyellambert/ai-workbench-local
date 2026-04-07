@@ -35,7 +35,6 @@ python scripts/run_phase5_structured_eval.py --task summary --use-indexed-docume
 python scripts/run_phase5_structured_eval.py --task summary --use-indexed-document --document-name "asap-2025-annual-report-tagged.pdf"
 python scripts/run_phase5_structured_eval.py --task extraction --use-indexed-document --document-name "exhib101.pdf"
 python scripts/run_phase5_structured_eval.py --task extraction --use-indexed-document --document-name "exhibit10-3.pdf"
-python scripts/run_phase5_structured_eval.py --task cv_analysis --use-indexed-document --document-name "CV - Lucas - gen.pdf"
 python scripts/evaluate_checklist_regression.py --document-name "9789241598590_eng.pdf"
 python scripts/evaluate_evidence_cv_gold_set.py
 python scripts/report_phase8_eval_store.py --limit 50

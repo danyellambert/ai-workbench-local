@@ -23,15 +23,15 @@ def test_reconcile_recovers_name_and_location_around_contact_header_window():
             page=1,
             ocr_text=(
                 "Noise line\n"
-                "/in/lucas-de-souza-ferreira/\n"
-                "lucas.souza-ferreira@student-cs.fr\n"
-                "Lucas de Souza Ferreira\n"
+                "/in/alex-de-souza-ferreira/\n"
+                "alex.souza-ferreira@example.com\n"
+                "Alex de Souza Ferreira\n"
                 "Rua Sao Bras, 370. Rio de Janeiro, Brazil\n"
             ),
         ),
     ]
     result = reconcile_pages(pages, document_id="doc-3")
-    assert result.resume.name.value == "Lucas de Souza Ferreira"
+    assert result.resume.name.value == "Alex de Souza Ferreira"
     assert result.resume.name.status == "confirmed"
     assert result.resume.location.value == "Rua Sao Bras, 370. Rio de Janeiro, Brazil"
     assert result.resume.location.status == "confirmed"
@@ -41,11 +41,11 @@ def test_reconcile_accepts_lowercase_name_particles():
     pages = [
         PageExtraction(
             page=1,
-            ocr_text="lucas.souza-ferreira@student-cs.fr\nLucas de Souza Ferreira\nRua Sao Bras, 370. Rio de Janeiro, Brazil\n",
+            ocr_text="alex.souza-ferreira@example.com\nAlex de Souza Ferreira\nRua Sao Bras, 370. Rio de Janeiro, Brazil\n",
         ),
     ]
     result = reconcile_pages(pages, document_id="doc-5")
-    assert result.resume.name.value == "Lucas de Souza Ferreira"
+    assert result.resume.name.value == "Alex de Souza Ferreira"
 
 
 def test_reconcile_rejects_education_line_as_location_candidate():

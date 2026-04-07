@@ -17,7 +17,6 @@ This directory concentrates local materials that can feed real-document evals an
 
 ## Manually reviewed real-document gold sets currently mapped from these materials
 
-- `CV - Lucas - gen.pdf`
 - `Sample-Resume-1-07262023.pdf`
 - `Sample-Resume-2-1.pdf`
 - `Sample-Resume-3-.pdf`

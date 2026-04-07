@@ -407,9 +407,9 @@ class Phase5RealDocumentEvalTests(unittest.TestCase):
             validated_output=CVAnalysisPayload(
                 task_type="cv_analysis",
                 personal_info=ContactInfo(
-                    full_name="Lucas de Souza Ferreira",
-                    email="lucas.souza-ferreira@student-cs.fr",
-                    location="Rio de Janeiro, Brésil",
+                    full_name="Alex de Souza Ferreira",
+                    email="alex.souza-ferreira@example.com",
+                    location="Rio de Janeiro, Brazil",
                     links=[],
                 ),
                 sections=[],
@@ -442,8 +442,8 @@ class Phase5RealDocumentEvalTests(unittest.TestCase):
             ),
         )
         source_text = """
-        Lucas de Souza Ferreira
-        /in/lucas-de-souza-ferreira/
+        Alex de Souza Ferreira
+        /in/alex-de-souza-ferreira/
         Portugais Natif
         Français Bilingue
         Anglais Bilingue
@@ -460,7 +460,7 @@ class Phase5RealDocumentEvalTests(unittest.TestCase):
         section_types = [section.section_type for section in normalized.sections]
         self.assertIn("education", section_types)
         self.assertIn("experience", section_types)
-        self.assertIn("/in/lucas-de-souza-ferreira/", normalized.personal_info.links)
+        self.assertIn("/in/alex-de-souza-ferreira/", normalized.personal_info.links)
         self.assertTrue(any((entry.get("institution") or "") == "Université Fédérale du Rio de Janeiro" for entry in normalized.model_dump(mode="python")["education_entries"]))
         self.assertEqual(normalized.experience_entries[0].organization, "CentraleSupélec")
 
@@ -535,7 +535,7 @@ class Phase5RealDocumentEvalTests(unittest.TestCase):
             parsed_json={},
             validated_output=CVAnalysisPayload(
                 task_type="cv_analysis",
-                personal_info=ContactInfo(full_name="Lucas de Souza Ferreira"),
+                personal_info=ContactInfo(full_name="Alex de Souza Ferreira"),
                 sections=[],
                 skills=[],
                 languages=[],

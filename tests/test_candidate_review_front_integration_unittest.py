@@ -21,10 +21,8 @@ from src.storage.rag_store import load_rag_store
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REAL_RESUME_1_PATH = PROJECT_ROOT / "data" / "materials_demo" / "cv_analysis" / "Sample-Resume-1-07262023.pdf"
-REAL_LUCAS_PATH = PROJECT_ROOT / "data" / "materials_demo" / "cv_analysis" / "CV - Lucas - gen.pdf"
 SYNTHETIC_TXT_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "04_cv_sample.txt"
 GOLD_RESUME_1_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "14_cv_sample_resume_1_gold.json"
-GOLD_LUCAS_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "08_cv_lucas_real_gold.json"
 EVAL_SCRIPT_PATH = PROJECT_ROOT / "scripts" / "run_phase5_structured_eval.py"
 
 
@@ -182,134 +180,6 @@ class _RuleBasedCandidateProvider:
                     ],
                     "improvement_areas": [
                         "Validate long-term leadership scope in industry settings.",
-                    ],
-                    "projects": [],
-                },
-                ensure_ascii=False,
-            )
-
-        if "Lucas de Souza Ferreira" in prompt:
-            return json.dumps(
-                {
-                    "task_type": "cv_analysis",
-                    "personal_info": {
-                        "full_name": "Lucas de Souza Ferreira",
-                        "email": "lucas.souza-ferreira@student-cs.fr",
-                        "phone": None,
-                        "location": "Rio de Janeiro, Brésil",
-                        "links": ["/in/lucas-de-souza-ferreira/"],
-                    },
-                    "sections": [
-                        {
-                            "section_type": "summary",
-                            "title": "Professional Summary",
-                            "content": [
-                                {
-                                    "text": "Ingénieur spécialisé en Énergie avec expérience en électrotechnique et data science, à la recherche d’un poste d’ingénieur dans le secteur d’énergie.",
-                                    "details": {},
-                                }
-                            ],
-                            "confidence": 0.95,
-                        },
-                        {
-                            "section_type": "interests",
-                            "title": "Centres d'intérêt",
-                            "content": [
-                                {"text": "Musique", "details": {}},
-                                {"text": "Guitare", "details": {}},
-                                {"text": "Flûte", "details": {}},
-                                {"text": "Sports", "details": {}},
-                                {"text": "Équipe d'athlétisme", "details": {}},
-                                {"text": "Technologie", "details": {}},
-                            ],
-                            "confidence": 0.9,
-                        },
-                    ],
-                    "skills": [
-                        "Powerfactory",
-                        "Python",
-                        "Base de Données",
-                        "SIMULINK",
-                        "MATLAB",
-                        "PSCAD",
-                        "Matpower",
-                        "Réseaux Électriques",
-                        "Énergies Renouvelables",
-                        "Optimisation",
-                    ],
-                    "languages": [
-                        {"language": "Portugais", "level": "Natif"},
-                        {"language": "Français", "level": "Bilingue"},
-                        {"language": "Anglais", "level": "Bilingue"},
-                    ],
-                    "education_entries": [
-                        {
-                            "degree": "Ingénieur spécialisé en Énergie",
-                            "institution": "CentraleSupélec",
-                            "location": "Paris-Saclay",
-                            "date_range": "2021-2023",
-                            "description": "Formation en double diplôme d'ingénieur, parcours énergie, réseaux électriques, énergies renouvelables, machines électriques, GPA : 4/5.",
-                        },
-                        {
-                            "degree": "Master en Réseaux et Renouvelables",
-                            "institution": "Université Paris-Saclay",
-                            "location": "Paris-Saclay",
-                            "date_range": "2022-2023",
-                            "description": "Cursus orienté dans la production d'énergie décentralisée et réseaux électriques.",
-                        },
-                        {
-                            "degree": "Ingénieur spécialisé en Électrotechnique",
-                            "institution": "Université Fédérale du Rio de Janeiro",
-                            "location": "Rio de Janeiro",
-                            "date_range": "2018-2024",
-                            "description": "Cursus orienté vers la distribution d'énergie et les systèmes électriques. Moyenne: 8.6/10.",
-                        },
-                    ],
-                    "experience_entries": [
-                        {
-                            "title": "Développement d’interface pour l'analyse de la courbe de charge du système électrique brésilien",
-                            "organization": "ONS",
-                            "date_range": "07/2024 - 12/2024",
-                            "bullets": [
-                                "Analyse de sensibilité des principales variables de la courbe de charge du système électrique brésilienne.",
-                                "Développement d’une interface de surveillance pour la visualisation en temps réel des données de courbes de charge.",
-                            ],
-                        },
-                        {
-                            "title": "Modélisation de services de support dans une centrale électrique hybride",
-                            "organization": "Laboratoire des sources alternatives d’énergie",
-                            "date_range": "01/2024 - 06/2024",
-                            "bullets": [
-                                "Modélisation du contrôle des convertisseurs d'un système photovoltaïque pour un fonctionnement Grid Following.",
-                                "Étude et mise en œuvre de services de support de fréquence et tension pour les micro-réseaux.",
-                            ],
-                        },
-                        {
-                            "title": "Développement de nouveaux algorithmes pour l'outil Qualité d'alimentation des territoires",
-                            "organization": "EDF R&D",
-                            "date_range": "05/2023 - 11/2023",
-                            "bullets": [
-                                "Modélisation statistique des événements extrêmes dans le réseau électrique.",
-                                "Analyse des données du réseau électrique sous Python et mise en place de load flow.",
-                            ],
-                        },
-                        {
-                            "title": "Optimisation de l’emplacement des générateurs distribués dans un réseau électrique",
-                            "organization": "CentraleSupélec",
-                            "date_range": "02/2022 - 04/2022",
-                            "bullets": [
-                                "Développement des méthodes d’optimisation pour minimiser les pertes des lignes.",
-                                "Travail réalisé sur MATLAB.",
-                            ],
-                        },
-                    ],
-                    "experience_years": 2.5,
-                    "strengths": [
-                        "Strong energy systems and electrotechnics background across multiple internships and projects.",
-                        "Multilingual communication across Portuguese, French, and English.",
-                    ],
-                    "improvement_areas": [
-                        "Validate depth of production-scale ownership in full-time delivery environments.",
                     ],
                     "projects": [],
                 },
@@ -543,21 +413,6 @@ class CandidateReviewFrontIntegrationTests(unittest.TestCase):
         self.assertIn("Candidate: Francis B. Taylor", run["html"])
         self.assertEqual(run["export_result"]["status"], "completed")
         self.assertTrue(any(artifact.artifact_type == "pptx" for artifact in run["artifacts"]))
-
-    def test_front_flow_real_pdf_lucas_matches_gold_and_renders_languages(self) -> None:
-        gold = json.loads(GOLD_LUCAS_PATH.read_text(encoding="utf-8"))
-
-        run = self._run_front_flow(file_path=REAL_LUCAS_PATH, input_text=gold["input_text"])
-        payload = run["result"].structured_result.validated_output.model_dump(mode="json")
-        evaluation = eval_module._evaluate_payload_against_gold("cv_analysis", payload, gold)
-
-        self.assertEqual(run["index_status"]["ok"], True)
-        self.assertEqual(run["result"].status, "completed")
-        self.assertEqual(evaluation["status"], "PASS")
-        self.assertEqual(run["sections"]["candidate_profile"]["name"], "Lucas de Souza Ferreira")
-        self.assertTrue(any("Français" in item for item in payload["languages"]))
-        self.assertIn("Candidate: Lucas de Souza Ferreira", run["html"])
-        self.assertEqual(run["export_result"]["status"], "completed")
 
     def test_front_flow_synthetic_txt_resume_behaves_like_user_upload(self) -> None:
         run = self._run_front_flow(

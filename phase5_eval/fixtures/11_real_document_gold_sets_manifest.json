@@ -9,12 +9,6 @@
     },
     {
       "task_type": "cv_analysis",
-      "document_name": "CV - Lucas - gen.pdf",
-      "document_path": "data/materials_demo/cv_analysis/CV - Lucas - gen.pdf",
-      "gold_path": "phase5_eval/fixtures/08_cv_lucas_real_gold.json"
-    },
-    {
-      "task_type": "cv_analysis",
       "document_name": "Sample-Resume-1-07262023.pdf",
       "document_path": "data/materials_demo/cv_analysis/Sample-Resume-1-07262023.pdf",
       "gold_path": "phase5_eval/fixtures/14_cv_sample_resume_1_gold.json"

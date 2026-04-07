@@ -2,15 +2,6 @@
   "name": "Mini gold set for evidence_cv contact extraction",
   "documents": [
     {
-      "file": "data/materials_demo/cv_analysis/CV - Lucas - gen.pdf",
-      "name": "Lucas de Souza Ferreira",
-      "location": "Rio de Janeiro, Brésil",
-      "emails": [
-        "lucas.souza-ferreira@student-cs.fr"
-      ],
-      "phones": []
-    },
-    {
       "file": "data/materials_demo/cv_analysis/Sample-Resume-1-07262023.pdf",
       "name": "Francis B. Taylor",
       "location": "Cincinatti, OH 45201",
