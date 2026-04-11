@@ -62,7 +62,7 @@ from src.storage.phase7_model_comparison_log import (
     load_model_comparison_log,
     summarize_model_comparison_log,
 )
-from src.storage.phase95_evidenceops_action_store import append_evidenceops_actions_from_worklog_entry
+from src.storage.phase95_evidenceops_action_store import append_evidenceops_actions_from_worklog_entry, load_evidenceops_actions
 from src.storage.phase95_evidenceops_worklog import append_evidenceops_worklog_entry
 from src.storage.phase8_eval_store import load_eval_runs, summarize_eval_runs
 from src.storage.runtime_execution_log import (
@@ -128,6 +128,21 @@ from src.structured.tasks import (
     SUMMARY_PART_OVERLAP,
     build_extraction_execution_preview,
     build_checklist_execution_preview,
+)
+from src.ui.ai_lab_panels import (
+    build_ai_lab_tab_labels,
+    render_advanced_experiments_panel,
+    render_ai_lab_shell_banner,
+    render_ai_lab_tab_intro,
+    render_evals_diagnosis_panel,
+    render_lab_overview_panel,
+    render_model_comparison_execution_result,
+    render_model_comparison_history_panel,
+    render_runtime_index_health_panel,
+    render_runtime_onboarding_panel,
+    render_runtime_operational_summary,
+    render_strategy_benchmark_panel,
+    render_workflow_inspector_history_panel,
 )
 from src.ui.chat import render_chat_message
 from src.ui.evidenceops_mcp_panel import render_evidenceops_mcp_panel
@@ -1141,6 +1156,7 @@ effective_rag_settings = replace(
 )
 set_rag_runtime_settings(effective_rag_settings)
 evidence_config = build_evidence_config_from_rag_settings(effective_rag_settings)
+embedding_compatibility_preview = inspect_embedding_configuration_compatibility(rag_index, effective_rag_settings)
 
 selected_provider_instance = chat_capable_registry[selected_provider]["instance"]
 selected_provider_label = chat_capable_registry[selected_provider]["label"]
@@ -1162,31 +1178,33 @@ st.caption(
 st.caption(
     "Esta superfície concentra benchmark, evals, observabilidade, MCP e inspeção técnica. Os workflows de produto passam a viver na UI em Gradio."
 )
-st.caption(
-    f"Embedding: provider={effective_rag_settings.embedding_provider} · model={effective_rag_settings.embedding_model} · embedding_num_ctx={effective_rag_settings.embedding_context_window} · truncate={effective_rag_settings.embedding_truncate}"
-)
-if embedding_provider_fallback_reason:
+render_ai_lab_shell_banner()
+with st.expander("Snapshot técnico da sessão", expanded=False):
     st.caption(
-        f"Embedding provider efetivo: `{embedding_provider_key}` ({embedding_provider_label}) · fallback_reason=`{embedding_provider_fallback_reason}`"
+        f"Embedding: provider={effective_rag_settings.embedding_provider} · model={effective_rag_settings.embedding_model} · embedding_num_ctx={effective_rag_settings.embedding_context_window} · truncate={effective_rag_settings.embedding_truncate}"
     )
-st.caption(
-    f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k} · rerank_pool={effective_rag_settings.rerank_pool_size} · lexical_weight={effective_rag_settings.rerank_lexical_weight:.2f}"
-)
-st.caption(f"Loader nesta execução: {describe_loader_strategy(selected_loader_strategy)}")
-st.caption(f"Chunking nesta execução: {selected_chunking_strategy}")
-st.caption(f"Retrieval nesta execução: {selected_retrieval_strategy}")
-st.caption(f"Extração PDF nesta execução: {describe_pdf_extraction_mode(effective_rag_settings.pdf_extraction_mode)}")
-st.caption(f"OCR documental nesta execução: {effective_rag_settings.evidence_ocr_backend}")
-st.caption(f"VLM documental nesta execução: {effective_rag_settings.evidence_vl_model}")
-st.caption(
-    "Backend vetorial: "
-    f"status={vector_backend_status_preview.get('status')} · "
-    f"json_chunks={vector_backend_status_preview.get('json_chunks')} · "
-    f"chroma_chunks={vector_backend_status_preview.get('chroma_chunks')}"
-)
-st.caption(
-    f"Persistência Chroma: `{vector_backend_status_preview.get('persist_dir')}` · existe_em_disco={vector_backend_status_preview.get('persist_dir_exists')}"
-)
+    if embedding_provider_fallback_reason:
+        st.caption(
+            f"Embedding provider efetivo: `{embedding_provider_key}` ({embedding_provider_label}) · fallback_reason=`{embedding_provider_fallback_reason}`"
+        )
+    st.caption(
+        f"RAG de teste: chunk_size={effective_rag_settings.chunk_size} · overlap={effective_rag_settings.chunk_overlap} · top_k={effective_rag_settings.top_k} · rerank_pool={effective_rag_settings.rerank_pool_size} · lexical_weight={effective_rag_settings.rerank_lexical_weight:.2f}"
+    )
+    st.caption(f"Loader nesta execução: {describe_loader_strategy(selected_loader_strategy)}")
+    st.caption(f"Chunking nesta execução: {selected_chunking_strategy}")
+    st.caption(f"Retrieval nesta execução: {selected_retrieval_strategy}")
+    st.caption(f"Extração PDF nesta execução: {describe_pdf_extraction_mode(effective_rag_settings.pdf_extraction_mode)}")
+    st.caption(f"OCR documental nesta execução: {effective_rag_settings.evidence_ocr_backend}")
+    st.caption(f"VLM documental nesta execução: {effective_rag_settings.evidence_vl_model}")
+    st.caption(
+        "Backend vetorial: "
+        f"status={vector_backend_status_preview.get('status')} · "
+        f"json_chunks={vector_backend_status_preview.get('json_chunks')} · "
+        f"chroma_chunks={vector_backend_status_preview.get('chroma_chunks')}"
+    )
+    st.caption(
+        f"Persistência Chroma: `{vector_backend_status_preview.get('persist_dir')}` · existe_em_disco={vector_backend_status_preview.get('persist_dir_exists')}"
+    )
 if vector_backend_status_preview.get("status") == "dessincronizado":
     st.warning(vector_backend_status_preview.get("message"))
 elif vector_backend_status_preview.get("status") == "fallback_local":
@@ -1215,71 +1233,43 @@ if hasattr(selected_provider_instance, "inspect_context_window"):
         )
 
 st.divider()
-overview_tab, documents_tab, chat_tab, structured_tab, comparison_tab, evals_tab, evidenceops_tab = st.tabs(
-    [
-        "🧭 Lab Overview",
-        "📡 Runtime & Observability",
-        "💬 Document / Chat Experiments",
-        "🧠 Workflow Inspector & Structured",
-        "⚖️ Benchmarks & Model Comparison",
-        "📈 Evals & Diagnosis",
-        "🧾 EvidenceOps / MCP",
-    ]
+overview_tab, documents_tab, chat_tab, structured_tab, comparison_tab, evals_tab, advanced_tab, evidenceops_tab = st.tabs(
+    build_ai_lab_tab_labels()
 )
 
 with overview_tab:
-    st.caption("1. Visão consolidada do AI Lab com benchmark, evals, runtime, tracing e estado operacional recente.")
-    st.info(
-        "Esta home do AI Lab resume o estado do sistema enquanto o produto em Gradio concentra os workflows de negócio. "
-        "Use as guias abaixo para inspecionar benchmark/evals, runtime economics, workflow traces e operações EvidenceOps."
+    render_lab_overview_panel(
+        indexed_documents_preview=indexed_documents_preview,
+        vector_backend_status_preview=vector_backend_status_preview,
+        phase6_document_agent_log_summary=phase6_document_agent_log_summary,
+        phase7_model_comparison_log_summary=phase7_model_comparison_log_summary,
+        phase8_eval_summary=phase8_eval_summary,
+        runtime_execution_summary=runtime_execution_summary,
     )
-
-    overview_col_1, overview_col_2, overview_col_3, overview_col_4 = st.columns(4)
-    overview_col_1.metric("Benchmark runs", int(phase7_model_comparison_log_summary.get("total_runs") or 0))
-    overview_col_2.metric("Eval PASS rate", f"{float(phase8_eval_summary.get('pass_rate') or 0.0):.0%}")
-    overview_col_3.metric("Runtime runs", int(runtime_execution_summary.get("total_runs") or 0))
-    overview_col_4.metric("Doc-agent runs", int(phase6_document_agent_log_summary.get("total_runs") or 0))
-
-    overview_col_5, overview_col_6, overview_col_7, overview_col_8 = st.columns(4)
-    overview_col_5.metric("Needs review", f"{float(runtime_execution_summary.get('needs_review_rate') or 0.0):.0%}")
-    overview_col_6.metric("Avg runtime latency", f"{float(runtime_execution_summary.get('avg_latency_s') or 0.0):.2f}s")
-    overview_col_7.metric("Indexed docs", len(indexed_documents_preview))
-    overview_col_8.metric("Vector backend", str(vector_backend_status_preview.get("backend") or "n/a"))
-
-    st.markdown("### Navigation map")
-    st.write(
-        {
-            "Lab Overview": "Resumo executivo do AI Lab.",
-            "Runtime & Observability": "Base documental, ingestão, indexação e sinais operacionais do runtime.",
-            "Document / Chat Experiments": "Chat com RAG tratado como superfície experimental/diagnóstica, não como homepage do produto.",
-            "Workflow Inspector & Structured": "Structured outputs, workflow traces e inspeção do Document Operations Copilot.",
-            "Benchmarks & Model Comparison": "Benchmark de modelos/providers, estratégia e executive deck de benchmark/evals.",
-            "Evals & Diagnosis": "Pass/warn/fail trends, suites e sinais de quality gate.",
-            "EvidenceOps / MCP": "Console operacional de MCP, worklogs e actions.",
-        }
-    )
-
-    suite_leaderboard_preview = phase8_eval_summary.get("suite_leaderboard") if isinstance(phase8_eval_summary.get("suite_leaderboard"), list) else []
-    if suite_leaderboard_preview:
-        st.markdown("### Current eval leadership")
-        st.dataframe(suite_leaderboard_preview[:5], width="stretch")
-
-    if runtime_execution_summary.get("flow_counts"):
-        st.markdown("### Runtime flow distribution")
-        st.write(
-            {
-                "flow_counts": runtime_execution_summary.get("flow_counts"),
-                "task_counts": runtime_execution_summary.get("task_counts"),
-                "provider_counts": runtime_execution_summary.get("provider_counts"),
-            }
-        )
 
 with documents_tab:
-    st.caption("2. Runtime & Observability: ingestão, indexação e manutenção da base documental compartilhada usada pelos módulos experimentais do AI Lab.")
+    render_ai_lab_tab_intro("runtime")
+    render_runtime_onboarding_panel(
+        indexed_documents=indexed_documents_preview,
+        runtime_execution_summary=runtime_execution_summary,
+        phase7_model_comparison_log_summary=phase7_model_comparison_log_summary,
+        phase8_eval_summary=phase8_eval_summary,
+    )
+    render_runtime_operational_summary(
+        indexed_documents=indexed_documents_preview,
+        vector_backend_status=vector_backend_status_preview,
+        embedding_compatibility=embedding_compatibility_preview,
+        runtime_execution_summary=runtime_execution_summary,
+        phase6_document_agent_log_summary=phase6_document_agent_log_summary,
+        phase7_model_comparison_log_summary=phase7_model_comparison_log_summary,
+        phase8_eval_summary=phase8_eval_summary,
+    )
     st.info(
         "O processamento de PDF, OCR e fallback para documentos escaneados acontece na etapa de indexação. "
         "Depois disso, as outras guias trabalham apenas sobre os documentos já indexados e selecionados pelo usuário, evitando conflito entre leitura OCR e uso do RAG em tempo de consulta."
     )
+    st.markdown("#### Ingestão & índice")
+    st.caption("Upload, reindexação, limpeza lógica e reset físico do backend vetorial continuam concentrados nesta área operacional.")
     st.divider()
     st.subheader("Documentos (Fase 4.5 — base documental)")
     uploaded_files = st.file_uploader(
@@ -1443,6 +1433,13 @@ with documents_tab:
     rag_index = normalize_rag_index(get_rag_index(), effective_rag_settings)
     embedding_compatibility = inspect_embedding_configuration_compatibility(rag_index, effective_rag_settings)
     indexed_documents = get_indexed_documents(rag_index, effective_rag_settings)
+    current_vector_backend_status = inspect_vector_backend_status(rag_index, effective_rag_settings)
+
+    render_runtime_index_health_panel(
+        indexed_documents=indexed_documents,
+        vector_backend_status=current_vector_backend_status,
+        embedding_compatibility=embedding_compatibility,
+    )
 
     if rag_index:
         documents_count = len(indexed_documents)
@@ -1610,7 +1607,7 @@ document_preview_map = _build_document_preview_map(rag_index, indexed_documents)
 
 
 with chat_tab:
-    st.caption("3. Chat experimental com RAG para exploração, debug de grounding e inspeção operacional — não é mais a homepage do produto.")
+    render_ai_lab_tab_intro("chat")
     st.info(
         "O chat usa apenas os documentos selecionados abaixo. PDFs escaneados já entram processados pela etapa de indexação, então não há disputa entre OCR e recuperação em tempo de conversa."
     )
@@ -2113,7 +2110,7 @@ with chat_tab:
 
 
 with structured_tab:
-    st.caption("4. Workflow Inspector & Structured: inspeção de structured outputs, execuções LangGraph e comportamento do Document Operations Copilot.")
+    render_ai_lab_tab_intro("workflow_inspector")
     st.info(
         "Fluxo recomendado: 1) escolha a task, 2) selecione um ou mais documentos indexados, 3) rode a análise e revise o resultado em JSON ou visualização friendly."
     )
@@ -2191,58 +2188,20 @@ with structured_tab:
         help="Executa a estratégia alternativa em segundo plano para comparar robustez, latência e guardrails entre `direct` e `langgraph_context_retry`.",
     )
 
-    with st.expander("Fase 5.5 · histórico direct vs LangGraph", expanded=False):
-        st.caption(f"Log local: `{PHASE55_LANGGRAPH_SHADOW_LOG_PATH.name}`")
-        st.write(phase55_langgraph_shadow_log_summary)
-        if phase55_langgraph_shadow_log_entries:
-            recent_entries = list(reversed(phase55_langgraph_shadow_log_entries[-10:]))
-            st.dataframe(
-                [
-                    {
-                        "timestamp": entry.get("timestamp"),
-                        "task": entry.get("task_type"),
-                        "primary": entry.get("primary_strategy_used"),
-                        "alternate": entry.get("alternate_strategy_used"),
-                        "same_success": entry.get("same_success"),
-                        "quality_delta": entry.get("quality_delta"),
-                        "latency_delta_s": entry.get("latency_delta_s"),
-                        "alternate_avoided_review": entry.get("alternate_avoided_review"),
-                    }
-                    for entry in recent_entries
-                ],
-                width="stretch",
-            )
-            if st.button("Limpar histórico direct vs LangGraph", key="phase55_clear_langgraph_shadow_log"):
-                clear_langgraph_shadow_log(PHASE55_LANGGRAPH_SHADOW_LOG_PATH)
-                st.rerun()
-        else:
-            st.caption("Nenhuma comparação direct vs LangGraph registrada ainda.")
-
-    with st.expander("Fase 6 · histórico do Document Operations Copilot", expanded=False):
-        st.caption(f"Log local: `{PHASE6_DOCUMENT_AGENT_LOG_PATH.name}`")
-        st.write(phase6_document_agent_log_summary)
-        if phase6_document_agent_log_entries:
-            recent_entries = list(reversed(phase6_document_agent_log_entries[-10:]))
-            st.dataframe(
-                [
-                    {
-                        "timestamp": entry.get("timestamp"),
-                        "intent": entry.get("user_intent"),
-                        "tool": entry.get("tool_used"),
-                        "confidence": entry.get("confidence"),
-                        "needs_review": entry.get("needs_review"),
-                        "source_count": entry.get("source_count"),
-                        "query": entry.get("query"),
-                    }
-                    for entry in recent_entries
-                ],
-                width="stretch",
-            )
-            if st.button("Limpar histórico do agente documental", key="phase6_clear_document_agent_log"):
-                clear_document_agent_log(PHASE6_DOCUMENT_AGENT_LOG_PATH)
-                st.rerun()
-        else:
-            st.caption("Nenhuma execução auditável do Document Operations Copilot registrada ainda.")
+    workflow_inspector_actions = render_workflow_inspector_history_panel(
+        phase55_langgraph_shadow_log_path=PHASE55_LANGGRAPH_SHADOW_LOG_PATH,
+        phase55_langgraph_shadow_log_summary=phase55_langgraph_shadow_log_summary,
+        phase55_langgraph_shadow_log_entries=phase55_langgraph_shadow_log_entries,
+        phase6_document_agent_log_path=PHASE6_DOCUMENT_AGENT_LOG_PATH,
+        phase6_document_agent_log_summary=phase6_document_agent_log_summary,
+        phase6_document_agent_log_entries=phase6_document_agent_log_entries,
+    )
+    if workflow_inspector_actions.get("clear_langgraph_shadow_log"):
+        clear_langgraph_shadow_log(PHASE55_LANGGRAPH_SHADOW_LOG_PATH)
+        st.rerun()
+    if workflow_inspector_actions.get("clear_document_agent_log"):
+        clear_document_agent_log(PHASE6_DOCUMENT_AGENT_LOG_PATH)
+        st.rerun()
 
     structured_input_text = st.text_area(
         "Input text (opcional quando usar documentos)",
@@ -2876,7 +2835,7 @@ with structured_tab:
         render_structured_result(structured_result, requested_mode=selected_render_mode)
 
 with comparison_tab:
-    st.caption("5. Benchmarks & Model Comparison: compare múltiplos modelos/providers lado a lado usando o mesmo prompt e, opcionalmente, o mesmo grounding documental.")
+    render_ai_lab_tab_intro("benchmarks")
     st.info(
         "Slice inicial da Fase 7: comparação local entre combinações de provider/model com métricas básicas de latência, tamanho de resposta e aderência ao formato pedido."
     )
@@ -2917,7 +2876,22 @@ with comparison_tab:
         if len(default_candidate_options) >= 2:
             break
 
-    with st.expander("Fase 7 · histórico local de comparação entre modelos", expanded=False):
+    comparison_history_clear_requested = render_model_comparison_history_panel(
+        phase7_model_comparison_log_path=PHASE7_MODEL_COMPARISON_LOG_PATH,
+        phase7_model_comparison_log_summary=phase7_model_comparison_log_summary,
+        phase7_model_comparison_log_entries=phase7_model_comparison_log_entries,
+        runtime_bucket_labels=MODEL_COMPARISON_RUNTIME_BUCKET_LABELS,
+        quantization_labels=MODEL_COMPARISON_QUANTIZATION_LABELS,
+        use_case_presets=MODEL_COMPARISON_USE_CASE_PRESETS,
+    )
+    if comparison_history_clear_requested:
+        clear_model_comparison_log(PHASE7_MODEL_COMPARISON_LOG_PATH)
+        st.rerun()
+
+    if False:
+        pass
+        _legacy_model_comparison_history_block = """
+        with st.expander("Fase 7 · histórico local de comparação entre modelos", expanded=False):
         st.caption(f"Log local: `{PHASE7_MODEL_COMPARISON_LOG_PATH.name}`")
         st.write(phase7_model_comparison_log_summary)
         if phase7_model_comparison_log_summary.get("total_candidates"):
@@ -3060,8 +3034,16 @@ with comparison_tab:
                 st.rerun()
         else:
             st.caption("Nenhuma comparação registrada ainda.")
+        """
 
-    with st.expander("Fase 7 · benchmark de estratégias adjacentes", expanded=False):
+    render_strategy_benchmark_panel(
+        phase55_shadow_log_summary=phase55_shadow_log_summary,
+        phase55_langgraph_shadow_log_summary=phase55_langgraph_shadow_log_summary,
+    )
+
+    if False:
+        _legacy_strategy_benchmark_block = """
+        with st.expander("Fase 7 · benchmark de estratégias adjacentes", expanded=False):
         retrieval_metric_col_1, retrieval_metric_col_2, retrieval_metric_col_3 = st.columns(3)
         retrieval_metric_col_1.metric("Retrieval shadow runs", int(phase55_shadow_log_summary.get("total_runs") or 0))
         retrieval_metric_col_2.metric("Same top-1", f"{float(phase55_shadow_log_summary.get('same_top_1_rate', 0.0)):.0%}")
@@ -3084,6 +3066,7 @@ with comparison_tab:
                 "langgraph_strategy_pairs": phase55_langgraph_shadow_log_summary.get("strategy_pairs"),
                 "langgraph_alternate_fallbacks": phase55_langgraph_shadow_log_summary.get("alternate_fallbacks"),
             })
+        """
 
     comparison_use_case = st.selectbox(
         "Caso de uso do benchmark",
@@ -3267,120 +3250,44 @@ with comparison_tab:
         }
 
     stored_model_comparison_result = st.session_state.get(MODEL_COMPARISON_RESULT_STATE_KEY)
-    if isinstance(stored_model_comparison_result, dict):
-        aggregate = stored_model_comparison_result.get("aggregate") if isinstance(stored_model_comparison_result.get("aggregate"), dict) else {}
-        candidate_results = stored_model_comparison_result.get("candidate_results") if isinstance(stored_model_comparison_result.get("candidate_results"), list) else []
-        stored_use_case = str(stored_model_comparison_result.get("benchmark_use_case") or "ad_hoc")
-        stored_use_case_label = MODEL_COMPARISON_USE_CASE_PRESETS.get(stored_use_case, {}).get("label", stored_use_case)
-        st.markdown("### Resultado da comparação")
-        st.caption(f"Caso de uso desta execução: {stored_use_case_label}")
-        metric_col_1, metric_col_2, metric_col_3, metric_col_4 = st.columns(4)
-        metric_col_1.metric("Candidatos", aggregate.get("total_candidates", 0))
-        metric_col_2.metric("Taxa de sucesso", f"{float(aggregate.get('success_rate', 0.0)):.0%}")
-        metric_col_3.metric("Latência média", f"{float(aggregate.get('avg_latency_s', 0.0)):.2f}s")
-        metric_col_4.metric("Aderência média", f"{float(aggregate.get('avg_format_adherence', 0.0)):.0%}")
-        if comparison_use_documents:
-            st.caption(f"Groundedness média: {float(aggregate.get('avg_groundedness_score', 0.0)):.0%}")
-        if comparison_response_format == "json":
-            st.caption(f"Schema adherence média: {float(aggregate.get('avg_schema_adherence', 0.0)):.0%}")
-        st.caption(f"Use-case fit médio: {float(aggregate.get('avg_use_case_fit_score', 0.0)):.0%}")
-
-        best_latency = aggregate.get("best_latency_candidate") if isinstance(aggregate.get("best_latency_candidate"), dict) else None
-        best_format = aggregate.get("best_format_candidate") if isinstance(aggregate.get("best_format_candidate"), dict) else None
-        best_overall = aggregate.get("best_overall_candidate") if isinstance(aggregate.get("best_overall_candidate"), dict) else None
-        if best_latency:
-            st.caption(
-                f"Melhor latência: {best_latency.get('provider')} · {best_latency.get('model')} · {best_latency.get('latency_s')}s"
-            )
-        if best_format:
-            st.caption(
-                f"Melhor aderência ao formato: {best_format.get('provider')} · {best_format.get('model')} · {float(best_format.get('format_adherence', 0.0)):.0%}"
-            )
-        if best_overall:
-            st.caption(
-                f"Melhor geral: {best_overall.get('provider')} · {best_overall.get('model')} · score={float(best_overall.get('comparison_score', 0.0)):.3f}"
-            )
-
-        candidate_ranking = aggregate.get("candidate_ranking") if isinstance(aggregate.get("candidate_ranking"), list) else []
-        if candidate_ranking:
-            with st.expander("Ranking consolidado da execução", expanded=False):
-                st.dataframe(candidate_ranking, width="stretch")
-
-        columns_count = min(3, max(1, len(candidate_results)))
-        cols = st.columns(columns_count)
-        for index, candidate in enumerate(candidate_results):
-            with cols[index % columns_count]:
-                with st.container(border=True):
-                    st.write(
-                        f"**{candidate.get('provider_label') or candidate.get('provider_effective')} · {candidate.get('model_effective')}**"
-                    )
-                    st.caption(
-                        f"{MODEL_COMPARISON_RUNTIME_BUCKET_LABELS.get(str(candidate.get('runtime_bucket') or ''), str(candidate.get('runtime_bucket') or 'runtime'))} · {MODEL_COMPARISON_QUANTIZATION_LABELS.get(str(candidate.get('quantization_family') or ''), str(candidate.get('quantization_family') or 'quantization'))} · success={candidate.get('success')} · latency={candidate.get('latency_s')}s · adherence={float(candidate.get('format_adherence', 0.0)):.0%}"
-                    )
-                    st.caption(
-                        f"chars={candidate.get('output_chars')} · words={candidate.get('output_words')} · used_chunks={candidate.get('used_chunks')} · grounded={float(candidate.get('groundedness_score', 0.0)):.0%} · use-case-fit={float(candidate.get('use_case_fit_score', 0.0)):.0%}"
-                    )
-                    if isinstance(candidate.get("schema_adherence"), (int, float)):
-                        st.caption(f"schema={float(candidate.get('schema_adherence', 0.0)):.0%}")
-                    if candidate.get("error"):
-                        st.error(str(candidate.get("error")))
-                    st.text_area(
-                        f"comparison_output_{index}",
-                        value=str(candidate.get("response_text") or ""),
-                        height=260,
-                        disabled=True,
-                        label_visibility="collapsed",
-                    )
+    render_model_comparison_execution_result(
+        stored_model_comparison_result=stored_model_comparison_result if isinstance(stored_model_comparison_result, dict) else None,
+        comparison_use_documents=comparison_use_documents,
+        comparison_response_format=comparison_response_format,
+        runtime_bucket_labels=MODEL_COMPARISON_RUNTIME_BUCKET_LABELS,
+        quantization_labels=MODEL_COMPARISON_QUANTIZATION_LABELS,
+        use_case_presets=MODEL_COMPARISON_USE_CASE_PRESETS,
+    )
 
 with evals_tab:
-    st.caption("6. Evals & Diagnosis: acompanhe suites, pass/warn/fail trends e sinais de quality gate do sistema.")
-    if not phase8_eval_entries:
-        st.info("Nenhuma run de eval registrada ainda. Use os scripts/suites da Fase 8 para alimentar esta visão diagnóstica.")
-    else:
-        eval_metric_col_1, eval_metric_col_2, eval_metric_col_3, eval_metric_col_4 = st.columns(4)
-        eval_metric_col_1.metric("Eval runs", int(phase8_eval_summary.get("total_runs") or 0))
-        eval_metric_col_2.metric("PASS", f"{float(phase8_eval_summary.get('pass_rate') or 0.0):.0%}")
-        eval_metric_col_3.metric("WARN", f"{float(phase8_eval_summary.get('warn_rate') or 0.0):.0%}")
-        eval_metric_col_4.metric("FAIL", f"{float(phase8_eval_summary.get('fail_rate') or 0.0):.0%}")
+    render_ai_lab_tab_intro("evals")
+    render_evals_diagnosis_panel(
+        phase8_eval_entries=phase8_eval_entries,
+        phase8_eval_summary=phase8_eval_summary,
+    )
 
-        eval_metric_col_5, eval_metric_col_6, eval_metric_col_7 = st.columns(3)
-        eval_metric_col_5.metric("Needs review", f"{float(phase8_eval_summary.get('needs_review_rate') or 0.0):.0%}")
-        eval_metric_col_6.metric("Avg score ratio", f"{float(phase8_eval_summary.get('avg_score_ratio') or 0.0):.0%}")
-        eval_metric_col_7.metric("Avg latency", f"{float(phase8_eval_summary.get('avg_latency_s') or 0.0):.2f}s")
-
-        suite_leaderboard = phase8_eval_summary.get("suite_leaderboard") if isinstance(phase8_eval_summary.get("suite_leaderboard"), list) else []
-        task_leaderboard = phase8_eval_summary.get("task_leaderboard") if isinstance(phase8_eval_summary.get("task_leaderboard"), list) else []
-        if suite_leaderboard:
-            st.markdown("### Suite leaderboard")
-            st.dataframe(suite_leaderboard[:10], width="stretch")
-        if task_leaderboard:
-            st.markdown("### Task leaderboard")
-            st.dataframe(task_leaderboard[:10], width="stretch")
-
-        recent_eval_rows = [
-            {
-                "created_at": entry.get("created_at"),
-                "suite_name": entry.get("suite_name"),
-                "task_type": entry.get("task_type"),
-                "case_name": entry.get("case_name"),
-                "status": entry.get("status"),
-                "score": entry.get("score"),
-                "max_score": entry.get("max_score"),
-                "needs_review": entry.get("needs_review"),
-                "latency_s": entry.get("latency_s"),
-            }
-            for entry in phase8_eval_entries[:20]
-        ]
-        if recent_eval_rows:
-            st.markdown("### Recent eval cases")
-            st.dataframe(recent_eval_rows, width="stretch")
+with advanced_tab:
+    render_ai_lab_tab_intro("advanced")
+    render_advanced_experiments_panel(
+        workspace_root=WORKSPACE_ROOT,
+        indexed_documents=indexed_documents,
+        vector_backend_status=inspect_vector_backend_status(rag_index, effective_rag_settings),
+        embedding_compatibility=embedding_compatibility,
+        rag_settings=effective_rag_settings,
+        phase55_shadow_log_summary=phase55_shadow_log_summary,
+        phase7_model_comparison_log_summary=phase7_model_comparison_log_summary,
+        phase8_eval_summary=phase8_eval_summary,
+        runtime_execution_summary=runtime_execution_summary,
+    )
 
 with evidenceops_tab:
+    render_ai_lab_tab_intro("evidenceops")
     render_evidenceops_mcp_panel(
         console_state_key=EVIDENCEOPS_MCP_CONSOLE_STATE_KEY,
         last_mcp_entry=st.session_state.get(EVIDENCEOPS_MCP_LAST_ENTRY_STATE_KEY),
         last_mcp_register_result=st.session_state.get(EVIDENCEOPS_MCP_LAST_REGISTER_RESULT_STATE_KEY),
         last_mcp_telemetry=st.session_state.get(EVIDENCEOPS_MCP_LAST_TELEMETRY_STATE_KEY),
+        action_store_entries=load_evidenceops_actions(PHASE95_EVIDENCEOPS_ACTION_STORE_PATH, limit=250),
     )
 
 runtime_snapshot = build_runtime_snapshot(
