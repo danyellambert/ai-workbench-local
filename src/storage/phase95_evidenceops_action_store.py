@@ -4,16 +4,21 @@ import hashlib
 import json
 import sqlite3
 from collections import Counter
+from contextlib import contextmanager
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
 
+@contextmanager
 def _connect(path: Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(path)
     connection.row_factory = sqlite3.Row
-    return connection
+    try:
+        yield connection
+    finally:
+        connection.close()
 
 
 def ensure_evidenceops_action_store(path: Path) -> None:

@@ -4,16 +4,21 @@ import json
 import hashlib
 import sqlite3
 from collections import Counter
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 
+@contextmanager
 def _connect(path: Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(path)
     connection.row_factory = sqlite3.Row
-    return connection
+    try:
+        yield connection
+    finally:
+        connection.close()
 
 
 def ensure_eval_store(path: Path) -> None:
@@ -231,6 +236,7 @@ def summarize_eval_runs(entries: list[dict[str, Any]]) -> dict[str, Any]:
             "needs_review_rate": 0.0,
             "suite_leaderboard": [],
             "task_leaderboard": [],
+            "latest_created_at": None,
         }
 
     status_counter: Counter[str] = Counter()
@@ -337,6 +343,7 @@ def summarize_eval_runs(entries: list[dict[str, Any]]) -> dict[str, Any]:
         "needs_review_rate": round(needs_review_count / max(total_runs, 1), 3),
         "suite_leaderboard": _leaderboard_from_metrics(suite_metrics, "suite_name"),
         "task_leaderboard": _leaderboard_from_metrics(task_metrics, "task_type"),
+        "latest_created_at": entries[0].get("created_at"),
     }
 
 
