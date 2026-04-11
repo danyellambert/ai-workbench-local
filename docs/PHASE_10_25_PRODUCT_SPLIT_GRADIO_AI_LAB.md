@@ -502,6 +502,350 @@ Suggested checklist:
 
 ---
 
+## Additional execution plan — make Streamlit the AI Engineering Operating Console
+
+The current Streamlit surface already contains real engineering depth:
+
+- benchmark and model comparison
+- evals and diagnosis
+- runtime economics and execution history
+- workflow inspection and `needs_review`
+- OCR / VLM / retrieval / embedding experimentation
+- MCP / EvidenceOps operational surfaces
+
+The next problem is no longer "do we have enough engineering content?".
+
+The next problem is:
+
+> how do we present this engineering depth in a way that looks like a serious AI engineering operating console rather than a collection of technical panels?
+
+### Reading from the current AI Lab surface
+
+#### What is already strong
+
+- the surface already communicates **AI Lab**, not generic product UI
+- observability, evals, workflow traces, MCP, and document intelligence are already present
+- the project already has enough signals to look like a serious engineering system
+
+#### What still needs to improve
+
+- observability exists, but it does not yet dominate the surface as the system's main operating layer
+- several tabs still feel too close to raw metrics/tables instead of **summary -> triage -> drilldown**
+- the UI does not yet answer the daily operational questions of an AI engineer quickly enough
+- the full engineering offering of the repository is present, but not yet condensed into one clear operating model
+
+---
+
+## The 5 questions the Streamlit AI Lab must answer
+
+The Streamlit surface should be reorganized so that an AI engineer can answer these five questions in under a minute:
+
+1. **Is the system healthy right now?**
+2. **Where is quality regressing?**
+3. **Where are latency and cost getting worse?**
+4. **Which part of the pipeline is failing or degrading?**
+5. **What engineering action should be taken next?**
+
+If the AI Lab consistently answers those questions, it stops looking like a collection of tabs and starts looking like an engineering control plane.
+
+---
+
+## Capability map the Streamlit AI Lab must expose clearly
+
+The Streamlit AI Lab should make the project's engineering capabilities legible as a single system:
+
+### 1. System health and operational status
+
+- vector/index health
+- embedding compatibility
+- MCP connectivity/readiness
+- OCR / Docling / VLM health
+- quality gate status
+- budget/routing status
+
+### 2. Runtime and observability
+
+- latency anatomy
+- bottleneck distribution
+- budget-aware routing
+- token/cost estimation
+- execution reliability and failure patterns
+
+### 3. Quality and evaluation discipline
+
+- eval suites
+- persistent failures
+- recent regressions
+- adaptation/refactor candidates
+- quality gate interpretation
+
+### 4. Document intelligence engineering
+
+- ingestion/indexation state
+- retrieval/reranking behavior
+- OCR/Docling/VLM usage
+- suspicious documents/pages
+- reindex recommendations
+
+### 5. Agent and workflow orchestration
+
+- routing decisions
+- guardrails
+- retry behavior
+- `needs_review`
+- direct vs LangGraph comparison
+
+### 6. Benchmark and decision support
+
+- best provider/model by use case
+- best latency/runtime bucket
+- best quality/format adherence trade-off
+- recommended defaults and alternatives
+
+### 7. Experiment and artifact registry
+
+- benchmark reports
+- eval artifacts
+- runtime logs
+- phase evidence and technical documents
+
+### 8. MCP / EvidenceOps / operational governance
+
+- client health
+- external-target readiness
+- repository state
+- open actions
+- governance/update operations
+
+---
+
+## Cross-cutting UX rules for the AI Lab
+
+The lab should follow these presentation rules across all tabs:
+
+- **summary first, drilldown second**
+- **alert-first reading** before raw data
+- **decision-oriented language** instead of metric dumping
+- **recent window vs previous window** whenever possible
+- **clear system-health badges** for important subsystems
+- **operational recommendations** in every major area
+- **artifact traceability** between UI panels and versioned repository evidence
+- **PT/EN consistency** so the surface feels intentionally designed instead of gradually accumulated
+
+---
+
+## Layered execution priorities for the next 10.25 iteration
+
+### Priority 0 — shell and narrative reframing
+
+Goal:
+
+- make the whole Streamlit feel like an **AI engineering operating console**
+
+Checklist:
+
+- turn the current home into a real command center
+- ensure every major tab starts with a short operational reading
+- reduce the feeling of technical fragmentation across tabs
+- standardize terminology and mental model across the shell
+
+### Priority 1 — observability and reliability as the dominant layer
+
+Goal:
+
+- make the project's engineering maturity immediately visible through health, latency, reliability, and budget signals
+
+Checklist:
+
+- consolidate health, latency, budget, and incident signals
+- add recent-vs-previous comparisons where possible
+- expose simple comfort zones / quality-floor logic
+- make bottleneck analysis more operational and less purely descriptive
+
+### Priority 2 — evals as regression control, not only historical storage
+
+Goal:
+
+- turn evals into a day-to-day decision surface for engineering iteration
+
+Checklist:
+
+- rank regressions by severity
+- show what changed between recent windows
+- make next engineering action explicit by task/suite
+- surface task-level quality gates more prominently
+
+### Priority 3 — runtime + document intelligence as one coherent subsystem
+
+Goal:
+
+- present ingestion, retrieval, embeddings, OCR/VLM, and corpus health as one document-intelligence layer
+
+Checklist:
+
+- create a corpus/index health view
+- add document-level operational badges
+- highlight anomalies, suspicious pages, and reindex recommendations
+- improve retrieval diagnostics beyond raw parameter display
+
+### Priority 4 — workflow / guardrails / agent operations
+
+Goal:
+
+- make the internal behavior of the document agent and workflow system inspectable in operational terms
+
+Checklist:
+
+- summarize route decisions, guardrails, retries, and `needs_review`
+- show which parts of the workflow are adding safety vs only adding latency
+- prioritize actionable examples for human inspection
+
+### Priority 5 — benchmark as a decision system
+
+Goal:
+
+- make benchmark outputs directly useful for runtime/model decisions by use case
+
+Checklist:
+
+- show recommended default by use case
+- expose best alternative by latency/cost/stability
+- move raw candidate dumps further down into drilldowns
+- add decision memo language around benchmark results
+
+### Priority 6 — artifacts and experiment registry
+
+Goal:
+
+- make reports and artifacts feel like a navigable engineering evidence registry
+
+Checklist:
+
+- strengthen top-level artifact summaries
+- organize by operational category, not only by file group
+- connect reports back to the tabs they explain
+
+### Priority 7 — MCP / EvidenceOps operations and governance
+
+Goal:
+
+- evolve MCP from functional console to operational governance surface
+
+Checklist:
+
+- separate health snapshot, client operations, external readiness, and governance actions more clearly
+- elevate latest state / latest error / last successful action
+- improve product-language consistency for the ops surface
+
+---
+
+## Suggested additional slices inside Phase 10.25
+
+### Slice 10.25I — AI Lab Command Center and system health
+
+Objective:
+
+- turn the home into the main command center of the engineering surface
+
+Checklist:
+
+- add a global health bar for index, evals, MCP, OCR/VLM, and budget routing
+- add an operational alerts block
+- add triage cards for quality, latency, cost, workflow, document intelligence, and ops
+- add recommended next actions with links into drilldown tabs
+
+### Slice 10.25J — Observability & reliability control plane
+
+Objective:
+
+- make observability the dominant reading of the AI Lab
+
+Checklist:
+
+- consolidate latency, reliability, and budget signals
+- add recent-vs-previous operational comparisons
+- add comfort-zone / warning-zone interpretation for key metrics
+- add an incident-style execution table for problematic recent runs
+
+### Slice 10.25K — Quality, evals, and regression control
+
+Objective:
+
+- turn evals into an operational quality control system
+
+Checklist:
+
+- add a quality gate summary at the top of the tab
+- rank regressions and persistent failures more explicitly
+- highlight candidate engineering actions by task/suite
+- show what changed in the recent window
+
+### Slice 10.25L — Runtime, retrieval, and document intelligence
+
+Objective:
+
+- unify index health, retrieval behavior, and document-processing signals
+
+Checklist:
+
+- add corpus/index health summary
+- add document-level status badges (`OCR used`, `Docling`, `VL`, `suspicious`, `reindex recommended`)
+- improve retrieval diagnostics and context-pressure visibility
+- make OCR/VLM anomalies easier to inspect operationally
+
+### Slice 10.25M — Workflow, guardrails, and agent inspection
+
+Objective:
+
+- expose the internal reasoning of workflow orchestration in operator terms
+
+Checklist:
+
+- summarize routing and guardrail behavior in a workflow-health block
+- show the dominant reasons for `needs_review`
+- compare direct vs LangGraph more explicitly as an engineering decision
+- prioritize recent problematic examples for human inspection
+
+### Slice 10.25N — Benchmark decisions and experiment registry
+
+Objective:
+
+- make model comparison and experiment history drive technical decisions more directly
+
+Checklist:
+
+- show recommended default model/provider by use case
+- show alternatives by cost/latency/stability
+- add decision-memo language above raw benchmark tables
+- strengthen the artifact explorer as an engineering evidence registry
+
+### Slice 10.25O — MCP / EvidenceOps operational governance
+
+Objective:
+
+- elevate MCP from functional panel to governance/ops console
+
+Checklist:
+
+- separate health snapshot, client operations, external targets, and governance actions clearly
+- expose latest successful operation and latest failure more explicitly
+- improve the operational readability of external readiness
+- align language and hierarchy with the rest of the AI Lab shell
+
+---
+
+## Definition of done for the Streamlit AI Lab at this stage
+
+The Streamlit AI Lab should be considered well-positioned for this stage when:
+
+- the home behaves like a genuine engineering command center
+- observability is immediately visible as a first-class layer
+- every major tab answers a specific operational question
+- benchmark, evals, runtime, workflow, artifacts, and MCP read as one coherent system
+- the repository's engineering depth is legible without requiring a technical deep dive into the code first
+
+---
+
 ## Consolidated checklist of the change
 
 - [x] map everything that appears today in the current app between **product** and **AI Lab**
