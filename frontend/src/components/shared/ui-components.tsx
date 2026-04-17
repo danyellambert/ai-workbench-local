@@ -43,7 +43,10 @@ export function StatusPill({ status, className }: StatusPillProps) {
     error: 'bg-glow-error/10 text-glow-error border-glow-error/20',
     pending: 'bg-muted text-muted-foreground border-border',
     active: 'bg-glow-success/10 text-glow-success border-glow-success/20',
+    connected: 'bg-glow-success/10 text-glow-success border-glow-success/20',
     degraded: 'bg-glow-warning/10 text-glow-warning border-glow-warning/20',
+    disconnected: 'bg-glow-error/10 text-glow-error border-glow-error/20',
+    not_configured: 'bg-muted text-muted-foreground border-border',
     inactive: 'bg-muted text-muted-foreground border-border',
     ready: 'bg-glow-success/10 text-glow-success border-glow-success/20',
     generating: 'bg-primary/10 text-primary border-primary/20',
@@ -57,11 +60,11 @@ export function StatusPill({ status, className }: StatusPillProps) {
     <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border capitalize", config[status] || config.pending, className)}>
       <span className={cn("w-1.5 h-1.5 rounded-full",
         status === 'running' || status === 'indexing' || status === 'generating' ? 'animate-pulse' : '',
-        status === 'completed' || status === 'indexed' || status === 'active' || status === 'ready' || status === 'done' ? 'bg-glow-success' : '',
+        status === 'completed' || status === 'indexed' || status === 'active' || status === 'connected' || status === 'ready' || status === 'done' ? 'bg-glow-success' : '',
         status === 'running' || status === 'indexing' || status === 'generating' || status === 'open' ? 'bg-primary' : '',
         status === 'warning' || status === 'degraded' || status === 'in_progress' ? 'bg-glow-warning' : '',
-        status === 'error' || status === 'blocked' ? 'bg-glow-error' : '',
-        status === 'pending' || status === 'inactive' ? 'bg-muted-foreground' : '',
+        status === 'error' || status === 'blocked' || status === 'disconnected' ? 'bg-glow-error' : '',
+        status === 'pending' || status === 'inactive' || status === 'not_configured' ? 'bg-muted-foreground' : '',
       )} />
       {status.replace('_', ' ')}
     </span>

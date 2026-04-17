@@ -25,7 +25,7 @@ class OllamaProvider:
 
     def __init__(self, settings: OllamaSettings):
         self.settings = settings
-        self.client = OpenAI(base_url=settings.base_url, api_key="ollama")
+        self.client = OpenAI(base_url=settings.base_url, api_key=settings.api_key or "ollama")
         self.native_base_url = self._build_native_base_url(settings.base_url)
         self._last_usage_metrics: dict[str, object] = {}
 
@@ -66,7 +66,12 @@ class OllamaProvider:
 
     def _discover_models_via_api(self) -> list[str]:
         try:
-            with urllib_request.urlopen(f"{self.native_base_url}/api/tags", timeout=5) as response:
+            request = urllib_request.Request(
+                f"{self.native_base_url}/api/tags",
+                headers=self._native_headers(),
+                method="GET",
+            )
+            with urllib_request.urlopen(request, timeout=5) as response:
                 payload = json.loads(response.read().decode("utf-8"))
         except Exception:
             return []
@@ -79,6 +84,12 @@ class OllamaProvider:
             if model_name and model_name not in ordered_models:
                 ordered_models.append(model_name)
         return ordered_models
+
+    def _native_headers(self) -> dict[str, str]:
+        headers = {"Content-Type": "application/json"}
+        if self.settings.api_key:
+            headers["Authorization"] = f"Bearer {self.settings.api_key}"
+        return headers
 
     def _should_use_native_cli_runtime_hints(self) -> bool:
         if os.getenv("OLLAMA_USE_NATIVE_CLI_HINTS", "true").strip().lower() in {"0", "false", "no", "off"}:
@@ -122,7 +133,7 @@ class OllamaProvider:
         request = urllib_request.Request(
             url=f"{self.native_base_url}{path}",
             data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
+            headers=self._native_headers(),
             method="POST",
         )
         timeout_seconds = int(os.getenv("OLLAMA_HTTP_TIMEOUT_SECONDS", "300"))
@@ -279,7 +290,7 @@ class OllamaProvider:
         request = urllib_request.Request(
             url=f"{self.native_base_url}/api/chat",
             data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
+            headers=self._native_headers(),
             method="POST",
         )
 

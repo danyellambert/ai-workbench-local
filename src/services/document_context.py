@@ -628,7 +628,12 @@ def _get_effective_rag_settings():
             return runtime_settings
     except Exception:
         pass
-    return get_rag_settings()
+    try:
+        from .runtime_controls import build_effective_rag_settings
+
+        return build_effective_rag_settings(default_settings=get_rag_settings())
+    except Exception:
+        return get_rag_settings()
 
 
 def _get_embedding_provider():

@@ -8,6 +8,15 @@ import gradio as gr
 from src.app.product_bootstrap import ProductBootstrap
 from src.product.models import ProductWorkflowRequest, ProductWorkflowResult
 from src.product.presenters import build_product_result_sections
+from src.services.evidenceops_external_targets import (
+    build_external_targets_status,
+    create_notion_page_from_product_result,
+    create_notion_smoke_page,
+    create_trello_cards_from_product_result,
+    create_trello_smoke_card,
+    list_nextcloud_repository_documents,
+    list_notion_database_entries,
+)
 from src.product.service import (
     build_grounding_preview,
     generate_product_workflow_deck,
@@ -178,6 +187,15 @@ def _deck_button_label(definition: Any) -> str:
     return f"Generate {label}" if label else "Generate executive deck"
 
 
+def _trello_status_payload(*, status: str, message: str, **extra: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "status": status,
+        "message": message,
+    }
+    payload.update({key: value for key, value in extra.items() if value is not None})
+    return payload
+
+
 def build_gradio_product_app(bootstrap: ProductBootstrap):
     workflow_catalog = bootstrap.workflow_catalog
     default_workflow = bootstrap.product_settings.default_workflow
@@ -207,6 +225,58 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
     }
     default_models = {provider: (models[0] if models else "") for provider, models in model_map.items()}
     initial_document_stats = _document_status_stats(initial_documents)
+    try:
+        external_targets_status = build_external_targets_status()
+    except Exception:
+        external_targets_status = {}
+    trello_ready = bool(
+        isinstance(external_targets_status.get("trello"), dict)
+        and external_targets_status["trello"].get("configured")
+    )
+    nextcloud_ready = bool(
+        isinstance(external_targets_status.get("nextcloud"), dict)
+        and external_targets_status["nextcloud"].get("configured")
+    )
+    notion_ready = bool(
+        isinstance(external_targets_status.get("notion"), dict)
+        and external_targets_status["notion"].get("configured")
+    )
+    default_trello_status = (
+        _trello_status_payload(
+            status="idle",
+            message="Run a workflow and use 'Send to Trello' to create cards from the result.",
+        )
+        if trello_ready
+        else _trello_status_payload(
+            status="pending_configuration",
+            message="Trello is not fully configured in the environment yet.",
+            missing=(external_targets_status.get("trello") or {}).get("missing") if isinstance(external_targets_status.get("trello"), dict) else None,
+        )
+    )
+    default_nextcloud_status = (
+        _trello_status_payload(
+            status="idle",
+            message="Use 'List Nextcloud remote' to validate the remote repository from the Gradio UI.",
+        )
+        if nextcloud_ready
+        else _trello_status_payload(
+            status="pending_configuration",
+            message="Nextcloud is not fully configured in the environment yet.",
+            missing=(external_targets_status.get("nextcloud") or {}).get("missing") if isinstance(external_targets_status.get("nextcloud"), dict) else None,
+        )
+    )
+    default_notion_status = (
+        _trello_status_payload(
+            status="idle",
+            message="Run a workflow and use 'Send to Notion' or 'Create Notion smoke page' to validate the integration.",
+        )
+        if notion_ready
+        else _trello_status_payload(
+            status="pending_configuration",
+            message="Notion is not fully configured in the environment yet.",
+            missing=(external_targets_status.get("notion") or {}).get("missing") if isinstance(external_targets_status.get("notion"), dict) else None,
+        )
+    )
 
     def _workflow_button_updates(active_workflow: str) -> list[dict[str, Any]]:
         return [
@@ -224,6 +294,8 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
             state,
             selected_workflow=workflow_id,
             indexed_document_ids=normalized_document_ids,
+            latest_trello_result=None,
+            latest_notion_result=None,
             last_error=None,
         )
         return (
@@ -235,6 +307,10 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
             build_contract_snapshot_html(_workflow_contract_entry(frontend_contract, workflow_id)),
             _workflow_contract_entry(frontend_contract, workflow_id),
             gr.update(value=_deck_button_label(definition), interactive=False),
+            gr.update(interactive=False),
+            gr.update(interactive=False),
+            default_trello_status,
+            default_notion_status,
             gr.update(value="Workflow default"),
             _run_preset_hint_html("Workflow default keeps the recommended evidence mode and automatic context sizing for most runs."),
             gr.update(value="auto"),
@@ -367,7 +443,34 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
         result = run_product_workflow(request)
         sections = build_product_result_sections(result)
         primary_title, primary_rows, secondary_title, secondary_rows, source_rows = _result_tables(sections)
-        updated_state = update_product_state(state, latest_result=result, latest_deck_result=None, last_error=None)
+        updated_state = update_product_state(
+            state,
+            latest_result=result,
+            latest_deck_result=None,
+            latest_trello_result=None,
+            latest_notion_result=None,
+            last_error=None,
+        )
+        trello_status = (
+            _trello_status_payload(
+                status="ready",
+                message="Workflow completed. Click 'Send to Trello' to create card(s) from this result.",
+                workflow_id=result.workflow_id,
+                workflow_label=result.workflow_label,
+            )
+            if trello_ready
+            else default_trello_status
+        )
+        notion_status = (
+            _trello_status_payload(
+                status="ready",
+                message="Workflow completed. Click 'Send to Notion' to create a page from this result.",
+                workflow_id=result.workflow_id,
+                workflow_label=result.workflow_label,
+            )
+            if notion_ready
+            else default_notion_status
+        )
         return (
             build_result_summary_html(result),
             build_result_panels_html(result),
@@ -381,6 +484,10 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
             build_artifact_panel_html(result),
             _result_artifact_paths(result),
             gr.update(interactive=bootstrap.product_settings.enable_deck_generation),
+            gr.update(interactive=trello_ready),
+            gr.update(interactive=notion_ready),
+            trello_status,
+            notion_status,
             updated_state,
         )
 
@@ -401,6 +508,109 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
             last_error=None,
         )
         return export_result, build_artifact_panel_html(updated_result, export_result), [artifact.path for artifact in artifacts if artifact.path], updated_state
+
+    def _send_to_trello(state: ProductSessionState):
+        result = state.latest_result if isinstance(state, ProductSessionState) else None
+        if result is None:
+            payload = _trello_status_payload(
+                status="idle",
+                message="Run a workflow before sending its result to Trello.",
+            )
+            return payload, state
+        try:
+            trello_result = create_trello_cards_from_product_result(result, dry_run=False)
+            updated_state = update_product_state(
+                state,
+                latest_trello_result=trello_result,
+                last_error=None,
+            )
+            return trello_result, updated_state
+        except Exception as error:
+            payload = _trello_status_payload(
+                status="error",
+                message=str(error),
+                workflow_id=result.workflow_id,
+                workflow_label=result.workflow_label,
+            )
+            updated_state = update_product_state(
+                state,
+                latest_trello_result=payload,
+                last_error=str(error),
+            )
+            return payload, updated_state
+
+    def _send_to_notion(state: ProductSessionState):
+        result = state.latest_result if isinstance(state, ProductSessionState) else None
+        if result is None:
+            payload = _trello_status_payload(
+                status="idle",
+                message="Run a workflow before sending its result to Notion.",
+            )
+            return payload, state
+        try:
+            notion_result = create_notion_page_from_product_result(result, dry_run=False)
+            updated_state = update_product_state(
+                state,
+                latest_notion_result=notion_result,
+                last_error=None,
+            )
+            return notion_result, updated_state
+        except Exception as error:
+            payload = _trello_status_payload(
+                status="error",
+                message=str(error),
+                workflow_id=result.workflow_id,
+                workflow_label=result.workflow_label,
+            )
+            updated_state = update_product_state(
+                state,
+                latest_notion_result=payload,
+                last_error=str(error),
+            )
+            return payload, updated_state
+
+    def _check_external_targets() -> dict[str, Any]:
+        try:
+            return build_external_targets_status()
+        except Exception as error:
+            return _trello_status_payload(status="error", message=str(error))
+
+    def _list_nextcloud_remote() -> dict[str, Any]:
+        try:
+            raw_documents = list_nextcloud_repository_documents(limit=10)
+            documents = []
+            for item in raw_documents:
+                if not isinstance(item, dict):
+                    continue
+                normalized = dict(item)
+                if "path" in normalized:
+                    normalized["remote_url"] = normalized.pop("path")
+                documents.append(normalized)
+            return {
+                "status": "success",
+                "document_count": len(documents),
+                "documents": documents,
+            }
+        except Exception as error:
+            return _trello_status_payload(status="error", message=str(error))
+
+    def _create_trello_smoke_from_ui() -> dict[str, Any]:
+        try:
+            return create_trello_smoke_card(dry_run=False)
+        except Exception as error:
+            return _trello_status_payload(status="error", message=str(error))
+
+    def _list_notion_entries() -> dict[str, Any]:
+        try:
+            return list_notion_database_entries(limit=10)
+        except Exception as error:
+            return _trello_status_payload(status="error", message=str(error))
+
+    def _create_notion_smoke_from_ui() -> dict[str, Any]:
+        try:
+            return create_notion_smoke_page(dry_run=False)
+        except Exception as error:
+            return _trello_status_payload(status="error", message=str(error))
 
     with gr.Blocks(title=bootstrap.product_settings.app_name) as app:
         gr.HTML(f"<style>{build_product_css(bootstrap.product_settings.accent_color)}</style>")
@@ -502,6 +712,16 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
                         visible=bootstrap.product_settings.enable_deck_generation,
                         interactive=False,
                     )
+                    trello_button = gr.Button(
+                        "Send to Trello",
+                        variant="secondary",
+                        interactive=False,
+                    )
+                    notion_button = gr.Button(
+                        "Send to Notion",
+                        variant="secondary",
+                        interactive=False,
+                    )
             with gr.Column(scale=7, elem_classes="product-insight-canvas"):
                 gr.HTML(
                     build_step_header_html(
@@ -510,10 +730,10 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
                         body="Start with the executive outcome, then drill into evidence, tables, deliverables and workflow contract only when needed.",
                     )
                 )
-                result_summary = gr.HTML(build_result_summary_html(None))
-                result_panels = gr.HTML(build_result_panels_html(None))
                 with gr.Tabs():
-                    with gr.Tab("Decision tables"):
+                    with gr.Tab("Findings"):
+                        result_summary = gr.HTML(build_result_summary_html(None))
+                        result_panels = gr.HTML(build_result_panels_html(None))
                         primary_table_title = gr.Markdown("### Top findings")
                         primary_table = gr.Dataframe(headers=["Col 1", "Col 2", "Col 3", "Col 4"], interactive=False)
                         secondary_table_title = gr.Markdown("### Actions and details")
@@ -522,10 +742,22 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
                         grounding_summary = gr.HTML('<div class="product-empty-state">Evidence preview will appear here before execution.</div>')
                         grounding_preview_text = gr.Textbox(label="Evidence context preview", lines=12, interactive=False)
                         sources_table = gr.Dataframe(headers=["Source", "Chunk", "Score", "Snippet"], label="Evidence table", interactive=False)
-                    with gr.Tab("Deliverables"):
+                    with gr.Tab("Artifacts"):
                         artifact_summary = gr.HTML(build_artifact_panel_html(None))
                         artifact_files = gr.File(label="Deliverables", file_count="multiple")
                         deck_status = gr.JSON(label="Export status")
+                        trello_status = gr.JSON(label="Trello handoff", value=default_trello_status)
+                        notion_status = gr.JSON(label="Notion handoff", value=default_notion_status)
+                        with gr.Accordion("External integrations", open=False):
+                            with gr.Row():
+                                external_status_button = gr.Button("Check integrations", variant="secondary")
+                                nextcloud_list_button = gr.Button("List Nextcloud remote", variant="secondary", interactive=nextcloud_ready)
+                                trello_smoke_button = gr.Button("Create Trello smoke card", variant="secondary", interactive=trello_ready)
+                                notion_list_button = gr.Button("List Notion entries", variant="secondary", interactive=notion_ready)
+                                notion_smoke_button = gr.Button("Create Notion smoke page", variant="secondary", interactive=notion_ready)
+                            external_targets_status_json = gr.JSON(label="External targets status", value=external_targets_status or {})
+                            nextcloud_status = gr.JSON(label="Nextcloud remote", value=default_nextcloud_status)
+                            notion_entries = gr.JSON(label="Notion entries", value=default_notion_status)
                     with gr.Tab("Workflow contract"):
                         workflow_contract_html = gr.HTML(build_contract_snapshot_html(initial_workflow_contract))
                         workflow_contract_json = gr.JSON(label="Technical contract JSON", value=initial_workflow_contract)
@@ -545,6 +777,10 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
                     workflow_contract_html,
                     workflow_contract_json,
                     deck_button,
+                    trello_button,
+                    notion_button,
+                    trello_status,
+                    notion_status,
                     run_preset_dropdown,
                     run_preset_hint,
                     context_mode,
@@ -605,14 +841,68 @@ def build_gradio_product_app(bootstrap: ProductBootstrap):
                 artifact_summary,
                 artifact_files,
                 deck_button,
+                trello_button,
+                notion_button,
+                trello_status,
+                notion_status,
                 workflow_state,
             ],
+            api_name="run_workflow",
         )
 
         deck_button.click(
             fn=_generate_deck,
             inputs=[workflow_state],
             outputs=[deck_status, artifact_summary, artifact_files, workflow_state],
+        )
+
+        trello_button.click(
+            fn=_send_to_trello,
+            inputs=[workflow_state],
+            outputs=[trello_status, workflow_state],
+            api_name="send_result_to_trello",
+        )
+
+        notion_button.click(
+            fn=_send_to_notion,
+            inputs=[workflow_state],
+            outputs=[notion_status, workflow_state],
+            api_name="send_result_to_notion",
+        )
+
+        external_status_button.click(
+            fn=_check_external_targets,
+            inputs=None,
+            outputs=[external_targets_status_json],
+            api_name="check_external_targets",
+        )
+
+        nextcloud_list_button.click(
+            fn=_list_nextcloud_remote,
+            inputs=None,
+            outputs=[nextcloud_status],
+            api_name="list_nextcloud_remote",
+        )
+
+        trello_smoke_button.click(
+            fn=_create_trello_smoke_from_ui,
+            inputs=None,
+            outputs=[trello_status],
+            api_name="create_trello_smoke_card",
+        )
+
+        notion_list_button.click(
+            fn=_list_notion_entries,
+            inputs=None,
+            outputs=[notion_entries],
+            api_name="list_notion_entries",
+        )
+
+        notion_smoke_button.click(
+            fn=_create_notion_smoke_from_ui,
+            inputs=None,
+            outputs=[notion_status],
+            api_name="create_notion_smoke_page",
         )
 
     return app

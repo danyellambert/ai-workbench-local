@@ -1,18 +1,40 @@
 import { motion } from 'framer-motion';
-import { ClipboardList, AlertTriangle, CheckCircle2, Clock, User, Sparkles } from 'lucide-react';
+import { ClipboardList, AlertTriangle, CheckCircle2, Clock, User, Sparkles, Target, ArrowRight } from 'lucide-react';
 import { PageHeader, StatusPill, SeverityBadge, GlassCard } from '@/components/shared/ui-components';
 import { actionItems } from '@/lib/mock-data';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAppStore } from '@/lib/store';
 
 const statusCols = ['open', 'in_progress', 'blocked', 'done'] as const;
 
+const criticalPath = actionItems
+  .filter(a => a.status !== 'done' && (a.priority === 'critical' || a.priority === 'high'))
+  .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
 export default function ActionPlanPage() {
+  const defaultEvidencePanelOpen = useAppStore((state) => state.operatorPreferences.defaultEvidencePanelOpen);
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Action Plan & Evidence Review" description="Transform findings into actionable tasks with owners, timelines and evidence tracking.">
         <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"><Sparkles className="w-3.5 h-3.5 mr-2" /> Generate Deck</Button>
       </PageHeader>
+
+      {/* Business Objective */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
+        className="glass rounded-xl p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <Target className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs text-foreground font-medium">Objective: Reduce contractual risk exposure to enable vendor agreement execution by Q1 close.</p>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {actionItems.filter(a => a.status === 'done').length} of {actionItems.length} actions completed · 
+              {actionItems.filter(a => a.status === 'blocked').length} blocked · 
+              {criticalPath.length} on critical path
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Summary */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -30,7 +52,33 @@ export default function ActionPlanPage() {
         ))}
       </motion.div>
 
-      <Tabs defaultValue="kanban">
+      {/* Critical Path */}
+      {criticalPath.length > 0 && (
+        <GlassCard className="mb-6" delay={0.12}>
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-4 h-4 text-glow-warning" />
+            <h3 className="text-sm font-medium text-foreground">Critical Path — Top Unblockers</h3>
+          </div>
+          <div className="space-y-2">
+            {criticalPath.slice(0, 3).map((item, i) => (
+              <div key={item.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-secondary/20">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-[10px] font-bold text-muted-foreground w-4">{i + 1}</span>
+                  <SeverityBadge severity={item.priority} />
+                  <span className="text-xs text-foreground truncate">{item.title}</span>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-muted-foreground shrink-0">
+                  <span>{item.owner}</span>
+                  <span>Due: {item.dueDate}</span>
+                  <StatusPill status={item.status} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      )}
+
+      <Tabs defaultValue={defaultEvidencePanelOpen ? 'evidence' : 'kanban'}>
         <TabsList className="bg-secondary/30 border border-border/50 mb-4">
           <TabsTrigger value="kanban" className="text-xs data-[state=active]:bg-secondary">Board</TabsTrigger>
           <TabsTrigger value="table" className="text-xs data-[state=active]:bg-secondary">Table</TabsTrigger>
@@ -135,7 +183,7 @@ export default function ActionPlanPage() {
                   </div>
                   <div className="flex items-center gap-2 ml-3">
                     {item.status === 'blocked' ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-glow-error/10 text-glow-error border border-glow-error/20">Needs Review</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-glow-error/10 text-glow-error border border-glow-error/20">Evidence Gap</span>
                     ) : item.status === 'done' ? (
                       <span className="text-[10px] px-2 py-0.5 rounded bg-glow-success/10 text-glow-success border border-glow-success/20">Sufficient</span>
                     ) : (

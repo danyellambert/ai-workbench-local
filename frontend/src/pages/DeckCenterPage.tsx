@@ -1,12 +1,27 @@
 import { motion } from 'framer-motion';
 import { FileOutput, Download, Eye, Clock, Sparkles, FileText, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { PageHeader, StatusPill, GlassCard } from '@/components/shared/ui-components';
-import { artifacts } from '@/lib/mock-data';
+import { getProductArtifacts } from '@/lib/product-api';
 import { Button } from '@/components/ui/button';
 
 const pipelineSteps = ['Generating Contract', 'Calling Renderer', 'Building Slides', 'Ready for Download'];
 
+function formatDateTime(value?: string | null): string {
+  if (!value) return 'n/a';
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
+
 export default function DeckCenterPage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['product-artifacts'],
+    queryFn: getProductArtifacts,
+  });
+
+  const artifacts = data?.artifacts ?? [];
+
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Deck Center" description="Executive artifact generation, export pipeline and download center.">
@@ -33,6 +48,11 @@ export default function DeckCenterPage() {
 
       {/* Artifacts Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {!artifacts.length && (
+          <GlassCard className="md:col-span-2 lg:col-span-3">
+            <div className="text-xs text-muted-foreground">{isLoading ? 'Loading artifacts...' : 'No product artifacts were found yet.'}</div>
+          </GlassCard>
+        )}
         {artifacts.map((a, i) => (
           <motion.div key={a.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.05 }}
@@ -47,11 +67,11 @@ export default function DeckCenterPage() {
             <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-3">
               <span className="uppercase">{a.type}</span>
               <span>{a.size}</span>
-              <span>{a.workflow}</span>
+              <span>{a.workflow_label}</span>
             </div>
             <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-4">
               <Clock className="w-3 h-3" />
-              {new Date(a.createdAt).toLocaleString()}
+              {formatDateTime(a.created_at)}
             </div>
             {a.status === 'ready' && (
               <div className="flex items-center gap-2">
@@ -74,7 +94,7 @@ export default function DeckCenterPage() {
                 <span className="text-xs text-foreground truncate">{a.name}</span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground uppercase">{a.type}</span>
               </div>
-              <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{new Date(a.createdAt).toLocaleDateString()}</span>
+              <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{formatDateTime(a.created_at)}</span>
             </div>
           ))}
         </div>

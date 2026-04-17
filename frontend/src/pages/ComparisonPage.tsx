@@ -1,9 +1,22 @@
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { GitCompare, ArrowRight, Sparkles, AlertTriangle, Play, ArrowLeftRight } from 'lucide-react';
-import { PageHeader, SeverityBadge, GlassCard } from '@/components/shared/ui-components';
-import { comparisonDiffs, documents } from '@/lib/mock-data';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Sparkles, AlertTriangle, Play, ArrowLeftRight, CheckCircle2, Shield, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { PageHeader, GlassCard, StatusPill } from '@/components/shared/ui-components';
+import {
+  buildProductArtifactUrl,
+  generateProductWorkflowDeck,
+  getProductDocumentLibrary,
+  runProductWorkflow,
+  type ProductDocumentLibraryEntry,
+  type ProductPolicyComparisonDiff,
+  type ProductRunWorkflowResponse,
+  type ProductWorkflowArtifact,
+} from '@/lib/product-api';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/components/ui/sonner';
+import { useAppStore } from '@/lib/store';
 
 const impactColors = {
   breaking: 'bg-glow-error/10 text-glow-error border-glow-error/20',
@@ -11,13 +24,242 @@ const impactColors = {
   minor: 'bg-muted text-muted-foreground border-border',
 };
 
+function dedupeArtifacts(artifacts: ProductWorkflowArtifact[]): ProductWorkflowArtifact[] {
+  const seen = new Set<string>();
+  const normalized: ProductWorkflowArtifact[] = [];
+  for (const artifact of artifacts) {
+    const key = `${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(artifact);
+  }
+  return normalized;
+}
+
+function getDefaultSecondaryDocument(
+  documents: ProductDocumentLibraryEntry[],
+  primaryId: string,
+): string {
+  return documents.find((document) => document.document_id !== primaryId)?.document_id || '';
+}
+
 export default function ComparisonPage() {
+  const queryClient = useQueryClient();
+  const showSourceBadges = useAppStore((state) => state.operatorPreferences.showSourceBadges);
+  const [selectedDocumentAId, setSelectedDocumentAId] = useState('');
+  const [selectedDocumentBId, setSelectedDocumentBId] = useState('');
+  const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
+  const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
+  const [deckExportState, setDeckExportState] = useState<{ status: string; message: string } | null>(null);
+
+  const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
+    queryKey: ['product-document-library'],
+    queryFn: getProductDocumentLibrary,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const availableDocuments = useMemo(
+    () => (documentLibrary?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
+    [documentLibrary],
+  );
+
+  useEffect(() => {
+    if (!availableDocuments.length) {
+      setSelectedDocumentAId('');
+      setSelectedDocumentBId('');
+      return;
+    }
+
+    const fallbackPrimaryId = availableDocuments[0].document_id;
+    const nextPrimaryId = availableDocuments.some((document) => document.document_id === selectedDocumentAId)
+      ? selectedDocumentAId
+      : fallbackPrimaryId;
+    const fallbackSecondaryId = getDefaultSecondaryDocument(availableDocuments, nextPrimaryId);
+    const nextSecondaryId =
+      selectedDocumentBId &&
+      selectedDocumentBId !== nextPrimaryId &&
+      availableDocuments.some((document) => document.document_id === selectedDocumentBId)
+        ? selectedDocumentBId
+        : fallbackSecondaryId;
+
+    if (nextPrimaryId !== selectedDocumentAId) setSelectedDocumentAId(nextPrimaryId);
+    if (nextSecondaryId !== selectedDocumentBId) setSelectedDocumentBId(nextSecondaryId);
+  }, [availableDocuments, selectedDocumentAId, selectedDocumentBId]);
+
+  const selectedDocumentA = useMemo(
+    () => availableDocuments.find((document) => document.document_id === selectedDocumentAId),
+    [availableDocuments, selectedDocumentAId],
+  );
+  const selectedDocumentB = useMemo(
+    () => availableDocuments.find((document) => document.document_id === selectedDocumentBId),
+    [availableDocuments, selectedDocumentBId],
+  );
+
+  const runComparisonMutation = useMutation({
+    mutationFn: () =>
+      runProductWorkflow({
+        workflow_id: 'policy_contract_comparison',
+        document_ids: [selectedDocumentAId, selectedDocumentBId].filter(Boolean),
+        context_strategy: 'retrieval',
+        context_window_mode: 'auto',
+        use_document_context: true,
+      }),
+    onSuccess: async (payload) => {
+      setWorkflowResponse(payload);
+      setGeneratedArtifacts([]);
+      setDeckExportState(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+      ]);
+      toast.success('Policy comparison completed with grounded output.');
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Policy comparison failed.');
+    },
+  });
+
+  const generateDeckMutation = useMutation({
+    mutationFn: () => {
+      if (!workflowResponse?.result) {
+        throw new Error('Run the policy comparison before generating the executive deck.');
+      }
+      return generateProductWorkflowDeck(workflowResponse.result);
+    },
+    onSuccess: async (payload) => {
+      setGeneratedArtifacts(payload.artifacts);
+      const rawStatus = String(payload.export_result?.status || '').trim().toLowerCase();
+      const hasArtifacts = payload.artifacts.length > 0;
+      const normalizedStatus = hasArtifacts
+        ? 'completed'
+        : rawStatus.includes('fail')
+          ? 'error'
+          : rawStatus.includes('disabled') || rawStatus.includes('unavailable')
+            ? 'warning'
+            : 'warning';
+      const statusMessage = hasArtifacts
+        ? 'Comparison artifacts were generated and are ready for review.'
+        : rawStatus.includes('disabled')
+          ? 'Deck export is currently disabled in the Product API configuration. The workflow ran correctly, but no downloadable artifact was produced.'
+          : rawStatus.includes('unavailable')
+            ? 'The comparison deck renderer is unavailable right now. Check the presentation export service before retrying.'
+            : 'The deck generation request completed, but no downloadable artifact was returned.';
+      setDeckExportState({ status: normalizedStatus, message: statusMessage });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
+      ]);
+      if (hasArtifacts) {
+        toast.success('Policy comparison deck artifacts generated successfully.');
+      } else {
+        toast.error(statusMessage);
+      }
+    },
+    onError: (error) => {
+      setDeckExportState({ status: 'error', message: error instanceof Error ? error.message : 'Deck generation failed.' });
+      toast.error(error instanceof Error ? error.message : 'Deck generation failed.');
+    },
+  });
+
+  const comparisonView = workflowResponse?.comparison_view ?? null;
+  const impactCounts = comparisonView?.executive_summary.counts ?? { breaking: 0, significant: 0, minor: 0 };
+  const differences: ProductPolicyComparisonDiff[] = comparisonView?.differences ?? [];
+  const mustFixItems = comparisonView?.must_fix_items ?? [];
+  const negotiationPriorities = comparisonView?.negotiation_priorities ?? [];
+  const allArtifacts = useMemo(
+    () => dedupeArtifacts([...(comparisonView?.artifacts ?? []), ...generatedArtifacts]),
+    [comparisonView?.artifacts, generatedArtifacts],
+  );
+
+  const runDisabled =
+    !selectedDocumentAId ||
+    !selectedDocumentBId ||
+    selectedDocumentAId === selectedDocumentBId ||
+    availableDocuments.length < 2 ||
+    runComparisonMutation.isPending;
+
+  const handleDocumentAChange = (documentId: string) => {
+    setSelectedDocumentAId(documentId);
+    if (documentId === selectedDocumentBId) {
+      setSelectedDocumentBId(getDefaultSecondaryDocument(availableDocuments, documentId));
+    }
+    setWorkflowResponse(null);
+    setGeneratedArtifacts([]);
+    setDeckExportState(null);
+  };
+
+  const handleDocumentBChange = (documentId: string) => {
+    setSelectedDocumentBId(documentId);
+    setWorkflowResponse(null);
+    setGeneratedArtifacts([]);
+    setDeckExportState(null);
+  };
+
+  const handleOpenArtifact = (artifact: ProductWorkflowArtifact) => {
+    if (!artifact.path) {
+      toast.error(`${artifact.label} is registered, but no local path is available yet.`);
+      return;
+    }
+    window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Policy & Contract Comparison" description="Compare documents side-by-side with impact analysis and grounded recommendations.">
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"><Play className="w-3.5 h-3.5 mr-2" /> Run Comparison</Button>
-        <Button variant="outline" className="h-9 px-4 text-xs border-border/50"><Sparkles className="w-3.5 h-3.5 mr-2" /> Generate Deck</Button>
+        <Button
+          className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"
+          disabled={runDisabled}
+          onClick={() => runComparisonMutation.mutate()}
+        >
+          {runComparisonMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />}
+          {runComparisonMutation.isPending ? 'Running Comparison' : 'Run Comparison'}
+        </Button>
+        <Button
+          variant="outline"
+          className="h-9 px-4 text-xs border-border/50"
+          disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending}
+          onClick={() => generateDeckMutation.mutate()}
+        >
+          {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />}
+          {generateDeckMutation.isPending ? 'Generating Deck' : 'Generate Deck'}
+        </Button>
       </PageHeader>
+
+      {documentsError && (
+        <div className="glass rounded-xl p-4 mb-6 border border-glow-warning/20 text-xs text-glow-warning flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          Product API unavailable. The comparison surface cannot load the document library right now.
+        </div>
+      )}
+
+      {!documentsLoading && availableDocuments.length < 2 && (
+        <div className="glass rounded-xl p-4 mb-6 border border-glow-warning/20 text-xs text-glow-warning flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4" />
+          At least two indexed documents are required to run a grounded policy comparison.
+        </div>
+      )}
+
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="glass rounded-xl p-4 mb-6">
+        <div className="flex items-center gap-1">
+          {(comparisonView?.run_state.steps ?? [
+            { key: 'select', label: 'Select', status: selectedDocumentAId && selectedDocumentBId ? 'completed' : 'pending' },
+            { key: 'ground', label: 'Ground', status: workflowResponse?.result?.grounding_preview ? 'completed' : 'pending' },
+            { key: 'analyze', label: 'Analyze', status: runComparisonMutation.isPending ? 'running' : workflowResponse?.result ? 'completed' : 'pending' },
+            { key: 'review', label: 'Review', status: differences.length > 0 ? 'completed' : 'pending' },
+            { key: 'export', label: 'Export', status: generateDeckMutation.isPending ? 'running' : allArtifacts.length > 0 ? 'completed' : 'pending' },
+          ]).map((step, index, steps) => (
+            <div key={step.key} className="flex items-center gap-1 flex-1">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-muted-foreground">
+                <StatusPill status={step.status} />
+                <span className="hidden sm:inline">{step.label}</span>
+              </div>
+              {index < steps.length - 1 && <div className={`flex-1 h-px ${step.status === 'completed' ? 'bg-glow-success/40' : 'bg-border'}`} />}
+            </div>
+          ))}
+        </div>
+      </motion.div>
 
       {/* Document Selection */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -25,16 +267,24 @@ export default function ComparisonPage() {
         <div className="grid md:grid-cols-2 gap-4 items-end">
           <div>
             <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Document A</label>
-            <Select defaultValue="d1">
+            <Select value={selectedDocumentAId} onValueChange={handleDocumentAChange}>
               <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue /></SelectTrigger>
-              <SelectContent>{documents.filter(d => d.status === 'indexed').map(d => (<SelectItem key={d.id} value={d.id} className="text-xs">{d.name}</SelectItem>))}</SelectContent>
+              <SelectContent>
+                {availableDocuments.map(document => (
+                  <SelectItem key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div>
             <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Document B</label>
-            <Select defaultValue="d4">
+            <Select value={selectedDocumentBId} onValueChange={handleDocumentBChange}>
               <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue /></SelectTrigger>
-              <SelectContent>{documents.filter(d => d.status === 'indexed').map(d => (<SelectItem key={d.id} value={d.id} className="text-xs">{d.name}</SelectItem>))}</SelectContent>
+              <SelectContent>
+                {availableDocuments.map(document => (
+                  <SelectItem key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -48,30 +298,69 @@ export default function ComparisonPage() {
             <h3 className="text-sm font-medium text-foreground">Executive Summary</h3>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-            Analysis of 5 clause differences between <span className="text-foreground">MSA v4.2</span> and <span className="text-foreground">Cloud Infrastructure SLA</span> reveals
-            <span className="text-glow-error font-medium"> 2 breaking</span> and
-            <span className="text-glow-warning font-medium"> 2 significant</span> differences requiring immediate attention.
+            {comparisonView ? (
+              <>
+                Analysis between <span className="text-foreground">{comparisonView.executive_summary.documents[0] || selectedDocumentA?.name || 'Document A'}</span> and <span className="text-foreground">{comparisonView.executive_summary.documents[1] || selectedDocumentB?.name || 'Document B'}</span> reveals
+                <span className="text-glow-error font-medium"> {impactCounts.breaking} breaking</span> and
+                <span className="text-glow-warning font-medium"> {impactCounts.significant} significant</span> differences requiring attention. {comparisonView.executive_summary.narrative}
+              </>
+            ) : (
+              'Select two indexed documents and run the comparison to populate grounded deltas, must-fix items and negotiation priorities.'
+            )}
           </p>
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-glow-error/20 border border-glow-error/30" />
-              <span className="text-muted-foreground">2 Breaking</span>
+              <span className="text-muted-foreground">{impactCounts.breaking} Breaking</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-glow-warning/20 border border-glow-warning/30" />
-              <span className="text-muted-foreground">2 Significant</span>
+              <span className="text-muted-foreground">{impactCounts.significant} Significant</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-muted border border-border" />
-              <span className="text-muted-foreground">1 Minor</span>
+              <span className="text-muted-foreground">{impactCounts.minor} Minor</span>
             </div>
+          </div>
+        </GlassCard>
+      </motion.div>
+
+      {/* Must-Fix & Negotiation Priorities */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}
+        className="grid md:grid-cols-2 gap-4 mb-6">
+        <GlassCard>
+          <div className="flex items-center gap-2 mb-3">
+            <Shield className="w-4 h-4 text-glow-error" />
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Must-Fix Before Approval</h4>
+          </div>
+          <div className="space-y-2">
+            {mustFixItems.length > 0 ? mustFixItems.map((item, index) => (
+              <div key={`${item.title}-${index}`} className="flex items-start gap-2 text-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-glow-error mt-1.5 shrink-0" />
+                <div>
+                  <p className="text-foreground font-medium">{item.title}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.detail}</p>
+                </div>
+              </div>
+            )) : <p className="text-xs text-muted-foreground">Run the grounded comparison to identify the highest-priority blockers before approval.</p>}
+          </div>
+        </GlassCard>
+        <GlassCard>
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-4 h-4 text-glow-warning" />
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Negotiation Priorities</h4>
+          </div>
+          <div className="space-y-2 text-xs text-muted-foreground leading-relaxed">
+            {negotiationPriorities.length > 0 ? negotiationPriorities.map((priority, index) => (
+              <p key={priority}><span className="text-foreground font-medium">{index + 1}.</span> {priority}</p>
+            )) : <p>Negotiation priorities will appear here after the grounded comparison runs.</p>}
           </div>
         </GlassCard>
       </motion.div>
 
       {/* Comparison Diffs */}
       <div className="space-y-3">
-        {comparisonDiffs.map((diff, i) => (
+        {differences.length > 0 ? differences.map((diff, i) => (
           <motion.div key={diff.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + i * 0.06 }}
             className="glass rounded-xl p-5 hover:border-primary/20 transition-all duration-300">
@@ -84,20 +373,31 @@ export default function ComparisonPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-4 mb-3">
               <div className="bg-glow-error/5 border border-glow-error/10 rounded-lg p-3">
-                <span className="text-[10px] uppercase tracking-wider text-glow-error/60 font-medium block mb-1">Document A</span>
-                <p className="text-xs text-foreground/80 leading-relaxed">{diff.docA}</p>
+                <span className="text-[10px] uppercase tracking-wider text-glow-error/60 font-medium block mb-1">{diff.doc_a_label}</span>
+                <p className="text-xs text-foreground/80 leading-relaxed">{diff.doc_a_text}</p>
               </div>
               <div className="bg-glow-success/5 border border-glow-success/10 rounded-lg p-3">
-                <span className="text-[10px] uppercase tracking-wider text-glow-success/60 font-medium block mb-1">Document B</span>
-                <p className="text-xs text-foreground/80 leading-relaxed">{diff.docB}</p>
+                <span className="text-[10px] uppercase tracking-wider text-glow-success/60 font-medium block mb-1">{diff.doc_b_label}</span>
+                <p className="text-xs text-foreground/80 leading-relaxed">{diff.doc_b_text}</p>
               </div>
             </div>
             <div className="flex items-start gap-2 bg-secondary/20 rounded-lg p-3">
               <ArrowLeftRight className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground leading-relaxed">{diff.businessImpact}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{diff.business_impact}</p>
             </div>
+            {showSourceBadges && diff.evidence.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/30 space-y-1">
+                {diff.evidence.map((item) => (
+                  <p key={item} className="text-[10px] text-muted-foreground">• {item}</p>
+                ))}
+              </div>
+            )}
           </motion.div>
-        ))}
+        )) : (
+          <GlassCard>
+            <div className="text-xs text-muted-foreground">Run the comparison to populate grounded differences, category tags and bilateral document evidence.</div>
+          </GlassCard>
+        )}
       </div>
 
       {/* Recommendation */}
@@ -105,15 +405,63 @@ export default function ComparisonPage() {
         className="mt-6">
         <GlassCard>
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-primary" />
+            <CheckCircle2 className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Recommendation</h3>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Proceed with Document B's terms as baseline. The liability cap and IP ownership clauses in Document A present unacceptable risk.
-            Negotiate Document A's data residency and incident response terms into Document B's framework. Generate a decision deck for stakeholder review.
+          <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+            {comparisonView ? (
+              comparisonView.recommendation.summary
+            ) : (
+              'Run the grounded comparison to generate a decision-ready recommendation and executive handoff note.'
+            )}
           </p>
+          <div className="flex items-center gap-3 text-[10px] text-muted-foreground pt-2 border-t border-border/30">
+            <span><span className="text-foreground font-medium">Handoff:</span> {comparisonView?.recommendation.handoff || 'Human review pending'}</span>
+            <span>·</span>
+            <span><span className="text-foreground font-medium">Artifact:</span> {comparisonView?.recommendation.artifact_label || 'Generate the comparison deck to create a local artifact.'}</span>
+          </div>
         </GlassCard>
       </motion.div>
+
+      <div className="grid lg:grid-cols-2 gap-4 mt-6">
+        <GlassCard>
+          <h3 className="text-sm font-medium text-foreground mb-3">Watchouts</h3>
+          <div className="space-y-2 text-xs text-muted-foreground">
+            {(comparisonView?.watchouts ?? []).length > 0 ? (comparisonView?.watchouts ?? []).map((item) => (
+              <p key={item}>• {item}</p>
+            )) : <p>Watchouts will appear here after the workflow runs.</p>}
+          </div>
+        </GlassCard>
+
+        <GlassCard>
+          <h3 className="text-sm font-medium text-foreground mb-3">Generated Artifacts</h3>
+          {deckExportState && (
+            <div className="mb-3 rounded-lg bg-secondary/20 border border-border/40 px-3 py-2">
+              <div className="flex items-center gap-2 mb-1">
+                <StatusPill status={deckExportState.status} />
+                <span className="text-xs font-medium text-foreground">Deck export status</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">{deckExportState.message}</p>
+            </div>
+          )}
+          <div className="space-y-2">
+            {allArtifacts.length > 0 ? allArtifacts.map((artifact) => (
+              <div key={`${artifact.artifact_type}-${artifact.path || artifact.label}`} className="flex items-center justify-between py-2 px-3 rounded-lg bg-secondary/20 hover:bg-secondary/30 transition-colors">
+                <div className="flex items-center gap-2 min-w-0">
+                  <StatusPill status={artifact.available ? 'ready' : 'pending'} />
+                  <div className="min-w-0">
+                    <span className="block text-xs text-foreground truncate">{artifact.download_name || artifact.label}</span>
+                    <span className="block text-[10px] text-muted-foreground truncate">{artifact.artifact_type}{artifact.path ? ` • ${artifact.path}` : ''}</span>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="h-7 text-[10px] text-muted-foreground hover:text-foreground" disabled={!artifact.available || !artifact.path} onClick={() => handleOpenArtifact(artifact)}>
+                  Open <ExternalLink className="w-3 h-3 ml-1" />
+                </Button>
+              </div>
+            )) : <div className="text-xs text-muted-foreground">Run the workflow and generate the deck to populate comparison artifacts.</div>}
+          </div>
+        </GlassCard>
+      </div>
     </motion.div>
   );
 }

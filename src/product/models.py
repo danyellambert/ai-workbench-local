@@ -48,6 +48,12 @@ class ProductDocumentRef(BaseModel):
     chunk_count: int = 0
     indexed_at: str | None = None
     loader_strategy_label: str | None = None
+    status: Literal["indexed", "indexing", "warning", "error", "pending"] = "indexed"
+    size_bytes: int | None = None
+    size_label: str | None = None
+    warnings: list[str] = Field(default_factory=list)
+    source_type: str | None = None
+    page_count: int | None = None
 
 
 class GroundingPreview(BaseModel):
@@ -73,7 +79,10 @@ class ProductWorkflowRequest(BaseModel):
     input_text: str = ""
     provider: str = "ollama"
     model: str | None = None
+    prompt_profile: str | None = None
     temperature: float = 0.2
+    top_p: float | None = None
+    max_tokens: int | None = None
     context_window_mode: Literal["auto", "manual"] = "auto"
     context_window: int | None = None
     use_document_context: bool = True

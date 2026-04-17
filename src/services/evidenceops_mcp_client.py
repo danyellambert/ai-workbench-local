@@ -19,10 +19,6 @@ from ..storage.runtime_paths import (
 )
 
 
-DEFAULT_EVIDENCEOPS_MCP_SERVER_KEY = "evidenceops_local"
-DEFAULT_CLINE_MCP_SETTINGS_PATH = Path("/Users/danyellambert/.cline/data/settings/cline_mcp_settings.json")
-
-
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -102,40 +98,6 @@ def resolve_evidenceops_mcp_client_config(
         args=[str(resolved_root / "scripts" / "run_evidenceops_mcp_server.py")],
         env=_default_evidenceops_env(resolved_root),
     )
-
-
-def build_evidenceops_mcp_server_entry(config: EvidenceOpsMcpClientConfig | None = None) -> dict[str, Any]:
-    resolved_config = config or resolve_evidenceops_mcp_client_config()
-    return {
-        "disabled": False,
-        "autoApprove": [],
-        "command": resolved_config.command,
-        "args": list(resolved_config.args),
-        "env": dict(resolved_config.env),
-    }
-
-
-def install_evidenceops_mcp_server_in_cline_settings(
-    *,
-    settings_path: Path | None = None,
-    config: EvidenceOpsMcpClientConfig | None = None,
-    server_key: str = DEFAULT_EVIDENCEOPS_MCP_SERVER_KEY,
-) -> dict[str, Any]:
-    resolved_settings_path = settings_path or DEFAULT_CLINE_MCP_SETTINGS_PATH
-    resolved_settings_path.parent.mkdir(parents=True, exist_ok=True)
-    payload: dict[str, Any] = {"mcpServers": {}}
-    if resolved_settings_path.exists():
-        try:
-            loaded = json.loads(resolved_settings_path.read_text(encoding="utf-8"))
-            if isinstance(loaded, dict):
-                payload = loaded
-        except (OSError, json.JSONDecodeError):
-            payload = {"mcpServers": {}}
-    mcp_servers = payload.get("mcpServers") if isinstance(payload.get("mcpServers"), dict) else {}
-    payload["mcpServers"] = mcp_servers
-    mcp_servers[str(server_key)] = build_evidenceops_mcp_server_entry(config)
-    resolved_settings_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    return payload
 
 
 class EvidenceOpsMcpClient:

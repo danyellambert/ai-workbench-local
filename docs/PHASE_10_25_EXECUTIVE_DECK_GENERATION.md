@@ -387,6 +387,29 @@ Deliverables:
 
 Complete the **Policy / Contract Comparison Deck** and prepare the foundation for **Decision Decks**.
 
+Current implementation slices for the **Policy Comparison web surface**:
+
+### Slice 3.1 — Policy Comparison backend view contract
+
+- [x] expose a dedicated comparison-oriented response contract from the Product API
+- [x] map structured comparison findings into UI-ready impact buckets and executive summary data
+- [x] preserve reuse of the existing `policy_contract_comparison_deck` export path
+
+### Slice 3.2 — Policy Comparison frontend integration
+
+- [x] replace mock document selectors with the real document library
+- [x] connect **Run Comparison** to `/api/product/run-workflow`
+- [x] connect **Generate Deck** to `/api/product/generate-deck`
+- [x] render real executive summary, must-fix items, negotiation priorities, diff cards and generated artifacts
+
+### Slice 3.3 — Policy Comparison validation / follow-up
+
+- [x] add backend presenter/API coverage for the comparison view
+- [x] add frontend test coverage for the real comparison tab flow
+- [ ] run the full backend test path in an environment with optional Python dependencies installed (`python-dotenv`, `openai`, `pypdf`, etc.)
+- [ ] enrich the workflow with clause-to-clause bilateral evidence extraction so each diff card can show a stronger left/right grounded mapping
+- [ ] add comparison-specific artifact download/open polish beyond the current local artifact actions
+
 ## Slice 4 — Operational action layer
 
 Complete the **Action Plan Deck**.

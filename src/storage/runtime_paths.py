@@ -88,3 +88,13 @@ def get_phase95_evidenceops_repository_snapshot_path(base_dir: Path) -> Path:
 def get_product_workflow_history_path(base_dir: Path) -> Path:
     runtime_root = get_runtime_root(base_dir)
     return _prefer_existing_legacy_path(runtime_root / "logs" / "product" / "workflow_history.json", base_dir / ".product_workflow_history.json")
+
+
+def get_runtime_controls_state_path(base_dir: Path) -> Path:
+    runtime_root = get_runtime_root(base_dir)
+    return runtime_root / "state" / "product" / "runtime_controls.json"
+
+
+def get_preferences_state_path(base_dir: Path) -> Path:
+    runtime_root = get_runtime_root(base_dir)
+    return runtime_root / "state" / "product" / "preferences.json"

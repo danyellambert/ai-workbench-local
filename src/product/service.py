@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from src.config import BASE_DIR, PresentationExportSettings, RagSettings
 from src.providers.registry import resolve_provider_runtime_profile
 from src.rag.loaders import LoadedDocument
-from src.rag.service import get_indexed_documents, normalize_rag_index, upsert_documents_in_rag_index
+from src.rag.service import get_indexed_documents, normalize_rag_index, remove_documents_from_rag_index, upsert_documents_in_rag_index
 from src.services.document_context import build_structured_document_context
 from src.services.presentation_export import (
     ACTION_PLAN_EXPORT_KIND,
@@ -16,7 +16,7 @@ from src.services.presentation_export import (
     POLICY_CONTRACT_COMPARISON_EXPORT_KIND,
 )
 from src.services.presentation_export_service import generate_executive_deck
-from src.storage.rag_store import load_rag_store, save_rag_store
+from src.storage.rag_store import clear_rag_store, load_rag_document_catalog, load_rag_store, save_rag_store
 from src.storage.runtime_paths import (
     get_phase95_evidenceops_action_store_path,
     get_phase95_evidenceops_worklog_path,
@@ -36,7 +36,7 @@ from .models import (
 )
 
 DEFAULT_WORKFLOW_QUERIES: dict[ProductWorkflowId, str] = {
-    "document_review": "Review the selected documents and produce a grounded executive summary with key findings, risks, gaps and recommended next actions.",
+    "document_review": "List the main risks, gaps and red flags in the selected documents. Produce grounded executive findings, top blockers, business impact and recommended next actions.",
     "policy_contract_comparison": "Compare the selected documents and identify the most relevant differences, business impact, watchouts and a grounded recommendation.",
     "action_plan_evidence_review": "Review the selected documents and derive a grounded action plan with owners, deadlines, evidence gaps and recommended next steps.",
     "candidate_review": "Review this candidate profile and summarize relevant experience, strengths, gaps, seniority signals and an initial recommendation.",
@@ -49,11 +49,13 @@ WORKFLOW_CONTRACT_DOCS: dict[ProductWorkflowId, str] = {
     "candidate_review": "docs/EXECUTIVE_DECK_GENERATION_CANDIDATE_REVIEW_DECK_CONTRACT_V1.md",
 }
 
-DOCUMENT_AGENT_WORKFLOW_DEFAULTS: dict[ProductWorkflowId, dict[str, str]] = {
+DOCUMENT_AGENT_WORKFLOW_DEFAULTS: dict[ProductWorkflowId, dict[str, object]] = {
     "document_review": {
         "agent_intent": "document_risk_review",
         "agent_tool": "review_document_risks",
         "agent_answer_mode": "friendly",
+        "document_review_findings_synthesis_enabled": True,
+        "document_review_findings_prompt_style": "hybrid",
     },
     "policy_contract_comparison": {
         "agent_intent": "document_comparison",
@@ -198,21 +200,67 @@ def _load_current_rag_index(rag_settings: RagSettings) -> dict[str, object] | No
     return normalize_rag_index(load_rag_store(rag_settings.store_path), rag_settings)
 
 
+def _format_size_label(size_bytes: int | None) -> str | None:
+    if not isinstance(size_bytes, int) or size_bytes <= 0:
+        return None
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    if size_bytes < 1024 * 1024:
+        return f"{round(size_bytes / 1024, 1)} KB"
+    return f"{round(size_bytes / (1024 * 1024), 1)} MB"
+
+
+def _normalize_document_warnings(raw_value: object) -> list[str]:
+    if not isinstance(raw_value, list):
+        return []
+    warnings: list[str] = []
+    for item in raw_value:
+        normalized = " ".join(str(item or "").split()).strip()
+        if normalized:
+            warnings.append(normalized)
+    return warnings
+
+
+def _derive_product_document_status(*, indexed_at: str | None, chunk_count: int, warnings: list[str]) -> str:
+    if indexed_at and chunk_count > 0:
+        return "warning" if warnings else "indexed"
+    if warnings:
+        return "error"
+    if chunk_count > 0:
+        return "indexing"
+    return "pending"
+
+
 def list_product_documents(rag_settings: RagSettings) -> list[ProductDocumentRef]:
-    rag_index = _load_current_rag_index(rag_settings)
-    documents = get_indexed_documents(rag_index, rag_settings) if rag_index else []
+    lightweight_documents = load_rag_document_catalog(rag_settings.store_path)
+    if isinstance(lightweight_documents, list):
+        documents = lightweight_documents
+    else:
+        rag_index = _load_current_rag_index(rag_settings)
+        documents = get_indexed_documents(rag_index, rag_settings) if rag_index else []
     normalized: list[ProductDocumentRef] = []
     for document in documents:
         loader_metadata = document.get("loader_metadata") if isinstance(document.get("loader_metadata"), dict) else {}
+        warnings = _normalize_document_warnings(loader_metadata.get("warnings"))
+        indexed_at = str(document.get("indexed_at") or "").strip() or None
+        size_bytes_raw = loader_metadata.get("size_bytes")
+        size_bytes = int(size_bytes_raw) if isinstance(size_bytes_raw, (int, float)) else None
+        chunk_count = int(document.get("chunk_count") or 0)
         normalized.append(
             ProductDocumentRef(
                 document_id=str(document.get("document_id") or document.get("file_hash") or "document"),
                 name=str(document.get("name") or "document"),
                 file_type=str(document.get("file_type") or "").strip() or None,
                 char_count=int(document.get("char_count") or 0),
-                chunk_count=int(document.get("chunk_count") or 0),
-                indexed_at=str(document.get("indexed_at") or "").strip() or None,
+                chunk_count=chunk_count,
+                indexed_at=indexed_at,
                 loader_strategy_label=str(loader_metadata.get("loader_strategy_label") or loader_metadata.get("strategy_label") or "").strip() or None,
+                status=_derive_product_document_status(indexed_at=indexed_at, chunk_count=chunk_count, warnings=warnings),
+                size_bytes=size_bytes,
+                size_label=_format_size_label(size_bytes),
+                warnings=warnings,
+                source_type=str(loader_metadata.get("source_type") or "").strip() or None,
+                page_count=int(loader_metadata.get("page_count")) if isinstance(loader_metadata.get("page_count"), (int, float)) else None,
             )
         )
     return normalized
@@ -223,6 +271,7 @@ def index_loaded_documents(
     *,
     rag_settings: RagSettings,
     provider_registry: dict[str, dict[str, object]],
+    progress_callback: Callable[[str, dict[str, object]], None] | None = None,
 ) -> tuple[list[ProductDocumentRef], dict[str, object]]:
     if not documents:
         return list_product_documents(rag_settings), {"ok": False, "message": "No documents were provided for indexing."}
@@ -241,6 +290,7 @@ def index_loaded_documents(
         settings=rag_settings,
         embedding_provider=embedding_provider,
         rag_index=rag_index,
+        progress_callback=progress_callback,
     )
     save_rag_store(rag_settings.store_path, updated_index)
     documents_after = list_product_documents(rag_settings)
@@ -248,6 +298,38 @@ def index_loaded_documents(
         "ok": True,
         "message": f"{len(documents)} document(s) indexed successfully.",
         "embedding_provider": runtime_profile.get("effective_provider"),
+        "sync_status": sync_status,
+    }
+
+
+def delete_product_documents(
+    document_ids: list[str],
+    *,
+    rag_settings: RagSettings,
+) -> tuple[list[ProductDocumentRef], dict[str, object]]:
+    normalized_ids = [str(item).strip() for item in document_ids if str(item).strip()]
+    if not normalized_ids:
+        return list_product_documents(rag_settings), {"ok": False, "message": "No document ids were provided for deletion.", "removed_count": 0}
+
+    documents_before = list_product_documents(rag_settings)
+    existing_document_ids = {item.document_id for item in documents_before}
+    removable_ids = [document_id for document_id in normalized_ids if document_id in existing_document_ids]
+    if not removable_ids:
+        return documents_before, {"ok": False, "message": "No matching indexed documents were found for deletion.", "removed_count": 0}
+
+    rag_index = _load_current_rag_index(rag_settings)
+    updated_index, sync_status = remove_documents_from_rag_index(rag_index, rag_settings, removable_ids)
+    if updated_index is None:
+        clear_rag_store(rag_settings.store_path)
+    else:
+        save_rag_store(rag_settings.store_path, updated_index)
+
+    documents_after = list_product_documents(rag_settings)
+    return documents_after, {
+        "ok": True,
+        "message": f"{len(removable_ids)} document(s) removed successfully.",
+        "removed_count": len(removable_ids),
+        "removed_document_ids": removable_ids,
         "sync_status": sync_status,
     }
 
@@ -673,7 +755,10 @@ def _run_structured_product_workflow(
         context_strategy=strategy,
         provider=request.provider,
         model=request.model,
+        prompt_profile=request.prompt_profile,
         temperature=request.temperature,
+        top_p=request.top_p,
+        max_tokens=request.max_tokens,
         context_window=(request.context_window if request.context_window_mode == "manual" else None),
         telemetry=telemetry,
     )
@@ -708,6 +793,9 @@ def _run_structured_product_workflow(
             "task_type": task_type,
             "provider": request.provider,
             "model": request.model,
+            "prompt_profile": request.prompt_profile,
+            "top_p": request.top_p,
+            "max_tokens": request.max_tokens,
             "context_strategy": strategy,
             "source_documents": list(request.document_ids),
             "workflow_contract": workflow_definition.workflow_contract,

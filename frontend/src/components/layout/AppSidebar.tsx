@@ -2,12 +2,13 @@ import { useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, FileText, Workflow, FileOutput, History,
-  MessageSquare, Layers, BarChart3, Terminal,
   Settings, Palette, Server, ChevronLeft, ChevronRight,
-  Sparkles, Shield, GitCompare, ClipboardList, UserCheck
+  Sparkles, Shield, GitCompare, ClipboardList, UserCheck,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { AI_LAB_ROUTES } from '@/lib/ai-lab-navigation';
+import { APP_CONFIG } from '@/lib/app-config';
 
 const productNav = [
   { label: 'Command Center', path: '/app', icon: LayoutDashboard },
@@ -22,12 +23,7 @@ const productNav = [
   { label: 'Run History', path: '/app/history', icon: History },
 ];
 
-const labNav = [
-  { label: 'Chat with RAG', path: '/app/lab/chat', icon: MessageSquare },
-  { label: 'Structured Outputs', path: '/app/lab/structured', icon: Layers },
-  { label: 'Model Comparison', path: '/app/lab/models', icon: BarChart3 },
-  { label: 'EvidenceOps MCP', path: '/app/lab/evidenceops', icon: Terminal },
-];
+const labNav = AI_LAB_ROUTES.map((route) => ({ label: route.label, path: route.path, icon: route.icon }));
 
 const systemNav = [
   { label: 'Runtime Controls', path: '/app/settings/runtime', icon: Server },
@@ -94,8 +90,8 @@ export default function AppSidebar() {
         </div>
         {!collapsed && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
-            <h1 className="text-sm font-semibold text-foreground truncate">AI Decision Studio</h1>
-            <p className="text-[10px] text-muted-foreground">Local · v2.4</p>
+            <h1 className="text-sm font-semibold text-foreground truncate">{APP_CONFIG.name}</h1>
+            <p className="text-[10px] text-muted-foreground">{APP_CONFIG.environment} · {APP_CONFIG.version}</p>
           </motion.div>
         )}
       </div>

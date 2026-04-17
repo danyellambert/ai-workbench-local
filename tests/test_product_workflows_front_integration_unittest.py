@@ -189,6 +189,59 @@ class _RuleBasedWorkflowProvider:
                 ensure_ascii=False,
             )
 
+        if "document_review_findings" in prompt and "Artemis III" in prompt:
+            return json.dumps(
+                {
+                    "task_type": "document_review_findings",
+                    "decision_summary": {
+                        "label": "Renegotiate",
+                        "status": "Requires Legal Review",
+                        "rationale": "NASA program and governance risks remain materially elevated around Artemis III, ISS transition and technical authority resilience.",
+                    },
+                    "findings": [
+                        {
+                            "severity": "critical",
+                            "category": "Program Risk",
+                            "title": "Artemis III readiness still carries elevated safety risk",
+                            "description": "The report states that Artemis III and follow-on missions still present a major safety concern and require renewed readiness discipline.",
+                            "recommendation": "Reassess Artemis III readiness gates before committing to downstream milestones.",
+                            "confidence": 0.87,
+                            "evidence": "has repeatedly raised concern regarding Artemis III and subsequent Artemis mission risk postures",
+                            "impact": "Human spaceflight risk may increase if schedule pressure overrides safety discipline.",
+                        },
+                        {
+                            "severity": "high",
+                            "category": "Operational Risk",
+                            "title": "ISS transition is entering its riskiest operating period",
+                            "description": "The report flags the ISS transition and deorbit period as a high-risk operating window that requires earlier planning decisions.",
+                            "recommendation": "Advance ISS transition and deorbit planning with explicit owners and milestones.",
+                            "confidence": 0.84,
+                            "evidence": "the International Space Station (ISS) as now entering the riskiest period of its operational life",
+                            "impact": "Late transition decisions could compound operational and safety exposure before 2030.",
+                        },
+                        {
+                            "severity": "high",
+                            "category": "Governance",
+                            "title": "Technical authority resilience is under pressure",
+                            "description": "The report warns that attrition, budget reduction and organizational pressure may weaken independent technical authority.",
+                            "recommendation": "Protect independent technical authorities against attrition and budget pressure.",
+                            "confidence": 0.81,
+                            "evidence": "workforce attrition, proposed budget reductions, and organizational pressures could erode their effectiveness",
+                            "impact": "Weaker independent review can degrade acquisition and safety decision quality.",
+                        },
+                    ],
+                    "top_blockers": [
+                        "Artemis III readiness still carries elevated safety risk",
+                        "ISS transition is entering its riskiest operating period",
+                    ],
+                    "business_impact": [
+                        "Mission readiness decisions still have material safety and governance exposure.",
+                        "Delayed ISS transition planning may increase operational risk before the 2030 deorbit target.",
+                    ],
+                },
+                ensure_ascii=False,
+            )
+
         if '"task_type": "extraction"' in prompt and "SEPARATION AGREEMENT" in prompt:
             return json.dumps(
                 {
@@ -405,6 +458,10 @@ class ProductWorkflowsFrontIntegrationTests(unittest.TestCase):
         self.assertEqual(run["result"].status, "warning")
         self.assertEqual(payload.tool_used, "review_document_risks")
         self.assertIn("Artemis III", run["result"].summary)
+        self.assertTrue(payload.document_review_findings)
+        self.assertEqual(payload.document_review_decision_summary.label, "Renegotiate")
+        self.assertTrue(payload.document_review_top_blockers)
+        self.assertTrue(payload.document_review_business_impact)
         self.assertTrue(run["sections"]["next_steps"])
         self.assertTrue(any(table.get("title") == "Risk review" for table in run["sections"]["tables"]))
         self.assertIn("Watchouts", run["panels_html"])

@@ -4,11 +4,14 @@ from __future__ import annotations
 from datetime import datetime
 import json
 import math
+import os
 from pathlib import Path
 import re
 import time
 import unicodedata
-from typing import Optional, Type
+from typing import Literal, Optional, Type
+
+from pydantic import BaseModel, Field
 
 from .base import (
     AgentSource,
@@ -20,6 +23,9 @@ from .base import (
     CVSectionContentItem,
     CodeAnalysisPayload,
     DocumentAgentPayload,
+    DocumentReviewDecisionSummary,
+    DocumentReviewFinding,
+    DocumentReviewFindingsPayload,
     ExtractionPayload,
     SummaryPayload,
 )
@@ -46,6 +52,39 @@ CHECKLIST_PART_CHUNK_SIZE = 28000
 CHECKLIST_PART_OVERLAP = 400
 CHECKLIST_MULTI_STAGE_QUESTION_THRESHOLD = 12
 CHECKLIST_MULTI_STAGE_LINE_THRESHOLD = 80
+DOCUMENT_REVIEW_FINDINGS_MAX_ITEMS = 8
+
+
+class DocumentReviewCandidateSelection(BaseModel):
+    """Small selection/refinement record used as a Nemotron fallback."""
+
+    candidate_id: str = Field(description="Candidate finding ID selected from the grounded input")
+    title_override: Optional[str] = Field(default=None, description="Optional shorter executive title")
+    recommendation_override: Optional[str] = Field(default=None, description="Optional shorter grounded recommendation")
+    impact_override: Optional[str] = Field(default=None, description="Optional short business impact")
+
+
+class DocumentReviewFindingsSelectionPayload(BaseModel):
+    """Reduced schema for Nemotron selection when full JSON synthesis is unstable."""
+
+    task_type: Literal["document_review_findings_selection"] = "document_review_findings_selection"
+    decision_summary: Optional[dict[str, object]] = Field(default=None, description="Optional decision summary")
+    selected_candidates: list[DocumentReviewCandidateSelection] = Field(default_factory=list, description="Selected candidates from the grounded input")
+    top_blockers: list[str] = Field(default_factory=list, description="Short blocker strings")
+    business_impact: list[str] = Field(default_factory=list, description="Short business impact statements")
+
+
+def _coerce_bool(value: object, *, default: bool) -> bool:
+    if isinstance(value, bool):
+        return value
+    text = str(value or "").strip().lower()
+    if not text:
+        return default
+    if text in {"1", "true", "yes", "on"}:
+        return True
+    if text in {"0", "false", "no", "off"}:
+        return False
+    return default
 
 
 def _normalize_matching_text(value: object) -> str:
@@ -55,6 +94,14 @@ def _normalize_matching_text(value: object) -> str:
     text = text.lower().replace("’", "'")
     text = re.sub(r"\s+", " ", text).strip()
     return text
+
+
+def _token_set(value: object) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]{4,}", _normalize_matching_text(value))
+        if len(token) >= 4
+    }
 
 
 def detect_checklist_domain_profile(*parts: str | None) -> str:
@@ -202,6 +249,8 @@ class TaskHandler:
                 model=request.model,
                 temperature=request.temperature,
                 context_window=request.context_window,
+                top_p=request.top_p,
+                max_tokens=request.max_tokens,
             )
             response_text = "".join(provider.iter_stream_text(stream))
             native_usage = get_provider_native_usage_metrics(provider)
@@ -3208,8 +3257,10 @@ class DocumentAgentTaskHandler(TaskHandler):
                 )
             elif tool_name == "review_document_risks":
                 payload, nested_result = self._run_document_risk_review_tool(
+                    provider=provider,
                     request=request,
                     context_strategy=context_strategy,
+                    sources=sources,
                 )
                 tool_runs.append(
                     AgentToolExecution(
@@ -3800,8 +3851,10 @@ class DocumentAgentTaskHandler(TaskHandler):
     def _run_document_risk_review_tool(
         self,
         *,
+        provider,
         request: TaskExecutionRequest,
         context_strategy: str,
+        sources: list[AgentSource],
     ) -> tuple[DocumentAgentPayload, StructuredResult]:
         nested_result = self._run_nested_structured_task(
             request=request,
@@ -3832,6 +3885,24 @@ class DocumentAgentTaskHandler(TaskHandler):
         if top_gap:
             summary += f" Main evidence gap: {top_gap}"
 
+        findings_payload, findings_synthesis_metadata = self._maybe_synthesize_document_review_findings(
+            provider=provider,
+            request=request,
+            extraction_payload=payload,
+            sources=sources,
+            summary=summary,
+            risks=risks,
+            gaps=gaps,
+            actions=actions,
+        )
+
+        synthesized_findings = list(findings_payload.findings) if findings_payload is not None else []
+        synthesized_recommendations = normalize_agent_bullet_points(
+            [item.recommendation for item in synthesized_findings if item.recommendation],
+            limit=4,
+        )
+        effective_actions = normalize_agent_bullet_points([*actions, *synthesized_recommendations], limit=6)
+
         return (
             DocumentAgentPayload(
                 user_intent=str(self._telemetry_dict(request).get("agent_intent") or "document_risk_review"),
@@ -3840,14 +3911,20 @@ class DocumentAgentTaskHandler(TaskHandler):
                 tool_used="review_document_risks",
                 summary=summary,
                 key_points=key_points,
-                recommended_actions=actions[:4],
+                recommended_actions=effective_actions[:4],
                 limitations=gaps,
+                document_review_decision_summary=(findings_payload.decision_summary if findings_payload is not None else None),
+                document_review_findings=synthesized_findings,
+                document_review_top_blockers=(list(findings_payload.top_blockers) if findings_payload is not None else []),
+                document_review_business_impact=(list(findings_payload.business_impact) if findings_payload is not None else []),
                 structured_response={
                     "review_type": "risk_gap_review",
                     "risks": risks,
                     "gaps": gaps,
-                    "actions": actions,
+                    "actions": effective_actions,
                     "extraction_payload": payload.model_dump(mode="json"),
+                    **({"findings_synthesis": findings_payload.model_dump(mode="json")} if findings_payload is not None else {}),
+                    **({"findings_synthesis_metadata": findings_synthesis_metadata} if findings_synthesis_metadata else {}),
                 },
                 confidence=confidence,
                 needs_review=bool(gaps and not risks),
@@ -3855,6 +3932,807 @@ class DocumentAgentTaskHandler(TaskHandler):
             ),
             nested_result,
         )
+
+    def _resolve_document_review_findings_synthesis_enabled(self, request: TaskExecutionRequest) -> bool:
+        telemetry = self._telemetry_dict(request)
+        if "document_review_findings_synthesis_enabled" in telemetry:
+            return _coerce_bool(telemetry.get("document_review_findings_synthesis_enabled"), default=True)
+        if "document_review_findings_disable_synthesis" in telemetry:
+            return not _coerce_bool(telemetry.get("document_review_findings_disable_synthesis"), default=False)
+        return _coerce_bool(os.getenv("DOCUMENT_REVIEW_FINDINGS_SYNTHESIS_ENABLED", "true"), default=True)
+
+    def _resolve_document_review_findings_model(self, request: TaskExecutionRequest, *, provider=None) -> str | None:
+        telemetry = self._telemetry_dict(request)
+        telemetry_override = str(
+            telemetry.get("document_review_findings_model")
+            or telemetry.get("document_review_findings_model_override")
+            or ""
+        ).strip()
+        if telemetry_override:
+            return telemetry_override
+
+        configured_model = str(os.getenv("DOCUMENT_REVIEW_FINDINGS_MODEL", "")).strip()
+        if configured_model:
+            return configured_model
+
+        prefer_nemotron = _coerce_bool(
+            telemetry.get("document_review_findings_prefer_nemotron", os.getenv("DOCUMENT_REVIEW_FINDINGS_PREFER_NEMOTRON", "false")),
+            default=False,
+        )
+
+        available_models: list[str] = []
+        if provider is not None and hasattr(provider, "list_available_models"):
+            try:
+                available_models.extend(
+                    str(model).strip()
+                    for model in provider.list_available_models()
+                    if str(model).strip()
+                )
+            except Exception:
+                pass
+
+        available_models = [
+            *available_models,
+            *[
+                model.strip()
+                for model in str(os.getenv("OLLAMA_AVAILABLE_MODELS", "")).split(",")
+                if model.strip()
+            ],
+        ]
+
+        if prefer_nemotron:
+            nemotron_model = next((model for model in available_models if "nemotron" in model.lower()), None)
+            if nemotron_model:
+                return nemotron_model
+
+        if request.model:
+            return request.model
+
+        nemotron_model = next((model for model in available_models if "nemotron" in model.lower()), None)
+        if nemotron_model:
+            return nemotron_model
+        return available_models[0] if available_models else None
+
+    def _resolve_document_review_findings_prompt_style(self, request: TaskExecutionRequest | None = None) -> str:
+        telemetry = self._telemetry_dict(request) if request is not None else {}
+        telemetry_style = str(telemetry.get("document_review_findings_prompt_style") or "").strip().lower()
+        if telemetry_style in {"extractive", "executive", "hybrid"}:
+            return telemetry_style
+        configured_style = str(os.getenv("DOCUMENT_REVIEW_FINDINGS_PROMPT_STYLE", "hybrid")).strip().lower()
+        if configured_style in {"extractive", "executive", "hybrid"}:
+            return configured_style
+        return "hybrid"
+
+    def _is_nemotron_document_review_findings_model(self, model_name: str | None) -> bool:
+        return "nemotron" in str(model_name or "").strip().lower()
+
+    def _document_review_finding_title(self, value: object, *, fallback: str) -> str:
+        cleaned = " ".join(str(value or "").split()).strip()
+        if not cleaned:
+            return fallback
+        sentence = re.split(r"(?<=[.!?])\s+", cleaned, maxsplit=1)[0].strip()
+        if len(sentence) <= 88:
+            return sentence
+        shortened = sentence[:85].rsplit(" ", 1)[0].strip()
+        return f"{shortened}..." if shortened else fallback
+
+    def _document_review_finding_category(self, *values: object) -> str:
+        haystack = " ".join(
+            " ".join(str(value or "").split()).strip().lower()
+            for value in values
+            if str(value or "").strip()
+        )
+        if any(token in haystack for token in ("liability", "indemn", "jurisdiction", "clause", "contract", "legal")):
+            return "Legal Risk"
+        if any(token in haystack for token in ("gdpr", "privacy", "pii", "residency", "regulatory", "compliance")):
+            return "Compliance"
+        if any(token in haystack for token in ("security", "breach", "incident", "access control", "encryption")):
+            return "Security"
+        if any(token in haystack for token in ("sla", "uptime", "downtime", "operational", "availability", "latency")):
+            return "Operational Risk"
+        if any(token in haystack for token in ("renewal", "commercial", "payment", "pricing", "term")):
+            return "Commercial"
+        if any(token in haystack for token in ("gap", "missing", "unclear", "not specify", "not specified")):
+            return "Evidence Gap"
+        return "Grounded Finding"
+
+    def _document_review_finding_severity(self, *values: object) -> str:
+        haystack = " ".join(
+            " ".join(str(value or "").split()).strip().lower()
+            for value in values
+            if str(value or "").strip()
+        )
+        critical_tokens = (
+            "unlimited liability",
+            "uncapped",
+            "material breach",
+            "critical",
+            "block approval",
+            "regulatory violation",
+            "non-compliance",
+        )
+        high_tokens = (
+            "missing",
+            "requires review",
+            "breach",
+            "violate",
+            "violation",
+            "weak",
+            "high risk",
+            "security",
+            "gdpr",
+            "compliance",
+            "unclear",
+            "risk",
+        )
+        low_tokens = ("minor", "optional", "nice to have")
+        if any(token in haystack for token in critical_tokens):
+            return "critical"
+        if any(token in haystack for token in high_tokens):
+            return "high"
+        if any(token in haystack for token in low_tokens):
+            return "low"
+        return "medium"
+
+    def _best_document_review_source_for_values(self, sources: list[AgentSource], *values: object) -> AgentSource | None:
+        if not sources:
+            return None
+        ranked = sorted(
+            sources,
+            key=lambda source: self._score_document_review_source_match(source, *values),
+            reverse=True,
+        )
+        best = ranked[0]
+        if self._score_document_review_source_match(best, *values) <= 0:
+            return None
+        return best
+
+    def _build_document_review_candidate_findings(
+        self,
+        *,
+        extraction_payload: ExtractionPayload,
+        sources: list[AgentSource],
+        actions: list[str],
+        summary: str,
+    ) -> list[dict[str, object]]:
+        candidates: list[dict[str, object]] = []
+        risk_items = list(extraction_payload.risks or [])
+        action_items = list(extraction_payload.action_items or [])
+        fallback_recommendation = actions[0] if actions else "Review this finding before approval."
+
+        for index, risk in enumerate(risk_items, start=1):
+            description = " ".join(str(risk.description or "").split()).strip()
+            if not description:
+                continue
+            impact = " ".join(str(risk.impact or "").split()).strip() or None
+            evidence = " ".join(str(risk.evidence or "").split()).strip() or description
+            paired_action = action_items[index - 1] if index - 1 < len(action_items) else None
+            recommendation = (
+                " ".join(str(getattr(paired_action, "description", "") or "").split()).strip()
+                or fallback_recommendation
+            )
+            matched_source = self._best_document_review_source_for_values(
+                sources,
+                evidence,
+                description,
+                impact or "",
+                recommendation,
+            )
+            candidates.append(
+                {
+                    "candidate_id": f"risk-{index}",
+                    "proposed_severity": self._document_review_finding_severity(description, impact or "", evidence, recommendation),
+                    "proposed_category": self._document_review_finding_category(description, impact or "", evidence),
+                    "proposed_title": self._document_review_finding_title(description, fallback=f"Grounded finding {index}"),
+                    "description": description,
+                    "impact": impact,
+                    "evidence": evidence,
+                    "recommendation": recommendation,
+                    "source_document_id": matched_source.document_id if matched_source is not None else None,
+                    "source_label": matched_source.source if matched_source is not None else None,
+                    "chunk_id": matched_source.chunk_id if matched_source is not None else None,
+                }
+            )
+            if len(candidates) >= 5:
+                break
+
+        if not candidates:
+            for index, gap in enumerate(list(extraction_payload.missing_information or [])[:3], start=1):
+                cleaned_gap = " ".join(str(gap or "").split()).strip()
+                if not cleaned_gap:
+                    continue
+                matched_source = self._best_document_review_source_for_values(sources, cleaned_gap, summary)
+                candidates.append(
+                    {
+                        "candidate_id": f"gap-{index}",
+                        "proposed_severity": self._document_review_finding_severity(cleaned_gap, summary),
+                        "proposed_category": "Evidence Gap",
+                        "proposed_title": self._document_review_finding_title(cleaned_gap, fallback=f"Evidence gap {index}"),
+                        "description": cleaned_gap,
+                        "impact": None,
+                        "evidence": cleaned_gap,
+                        "recommendation": fallback_recommendation,
+                        "source_document_id": matched_source.document_id if matched_source is not None else None,
+                        "source_label": matched_source.source if matched_source is not None else None,
+                        "chunk_id": matched_source.chunk_id if matched_source is not None else None,
+                    }
+                )
+        return candidates[:5]
+
+    def _build_document_review_findings_grounded_input(
+        self,
+        *,
+        extraction_payload: ExtractionPayload,
+        sources: list[AgentSource],
+        summary: str,
+        risks: list[str],
+        gaps: list[str],
+        actions: list[str],
+        model_name: str | None,
+        minimal: bool = False,
+    ) -> dict[str, object]:
+        candidate_findings = self._build_document_review_candidate_findings(
+            extraction_payload=extraction_payload,
+            sources=sources,
+            actions=actions,
+            summary=summary,
+        )
+        if not self._is_nemotron_document_review_findings_model(model_name):
+            return {
+                "summary": summary,
+                "main_subject": extraction_payload.main_subject,
+                "warnings": gaps,
+                "recommended_actions": actions,
+                "risks": extraction_payload.model_dump(mode="json").get("risks", []),
+                "action_items": extraction_payload.model_dump(mode="json").get("action_items", []),
+                "missing_information": list(extraction_payload.missing_information or []),
+                "sources": [source.model_dump(mode="json") for source in sources[:6]],
+                "grounded_sources": [source.model_dump(mode="json") for source in sources[:6]],
+                "candidate_findings": candidate_findings,
+            }
+
+        source_digest = [
+            {
+                "source": source.source,
+                "document_id": source.document_id,
+                "chunk_id": source.chunk_id,
+                "snippet": source.snippet,
+            }
+            for source in sources[: (3 if minimal else 4)]
+        ]
+        grounded_input: dict[str, object] = {
+            "summary": summary,
+            "main_subject": extraction_payload.main_subject,
+            "risk_statements": risks[: (3 if minimal else 4)],
+            "gap_statements": gaps[: (2 if minimal else 3)],
+            "recommended_actions": actions[: (3 if minimal else 4)],
+            "candidate_findings": candidate_findings[: (3 if minimal else 5)],
+            "source_digest": source_digest,
+        }
+        if not minimal:
+            grounded_input["missing_information"] = list(extraction_payload.missing_information or [])[:3]
+        return grounded_input
+
+    def _build_document_review_findings_prompt(
+        self,
+        *,
+        request: TaskExecutionRequest | None,
+        grounded_input: dict[str, object],
+        model_name: str | None = None,
+    ) -> str:
+        nemotron_mode = self._is_nemotron_document_review_findings_model(model_name)
+        prompt_style = self._resolve_document_review_findings_prompt_style(request)
+        if prompt_style == "extractive":
+            style_rules = """
+- Stay maximally extractive and conservative.
+- Prefer wording very close to the grounded evidence.
+- Minimize business interpretation unless the impact is explicit.
+""".strip()
+        elif prompt_style == "executive":
+            style_rules = """
+- Write concise executive findings suitable for a decision workspace.
+- You may compress wording for clarity, but remain fully grounded in the provided evidence.
+- Emphasize business impact and decision rationale when explicit.
+""".strip()
+        else:
+            style_rules = """
+- Use a hybrid style: executive clarity with conservative grounding.
+- Prefer concise executive wording, but never at the cost of traceability.
+- Keep impact and recommendations practical, short, and grounded.
+""".strip()
+        if nemotron_mode:
+            style_rules += "\n" + """
+- Prefer to refine, merge, or drop the `candidate_findings` already present in the grounded input.
+- Do not invent new findings when the candidate findings already cover the grounded material.
+- Preserve `source_document_id`, `source_label`, and `chunk_id` from candidate findings when they are present and still grounded.
+- Keep fields compact: title <= 12 words, description <= 28 words, recommendation <= 18 words, impact <= 18 words.
+- Return 2 to 5 findings maximum.
+""".strip()
+            target_schema = {
+                "task_type": "document_review_findings",
+                "decision_summary": {
+                    "label": "Approve with changes",
+                    "status": "Requires Review",
+                    "rationale": "Short conservative rationale grounded in the supplied material.",
+                },
+                "findings": [
+                    {
+                        "severity": "high",
+                        "category": "Operational Risk",
+                        "title": "Short grounded finding title",
+                        "description": "Short grounded description",
+                        "recommendation": "Short grounded recommendation",
+                        "confidence": 0.78,
+                        "evidence": "Exact or closely quoted grounded evidence",
+                        "impact": "Short business impact statement",
+                        "source_document_id": "doc-1",
+                        "source_label": "contract.pdf",
+                        "chunk_id": 1,
+                    }
+                ],
+                "top_blockers": ["Short blocker"],
+                "business_impact": ["Short business impact statement"],
+            }
+            schema_json = json.dumps(target_schema, ensure_ascii=False, indent=2)
+        else:
+            schema_json = json.dumps(DocumentReviewFindingsPayload.model_json_schema(), ensure_ascii=False, indent=2)
+        grounded_json = json.dumps(grounded_input, ensure_ascii=False, indent=2)
+        return f"""
+You are generating native findings for a Document Review workspace.
+Return ONLY one valid JSON object.
+Do not include markdown fences.
+Use only the grounded material provided below.
+
+Rules:
+- Never invent `source_document_id`, `source_label`, `chunk_id`, `owner`, or `due_date`.
+- If a source or chunk cannot be grounded from the provided material, return it as null.
+- Every finding must be supported by explicit grounded evidence copied or closely quoted from the input.
+- Do not create duplicate findings with slightly different wording.
+- Prefer 3 to 8 high-signal findings; if the grounded material is thinner, return fewer findings instead of inventing.
+- `decision_summary` must stay conservative and grounded in the provided risks, actions, gaps, and evidence.
+- `top_blockers` should be short strings only.
+- `business_impact` should be short executive statements only.
+- Confidence must reflect grounding strength; do not use 1.0.
+{style_rules}
+
+Target JSON schema:
+{schema_json}
+
+Grounded input:
+{grounded_json}
+"""
+
+    def _build_document_review_findings_selection_prompt(
+        self,
+        *,
+        request: TaskExecutionRequest | None,
+        grounded_input: dict[str, object],
+        model_name: str | None = None,
+    ) -> str:
+        prompt_style = self._resolve_document_review_findings_prompt_style(request)
+        style_note = {
+            "extractive": "Stay conservative and prefer the existing candidate wording.",
+            "executive": "Make titles and impact slightly more executive, but stay grounded.",
+            "hybrid": "Prefer concise executive clarity while preserving the grounded candidate wording.",
+        }.get(prompt_style, "Stay grounded and concise.")
+        schema_json = json.dumps(DocumentReviewFindingsSelectionPayload.model_json_schema(), ensure_ascii=False, indent=2)
+        grounded_json = json.dumps(grounded_input, ensure_ascii=False, indent=2)
+        return f"""
+You are selecting the best grounded candidate findings for a Document Review workspace.
+Return ONLY one valid JSON object.
+Do not include markdown fences.
+Do not invent new findings.
+Select only from `candidate_findings` using their `candidate_id` values.
+
+Rules:
+- Select 2 to 5 candidates maximum.
+- `selected_candidates[].candidate_id` must exactly match an existing candidate ID.
+- `title_override`, `recommendation_override`, and `impact_override` are optional and must remain short and grounded.
+- Keep `top_blockers` short.
+- Keep `business_impact` short.
+- {style_note}
+
+Target JSON schema:
+{schema_json}
+
+Grounded input:
+{grounded_json}
+"""
+
+    def _materialize_document_review_findings_from_selection(
+        self,
+        selection_payload: DocumentReviewFindingsSelectionPayload,
+        *,
+        candidate_findings: list[dict[str, object]],
+    ) -> DocumentReviewFindingsPayload:
+        candidate_map = {
+            str(item.get("candidate_id") or "").strip(): item
+            for item in candidate_findings
+            if str(item.get("candidate_id") or "").strip()
+        }
+        findings: list[DocumentReviewFinding] = []
+        for selected in selection_payload.selected_candidates:
+            candidate = candidate_map.get(str(selected.candidate_id).strip())
+            if not candidate:
+                continue
+            findings.append(
+                DocumentReviewFinding(
+                    severity=str(candidate.get("proposed_severity") or "medium"),
+                    category=str(candidate.get("proposed_category") or "Grounded Finding"),
+                    title=str(selected.title_override or candidate.get("proposed_title") or candidate.get("description") or "Grounded finding"),
+                    description=str(candidate.get("description") or "").strip(),
+                    recommendation=str(selected.recommendation_override or candidate.get("recommendation") or "").strip() or None,
+                    confidence=0.78,
+                    evidence=str(candidate.get("evidence") or candidate.get("description") or "").strip(),
+                    impact=str(selected.impact_override or candidate.get("impact") or "").strip() or None,
+                    source_document_id=(str(candidate.get("source_document_id") or "").strip() or None),
+                    source_label=(str(candidate.get("source_label") or "").strip() or None),
+                    chunk_id=(candidate.get("chunk_id") if isinstance(candidate.get("chunk_id"), int) else None),
+                )
+            )
+
+        decision_summary = None
+        if isinstance(selection_payload.decision_summary, dict):
+            label = str(selection_payload.decision_summary.get("label") or "").strip() or None
+            status = str(selection_payload.decision_summary.get("status") or "").strip() or None
+            rationale = str(selection_payload.decision_summary.get("rationale") or "").strip() or None
+            if label or status or rationale:
+                decision_summary = DocumentReviewDecisionSummary(
+                    label=label,
+                    status=status,
+                    rationale=rationale,
+                )
+        if decision_summary is None and findings:
+            decision_summary = DocumentReviewDecisionSummary(
+                label="Approve with changes",
+                status="Requires Review",
+                rationale=f"{len(findings)} grounded finding(s) require changes or review before approval.",
+            )
+
+        return DocumentReviewFindingsPayload(
+            decision_summary=decision_summary,
+            findings=findings,
+            top_blockers=selection_payload.top_blockers,
+            business_impact=selection_payload.business_impact,
+        )
+
+    def _score_document_review_candidate_match(self, finding: DocumentReviewFinding, candidate: dict[str, object]) -> int:
+        return max(
+            self._score_document_review_source_match(
+                AgentSource(
+                    source=str(candidate.get("source_label") or "candidate"),
+                    document_id=str(candidate.get("source_document_id") or "") or None,
+                    chunk_id=int(candidate.get("chunk_id")) if isinstance(candidate.get("chunk_id"), int) else None,
+                    snippet=str(candidate.get("evidence") or "") or None,
+                ),
+                finding.evidence,
+                finding.description,
+                finding.title,
+                finding.recommendation,
+                finding.impact,
+            ),
+            len(_token_set(str(candidate.get("description") or "")) & _token_set(finding.description or "")),
+            len(_token_set(str(candidate.get("evidence") or "")) & _token_set(finding.evidence or "")),
+        )
+
+    def _match_document_review_candidate(
+        self,
+        finding: DocumentReviewFinding,
+        candidate_findings: list[dict[str, object]] | None,
+    ) -> dict[str, object] | None:
+        if not candidate_findings:
+            return None
+        ranked = sorted(
+            candidate_findings,
+            key=lambda item: self._score_document_review_candidate_match(finding, item),
+            reverse=True,
+        )
+        best = ranked[0]
+        if self._score_document_review_candidate_match(finding, best) <= 0:
+            return None
+        return best
+
+    def _score_document_review_source_match(self, source: AgentSource, *values: object) -> int:
+        haystack = " ".join(
+            " ".join(str(item or "").split()).strip().lower()
+            for item in (source.source, source.document_id, source.snippet)
+            if str(item or "").strip()
+        )
+        probe = " ".join(" ".join(str(value or "").split()).strip().lower() for value in values if str(value or "").strip())
+        if not haystack or not probe:
+            return 0
+        tokens = {token for token in re.findall(r"[a-z0-9]{4,}", probe) if len(token) >= 4}
+        if not tokens:
+            return 0
+        return sum(1 for token in tokens if token in haystack)
+
+    def _match_document_review_source(self, finding: DocumentReviewFinding, sources: list[AgentSource]) -> AgentSource | None:
+        if not sources:
+            return None
+        direct_match = next(
+            (
+                source
+                for source in sources
+                if (
+                    finding.source_document_id
+                    and source.document_id
+                    and str(finding.source_document_id).strip().lower() == str(source.document_id).strip().lower()
+                )
+                or (
+                    finding.source_label
+                    and str(finding.source_label).strip().lower() == str(source.source).strip().lower()
+                )
+            ),
+            None,
+        )
+        if direct_match is not None:
+            return direct_match
+        ranked = sorted(
+            sources,
+            key=lambda source: self._score_document_review_source_match(
+                source,
+                finding.evidence,
+                finding.description,
+                finding.title,
+                finding.impact,
+            ),
+            reverse=True,
+        )
+        best = ranked[0]
+        if self._score_document_review_source_match(best, finding.evidence, finding.description, finding.title, finding.impact) <= 0:
+            return None
+        return best
+
+    def _sanitize_document_review_findings_payload(
+        self,
+        payload: DocumentReviewFindingsPayload,
+        *,
+        sources: list[AgentSource],
+        candidate_findings: list[dict[str, object]] | None = None,
+        prefer_candidate_fields: bool = False,
+    ) -> DocumentReviewFindingsPayload:
+        normalized_findings: list[DocumentReviewFinding] = []
+        seen_findings: set[tuple[str, str, str]] = set()
+        for item in payload.findings:
+            if not item.title.strip() or not item.description.strip() or not item.evidence.strip():
+                continue
+            matched_candidate = self._match_document_review_candidate(item, candidate_findings)
+            matched_source = self._match_document_review_source(item, sources)
+            base_confidence = float(item.confidence or 0.0) if isinstance(item.confidence, (int, float)) else 0.0
+            audit_confidence = 0.52
+            if matched_source is not None:
+                audit_confidence += 0.18
+            if item.recommendation:
+                audit_confidence += 0.04
+            if item.impact:
+                audit_confidence += 0.04
+            if len(item.evidence.split()) >= 8:
+                audit_confidence += 0.03
+            resolved_confidence = round(max(base_confidence, min(audit_confidence, 0.95)), 3)
+            candidate_update: dict[str, object] = {}
+            if prefer_candidate_fields and matched_candidate is not None:
+                candidate_update = {
+                    "severity": str(matched_candidate.get("proposed_severity") or item.severity),
+                    "category": str(matched_candidate.get("proposed_category") or item.category),
+                    "description": str(matched_candidate.get("description") or item.description),
+                    "recommendation": str(matched_candidate.get("recommendation") or item.recommendation) or item.recommendation,
+                    "impact": str(matched_candidate.get("impact") or item.impact) or item.impact,
+                    "source_document_id": matched_candidate.get("source_document_id") or item.source_document_id,
+                    "source_label": matched_candidate.get("source_label") or item.source_label,
+                    "chunk_id": matched_candidate.get("chunk_id") if matched_candidate.get("chunk_id") is not None else item.chunk_id,
+                }
+            normalized_item = item.model_copy(
+                update={
+                    **candidate_update,
+                    "source_document_id": matched_source.document_id if matched_source is not None else item.source_document_id,
+                    "source_label": matched_source.source if matched_source is not None else item.source_label,
+                    "chunk_id": matched_source.chunk_id if matched_source is not None else item.chunk_id,
+                    "confidence": resolved_confidence,
+                }
+            )
+            key = (
+                normalized_item.severity,
+                normalized_item.title.strip().casefold(),
+                normalized_item.evidence.strip().casefold(),
+            )
+            if key in seen_findings:
+                continue
+            seen_findings.add(key)
+            normalized_findings.append(normalized_item)
+            if len(normalized_findings) >= DOCUMENT_REVIEW_FINDINGS_MAX_ITEMS:
+                break
+
+        finding_titles = [item.title for item in normalized_findings if item.title]
+        top_blockers = normalize_agent_bullet_points(payload.top_blockers, limit=4)
+        if not top_blockers or not any(blocker.casefold() in {title.casefold() for title in finding_titles} for blocker in top_blockers):
+            top_blockers = normalize_agent_bullet_points(finding_titles, limit=4)
+        business_impact = normalize_agent_bullet_points(payload.business_impact, limit=4)
+        return payload.model_copy(
+            update={
+                "findings": normalized_findings,
+                "top_blockers": top_blockers,
+                "business_impact": business_impact,
+            }
+        )
+
+    def _maybe_synthesize_document_review_findings(
+        self,
+        *,
+        provider,
+        request: TaskExecutionRequest,
+        extraction_payload: ExtractionPayload,
+        sources: list[AgentSource],
+        summary: str,
+        risks: list[str],
+        gaps: list[str],
+        actions: list[str],
+    ) -> tuple[DocumentReviewFindingsPayload | None, dict[str, object] | None]:
+        if not (risks or gaps or actions):
+            return None, None
+
+        if not self._resolve_document_review_findings_synthesis_enabled(request):
+            return None, {
+                "success": False,
+                "skipped": True,
+                "reason": "document_review_findings_synthesis_disabled",
+            }
+
+        model_override = self._resolve_document_review_findings_model(request, provider=provider)
+        if not model_override:
+            return None, {
+                "success": False,
+                "skipped": True,
+                "reason": "document_review_findings_model_not_configured",
+            }
+
+        synthesis_request = request.model_copy(
+            update={
+                "task_type": "document_review_findings",
+                "model": model_override,
+                "temperature": 0.0,
+                "top_p": 0.7 if self._is_nemotron_document_review_findings_model(model_override) else request.top_p,
+                "max_tokens": 700 if self._is_nemotron_document_review_findings_model(model_override) else request.max_tokens,
+                "telemetry": dict(self._telemetry_dict(request)),
+            }
+        )
+        max_attempts = 2 if self._is_nemotron_document_review_findings_model(model_override) else 1
+        last_error: dict[str, object] | None = None
+
+        for attempt in range(1, max_attempts + 1):
+            grounded_input = self._build_document_review_findings_grounded_input(
+                extraction_payload=extraction_payload,
+                sources=sources,
+                summary=summary,
+                risks=risks,
+                gaps=gaps,
+                actions=actions,
+                model_name=model_override,
+                minimal=(attempt > 1),
+            )
+            prompt = self._build_document_review_findings_prompt(
+                request=request,
+                grounded_input=grounded_input,
+                model_name=model_override,
+            )
+            self._set_telemetry_value(synthesis_request, "current_stage", f"document_review_findings_synthesis_attempt_{attempt}")
+
+            try:
+                response_text = self._collect_response_text(provider, synthesis_request, prompt)
+                result = self._parse_with_recovery(
+                    provider=provider,
+                    request=synthesis_request,
+                    response_text=response_text,
+                    payload_schema=DocumentReviewFindingsPayload,
+                    original_prompt=prompt,
+                )
+            except Exception as error:
+                last_error = {
+                    "success": False,
+                    "error": str(error),
+                    "model": synthesis_request.model,
+                    "attempt": attempt,
+                }
+                continue
+
+            if not result.success or not isinstance(result.validated_output, DocumentReviewFindingsPayload):
+                last_error = {
+                    "success": False,
+                    "error": result.validation_error or result.parsing_error or (result.error.message if result.error else "document_review_findings_synthesis_failed"),
+                    "model": synthesis_request.model,
+                    "attempt": attempt,
+                }
+                continue
+
+            sanitized = self._sanitize_document_review_findings_payload(result.validated_output, sources=sources)
+            if self._is_nemotron_document_review_findings_model(model_override):
+                sanitized = self._sanitize_document_review_findings_payload(
+                    sanitized,
+                    sources=sources,
+                    candidate_findings=list(grounded_input.get("candidate_findings") or []),
+                    prefer_candidate_fields=True,
+                )
+            if not sanitized.findings:
+                last_error = {
+                    "success": False,
+                    "error": "document_review_findings_synthesis_returned_no_grounded_findings",
+                    "model": synthesis_request.model,
+                    "attempt": attempt,
+                }
+                continue
+            return sanitized, {
+                "success": True,
+                "model": synthesis_request.model,
+                "prompt_style": self._resolve_document_review_findings_prompt_style(request),
+                "finding_count": len(sanitized.findings),
+                "attempts": attempt,
+            }
+
+        if self._is_nemotron_document_review_findings_model(model_override):
+            fallback_grounded_input = self._build_document_review_findings_grounded_input(
+                extraction_payload=extraction_payload,
+                sources=sources,
+                summary=summary,
+                risks=risks,
+                gaps=gaps,
+                actions=actions,
+                model_name=model_override,
+                minimal=True,
+            )
+            selection_prompt = self._build_document_review_findings_selection_prompt(
+                request=request,
+                grounded_input=fallback_grounded_input,
+                model_name=model_override,
+            )
+            selection_request = synthesis_request.model_copy(
+                update={
+                    "task_type": "document_review_findings_selection",
+                    "max_tokens": 320,
+                    "top_p": 0.6,
+                }
+            )
+            self._set_telemetry_value(selection_request, "current_stage", "document_review_findings_selection_fallback")
+            try:
+                selection_response = self._collect_response_text(provider, selection_request, selection_prompt)
+                selection_result = self._parse_with_recovery(
+                    provider=provider,
+                    request=selection_request,
+                    response_text=selection_response,
+                    payload_schema=DocumentReviewFindingsSelectionPayload,
+                    original_prompt=selection_prompt,
+                )
+                if selection_result.success and isinstance(selection_result.validated_output, DocumentReviewFindingsSelectionPayload):
+                    materialized = self._materialize_document_review_findings_from_selection(
+                        selection_result.validated_output,
+                        candidate_findings=list(fallback_grounded_input.get("candidate_findings") or []),
+                    )
+                    sanitized = self._sanitize_document_review_findings_payload(
+                        materialized,
+                        sources=sources,
+                        candidate_findings=list(fallback_grounded_input.get("candidate_findings") or []),
+                        prefer_candidate_fields=True,
+                    )
+                    if sanitized.findings:
+                        return sanitized, {
+                            "success": True,
+                            "model": synthesis_request.model,
+                            "prompt_style": self._resolve_document_review_findings_prompt_style(request),
+                            "finding_count": len(sanitized.findings),
+                            "attempts": max_attempts,
+                            "fallback_mode": "candidate_selection",
+                        }
+            except Exception as error:
+                last_error = {
+                    "success": False,
+                    "error": str(error),
+                    "model": synthesis_request.model,
+                    "attempt": max_attempts,
+                    "fallback_mode": "candidate_selection",
+                }
+
+        return None, {
+            **(last_error or {"success": False, "error": "document_review_findings_synthesis_failed", "model": synthesis_request.model}),
+            "attempts": max_attempts,
+        }
 
     def _run_operational_task_extraction_tool(
         self,
@@ -4100,6 +4978,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     "label": label,
                     "summary": payload.executive_summary,
                     "key_points": normalize_agent_bullet_points(payload.key_insights or [topic.title for topic in payload.topics], limit=4),
+                    "evidence_lines": self._comparison_summary_evidence_lines(payload),
                     "quality_score": nested_result.quality_score,
                 }
             )
@@ -4134,11 +5013,14 @@ class DocumentAgentTaskHandler(TaskHandler):
         ]
         findings.extend(
             ComparisonFinding(
-                finding_type="cross_document_observation",
+                finding_type=self._infer_cross_document_finding_type(point),
                 title=self._short_label_from_text(point),
                 description=point,
                 documents=[str(item["label"]) for item in document_summaries],
-                evidence=[],
+                evidence=[
+                    f"{item['label']}: {self._best_document_summary_evidence(point, item) or item['summary']}"
+                    for item in document_summaries[:2]
+                ],
             )
             for point in comparison_points
         )
@@ -4228,6 +5110,63 @@ class DocumentAgentTaskHandler(TaskHandler):
             return "Comparison finding"
         words = cleaned.split()
         return " ".join(words[:8]) + ("…" if len(words) > 8 else "")
+
+    def _comparison_summary_evidence_lines(self, payload: SummaryPayload) -> list[str]:
+        candidates: list[object] = [payload.executive_summary, *(payload.key_insights or [])]
+        for topic in payload.topics[:6]:
+            candidates.extend(topic.supporting_evidence[:2])
+            candidates.extend(topic.key_points[:2])
+        return normalize_agent_bullet_points(candidates, limit=10)
+
+    def _score_comparison_support_line(self, probe: str, candidate: str) -> int:
+        normalized_probe = _normalize_matching_text(probe)
+        normalized_candidate = _normalize_matching_text(candidate)
+        if not normalized_probe or not normalized_candidate:
+            return 0
+        probe_tokens = {token for token in re.findall(r"[a-z0-9]{4,}", normalized_probe) if len(token) >= 4}
+        if not probe_tokens:
+            return 0
+        return sum(1 for token in probe_tokens if token in normalized_candidate)
+
+    def _best_document_summary_evidence(self, point: str, summary_item: dict[str, object]) -> str | None:
+        candidates = [
+            *(summary_item.get("evidence_lines") or []),
+            *(summary_item.get("key_points") or []),
+            summary_item.get("summary") or "",
+        ]
+        best_line = ""
+        best_score = -1
+        for candidate in candidates:
+            cleaned = " ".join(str(candidate or "").split()).strip()
+            if not cleaned:
+                continue
+            score = self._score_comparison_support_line(point, cleaned)
+            if score > best_score:
+                best_score = score
+                best_line = cleaned
+        return best_line or None
+
+    def _infer_cross_document_finding_type(self, point: str) -> str:
+        normalized = _normalize_matching_text(point)
+        if any(token in normalized for token in ("approval", "revalidation", "quarterly", "manager acknowledgment")):
+            return "approval_change"
+        if any(token in normalized for token in ("liability", "cap", "uncapped", "indemn")):
+            return "liability_delta"
+        if any(token in normalized for token in ("incident", "24 hours", "escalated", "notification")):
+            return "incident_response_delta"
+        if any(token in normalized for token in ("vendor", "onboarding", "reassessment", "supplier")):
+            return "vendor_oversight_delta"
+        if any(token in normalized for token in ("retained", "retention", "logs", "telemetry", "storage")):
+            return "retention_delta"
+        if any(token in normalized for token in ("mfa", "multi factor", "authentication", "privileged")):
+            return "identity_control_delta"
+        if any(token in normalized for token in ("audit", "reporting", "evidence")):
+            return "auditability_delta"
+        if any(token in normalized for token in ("renewal", "notice", "term", "termination")):
+            return "commercial_term_delta"
+        if any(token in normalized for token in ("ip", "intellectual property", "derivative")):
+            return "ip_delta"
+        return "cross_document_observation"
 
     def _build_document_agent_consult_prompt(self, *, user_query: str, context_text: str) -> str:
         return f"""

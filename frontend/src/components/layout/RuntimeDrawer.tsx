@@ -1,96 +1,181 @@
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useAppStore } from '@/lib/store';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
+import { useAppStore } from '@/lib/store';
+import { getRuntimeControls } from '@/lib/product-api';
+import {
+  buildCatalogLookup,
+  deriveRuntimeFallbackChain,
+  formatRuntimeUpdatedAt,
+  getRuntimeConnection,
+} from '@/lib/runtime-controls-ui';
+
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div className="space-y-3">
+    <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</h4>
+    {children}
+  </div>
+);
+
+const Control = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="space-y-1.5">
+    <Label className="text-xs text-muted-foreground">{label}</Label>
+    {children}
+  </div>
+);
+
+const ValueBox = ({ children, mono = false }: { children: React.ReactNode; mono?: boolean }) => (
+  <div className={`rounded-md border border-border/50 bg-secondary/20 px-3 py-2 text-xs text-foreground ${mono ? 'font-mono text-[11px]' : ''}`}>
+    {children}
+  </div>
+);
 
 export default function RuntimeDrawer() {
   const { runtimeDrawerOpen, setRuntimeDrawerOpen } = useAppStore();
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['runtime-controls'],
+    queryFn: getRuntimeControls,
+    refetchOnWindowFocus: false,
+  });
 
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="space-y-3">
-      <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{title}</h4>
-      {children}
-    </div>
-  );
-
-  const Control = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="space-y-1.5">
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      {children}
-    </div>
-  );
+  const activeProfile = data?.active_profile;
+  const primaryConnection = activeProfile ? getRuntimeConnection(data, activeProfile.primaryConnectionId) : undefined;
+  const embeddingConnection = activeProfile ? getRuntimeConnection(data, activeProfile.embeddingConnectionId) : undefined;
+  const policyLookup = buildCatalogLookup(data?.catalogs.executionPolicies);
+  const docPresetLookup = buildCatalogLookup(data?.catalogs.docPresets);
+  const qualityLookup = buildCatalogLookup(data?.catalogs.qualityPostures);
+  const fallbackChain = activeProfile ? deriveRuntimeFallbackChain(activeProfile, data) : [];
 
   return (
     <Sheet open={runtimeDrawerOpen} onOpenChange={setRuntimeDrawerOpen}>
-      <SheetContent className="w-[380px] bg-card border-border overflow-y-auto">
+      <SheetContent className="w-[380px] overflow-y-auto border-border bg-card">
         <SheetHeader>
-          <SheetTitle className="text-sm flex items-center gap-2">
+          <SheetTitle className="flex items-center gap-2 text-sm">
             Runtime Controls
-            <Badge variant="outline" className="text-[10px] border-glow-success/30 text-glow-success">Active</Badge>
+            <Badge variant="outline" className="border-glow-success/30 text-[10px] text-glow-success">
+              Live
+            </Badge>
           </SheetTitle>
         </SheetHeader>
 
-        <div className="space-y-6 mt-6">
-          <Section title="Generation">
-            <Control label="Provider">
-              <Select defaultValue="ollama"><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="ollama">Ollama</SelectItem><SelectItem value="openai">OpenAI Compatible</SelectItem><SelectItem value="hf">HuggingFace Server</SelectItem></SelectContent>
-              </Select>
-            </Control>
-            <Control label="Model">
-              <Select defaultValue="qwen"><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="qwen">qwen2.5:32b-instruct</SelectItem><SelectItem value="llama">llama3.1:70b-instruct</SelectItem><SelectItem value="mistral">mistral:7b-instruct</SelectItem></SelectContent>
-              </Select>
-            </Control>
-            <Control label="Temperature — 0.3">
-              <Slider defaultValue={[0.3]} min={0} max={1} step={0.05} className="py-1" />
-            </Control>
-            <Control label="Context Window">
-              <Select defaultValue="auto"><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="auto">Auto</SelectItem><SelectItem value="4k">4,096</SelectItem><SelectItem value="8k">8,192</SelectItem><SelectItem value="16k">16,384</SelectItem><SelectItem value="32k">32,768</SelectItem></SelectContent>
-              </Select>
-            </Control>
-          </Section>
+        <div className="mt-6 space-y-6">
+          {!activeProfile && (
+            <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 text-[10px] text-muted-foreground">
+              {isLoading ? 'Loading live runtime controls…' : isError ? 'Runtime Controls unavailable from backend.' : 'No runtime profile available.'}
+            </div>
+          )}
 
-          <Separator />
+          {activeProfile && (
+            <>
+              <div className="space-y-2 rounded-lg border border-border/50 bg-secondary/20 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-medium text-foreground">{activeProfile.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{primaryConnection?.name ?? activeProfile.primaryConnectionId} · {activeProfile.primaryModel}</p>
+                  </div>
+                  <Badge variant="outline" className="border-primary/30 text-[9px] text-primary">
+                    {policyLookup[activeProfile.executionPolicy]?.label ?? activeProfile.executionPolicy}
+                  </Badge>
+                </div>
+                <p className="text-[10px] text-muted-foreground">Embedding via {embeddingConnection?.name ?? activeProfile.embeddingConnectionId} · {activeProfile.embeddingModel}</p>
+                <p className="text-[10px] text-muted-foreground">Doc preset: {docPresetLookup[activeProfile.docProcessingPreset]?.label ?? activeProfile.docProcessingPreset}</p>
+                <p className="text-[10px] text-muted-foreground">Quality: {qualityLookup[activeProfile.qualityPosture]?.label ?? activeProfile.qualityPosture}</p>
+                <p className="text-[10px] text-muted-foreground">Updated: {formatRuntimeUpdatedAt(data?.updated_at)}</p>
+                <div className="pt-1">
+                  <Button asChild variant="outline" className="h-8 w-full text-xs" onClick={() => setRuntimeDrawerOpen(false)}>
+                    <Link to="/app/settings/runtime">Open full Runtime Controls</Link>
+                  </Button>
+                </div>
+              </div>
 
-          <Section title="Retrieval">
-            <Control label="Embedding Model">
-              <Select defaultValue="nomic"><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="nomic">nomic-embed-text</SelectItem><SelectItem value="bge">bge-m3</SelectItem></SelectContent>
-              </Select>
-            </Control>
-            <Control label="Top-K — 15">
-              <Slider defaultValue={[15]} min={3} max={50} step={1} className="py-1" />
-            </Control>
-            <Control label="Chunk Size — 1200">
-              <Slider defaultValue={[1200]} min={256} max={4096} step={64} className="py-1" />
-            </Control>
-            <Control label="Chunk Overlap — 200">
-              <Slider defaultValue={[200]} min={0} max={512} step={32} className="py-1" />
-            </Control>
-            <Control label="Rerank Pool Size — 50">
-              <Slider defaultValue={[50]} min={10} max={200} step={5} className="py-1" />
-            </Control>
-          </Section>
+              <Section title="Generation">
+                <Control label="Provider Connection">
+                  <ValueBox>{primaryConnection?.name ?? activeProfile.primaryConnectionId}</ValueBox>
+                </Control>
+                <Control label="Model">
+                  <ValueBox mono>{activeProfile.primaryModel}</ValueBox>
+                </Control>
+                <Control label={`Temperature — ${activeProfile.generation.temperature}`}>
+                  <ValueBox>{activeProfile.generation.temperature}</ValueBox>
+                </Control>
+                <Control label={`Top-P — ${activeProfile.generation.topP}`}>
+                  <ValueBox>{activeProfile.generation.topP}</ValueBox>
+                </Control>
+                <Control label={`Max Output Tokens — ${activeProfile.generation.maxOutputTokens}`}>
+                  <ValueBox>{activeProfile.generation.maxOutputTokens}</ValueBox>
+                </Control>
+                <Control label="Context Window">
+                  <ValueBox>{activeProfile.generation.contextWindow}</ValueBox>
+                </Control>
+                <Control label="Prompt Profile">
+                  <ValueBox>{activeProfile.generation.promptProfile}</ValueBox>
+                </Control>
+              </Section>
 
-          <Separator />
+              <Separator />
 
-          <Section title="Document Processing">
-            <Control label="PDF Extraction">
-              <Select defaultValue="plumber"><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="plumber">pdf_plumber</SelectItem><SelectItem value="marker">marker</SelectItem><SelectItem value="ocr">OCR fallback</SelectItem></SelectContent>
-              </Select>
-            </Control>
-            <Control label="OCR Backend">
-              <Select defaultValue="tesseract"><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="tesseract">Tesseract</SelectItem><SelectItem value="surya">Surya</SelectItem></SelectContent>
-              </Select>
-            </Control>
-          </Section>
+              <Section title="Retrieval">
+                <Control label="Embedding Connection">
+                  <ValueBox>{embeddingConnection?.name ?? activeProfile.embeddingConnectionId}</ValueBox>
+                </Control>
+                <Control label="Embedding Model">
+                  <ValueBox mono>{activeProfile.embeddingModel}</ValueBox>
+                </Control>
+                <Control label="Retrieval Strategy">
+                  <ValueBox>{activeProfile.retrievalStrategy}</ValueBox>
+                </Control>
+                <Control label={`Top-K — ${activeProfile.retrieval.topK}`}>
+                  <ValueBox>{activeProfile.retrieval.topK}</ValueBox>
+                </Control>
+                <Control label={`Chunk Size — ${activeProfile.retrieval.chunkSize}`}>
+                  <ValueBox>{activeProfile.retrieval.chunkSize}</ValueBox>
+                </Control>
+                <Control label={`Chunk Overlap — ${activeProfile.retrieval.chunkOverlap}`}>
+                  <ValueBox>{activeProfile.retrieval.chunkOverlap}</ValueBox>
+                </Control>
+                <Control label={`Rerank Pool Size — ${activeProfile.retrieval.rerankPoolSize}`}>
+                  <ValueBox>{activeProfile.retrieval.rerankPoolSize}</ValueBox>
+                </Control>
+              </Section>
+
+              <Separator />
+
+              <Section title="Document Processing">
+                <Control label="PDF Extraction">
+                  <ValueBox>{activeProfile.docProcessing.pdfExtractionMode}</ValueBox>
+                </Control>
+                <Control label="OCR Backend">
+                  <ValueBox>{activeProfile.docProcessing.ocrBackend}</ValueBox>
+                </Control>
+                <Control label="Table Extraction">
+                  <ValueBox>{activeProfile.docProcessing.tableExtractionMode}</ValueBox>
+                </Control>
+                <Control label={`Scanned Doc Threshold — ${activeProfile.docProcessing.scannedDocumentThreshold}`}>
+                  <ValueBox>{activeProfile.docProcessing.scannedDocumentThreshold}</ValueBox>
+                </Control>
+              </Section>
+
+              {fallbackChain.length > 0 && (
+                <>
+                  <Separator />
+                  <Section title="Fallback Chain">
+                    <div className="space-y-2">
+                      {fallbackChain.map((step) => (
+                        <ValueBox key={`${step.connectionId}-${step.model}`}>
+                          {step.label} · {step.model}
+                        </ValueBox>
+                      ))}
+                    </div>
+                  </Section>
+                </>
+              )}
+            </>
+          )}
         </div>
       </SheetContent>
     </Sheet>

@@ -23,11 +23,14 @@ from src.config import (
     TrelloSettings,
     get_evidenceops_external_settings,
 )
+from src.product.models import ProductWorkflowResult
 from src.services.evidenceops_repository import (
     DEFAULT_EVIDENCEOPS_REPOSITORY_SUFFIXES,
     diff_evidenceops_repository_snapshots,
     summarize_evidenceops_repository_documents,
 )
+from src.services.evidenceops_worklog import build_evidenceops_worklog_entry
+from src.structured.base import CVAnalysisPayload, DocumentAgentPayload
 
 
 DEFAULT_PHASE95_PRIMARY_CORPUS_RELATIVE_PATH = Path("data/corpus_revisado/option_b_synthetic_premium")
@@ -565,6 +568,268 @@ class TrelloClient:
         )
 
 
+def _trim_text(value: object, *, max_chars: int = 240) -> str:
+    normalized = " ".join(str(value or "").split()).strip()
+    if len(normalized) <= max_chars:
+        return normalized
+    if max_chars <= 1:
+        return normalized[:max_chars]
+    return normalized[: max_chars - 1].rstrip() + "…"
+
+
+def _result_document_ids(result: ProductWorkflowResult) -> list[str]:
+    document_ids: list[str] = []
+    if result.grounding_preview is not None:
+        document_ids.extend(str(item).strip() for item in result.grounding_preview.document_ids if str(item).strip())
+    debug_source_documents = result.debug_metadata.get("source_documents") if isinstance(result.debug_metadata, dict) else []
+    if isinstance(debug_source_documents, list):
+        document_ids.extend(str(item).strip() for item in debug_source_documents if str(item).strip())
+    return list(dict.fromkeys(document_ids))
+
+
+def _result_requires_review(result: ProductWorkflowResult) -> bool:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    if isinstance(payload, DocumentAgentPayload) and payload.needs_review:
+        return True
+    return result.status == "warning"
+
+
+def _resolve_trello_target_list_id(
+    *,
+    result: ProductWorkflowResult,
+    settings: EvidenceOpsExternalSettings,
+) -> str:
+    if _result_requires_review(result) and str(settings.trello.list_review_id or "").strip():
+        return str(settings.trello.list_review_id)
+    fallback_candidates = [
+        settings.trello.list_open_id,
+        settings.trello.list_review_id,
+        settings.trello.list_approved_id,
+        settings.trello.list_done_id,
+    ]
+    for candidate in fallback_candidates:
+        if str(candidate or "").strip():
+            return str(candidate)
+    raise ValueError("No Trello target list is configured for card creation.")
+
+
+def _candidate_card_name(result: ProductWorkflowResult, payload: CVAnalysisPayload) -> str:
+    personal_info = payload.personal_info
+    full_name = _trim_text(getattr(personal_info, "full_name", "") if personal_info is not None else "", max_chars=64)
+    if full_name:
+        return _trim_text(f"[{result.workflow_label}] {full_name}", max_chars=120)
+    return _trim_text(f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}", max_chars=120)
+
+
+def _build_product_result_card_description(
+    *,
+    result: ProductWorkflowResult,
+    document_ids: list[str],
+    action_item: dict[str, Any] | None = None,
+) -> str:
+    description_lines = [
+        f"Workflow: {result.workflow_label}",
+        f"Workflow ID: {result.workflow_id}",
+        f"Run status: {result.status}",
+        f"Summary: {_trim_text(result.summary, max_chars=900)}",
+    ]
+    if result.recommendation:
+        description_lines.append(f"Recommendation: {_trim_text(result.recommendation, max_chars=400)}")
+    if isinstance(action_item, dict):
+        if str(action_item.get("owner") or "").strip():
+            description_lines.append(f"Owner: {_trim_text(action_item.get('owner'), max_chars=120)}")
+        if str(action_item.get("due_date") or "").strip():
+            description_lines.append(f"Due date: {_trim_text(action_item.get('due_date'), max_chars=120)}")
+        if str(action_item.get("status") or "").strip():
+            description_lines.append(f"Action status: {_trim_text(action_item.get('status'), max_chars=120)}")
+        if str(action_item.get("evidence") or "").strip():
+            description_lines.append(f"Evidence: {_trim_text(action_item.get('evidence'), max_chars=600)}")
+    if result.highlights:
+        description_lines.append(
+            "Highlights: " + "; ".join(_trim_text(item, max_chars=120) for item in result.highlights[:5] if str(item).strip())
+        )
+    if result.warnings:
+        description_lines.append(
+            "Warnings: " + "; ".join(_trim_text(item, max_chars=120) for item in result.warnings[:4] if str(item).strip())
+        )
+    if document_ids:
+        description_lines.append("Documents: " + ", ".join(document_ids[:8]))
+    description_lines.append("Source surface: Gradio UI")
+    return "\n".join(line for line in description_lines if str(line).strip())
+
+
+def _build_product_result_trello_cards(
+    *,
+    result: ProductWorkflowResult,
+    settings: EvidenceOpsExternalSettings,
+    max_cards: int = 8,
+) -> tuple[list[dict[str, Any]], str]:
+    target_list_id = _resolve_trello_target_list_id(result=result, settings=settings)
+    document_ids = _result_document_ids(result)
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    cards: list[dict[str, Any]] = []
+
+    if isinstance(payload, DocumentAgentPayload):
+        worklog_entry = build_evidenceops_worklog_entry(
+            payload=payload,
+            query=result.recommendation or result.summary,
+            document_ids=document_ids,
+            execution_metadata={
+                "workflow_id": result.workflow_id,
+                "workflow_label": result.workflow_label,
+                "product_surface": "gradio",
+            },
+        )
+        action_items = worklog_entry.get("action_items") if isinstance(worklog_entry.get("action_items"), list) else []
+        for item in action_items[:max_cards]:
+            if not isinstance(item, dict):
+                continue
+            action_name = _trim_text(item.get("description") or "EvidenceOps action", max_chars=96)
+            cards.append(
+                {
+                    "name": _trim_text(f"[{result.workflow_label}] {action_name}", max_chars=120),
+                    "description": _build_product_result_card_description(
+                        result=result,
+                        document_ids=document_ids,
+                        action_item=item,
+                    ),
+                    "list_id": target_list_id,
+                }
+            )
+        if cards:
+            return cards, "action_items"
+
+    if isinstance(payload, CVAnalysisPayload):
+        card_name = _candidate_card_name(result, payload)
+    else:
+        card_name = _trim_text(
+            f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}",
+            max_chars=120,
+        )
+    cards.append(
+        {
+            "name": card_name,
+            "description": _build_product_result_card_description(result=result, document_ids=document_ids),
+            "list_id": target_list_id,
+        }
+    )
+    return cards, "summary"
+
+
+def create_trello_cards_from_product_result(
+    result: ProductWorkflowResult,
+    *,
+    settings: EvidenceOpsExternalSettings | None = None,
+    dry_run: bool = True,
+    max_cards: int = 8,
+) -> dict[str, Any]:
+    if not isinstance(result, ProductWorkflowResult):
+        raise ValueError("A valid ProductWorkflowResult is required to create Trello cards.")
+
+    resolved_settings = settings or get_evidenceops_external_settings()
+    missing_fields = [
+        field_name
+        for field_name, value in {
+            "api_key": resolved_settings.trello.api_key,
+            "token": resolved_settings.trello.token,
+            "board_id": resolved_settings.trello.board_id,
+            "list_open_id": resolved_settings.trello.list_open_id,
+        }.items()
+        if not str(value or "").strip()
+    ]
+    if missing_fields:
+        raise ValueError(f"Trello is not fully configured. Missing: {', '.join(missing_fields)}")
+
+    cards, card_mode = _build_product_result_trello_cards(
+        result=result,
+        settings=resolved_settings,
+        max_cards=max_cards,
+    )
+    plan = {
+        "status": "planned" if dry_run else "success",
+        "dry_run": bool(dry_run),
+        "workflow_id": result.workflow_id,
+        "workflow_label": result.workflow_label,
+        "card_mode": card_mode,
+        "target_board_id": resolved_settings.trello.board_id or None,
+        "planned_card_count": len(cards),
+        "planned_cards": cards,
+    }
+    if dry_run:
+        return plan
+
+    trello = TrelloClient(resolved_settings.trello)
+    created_cards = [
+        trello.create_card(
+            list_id=str(card.get("list_id") or resolved_settings.trello.list_open_id),
+            name=str(card.get("name") or "EvidenceOps workflow result"),
+            description=str(card.get("description") or ""),
+        )
+        for card in cards
+    ]
+    return {
+        **plan,
+        "status": "success",
+        "dry_run": False,
+        "created_cards": created_cards,
+        "created_card_count": len(created_cards),
+        "created_card_urls": [
+            str(item.get("url"))
+            for item in created_cards
+            if isinstance(item, dict) and str(item.get("url") or "").strip()
+        ],
+    }
+
+
+def create_trello_smoke_card(
+    *,
+    settings: EvidenceOpsExternalSettings | None = None,
+    dry_run: bool = False,
+    title_prefix: str = "[TEST] Gradio Trello smoke",
+    description: str = "Smoke test card created from the Gradio UI integration test.",
+) -> dict[str, Any]:
+    resolved_settings = settings or get_evidenceops_external_settings()
+    missing_fields = [
+        field_name
+        for field_name, value in {
+            "api_key": resolved_settings.trello.api_key,
+            "token": resolved_settings.trello.token,
+            "board_id": resolved_settings.trello.board_id,
+            "list_open_id": resolved_settings.trello.list_open_id,
+        }.items()
+        if not str(value or "").strip()
+    ]
+    if missing_fields:
+        raise ValueError(f"Trello is not fully configured. Missing: {', '.join(missing_fields)}")
+
+    card_name = f"{_trim_text(title_prefix, max_chars=72)} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    plan = {
+        "status": "planned" if dry_run else "success",
+        "dry_run": bool(dry_run),
+        "target_board_id": resolved_settings.trello.board_id or None,
+        "target_list_id": resolved_settings.trello.list_open_id or None,
+        "name": card_name,
+        "description": description,
+    }
+    if dry_run:
+        return plan
+
+    trello = TrelloClient(resolved_settings.trello)
+    created_card = trello.create_card(
+        list_id=str(resolved_settings.trello.list_open_id),
+        name=card_name,
+        description=description,
+    )
+    return {
+        **plan,
+        "status": "success",
+        "dry_run": False,
+        "card": created_card,
+        "card_url": created_card.get("url"),
+        "card_id": created_card.get("id"),
+    }
+
+
 class NotionClient:
     base_url = "https://api.notion.com/v1"
 
@@ -587,8 +852,8 @@ class NotionClient:
         with urllib.request.urlopen(request, timeout=30) as response:  # pragma: no cover - network integration
             return json.loads(response.read().decode("utf-8"))
 
-    def query_database(self) -> dict[str, Any]:
-        return self._request("POST", f"databases/{self.settings.database_id}/query", body={})
+    def query_database(self, *, body: dict[str, Any] | None = None) -> dict[str, Any]:
+        return self._request("POST", f"databases/{self.settings.database_id}/query", body=body or {})
 
     def create_page(self, *, title: str, properties: dict[str, Any], children: list[dict[str, Any]] | None = None) -> dict[str, Any]:
         payload = {
@@ -603,6 +868,194 @@ class NotionClient:
         if children:
             payload["children"] = children
         return self._request("POST", "pages", body=payload)
+
+
+def _require_notion_settings(settings: EvidenceOpsExternalSettings) -> None:
+    missing_fields = [
+        field_name
+        for field_name, value in {
+            "api_key": settings.notion.api_key,
+            "database_id": settings.notion.database_id,
+        }.items()
+        if not str(value or "").strip()
+    ]
+    if missing_fields:
+        raise ValueError(f"Notion is not fully configured. Missing: {', '.join(missing_fields)}")
+
+
+def _build_notion_rich_text(content: object) -> list[dict[str, Any]]:
+    normalized = _trim_text(content, max_chars=1800)
+    if not normalized:
+        return []
+    return [{"type": "text", "text": {"content": normalized}}]
+
+
+def _build_notion_paragraph_block(content: object) -> dict[str, Any] | None:
+    rich_text = _build_notion_rich_text(content)
+    if not rich_text:
+        return None
+    return {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {"rich_text": rich_text},
+    }
+
+
+def _extract_notion_page_title(page: dict[str, Any]) -> str:
+    properties = page.get("properties") if isinstance(page.get("properties"), dict) else {}
+    name_property = properties.get("Name") if isinstance(properties.get("Name"), dict) else {}
+    title_items = name_property.get("title") if isinstance(name_property.get("title"), list) else []
+    title = "".join(
+        str(item.get("plain_text") or "")
+        for item in title_items
+        if isinstance(item, dict)
+    ).strip()
+    if title:
+        return title
+    for property_value in properties.values():
+        if not isinstance(property_value, dict):
+            continue
+        title_items = property_value.get("title") if isinstance(property_value.get("title"), list) else []
+        title = "".join(
+            str(item.get("plain_text") or "")
+            for item in title_items
+            if isinstance(item, dict)
+        ).strip()
+        if title:
+            return title
+    return str(page.get("id") or "Untitled Notion page")
+
+
+def list_notion_database_entries(
+    *,
+    settings: EvidenceOpsExternalSettings | None = None,
+    limit: int = 10,
+) -> dict[str, Any]:
+    resolved_settings = settings or get_evidenceops_external_settings()
+    _require_notion_settings(resolved_settings)
+    notion = NotionClient(resolved_settings.notion)
+    response = notion.query_database(body={"page_size": max(1, min(int(limit), 100))})
+    results = response.get("results") if isinstance(response.get("results"), list) else []
+    entries = [
+        {
+            "id": str(item.get("id") or ""),
+            "page_url": str(item.get("url") or "") or None,
+            "title": _extract_notion_page_title(item) if isinstance(item, dict) else "Untitled",
+            "created_time": str(item.get("created_time") or "") or None,
+            "last_edited_time": str(item.get("last_edited_time") or "") or None,
+        }
+        for item in results
+        if isinstance(item, dict)
+    ]
+    return {
+        "status": "success",
+        "database_id": resolved_settings.notion.database_id,
+        "entry_count": len(entries),
+        "entries": entries,
+    }
+
+
+def create_notion_smoke_page(
+    *,
+    settings: EvidenceOpsExternalSettings | None = None,
+    dry_run: bool = False,
+    title_prefix: str = "[TEST] Gradio Notion smoke",
+) -> dict[str, Any]:
+    resolved_settings = settings or get_evidenceops_external_settings()
+    _require_notion_settings(resolved_settings)
+    title = f"{_trim_text(title_prefix, max_chars=72)} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    children = [
+        _build_notion_paragraph_block("Smoke test page created from the Gradio UI integration test."),
+        _build_notion_paragraph_block("If this page exists in the configured database, the Notion integration is working."),
+    ]
+    children = [item for item in children if item is not None]
+    plan = {
+        "status": "planned" if dry_run else "success",
+        "dry_run": bool(dry_run),
+        "database_id": resolved_settings.notion.database_id,
+        "title": title,
+        "children_count": len(children),
+    }
+    if dry_run:
+        return plan
+
+    notion = NotionClient(resolved_settings.notion)
+    page = notion.create_page(title=title, properties={}, children=children)
+    return {
+        **plan,
+        "status": "success",
+        "dry_run": False,
+        "page_id": page.get("id"),
+        "page_title": title,
+        "page_url": page.get("url"),
+    }
+
+
+def _product_result_notion_title(result: ProductWorkflowResult) -> str:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    if isinstance(payload, CVAnalysisPayload) and payload.personal_info is not None:
+        full_name = _trim_text(getattr(payload.personal_info, "full_name", ""), max_chars=64)
+        if full_name:
+            return _trim_text(f"[{result.workflow_label}] {full_name}", max_chars=120)
+    return _trim_text(
+        f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}",
+        max_chars=120,
+    )
+
+
+def create_notion_page_from_product_result(
+    result: ProductWorkflowResult,
+    *,
+    settings: EvidenceOpsExternalSettings | None = None,
+    dry_run: bool = True,
+) -> dict[str, Any]:
+    if not isinstance(result, ProductWorkflowResult):
+        raise ValueError("A valid ProductWorkflowResult is required to create a Notion page.")
+
+    resolved_settings = settings or get_evidenceops_external_settings()
+    _require_notion_settings(resolved_settings)
+
+    document_ids = _result_document_ids(result)
+    children = [
+        _build_notion_paragraph_block(f"Workflow: {result.workflow_label}"),
+        _build_notion_paragraph_block(f"Workflow ID: {result.workflow_id}"),
+        _build_notion_paragraph_block(f"Run status: {result.status}"),
+        _build_notion_paragraph_block(f"Summary: {result.summary}"),
+    ]
+    if result.recommendation:
+        children.append(_build_notion_paragraph_block(f"Recommendation: {result.recommendation}"))
+    if result.highlights:
+        children.append(_build_notion_paragraph_block("Highlights: " + "; ".join(_trim_text(item, max_chars=120) for item in result.highlights[:5])))
+    if result.warnings:
+        children.append(_build_notion_paragraph_block("Warnings: " + "; ".join(_trim_text(item, max_chars=120) for item in result.warnings[:5])))
+    if document_ids:
+        children.append(_build_notion_paragraph_block("Documents: " + ", ".join(document_ids[:8])))
+    children.append(_build_notion_paragraph_block("Source surface: Gradio UI"))
+    children = [item for item in children if item is not None]
+
+    title = _product_result_notion_title(result)
+    plan = {
+        "status": "planned" if dry_run else "success",
+        "dry_run": bool(dry_run),
+        "workflow_id": result.workflow_id,
+        "workflow_label": result.workflow_label,
+        "database_id": resolved_settings.notion.database_id,
+        "title": title,
+        "children_count": len(children),
+    }
+    if dry_run:
+        return plan
+
+    notion = NotionClient(resolved_settings.notion)
+    page = notion.create_page(title=title, properties={}, children=children)
+    return {
+        **plan,
+        "status": "success",
+        "dry_run": False,
+        "page_id": page.get("id"),
+        "page_title": title,
+        "page_url": page.get("url"),
+    }
 
 
 def sync_phase95_corpus_to_nextcloud(

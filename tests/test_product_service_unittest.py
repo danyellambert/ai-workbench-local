@@ -149,8 +149,11 @@ class ProductServiceTests(unittest.TestCase):
         self.assertEqual(workflow_mock.call_args.kwargs["strategy"], "langgraph_context_retry")
         self.assertEqual(execution_request.task_type, "document_agent")
         self.assertEqual(execution_request.context_strategy, "retrieval")
+        self.assertIn("top blockers", execution_request.input_text.lower())
         self.assertEqual(execution_request.telemetry["agent_intent"], "document_risk_review")
         self.assertEqual(execution_request.telemetry["agent_tool"], "review_document_risks")
+        self.assertTrue(execution_request.telemetry["document_review_findings_synthesis_enabled"])
+        self.assertEqual(execution_request.telemetry["document_review_findings_prompt_style"], "hybrid")
         self.assertEqual(result.debug_metadata["workflow_contract"], "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md")
         self.assertIn("Document Review deck artifact", result.debug_metadata["expected_outputs"])
 

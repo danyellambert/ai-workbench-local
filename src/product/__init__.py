@@ -8,7 +8,7 @@ from .models import (
     ProductWorkflowRequest,
     ProductWorkflowResult,
 )
-from .presenters import build_product_result_sections
+from .presenters import build_document_review_view, build_policy_comparison_view, build_product_result_sections
 from .service import (
     build_grounding_preview,
     build_product_workflow_catalog,
@@ -28,6 +28,8 @@ __all__ = [
     "ProductWorkflowRequest",
     "ProductWorkflowResult",
     "build_grounding_preview",
+    "build_document_review_view",
+    "build_policy_comparison_view",
     "build_product_result_sections",
     "build_product_workflow_catalog",
     "generate_product_workflow_deck",

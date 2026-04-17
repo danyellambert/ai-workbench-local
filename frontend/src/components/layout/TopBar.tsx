@@ -1,6 +1,10 @@
+import { useQuery } from '@tanstack/react-query';
 import { Search, Command, Settings, Activity, Zap } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { useLocation } from 'react-router-dom';
+import { AI_LAB_ROUTE_MAP } from '@/lib/ai-lab-navigation';
+import { getRuntimeControls } from '@/lib/product-api';
+import { getRuntimeConnection } from '@/lib/runtime-controls-ui';
 
 const routeTitles: Record<string, string> = {
   '/app': 'Command Center',
@@ -12,10 +16,6 @@ const routeTitles: Record<string, string> = {
   '/app/workflows/candidate-review': 'Candidate Review',
   '/app/deck-center': 'Deck Center',
   '/app/history': 'Run History',
-  '/app/lab/chat': 'Chat with RAG',
-  '/app/lab/structured': 'Structured Outputs',
-  '/app/lab/models': 'Model Comparison',
-  '/app/lab/evidenceops': 'EvidenceOps MCP',
   '/app/settings/runtime': 'Runtime Controls',
   '/app/settings/preferences': 'Preferences',
 };
@@ -23,15 +23,38 @@ const routeTitles: Record<string, string> = {
 export default function TopBar() {
   const { setCommandPaletteOpen, setRuntimeDrawerOpen } = useAppStore();
   const location = useLocation();
-  const title = routeTitles[location.pathname] || 'AI Decision Studio';
+  const { data: runtimeControls, isLoading: runtimeControlsLoading, isError: runtimeControlsError } = useQuery({
+    queryKey: ['runtime-controls'],
+    queryFn: getRuntimeControls,
+    refetchOnWindowFocus: false,
+  });
+  const labRoute = AI_LAB_ROUTE_MAP[location.pathname];
+  const productTitle = routeTitles[location.pathname];
+  const title = labRoute?.label || productTitle || 'AI Decision Studio';
+  const isLab = !!labRoute;
+  const isSystem = !isLab && location.pathname.startsWith('/app/settings/');
+  const isProduct = !isLab && !isSystem && !!productTitle;
+  const sectionBadge = isLab ? 'AI Lab' : isSystem ? 'System' : isProduct ? 'Product' : null;
+  const activeProfile = runtimeControls?.active_profile;
+  const primaryConnection = activeProfile ? getRuntimeConnection(runtimeControls, activeProfile.primaryConnectionId) : undefined;
+  const runtimeLabel = runtimeControlsLoading
+    ? 'Loading runtime…'
+    : runtimeControlsError || !activeProfile
+      ? 'Runtime unavailable'
+      : `${primaryConnection?.name ?? activeProfile.primaryConnectionId} · ${activeProfile.primaryModel}`;
 
   return (
     <header className="h-14 border-b border-border/50 flex items-center justify-between px-6 bg-background/80 backdrop-blur-md sticky top-0 z-20">
       <div className="flex items-center gap-4">
+        {sectionBadge && (
+          <span className="text-[9px] uppercase tracking-widest text-primary/60 font-medium">
+            {sectionBadge}
+          </span>
+        )}
         <h2 className="text-sm font-medium text-foreground">{title}</h2>
         <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground bg-secondary/50 px-2 py-1 rounded-md">
           <Activity className="w-3 h-3 text-glow-success" />
-          <span>ollama · qwen2.5:32b</span>
+          <span>{runtimeLabel}</span>
         </div>
       </div>
 

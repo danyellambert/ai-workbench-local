@@ -5,6 +5,7 @@ from src.config import (
     get_huggingface_inference_settings,
     get_huggingface_server_settings,
     get_huggingface_settings,
+    get_ollama_hosted_settings,
     get_ollama_settings,
     get_openai_settings,
 )
@@ -114,6 +115,18 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
             "default_context_window": ollama_settings.default_context_window,
         }
     }
+
+    ollama_hosted_settings = get_ollama_hosted_settings()
+    if ollama_hosted_settings is not None:
+        registry["ollama_hosted"] = {
+            "label": "Ollama Hosted",
+            "detail": f"Hosted Ollama endpoint at `{ollama_hosted_settings.base_url}`",
+            "instance": OllamaProvider(ollama_hosted_settings),
+            "supports_chat": True,
+            "supports_embeddings": True,
+            "default_model": ollama_hosted_settings.default_model,
+            "default_context_window": ollama_hosted_settings.default_context_window,
+        }
 
     openai_settings = get_openai_settings()
     if openai_settings.api_key and OpenAIProvider is not None:

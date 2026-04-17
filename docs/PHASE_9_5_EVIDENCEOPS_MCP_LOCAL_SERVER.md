@@ -36,18 +36,16 @@ This iteration promotes the local EvidenceOps vertical into a **real MCP server 
 python scripts/run_evidenceops_mcp_server.py
 ```
 
-## Registration in Cline
+## Client registration
 
-Registering the server in Cline is **optional**.
+This repository intentionally does **not** ship registration helpers for specific MCP clients.
 
-- it can be useful for debugging/manual testing with Cline as the MCP client
-- but it is **not part of the product core**
-- the main project flow remains:
+- the product scope remains:
   - local MCP server
   - app MCP client
   - integration with `main.py`
 
-If you do not want to mix the project infrastructure with the assistant infrastructure, you can leave Cline **without this registration**.
+If you want to connect an external MCP client, manage that client configuration outside this repository.
 
 ## Supported environment variables
 

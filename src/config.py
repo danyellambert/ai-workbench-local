@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
+from src.storage.secret_store import get_secret
 from src.storage.runtime_paths import (
     get_artifact_root,
     get_chat_history_path,
@@ -28,6 +29,7 @@ class OllamaSettings:
     history_path: Path
     default_top_p: float | None = None
     default_max_tokens: int | None = None
+    api_key: str | None = None
 
 
 @dataclass(frozen=True)
@@ -92,6 +94,13 @@ def _optional_int_env(name: str) -> int | None:
     if not raw_value:
         return None
     return int(raw_value)
+
+
+def _env_or_secret(env_name: str, secret_key: str) -> str | None:
+    env_value = str(os.getenv(env_name, "")).strip()
+    if env_value:
+        return env_value
+    return get_secret(secret_key)
 
 
 @dataclass(frozen=True)
@@ -247,6 +256,42 @@ def get_ollama_settings() -> OllamaSettings:
         available_models_env=available_models_env,
         available_embedding_models_env=available_embedding_models_env,
         history_path=get_chat_history_path(BASE_DIR),
+        api_key=None,
+    )
+
+
+def get_ollama_hosted_settings() -> OllamaSettings | None:
+    hosted_base_url = os.getenv("OLLAMA_HOSTED_BASE_URL", "").strip()
+    if not hosted_base_url:
+        return None
+
+    default_model = os.getenv("OLLAMA_HOSTED_MODEL", "").strip() or os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+    available_models_env = [
+        model.strip()
+        for model in os.getenv("OLLAMA_HOSTED_AVAILABLE_MODELS", "").split(",")
+        if model.strip()
+    ]
+    available_embedding_models_env = [
+        model.strip()
+        for model in os.getenv("OLLAMA_HOSTED_AVAILABLE_EMBEDDING_MODELS", "").split(",")
+        if model.strip()
+    ]
+    hosted_top_p = _optional_float_env("OLLAMA_HOSTED_TOP_P")
+    hosted_max_tokens = _optional_int_env("OLLAMA_HOSTED_MAX_TOKENS")
+
+    return OllamaSettings(
+        project_name=os.getenv("PROJECT_NAME", "AI Workbench Local"),
+        base_url=hosted_base_url,
+        default_model=default_model,
+        default_temperature=float(os.getenv("OLLAMA_HOSTED_TEMPERATURE", os.getenv("OLLAMA_TEMPERATURE", "0.2"))),
+        default_context_window=int(os.getenv("OLLAMA_HOSTED_CONTEXT_WINDOW", os.getenv("OLLAMA_CONTEXT_WINDOW", "8192"))),
+        default_top_p=hosted_top_p if hosted_top_p is not None else _optional_float_env("OLLAMA_TOP_P"),
+        default_max_tokens=hosted_max_tokens if hosted_max_tokens is not None else _optional_int_env("OLLAMA_MAX_TOKENS"),
+        default_prompt_profile=os.getenv("DEFAULT_PROMPT_PROFILE", "neutro"),
+        available_models_env=available_models_env,
+        available_embedding_models_env=available_embedding_models_env,
+        history_path=get_chat_history_path(BASE_DIR),
+        api_key=_env_or_secret("OLLAMA_HOSTED_API_KEY", "ollama_hosted_api_key"),
     )
 
 
@@ -264,7 +309,7 @@ def get_openai_settings() -> OpenAISettings:
     ]
 
     return OpenAISettings(
-        api_key=os.getenv("OPENAI_API_KEY"),
+        api_key=_env_or_secret("OPENAI_API_KEY", "openai_api_key"),
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         embedding_model=os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
         default_context_window=int(os.getenv("OPENAI_CONTEXT_WINDOW", "128000")),
@@ -338,7 +383,7 @@ def get_huggingface_inference_settings() -> HuggingFaceInferenceSettings:
 
     return HuggingFaceInferenceSettings(
         base_url=os.getenv("HUGGINGFACE_INFERENCE_BASE_URL", "https://router.huggingface.co/v1").strip(),
-        api_key=os.getenv("HUGGINGFACE_INFERENCE_API_KEY"),
+        api_key=_env_or_secret("HUGGINGFACE_INFERENCE_API_KEY", "huggingface_inference_api_key"),
         model=os.getenv("HUGGINGFACE_INFERENCE_MODEL", "").strip(),
         embedding_model=os.getenv("HUGGINGFACE_INFERENCE_EMBEDDING_MODEL", "").strip(),
         default_context_window=int(os.getenv("HUGGINGFACE_INFERENCE_CONTEXT_WINDOW", "8192")),

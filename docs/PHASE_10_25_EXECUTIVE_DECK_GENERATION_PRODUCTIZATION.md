@@ -377,6 +377,19 @@ Suggested order:
 2. `evidenceops_document_review_deck`
 3. `phase_closure_or_project_review_deck`
 
+#### Phase 10.25 follow-on slice — Policy Comparison product surface
+
+This follow-on slice maps the first concrete web-app integration of **P3 — Policy / Contract Comparison Deck**.
+
+- [x] register the Policy Comparison backlog as explicit slices in the Phase 10.25 roadmap
+- [x] add a dedicated backend comparison view for the Product API
+- [x] wire the frontend comparison tab to real document-library, workflow-run and deck-generation endpoints
+- [x] add focused backend/frontend tests for the slice
+- [x] validate the frontend slice with Vitest and production build checks
+- [ ] validate the backend unit path in a Python environment with the optional runtime dependencies installed
+- [ ] deepen the comparison payload so each UI diff can render stronger document-A vs document-B grounded excerpts
+- [ ] harden richer artifact UX for comparison-specific exports and review flows
+
 ### Slice 6 — operational hardening
 
 Only after the feature is already useful and stable:

@@ -12,6 +12,9 @@ class ProductSessionState:
     indexed_document_ids: list[str] = field(default_factory=list)
     latest_result: ProductWorkflowResult | None = None
     latest_deck_result: dict[str, Any] | None = None
+    latest_trello_result: dict[str, Any] | None = None
+    latest_nextcloud_result: dict[str, Any] | None = None
+    latest_notion_result: dict[str, Any] | None = None
     last_error: str | None = None
 
 

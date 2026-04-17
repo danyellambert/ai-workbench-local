@@ -5,6 +5,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Callable
 
 from src.config import RagSettings
 from src.evidence_cv.config import build_evidence_config_from_rag_settings
@@ -351,6 +352,15 @@ def _compute_evidence_rollout_bucket(file_bytes: bytes, filename: str) -> int:
 
 def _detect_cv_like_content(file_bytes: bytes, filename: str, rag_settings: RagSettings) -> tuple[bool, list[str]]:
     text, metadata = _extract_pdf_text(file_bytes, rag_settings)
+    return _detect_cv_like_content_from_extraction(text=text, metadata=metadata, filename=filename)
+
+
+def _detect_cv_like_content_from_extraction(
+    *,
+    text: str,
+    metadata: dict[str, object],
+    filename: str,
+) -> tuple[bool, list[str]]:
     normalized = text.lower()
     top_text = "\n".join(text.splitlines()[:30])
     reasons: list[str] = []
@@ -392,6 +402,9 @@ def _build_evidence_routing_diagnostics(
     file_bytes: bytes,
     filename: str,
     rag_settings: RagSettings | None,
+    *,
+    extracted_text: str | None = None,
+    extracted_metadata: dict[str, object] | None = None,
 ) -> tuple[bool, dict[str, object]]:
     filename_hint = _looks_like_cv_filename(filename)
     diagnostics: dict[str, object] = {
@@ -433,8 +446,17 @@ def _build_evidence_routing_diagnostics(
         )
         return False, diagnostics
 
+    baseline_text = extracted_text
+    baseline_metadata = dict(extracted_metadata or {})
+    if baseline_text is None or not baseline_metadata:
+        baseline_text, baseline_metadata = _extract_pdf_text(file_bytes, rag_settings)
+
     if getattr(rag_settings, "pdf_evidence_pipeline_use_for_cv_like", True):
-        cv_like_content, cv_like_reasons = _detect_cv_like_content(file_bytes, filename, rag_settings)
+        cv_like_content, cv_like_reasons = _detect_cv_like_content_from_extraction(
+            text=baseline_text,
+            metadata=baseline_metadata,
+            filename=filename,
+        )
         diagnostics["cv_like_content_detected"] = cv_like_content
         diagnostics["cv_like_reasons"] = cv_like_reasons
         if cv_like_content:
@@ -446,35 +468,9 @@ def _build_evidence_routing_diagnostics(
             )
             return True, diagnostics
 
-    if getattr(rag_settings, "pdf_evidence_pipeline_use_for_strong_scan_like", True):
-        settings = PdfHybridSettings(
-            extraction_mode=normalize_pdf_extraction_mode(rag_settings.pdf_extraction_mode),
-            baseline_chars_per_page_threshold=rag_settings.pdf_baseline_chars_per_page_threshold,
-            min_text_coverage_ratio=rag_settings.pdf_min_text_coverage_ratio,
-            suspicious_image_count_threshold=rag_settings.pdf_suspicious_image_count_threshold,
-            suspicious_image_area_ratio=rag_settings.pdf_suspicious_image_area_ratio,
-            suspicious_low_text_chars=rag_settings.pdf_suspicious_low_text_chars,
-            suspicious_page_score_threshold=rag_settings.pdf_suspicious_page_score_threshold,
-            suspicious_pages_trigger_full_docling_ratio=rag_settings.pdf_suspicious_pages_trigger_full_docling_ratio,
-            suspicious_pages_trigger_full_docling_min_count=rag_settings.pdf_suspicious_pages_trigger_full_docling_min_count,
-            max_selective_docling_pages=rag_settings.pdf_max_selective_docling_pages,
-            docling_enabled=rag_settings.pdf_docling_enabled,
-            docling_ocr_enabled=rag_settings.pdf_docling_ocr_enabled,
-            docling_force_full_page_ocr=rag_settings.pdf_docling_force_full_page_ocr,
-            docling_picture_description=rag_settings.pdf_docling_picture_description,
-            ocr_fallback_enabled=rag_settings.pdf_ocr_fallback_enabled,
-            ocr_fallback_min_chars=rag_settings.pdf_ocr_fallback_min_chars,
-            ocr_fallback_min_chars_per_page=rag_settings.pdf_ocr_fallback_min_chars_per_page,
-            ocr_fallback_languages=rag_settings.pdf_ocr_fallback_languages,
-            ocr_fallback_timeout_seconds=rag_settings.pdf_ocr_fallback_timeout_seconds,
-            scan_image_ocr_enabled=rag_settings.pdf_scan_image_ocr_enabled,
-            scan_image_ocr_min_suspicious_ratio=rag_settings.pdf_scan_image_ocr_min_suspicious_ratio,
-            scan_image_ocr_min_suspicious_count=rag_settings.pdf_scan_image_ocr_min_suspicious_count,
-            scan_image_ocr_oversample_dpi=rag_settings.pdf_scan_image_ocr_oversample_dpi,
-        )
-        result = extract_pdf_text_hybrid(file_bytes, settings)
-        suspicious_pages = int(result.metadata.get("suspicious_pages") or 0)
-        page_count = int(result.metadata.get("page_count") or 1)
+    if getattr(rag_settings, "pdf_evidence_pipeline_use_for_strong_scan_like", True) and filename_hint:
+        suspicious_pages = int(baseline_metadata.get("suspicious_pages") or 0)
+        page_count = int(baseline_metadata.get("page_count") or 1)
         suspicious_ratio = suspicious_pages / max(page_count, 1)
         suspicious_ratio_threshold = float(getattr(rag_settings, "pdf_evidence_pipeline_min_scan_suspicious_ratio", 0.8))
         strong_scan_like = suspicious_ratio >= suspicious_ratio_threshold
@@ -493,6 +489,13 @@ def _build_evidence_routing_diagnostics(
                 }
             )
             return True, diagnostics
+    elif getattr(rag_settings, "pdf_evidence_pipeline_use_for_strong_scan_like", True) and not filename_hint:
+        diagnostics.update(
+            {
+                "strong_scan_like": False,
+                "strong_scan_like_skipped_reason": "filename_not_cv_like",
+            }
+        )
 
     diagnostics.update(
         {
@@ -574,7 +577,11 @@ def _extract_pdf_text_with_evidence_pipeline(
     return text, metadata
 
 
-def _extract_pdf_text(file_bytes: bytes, rag_settings: RagSettings | None = None) -> tuple[str, dict[str, object]]:
+def _extract_pdf_text(
+    file_bytes: bytes,
+    rag_settings: RagSettings | None = None,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
+) -> tuple[str, dict[str, object]]:
     settings = PdfHybridSettings(
         extraction_mode=normalize_pdf_extraction_mode(rag_settings.pdf_extraction_mode if rag_settings else "hybrid"),
         baseline_chars_per_page_threshold=(rag_settings.pdf_baseline_chars_per_page_threshold if rag_settings else 90),
@@ -600,7 +607,7 @@ def _extract_pdf_text(file_bytes: bytes, rag_settings: RagSettings | None = None
         scan_image_ocr_min_suspicious_count=(rag_settings.pdf_scan_image_ocr_min_suspicious_count if rag_settings else 2),
         scan_image_ocr_oversample_dpi=(rag_settings.pdf_scan_image_ocr_oversample_dpi if rag_settings else 300),
     )
-    result = extract_pdf_text_hybrid(file_bytes, settings)
+    result = extract_pdf_text_hybrid(file_bytes, settings, progress_callback=progress_callback)
     metadata = result.metadata or {}
     metadata.setdefault("evidence_summary", {
         "emails": [],
@@ -621,7 +628,11 @@ def _extract_txt_text(file_bytes: bytes) -> str:
     return file_bytes.decode("utf-8", errors="ignore")
 
 
-def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> LoadedDocument:
+def load_document(
+    uploaded_file,
+    rag_settings: RagSettings | None = None,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
+) -> LoadedDocument:
     file_bytes = uploaded_file.getvalue()
     suffix = uploaded_file.name.lower().rsplit(".", 1)[-1] if "." in uploaded_file.name else ""
 
@@ -632,10 +643,16 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
     )
 
     if suffix == "pdf":
-        use_evidence_pipeline, routing_diagnostics = _build_evidence_routing_diagnostics(file_bytes, uploaded_file.name, rag_settings)
+        legacy_text, legacy_metadata = _extract_pdf_text(file_bytes, rag_settings, progress_callback=progress_callback)
+        use_evidence_pipeline, routing_diagnostics = _build_evidence_routing_diagnostics(
+            file_bytes,
+            uploaded_file.name,
+            rag_settings,
+            extracted_text=legacy_text,
+            extracted_metadata=legacy_metadata,
+        )
         if use_evidence_pipeline:
             try:
-                legacy_text, legacy_metadata = _extract_pdf_text(file_bytes, rag_settings)
                 text, metadata = _extract_pdf_text_with_evidence_pipeline(
                     file_bytes,
                     uploaded_file.name,
@@ -652,7 +669,7 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
                     text = legacy_text
                 metadata["fallback_available"] = True
             except Exception as error:
-                text, metadata = _extract_pdf_text(file_bytes, rag_settings)
+                text, metadata = _extract_pdf_text(file_bytes, rag_settings, progress_callback=progress_callback)
                 metadata["evidence_pipeline_error"] = str(error)
                 metadata["evidence_pipeline_fallback_used"] = True
                 metadata["routing_diagnostics"] = {
@@ -661,7 +678,7 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
                     "reason": "evidence_pipeline_runtime_error",
                 }
         else:
-            text, metadata = _extract_pdf_text(file_bytes, rag_settings)
+            text, metadata = legacy_text, legacy_metadata
             metadata["routing_diagnostics"] = routing_diagnostics
         file_type = "pdf"
     elif suffix == "csv":
@@ -684,6 +701,7 @@ def load_document(uploaded_file, rag_settings: RagSettings | None = None) -> Loa
         "loader_strategy_requested": loader_strategy_requested,
         "loader_strategy_used": loader_strategy_used,
         "loader_strategy_label": describe_loader_strategy(loader_strategy_used),
+        "size_bytes": len(file_bytes),
         **(
             {"loader_strategy_fallback_reason": loader_strategy_fallback_reason}
             if loader_strategy_fallback_reason
