@@ -51,7 +51,7 @@ def _fake_external_settings() -> EvidenceOpsExternalSettings:
 
 
 class EvidenceOpsExternalTargetsTests(unittest.TestCase):
-    def test_create_trello_cards_from_product_result_uses_action_items_for_document_agent(self) -> None:
+    def test_create_trello_cards_from_product_result_uses_action_plan_items_for_document_agent(self) -> None:
         payload = DocumentAgentPayload(
             user_intent="operational_task_extraction",
             answer_mode="friendly",
@@ -109,12 +109,54 @@ class EvidenceOpsExternalTargetsTests(unittest.TestCase):
         )
 
         self.assertEqual(response["status"], "planned")
-        self.assertEqual(response["card_mode"], "action_items")
+        self.assertEqual(response["card_mode"], "action_plan_items")
         self.assertEqual(response["planned_card_count"], 1)
-        self.assertEqual(response["planned_cards"][0]["list_id"], "review-list")
+        self.assertEqual(response["planned_cards"][0]["list_id"], "open-list")
         self.assertIn("Contact finance team about missing approval", response["planned_cards"][0]["name"])
         self.assertIn("Owner: Ana", response["planned_cards"][0]["description"])
         self.assertIn("Documents: DOC-001", response["planned_cards"][0]["description"])
+
+
+    @patch("src.services.evidenceops_external_targets.build_action_plan_view")
+    def test_create_trello_cards_from_action_plan_view_maps_statuses_to_matching_lists(self, build_view_mock) -> None:
+        build_view_mock.return_value = {
+            "items": [
+                {"title": "Collect missing approvals", "owner": "Ana", "due_date": "2026-04-20", "status": "open", "source": "Approval Email.pdf", "evidence": "Approval email missing."},
+                {"title": "Close temporary exception", "owner": "Bruno", "due_date": "2026-04-21", "status": "in_progress", "source": "Evidence Log.pdf", "evidence": "Exception is being closed."},
+                {"title": "Obtain governance sign-off", "owner": "Clara", "due_date": "2026-04-22", "status": "blocked", "source": "Committee Minutes.pdf", "evidence": "Pending committee decision."},
+                {"title": "Archive closure note", "owner": "Diego", "due_date": "2026-04-23", "status": "done", "source": "Closure Note.pdf", "evidence": "Closure note filed."},
+            ]
+        }
+        result = ProductWorkflowResult(
+            workflow_id="action_plan_evidence_review",
+            workflow_label="Action Plan / Evidence Review",
+            status="warning",
+            summary="Operational follow-up actions were identified.",
+            recommendation="Publish the grounded action plan to Trello.",
+            structured_result=StructuredResult(success=True, task_type="document_agent", validated_output=None),
+            grounding_preview=GroundingPreview(
+                strategy="document_scan",
+                document_ids=["DOC-001", "DOC-002"],
+                context_chars=1200,
+                source_block_count=3,
+                preview_text="Grounded context preview",
+            ),
+        )
+
+        response = create_trello_cards_from_product_result(result, settings=_fake_external_settings(), dry_run=True)
+
+        self.assertEqual(response["card_mode"], "action_plan_items")
+        self.assertEqual(response["planned_card_count"], 4)
+        self.assertEqual([card["list_id"] for card in response["planned_cards"]], ["open-list", "approved-list", "review-list", "done-list"])
+        self.assertEqual(response["list_breakdown"], [
+            {"list_id": "open-list", "list_label": "Open", "count": 1},
+            {"list_id": "review-list", "list_label": "Review", "count": 1},
+            {"list_id": "approved-list", "list_label": "Approved", "count": 1},
+            {"list_id": "done-list", "list_label": "Done", "count": 1},
+        ])
+        self.assertIn("Open: 1", response["message"])
+        self.assertIn("Approved: 1", response["message"])
+        self.assertIn("Done: 1", response["message"])
 
     def test_create_trello_cards_from_product_result_falls_back_to_summary_for_candidate_review(self) -> None:
         payload = CVAnalysisPayload(

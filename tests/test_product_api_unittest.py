@@ -459,6 +459,163 @@ class ProductApiTests(unittest.TestCase):
             server.server_close()
             thread.join(timeout=2)
 
+    def test_product_api_run_workflow_returns_action_plan_view_for_action_plan_workflow(self) -> None:
+        from unittest.mock import patch
+
+        server, thread = self._start_server()
+        try:
+            fake_result = ProductWorkflowResult(
+                workflow_id="action_plan_evidence_review",
+                workflow_label="Action Plan / Evidence Review",
+                status="warning",
+                summary="Vendor access remediation: 3 actionable task(s) and 2 evidence gaps identified.",
+                deck_export_kind="action_plan_deck",
+                deck_available=True,
+            )
+
+            with patch("src.product.api.run_product_workflow", return_value=fake_result), patch(
+                "src.product.api.build_action_plan_view",
+                return_value={
+                    "objective": "Drive grounded follow-up actions for vendor access remediation.",
+                    "summary": {
+                        "total": 3,
+                        "open": 1,
+                        "in_progress": 1,
+                        "blocked": 1,
+                        "done": 0,
+                        "completed": 0,
+                        "critical_path": 2,
+                        "evidence_gaps": 2,
+                        "documents": 2,
+                        "artifacts": 0,
+                    },
+                    "items": [
+                        {
+                            "id": "action-item-1",
+                            "title": "Collect missing privileged-access approvals.",
+                            "owner": "Identity Ops",
+                            "due_date": "2024-03-22",
+                            "priority": "high",
+                            "status": "in_progress",
+                            "source": "Privileged Account Approval Email.pdf",
+                            "evidence": "Approval email is missing for two privileged administrators.",
+                            "rationale": "Approval email is missing for two privileged administrators.",
+                            "notes": None,
+                            "document_id": "doc-1",
+                        }
+                    ],
+                    "critical_path": [
+                        {
+                            "id": "action-item-1",
+                            "title": "Collect missing privileged-access approvals.",
+                            "owner": "Identity Ops",
+                            "due_date": "2024-03-22",
+                            "priority": "high",
+                            "status": "in_progress",
+                            "source": "Privileged Account Approval Email.pdf",
+                            "evidence": "Approval email is missing for two privileged administrators.",
+                            "rationale": "Approval email is missing for two privileged administrators.",
+                            "notes": None,
+                            "document_id": "doc-1",
+                        }
+                    ],
+                    "evidence_gaps": [
+                        {
+                            "id": "gap-1",
+                            "item_id": "action-item-1",
+                            "title": "Collect missing privileged-access approvals.",
+                            "detail": "Missing explicit owner sign-off artifact for the remaining administrators.",
+                            "status": "partial",
+                            "source": "Privileged Account Approval Email.pdf",
+                            "notes": None,
+                        }
+                    ],
+                    "artifacts": [],
+                    "document_ids": ["doc-1", "doc-2"],
+                    "run_metadata": {
+                        "workflow_id": "action_plan_evidence_review",
+                        "workflow_label": "Action Plan / Evidence Review",
+                        "status": "warning",
+                        "provider": "ollama",
+                        "model": "qwen2.5:7b",
+                        "context_strategy": "document_scan",
+                        "deck_available": True,
+                        "deck_export_kind": "action_plan_deck",
+                        "warning_count": 1,
+                        "warnings": ["Awaiting final governance sign-off."],
+                        "source_block_count": 2,
+                        "highlights": ["Collect missing privileged-access approvals."],
+                        "summary": "Vendor access remediation: 3 actionable task(s) and 2 evidence gaps identified.",
+                        "recommendation": "Close the access-control evidence gaps before the next committee checkpoint.",
+                        "run_state": {"current_step": "review", "steps": []},
+                    },
+                },
+            ) as action_plan_view_mock, patch(
+                "src.product.api.append_product_workflow_history_entry",
+            ):
+                workflow_response = self._post_json(
+                    server,
+                    "/api/product/run-workflow",
+                    {
+                        "workflow_id": "action_plan_evidence_review",
+                        "document_ids": ["doc-1", "doc-2"],
+                        "provider": "ollama",
+                        "model": "qwen2.5:7b",
+                    },
+                )
+                self.assertTrue(workflow_response["ok"])
+                self.assertEqual(workflow_response["result"]["workflow_id"], "action_plan_evidence_review")
+                self.assertIn("action_plan_view", workflow_response)
+                self.assertEqual(workflow_response["action_plan_view"]["summary"]["critical_path"], 2)
+                self.assertEqual(workflow_response["action_plan_view"]["items"][0]["owner"], "Identity Ops")
+                action_plan_view_mock.assert_called_once()
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_product_api_publish_trello_endpoint(self) -> None:
+        from unittest.mock import patch
+
+        server, thread = self._start_server()
+        try:
+            fake_result = ProductWorkflowResult(
+                workflow_id="action_plan_evidence_review",
+                workflow_label="Action Plan / Evidence Review",
+                status="warning",
+                summary="Current run produced 2 actionable items.",
+                deck_export_kind="action_plan_deck",
+                deck_available=True,
+            )
+            publish_payload = {
+                "status": "success",
+                "dry_run": False,
+                "created_card_count": 2,
+                "target_board_id": "board-1",
+                "message": "Published 2 card(s) to Trello.",
+            }
+
+            with patch(
+                "src.product.api.publish_product_workflow_to_trello",
+                return_value=publish_payload,
+            ) as publish_mock:
+                response = self._post_json(
+                    server,
+                    "/api/product/publish-trello",
+                    {
+                        "result": fake_result.model_dump(mode="json"),
+                    },
+                )
+
+                self.assertTrue(response["ok"])
+                self.assertEqual(response["status"], "success")
+                self.assertEqual(response["created_card_count"], 2)
+                publish_mock.assert_called_once()
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
     def test_product_api_upload_documents_endpoint(self) -> None:
         from unittest.mock import patch
 

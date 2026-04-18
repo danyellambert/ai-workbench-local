@@ -30,6 +30,7 @@ from src.product.ingestion_jobs import (
     mark_product_upload_job_running,
     update_product_upload_job_stage,
 )
+from src.product.action_plan_presenter import build_action_plan_view
 from src.product.models import ProductWorkflowRequest, ProductWorkflowResult
 from src.product.presenters import build_document_review_view, build_policy_comparison_view
 from src.product.service import (
@@ -37,6 +38,7 @@ from src.product.service import (
     build_product_workflow_frontend_contract,
     delete_product_documents,
     generate_product_workflow_deck,
+    publish_product_workflow_to_trello,
     index_loaded_documents,
     list_product_documents,
     run_product_workflow,
@@ -552,6 +554,8 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     response_payload["result_view"] = build_document_review_view(result)
                 if request.workflow_id == "policy_contract_comparison":
                     response_payload["comparison_view"] = build_policy_comparison_view(result)
+                if request.workflow_id == "action_plan_evidence_review":
+                    response_payload["action_plan_view"] = build_action_plan_view(result)
                 self._send_json(HTTPStatus.OK, response_payload)
             except Exception as error:  # pragma: no cover - defensive API surface
                 if "request" in locals():
@@ -586,6 +590,22 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                         "ok": True,
                         "export_result": export_result,
                         "artifacts": [artifact.model_dump(mode="json") for artifact in artifacts],
+                    },
+                )
+            except Exception as error:  # pragma: no cover - defensive API surface
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path == "/api/product/publish-trello":
+            try:
+                result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
+                product_result = ProductWorkflowResult.model_validate(result_payload)
+                trello_result = publish_product_workflow_to_trello(product_result, dry_run=False)
+                self._send_json(
+                    HTTPStatus.OK,
+                    {
+                        "ok": True,
+                        **trello_result,
                     },
                 )
             except Exception as error:  # pragma: no cover - defensive API surface

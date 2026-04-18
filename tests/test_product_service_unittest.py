@@ -3,11 +3,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from src.product.models import ProductWorkflowRequest
+from src.product.models import GroundingPreview, ProductWorkflowRequest, ProductWorkflowResult
 from src.product.service import (
     build_grounding_preview,
     build_product_workflow_catalog,
     build_product_workflow_frontend_contract,
+    generate_product_workflow_deck,
+    publish_product_workflow_to_trello,
     list_product_documents,
     run_product_workflow,
 )
@@ -205,6 +207,95 @@ class ProductServiceTests(unittest.TestCase):
         self.assertEqual(execution_request.telemetry["agent_tool"], "extract_operational_tasks")
         self.assertEqual(result.debug_metadata["preferred_context_strategy"], "document_scan")
         self.assertIn("Action Plan deck artifact", result.debug_metadata["expected_outputs"])
+
+
+    def test_generate_product_workflow_deck_uses_current_action_plan_items_instead_of_global_action_store(self) -> None:
+        payload = DocumentAgentPayload(
+            task_type="document_agent",
+            user_intent="action_plan_evidence_review",
+            answer_mode="friendly",
+            tool_used="extract_operational_tasks",
+            summary="Governance Committee Minutes and Action Items: 0 actionable task(s), 0 deadline(s) and 0 operational risk(s) identified.",
+            recommended_actions=["Open the cited source excerpts to confirm the interpretation before acting."],
+            structured_response={
+                "actions": [],
+                "extraction_payload": {
+                    "task_type": "extraction",
+                    "main_subject": "Governance Committee Minutes and Action Items",
+                    "action_items": [],
+                    "risks": [],
+                    "missing_information": [],
+                },
+            },
+            sources=[
+                {
+                    "source": "Governance Committee Minutes and Action Items.pdf",
+                    "document_id": "doc-minutes",
+                    "chunk_id": 1,
+                    "score": 0.94,
+                    "snippet": "Negotiate liability cap with vendor legal Maria Santos 2024-03-22 In progress CTR-010 Section 7.3",
+                }
+            ],
+            confidence=0.67,
+            needs_review=True,
+            needs_review_reason="operational_extraction_without_grounded_actions",
+        )
+        result = ProductWorkflowResult(
+            workflow_id="action_plan_evidence_review",
+            workflow_label="Action Plan / Evidence Review",
+            status="warning",
+            summary="Governance Committee Minutes and Action Items: 0 actionable task(s), 0 deadline(s) and 0 operational risk(s) identified.",
+            recommendation="Open the cited source excerpts to confirm the interpretation before acting.",
+            structured_result=StructuredResult(success=True, task_type="document_agent", validated_output=payload),
+            grounding_preview=GroundingPreview(
+                strategy="document_scan",
+                document_ids=["doc-minutes"],
+                context_chars=1200,
+                source_block_count=1,
+                preview_text="[Source: Governance Committee Minutes and Action Items.pdf] Action Register Action Item Owner Due Date Status Evidence / Source Negotiate liability cap with vendor legal Maria Santos 2024-03-22 In progress CTR-010 Section 7.3 unlimited liability clause",
+            ),
+            deck_export_kind="action_plan_deck",
+            deck_available=True,
+        )
+
+        with patch("src.product.service.generate_executive_deck", return_value={"status": "completed", "local_pptx_path": "", "local_contract_path": "", "local_payload_path": "", "local_review_path": "", "local_preview_manifest_path": "", "local_thumbnail_sheet_path": ""}) as export_mock:
+            generate_product_workflow_deck(result, settings=type("S", (), {"local_artifact_dir": "/tmp", "enabled": True, "base_url": "http://127.0.0.1:8787", "enabled_export_kinds": []})())
+
+        kwargs = export_mock.call_args.kwargs
+        explicit_entries = kwargs.get("evidenceops_action_entries")
+        self.assertTrue(explicit_entries)
+        self.assertEqual(explicit_entries[0]["description"], "Negotiate liability cap with vendor legal")
+        self.assertEqual(explicit_entries[0]["owner"], "Maria Santos")
+        self.assertEqual(explicit_entries[0]["kanban_stage"], "Doing")
+        self.assertIn("Priority: Critical", explicit_entries[0]["trello_labels"])
+        self.assertEqual(kwargs.get("phase95_evidenceops_action_store_path"), None)
+
+    def test_publish_product_workflow_to_trello_uses_external_target_service(self) -> None:
+        result = ProductWorkflowResult(
+            workflow_id="action_plan_evidence_review",
+            workflow_label="Action Plan / Evidence Review",
+            status="warning",
+            summary="Current run produced 2 actionable items.",
+            recommendation="Publish the two critical actions to Trello.",
+            deck_export_kind="action_plan_deck",
+            deck_available=True,
+        )
+
+        with patch(
+            "src.product.service.create_trello_cards_from_product_result",
+            return_value={
+                "status": "success",
+                "dry_run": False,
+                "created_card_count": 2,
+                "target_board_id": "board-1",
+            },
+        ) as trello_mock:
+            payload = publish_product_workflow_to_trello(result, dry_run=False)
+
+        trello_mock.assert_called_once_with(result, dry_run=False)
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["created_card_count"], 2)
+        self.assertIn("Published 2 card(s) to Trello", payload["message"])
 
     def test_run_product_workflow_candidate_review_surfaces_warning_when_cv_is_sparse(self) -> None:
         structured_result = StructuredResult(

@@ -23,6 +23,7 @@ from src.config import (
     TrelloSettings,
     get_evidenceops_external_settings,
 )
+from src.product.action_plan_presenter import build_action_plan_view
 from src.product.models import ProductWorkflowResult
 from src.services.evidenceops_repository import (
     DEFAULT_EVIDENCEOPS_REPOSITORY_SUFFIXES,
@@ -594,6 +595,24 @@ def _result_requires_review(result: ProductWorkflowResult) -> bool:
     return result.status == "warning"
 
 
+def _first_configured_trello_list_id(*candidates: object) -> str:
+    for candidate in candidates:
+        normalized = str(candidate or "").strip()
+        if normalized:
+            return normalized
+    raise ValueError("No Trello target list is configured for card creation.")
+
+
+def _trello_list_label_for_id(list_id: str, settings: EvidenceOpsExternalSettings) -> str:
+    catalog = {
+        str(settings.trello.list_open_id or "").strip(): "Open",
+        str(settings.trello.list_review_id or "").strip(): "Review",
+        str(settings.trello.list_approved_id or "").strip(): "Approved",
+        str(settings.trello.list_done_id or "").strip(): "Done",
+    }
+    return catalog.get(str(list_id or "").strip(), "Configured target")
+
+
 def _resolve_trello_target_list_id(
     *,
     result: ProductWorkflowResult,
@@ -601,16 +620,98 @@ def _resolve_trello_target_list_id(
 ) -> str:
     if _result_requires_review(result) and str(settings.trello.list_review_id or "").strip():
         return str(settings.trello.list_review_id)
-    fallback_candidates = [
+    return _first_configured_trello_list_id(
         settings.trello.list_open_id,
         settings.trello.list_review_id,
         settings.trello.list_approved_id,
         settings.trello.list_done_id,
+    )
+
+
+def _resolve_trello_target_list_id_for_action_item(
+    *,
+    action_item: dict[str, Any],
+    result: ProductWorkflowResult,
+    settings: EvidenceOpsExternalSettings,
+) -> str:
+    status = str(action_item.get("status") or "").strip().lower()
+    kanban_stage = str(action_item.get("kanban_stage") or "").strip().lower()
+
+    done_statuses = {"done", "completed", "closed", "resolved"}
+    review_statuses = {
+        "blocked",
+        "review",
+        "needs_review",
+        "pending_review",
+        "awaiting_review",
+        "awaiting_approval",
+        "pending_approval",
+    }
+    active_statuses = {"in_progress", "doing", "active", "executing", "approved"}
+    open_statuses = {"open", "todo", "to_do", "suggested", "backlog", "pending"}
+
+    if status in done_statuses or kanban_stage == "done":
+        return _first_configured_trello_list_id(
+            settings.trello.list_done_id,
+            settings.trello.list_approved_id,
+            settings.trello.list_open_id,
+            settings.trello.list_review_id,
+        )
+    if status in review_statuses or kanban_stage in {"blocked", "review"}:
+        return _first_configured_trello_list_id(
+            settings.trello.list_review_id,
+            settings.trello.list_open_id,
+            settings.trello.list_approved_id,
+            settings.trello.list_done_id,
+        )
+    if status in active_statuses or kanban_stage in {"doing", "in progress", "approved"}:
+        return _first_configured_trello_list_id(
+            settings.trello.list_approved_id,
+            settings.trello.list_open_id,
+            settings.trello.list_review_id,
+            settings.trello.list_done_id,
+        )
+    if status in open_statuses or kanban_stage in {"to do", "todo", "open"}:
+        return _first_configured_trello_list_id(
+            settings.trello.list_open_id,
+            settings.trello.list_approved_id,
+            settings.trello.list_review_id,
+            settings.trello.list_done_id,
+        )
+    if _result_requires_review(result) and str(settings.trello.list_review_id or "").strip():
+        return str(settings.trello.list_review_id)
+    return _resolve_trello_target_list_id(result=result, settings=settings)
+
+
+def _build_trello_list_breakdown(cards: list[dict[str, Any]], settings: EvidenceOpsExternalSettings) -> list[dict[str, Any]]:
+    ordered_ids = [
+        str(settings.trello.list_open_id or "").strip(),
+        str(settings.trello.list_review_id or "").strip(),
+        str(settings.trello.list_approved_id or "").strip(),
+        str(settings.trello.list_done_id or "").strip(),
     ]
-    for candidate in fallback_candidates:
-        if str(candidate or "").strip():
-            return str(candidate)
-    raise ValueError("No Trello target list is configured for card creation.")
+    counts: dict[str, int] = {}
+    for card in cards:
+        list_id = str(card.get("list_id") or "").strip()
+        if not list_id:
+            continue
+        counts[list_id] = counts.get(list_id, 0) + 1
+    breakdown: list[dict[str, Any]] = []
+    for list_id in ordered_ids:
+        if not list_id or list_id not in counts:
+            continue
+        breakdown.append(
+            {
+                "list_id": list_id,
+                "list_label": _trello_list_label_for_id(list_id, settings),
+                "count": counts[list_id],
+            }
+        )
+    for list_id, count in counts.items():
+        if list_id in ordered_ids:
+            continue
+        breakdown.append({"list_id": list_id, "list_label": _trello_list_label_for_id(list_id, settings), "count": count})
+    return breakdown
 
 
 def _candidate_card_name(result: ProductWorkflowResult, payload: CVAnalysisPayload) -> str:
@@ -642,6 +743,8 @@ def _build_product_result_card_description(
             description_lines.append(f"Due date: {_trim_text(action_item.get('due_date'), max_chars=120)}")
         if str(action_item.get("status") or "").strip():
             description_lines.append(f"Action status: {_trim_text(action_item.get('status'), max_chars=120)}")
+        if str(action_item.get("source") or "").strip():
+            description_lines.append(f"Source: {_trim_text(action_item.get('source'), max_chars=240)}")
         if str(action_item.get("evidence") or "").strip():
             description_lines.append(f"Evidence: {_trim_text(action_item.get('evidence'), max_chars=600)}")
     if result.highlights:
@@ -664,10 +767,40 @@ def _build_product_result_trello_cards(
     settings: EvidenceOpsExternalSettings,
     max_cards: int = 8,
 ) -> tuple[list[dict[str, Any]], str]:
-    target_list_id = _resolve_trello_target_list_id(result=result, settings=settings)
     document_ids = _result_document_ids(result)
     payload = result.structured_result.validated_output if result.structured_result is not None else None
     cards: list[dict[str, Any]] = []
+
+    if result.workflow_id == "action_plan_evidence_review":
+        try:
+            action_plan_view = build_action_plan_view(result)
+        except Exception:
+            action_plan_view = {}
+        items = action_plan_view.get("items") if isinstance(action_plan_view, dict) else None
+        if isinstance(items, list):
+            for item in items[:max_cards]:
+                if not isinstance(item, dict):
+                    continue
+                action_name = _trim_text(item.get("title") or "Action plan item", max_chars=96)
+                cards.append(
+                    {
+                        "name": _trim_text(f"[{result.workflow_label}] {action_name}", max_chars=120),
+                        "description": _build_product_result_card_description(
+                            result=result,
+                            document_ids=document_ids,
+                            action_item=item,
+                        ),
+                        "list_id": _resolve_trello_target_list_id_for_action_item(
+                            action_item=item,
+                            result=result,
+                            settings=settings,
+                        ),
+                    }
+                )
+            if cards:
+                return cards, "action_plan_items"
+
+    target_list_id = _resolve_trello_target_list_id(result=result, settings=settings)
 
     if isinstance(payload, DocumentAgentPayload):
         worklog_entry = build_evidenceops_worklog_entry(
@@ -745,6 +878,7 @@ def create_trello_cards_from_product_result(
         settings=resolved_settings,
         max_cards=max_cards,
     )
+    list_breakdown = _build_trello_list_breakdown(cards, resolved_settings)
     plan = {
         "status": "planned" if dry_run else "success",
         "dry_run": bool(dry_run),
@@ -754,8 +888,13 @@ def create_trello_cards_from_product_result(
         "target_board_id": resolved_settings.trello.board_id or None,
         "planned_card_count": len(cards),
         "planned_cards": cards,
+        "list_breakdown": list_breakdown,
     }
     if dry_run:
+        plan.setdefault(
+            "message",
+            "Planned Trello publish by list: " + ", ".join(f"{item['list_label']}: {item['count']}" for item in list_breakdown) if list_breakdown else "Planned Trello publish.",
+        )
         return plan
 
     trello = TrelloClient(resolved_settings.trello)
@@ -771,6 +910,10 @@ def create_trello_cards_from_product_result(
         **plan,
         "status": "success",
         "dry_run": False,
+        "message": (
+            f"Published {len(created_cards)} card(s) to Trello"
+            + (" — " + ", ".join(f"{item['list_label']}: {item['count']}" for item in list_breakdown) if list_breakdown else ".")
+        ),
         "created_cards": created_cards,
         "created_card_count": len(created_cards),
         "created_card_urls": [
