@@ -290,6 +290,83 @@ export interface ProductPolicyComparisonView {
   };
 }
 
+export type ProductActionPlanPriority = 'critical' | 'high' | 'medium' | 'low';
+export type ProductActionPlanStatus = 'open' | 'in_progress' | 'blocked' | 'done';
+export type ProductActionPlanEvidenceGapStatus = 'sufficient' | 'partial' | 'missing';
+
+export interface ProductActionPlanItem {
+  id: string;
+  title: string;
+  owner?: string | null;
+  due_date?: string | null;
+  priority: ProductActionPlanPriority;
+  status: ProductActionPlanStatus;
+  source?: string | null;
+  evidence?: string | null;
+  rationale?: string | null;
+  notes?: string | null;
+  document_id?: string | null;
+}
+
+export interface ProductActionPlanEvidenceGap {
+  id: string;
+  item_id?: string | null;
+  title: string;
+  detail: string;
+  status: ProductActionPlanEvidenceGapStatus;
+  source?: string | null;
+  notes?: string | null;
+}
+
+export interface ProductActionPlanSummary {
+  total: number;
+  open: number;
+  in_progress: number;
+  blocked: number;
+  done: number;
+  completed: number;
+  critical_path: number;
+  evidence_gaps: number;
+  documents: number;
+  artifacts: number;
+}
+
+export interface ProductActionPlanRunMetadata {
+  workflow_id: string;
+  workflow_label: string;
+  status: string;
+  provider?: string | null;
+  model?: string | null;
+  context_strategy?: string | null;
+  deck_available: boolean;
+  deck_export_kind?: string | null;
+  warning_count: number;
+  warnings: string[];
+  source_block_count: number;
+  highlights: string[];
+  summary: string;
+  recommendation?: string | null;
+  run_state: {
+    current_step: string;
+    steps: Array<{
+      key: string;
+      label: string;
+      status: string;
+    }>;
+  };
+}
+
+export interface ProductActionPlanView {
+  objective: string;
+  summary: ProductActionPlanSummary;
+  items: ProductActionPlanItem[];
+  critical_path: ProductActionPlanItem[];
+  evidence_gaps: ProductActionPlanEvidenceGap[];
+  artifacts: ProductWorkflowArtifact[];
+  document_ids: string[];
+  run_metadata: ProductActionPlanRunMetadata;
+}
+
 export interface ProductWorkflowResultPayload {
   workflow_id: string;
   workflow_label: string;
@@ -311,6 +388,7 @@ export interface ProductRunWorkflowResponse {
   result: ProductWorkflowResultPayload;
   result_view?: ProductDocumentReviewView;
   comparison_view?: ProductPolicyComparisonView;
+  action_plan_view?: ProductActionPlanView;
 }
 
 export interface ProductGenerateDeckResponse {
@@ -318,6 +396,30 @@ export interface ProductGenerateDeckResponse {
   export_result: Record<string, unknown>;
   artifacts: ProductWorkflowArtifact[];
 }
+
+export interface ProductPublishTrelloListBreakdown {
+  list_id?: string | null;
+  list_label: string;
+  count: number;
+}
+
+export interface ProductPublishTrelloResponse {
+  ok: boolean;
+  status: string;
+  dry_run: boolean;
+  workflow_id?: string;
+  workflow_label?: string;
+  card_mode?: string | null;
+  message?: string | null;
+  target_board_id?: string | null;
+  planned_card_count?: number;
+  created_card_count?: number;
+  planned_cards?: Array<Record<string, unknown>>;
+  created_cards?: Array<Record<string, unknown>>;
+  created_card_urls?: string[];
+  list_breakdown?: ProductPublishTrelloListBreakdown[];
+}
+
 
 export interface RuntimeControlsCatalogItem {
   value: string;
@@ -553,6 +655,26 @@ export async function generateProductWorkflowDeck(result: ProductWorkflowResultP
     throw new Error(message);
   }
   return response.json() as Promise<ProductGenerateDeckResponse>;
+}
+
+
+export async function publishProductWorkflowToTrello(result: ProductWorkflowResultPayload): Promise<ProductPublishTrelloResponse> {
+  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-trello`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ result }),
+  });
+  if (!response.ok) {
+    let message = `Product API Trello publish failed: ${response.status}`;
+    try {
+      const errorPayload = await response.json() as { error?: string };
+      if (errorPayload?.error) message = errorPayload.error;
+    } catch {
+      // ignore JSON parsing error and keep fallback message
+    }
+    throw new Error(message);
+  }
+  return response.json() as Promise<ProductPublishTrelloResponse>;
 }
 
 export function buildProductArtifactUrl(path: string): string {
