@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import Any, Optional
 
 from ..config import get_rag_settings
@@ -596,13 +597,31 @@ def _build_cv_grounding_bundle(indexing_payload: dict[str, Any]) -> dict[str, An
 
 def _get_rag_index() -> dict[str, Any] | None:
     disk_index: dict[str, Any] | None = None
+    settings = _get_effective_rag_settings()
     try:
-        from ..storage.rag_store import load_rag_store
-        from ..storage.runtime_paths import get_rag_store_path
+        from ..rag.service import normalize_rag_index
+        from ..storage.rag_store import load_rag_document_catalog, load_rag_store
 
-        disk_index = load_rag_store(get_rag_store_path(get_rag_settings().store_path.parent))
-        if isinstance(disk_index, dict):
-            return disk_index
+        # RagSettings.store_path already points to the fully resolved rag_store.json.
+        # Passing store_path.parent into get_rag_store_path() duplicated the runtime
+        # root segments and caused document grounding to read from a non-existent path,
+        # which zeroed Action Plan grounding even when the selected documents were
+        # correctly indexed.
+        raw_disk_index = load_rag_store(settings.store_path)
+        if isinstance(raw_disk_index, dict):
+            normalized_disk_index = normalize_rag_index(raw_disk_index, settings)
+            if isinstance(normalized_disk_index, dict):
+                return normalized_disk_index
+            return raw_disk_index
+
+        document_catalog = load_rag_document_catalog(settings.store_path)
+        if isinstance(document_catalog, list):
+            disk_index = {
+                "documents": [item for item in document_catalog if isinstance(item, dict)],
+                "chunks": [],
+                "settings": {"store_path": str(settings.store_path)},
+                "updated_at": None,
+            }
     except Exception:
         disk_index = None
     try:
@@ -753,18 +772,137 @@ def _join_chunk_context(chunks: list[dict[str, Any]], max_chars: int) -> str:
     return "\n\n".join(parts)
 
 
+def _build_document_fallback_context(documents: list[dict[str, Any]], max_chars: int) -> str:
+    pseudo_chunks: list[dict[str, Any]] = []
+    for position, document in enumerate(documents, start=1):
+        if not isinstance(document, dict):
+            continue
+        metadata = document.get("loader_metadata") if isinstance(document.get("loader_metadata"), dict) else {}
+        indexing_payload = metadata.get("indexing_payload") if isinstance(metadata.get("indexing_payload"), dict) else {}
+
+        block_text = ""
+        if indexing_payload:
+            block_text = _serialize_indexing_payload(indexing_payload)
+            if not block_text:
+                block_text = _clean_context_block_text(str(indexing_payload.get("raw_text") or ""))
+        if not block_text:
+            block_text = _clean_context_block_text(
+                str(
+                    metadata.get("grounding_text_excerpt")
+                    or metadata.get("raw_text")
+                    or metadata.get("text")
+                    or ""
+                )
+            )
+        if not block_text and isinstance(metadata.get("evidence_summary"), dict):
+            evidence_summary = metadata.get("evidence_summary") or {}
+            summary_lines: list[str] = []
+            for label, key in (
+                ("Document ID", "document_id"),
+                ("Source Type", "source_type"),
+                ("Name", "name_value"),
+                ("Location", "location_value"),
+            ):
+                value = _normalize_whitespace(str(evidence_summary.get(key) or ""))
+                if value:
+                    summary_lines.append(f"{label}: {value}")
+            warnings = evidence_summary.get("warnings")
+            if isinstance(warnings, list) and warnings:
+                summary_lines.append("Warnings: " + "; ".join(_normalize_whitespace(str(item)) for item in warnings if _normalize_whitespace(str(item))))
+            emails = evidence_summary.get("emails")
+            if isinstance(emails, list) and emails:
+                summary_lines.append("Emails: " + ", ".join(_normalize_whitespace(str(item)) for item in emails if _normalize_whitespace(str(item))))
+            phones = evidence_summary.get("phones")
+            if isinstance(phones, list) and phones:
+                summary_lines.append("Phones: " + ", ".join(_normalize_whitespace(str(item)) for item in phones if _normalize_whitespace(str(item))))
+            block_text = _clean_context_block_text("\n".join(summary_lines))
+        if not block_text:
+            continue
+        pseudo_chunks.append(
+            {
+                "document_id": str(document.get("document_id") or document.get("file_hash") or position),
+                "source": str(document.get("name") or document.get("document_id") or f"document-{position}"),
+                "chunk_id": position,
+                "text": block_text,
+            }
+        )
+    if not pseudo_chunks:
+        return ""
+    return _join_chunk_context(pseudo_chunks, max_chars=max_chars)
+
+
+def _load_chroma_chunks(document_ids: list[str] | None = None) -> list[dict[str, Any]]:
+    try:
+        from ..rag.vector_store import ChromaVectorStore
+    except Exception:
+        return []
+
+    try:
+        settings = _get_effective_rag_settings()
+        chroma_path = Path(getattr(settings, "chroma_path", get_rag_settings().chroma_path))
+        store = ChromaVectorStore(chroma_path)
+        collection = store._get_collection()
+
+        where: dict[str, object] | None = None
+        if document_ids:
+            normalized_ids = [str(item) for item in document_ids if item]
+            if normalized_ids:
+                where = {"document_id": {"$in": normalized_ids}}
+
+        get_kwargs: dict[str, object] = {"include": ["metadatas", "documents"]}
+        if where is not None:
+            get_kwargs["where"] = where
+        results = collection.get(**get_kwargs)
+    except Exception:
+        return []
+
+    ids = results.get("ids") or []
+    metadatas = results.get("metadatas") or []
+    documents = results.get("documents") or []
+    output: list[dict[str, Any]] = []
+    for index, (chunk_id, metadata, document_text) in enumerate(zip(ids, metadatas, documents), start=1):
+        metadata = metadata if isinstance(metadata, dict) else {}
+        text_value = str(document_text or "").strip()
+        if not text_value:
+            continue
+        output.append(
+            {
+                "document_id": str(metadata.get("document_id") or chunk_id or index),
+                "file_hash": str(metadata.get("document_id") or chunk_id or index),
+                "source": str(metadata.get("source") or metadata.get("document_id") or f"document-{index}"),
+                "file_type": str(metadata.get("file_type") or ""),
+                "chunk_id": int(metadata.get("chunk_id") or index),
+                "start_char": int(metadata.get("start_char") or 0),
+                "end_char": int(metadata.get("end_char") or 0),
+                "snippet": str(metadata.get("snippet") or ""),
+                "text": text_value,
+            }
+        )
+    return _ordered_chunks(output)
+
+
 def build_document_scan_context(
     document_ids: list[str] | None = None,
     max_chunks: int = DEFAULT_DOCUMENT_SCAN_CHUNKS,
     max_chars: int = DEFAULT_DOCUMENT_SCAN_CHARS,
 ) -> str:
     rag_index = _get_rag_index()
-    if not isinstance(rag_index, dict):
-        return ""
-    chunks = _ordered_chunks(_filtered_chunks(rag_index, document_ids))
-    if not chunks:
-        return ""
-    return _join_chunk_context(chunks[:max_chunks], max_chars=max_chars)
+    documents: list[dict[str, Any]] = []
+    if isinstance(rag_index, dict):
+        chunks = _ordered_chunks(_filtered_chunks(rag_index, document_ids))
+        if chunks:
+            joined = _join_chunk_context(chunks[:max_chunks], max_chars=max_chars)
+            if joined:
+                return joined
+        documents = _find_documents(rag_index, document_ids)
+
+    chroma_chunks = _load_chroma_chunks(document_ids)
+    if chroma_chunks:
+        joined = _join_chunk_context(chroma_chunks[:max_chunks], max_chars=max_chars)
+        if joined:
+            return joined
+
+    return _build_document_fallback_context(documents, max_chars=max_chars)
 
 
 def build_retrieval_context(

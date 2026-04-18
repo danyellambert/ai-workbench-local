@@ -696,12 +696,16 @@ def load_document(
     else:
         raise RuntimeError("Unsupported format. Use PDF, TXT, CSV, MD, or PY.")
 
+    cleaned_text = text.strip()
+    grounding_text_excerpt = cleaned_text[:12000] if cleaned_text else ""
+
     metadata = {
         **metadata,
         "loader_strategy_requested": loader_strategy_requested,
         "loader_strategy_used": loader_strategy_used,
         "loader_strategy_label": describe_loader_strategy(loader_strategy_used),
         "size_bytes": len(file_bytes),
+        "grounding_text_excerpt": grounding_text_excerpt,
         **(
             {"loader_strategy_fallback_reason": loader_strategy_fallback_reason}
             if loader_strategy_fallback_reason
@@ -709,7 +713,6 @@ def load_document(
         ),
     }
 
-    cleaned_text = text.strip()
     if not cleaned_text:
         raise RuntimeError("Could not extract useful content from the uploaded file.")
 
