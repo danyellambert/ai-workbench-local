@@ -50,3 +50,5 @@ screenshots_ai_lab
 screenshots_frontend
 screenshots_gradio
 frontend/tmp_*.md
+.tmp_action_plan_isolated_selected_e2e/
+frontend/.tmp_action_plan_isolated_selected_e2e/

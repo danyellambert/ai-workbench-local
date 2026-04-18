@@ -14,6 +14,9 @@ const apiPort = process.env.PRODUCT_API_SERVER_PORT || "8011";
 const frontendPort = process.env.FRONTEND_DEV_PORT || "8080";
 const pythonBin = process.env.PYTHON_BIN || "python";
 const productApiBaseUrl = process.env.VITE_PRODUCT_API_BASE_URL || `http://${apiHost}:${apiPort}`;
+const reuseExistingApi = !["0", "false", "False", "no", "NO"].includes(
+  String(process.env.PRODUCT_API_REUSE_EXISTING || "1"),
+);
 
 const sharedEnv = {
   ...process.env,
@@ -108,16 +111,22 @@ function attachChild(name, child, { critical = true } = {}) {
 console.log(`[dev] Starting Product API on http://${apiHost}:${apiPort}`);
 console.log(`[dev] Starting frontend on http://localhost:${frontendPort}`);
 console.log(`[dev] Frontend will use Product API base URL: ${productApiBaseUrl}`);
+console.log(`[dev] PRODUCT_API_REUSE_EXISTING=${reuseExistingApi ? "1" : "0"}`);
 
 const productApiHealthUrl = `${productApiBaseUrl.replace(/\/$/, "")}/health`;
 const existingApiHealthy = await probeHttp(productApiHealthUrl);
 
-if (existingApiHealthy) {
+if (existingApiHealthy && reuseExistingApi) {
   console.log(`[dev] Reusing existing Product API at ${productApiBaseUrl}`);
 } else {
   const portBusy = await probePort(apiHost, apiPort);
   if (portBusy) {
-    console.error(`[dev] Port ${apiPort} is already in use, but no healthy Product API responded at ${productApiHealthUrl}.`);
+    console.error(`[dev] Port ${apiPort} is already in use.`);
+    if (existingApiHealthy) {
+      console.error(`[dev] A healthy Product API is already responding at ${productApiBaseUrl}, but PRODUCT_API_REUSE_EXISTING=0.`);
+    } else {
+      console.error(`[dev] No healthy Product API responded at ${productApiHealthUrl}.`);
+    }
     console.error(`[dev] Free the port or set PRODUCT_API_SERVER_PORT to another value, then try again.`);
     process.exit(1);
   }
@@ -130,9 +139,22 @@ if (existingApiHealthy) {
   attachChild("product-api", productApi);
 }
 
+const frontendPortBusy = await probePort("127.0.0.1", frontendPort);
+if (frontendPortBusy) {
+  console.error(`[dev] Frontend port ${frontendPort} is already in use. Use another FRONTEND_DEV_PORT or free the port.`);
+  process.exit(1);
+}
+
 const vite = spawn(
   process.execPath,
-  [path.join(frontendDir, "node_modules", "vite", "bin", "vite.js"), "--host", "::", "--port", frontendPort],
+  [
+    path.join(frontendDir, "node_modules", "vite", "bin", "vite.js"),
+    "--host",
+    "::",
+    "--port",
+    frontendPort,
+    "--strictPort",
+  ],
   {
     cwd: frontendDir,
     env: sharedEnv,
