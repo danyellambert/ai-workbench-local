@@ -17,6 +17,10 @@ def _connect(path: Path) -> sqlite3.Connection:
     connection.row_factory = sqlite3.Row
     try:
         yield connection
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
     finally:
         connection.close()
 

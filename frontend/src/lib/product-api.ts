@@ -724,3 +724,68 @@ export function testPreferencesConnection(connectionId: string): Promise<Prefere
 export function updatePreferencesConnectionCredential(connectionId: string, apiKey: string): Promise<PreferencesResponse> {
   return postProductApi<PreferencesResponse>(`/api/preferences/connections/${encodeURIComponent(connectionId)}/credential`, { api_key: apiKey });
 }
+
+export type LabDataSource = 'live' | 'derived' | 'snapshot' | 'mock';
+
+export interface LabOverviewResponse {
+  ok: boolean;
+  meta: { source: LabDataSource; updated_at?: string | null; notes?: string[] };
+  runtime: {
+    generationProvider: string;
+    generationModel: string;
+    vectorBackendStatus: string;
+    indexedDocumentCount: number;
+    ingestionHealth: string;
+    contextPressure: number;
+  };
+  kpis: Array<{ label: string; value: string | number; status: string; trend?: string }>;
+  alerts: Array<{ id: string; severity: string; title: string; detail: string; source: string; timestamp?: string | null }>;
+  workflow_mix_label?: string;
+  workflow_mix: Array<{ name: string; value: number }>;
+  review_rate: number;
+}
+
+export interface LabEvalSuite {
+  name: string;
+  total: number;
+  pass: number;
+  warn: number;
+  fail: number;
+  needsReview: number;
+  lastRun?: string | null;
+}
+
+export interface LabEvalCase {
+  id: string;
+  task: string;
+  suite: string;
+  verdict: 'PASS' | 'WARN' | 'FAIL';
+  score: number;
+  needsReview: boolean;
+  model: string;
+  latency: number;
+  timestamp?: string | null;
+  errorDetail?: string | null;
+}
+
+export interface LabEvalsResponse {
+  ok: boolean;
+  meta: { source: LabDataSource; updated_at?: string | null; notes?: string[] };
+  passRate: number;
+  totals: { total: number; pass: number; warn: number; fail: number; review: number };
+  suites: LabEvalSuite[];
+  cases: LabEvalCase[];
+  diagnosis: Record<string, unknown>;
+}
+
+export function getLabOverview(): Promise<LabOverviewResponse> {
+  return fetchProductApi<LabOverviewResponse>('/api/lab/overview');
+}
+
+export const fetchLabOverview = getLabOverview;
+
+export function getLabEvals(): Promise<LabEvalsResponse> {
+  return fetchProductApi<LabEvalsResponse>('/api/lab/evals');
+}
+
+export const fetchLabEvals = getLabEvals;

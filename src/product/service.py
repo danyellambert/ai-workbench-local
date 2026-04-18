@@ -8,7 +8,6 @@ from src.providers.registry import resolve_provider_runtime_profile
 from src.rag.loaders import LoadedDocument
 from src.rag.service import get_indexed_documents, normalize_rag_index, remove_documents_from_rag_index, upsert_documents_in_rag_index
 from src.services.document_context import build_structured_document_context
-from src.services.evidenceops_external_targets import create_trello_cards_from_product_result
 from src.services.presentation_export import (
     ACTION_PLAN_EXPORT_KIND,
     CANDIDATE_REVIEW_EXPORT_KIND,
@@ -17,6 +16,7 @@ from src.services.presentation_export import (
     POLICY_CONTRACT_COMPARISON_EXPORT_KIND,
 )
 from src.services.presentation_export_service import generate_executive_deck
+from src.services.evidenceops_external_targets import create_trello_cards_from_product_result
 from src.storage.rag_store import clear_rag_store, load_rag_document_catalog, load_rag_store, save_rag_store
 from src.storage.runtime_paths import (
     get_phase95_evidenceops_action_store_path,
@@ -870,43 +870,14 @@ def _artifact_or_none(artifact_type: str, label: str, path_value: object) -> Pro
     )
 
 
-def _kanban_stage_for_status(value: object) -> str:
-    normalized = str(value or "").strip().lower()
-    if normalized == "done":
-        return "Done"
-    if normalized == "blocked":
-        return "Blocked"
-    if normalized == "in_progress":
-        return "Doing"
-    return "To do"
-
-
-def _trello_labels_for_item(item: dict[str, Any]) -> list[str]:
-    labels: list[str] = []
-    priority = str(item.get("priority") or "").strip()
-    if priority:
-        labels.append(f"Priority: {priority.title()}")
-    status = str(item.get("status") or "").strip()
-    if status:
-        labels.append(f"Status: {status.replace('_', ' ').title()}")
-    source = str(item.get("source") or "").strip()
-    if source:
-        labels.append(f"Source: {source}")
-    return labels
-
-
 def _build_action_plan_export_entries(result: ProductWorkflowResult) -> list[dict[str, Any]]:
     if result.workflow_id != "action_plan_evidence_review":
         return []
     view = build_action_plan_view(result)
     entries: list[dict[str, Any]] = []
-    for rank, item in enumerate(view.get("critical_path", []), start=1):
-        if isinstance(item, dict):
-            item.setdefault("critical_path_rank", rank)
     for item in view.get("items", []):
         if not isinstance(item, dict):
             continue
-        evidence_text = item.get("evidence") or item.get("rationale")
         entries.append(
             {
                 "action_type": "action_item",
@@ -916,36 +887,11 @@ def _build_action_plan_export_entries(result: ProductWorkflowResult) -> list[dic
                 "due_date": item.get("due_date"),
                 "status": item.get("status") or "open",
                 "source": item.get("source"),
-                "source_document_id": item.get("document_id"),
-                "evidence": evidence_text,
-                "rationale": item.get("rationale"),
-                "notes": item.get("notes"),
+                "evidence": item.get("evidence") or item.get("rationale"),
                 "review_type": "action_plan_evidence_review",
-                "workflow_id": result.workflow_id,
-                "kanban_stage": _kanban_stage_for_status(item.get("status") or "open"),
-                "trello_card_title": item.get("title"),
-                "trello_labels": _trello_labels_for_item(item),
-                "needs_evidence_followup": not bool(str(evidence_text or "").strip()),
-                "critical_path_rank": item.get("critical_path_rank"),
             }
         )
     return entries
-
-
-def publish_product_workflow_to_trello(
-    result: ProductWorkflowResult,
-    *,
-    dry_run: bool = False,
-) -> dict[str, Any]:
-    plan = create_trello_cards_from_product_result(result, dry_run=dry_run)
-    if not isinstance(plan, dict):
-        raise ValueError("Trello publish did not return a valid payload.")
-    if plan.get("dry_run"):
-        plan.setdefault("message", "Trello dry-run completed. Review the planned cards before publishing.")
-    else:
-        count = int(plan.get("created_card_count") or 0)
-        plan.setdefault("message", f"Published {count} card(s) to Trello.")
-    return plan
 
 
 def generate_product_workflow_deck(
@@ -978,3 +924,17 @@ def generate_product_workflow_deck(
         if artifact is not None
     ]
     return export_result, artifacts
+
+
+def publish_product_workflow_to_trello(
+    result: ProductWorkflowResult,
+    *,
+    dry_run: bool = True,
+    max_cards: int = 8,
+) -> dict[str, Any]:
+    """Create or plan Trello cards for a workflow result without leaking EvidenceOps internals to the API layer."""
+    return create_trello_cards_from_product_result(
+        result,
+        dry_run=dry_run,
+        max_cards=max_cards,
+    )

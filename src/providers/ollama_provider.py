@@ -5,7 +5,10 @@ import subprocess
 from urllib import request as urllib_request
 from urllib.parse import urlparse
 
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except Exception:  # optional dependency
+    OpenAI = None
 
 from src.config import OllamaSettings
 
@@ -25,7 +28,7 @@ class OllamaProvider:
 
     def __init__(self, settings: OllamaSettings):
         self.settings = settings
-        self.client = OpenAI(base_url=settings.base_url, api_key=settings.api_key or "ollama")
+        self.client = OpenAI(base_url=settings.base_url, api_key=settings.api_key or "ollama") if OpenAI is not None else None
         self.native_base_url = self._build_native_base_url(settings.base_url)
         self._last_usage_metrics: dict[str, object] = {}
 

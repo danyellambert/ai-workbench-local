@@ -31,6 +31,19 @@ from src.product.ingestion_jobs import (
     update_product_upload_job_stage,
 )
 from src.product.action_plan_presenter import build_action_plan_view
+from src.product.lab import (
+    build_lab_artifacts_payload,
+    build_lab_benchmarks_payload,
+    build_lab_chat_payload,
+    build_lab_evals_payload,
+    build_lab_evidenceops_payload,
+    build_lab_evidenceops_search_payload,
+    build_lab_overview_payload,
+    build_lab_runtime_payload,
+    build_lab_workflow_inspector_payload,
+    execute_lab_chat_turn,
+    execute_lab_workflow_inspector_run,
+)
 from src.product.models import ProductWorkflowRequest, ProductWorkflowResult
 from src.product.presenters import build_document_review_view, build_policy_comparison_view
 from src.product.service import (
@@ -38,9 +51,9 @@ from src.product.service import (
     build_product_workflow_frontend_contract,
     delete_product_documents,
     generate_product_workflow_deck,
-    publish_product_workflow_to_trello,
     index_loaded_documents,
     list_product_documents,
+    publish_product_workflow_to_trello,
     run_product_workflow,
 )
 from src.services.preferences import (
@@ -56,8 +69,20 @@ from src.services.runtime_controls import (
     build_runtime_controls_payload,
     update_runtime_controls_payload,
 )
+from src.storage.lab_state import (
+    append_lab_chat_message,
+    append_lab_workflow_run,
+    create_lab_chat_session,
+    get_lab_chat_session,
+    update_lab_chat_session_runtime,
+)
 from src.storage.product_workflow_history import append_product_workflow_history_entry
-from src.storage.runtime_paths import get_artifact_root, get_product_workflow_history_path
+from src.storage.runtime_paths import (
+    get_artifact_root,
+    get_lab_chat_sessions_path,
+    get_lab_workflow_runs_path,
+    get_product_workflow_history_path,
+)
 
 
 class ReusableThreadingHTTPServer(ThreadingHTTPServer):
@@ -88,6 +113,19 @@ def _resolve_product_artifact_path(*, bootstrap: ProductBootstrap, raw_path: str
         raise FileNotFoundError(f"Artifact not found: {resolved}")
     return resolved
 
+
+
+
+def _default_lab_document_ids(bootstrap: ProductBootstrap, *, minimum: int = 1) -> list[str]:
+    try:
+        documents = list_product_documents(bootstrap.rag_settings)
+    except Exception:
+        return []
+    indexed = [item.document_id for item in documents if getattr(item, "status", None) in {"indexed", "warning"}]
+    if len(indexed) >= minimum:
+        return indexed[: max(minimum, 2)]
+    ordered = [item.document_id for item in documents if str(getattr(item, "document_id", "")).strip()]
+    return ordered[: max(minimum, 2)]
 
 def _read_json_body(handler: BaseHTTPRequestHandler) -> dict[str, Any]:
     content_length = int(handler.headers.get("Content-Length") or 0)
@@ -410,6 +448,43 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.OK, build_product_document_library_payload(self.bootstrap))
             return
 
+        if path == "/api/lab/overview":
+            self._send_json(HTTPStatus.OK, build_lab_overview_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/lab/runtime":
+            self._send_json(HTTPStatus.OK, build_lab_runtime_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/lab/chat":
+            self._send_json(HTTPStatus.OK, build_lab_chat_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/lab/workflow-inspector":
+            self._send_json(HTTPStatus.OK, build_lab_workflow_inspector_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/lab/benchmarks":
+            self._send_json(HTTPStatus.OK, build_lab_benchmarks_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/lab/evals":
+            self._send_json(HTTPStatus.OK, build_lab_evals_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/lab/artifacts":
+            self._send_json(HTTPStatus.OK, build_lab_artifacts_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/lab/evidenceops":
+            self._send_json(HTTPStatus.OK, build_lab_evidenceops_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/lab/evidenceops/search":
+            query_text = str((query.get("q") or [""])[0])
+            self._send_json(HTTPStatus.OK, build_lab_evidenceops_search_payload(self.bootstrap.workspace_root, query=query_text))
+            return
+
         if path.startswith("/api/product/upload-jobs/"):
             job_id = path.rsplit("/", 1)[-1].strip()
             payload = get_product_upload_job(job_id)
@@ -596,19 +671,82 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
 
-        if path == "/api/product/publish-trello":
+        if path == "/api/product/publish-to-trello":
             try:
                 result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
                 product_result = ProductWorkflowResult.model_validate(result_payload)
-                trello_result = publish_product_workflow_to_trello(product_result, dry_run=False)
-                self._send_json(
-                    HTTPStatus.OK,
-                    {
-                        "ok": True,
-                        **trello_result,
-                    },
-                )
+                dry_run = bool(payload.get("dry_run") or payload.get("publish_options", {}).get("dry_run") if isinstance(payload.get("publish_options"), dict) else False)
+                publish_payload = publish_product_workflow_to_trello(product_result, dry_run=dry_run)
+                publish_payload.setdefault("ok", True)
+                publish_payload.setdefault("workflow_id", product_result.workflow_id)
+                publish_payload.setdefault("workflow_label", product_result.workflow_label)
+                self._send_json(HTTPStatus.OK, publish_payload)
             except Exception as error:  # pragma: no cover - defensive API surface
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path == "/api/lab/workflow-inspector/run":
+            try:
+                execution = execute_lab_workflow_inspector_run(
+                    bootstrap=self.bootstrap,
+                    task_id=str(payload.get("task_id") or payload.get("workflow_id") or self.bootstrap.product_settings.default_workflow),
+                    document_id=(str(payload.get("document_id")) if payload.get("document_id") is not None else None),
+                    input_text=(str(payload.get("input_text")) if payload.get("input_text") is not None else None),
+                    provider=(str(payload.get("provider")) if payload.get("provider") is not None else None),
+                    model=(str(payload.get("model")) if payload.get("model") is not None else None),
+                )
+                result = execution.get("result")
+                request = execution.get("request")
+                run_record = execution.get("run_record")
+                response_payload = {
+                    "ok": True,
+                    "run": run_record,
+                    "result": result.model_dump(mode="json") if hasattr(result, "model_dump") else result,
+                    "page": build_lab_workflow_inspector_payload(self.bootstrap.workspace_root),
+                }
+                if getattr(request, "workflow_id", None) == "document_review":
+                    response_payload["result_view"] = build_document_review_view(result)
+                if getattr(request, "workflow_id", None) == "policy_contract_comparison":
+                    response_payload["comparison_view"] = build_policy_comparison_view(result)
+                if getattr(request, "workflow_id", None) == "action_plan_evidence_review":
+                    response_payload["action_plan_view"] = build_action_plan_view(result)
+                self._send_json(HTTPStatus.OK, response_payload)
+            except Exception as error:  # pragma: no cover - defensive API surface
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path == "/api/lab/chat/sessions":
+            try:
+                document_ids = [str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()]
+                if not document_ids:
+                    document_ids = _default_lab_document_ids(self.bootstrap, minimum=1)
+                session = create_lab_chat_session(
+                    get_lab_chat_sessions_path(self.bootstrap.workspace_root),
+                    title=str(payload.get("title") or "AI Lab chat session"),
+                    document_ids=document_ids,
+                )
+                self._send_json(HTTPStatus.OK, {"ok": True, "session": session, "page": build_lab_chat_payload(self.bootstrap.workspace_root)})
+            except Exception as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path.startswith("/api/lab/chat/sessions/") and path.endswith("/messages"):
+            try:
+                session_id = path.removeprefix("/api/lab/chat/sessions/").removesuffix("/messages").strip("/")
+                response_payload = execute_lab_chat_turn(
+                    bootstrap=self.bootstrap,
+                    session_id=session_id,
+                    content=str(payload.get("content") or ""),
+                    document_ids=[str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()],
+                )
+                self._send_json(HTTPStatus.OK, {
+                    "ok": True,
+                    "session_id": session_id,
+                    "assistant_message": response_payload.get("assistant_message"),
+                    "artifact_path": response_payload.get("artifact_path"),
+                    "page": build_lab_chat_payload(self.bootstrap.workspace_root, session_id=session_id),
+                })
+            except Exception as error:
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
 

@@ -52,3 +52,5 @@ screenshots_gradio
 frontend/tmp_*.md
 .tmp_action_plan_isolated_selected_e2e/
 frontend/.tmp_action_plan_isolated_selected_e2e/
+.tmp_ai_lab_e2e/
+tmp_ai_lab_e2e.zip
