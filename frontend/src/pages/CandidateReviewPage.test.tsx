@@ -202,9 +202,44 @@ describe('CandidateReviewPage', () => {
     });
   });
 
+  it('filters duplicate and placeholder experience rows before rendering them', async () => {
+    vi.mocked(runProductWorkflow).mockResolvedValueOnce({
+      ...buildWorkflowResponse(),
+      result_sections: {
+        ...buildWorkflowResponse().result_sections,
+        tables: [
+          {
+            title: 'Experience highlights',
+            headers: ['Role', 'Company', 'Period', 'Evidence'],
+            rows: [
+              ['Senior ML Engineer', 'Acme AI', '2022-2026', 'Led retrieval and ranking systems.'],
+              ['Senior ML Engineer', 'Acme AI', '2022-2026', 'Led retrieval and ranking systems.'],
+              ['-', '-', '2022-2026', '-'],
+              ['', '', '', ''],
+            ],
+          },
+        ],
+        evidence_highlights: [['Retrieval systems', '0.92', 'CV', 'Led ranking and search quality improvements.']],
+      },
+    });
+
+    renderPage();
+    expect(await screen.findByText('Sarah Chen - Senior ML Engineer CV.pdf')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /run candidate review/i }));
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('candidate-review-experience-row')).toHaveLength(1);
+    });
+    expect(screen.getByText('1 structured experience row(s)')).toBeInTheDocument();
+    expect(screen.queryByText('-', { selector: 'h5' })).not.toBeInTheDocument();
+  });
+
+
   it('runs the live candidate workflow and renders grounded sections plus deck artifacts', async () => {
     renderPage();
 
+    expect(screen.getByTestId('candidate-review-page')).toBeInTheDocument();
     expect(await screen.findByText('Sarah Chen - Senior ML Engineer CV.pdf')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /run candidate review/i }));

@@ -89,6 +89,30 @@ function getTable(sections: ProductResultSections | null, title: string) {
   return sections?.tables.find((table) => table.title === title) || null;
 }
 
+function isMeaningfulCell(value: unknown): boolean {
+  const normalized = String(value ?? '').trim().toLowerCase();
+  return Boolean(normalized && normalized !== '-' && normalized !== 'n/a' && normalized !== 'na' && normalized !== 'null' && normalized !== 'undefined');
+}
+
+function dedupeRows(rows: Array<Array<unknown>>): Array<Array<unknown>> {
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    const key = row.map((cell) => String(cell ?? '').trim().toLowerCase()).join('|');
+    if (!key) return false;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function normalizeExperienceRows(rows: Array<Array<unknown>>): Array<Array<unknown>> {
+  return dedupeRows(rows).filter((row) => isMeaningfulCell(row[0]) || isMeaningfulCell(row[1]) || isMeaningfulCell(row[3]));
+}
+
+function normalizeEvidenceRows(rows: Array<Array<unknown>>): Array<Array<unknown>> {
+  return dedupeRows(rows).filter((row) => row.some((cell) => isMeaningfulCell(cell)));
+}
+
 function getStatusCopy(response: ProductRunWorkflowResponse | null): { label: string; detail: string } {
   const status = String(response?.result?.status || '').toLowerCase();
   if (status === 'completed') {
@@ -266,9 +290,11 @@ export default function CandidateReviewPage() {
   const statusCopy = getStatusCopy(workflowResponse);
   const candidateProfile = sections?.candidate_profile ?? null;
   const score = deriveScore(workflowResponse, sections);
-  const evidenceRows = sections?.evidence_highlights ?? [];
+  const evidenceRows = useMemo(() => normalizeEvidenceRows(sections?.evidence_highlights ?? []), [sections?.evidence_highlights]);
   const experienceTable = getTable(sections, 'Experience highlights');
+  const experienceRows = useMemo(() => normalizeExperienceRows(experienceTable?.rows ?? []), [experienceTable?.rows]);
   const evidenceTable = getTable(sections, 'Evidence highlights');
+  const evidenceTableRows = useMemo(() => normalizeEvidenceRows(evidenceTable?.rows ?? []), [evidenceTable?.rows]);
   const allArtifacts = useMemo(
     () => dedupeArtifacts([...(sections?.artifacts ?? []), ...generatedArtifacts]),
     [generatedArtifacts, sections?.artifacts],
@@ -293,7 +319,7 @@ export default function CandidateReviewPage() {
   };
 
   return (
-    <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <motion.div data-testid="candidate-review-page" className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Candidate Review" description="Live hiring intelligence backed by the Product API, the indexed document corpus and structured candidate-analysis output.">
         <input
           ref={fileInputRef}
@@ -302,13 +328,13 @@ export default function CandidateReviewPage() {
           className="hidden"
           onChange={(event) => handleFilesSelected(event.target.files)}
         />
-        <Button variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={uploadInProgress} onClick={() => fileInputRef.current?.click()}>
+        <Button data-testid="candidate-review-upload-button" variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={uploadInProgress} onClick={() => fileInputRef.current?.click()}>
           {uploadInProgress ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-2" />} Upload CV
         </Button>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" disabled={!selectedDocumentId || runReviewMutation.isPending} onClick={() => runReviewMutation.mutate()}>
+        <Button data-testid="candidate-review-run-button" className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" disabled={!selectedDocumentId || runReviewMutation.isPending} onClick={() => runReviewMutation.mutate()}>
           {runReviewMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Run Candidate Review
         </Button>
-        <Button variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending} onClick={() => generateDeckMutation.mutate()}>
+        <Button data-testid="candidate-review-generate-deck-button" variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending} onClick={() => generateDeckMutation.mutate()}>
           {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Generate Deck
         </Button>
       </PageHeader>
@@ -345,22 +371,23 @@ export default function CandidateReviewPage() {
           <div>
             <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Candidate document</label>
             <Select value={selectedDocumentId} onValueChange={setSelectedDocumentId}>
-              <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue placeholder="Select a candidate document" /></SelectTrigger>
+              <SelectTrigger data-testid="candidate-review-document-trigger" className="h-9 text-xs bg-secondary/30"><SelectValue placeholder="Select a candidate document" /></SelectTrigger>
               <SelectContent>
                 {selectableDocuments.map((document) => (
-                  <SelectItem key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
+                  <SelectItem data-testid="candidate-review-document-option" data-document-name={document.name} key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
-              <div>Indexed: {selectedDocumentDate}</div>
-              <div>Chunks: {selectedDocument?.chunk_count ?? 0} | Characters: {(selectedDocument?.char_count ?? 0).toLocaleString()}</div>
-              <div>Source coverage: {preview?.source_block_count ?? 0} source block(s), {preview?.context_chars ?? 0} context chars</div>
+              <div data-testid="candidate-review-selected-document-date">Indexed: {selectedDocumentDate}</div>
+              <div data-testid="candidate-review-selected-document-stats">Chunks: {selectedDocument?.chunk_count ?? 0} | Characters: {(selectedDocument?.char_count ?? 0).toLocaleString()}</div>
+              <div data-testid="candidate-review-source-coverage">Source coverage: {preview?.source_block_count ?? 0} source block(s), {preview?.context_chars ?? 0} context chars</div>
             </div>
           </div>
           <div>
             <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Evaluation brief</label>
             <textarea
+              data-testid="candidate-review-brief-input"
               value={inputText}
               onChange={(event) => setInputText(event.target.value)}
               className="w-full min-h-[92px] rounded-lg border border-border/50 bg-secondary/20 px-3 py-2 text-xs text-foreground outline-none focus:border-primary/50"
@@ -381,7 +408,7 @@ export default function CandidateReviewPage() {
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-gradient-primary">{buildInitials(candidateProfile?.name)}</span>
             </div>
-            <h3 className="text-lg font-semibold text-foreground">{candidateProfile?.name || selectedDocument?.name || 'Awaiting candidate run'}</h3>
+            <h3 data-testid="candidate-review-candidate-name" className="text-lg font-semibold text-foreground">{candidateProfile?.name || selectedDocument?.name || 'Awaiting candidate run'}</h3>
             <p className="text-sm text-muted-foreground">{candidateProfile?.headline || 'Run the backend workflow to populate the live candidate profile.'}</p>
             <p className="text-xs text-muted-foreground mt-1">{candidateProfile?.location || 'Location will be derived from the structured CV output.'}</p>
 
@@ -393,7 +420,7 @@ export default function CandidateReviewPage() {
               <Progress value={score} className="h-2 bg-secondary" />
             </div>
 
-            <div className="mt-4 bg-glow-success/5 border border-glow-success/20 rounded-lg p-3">
+            <div data-testid="candidate-review-status-panel" className="mt-4 bg-glow-success/5 border border-glow-success/20 rounded-lg p-3">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-glow-success" />
                 <span className="text-sm font-semibold text-glow-success">{statusCopy.label}</span>
@@ -401,10 +428,10 @@ export default function CandidateReviewPage() {
               <p className="text-[10px] text-muted-foreground mt-1.5">{statusCopy.detail}</p>
             </div>
 
-            <div className="mt-4 space-y-2 text-left">
+            <div data-testid="candidate-review-run-metadata" className="mt-4 space-y-2 text-left">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Briefcase className="w-3.5 h-3.5" />
-                {experienceTable?.rows.length ? `${experienceTable.rows.length} structured experience row(s)` : 'Experience rows will populate after the live run.'}
+                {experienceRows.length ? `${experienceRows.length} structured experience row(s)` : 'Experience rows will populate after the live run.'}
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <GraduationCap className="w-3.5 h-3.5" />
@@ -472,14 +499,14 @@ export default function CandidateReviewPage() {
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Experience Highlights</h4>
             </div>
             <div className="space-y-4">
-              {experienceTable?.rows.length ? (
-                experienceTable.rows.map((row, index) => (
-                  <motion.div key={`${row[0]}-${row[1]}`} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.18 + index * 0.05 }} className="flex gap-4">
+              {experienceRows.length ? (
+                experienceRows.map((row, index) => (
+                  <motion.div data-testid="candidate-review-experience-row" key={`experience-${index}-${String(row[0] || '-')}-${String(row[1] || '-')}`} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.18 + index * 0.05 }} className="flex gap-4">
                     <div className="flex flex-col items-center">
                       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <Briefcase className="w-4 h-4 text-primary" />
                       </div>
-                      {index < experienceTable.rows.length - 1 && <div className="w-px flex-1 bg-border mt-2" />}
+                      {index < experienceRows.length - 1 && <div className="w-px flex-1 bg-border mt-2" />}
                     </div>
                     <div className="pb-4 flex-1">
                       <div className="flex items-center justify-between mb-1 gap-3">
@@ -527,7 +554,7 @@ export default function CandidateReviewPage() {
             </GlassCard>
           </div>
 
-          {evidenceTable && (
+          {evidenceTable && evidenceTableRows.length > 0 && (
             <GlassCard delay={0.26}>
               <div className="flex items-center gap-2 mb-3">
                 <FileText className="w-4 h-4 text-primary" />
@@ -543,10 +570,10 @@ export default function CandidateReviewPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {evidenceTable.rows.map((row) => (
-                      <tr key={`${row[0]}-${row[1]}`} className="border-t border-border/40">
+                    {evidenceTableRows.map((row, rowIndex) => (
+                      <tr key={`evidence-${rowIndex}-${String(row[0] || '-')}-${String(row[1] || '-')}`} className="border-t border-border/40">
                         {row.map((cell, index) => (
-                          <td key={`${row[0]}-${index}`} className="px-3 py-2 text-muted-foreground">{String(cell ?? '-')}</td>
+                          <td key={`evidence-cell-${rowIndex}-${index}`} className="px-3 py-2 text-muted-foreground">{String(cell ?? '-')}</td>
                         ))}
                       </tr>
                     ))}

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 
 import { PageHeader, StatusPill, GlassCard, MetricCard } from '@/components/shared/ui-components';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -30,6 +31,8 @@ import {
 import { toast } from '@/components/ui/sonner';
 
 const STATUS_FILTERS = ['all', 'completed', 'warning', 'error'] as const;
+const WINDOW_FILTERS = ['24h', '7d', '30d', 'all'] as const;
+const DEFAULT_PAGE_SIZE = 25;
 const WORKFLOW_ROUTE_MAP: Record<string, string> = {
   document_review: '/app/workflows/document-review',
   policy_contract_comparison: '/app/workflows/comparison',
@@ -63,13 +66,25 @@ function dedupeArtifacts(run: ProductRunEntry | null | undefined): ProductWorkfl
   });
 }
 
+function inWindow(timestamp: string | null | undefined, filter: (typeof WINDOW_FILTERS)[number]): boolean {
+  if (filter === 'all') return true;
+  if (!timestamp) return false;
+  const value = new Date(timestamp).getTime();
+  if (Number.isNaN(value)) return true;
+  const now = Date.now();
+  const windowMs = filter === '24h' ? 24 * 60 * 60 * 1000 : filter === '7d' ? 7 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+  return now - value <= windowMs;
+}
+
 export default function RunHistoryPage() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]>('all');
+  const [windowFilter, setWindowFilter] = useState<(typeof WINDOW_FILTERS)[number]>('7d');
   const [workflowFilter, setWorkflowFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedRunId, setSelectedRunId] = useState('');
   const [lastRerunId, setLastRerunId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(DEFAULT_PAGE_SIZE);
 
   const runHistoryQuery = useQuery({
     queryKey: ['product-run-history'],
@@ -77,7 +92,15 @@ export default function RunHistoryPage() {
     refetchOnWindowFocus: false,
   });
 
-  const runs = runHistoryQuery.data?.runs ?? [];
+  const runs = useMemo(() => {
+    const sourceRuns = runHistoryQuery.data?.runs ?? [];
+    return [...sourceRuns].sort((left, right) => {
+      const leftTime = left.timestamp ? new Date(left.timestamp).getTime() : 0;
+      const rightTime = right.timestamp ? new Date(right.timestamp).getTime() : 0;
+      return rightTime - leftTime;
+    });
+  }, [runHistoryQuery.data?.runs]);
+
   const workflowOptions = useMemo(
     () => ['all', ...Array.from(new Set(runs.map((run) => run.workflow_label).filter(Boolean)))],
     [runs],
@@ -88,24 +111,32 @@ export default function RunHistoryPage() {
     return runs.filter((run) => {
       const matchesStatus = statusFilter === 'all' || run.status === statusFilter;
       const matchesWorkflow = workflowFilter === 'all' || run.workflow_label === workflowFilter;
+      const matchesWindow = inWindow(run.timestamp, windowFilter);
       const matchesSearch =
         !needle ||
         `${run.id} ${run.workflow_label} ${(run.documents || []).join(' ')} ${run.recommendation || ''}`.toLowerCase().includes(needle);
-      return matchesStatus && matchesWorkflow && matchesSearch;
+      return matchesStatus && matchesWorkflow && matchesWindow && matchesSearch;
     });
-  }, [runs, search, statusFilter, workflowFilter]);
+  }, [runs, search, statusFilter, workflowFilter, windowFilter]);
+
+  const visibleRuns = useMemo(() => filteredRuns.slice(0, visibleCount), [filteredRuns, visibleCount]);
+  const hiddenRunCount = Math.max(filteredRuns.length - visibleRuns.length, 0);
 
   useEffect(() => {
-    if (!filteredRuns.length) {
+    setVisibleCount(DEFAULT_PAGE_SIZE);
+  }, [search, statusFilter, workflowFilter, windowFilter]);
+
+  useEffect(() => {
+    if (!visibleRuns.length) {
       setSelectedRunId('');
       return;
     }
-    if (!selectedRunId || !filteredRuns.some((run) => run.id === selectedRunId)) {
-      setSelectedRunId(filteredRuns[0].id);
+    if (!selectedRunId || !visibleRuns.some((run) => run.id === selectedRunId)) {
+      setSelectedRunId(visibleRuns[0].id);
     }
-  }, [filteredRuns, selectedRunId]);
+  }, [visibleRuns, selectedRunId]);
 
-  const selectedRun = filteredRuns.find((run) => run.id === selectedRunId) ?? filteredRuns[0] ?? null;
+  const selectedRun = visibleRuns.find((run) => run.id === selectedRunId) ?? visibleRuns[0] ?? null;
 
   const detailQuery = useQuery({
     queryKey: ['product-run-history-entry', selectedRun?.id],
@@ -154,11 +185,11 @@ export default function RunHistoryPage() {
         ) : null}
       </PageHeader>
 
-      {(runHistoryQuery.isError || detailQuery.isError) && (
+      {runHistoryQuery.isError && (
         <GlassCard className="mb-6 border border-glow-warning/20">
           <div className="flex items-center gap-2 text-xs text-glow-warning">
             <AlertTriangle className="h-4 w-4" />
-            Live run history is available, but one or more detail lookups failed. Summary rows remain usable and rerun is still enabled where the backend allows it.
+            The live run registry could not be loaded completely. Use the filters below after refresh to recover the latest persisted entries.
           </div>
         </GlassCard>
       )}
@@ -170,8 +201,8 @@ export default function RunHistoryPage() {
         <MetricCard label="Errors" value={runHistoryQuery.data?.summary.error_runs ?? runs.filter((run) => run.status === 'error').length} icon={FileText} glowColor="accent" delay={0.14} />
       </div>
 
-      <GlassCard className="mb-6">
-        <div className="grid gap-3 md:grid-cols-[minmax(0,1.4fr)_180px_220px]">
+      <GlassCard className="mb-4">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_180px_220px_180px]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by run id, workflow, document name or recommendation..." className="h-9 pl-9 text-xs" />
@@ -192,19 +223,34 @@ export default function RunHistoryPage() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={windowFilter} onValueChange={(value) => setWindowFilter(value as (typeof WINDOW_FILTERS)[number])}>
+            <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue placeholder="Window" /></SelectTrigger>
+            <SelectContent>
+              {WINDOW_FILTERS.map((windowValue) => (
+                <SelectItem key={windowValue} value={windowValue} className="text-xs">{windowValue === 'all' ? 'All time' : `Last ${windowValue}`}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </GlassCard>
 
+      <div className="mb-6 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+        <Badge variant="outline" className="border-border/60 text-[10px] text-muted-foreground">
+          Showing {visibleRuns.length} of {filteredRuns.length}
+        </Badge>
+        <span>The list defaults to recent runs so the page stays operational instead of turning into a raw log dump.</span>
+      </div>
+
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(460px,0.95fr)]">
         <div className="space-y-3">
-          {!filteredRuns.length && (
+          {!visibleRuns.length && (
             <GlassCard>
               <div className="text-xs text-muted-foreground">
-                {runHistoryQuery.isLoading ? 'Loading persisted workflow runs...' : 'No runs matched the current filters. Execute a workflow to populate this registry.'}
+                {runHistoryQuery.isLoading ? 'Loading persisted workflow runs...' : 'No runs matched the current filters. Expand the time window or execute a workflow to populate this registry.'}
               </div>
             </GlassCard>
           )}
-          {filteredRuns.map((run, index) => (
+          {visibleRuns.map((run, index) => (
             <motion.button
               type="button"
               key={run.id}
@@ -232,6 +278,11 @@ export default function RunHistoryPage() {
               </div>
             </motion.button>
           ))}
+          {hiddenRunCount > 0 ? (
+            <Button variant="outline" className="w-full h-9 text-xs border-border/50" onClick={() => setVisibleCount((current) => current + DEFAULT_PAGE_SIZE)}>
+              Show {Math.min(DEFAULT_PAGE_SIZE, hiddenRunCount)} more runs
+            </Button>
+          ) : null}
         </div>
 
         <GlassCard className="min-h-[620px]">
@@ -239,6 +290,12 @@ export default function RunHistoryPage() {
             <div className="text-xs text-muted-foreground">Select a run to inspect request payloads, backend result sections and rerun options.</div>
           ) : (
             <div className="space-y-5">
+              {detailQuery.isError ? (
+                <div className="rounded-lg border border-glow-warning/20 bg-glow-warning/5 px-3 py-2 text-[11px] text-glow-warning">
+                  Some older runs only expose summary rows. Rerun and the list itself remain usable; full detail could not be reconstructed for this selection.
+                </div>
+              ) : null}
+
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -260,85 +317,80 @@ export default function RunHistoryPage() {
                     disabled={!detailRun.can_rerun || rerunMutation.isPending}
                     onClick={() => rerunMutation.mutate(detailRun.id)}
                   >
-                    {rerunMutation.isPending ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Play className="mr-1 h-3 w-3" />}
-                    {rerunMutation.isPending ? 'Rerunning…' : 'Rerun'}
+                    {rerunMutation.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Play className="mr-1 h-3.5 w-3.5" />}
+                    {detailRun.can_rerun ? 'Rerun from history' : 'Rerun unavailable'}
                   </Button>
                 </div>
               </div>
 
+              {latestSummary ? (
+                <div className="rounded-lg border border-border/40 bg-secondary/10 p-4">
+                  <p className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Latest summary</p>
+                  <p className="text-sm leading-relaxed text-foreground">{latestSummary}</p>
+                </div>
+              ) : null}
+
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Provider</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{detailRun.provider || 'n/a'}</p>
-                </div>
-                <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Model</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{detailRun.model || 'n/a'}</p>
-                </div>
-                <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Documents</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{detailRun.document_count ?? detailRun.documents.length}</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{detailRun.documents?.length ?? 0}</p>
                 </div>
-              </div>
-
-              <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
-                <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground">Recommendation</h4>
-                <p className="mt-2 text-sm text-foreground">{detailRun.recommendation || latestSummary || 'No summary was persisted for this run.'}</p>
-                {detailRun.notes?.length ? (
-                  <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
-                    {detailRun.notes.map((note) => <p key={note}>{note}</p>)}
-                  </div>
-                ) : null}
-                {detailRun.error_message ? <p className="mt-2 text-[11px] text-glow-error">{detailRun.error_message}</p> : null}
-              </div>
-
-              <div>
-                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Documents</h4>
-                <div className="flex flex-wrap gap-2">
-                  {(detailRun.documents.length ? detailRun.documents : ['No document labels captured']).map((document) => (
-                    <span key={document} className="rounded-full border border-border/50 bg-secondary/15 px-2.5 py-1 text-[10px] text-muted-foreground">{document}</span>
-                  ))}
+                <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Artifacts</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{artifacts.length}</p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Duration</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{detailRun.duration_label || 'n/a'}</p>
                 </div>
               </div>
 
               {artifacts.length ? (
                 <div>
-                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Artifacts</h4>
-                  <div className="space-y-2">
+                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Linked artifacts</h4>
+                  <div className="flex flex-wrap gap-2">
                     {artifacts.map((artifact) => (
-                      <div key={`${artifact.artifact_type}:${artifact.path || artifact.label}`} className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-secondary/10 px-3 py-2">
-                        <div className="min-w-0">
-                          <p className="text-xs font-medium text-foreground truncate">{artifact.label}</p>
-                          <p className="text-[10px] text-muted-foreground truncate">{artifact.download_name || artifact.path || artifact.artifact_type}</p>
-                        </div>
-                        <Button variant="outline" size="sm" className="h-7 text-[10px]" disabled={!artifact.available || !artifact.path} onClick={() => artifact.path && window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer')}>
-                          Open <ExternalLink className="ml-1 h-3 w-3" />
-                        </Button>
-                      </div>
+                      <Button
+                        key={`${artifact.artifact_type}:${artifact.path || artifact.label}`}
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-[10px] border-border/50"
+                        disabled={!artifact.path}
+                        onClick={() => artifact.path && window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer')}
+                      >
+                        {artifact.label}
+                        <ExternalLink className="ml-1 h-3 w-3" />
+                      </Button>
                     ))}
                   </div>
                 </div>
               ) : null}
 
               {resultSections ? (
-                <div>
-                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Structured sections</h4>
-                  <pre className="max-h-[220px] overflow-auto rounded-lg border border-border/40 bg-secondary/10 p-3 text-[11px] text-muted-foreground whitespace-pre-wrap break-words">{stringifyPayload(resultSections)}</pre>
-                </div>
+                <details className="rounded-lg border border-border/40 bg-secondary/10 p-0" open>
+                  <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-foreground">Result sections</summary>
+                  <div className="border-t border-border/40 p-3">
+                    <pre className="max-h-[260px] overflow-auto whitespace-pre-wrap text-[11px] text-muted-foreground">{stringifyPayload(resultSections)}</pre>
+                  </div>
+                </details>
               ) : null}
 
               {requestPayloadText ? (
-                <div>
-                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Request payload</h4>
-                  <pre className="max-h-[220px] overflow-auto rounded-lg border border-border/40 bg-secondary/10 p-3 text-[11px] text-muted-foreground whitespace-pre-wrap break-words">{requestPayloadText}</pre>
-                </div>
+                <details className="rounded-lg border border-border/40 bg-secondary/10 p-0">
+                  <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-foreground">Request payload</summary>
+                  <div className="border-t border-border/40 p-3">
+                    <pre className="max-h-[260px] overflow-auto whitespace-pre-wrap text-[11px] text-muted-foreground">{requestPayloadText}</pre>
+                  </div>
+                </details>
               ) : null}
 
               {responsePayloadText ? (
-                <div>
-                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Response payload</h4>
-                  <pre className="max-h-[220px] overflow-auto rounded-lg border border-border/40 bg-secondary/10 p-3 text-[11px] text-muted-foreground whitespace-pre-wrap break-words">{responsePayloadText}</pre>
-                </div>
+                <details className="rounded-lg border border-border/40 bg-secondary/10 p-0">
+                  <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-foreground">Response payload</summary>
+                  <div className="border-t border-border/40 p-3">
+                    <pre className="max-h-[260px] overflow-auto whitespace-pre-wrap text-[11px] text-muted-foreground">{responsePayloadText}</pre>
+                  </div>
+                </details>
               ) : null}
             </div>
           )}

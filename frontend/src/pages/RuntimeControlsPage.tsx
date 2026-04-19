@@ -91,7 +91,7 @@ const WorkflowFitBadge = ({ fit }: { fit: WorkflowFit }) => {
   );
 };
 
-const DiagnosticItem = ({
+const ObservedItem = ({
   label,
   value,
   description,
@@ -527,47 +527,47 @@ export default function RuntimeControlsPage() {
         <div className="px-1 pt-1">
           <div className="mb-1 flex items-center gap-2">
             <Shield className="h-4 w-4 text-accent" />
-            <h3 className="text-sm font-medium text-foreground">Runtime Diagnostics</h3>
+            <h3 className="text-sm font-medium text-foreground">Observed Runtime State</h3>
             <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Read-only / demo layer
+              Observed / not editable
             </Badge>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            These blocks remain visible for explainability and AI engineer demos. They help inspect capability, compatibility, routing and derived policy signals without pretending every item is a first-class runtime knob.
+            These sections explain what the runtime is actually doing right now. They are intentionally not editable here, so operators can distinguish active controls from observed state.
           </p>
         </div>
 
         <GlassCard>
           <div className="mb-3 flex items-center gap-2">
             <Shield className="h-4 w-4 text-accent" />
-            <h3 className="text-sm font-medium text-foreground">Policy & Derived Signals</h3>
+            <h3 className="text-sm font-medium text-foreground">Policy Signals (computed)</h3>
             <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Derived
+              Computed from active controls
             </Badge>
           </div>
           <p className="mb-3 text-[10px] text-muted-foreground">
-            Useful for governance and demo narratives, but not currently treated as the primary control loop for runtime execution.
+            These values are computed from the active controls above. They remain visible because they explain governance posture and downstream behavior, but they are not edited independently here.
           </p>
           <div className="grid gap-3 md:grid-cols-2">
-            <DiagnosticItem
+            <ObservedItem
               label="Execution Policy"
               value={executionPolicyLookup[profile.executionPolicy]?.label ?? profile.executionPolicy}
               description={executionPolicyLookup[profile.executionPolicy]?.description}
             />
-            <DiagnosticItem
+            <ObservedItem
               label="Quality Posture"
               value={qualityPostureLookup[profile.qualityPosture]?.label ?? profile.qualityPosture}
-              description="Currently more useful as an explainability signal than as a hard routing control."
+              description="Explains how the active profile should behave, without acting as a separate knob on this screen."
             />
-            <DiagnosticItem
+            <ObservedItem
               label="Retrieval Strategy"
               value={profile.retrievalStrategy}
-              description="The current runtime behaves essentially as hybrid retrieval, so this is shown as a diagnostic signal rather than a key control." 
+              description="Shown here as the resolved runtime posture after profile + retrieval settings are applied." 
             />
-            <DiagnosticItem
+            <ObservedItem
               label="Doc Processing Preset"
               value={docPresetLookup[profile.docProcessingPreset]?.label ?? profile.docProcessingPreset}
-              description="Derived from the lower-level document processing settings kept in the active controls area."
+              description="Resolved from the document-processing controls above so operators can verify the final effective preset."
             />
           </div>
         </GlassCard>
@@ -577,7 +577,7 @@ export default function RuntimeControlsPage() {
             <Server className="h-4 w-4 text-glow-warning" />
             <h3 className="text-sm font-medium text-foreground">Provider Capability Fit</h3>
             <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Diagnostic
+              Observed
             </Badge>
           </div>
           <p className="mb-3 text-[10px] text-muted-foreground">
@@ -602,11 +602,11 @@ export default function RuntimeControlsPage() {
               <ArrowRight className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-medium text-foreground">Workflow Compatibility</h3>
               <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-                Verified only
+                Validated for current route
               </Badge>
             </div>
             <p className="mb-3 text-[10px] text-muted-foreground">
-              Only benchmark-backed or otherwise explicitly verified compatibility signals are shown here.
+              Only compatibility signals the backend can positively support for the current profile are shown here. This section should answer “what will safely run now?” rather than expose another control surface.
             </p>
             <div className="space-y-2">
               {workflowFit.map((fit) => (
@@ -628,10 +628,10 @@ export default function RuntimeControlsPage() {
             <RefreshCw className="h-4 w-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Fallback / Routing Chain</h3>
             <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Diagnostic
+              Observed
             </Badge>
           </div>
-          <p className="mb-3 text-[10px] text-muted-foreground">Ordered routing resolved from the active runtime profile.</p>
+          <p className="mb-3 text-[10px] text-muted-foreground">Resolved routing order for the active profile. This explains where traffic goes first and what happens if the preferred endpoint cannot serve the request.</p>
           <div className="space-y-0">
             <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-[9px] font-bold text-primary">1</div>
@@ -682,40 +682,47 @@ export default function RuntimeControlsPage() {
           </div>
         </GlassCard>
 
-        <GlassCard>
-          <div className="mb-3 flex items-center gap-2">
-            <Layers className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Experimental / Informational Signals</h3>
+        <details className="glass rounded-xl border border-border/50 p-0 open:bg-secondary/5">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-primary" />
+              <div>
+                <h3 className="text-sm font-medium text-foreground">Advanced informational signals</h3>
+                <p className="text-[10px] text-muted-foreground">Secondary signals kept for advanced inspection only.</p>
+              </div>
+            </div>
             <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Rebaixado
+              Advanced / informational
             </Badge>
+          </summary>
+          <div className="border-t border-border/40 px-4 pb-4 pt-3">
+            <p className="mb-3 text-[10px] text-muted-foreground">
+              These signals stay available for advanced inspection, but they are intentionally secondary because they do not currently change the main runtime path in a first-order way.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <ObservedItem
+                label="Grounding Strictness"
+                value={profile.retrieval.groundingStrictness}
+                description="Visible for advanced inspection while grounding is still mostly governed by the broader execution flow."
+              />
+              <ObservedItem
+                label="Table Extraction Mode"
+                value={profile.docProcessing.tableExtractionMode}
+                description="Visible for document-pipeline inspection, but intentionally de-emphasized until it materially changes runtime behavior."
+              />
+              <ObservedItem
+                label="Streaming"
+                value={profile.generation.streaming ? 'Enabled' : 'Disabled'}
+                description="Shown for explainability, but intentionally secondary to the saved generation controls."
+              />
+              <ObservedItem
+                label="Structured Output"
+                value={profile.generation.structuredOutput ? 'Enabled' : 'Disabled'}
+                description="Useful when auditing output shape, but intentionally secondary to the active generation settings."
+              />
+            </div>
           </div>
-          <p className="mb-3 text-[10px] text-muted-foreground">
-            These signals remain visible for demo and future evolution, but they are no longer promoted as primary controls in the main runtime path.
-          </p>
-          <div className="grid gap-3 md:grid-cols-2">
-            <DiagnosticItem
-              label="Grounding Strictness"
-              value={profile.retrieval.groundingStrictness}
-              description="Currently kept as an informational signal while grounding behavior is still largely shaped by the broader execution flow."
-            />
-            <DiagnosticItem
-              label="Table Extraction Mode"
-              value={profile.docProcessing.tableExtractionMode}
-              description="Visible for future document pipeline evolution, but not treated as a first-class runtime knob today."
-            />
-            <DiagnosticItem
-              label="Streaming"
-              value={profile.generation.streaming ? 'Enabled' : 'Disabled'}
-              description="Kept for explainability, but not emphasized as a primary runtime control on this screen."
-            />
-            <DiagnosticItem
-              label="Structured Output"
-              value={profile.generation.structuredOutput ? 'Enabled' : 'Disabled'}
-              description="Useful for demo narratives, but not yet presented as a core end-to-end runtime control here."
-            />
-          </div>
-        </GlassCard>
+        </details>
       </div>
     </motion.div>
   );

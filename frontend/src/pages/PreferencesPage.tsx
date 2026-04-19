@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -11,6 +11,7 @@ import {
   Layers,
   Link2,
   Loader2,
+  RefreshCw,
   Settings2,
   Shield,
   User,
@@ -24,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/sonner';
-import { GlassCard, PageHeader, StatusPill } from '@/components/shared/ui-components';
+import { GlassCard, MetricCard, PageHeader, StatusPill } from '@/components/shared/ui-components';
 import {
   getPreferences,
   updatePreferencesConnectionCredential,
@@ -356,11 +357,23 @@ export default function PreferencesPage() {
   const [testingConnectionId, setTestingConnectionId] = useState<string | null>(null);
   const [savingCredentialConnectionId, setSavingCredentialConnectionId] = useState<string | null>(null);
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['preferences'],
     queryFn: getPreferences,
     refetchOnWindowFocus: false,
+    retry: 1,
   });
+
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading || data) {
+      setLoadTimedOut(false);
+      return;
+    }
+    const timeout = window.setTimeout(() => setLoadTimedOut(true), 8000);
+    return () => window.clearTimeout(timeout);
+  }, [isLoading, data]);
 
   const saveMutation = useMutation({
     mutationFn: ({ payload }: { payload: PreferencesPatchPayload; successMessage: string }) => updatePreferences(payload),
@@ -422,15 +435,28 @@ export default function PreferencesPage() {
     },
   });
 
-  const executionPolicyLookup = useMemo(() => buildCatalogLookup(data?.catalogs.executionPolicies), [data?.catalogs.executionPolicies]);
-  const qualityPostureLookup = useMemo(() => buildCatalogLookup(data?.catalogs.qualityPostures), [data?.catalogs.qualityPostures]);
-  const docPresetLookup = useMemo(() => buildCatalogLookup(data?.catalogs.docPresets), [data?.catalogs.docPresets]);
-  const profiles = data?.runtime_profiles ?? [];
-  const workflowDefaults = data?.workflow_defaults ?? [];
-  const operatorPreferences = data?.operator_preferences;
+  const normalizedData = useMemo(() => {
+    if (!data) return undefined;
+    return {
+      ...data,
+      provider_connections: data.provider_connections ?? [],
+      runtime_profiles: data.runtime_profiles ?? [],
+      workflow_defaults: data.workflow_defaults ?? [],
+      connection_policy_rules: data.connection_policy_rules ?? [],
+      catalogs: data.catalogs ?? { executionPolicies: [], qualityPostures: [], docPresets: [] },
+      credential_policy: data.credential_policy ?? { notes: [] },
+    };
+  }, [data]);
+
+  const executionPolicyLookup = useMemo(() => buildCatalogLookup(normalizedData?.catalogs.executionPolicies), [normalizedData?.catalogs.executionPolicies]);
+  const qualityPostureLookup = useMemo(() => buildCatalogLookup(normalizedData?.catalogs.qualityPostures), [normalizedData?.catalogs.qualityPostures]);
+  const docPresetLookup = useMemo(() => buildCatalogLookup(normalizedData?.catalogs.docPresets), [normalizedData?.catalogs.docPresets]);
+  const profiles = normalizedData?.runtime_profiles ?? [];
+  const workflowDefaults = normalizedData?.workflow_defaults ?? [];
+  const operatorPreferences = normalizedData?.operator_preferences;
   const connectionsById = useMemo(
-    () => Object.fromEntries((data?.provider_connections ?? []).map((connection) => [connection.id, connection] as const)),
-    [data?.provider_connections],
+    () => Object.fromEntries((normalizedData?.provider_connections ?? []).map((connection) => [connection.id, connection] as const)),
+    [normalizedData?.provider_connections],
   );
   const isBusy = saveMutation.isPending;
 
@@ -450,7 +476,7 @@ export default function PreferencesPage() {
   };
 
   const handlePolicyRuleChange = (ruleId: string, enabled: boolean) => {
-    const nextRules: ConnectionPolicyRule[] = (data?.connection_policy_rules ?? []).map((rule) =>
+    const nextRules: ConnectionPolicyRule[] = (normalizedData?.connection_policy_rules ?? []).map((rule) =>
       rule.id === ruleId ? { ...rule, enabled } : rule,
     );
     savePreferences({ connection_policy_rules: nextRules }, 'Workspace policy updated.');
@@ -460,7 +486,7 @@ export default function PreferencesPage() {
     savePreferences({ operator_preferences: patch }, successMessage);
   };
 
-  if (isLoading && !data) {
+  if (isLoading && !normalizedData && !loadTimedOut) {
     return (
       <motion.div className="mx-auto max-w-[920px] p-6 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <PageHeader
@@ -472,13 +498,19 @@ export default function PreferencesPage() {
           </Badge>
         </PageHeader>
         <GlassCard>
-          <div className="text-xs text-muted-foreground">Loading preferences from the backend…</div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">Loading preferences from the backend…</div>
+              <div className="text-[10px] text-muted-foreground">This screen waits for the persisted workspace contract so it can render real connections, profiles and defaults.</div>
+            </div>
+            <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
         </GlassCard>
       </motion.div>
     );
   }
 
-  if (!data) {
+  if (!normalizedData) {
     return (
       <motion.div className="mx-auto max-w-[920px] p-6 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <PageHeader
@@ -486,9 +518,19 @@ export default function PreferencesPage() {
           description="Saved provider connections, runtime profiles, workflow defaults, and workspace policy."
         />
         <GlassCard>
-          <div className="flex items-center gap-2 text-xs text-glow-warning">
-            <AlertCircle className="h-4 w-4" />
-            {error instanceof Error ? error.message : 'Preferences could not be loaded from the backend.'}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-xs text-glow-warning">
+              <AlertCircle className="h-4 w-4" />
+              {loadTimedOut ? 'Preferences request timed out before the workspace contract became visible in the browser.' : error instanceof Error ? error.message : 'Preferences could not be loaded from the backend.'}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={() => refetch()}>
+                <RefreshCw className="mr-1 h-3 w-3" /> Retry
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 text-[10px] text-muted-foreground" onClick={() => window.location.assign('/app/settings/runtime')}>
+                Open Runtime Controls
+              </Button>
+            </div>
           </div>
         </GlassCard>
       </motion.div>
@@ -506,7 +548,7 @@ export default function PreferencesPage() {
             Live preferences
           </Badge>
           <Badge variant="outline" className="border-border/60 text-[10px] text-muted-foreground">
-            {data.contract_version}
+            {normalizedData.contract_version}
           </Badge>
           {isBusy && (
             <Badge variant="outline" className="border-border/60 text-[10px] text-muted-foreground">
@@ -517,6 +559,32 @@ export default function PreferencesPage() {
       </PageHeader>
 
       <div className="space-y-6">
+        <div className="grid gap-3 md:grid-cols-4">
+          <MetricCard label="Connections" value={normalizedData.provider_connections.length} icon={Link2} delay={0.03} />
+          <MetricCard label="Healthy" value={normalizedData.provider_connections.filter((connection) => connection.status === 'connected').length} icon={Check} glowColor="success" delay={0.06} />
+          <MetricCard label="Saved profiles" value={profiles.length} icon={Layers} glowColor="accent" delay={0.09} />
+          <MetricCard label="Workflow defaults" value={workflowDefaults.length} icon={Settings2} glowColor="warning" delay={0.12} />
+        </div>
+
+        <GlassCard>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Active profile</p>
+              <p className="mt-1 text-sm font-medium text-foreground">{profiles.find((profile) => profile.isActive)?.name ?? 'No active profile'}</p>
+              <p className="text-[10px] text-muted-foreground">Preferences persists profile defaults, connections and operator posture for the whole workspace.</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Default export</p>
+              <p className="mt-1 text-sm font-medium text-foreground">{operatorPreferences?.defaultExportFormat?.toUpperCase?.() ?? 'n/a'}</p>
+              <p className="text-[10px] text-muted-foreground">Runtime controls stay focused on the live route; Preferences stays focused on saved defaults.</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Credential handling</p>
+              <p className="mt-1 text-sm font-medium text-foreground">{(normalizedData.credential_policy as { mode?: string }).mode === 'workspace_managed' ? 'Workspace-managed' : 'Externally managed'}</p>
+              <p className="text-[10px] text-muted-foreground">Secrets remain masked; only the management posture and connection health are shown here.</p>
+            </div>
+          </div>
+        </GlassCard>
         {isError && (
           <GlassCard>
             <div className="flex items-center gap-2 text-xs text-glow-warning">
@@ -535,7 +603,7 @@ export default function PreferencesPage() {
             Live provider connections are discovered from the backend runtime registry, with workspace-safe metadata overlays and connection tests.
           </p>
           <div className="grid gap-4 md:grid-cols-2">
-            {data.provider_connections.map((connection) => (
+            {normalizedData.provider_connections.map((connection) => (
               <ConnectionCard
                 key={connection.id}
                 connection={connection}
@@ -616,13 +684,13 @@ export default function PreferencesPage() {
         <GlassCard>
           <div className="mb-3 flex items-center gap-2">
             <Shield className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Connection & Execution Policy</h3>
+            <h3 className="text-sm font-medium text-foreground">Workspace Policy</h3>
           </div>
           <p className="mb-3 text-[10px] text-muted-foreground">
-            Workspace-level policy expresses how local, hosted, and optional cloud usage should behave for this workspace.
+            Workspace-level policy expresses what this workspace allows by default. Live runtime routing and diagnostics stay in Runtime Controls.
           </p>
           <div className="space-y-2">
-            {data.connection_policy_rules.map((rule) => (
+            {normalizedData.connection_policy_rules.map((rule) => (
               <div key={rule.id} className="flex items-center justify-between gap-4 rounded-lg border border-border/40 bg-secondary/10 px-3 py-2.5">
                 <div className="flex-1">
                   <Label className="text-xs text-foreground">{rule.label}</Label>
@@ -696,8 +764,8 @@ export default function PreferencesPage() {
               <p className="text-[10px] text-muted-foreground">
                 Preferences are now backed by a live workspace contract. Active runtime profile changes are synchronized with Runtime Controls.
               </p>
-              <p className="text-[10px] text-muted-foreground">Last updated: {formatPreferencesUpdatedAt(data.updated_at)}</p>
-              {data.credential_policy.notes.map((note) => (
+              <p className="text-[10px] text-muted-foreground">Last updated: {formatPreferencesUpdatedAt(normalizedData.updated_at)}</p>
+              {(normalizedData.credential_policy.notes || []).map((note) => (
                 <p key={note} className="text-[10px] text-muted-foreground">• {note}</p>
               ))}
             </div>

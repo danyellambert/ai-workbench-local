@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
   CheckCircle2,
+  ChevronDown,
   Clock,
   Download,
   Eye,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 
 import { PageHeader, StatusPill, GlassCard, MetricCard } from '@/components/shared/ui-components';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -30,6 +32,7 @@ import {
 } from '@/lib/product-api';
 
 const STATUS_OPTIONS = ['all', 'ready', 'warning', 'error', 'pending'] as const;
+const DEFAULT_PAGE_SIZE = 24;
 
 function formatDateTime(value?: string | null): string {
   if (!value) return 'n/a';
@@ -69,10 +72,20 @@ function ArtifactAssetButton({ asset }: { asset: ProductArtifactAssetLink }) {
   );
 }
 
+function sortArtifacts(artifacts: ProductArtifactEntry[]): ProductArtifactEntry[] {
+  return [...artifacts].sort((left, right) => {
+    const leftTime = left.created_at ? new Date(left.created_at).getTime() : 0;
+    const rightTime = right.created_at ? new Date(right.created_at).getTime() : 0;
+    if (leftTime !== rightTime) return rightTime - leftTime;
+    return (right.title || right.name).localeCompare(left.title || left.name);
+  });
+}
+
 export default function DeckCenterPage() {
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_OPTIONS)[number]>('all');
+  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_OPTIONS)[number]>('ready');
   const [selectedArtifactId, setSelectedArtifactId] = useState('');
+  const [visibleCount, setVisibleCount] = useState(DEFAULT_PAGE_SIZE);
 
   const artifactsQuery = useQuery({
     queryKey: ['product-artifacts'],
@@ -81,15 +94,16 @@ export default function DeckCenterPage() {
   });
 
   const artifacts = artifactsQuery.data?.artifacts ?? [];
+  const rankedArtifacts = useMemo(() => sortArtifacts(artifacts), [artifacts]);
   const workflowOptions = useMemo(
-    () => ['all', ...Array.from(new Set(artifacts.map((artifact) => artifact.workflow_label).filter(Boolean)))],
-    [artifacts],
+    () => ['all', ...Array.from(new Set(rankedArtifacts.map((artifact) => artifact.workflow_label).filter(Boolean)))],
+    [rankedArtifacts],
   );
   const [workflowFilter, setWorkflowFilter] = useState('all');
 
   const filteredArtifacts = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    return artifacts.filter((artifact) => {
+    return rankedArtifacts.filter((artifact) => {
       const matchesSearch =
         !needle ||
         `${artifact.name} ${artifact.title || ''} ${artifact.workflow_label} ${artifact.export_kind || ''} ${artifact.type}`
@@ -99,19 +113,30 @@ export default function DeckCenterPage() {
       const matchesWorkflow = workflowFilter === 'all' || artifact.workflow_label === workflowFilter;
       return matchesSearch && matchesStatus && matchesWorkflow;
     });
-  }, [artifacts, search, statusFilter, workflowFilter]);
+  }, [rankedArtifacts, search, statusFilter, workflowFilter]);
+
+  const visibleArtifacts = useMemo(() => filteredArtifacts.slice(0, visibleCount), [filteredArtifacts, visibleCount]);
+  const hiddenArtifactCount = Math.max(filteredArtifacts.length - visibleArtifacts.length, 0);
+  const incompleteHiddenCount = useMemo(
+    () => artifacts.filter((artifact) => artifact.status !== 'ready').length,
+    [artifacts],
+  );
 
   useEffect(() => {
-    if (!filteredArtifacts.length) {
+    setVisibleCount(DEFAULT_PAGE_SIZE);
+  }, [search, statusFilter, workflowFilter]);
+
+  useEffect(() => {
+    if (!visibleArtifacts.length) {
       setSelectedArtifactId('');
       return;
     }
-    if (!selectedArtifactId || !filteredArtifacts.some((artifact) => artifact.id === selectedArtifactId)) {
-      setSelectedArtifactId(filteredArtifacts[0].id);
+    if (!selectedArtifactId || !visibleArtifacts.some((artifact) => artifact.id === selectedArtifactId)) {
+      setSelectedArtifactId(visibleArtifacts[0].id);
     }
-  }, [filteredArtifacts, selectedArtifactId]);
+  }, [visibleArtifacts, selectedArtifactId]);
 
-  const selectedArtifact = filteredArtifacts.find((artifact) => artifact.id === selectedArtifactId) ?? filteredArtifacts[0] ?? null;
+  const selectedArtifact = visibleArtifacts.find((artifact) => artifact.id === selectedArtifactId) ?? visibleArtifacts[0] ?? null;
 
   const artifactDetailQuery = useQuery({
     queryKey: ['product-artifact-entry', selectedArtifact?.id],
@@ -123,11 +148,17 @@ export default function DeckCenterPage() {
   const detailArtifact = artifactDetailQuery.data?.artifact ?? selectedArtifact;
   const detail = artifactDetailQuery.data?.detail;
   const availableAssets = detail?.assets?.length ? detail.assets : detailArtifact?.available_assets ?? [];
+  const primaryActions = [
+    detailArtifact?.local_pptx_path ? { label: 'Presentation deck', path: detailArtifact.local_pptx_path } : null,
+    detailArtifact?.local_review_path ? { label: 'Review report', path: detailArtifact.local_review_path } : null,
+    detailArtifact?.local_payload_path ? { label: 'Source payload', path: detailArtifact.local_payload_path } : null,
+    detailArtifact?.local_contract_path ? { label: 'Contract JSON', path: detailArtifact.local_contract_path } : null,
+  ].filter(Boolean) as Array<{ label: string; path: string }>;
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Deck Center" description="Executive artifact catalog backed by the real export registry, persisted metadata, review sidecars and downloadable assets.">
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={() => window.location.assign('/app/workflows')}>
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={() => window.location.assign('/app/run')}>
           <Sparkles className="mr-2 h-3.5 w-3.5" /> Open Run Surface
         </Button>
       </PageHeader>
@@ -136,7 +167,7 @@ export default function DeckCenterPage() {
         <GlassCard className="mb-6 border border-glow-warning/20">
           <div className="flex items-center gap-2 text-xs text-glow-warning">
             <AlertTriangle className="h-4 w-4" />
-            Artifact registry is live, but one or more detail sidecars could not be loaded. Download links remain available whenever a local asset path exists.
+            The artifact registry is live, but one or more detail sidecars could not be loaded. Ready decks and downloadable assets remain available.
           </div>
         </GlassCard>
       )}
@@ -148,7 +179,7 @@ export default function DeckCenterPage() {
         <MetricCard label="Preview assets" value={artifacts.reduce((accumulator, artifact) => accumulator + safeNumber(artifact.preview_count), 0)} icon={Layers} glowColor="accent" delay={0.14} />
       </div>
 
-      <GlassCard className="mb-6">
+      <GlassCard className="mb-4">
         <div className="grid gap-3 md:grid-cols-[minmax(0,1.5fr)_180px_220px]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -173,26 +204,45 @@ export default function DeckCenterPage() {
         </div>
       </GlassCard>
 
+      <div className="mb-6 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+        <Badge variant="outline" className="border-border/60 text-[10px] text-muted-foreground">
+          Showing {visibleArtifacts.length} of {filteredArtifacts.length}
+        </Badge>
+        {statusFilter === 'ready' && incompleteHiddenCount > 0 ? (
+          <span>Non-ready exports stay out of the default view so the catalog reads as a deck center, not a raw artifact dump.</span>
+        ) : null}
+      </div>
+
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)]">
         <div className="space-y-3">
-          {!filteredArtifacts.length && (
+          {!visibleArtifacts.length && (
             <GlassCard>
               <div className="text-xs text-muted-foreground">
-                {artifactsQuery.isLoading ? 'Loading persisted deck artifacts...' : 'No artifacts matched the current filters. Clear the search or generate a new deck from the run surface.'}
+                {artifactsQuery.isLoading
+                  ? 'Loading persisted deck artifacts...'
+                  : 'No artifacts matched the current filters. Clear the search or switch the status filter to inspect incomplete exports.'}
               </div>
             </GlassCard>
           )}
-          {filteredArtifacts.map((artifact, index) => {
+          {visibleArtifacts.map((artifact, index) => {
             const isSelected = artifact.id === selectedArtifact?.id;
+            const qualityLabel = typeof artifact.average_score === 'number' ? `${artifact.average_score.toFixed(1)}/10` : 'not scored yet';
             return (
-              <motion.button
-                type="button"
+              <motion.div
                 key={artifact.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.08 + index * 0.03 }}
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedArtifactId(artifact.id)}
-                className={`glass w-full rounded-xl p-5 text-left transition-all duration-200 ${isSelected ? 'border-primary/40 bg-primary/5' : 'hover:border-primary/20'}`}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedArtifactId(artifact.id);
+                  }
+                }}
+                className={`glass rounded-xl p-5 text-left transition-all duration-200 ${isSelected ? 'border-primary/40 bg-primary/5' : 'hover:border-primary/20'}`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -204,8 +254,8 @@ export default function DeckCenterPage() {
                     <div className="grid gap-2 sm:grid-cols-2 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> {formatDateTime(artifact.created_at)}</div>
                       <div className="flex items-center gap-2"><Layers className="h-3.5 w-3.5" /> {artifact.slide_count ?? 0} slide(s) · {artifact.preview_count ?? 0} preview(s)</div>
-                      <div className="flex items-center gap-2"><FolderOpen className="h-3.5 w-3.5" /> {artifact.asset_count ?? availableAssets.length} asset(s)</div>
-                      <div className="flex items-center gap-2"><FileText className="h-3.5 w-3.5" /> {artifact.size || 'n/a'}</div>
+                      <div className="flex items-center gap-2"><FileText className="h-3.5 w-3.5" /> {qualityLabel}</div>
+                      <div className="flex items-center gap-2"><FolderOpen className="h-3.5 w-3.5" /> {artifact.asset_count ?? 0} file(s)</div>
                     </div>
                     {(artifact.status_reason || artifact.error_message || artifact.warnings?.length) && (
                       <p className="mt-2 text-[11px] text-glow-warning">
@@ -214,19 +264,32 @@ export default function DeckCenterPage() {
                     )}
                   </div>
                   {artifact.local_pptx_path ? (
-                    <Button variant="outline" size="sm" className="h-8 text-[10px] border-border/50" onClick={(event) => { event.stopPropagation(); openArtifactPath(artifact.local_pptx_path); }}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-[10px] border-border/50"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openArtifactPath(artifact.local_pptx_path);
+                      }}
+                    >
                       Open <Eye className="ml-1 h-3 w-3" />
                     </Button>
                   ) : null}
                 </div>
-              </motion.button>
+              </motion.div>
             );
           })}
+          {hiddenArtifactCount > 0 ? (
+            <Button variant="outline" className="w-full h-9 text-xs border-border/50" onClick={() => setVisibleCount((current) => current + DEFAULT_PAGE_SIZE)}>
+              Show {Math.min(DEFAULT_PAGE_SIZE, hiddenArtifactCount)} more deck entries <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
 
         <GlassCard className="min-h-[540px]">
           {!detailArtifact ? (
-            <div className="text-xs text-muted-foreground">Select an artifact to inspect its metadata, review sidecars and downloadable assets.</div>
+            <div className="text-xs text-muted-foreground">Select an artifact to inspect its readiness, review snapshot, preview assets and export files.</div>
           ) : (
             <div className="space-y-5">
               <div className="flex items-start justify-between gap-4">
@@ -248,7 +311,7 @@ export default function DeckCenterPage() {
                 </div>
                 <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Average review score</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{typeof detailArtifact.average_score === 'number' ? `${detailArtifact.average_score.toFixed(1)}/10` : 'n/a'}</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{typeof detailArtifact.average_score === 'number' ? `${detailArtifact.average_score.toFixed(1)}/10` : 'Not reviewed yet'}</p>
                 </div>
                 <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Issues</p>
@@ -256,16 +319,20 @@ export default function DeckCenterPage() {
                 </div>
               </div>
 
-              {availableAssets.length ? (
+              {primaryActions.length ? (
                 <div>
-                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Downloadable assets</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {availableAssets.map((asset) => <ArtifactAssetButton key={`${asset.artifact_type}:${asset.path || asset.label}`} asset={asset} />)}
+                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Primary files</h4>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {primaryActions.map((action) => (
+                      <Button key={action.label} variant="outline" className="justify-between" onClick={() => openArtifactPath(action.path)}>
+                        {action.label} <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    ))}
                   </div>
                 </div>
               ) : (
                 <div className="rounded-lg border border-glow-warning/20 bg-glow-warning/5 p-3 text-xs text-glow-warning">
-                  No local artifact assets were registered for this entry yet. The export metadata is still available below.
+                  This export has metadata, but it does not yet look like a ready-to-review deck package. Switch the status filter to inspect incomplete or failed exports.
                 </div>
               )}
 
@@ -291,12 +358,12 @@ export default function DeckCenterPage() {
 
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
-                  <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground">Review snapshot</h4>
+                  <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground">Readiness snapshot</h4>
                   <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                    <div>Status: {detailArtifact.review_status || 'n/a'}</div>
+                    <div>Status: {detailArtifact.review_status || detailArtifact.status}</div>
                     <div>Has preview: {detailArtifact.has_preview ? 'yes' : 'no'}</div>
                     <div>Has review: {detailArtifact.has_review ? 'yes' : 'no'}</div>
-                    <div>Metadata path: {detailArtifact.metadata_path || 'n/a'}</div>
+                    <div>Size: {detailArtifact.size || 'n/a'}</div>
                   </div>
                 </div>
                 <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
@@ -309,28 +376,25 @@ export default function DeckCenterPage() {
                 </div>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2">
-                {detailArtifact.local_pptx_path ? (
-                  <Button variant="outline" className="justify-between" onClick={() => openArtifactPath(detailArtifact.local_pptx_path)}>
-                    Presentation deck <Download className="h-4 w-4" />
-                  </Button>
-                ) : null}
-                {detailArtifact.local_payload_path ? (
-                  <Button variant="outline" className="justify-between" onClick={() => openArtifactPath(detailArtifact.local_payload_path)}>
-                    Source payload <ExternalLink className="h-4 w-4" />
-                  </Button>
-                ) : null}
-                {detailArtifact.local_contract_path ? (
-                  <Button variant="outline" className="justify-between" onClick={() => openArtifactPath(detailArtifact.local_contract_path)}>
-                    Contract JSON <ExternalLink className="h-4 w-4" />
-                  </Button>
-                ) : null}
-                {detailArtifact.local_review_path ? (
-                  <Button variant="outline" className="justify-between" onClick={() => openArtifactPath(detailArtifact.local_review_path)}>
-                    Review report <ExternalLink className="h-4 w-4" />
-                  </Button>
-                ) : null}
-              </div>
+              {availableAssets.length ? (
+                <div>
+                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">All registry assets</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {availableAssets.map((asset) => <ArtifactAssetButton key={`${asset.artifact_type}:${asset.path || asset.label}`} asset={asset} />)}
+                  </div>
+                </div>
+              ) : null}
+
+              <details className="rounded-lg border border-border/40 bg-secondary/10 p-0">
+                <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-foreground">Technical registry details</summary>
+                <div className="border-t border-border/40 px-3 py-3 text-xs text-muted-foreground space-y-1">
+                  <div>Metadata path: {detailArtifact.metadata_path || 'n/a'}</div>
+                  <div>Artifact dir: {detailArtifact.local_artifact_dir || 'n/a'}</div>
+                  <div>Preview manifest: {detailArtifact.local_preview_manifest_path || 'n/a'}</div>
+                  <div>Render request: {detailArtifact.local_render_request_path || 'n/a'}</div>
+                  <div>Render response: {detailArtifact.local_render_response_path || 'n/a'}</div>
+                </div>
+              </details>
             </div>
           )}
         </GlassCard>
