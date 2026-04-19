@@ -14,6 +14,7 @@ const commands = [
     items: [
       { label: 'Command Center', path: '/app', icon: LayoutDashboard },
       { label: 'Document Library', path: '/app/documents', icon: FileText },
+      { label: 'Run Surface', path: '/app/run', icon: Workflow },
       { label: 'Document Review', path: '/app/workflows/document-review', icon: Shield },
       { label: 'Policy Comparison', path: '/app/workflows/comparison', icon: GitCompare },
       { label: 'Action Plan', path: '/app/workflows/action-plan', icon: ClipboardList },

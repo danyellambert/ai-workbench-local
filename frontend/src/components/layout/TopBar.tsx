@@ -9,6 +9,7 @@ import { getRuntimeConnection } from '@/lib/runtime-controls-ui';
 const routeTitles: Record<string, string> = {
   '/app': 'Command Center',
   '/app/documents': 'Document Library',
+  '/app/run': 'Run Surface',
   '/app/workflows': 'Workflows',
   '/app/workflows/document-review': 'Document Review',
   '/app/workflows/comparison': 'Policy Comparison',

@@ -11,7 +11,7 @@ export default defineConfig({
   outputDir: artifactDir,
   use: {
     baseURL,
-    trace: 'retain-on-failure',
+    trace: 'off',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     viewport: { width: 1600, height: 1200 },

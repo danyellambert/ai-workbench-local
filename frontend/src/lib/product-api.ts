@@ -10,6 +10,36 @@ const rawBaseUrl = (import.meta.env.VITE_PRODUCT_API_BASE_URL as string | undefi
 
 export const PRODUCT_API_BASE_URL = (rawBaseUrl || "http://127.0.0.1:8011").replace(/\/$/, "");
 
+export interface ProductWorkflowDefinition {
+  workflow_id: string;
+  label: string;
+  headline: string;
+  description: string;
+  required_document_count_min: number;
+  required_document_count_max?: number | null;
+  supports_optional_prompt: boolean;
+  default_export_kind?: string | null;
+  default_export_label?: string | null;
+  backend_task_types: string[];
+  badge_items: string[];
+  preferred_context_strategy: 'document_scan' | 'retrieval';
+  input_placeholder: string;
+  example_prompts: string[];
+  expected_outputs: string[];
+  workflow_contract?: string | null;
+}
+
+export interface ProductWorkflowCatalogResponse {
+  contract_version: string;
+  product_headline: string;
+  workflow_count: number;
+  executive_deck_catalog: Array<{
+    export_kind: string;
+    label: string;
+  }>;
+  workflows: ProductWorkflowDefinition[];
+}
+
 export interface CommandCenterSummary {
   indexed_documents: number;
   total_chunks: number;
@@ -22,7 +52,7 @@ export interface CommandCenterSummary {
 export interface ProductRunEntry {
   id: string;
   timestamp?: string | null;
-  workflow_id?: string;
+  workflow_id?: string | null;
   workflow_label: string;
   status: string;
   provider?: string | null;
@@ -30,25 +60,64 @@ export interface ProductRunEntry {
   duration_s?: number | null;
   duration_label?: string | null;
   documents: string[];
+  document_ids?: string[];
   document_count?: number;
   findings_count?: number | null;
   warning_count?: number | null;
   recommendation?: string | null;
   artifacts?: string[];
+  artifact_items?: ProductWorkflowArtifact[];
   error_message?: string | null;
+  request_payload?: Record<string, unknown> | null;
+  response_payload?: ProductWorkflowResultPayload | Record<string, unknown> | null;
+  result_sections?: ProductResultSections | Record<string, unknown> | null;
+  can_rerun?: boolean;
+  notes?: string[];
+  source?: string;
+}
+
+export interface ProductArtifactAssetLink {
+  artifact_type: string;
+  label: string;
+  path?: string | null;
+  download_name?: string | null;
+  available: boolean;
 }
 
 export interface ProductArtifactEntry {
   id: string;
   name: string;
+  title?: string | null;
   type: string;
   workflow_label: string;
   created_at?: string | null;
   size: string;
   status: string;
+  status_reason?: string | null;
   export_kind?: string;
   local_artifact_dir?: string | null;
   local_pptx_path?: string | null;
+  local_contract_path?: string | null;
+  local_payload_path?: string | null;
+  local_review_path?: string | null;
+  local_preview_manifest_path?: string | null;
+  local_thumbnail_sheet_path?: string | null;
+  local_render_request_path?: string | null;
+  local_render_response_path?: string | null;
+  metadata_path?: string | null;
+  pptx_size_bytes?: number | null;
+  slide_count?: number | null;
+  preview_count?: number | null;
+  review_status?: string | null;
+  average_score?: number | null;
+  issue_count?: number | null;
+  warning_count?: number | null;
+  error_message?: string | null;
+  warnings?: string[];
+  available_assets?: ProductArtifactAssetLink[];
+  asset_count?: number;
+  has_preview?: boolean;
+  has_review?: boolean;
 }
 
 export interface ProductCommandCenterResponse {
@@ -56,6 +125,13 @@ export interface ProductCommandCenterResponse {
   summary: CommandCenterSummary;
   recent_runs: ProductRunEntry[];
   recent_artifacts: ProductArtifactEntry[];
+}
+
+export interface ProductRunHistoryDetailResponse {
+  ok: boolean;
+  source?: string;
+  history_path?: string;
+  run: ProductRunEntry;
 }
 
 export interface ProductRunHistoryResponse {
@@ -82,6 +158,29 @@ export interface ProductArtifactsResponse {
     error_artifacts: number;
   };
   artifacts: ProductArtifactEntry[];
+}
+
+export interface ProductArtifactPreviewSlide {
+  slide_number?: number | null;
+  filename?: string | null;
+  path?: string | null;
+  available?: boolean;
+}
+
+export interface ProductArtifactDetailResponse {
+  ok: boolean;
+  artifact_root?: string;
+  artifact: ProductArtifactEntry;
+  detail: {
+    metadata?: Record<string, unknown> | null;
+    review?: Record<string, unknown> | null;
+    preview_manifest?: Record<string, unknown> | null;
+    preview_slides?: ProductArtifactPreviewSlide[];
+    contract?: Record<string, unknown> | null;
+    payload?: Record<string, unknown> | null;
+    assets?: ProductArtifactAssetLink[];
+    notes?: string[];
+  };
 }
 
 export interface ProductDocumentLibraryEntry {
@@ -178,6 +277,29 @@ export interface ProductWorkflowArtifact {
   path?: string | null;
   download_name?: string | null;
   available: boolean;
+}
+
+export interface ProductResultSections {
+  summary?: string | null;
+  highlights: string[];
+  recommendation?: string | null;
+  warnings: string[];
+  tables: Array<{
+    title: string;
+    headers: string[];
+    rows: Array<Array<string | number | boolean | null | undefined>>;
+  }>;
+  sources: string[][];
+  artifacts: ProductWorkflowArtifact[];
+  candidate_profile?: {
+    name?: string | null;
+    headline?: string | null;
+    location?: string | null;
+  } | null;
+  strengths: string[];
+  watchouts: string[];
+  next_steps: string[];
+  evidence_highlights: Array<Array<string | number | boolean | null | undefined>>;
 }
 
 export interface ProductDocumentReviewFinding {
@@ -368,6 +490,7 @@ export interface ProductActionPlanView {
 }
 
 export interface ProductWorkflowResultPayload {
+  [key: string]: unknown;
   workflow_id: string;
   workflow_label: string;
   status: 'completed' | 'warning' | 'error';
@@ -385,41 +508,170 @@ export interface ProductWorkflowResultPayload {
 
 export interface ProductRunWorkflowResponse {
   ok: boolean;
+  run_id?: string;
   result: ProductWorkflowResultPayload;
+  result_sections?: ProductResultSections;
   result_view?: ProductDocumentReviewView;
   comparison_view?: ProductPolicyComparisonView;
   action_plan_view?: ProductActionPlanView;
+  reran_from_run_id?: string;
+  source_run?: ProductRunEntry;
+}
+
+export type ProductApiRenderableScalar = string | number | boolean | null | undefined;
+export type ProductApiRenderableValue = ProductApiRenderableScalar | ProductApiRenderableScalar[];
+
+export interface ProductDeckExportResult {
+  [key: string]: unknown;
+  status?: string;
+  export_kind?: string;
+  deck_title?: string | null;
+  output_path?: string | null;
+  artifact_path?: string | null;
+  deck_url?: string | null;
+  bytes_written?: number | null;
+  dry_run?: boolean;
+  message?: string | null;
 }
 
 export interface ProductGenerateDeckResponse {
   ok: boolean;
-  export_result: Record<string, unknown>;
+  export_result: ProductDeckExportResult;
   artifacts: ProductWorkflowArtifact[];
 }
 
 export interface ProductPublishTrelloListBreakdown {
   list_id?: string | null;
-  list_label: string;
-  count: number;
+  list_label?: string | null;
+  list_name?: string | null;
+  count?: number;
+  card_count?: number;
+  created_card_count?: number;
+  planned_card_count?: number;
+  [key: string]: unknown;
+}
+
+export interface ProductPublishTrelloCard {
+  id?: string | null;
+  card_id?: string | null;
+  card_url?: string | null;
+  name?: string | null;
+  title?: string | null;
+  list_id?: string | null;
+  list_label?: string | null;
+  [key: string]: unknown;
+}
+
+export interface ProductPublishTrelloResult {
+  [key: string]: unknown;
+  created_card_count?: number;
+  planned_card_count?: number;
+  board_url?: string | null;
+  target_board_id?: string | null;
+  board_name?: string | null;
+  list_name?: string | null;
+  dry_run?: boolean;
+  message?: string | null;
+  status?: 'success' | 'warning' | 'error' | string;
+  list_breakdown?: ProductPublishTrelloListBreakdown[];
+  created_cards?: ProductPublishTrelloCard[];
+  created_card_urls?: string[];
 }
 
 export interface ProductPublishTrelloResponse {
+  [key: string]: unknown;
   ok: boolean;
-  status: string;
-  dry_run: boolean;
-  workflow_id?: string;
-  workflow_label?: string;
-  card_mode?: string | null;
-  message?: string | null;
-  target_board_id?: string | null;
-  planned_card_count?: number;
+  workflow_id?: string | null;
+  workflow_label?: string | null;
+  status?: 'success' | 'warning' | 'error' | string;
+  dry_run?: boolean;
   created_card_count?: number;
-  planned_cards?: Array<Record<string, unknown>>;
-  created_cards?: Array<Record<string, unknown>>;
-  created_card_urls?: string[];
+  planned_card_count?: number;
+  board_url?: string | null;
+  target_board_id?: string | null;
+  board_name?: string | null;
+  list_name?: string | null;
   list_breakdown?: ProductPublishTrelloListBreakdown[];
+  created_cards?: ProductPublishTrelloCard[];
+  created_card_urls?: string[];
+  publish_result?: ProductPublishTrelloResult;
+  message?: string | null;
+  error?: string | null;
 }
 
+export interface LabOverviewKpi {
+  label: string;
+  value: string | number;
+  status: "healthy" | "warning" | "error" | "neutral";
+  trend?: string | null;
+}
+
+export interface LabOverviewAlert {
+  id: string;
+  severity: "critical" | "warning" | "info";
+  title: string;
+  detail: string;
+  source: string;
+  timestamp: string;
+}
+
+export interface LabOverviewResponse {
+  meta: {
+    source: "live" | "derived" | "snapshot" | "mock";
+    updated_at?: string | null;
+    notes?: string[];
+  };
+  runtime: {
+    generationProvider: string;
+    generationModel: string;
+    vectorBackendStatus: string;
+    indexedDocumentCount: number;
+    contextPressure: number;
+    ingestionHealth: string;
+  };
+  kpis: LabOverviewKpi[];
+  alerts: LabOverviewAlert[];
+  workflow_mix: Array<{ name: string; value: number }>;
+  review_rate: number;
+}
+
+export interface LabEvalsResponse {
+  meta: {
+    source: "live" | "derived" | "snapshot" | "mock";
+    updated_at?: string | null;
+    notes?: string[];
+  };
+  passRate: number;
+  totals: {
+    pass: number;
+    warn: number;
+    fail: number;
+    review: number;
+    total: number;
+  };
+  suites: Array<{
+    name: string;
+    total: number;
+    pass: number;
+    warn: number;
+    fail: number;
+    needsReview: number;
+    lastRun: string;
+  }>;
+  cases: Array<{
+    id: string;
+    task: string;
+    suite: string;
+    verdict: "PASS" | "WARN" | "FAIL";
+    score: number;
+    needsReview: boolean;
+    model: string;
+    latency: number;
+    timestamp: string;
+    errorDetail?: string | null;
+  }>;
+  diagnosis: Record<string, unknown>;
+}
 
 export interface RuntimeControlsCatalogItem {
   value: string;
@@ -552,12 +804,36 @@ export function getProductCommandCenter(): Promise<ProductCommandCenterResponse>
   return fetchProductApi<ProductCommandCenterResponse>("/api/product/command-center");
 }
 
+export function getProductWorkflows(): Promise<ProductWorkflowCatalogResponse> {
+  return fetchProductApi<ProductWorkflowCatalogResponse>("/api/product/workflows");
+}
+
 export function getProductRunHistory(): Promise<ProductRunHistoryResponse> {
   return fetchProductApi<ProductRunHistoryResponse>("/api/product/run-history");
 }
 
+export function getProductRunHistoryEntry(runId: string): Promise<ProductRunHistoryDetailResponse> {
+  return fetchProductApi<ProductRunHistoryDetailResponse>(`/api/product/run-history/${encodeURIComponent(runId)}`);
+}
+
+export async function rerunProductRunHistoryEntry(runId: string): Promise<ProductRunWorkflowResponse> {
+  return postProductApi<ProductRunWorkflowResponse>(`/api/product/run-history/${encodeURIComponent(runId)}/rerun`, {});
+}
+
 export function getProductArtifacts(): Promise<ProductArtifactsResponse> {
   return fetchProductApi<ProductArtifactsResponse>("/api/product/artifacts");
+}
+
+export function getProductArtifactEntry(artifactId: string): Promise<ProductArtifactDetailResponse> {
+  return fetchProductApi<ProductArtifactDetailResponse>(`/api/product/artifacts/${encodeURIComponent(artifactId)}`);
+}
+
+export function getLabOverview(): Promise<LabOverviewResponse> {
+  return fetchProductApi<LabOverviewResponse>("/api/lab/overview");
+}
+
+export function getLabEvals(): Promise<LabEvalsResponse> {
+  return fetchProductApi<LabEvalsResponse>("/api/lab/evals");
 }
 
 export function getProductDocumentLibrary(): Promise<ProductDocumentLibraryResponse> {
@@ -638,11 +914,14 @@ export async function runProductWorkflow(payload: {
   return response.json() as Promise<ProductRunWorkflowResponse>;
 }
 
-export async function generateProductWorkflowDeck(result: ProductWorkflowResultPayload): Promise<ProductGenerateDeckResponse> {
+export async function generateProductWorkflowDeck(
+  result: ProductWorkflowResultPayload | Record<string, unknown>,
+  options?: { runId?: string | null },
+): Promise<ProductGenerateDeckResponse> {
   const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/generate-deck`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ result }),
+    body: JSON.stringify({ result, run_id: options?.runId || undefined }),
   });
   if (!response.ok) {
     let message = `Product API deck generation failed: ${response.status}`;
@@ -657,18 +936,18 @@ export async function generateProductWorkflowDeck(result: ProductWorkflowResultP
   return response.json() as Promise<ProductGenerateDeckResponse>;
 }
 
-
-export async function publishProductWorkflowToTrello(result: ProductWorkflowResultPayload): Promise<ProductPublishTrelloResponse> {
-  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-trello`, {
+export async function publishProductWorkflowToTrello(payload: Record<string, unknown>): Promise<ProductPublishTrelloResponse> {
+  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-trello`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ result }),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) {
     let message = `Product API Trello publish failed: ${response.status}`;
     try {
-      const errorPayload = await response.json() as { error?: string };
+      const errorPayload = await response.json() as { error?: string; message?: string };
       if (errorPayload?.error) message = errorPayload.error;
+      else if (errorPayload?.message) message = errorPayload.message;
     } catch {
       // ignore JSON parsing error and keep fallback message
     }
@@ -724,68 +1003,3 @@ export function testPreferencesConnection(connectionId: string): Promise<Prefere
 export function updatePreferencesConnectionCredential(connectionId: string, apiKey: string): Promise<PreferencesResponse> {
   return postProductApi<PreferencesResponse>(`/api/preferences/connections/${encodeURIComponent(connectionId)}/credential`, { api_key: apiKey });
 }
-
-export type LabDataSource = 'live' | 'derived' | 'snapshot' | 'mock';
-
-export interface LabOverviewResponse {
-  ok: boolean;
-  meta: { source: LabDataSource; updated_at?: string | null; notes?: string[] };
-  runtime: {
-    generationProvider: string;
-    generationModel: string;
-    vectorBackendStatus: string;
-    indexedDocumentCount: number;
-    ingestionHealth: string;
-    contextPressure: number;
-  };
-  kpis: Array<{ label: string; value: string | number; status: string; trend?: string }>;
-  alerts: Array<{ id: string; severity: string; title: string; detail: string; source: string; timestamp?: string | null }>;
-  workflow_mix_label?: string;
-  workflow_mix: Array<{ name: string; value: number }>;
-  review_rate: number;
-}
-
-export interface LabEvalSuite {
-  name: string;
-  total: number;
-  pass: number;
-  warn: number;
-  fail: number;
-  needsReview: number;
-  lastRun?: string | null;
-}
-
-export interface LabEvalCase {
-  id: string;
-  task: string;
-  suite: string;
-  verdict: 'PASS' | 'WARN' | 'FAIL';
-  score: number;
-  needsReview: boolean;
-  model: string;
-  latency: number;
-  timestamp?: string | null;
-  errorDetail?: string | null;
-}
-
-export interface LabEvalsResponse {
-  ok: boolean;
-  meta: { source: LabDataSource; updated_at?: string | null; notes?: string[] };
-  passRate: number;
-  totals: { total: number; pass: number; warn: number; fail: number; review: number };
-  suites: LabEvalSuite[];
-  cases: LabEvalCase[];
-  diagnosis: Record<string, unknown>;
-}
-
-export function getLabOverview(): Promise<LabOverviewResponse> {
-  return fetchProductApi<LabOverviewResponse>('/api/lab/overview');
-}
-
-export const fetchLabOverview = getLabOverview;
-
-export function getLabEvals(): Promise<LabEvalsResponse> {
-  return fetchProductApi<LabEvalsResponse>('/api/lab/evals');
-}
-
-export const fetchLabEvals = getLabEvals;

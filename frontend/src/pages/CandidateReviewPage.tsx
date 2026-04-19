@@ -1,235 +1,593 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { UserCheck, Sparkles, Star, AlertTriangle, Briefcase, GraduationCap, CheckCircle2, Upload, Target, Search, ShieldAlert } from 'lucide-react';
-import { PageHeader, GlassCard } from '@/components/shared/ui-components';
-import { candidateData } from '@/lib/mock-data';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  UserCheck,
+  Sparkles,
+  AlertTriangle,
+  Briefcase,
+  GraduationCap,
+  CheckCircle2,
+  Upload,
+  Target,
+  Search,
+  ShieldAlert,
+  Loader2,
+  FileText,
+  ArrowRight,
+  ExternalLink,
+} from 'lucide-react';
+
+import { PageHeader, GlassCard, StatusPill } from '@/components/shared/ui-components';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/components/ui/sonner';
+import {
+  buildProductArtifactUrl,
+  generateProductWorkflowDeck,
+  getProductDocumentLibrary,
+  getProductGroundingPreview,
+  getProductUploadJob,
+  runProductWorkflow,
+  uploadProductDocuments,
+  type ProductDocumentLibraryEntry,
+  type ProductResultSections,
+  type ProductRunWorkflowResponse,
+  type ProductUploadDocumentsResponse,
+  type ProductWorkflowArtifact,
+} from '@/lib/product-api';
 
-const roleFitRubric = [
-  { requirement: 'LLM / Transformer expertise', type: 'must-have' as const, met: true, evidence: 'T5 development at Google Brain, RLHF at Anthropic, 3 NeurIPS papers' },
-  { requirement: 'Production ML systems at scale', type: 'must-have' as const, met: true, evidence: '10M+ daily predictions, MLOps toolchain (Kubeflow, MLflow, W&B)' },
-  { requirement: 'Team leadership experience', type: 'must-have' as const, met: true, evidence: 'Led 5-person ML team at Scale AI, mentored 3 interns at Google Brain' },
-  { requirement: 'RAG / retrieval system design', type: 'must-have' as const, met: false, evidence: 'Not explicitly mentioned — probe in interview' },
-  { requirement: 'Regulatory compliance (SOC2, HIPAA)', type: 'nice-to-have' as const, met: false, evidence: 'No direct compliance experience noted in CV' },
-  { requirement: 'Edge / on-premise deployment', type: 'nice-to-have' as const, met: false, evidence: 'Cloud-only experience — limited transferability' },
-  { requirement: 'Cross-functional collaboration', type: 'nice-to-have' as const, met: true, evidence: 'Product collaboration at Scale AI, cross-team influence at Anthropic' },
-];
+function isCandidateLikeDocument(document: ProductDocumentLibraryEntry): boolean {
+  const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`.toLowerCase();
+  return /(cv|resume|candidate|curriculum|hiring)/.test(haystack);
+}
 
-const interviewFocusAreas = [
-  { area: 'RAG Architecture & Retrieval Design', reason: 'Core to role — no explicit CV evidence. Assess depth of vector DB, chunking and reranking knowledge.', priority: 'high' as const },
-  { area: 'System Design Under Constraints', reason: 'Role requires on-premise/edge awareness. Probe experience with latency budgets and resource-constrained inference.', priority: 'high' as const },
-  { area: 'Technical Leadership Scope', reason: 'CV shows IC lead roles only. Clarify management vs technical authority boundaries.', priority: 'medium' as const },
-  { area: 'Compliance & Governance Awareness', reason: 'Regulatory gap may be trainable. Assess willingness and aptitude for SOC2/HIPAA contexts.', priority: 'low' as const },
-];
+function formatDate(value?: string | null): string {
+  if (!value) return 'n/a';
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+}
 
-const riskSignals = [
-  { signal: 'RAG experience gap', severity: 'high' as const, detail: 'Core requirement not evidenced in CV. Mitigable if strong fundamentals confirmed in interview.' },
-  { signal: 'Management scope unclear', severity: 'medium' as const, detail: 'IC lead ≠ people management. Clarify expectations if role includes direct reports.' },
-  { signal: 'Tenure pattern', severity: 'low' as const, detail: '2-year average tenure across roles. Normal for ML engineering market; not a red flag.' },
-];
+function buildInitials(name?: string | null): string {
+  const tokens = String(name || '')
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter(Boolean)
+    .slice(0, 2);
+  if (!tokens.length) return 'CV';
+  return tokens.map((token) => token[0]?.toUpperCase() || '').join('');
+}
 
-const mustHaves = roleFitRubric.filter(r => r.type === 'must-have');
-const mustHaveMet = mustHaves.filter(r => r.met).length;
+function deriveScore(response: ProductRunWorkflowResponse | null, sections: ProductResultSections | null): number {
+  const structured = response?.result?.structured_result;
+  const confidenceSeed =
+    (typeof structured?.overall_confidence === 'number' ? structured.overall_confidence : null) ??
+    (typeof structured?.quality_score === 'number' ? structured.quality_score : null);
+  if (typeof confidenceSeed === 'number') {
+    return Math.max(1, Math.min(99, Math.round(confidenceSeed * 100)));
+  }
+  const strengthCount = sections?.strengths.length || 0;
+  const watchoutCount = sections?.watchouts.length || 0;
+  return Math.max(15, Math.min(95, 55 + strengthCount * 8 - watchoutCount * 4));
+}
+
+function dedupeArtifacts(artifacts: ProductWorkflowArtifact[]): ProductWorkflowArtifact[] {
+  const seen = new Set<string>();
+  const normalized: ProductWorkflowArtifact[] = [];
+  for (const artifact of artifacts) {
+    const key = `${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(artifact);
+  }
+  return normalized;
+}
+
+function getTable(sections: ProductResultSections | null, title: string) {
+  return sections?.tables.find((table) => table.title === title) || null;
+}
+
+function getStatusCopy(response: ProductRunWorkflowResponse | null): { label: string; detail: string } {
+  const status = String(response?.result?.status || '').toLowerCase();
+  if (status === 'completed') {
+    return {
+      label: response?.result?.recommendation || 'Grounded review ready',
+      detail: 'The candidate review ran live against the selected document and the structured sections below come from the backend response.',
+    };
+  }
+  if (status === 'warning') {
+    return {
+      label: response?.result?.recommendation || 'Needs interview validation',
+      detail: 'The candidate review completed, but the backend surfaced watchouts that should be validated in interview before making a hiring call.',
+    };
+  }
+  if (status === 'error') {
+    return {
+      label: 'Run failed',
+      detail: 'The backend could not complete the candidate review. Check the error banner and document index before retrying.',
+    };
+  }
+  return {
+    label: 'Awaiting live run',
+    detail: 'Select a CV-like document and run the backend workflow to replace placeholders with grounded hiring signals.',
+  };
+}
 
 export default function CandidateReviewPage() {
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState('');
+  const [inputText, setInputText] = useState('Evaluate this CV for a senior AI engineer role and highlight strengths, watchouts, seniority signals and interview focus areas.');
+  const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
+  const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
+  const [activeUploadJobId, setActiveUploadJobId] = useState<string | null>(null);
+  const [uploadJobSeed, setUploadJobSeed] = useState<ProductUploadDocumentsResponse | null>(null);
+
+  const documentLibraryQuery = useQuery({
+    queryKey: ['product-document-library'],
+    queryFn: getProductDocumentLibrary,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const uploadJobQuery = useQuery({
+    queryKey: ['product-upload-job', activeUploadJobId],
+    queryFn: () => getProductUploadJob(activeUploadJobId || ''),
+    enabled: Boolean(activeUploadJobId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: (query) => {
+      const payload = query.state.data as ProductUploadDocumentsResponse | undefined;
+      if (!payload) return 1000;
+      return payload.status === 'completed' || payload.status === 'error' ? false : 1000;
+    },
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: uploadProductDocuments,
+    onSuccess: (payload) => {
+      setActiveUploadJobId(payload.job_id);
+      setUploadJobSeed(payload);
+      toast.success(payload.message || 'Candidate document upload accepted. Indexing started.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Candidate document upload failed.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    },
+  });
+
+  useEffect(() => {
+    const uploadJob = uploadJobQuery.data;
+    if (!uploadJob) return;
+    if (uploadJob.status === 'completed') {
+      setActiveUploadJobId(null);
+      setUploadJobSeed(uploadJob);
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['product-document-library'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
+      ]);
+      toast.success(uploadJob.message || 'Candidate document indexed successfully.');
+      return;
+    }
+    if (uploadJob.status === 'error') {
+      setActiveUploadJobId(null);
+      setUploadJobSeed(uploadJob);
+      toast.error(uploadJob.error || uploadJob.message || 'Candidate document upload failed.');
+    }
+  }, [queryClient, uploadJobQuery.data]);
+
+  const availableDocuments = useMemo(
+    () => (documentLibraryQuery.data?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
+    [documentLibraryQuery.data?.documents],
+  );
+
+  const preferredCandidateDocuments = useMemo(
+    () => availableDocuments.filter(isCandidateLikeDocument),
+    [availableDocuments],
+  );
+
+  const selectableDocuments = preferredCandidateDocuments.length ? preferredCandidateDocuments : availableDocuments;
+  const hasDedicatedCandidateCorpus = preferredCandidateDocuments.length > 0;
+
+  useEffect(() => {
+    if (!selectableDocuments.length) {
+      setSelectedDocumentId('');
+      return;
+    }
+    if (!selectedDocumentId || !selectableDocuments.some((document) => document.document_id === selectedDocumentId)) {
+      setSelectedDocumentId(selectableDocuments[0].document_id);
+    }
+  }, [selectedDocumentId, selectableDocuments]);
+
+  const selectedDocument = selectableDocuments.find((document) => document.document_id === selectedDocumentId);
+
+  const previewQuery = useQuery({
+    queryKey: ['candidate-review-preview', selectedDocumentId],
+    enabled: Boolean(selectedDocumentId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    queryFn: () =>
+      getProductGroundingPreview({
+        workflowId: 'candidate_review',
+        strategy: 'document_scan',
+        documentIds: selectedDocumentId ? [selectedDocumentId] : [],
+      }),
+  });
+
+  const runReviewMutation = useMutation({
+    mutationFn: () =>
+      runProductWorkflow({
+        workflow_id: 'candidate_review',
+        document_ids: selectedDocumentId ? [selectedDocumentId] : [],
+        input_text: inputText,
+        context_strategy: 'document_scan',
+        context_window_mode: 'auto',
+        use_document_context: true,
+      }),
+    onSuccess: async (payload) => {
+      setWorkflowResponse(payload);
+      setGeneratedArtifacts([]);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
+      ]);
+      toast.success('Candidate review completed with grounded backend output.');
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Candidate review failed.');
+    },
+  });
+
+  const generateDeckMutation = useMutation({
+    mutationFn: () => {
+      if (!workflowResponse?.result) {
+        throw new Error('Run the candidate review before generating the executive deck.');
+      }
+      return generateProductWorkflowDeck(workflowResponse.result, { runId: workflowResponse.run_id });
+    },
+    onSuccess: async (payload) => {
+      setGeneratedArtifacts(payload.artifacts);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
+      ]);
+      toast.success('Candidate review deck artifacts generated successfully.');
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Candidate review deck generation failed.');
+    },
+  });
+
+  const sections = workflowResponse?.result_sections ?? null;
+  const statusCopy = getStatusCopy(workflowResponse);
+  const candidateProfile = sections?.candidate_profile ?? null;
+  const score = deriveScore(workflowResponse, sections);
+  const evidenceRows = sections?.evidence_highlights ?? [];
+  const experienceTable = getTable(sections, 'Experience highlights');
+  const evidenceTable = getTable(sections, 'Evidence highlights');
+  const allArtifacts = useMemo(
+    () => dedupeArtifacts([...(sections?.artifacts ?? []), ...generatedArtifacts]),
+    [generatedArtifacts, sections?.artifacts],
+  );
+  const uploadJob = uploadJobQuery.data ?? uploadJobSeed;
+  const uploadInProgress = uploadMutation.isPending || ['queued', 'running'].includes(uploadJob?.status || '');
+  const selectedDocumentDate = formatDate(selectedDocument?.indexed_at || null);
+  const preview = workflowResponse?.result?.grounding_preview ?? previewQuery.data?.preview ?? null;
+
+  const handleFilesSelected = (fileList: FileList | File[] | null) => {
+    const files = Array.from(fileList ?? []);
+    if (!files.length) return;
+    uploadMutation.mutate(files.slice(0, 1));
+  };
+
+  const handleOpenArtifact = (artifact: ProductWorkflowArtifact) => {
+    if (!artifact.path) {
+      toast.error(`${artifact.label} is registered, but no local path is available yet.`);
+      return;
+    }
+    window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Candidate Review" description="AI-powered hiring intelligence with grounded evaluation and scoring.">
-        <Button variant="outline" className="h-9 px-4 text-xs border-border/50"><Upload className="w-3.5 h-3.5 mr-2" /> Upload CV</Button>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"><Sparkles className="w-3.5 h-3.5 mr-2" /> Generate Deck</Button>
+      <PageHeader title="Candidate Review" description="Live hiring intelligence backed by the Product API, the indexed document corpus and structured candidate-analysis output.">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.txt,.md"
+          className="hidden"
+          onChange={(event) => handleFilesSelected(event.target.files)}
+        />
+        <Button variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={uploadInProgress} onClick={() => fileInputRef.current?.click()}>
+          {uploadInProgress ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-2" />} Upload CV
+        </Button>
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" disabled={!selectedDocumentId || runReviewMutation.isPending} onClick={() => runReviewMutation.mutate()}>
+          {runReviewMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Run Candidate Review
+        </Button>
+        <Button variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending} onClick={() => generateDeckMutation.mutate()}>
+          {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Generate Deck
+        </Button>
       </PageHeader>
 
-      <div className="grid lg:grid-cols-12 gap-4">
-        {/* Profile Hero */}
-        <div className="lg:col-span-4 space-y-4">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="glass rounded-xl p-6 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-gradient-primary">SC</span>
+      {(documentLibraryQuery.isError || previewQuery.isError) && (
+        <GlassCard className="mb-6 border border-glow-warning/20">
+          <div className="flex items-center gap-2 text-xs text-glow-warning">
+            <AlertTriangle className="w-4 h-4" />
+            Live candidate-review dependencies are partially unavailable. The page remains interactive, but some readiness signals may be degraded.
+          </div>
+        </GlassCard>
+      )}
+
+      {!documentLibraryQuery.isLoading && !selectableDocuments.length && (
+        <GlassCard className="mb-6 border border-glow-warning/20">
+          <div className="flex items-center gap-2 text-xs text-glow-warning">
+            <AlertTriangle className="w-4 h-4" />
+            No indexed documents are available yet. Upload a resume/CV or use the Document Library to index one before running Candidate Review.
+          </div>
+        </GlassCard>
+      )}
+
+      {!documentLibraryQuery.isLoading && selectableDocuments.length > 0 && !hasDedicatedCandidateCorpus && (
+        <GlassCard className="mb-6 border border-glow-warning/20">
+          <div className="flex items-center gap-2 text-xs text-glow-warning">
+            <AlertTriangle className="w-4 h-4" />
+            The current corpus is live, but no CV-like filename was detected. Candidate Review can still run on the selected document, though the output may be derived from a non-resume source.
+          </div>
+        </GlassCard>
+      )}
+
+      <GlassCard className="mb-6">
+        <div className="grid lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)] gap-4">
+          <div>
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Candidate document</label>
+            <Select value={selectedDocumentId} onValueChange={setSelectedDocumentId}>
+              <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue placeholder="Select a candidate document" /></SelectTrigger>
+              <SelectContent>
+                {selectableDocuments.map((document) => (
+                  <SelectItem key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
+              <div>Indexed: {selectedDocumentDate}</div>
+              <div>Chunks: {selectedDocument?.chunk_count ?? 0} | Characters: {(selectedDocument?.char_count ?? 0).toLocaleString()}</div>
+              <div>Source coverage: {preview?.source_block_count ?? 0} source block(s), {preview?.context_chars ?? 0} context chars</div>
             </div>
-            <h3 className="text-lg font-semibold text-foreground">{candidateData.name}</h3>
-            <p className="text-sm text-muted-foreground">{candidateData.title}</p>
-            <p className="text-xs text-muted-foreground mt-1">{candidateData.location}</p>
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Evaluation brief</label>
+            <textarea
+              value={inputText}
+              onChange={(event) => setInputText(event.target.value)}
+              className="w-full min-h-[92px] rounded-lg border border-border/50 bg-secondary/20 px-3 py-2 text-xs text-foreground outline-none focus:border-primary/50"
+              placeholder="Describe the hiring context, role, seniority or signals to validate."
+            />
+            <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+              {preview?.preview_text
+                ? preview.preview_text.slice(0, 260)
+                : 'Grounding preview will appear here as soon as a candidate document is selected.'}
+            </p>
+          </div>
+        </div>
+      </GlassCard>
+
+      <div className="grid lg:grid-cols-12 gap-4">
+        <div className="lg:col-span-4 space-y-4">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="glass rounded-xl p-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold text-gradient-primary">{buildInitials(candidateProfile?.name)}</span>
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">{candidateProfile?.name || selectedDocument?.name || 'Awaiting candidate run'}</h3>
+            <p className="text-sm text-muted-foreground">{candidateProfile?.headline || 'Run the backend workflow to populate the live candidate profile.'}</p>
+            <p className="text-xs text-muted-foreground mt-1">{candidateProfile?.location || 'Location will be derived from the structured CV output.'}</p>
 
             <div className="mt-5 pt-5 border-t border-border/30">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted-foreground">Overall Score</span>
-                <span className="text-sm font-semibold text-primary">{candidateData.overallScore}/100</span>
+                <span className="text-xs text-muted-foreground">Overall confidence score</span>
+                <span className="text-sm font-semibold text-primary">{score}/100</span>
               </div>
-              <Progress value={candidateData.overallScore} className="h-2 bg-secondary" />
+              <Progress value={score} className="h-2 bg-secondary" />
             </div>
 
             <div className="mt-4 bg-glow-success/5 border border-glow-success/20 rounded-lg p-3">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-glow-success" />
-                <span className="text-sm font-semibold text-glow-success">{candidateData.recommendation}</span>
+                <span className="text-sm font-semibold text-glow-success">{statusCopy.label}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                {mustHaveMet}/{mustHaves.length} must-have requirements met. Advance to technical interview with focus on RAG architecture.
-              </p>
+              <p className="text-[10px] text-muted-foreground mt-1.5">{statusCopy.detail}</p>
             </div>
 
             <div className="mt-4 space-y-2 text-left">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Briefcase className="w-3.5 h-3.5" />{candidateData.experience}
+                <Briefcase className="w-3.5 h-3.5" />
+                {experienceTable?.rows.length ? `${experienceTable.rows.length} structured experience row(s)` : 'Experience rows will populate after the live run.'}
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <GraduationCap className="w-3.5 h-3.5" />{candidateData.education}
+                <GraduationCap className="w-3.5 h-3.5" />
+                {sections?.tables.some((table) => table.title === 'Education snapshot') ? 'Education snapshot available' : 'Education snapshot will appear when available'}
               </div>
             </div>
           </motion.div>
 
-          {/* Risk Signals */}
-          <GlassCard delay={0.2}>
+          <GlassCard delay={0.16}>
             <div className="flex items-center gap-2 mb-3">
               <ShieldAlert className="w-4 h-4 text-glow-warning" />
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Decision Risks</h4>
             </div>
             <div className="space-y-2">
-              {riskSignals.map(r => (
-                <div key={r.signal} className="text-xs">
+              {(sections?.watchouts.length ? sections.watchouts : ['Run the candidate workflow to surface live watchouts and interview risks.']).map((watchout) => (
+                <div key={watchout} className="text-xs">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${r.severity === 'high' ? 'bg-glow-error' : r.severity === 'medium' ? 'bg-glow-warning' : 'bg-muted-foreground'}`} />
-                    <span className="text-foreground font-medium">{r.signal}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-glow-warning shrink-0" />
+                    <span className="text-foreground font-medium">{watchout}</span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground ml-3.5">{r.detail}</p>
                 </div>
               ))}
             </div>
           </GlassCard>
 
-          {/* Seniority Signals */}
-          <GlassCard delay={0.25}>
-            <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Seniority Signals</h4>
+          <GlassCard delay={0.2}>
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Grounded Signals</h4>
             <div className="space-y-2">
-              {candidateData.senioritySignals.map(signal => (
-                <div key={signal} className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Star className="w-3 h-3 text-glow-warning shrink-0" />{signal}
-                </div>
-              ))}
+              {evidenceRows.length ? (
+                evidenceRows.map((row) => (
+                  <div key={`${row[0]}-${row[1]}`} className="rounded-lg bg-secondary/20 px-3 py-2">
+                    <p className="text-xs text-foreground font-medium">{String(row[0] || 'Signal')}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{String(row[1] || '-')} · {String(row[2] || '-')}</p>
+                    <p className="text-[10px] text-muted-foreground/80 mt-1">{String(row[3] || '')}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">Grounded evidence signals will appear here after the candidate workflow runs.</p>
+              )}
             </div>
           </GlassCard>
         </div>
 
-        {/* Main Content */}
         <div className="lg:col-span-8 space-y-4">
-          {/* Role-Fit Rubric */}
-          <GlassCard delay={0.12}>
+          <GlassCard delay={0.1}>
             <div className="flex items-center gap-2 mb-4">
               <Target className="w-4 h-4 text-primary" />
-              <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Role-Fit Rubric</h4>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{mustHaveMet}/{mustHaves.length} must-haves met</span>
-            </div>
-            <div className="space-y-2">
-              {roleFitRubric.map((r, i) => (
-                <motion.div key={r.requirement} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + i * 0.03 }}
-                  className={`flex items-start gap-3 py-2.5 px-3 rounded-lg ${r.met ? 'bg-glow-success/5' : 'bg-glow-warning/5'}`}>
-                  <div className="mt-0.5 shrink-0">
-                    {r.met ? <CheckCircle2 className="w-3.5 h-3.5 text-glow-success" /> : <AlertTriangle className="w-3.5 h-3.5 text-glow-warning" />}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-foreground">{r.requirement}</span>
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded border font-medium ${r.type === 'must-have' ? 'bg-primary/10 text-primary border-primary/20' : 'bg-secondary text-muted-foreground border-border/50'}`}>
-                        {r.type}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{r.evidence}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </GlassCard>
-
-          {/* Interview Focus Areas */}
-          <GlassCard delay={0.18}>
-            <div className="flex items-center gap-2 mb-4">
-              <Search className="w-4 h-4 text-primary" />
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Interview Focus Areas</h4>
             </div>
             <div className="space-y-2">
-              {interviewFocusAreas.map((f, i) => (
-                <div key={f.area} className="flex items-start gap-3 py-2 px-3 rounded-lg bg-secondary/20">
-                  <span className="text-[10px] font-bold text-muted-foreground w-4 mt-0.5">{i + 1}</span>
+              {(sections?.next_steps.length ? sections.next_steps : ['Run the candidate review to generate live interview focus areas.']).map((step, index) => (
+                <div key={step} className="flex items-start gap-3 py-2 px-3 rounded-lg bg-secondary/20">
+                  <span className="text-[10px] font-bold text-muted-foreground w-4 mt-0.5">{index + 1}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-foreground">{f.area}</span>
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-medium ${
-                        f.priority === 'high' ? 'bg-glow-error/10 text-glow-error' : f.priority === 'medium' ? 'bg-glow-warning/10 text-glow-warning' : 'bg-secondary text-muted-foreground'
-                      }`}>{f.priority}</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">{f.reason}</p>
+                    <span className="text-xs font-medium text-foreground">{step}</span>
                   </div>
                 </div>
               ))}
             </div>
           </GlassCard>
 
-          {/* Experience Timeline */}
-          <GlassCard delay={0.22}>
-            <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-4">Experience</h4>
+          <GlassCard delay={0.14}>
+            <div className="flex items-center gap-2 mb-4">
+              <Search className="w-4 h-4 text-primary" />
+              <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Experience Highlights</h4>
+            </div>
             <div className="space-y-4">
-              {candidateData.experiences.map((exp, i) => (
-                <motion.div key={exp.company} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.25 + i * 0.08 }}
-                  className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <Briefcase className="w-4 h-4 text-primary" />
+              {experienceTable?.rows.length ? (
+                experienceTable.rows.map((row, index) => (
+                  <motion.div key={`${row[0]}-${row[1]}`} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.18 + index * 0.05 }} className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Briefcase className="w-4 h-4 text-primary" />
+                      </div>
+                      {index < experienceTable.rows.length - 1 && <div className="w-px flex-1 bg-border mt-2" />}
                     </div>
-                    {i < candidateData.experiences.length - 1 && <div className="w-px flex-1 bg-border mt-2" />}
-                  </div>
-                  <div className="pb-4 flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <h5 className="text-sm font-medium text-foreground">{exp.role}</h5>
-                      <span className="text-[10px] text-muted-foreground">{exp.period}</span>
+                    <div className="pb-4 flex-1">
+                      <div className="flex items-center justify-between mb-1 gap-3">
+                        <h5 className="text-sm font-medium text-foreground">{String(row[0] || '-')}</h5>
+                        <span className="text-[10px] text-muted-foreground">{String(row[2] || '-')}</span>
+                      </div>
+                      <p className="text-xs text-primary/80 mb-2">{String(row[1] || '-')}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{String(row[3] || '-')}</p>
                     </div>
-                    <p className="text-xs text-primary/80 mb-2">{exp.company}</p>
-                    <div className="space-y-1">
-                      {exp.highlights.map(h => (
-                        <p key={h} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                          <span className="w-1 h-1 rounded-full bg-muted-foreground mt-1.5 shrink-0" />{h}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">Run the candidate review to populate grounded experience rows from the selected CV.</p>
+              )}
             </div>
           </GlassCard>
 
           <div className="grid md:grid-cols-2 gap-4">
-            {/* Strengths */}
-            <GlassCard delay={0.3}>
+            <GlassCard delay={0.18}>
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle2 className="w-4 h-4 text-glow-success" />
                 <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Strengths</h4>
               </div>
               <div className="space-y-2">
-                {candidateData.strengths.map(s => (
-                  <p key={s} className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
-                    <span className="w-1.5 h-1.5 rounded-full bg-glow-success mt-1.5 shrink-0" />{s}
+                {(sections?.strengths.length ? sections.strengths : ['Strengths will populate from the structured candidate payload after the live run.']).map((strength) => (
+                  <p key={strength} className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-glow-success mt-1.5 shrink-0" />{strength}
                   </p>
                 ))}
               </div>
             </GlassCard>
 
-            {/* Gaps */}
-            <GlassCard delay={0.35}>
+            <GlassCard delay={0.22}>
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="w-4 h-4 text-glow-warning" />
-                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Gaps</h4>
+                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Watchouts</h4>
               </div>
               <div className="space-y-2">
-                {candidateData.gaps.map(g => (
-                  <p key={g} className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
-                    <span className="w-1.5 h-1.5 rounded-full bg-glow-warning mt-1.5 shrink-0" />{g}
+                {(sections?.watchouts.length ? sections.watchouts : ['Watchouts will populate from the backend review status after the live run.']).map((watchout) => (
+                  <p key={watchout} className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-glow-warning mt-1.5 shrink-0" />{watchout}
                   </p>
                 ))}
               </div>
             </GlassCard>
           </div>
+
+          {evidenceTable && (
+            <GlassCard delay={0.26}>
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="w-4 h-4 text-primary" />
+                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Evidence Table</h4>
+              </div>
+              <div className="overflow-x-auto rounded-lg border border-border/50">
+                <table className="min-w-full text-left text-xs">
+                  <thead className="bg-secondary/30">
+                    <tr>
+                      {evidenceTable.headers.map((header) => (
+                        <th key={header} className="px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">{header}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {evidenceTable.rows.map((row) => (
+                      <tr key={`${row[0]}-${row[1]}`} className="border-t border-border/40">
+                        {row.map((cell, index) => (
+                          <td key={`${row[0]}-${index}`} className="px-3 py-2 text-muted-foreground">{String(cell ?? '-')}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </GlassCard>
+          )}
+
+          <GlassCard delay={0.3}>
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <h4 className="text-sm font-medium text-foreground">Artifacts</h4>
+                <p className="text-xs text-muted-foreground">Generated deck artifacts and any structured exports registered by the live candidate-review flow.</p>
+              </div>
+              <StatusPill status={allArtifacts.length ? 'ready' : workflowResponse?.result ? workflowResponse.result.status : 'pending'} />
+            </div>
+            {allArtifacts.length ? (
+              <div className="space-y-2">
+                {allArtifacts.map((artifact) => (
+                  <div key={`${artifact.artifact_type}-${artifact.path || artifact.label}`} className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-secondary/15 px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="text-xs text-foreground font-medium truncate">{artifact.label}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{artifact.download_name || artifact.path || artifact.artifact_type}</p>
+                    </div>
+                    <Button variant="outline" size="sm" className="h-7 text-[10px]" disabled={!artifact.available || !artifact.path} onClick={() => handleOpenArtifact(artifact)}>
+                      Open <ExternalLink className="w-3 h-3 ml-1" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Run the workflow and generate the deck to register downloadable candidate-review artifacts here.</p>
+            )}
+            {workflowResponse?.run_id && (
+              <p className="mt-3 text-[10px] text-muted-foreground">Linked run id: {workflowResponse.run_id}</p>
+            )}
+            {workflowResponse?.source_run?.id && (
+              <p className="mt-1 text-[10px] text-muted-foreground">Rerun source: {workflowResponse.source_run.id}</p>
+            )}
+          </GlassCard>
         </div>
       </div>
     </motion.div>

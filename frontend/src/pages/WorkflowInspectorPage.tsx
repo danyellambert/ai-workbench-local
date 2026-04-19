@@ -59,6 +59,8 @@ export default function WorkflowInspectorPage() {
     acc[item.mode] = (acc[item.mode] || 0) + 1;
     return acc;
   }, {});
+  const modeBreakdown = data?.mode_breakdown ?? [];
+  const reviewReasons = data?.review_reasons ?? [];
 
   useEffect(() => {
     if (!instructions && selectedDetail?.document_names?.length) {
@@ -135,6 +137,29 @@ export default function WorkflowInspectorPage() {
         ]}
       />
 
+      <div className="grid md:grid-cols-4 gap-3 mb-6">
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Tracked tasks</p>
+          <p className="text-lg font-semibold text-foreground">{summary?.task_count ?? taskOptions.length}</p>
+          <p className="text-[10px] text-muted-foreground">{summary?.document_count ?? documentOptions.length} indexed doc option(s)</p>
+        </GlassCard>
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Persisted live runs</p>
+          <p className="text-lg font-semibold text-foreground">{summary?.live_runs ?? 0}</p>
+          <p className="text-[10px] text-muted-foreground">{summary?.last_run_at ? new Date(summary.last_run_at).toLocaleString() : 'No recent live run'}</p>
+        </GlassCard>
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Mode mix</p>
+          <p className="text-sm font-semibold text-foreground truncate">{modeBreakdown[0]?.label ?? Object.keys(modeCounts)[0] ?? '—'}</p>
+          <p className="text-[10px] text-muted-foreground">{modeBreakdown[0]?.value ?? Object.values(modeCounts)[0] ?? 0} recent trace(s)</p>
+        </GlassCard>
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Review pressure</p>
+          <p className="text-sm font-semibold text-foreground truncate">{reviewReasons[0]?.label ?? 'No dominant blocker'}</p>
+          <p className="text-[10px] text-muted-foreground">{reviewReasons[0]?.value ?? 0} recent occurrence(s)</p>
+        </GlassCard>
+      </div>
+
       <div className="grid lg:grid-cols-12 gap-4 mb-6">
         <div className="lg:col-span-4 space-y-4">
           <GlassCard delay={0.1}>
@@ -192,6 +217,33 @@ export default function WorkflowInspectorPage() {
               onChange={(event) => setInstructions(event.target.value)}
               disabled={!canExecute || runMutation.isPending}
             />
+          </GlassCard>
+
+          <GlassCard delay={0.22}>
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Live trace posture</h4>
+            <div className="space-y-2 text-[10px] text-muted-foreground">
+              {modeBreakdown.length ? modeBreakdown.map((row) => (
+                <div key={row.label} className="flex items-center justify-between gap-3">
+                  <span>{row.label}</span>
+                  <span className="text-foreground font-mono">{row.value}</span>
+                </div>
+              )) : Object.entries(modeCounts).map(([mode, count]) => (
+                <div key={mode} className="flex items-center justify-between gap-3">
+                  <span>{mode}</span>
+                  <span className="text-foreground font-mono">{count}</span>
+                </div>
+              ))}
+            </div>
+            {reviewReasons.length ? (
+              <div className="mt-3 pt-3 border-t border-border/30 space-y-2 text-[10px] text-muted-foreground">
+                {reviewReasons.map((row) => (
+                  <div key={row.label} className="flex items-center justify-between gap-3">
+                    <span>{row.label}</span>
+                    <span className="text-foreground font-mono">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </GlassCard>
 
           <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-xs" disabled={!canExecute || runMutation.isPending || !currentTask} onClick={() => void handleRun()}>

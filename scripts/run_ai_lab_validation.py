@@ -374,10 +374,66 @@ def run_playwright(frontend_url: str, out_dir: Path, env: dict[str, str], steps:
         steps.append({'name': 'playwright', 'status': 'error', 'error': f'{error}\n{tail_text(log_path)}', 'output': str(log_path.relative_to(out_dir))})
 
 
+
+def collect_page_assessments(out_dir: Path) -> dict[str, Any]:
+    assessments_dir = out_dir / 'assessments'
+    pages: list[dict[str, Any]] = []
+    if assessments_dir.exists():
+        for path in sorted(assessments_dir.glob('*.json')):
+            try:
+                payload = json.loads(path.read_text(encoding='utf-8'))
+            except Exception:
+                continue
+            if isinstance(payload, dict):
+                pages.append(payload)
+
+    counts: dict[str, int] = {}
+    for page in pages:
+        status = str(page.get('status') or 'unknown')
+        counts[status] = counts.get(status, 0) + 1
+
+    return {
+        'pages': pages,
+        'counts': counts,
+    }
+
+
+def build_page_assessments_markdown(page_assessments: dict[str, Any]) -> str:
+    lines = ['# AI Lab page assessments', '']
+    pages = page_assessments.get('pages') or []
+    if not pages:
+        lines.append('- No page assessments were captured.')
+        return '\n'.join(lines) + '\n'
+
+    counts = page_assessments.get('counts') or {}
+    lines.append('## Status counts')
+    for key in sorted(counts):
+        lines.append(f'- {key}: {counts[key]}')
+    lines.append('')
+    lines.append('## Per page')
+    for page in pages:
+        lines.append(f"- `{page.get('slug', 'unknown')}`: **{page.get('status', 'unknown')}**")
+        payload_summary = page.get('payloadSummary') or {}
+        if payload_summary:
+            lines.append(
+                f"  - payload: source={payload_summary.get('metaSource') or 'unknown'} status={payload_summary.get('status') or 'n/a'} degraded_reason={payload_summary.get('degradedReason') or 'none'}"
+            )
+            counts_payload = payload_summary.get('counts') or {}
+            if counts_payload:
+                lines.append(f"  - counts: {json.dumps(counts_payload, ensure_ascii=False, sort_keys=True)}")
+        tab_labels = page.get('tabLabels') or []
+        if tab_labels:
+            lines.append(f"  - tabs: {', '.join(str(item) for item in tab_labels)}")
+        for check in page.get('checks') or []:
+            lines.append(f"  - check `{check.get('name', 'unknown')}`: {check.get('status', 'unknown')} — {check.get('details') or 'n/a'}")
+    return '\n'.join(lines) + '\n'
+
+
 def build_summary(*, out_dir: Path, manifest: dict[str, Any], steps: list[dict[str, Any]], base_url: str, frontend_url: str) -> dict[str, Any]:
     counts: dict[str, int] = {}
     for step in steps:
         counts[step['status']] = counts.get(step['status'], 0) + 1
+    page_assessments = collect_page_assessments(out_dir)
     return {
         'generated_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
         'base_url': base_url,
@@ -386,12 +442,14 @@ def build_summary(*, out_dir: Path, manifest: dict[str, Any], steps: list[dict[s
         'steps': steps,
         'step_counts': counts,
         'ai_lab_manifest': manifest,
+        'page_assessments': page_assessments['pages'],
+        'page_status_counts': page_assessments['counts'],
         'return_to_chat': [
-            'run-meta.json', 'frontend-smoke.log', 'summary.json', 'summary.md', 'ai-lab-manifest.json', 'health.json', 'workflows.json',
+            'run-meta.json', 'frontend-smoke.log', 'summary.json', 'summary.md', 'page-assessments.json', 'page-assessments.md', 'ai-lab-manifest.json', 'health.json', 'workflows.json',
             'document-library.json', 'runtime-controls.json', 'command-center.json', 'run-history.json', 'artifacts.json',
             'lab-overview.json', 'lab-runtime.json', 'lab-chat.json', 'lab-workflow-inspector.json', 'lab-benchmarks.json',
             'lab-evals.json', 'lab-artifacts.json', 'lab-evidenceops.json', 'backend.log', 'frontend.log', 'playwright.log',
-            'screenshots/', 'api/', 'browser/', 'dom/'
+            'screenshots/', 'api/', 'browser/', 'dom/', 'assessments/'
         ],
     }
 
@@ -401,6 +459,13 @@ def build_summary_markdown(summary: dict[str, Any]) -> str:
     for step in summary['steps']:
         suffix = f" — {step.get('error')}" if step.get('error') else ''
         lines.append(f"- `{step['name']}`: **{step['status']}**{suffix}")
+    page_status_counts = summary.get('page_status_counts') or {}
+    if page_status_counts:
+        lines.extend(['', '## Page assessment counts'])
+        for key in sorted(page_status_counts):
+            lines.append(f'- {key}: {page_status_counts[key]}')
+    for page in summary.get('page_assessments') or []:
+        lines.append(f"- page `{page.get('slug', 'unknown')}`: **{page.get('status', 'unknown')}**")
     lines.extend(['', '## Return these files', *[f'- {item}' for item in summary['return_to_chat']]])
     return '\n'.join(lines) + '\n'
 
@@ -425,6 +490,7 @@ def main() -> None:
     ensure_directory(out_dir / 'api')
     ensure_directory(out_dir / 'browser')
     ensure_directory(out_dir / 'dom')
+    ensure_directory(out_dir / 'assessments')
 
     requested_backend_host = os.environ.get('PRODUCT_API_SERVER_NAME', '127.0.0.1')
     requested_backend_port = int(os.environ.get('PRODUCT_API_SERVER_PORT', '8011'))
@@ -512,6 +578,9 @@ def main() -> None:
     summary = build_summary(out_dir=out_dir, manifest=manifest, steps=steps, base_url=base_url, frontend_url=frontend_url)
     write_json(out_dir / 'summary.json', summary)
     write_text(out_dir / 'summary.md', build_summary_markdown(summary))
+    page_assessments_payload = {'pages': summary.get('page_assessments') or [], 'counts': summary.get('page_status_counts') or {}}
+    write_json(out_dir / 'page-assessments.json', page_assessments_payload)
+    write_text(out_dir / 'page-assessments.md', build_page_assessments_markdown(page_assessments_payload))
     print(f'AI Lab validation complete. Output directory: {out_dir}')
     for item in summary['return_to_chat']:
         print(f'- {out_dir / item}')

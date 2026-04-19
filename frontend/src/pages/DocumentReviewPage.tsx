@@ -164,7 +164,7 @@ export default function DocumentReviewPage() {
       if (!workflowResponse?.result) {
         throw new Error('Run a grounded review before generating the executive deck.');
       }
-      return generateProductWorkflowDeck(workflowResponse.result);
+      return generateProductWorkflowDeck(workflowResponse.result, { runId: workflowResponse.run_id });
     },
     onSuccess: async (payload) => {
       setGeneratedArtifacts(payload.artifacts);

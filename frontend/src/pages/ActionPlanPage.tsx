@@ -252,7 +252,7 @@ export default function ActionPlanPage() {
       if (!workflowResponse?.result) {
         throw new Error('Run the action plan workflow before generating the deck.');
       }
-      return generateProductWorkflowDeck(workflowResponse.result);
+      return generateProductWorkflowDeck(workflowResponse.result, { runId: workflowResponse.run_id });
     },
     onSuccess: async (payload) => {
       setGeneratedArtifacts(payload.artifacts);

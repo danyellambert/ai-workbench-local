@@ -118,14 +118,45 @@ export interface LabChatSessionSummary {
   updated_at?: string | null;
   message_count: number;
   status?: string | null;
+  document_count?: number;
+  last_error?: string | null;
+  last_model?: string | null;
+  avg_latency_s?: number | null;
+  grounded_messages?: number;
+}
+
+export interface LabTimelineEntry {
+  id: string;
+  kind?: string | null;
+  label: string;
+  timestamp?: string | null;
+  status?: string | null;
+  detail?: string | null;
+}
+
+export interface LabChatSummary {
+  total_sessions?: number;
+  assistant_messages?: number;
+  grounded_messages?: number;
+  grounding_sources?: number;
+  active_documents?: number;
+  avg_latency_s?: number | null;
+  last_model?: string | null;
+  failed_sessions?: number;
 }
 
 export interface LabChatResponse {
   ok: boolean;
+  status?: string | null;
+  degraded_reason?: string | null;
+  last_updated_at?: string | null;
   meta: LabApiMeta;
   capabilities: LabCapabilityState;
   active_session_id?: string | null;
   sessions?: LabChatSessionSummary[];
+  summary?: LabChatSummary;
+  grounding_overview?: LabKeyValueRow[];
+  session_timeline?: LabTimelineEntry[];
   messages: LabChatMessage[];
   suggested_prompts: string[];
   selected_documents: LabDocumentOption[];
@@ -194,6 +225,11 @@ export interface LabWorkflowTaskDetail {
   trace_fields: LabKeyValueRow[];
   raw_json: Record<string, unknown>;
   executions: LabWorkflowExecution[];
+  artifact_path?: string | null;
+  latest_request?: Record<string, unknown>;
+  latest_status?: string | null;
+  latest_timestamp?: string | null;
+  latest_summary?: string | null;
 }
 
 export interface LabWorkflowCase {
@@ -207,10 +243,15 @@ export interface LabWorkflowCase {
   sourceCount: number;
   timestamp?: string | null;
   reviewReason?: string | null;
+  artifactPath?: string | null;
+  summary?: string | null;
 }
 
 export interface LabWorkflowInspectorResponse {
   ok: boolean;
+  status?: string | null;
+  degraded_reason?: string | null;
+  last_updated_at?: string | null;
   meta: LabApiMeta;
   capabilities: LabCapabilityState;
   summary: {
@@ -219,7 +260,13 @@ export interface LabWorkflowInspectorResponse {
     avg_confidence: number;
     review_blockers: number;
     failed: number;
+    task_count?: number;
+    document_count?: number;
+    live_runs?: number;
+    last_run_at?: string | null;
   };
+  mode_breakdown?: LabKeyValueRow[];
+  review_reasons?: LabKeyValueRow[];
   task_options: LabWorkflowTaskOption[];
   document_options: Array<{ id: string; name: string; status: string }>;
   selected_task_id?: string | null;
@@ -283,6 +330,9 @@ export interface LabRetrievalObservation {
 
 export interface LabBenchmarksResponse {
   ok: boolean;
+  status?: string | null;
+  degraded_reason?: string | null;
+  last_updated_at?: string | null;
   meta: LabApiMeta;
   summary: {
     modelCount: number;
@@ -290,6 +340,8 @@ export interface LabBenchmarksResponse {
     bestGroundedness: number;
     fastestLatency: number;
   };
+  providerSummary?: Array<{ provider: string; models: number; avgLatency: number; bestFit: number; bestModel?: string | null }>;
+  leaderboardHighlights?: Array<{ label: string; model?: string | null; detail?: string | null }>;
   models: LabBenchmarkModel[];
   presets: LabBenchmarkPreset[];
   retrievalObservations: LabRetrievalObservation[];
@@ -345,6 +397,9 @@ export interface LabEvalDiagnosisPriority {
 
 export interface LabEvalsResponse {
   ok: boolean;
+  status?: string | null;
+  degraded_reason?: string | null;
+  last_updated_at?: string | null;
   meta: LabApiMeta;
   passRate: number;
   totals: {
@@ -356,6 +411,9 @@ export interface LabEvalsResponse {
   };
   suites: LabEvalSuite[];
   cases: LabEvalCase[];
+  providerBreakdown?: Array<{ provider: string; total: number; passRate: number; failures: number }>;
+  taskBreakdown?: Array<{ task: string; total: number; passRate: number; avgScore: number }>;
+  watchlist?: Array<{ id: string; task: string; suite: string; reason: string; timestamp?: string | null; verdict: LabEvalVerdict }>;
   diagnosis: {
     topFailureReasons: LabEvalDiagnosisFailureReason[];
     adaptationCandidates: LabEvalDiagnosisCandidate[];
@@ -386,13 +444,26 @@ export interface LabDiagnosticEntry {
 
 export interface LabArtifactsResponse {
   ok: boolean;
+  status?: string | null;
+  degraded_reason?: string | null;
+  last_updated_at?: string | null;
   meta: LabApiMeta;
   artifacts: LabArtifact[];
   summary: {
     totalArtifacts: number;
     readyArtifacts: number;
     errorArtifacts: number;
+    chatSessions?: number;
+    workflowRuns?: number;
   };
+  runRegistry?: {
+    chatSessions: number;
+    workflowRuns: number;
+    latestChatSession?: string | null;
+    latestWorkflowRun?: string | null;
+    latestWorkflowArtifact?: string | null;
+  };
+  recentCaptures?: Array<{ id: string; label: string; category?: string | null; status?: string | null; createdAt?: string | null; artifactPath?: string | null }>;
   diagnostics: LabDiagnosticEntry[];
 }
 
@@ -442,6 +513,9 @@ export interface LabEvidenceReadiness {
 
 export interface LabEvidenceOpsResponse {
   ok: boolean;
+  status?: string | null;
+  degraded_reason?: string | null;
+  last_updated_at?: string | null;
   meta: LabApiMeta;
   summary: {
     toolsTotal: number;
@@ -451,12 +525,18 @@ export interface LabEvidenceOpsResponse {
     lastSyncAt?: string | null;
     repositoryRoot: string;
     repositoryDocumentCount: number;
+    repositoryCategories?: string[];
   };
   tools: LabEvidenceTool[];
   actions: LabEvidenceAction[];
   operations: LabEvidenceOperation[];
   telemetry: LabEvidenceTelemetry[];
   readiness: LabEvidenceReadiness[];
+  ownershipSummary?: Array<{ owner: string; count: number }>;
+  operationBreakdown?: LabKeyValueRow[];
+  timeline?: Array<{ id: string; title: string; subtitle?: string | null; timestamp?: string | null; status?: string | null }>;
+  searchHints?: string[];
+  repositoryStats?: { totalDocuments: number; newDocuments: number; changedDocuments: number; removedDocuments: number };
 }
 
 export interface LabEvidenceSearchResult {

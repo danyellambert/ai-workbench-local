@@ -54,3 +54,5 @@ frontend/tmp_*.md
 frontend/.tmp_action_plan_isolated_selected_e2e/
 .tmp_ai_lab_e2e/
 tmp_ai_lab_e2e.zip
+frontend/.tmp_frontend_surface_e2e/
+frontend/playwright-report/

@@ -125,7 +125,7 @@ export default function ComparisonPage() {
       if (!workflowResponse?.result) {
         throw new Error('Run the policy comparison before generating the executive deck.');
       }
-      return generateProductWorkflowDeck(workflowResponse.result);
+      return generateProductWorkflowDeck(workflowResponse.result, { runId: workflowResponse.run_id });
     },
     onSuccess: async (payload) => {
       setGeneratedArtifacts(payload.artifacts);

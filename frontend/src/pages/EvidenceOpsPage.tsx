@@ -44,6 +44,9 @@ export default function EvidenceOpsPage() {
 
   const data = evidenceQuery.data;
   const summary = data?.summary;
+  const ownershipSummary = data?.ownershipSummary ?? [];
+  const operationBreakdown = data?.operationBreakdown ?? [];
+  const timeline = data?.timeline ?? [];
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -84,11 +87,35 @@ export default function EvidenceOpsPage() {
         ]}
       />
 
+      <div className="grid md:grid-cols-4 gap-3 mb-6">
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Repository drift</p>
+          <p className="text-lg font-semibold text-foreground">{data?.repositoryStats?.changedDocuments ?? 0}</p>
+          <p className="text-[10px] text-muted-foreground">changed doc(s), {data?.repositoryStats?.newDocuments ?? 0} new</p>
+        </GlassCard>
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Top owner</p>
+          <p className="text-sm font-semibold text-foreground">{ownershipSummary[0]?.owner ?? 'Unassigned'}</p>
+          <p className="text-[10px] text-muted-foreground">{ownershipSummary[0]?.count ?? 0} open action(s)</p>
+        </GlassCard>
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Operation mix</p>
+          <p className="text-sm font-semibold text-foreground">{operationBreakdown[0]?.label ?? '—'}</p>
+          <p className="text-[10px] text-muted-foreground">{operationBreakdown[0]?.value ?? 0} recent operation(s)</p>
+        </GlassCard>
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Search hints</p>
+          <p className="text-sm font-semibold text-foreground truncate">{data?.searchHints?.slice(0, 2).join(' · ') || 'vendor · policy'}</p>
+          <p className="text-[10px] text-muted-foreground">{data?.degraded_reason ?? 'Live repository and persisted state connected.'}</p>
+        </GlassCard>
+      </div>
+
       <Tabs defaultValue="tools">
         <TabsList className="bg-secondary/30 border border-border/50 mb-4">
           <TabsTrigger value="tools" className="text-xs data-[state=active]:bg-secondary">Tools</TabsTrigger>
           <TabsTrigger value="actions" className="text-xs data-[state=active]:bg-secondary">Open Actions</TabsTrigger>
           <TabsTrigger value="operations" className="text-xs data-[state=active]:bg-secondary">Auto Operations</TabsTrigger>
+          <TabsTrigger value="timeline" className="text-xs data-[state=active]:bg-secondary">Timeline</TabsTrigger>
           <TabsTrigger value="telemetry" className="text-xs data-[state=active]:bg-secondary">Telemetry</TabsTrigger>
           <TabsTrigger value="readiness" className="text-xs data-[state=active]:bg-secondary">Readiness</TabsTrigger>
           <TabsTrigger value="search" className="text-xs data-[state=active]:bg-secondary">Search</TabsTrigger>
@@ -194,6 +221,37 @@ export default function EvidenceOpsPage() {
           </GlassCard>
         </TabsContent>
 
+
+        <TabsContent value="timeline" className="mt-0">
+          <GlassCard>
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-medium text-foreground">Operational Timeline</h3>
+              {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
+            </div>
+            <div className="space-y-2">
+              {timeline.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No persisted EvidenceOps timeline exists yet.</p>
+              ) : (
+                timeline.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-border/30 bg-secondary/20 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{item.subtitle}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <StatusPill status={item.status === 'success' ? 'completed' : item.status === 'warning' ? 'warning' : 'error'} />
+                        <p className="text-[10px] text-muted-foreground mt-1">{formatDateTime(item.timestamp)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </GlassCard>
+        </TabsContent>
+
         <TabsContent value="telemetry" className="mt-0">
           <GlassCard>
             <div className="flex items-center gap-2 mb-4">
@@ -253,7 +311,7 @@ export default function EvidenceOpsPage() {
             </div>
             {data?.meta.notes?.length ? (
               <div className="mt-3 rounded-lg bg-secondary/20 p-3 text-[10px] text-muted-foreground">
-                {data.meta.notes.join(' ')}
+                {data?.meta?.notes?.join(' ')}
               </div>
             ) : null}
           </GlassCard>
@@ -285,6 +343,7 @@ export default function EvidenceOpsPage() {
               <div className="text-center py-8">
                 <FolderSearch className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground">Enter a query to search indexed repository documents via live backend search.</p>
+                {data?.searchHints?.length ? <p className="mt-2 text-[10px] text-muted-foreground">Try: {data.searchHints.join(' · ')}</p> : null}
               </div>
             ) : searchQuery.isLoading ? (
               <div className="text-center py-8 text-xs text-muted-foreground">Searching repository for “{submittedQuery}”…</div>

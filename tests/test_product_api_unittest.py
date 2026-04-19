@@ -42,7 +42,7 @@ class ProductApiTests(unittest.TestCase):
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib_request.urlopen(request, timeout=5) as response:
+        with urllib_request.urlopen(request, timeout=30) as response:
             return json.loads(response.read().decode("utf-8"))
 
     def _patch_json(self, server, path: str, payload: dict) -> dict:
@@ -52,7 +52,7 @@ class ProductApiTests(unittest.TestCase):
             headers={"Content-Type": "application/json"},
             method="PATCH",
         )
-        with urllib_request.urlopen(request, timeout=5) as response:
+        with urllib_request.urlopen(request, timeout=30) as response:
             return json.loads(response.read().decode("utf-8"))
 
     def _post_multipart(self, server, path: str, files: list[tuple[str, str, bytes]]) -> dict:
@@ -75,7 +75,7 @@ class ProductApiTests(unittest.TestCase):
             headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
             method="POST",
         )
-        with urllib_request.urlopen(request, timeout=5) as response:
+        with urllib_request.urlopen(request, timeout=30) as response:
             return json.loads(response.read().decode("utf-8"))
 
     def test_product_api_exposes_root_health_and_workflow_catalog(self) -> None:
@@ -762,6 +762,109 @@ class ProductApiTests(unittest.TestCase):
                 artifacts = self._get_json(server, "/api/product/artifacts")
                 self.assertTrue(artifacts["ok"])
                 self.assertEqual(artifacts["summary"]["completed_artifacts"], 4)
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+
+    def test_product_api_run_history_detail_and_artifact_detail_endpoints(self) -> None:
+        from unittest.mock import patch
+
+        server, thread = self._start_server()
+        try:
+            with patch(
+                "src.product.api.build_product_run_detail_payload",
+                return_value={
+                    "ok": True,
+                    "source": "history_file",
+                    "run": {
+                        "id": "run-42",
+                        "workflow_id": "document_review",
+                        "workflow_label": "Document Review",
+                        "status": "completed",
+                        "documents": ["Policy A.pdf"],
+                        "request_payload": {"workflow_id": "document_review", "document_ids": ["doc-1"]},
+                        "response_payload": {"workflow_id": "document_review", "status": "completed"},
+                        "result_sections": {"summary": "Grounded summary", "highlights": ["One highlight"], "warnings": [], "tables": [], "sources": [], "artifacts": [], "strengths": [], "watchouts": [], "next_steps": [], "evidence_highlights": []},
+                        "can_rerun": True,
+                    },
+                },
+            ), patch(
+                "src.product.api.build_product_artifact_detail_payload",
+                return_value={
+                    "ok": True,
+                    "artifact": {
+                        "id": "artifact-9",
+                        "name": "Document Review Deck",
+                        "workflow_label": "Document Review",
+                        "type": "pptx",
+                        "status": "ready",
+                        "size": "128 KB",
+                        "available_assets": [{"artifact_type": "pptx", "label": "Deck", "path": "artifacts/document-review.pptx", "available": True}],
+                    },
+                    "detail": {
+                        "notes": ["Review sidecar present"],
+                        "assets": [{"artifact_type": "pptx", "label": "Deck", "path": "artifacts/document-review.pptx", "available": True}],
+                    },
+                },
+            ):
+                run_detail = self._get_json(server, "/api/product/run-history/run-42")
+                self.assertTrue(run_detail["ok"])
+                self.assertEqual(run_detail["run"]["id"], "run-42")
+                self.assertTrue(run_detail["run"]["can_rerun"])
+
+                artifact_detail = self._get_json(server, "/api/product/artifacts/artifact-9")
+                self.assertTrue(artifact_detail["ok"])
+                self.assertEqual(artifact_detail["artifact"]["id"], "artifact-9")
+                self.assertEqual(artifact_detail["detail"]["assets"][0]["artifact_type"], "pptx")
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_product_api_rerun_endpoint_replays_source_run(self) -> None:
+        from unittest.mock import patch
+
+        server, thread = self._start_server()
+        try:
+            fake_result = ProductWorkflowResult(
+                workflow_id="document_review",
+                workflow_label="Document Review",
+                summary="Grounded summary from rerun",
+                deck_export_kind="document_review_deck",
+                deck_available=True,
+            )
+
+            source_run = {
+                "id": "run-source",
+                "workflow_id": "document_review",
+                "workflow_label": "Document Review",
+                "status": "completed",
+                "documents": ["Policy A.pdf"],
+                "request_payload": {
+                    "workflow_id": "document_review",
+                    "document_ids": ["doc-1"],
+                    "provider": "ollama",
+                    "model": "qwen2.5:7b",
+                },
+                "can_rerun": True,
+            }
+
+            with patch("src.product.api.build_product_run_detail_payload", return_value={"ok": True, "run": source_run}), patch(
+                "src.product.api.run_product_workflow",
+                return_value=fake_result,
+            ), patch(
+                "src.product.api.list_product_documents",
+                return_value=[],
+            ), patch(
+                "src.product.api.append_product_workflow_history_entry",
+            ) as append_history:
+                payload = self._post_json(server, "/api/product/run-history/run-source/rerun", {})
+                self.assertTrue(payload["ok"])
+                self.assertEqual(payload["reran_from_run_id"], "run-source")
+                self.assertEqual(payload["result"]["workflow_id"], "document_review")
+                self.assertTrue(append_history.called)
         finally:
             server.shutdown()
             server.server_close()

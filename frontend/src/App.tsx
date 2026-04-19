@@ -64,6 +64,7 @@ const App = () => {
               <Route path="/app" element={<AppShell />}>
                 <Route index element={<OverviewPage />} />
                 <Route path="documents" element={<DocumentsPage />} />
+                <Route path="run" element={<WorkflowCatalogPage />} />
                 <Route path="workflows" element={<WorkflowCatalogPage />} />
                 <Route path="workflows/document-review" element={<DocumentReviewPage />} />
                 <Route path="workflows/comparison" element={<ComparisonPage />} />

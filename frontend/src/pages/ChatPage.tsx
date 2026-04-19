@@ -5,6 +5,7 @@ import { MessageSquare, Send, FileText, Sparkles, Activity, Database, Clock, Gau
 import { AiLabSectionIntro, DataSourceBadge } from '@/components/ai-lab/AiLabSectionIntro';
 import { GlassCard } from '@/components/shared/ui-components';
 import { aiLabQueryKeys, createLabChatSession, getLabChatPage, sendLabChatMessage } from '@/lib/ai-lab-data';
+import type { LabChatMessage, LabChatMessageSource, LabChatSessionSummary, LabDocumentOption, LabTimelineEntry } from '@/lib/ai-lab-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/lib/store';
@@ -71,7 +72,7 @@ function normalizeRows(rows: unknown) {
   return [];
 }
 
-function normalizeMessageSources(sources: unknown) {
+function normalizeMessageSources(sources: unknown): LabChatMessageSource[] {
   if (!Array.isArray(sources)) {
     return [];
   }
@@ -107,7 +108,7 @@ function normalizeMessageSources(sources: unknown) {
   });
 }
 
-function normalizeMessages(messages: unknown) {
+function normalizeMessages(messages: unknown): LabChatMessage[] {
   if (!Array.isArray(messages)) {
     return [];
   }
@@ -130,7 +131,7 @@ function normalizeMessages(messages: unknown) {
   });
 }
 
-function normalizeSessions(sessions: unknown) {
+function normalizeSessions(sessions: unknown): LabChatSessionSummary[] {
   if (!Array.isArray(sessions)) {
     return [];
   }
@@ -167,12 +168,42 @@ function normalizeSessions(sessions: unknown) {
                 ? record.messageCount
                 : 0,
         status: typeof record.status === 'string' ? record.status : null,
+        document_count:
+          typeof record.document_count === 'number'
+            ? record.document_count
+            : typeof record.documentCount === 'number'
+              ? record.documentCount
+              : 0,
+        last_error:
+          typeof record.last_error === 'string'
+            ? record.last_error
+            : typeof record.lastError === 'string'
+              ? record.lastError
+              : null,
+        last_model:
+          typeof record.last_model === 'string'
+            ? record.last_model
+            : typeof record.lastModel === 'string'
+              ? record.lastModel
+              : null,
+        avg_latency_s:
+          typeof record.avg_latency_s === 'number'
+            ? record.avg_latency_s
+            : typeof record.avgLatencyS === 'number'
+              ? record.avgLatencyS
+              : null,
+        grounded_messages:
+          typeof record.grounded_messages === 'number'
+            ? record.grounded_messages
+            : typeof record.groundedMessages === 'number'
+              ? record.groundedMessages
+              : 0,
       },
     ];
   });
 }
 
-function normalizeDocuments(documents: unknown) {
+function normalizeDocuments(documents: unknown): LabDocumentOption[] {
   if (!Array.isArray(documents)) {
     return [];
   }
@@ -192,7 +223,6 @@ function normalizeDocuments(documents: unknown) {
 
     return [
       {
-        ...record,
         document_id: documentId,
         name:
           typeof record.name === 'string'
@@ -200,6 +230,16 @@ function normalizeDocuments(documents: unknown) {
             : typeof record.title === 'string'
               ? record.title
               : `Document ${index + 1}`,
+        status: typeof record.status === 'string' ? record.status : 'indexed',
+        chunk_count: typeof record.chunk_count === 'number' ? record.chunk_count : typeof record.chunkCount === 'number' ? record.chunkCount : undefined,
+        char_count: typeof record.char_count === 'number' ? record.char_count : typeof record.charCount === 'number' ? record.charCount : undefined,
+        indexed_at: typeof record.indexed_at === 'string' ? record.indexed_at : typeof record.indexedAt === 'string' ? record.indexedAt : null,
+        loader_strategy_label: typeof record.loader_strategy_label === 'string' ? record.loader_strategy_label : typeof record.loaderStrategyLabel === 'string' ? record.loaderStrategyLabel : null,
+        size_bytes: typeof record.size_bytes === 'number' ? record.size_bytes : typeof record.sizeBytes === 'number' ? record.sizeBytes : null,
+        size_label: typeof record.size_label === 'string' ? record.size_label : typeof record.sizeLabel === 'string' ? record.sizeLabel : null,
+        source_type: typeof record.source_type === 'string' ? record.source_type : typeof record.sourceType === 'string' ? record.sourceType : null,
+        page_count: typeof record.page_count === 'number' ? record.page_count : typeof record.pageCount === 'number' ? record.pageCount : null,
+        warnings: Array.isArray(record.warnings) ? record.warnings.filter((warning): warning is string => typeof warning === 'string') : [],
       },
     ];
   });
@@ -233,6 +273,9 @@ export default function ChatPage() {
   const sessions = useMemo(() => normalizeSessions(data?.sessions), [data?.sessions]);
   const sessionDiagnostics = useMemo(() => normalizeRows(data?.session_diagnostics), [data?.session_diagnostics]);
   const retrievalQuality = useMemo(() => normalizeRows(data?.retrieval_quality), [data?.retrieval_quality]);
+  const groundingOverview = useMemo(() => normalizeRows(data?.grounding_overview), [data?.grounding_overview]);
+  const sessionTimeline = useMemo<LabTimelineEntry[]>(() => (Array.isArray(data?.session_timeline) ? data.session_timeline as LabTimelineEntry[] : []), [data?.session_timeline]);
+  const chatSummary = data?.summary;
   const metaNotes = useMemo(
     () => (Array.isArray(data?.meta?.notes) ? data.meta.notes.filter((note): note is string => typeof note === 'string') : []),
     [data?.meta?.notes],
@@ -270,10 +313,21 @@ export default function ChatPage() {
   });
 
   const canSend = Boolean(data?.capabilities?.can_send);
+  const hasVisibleRuntimeError = isError || sendMutation.isError;
+  const shouldSuppressStaleProviderError = canSend && !hasVisibleRuntimeError;
+  const visibleMetaNotes = useMemo(
+    () => metaNotes.filter((note) => !(shouldSuppressStaleProviderError && /^HTTP Error\s+\d+:/i.test(note.trim()))),
+    [metaNotes, shouldSuppressStaleProviderError],
+  );
+
   const retrievalStrategy = retrievalQuality.find((row) => row.label === 'Strategy')?.value ?? 'trace_only';
   const topK = sessionDiagnostics.find((row) => row.label === 'Top-K')?.value ?? '—';
   const activeSessionId = data?.active_session_id ?? sessionId ?? sessions[0]?.session_id ?? null;
   const activeSession = sessions.find((item) => item.session_id === activeSessionId) ?? sessions[0];
+  const activeSessionError = activeSession?.last_error?.trim() ?? null;
+  const showActiveSessionError = Boolean(activeSessionError && !(shouldSuppressStaleProviderError && /^HTTP Error\s+\d+:/i.test(activeSessionError)));
+  const effectiveStatus = shouldSuppressStaleProviderError && data?.status === 'degraded' ? 'live' : data?.status;
+  const activeStatusLabel = effectiveStatus === 'degraded' ? 'Degraded' : effectiveStatus === 'trace_only' ? 'Trace only' : 'Live';
 
   const handleSend = async () => {
     if (!canSend || sendMutation.isPending || !input.trim()) {
@@ -296,7 +350,7 @@ export default function ChatPage() {
         description="Diagnostic RAG surface for document interaction, retrieval quality assessment and grounding validation."
         operatorQuestion="Is RAG helping or just adding noise and cost?"
         badges={[
-          { label: canSend ? 'Live session' : 'Degraded', variant: canSend ? 'success' : 'warning' },
+          { label: activeStatusLabel, variant: effectiveStatus === 'degraded' ? 'warning' : effectiveStatus === 'trace_only' ? 'default' : 'success' },
           { label: String(retrievalStrategy), variant: 'default' },
           { label: `top-k: ${topK}`, variant: 'default' },
         ]}
@@ -318,9 +372,9 @@ export default function ChatPage() {
 
       <div className="flex-1 flex gap-4 min-h-0">
         <div className="flex-1 flex flex-col min-w-0">
-          {metaNotes.length ? (
+          {visibleMetaNotes.length ? (
             <div className="mb-4 rounded-xl border border-border/50 bg-secondary/20 px-4 py-3 text-[11px] text-muted-foreground">
-              {metaNotes.join(' ')}
+              {visibleMetaNotes.join(' ')}
             </div>
           ) : null}
 
@@ -437,9 +491,14 @@ export default function ChatPage() {
                       <FolderClock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                     </div>
                     <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between gap-2">
-                      <span>{session.message_count} msg</span>
+                      <span>{session.message_count} msg · {session.document_count ?? 0} docs</span>
                       <span>{session.updated_at ? new Date(session.updated_at).toLocaleString() : '—'}</span>
                     </div>
+                    <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between gap-2">
+                      <span>{session.last_model ?? 'model n/a'}</span>
+                      <span>{session.status ?? 'active'}</span>
+                    </div>
+                    {showActiveSessionError && session.session_id === activeSession?.session_id ? <p className="mt-1 text-[10px] text-glow-warning truncate">{activeSessionError}</p> : null}
                   </button>
                 ))
               )}
@@ -456,9 +515,18 @@ export default function ChatPage() {
                 <p className="text-xs text-muted-foreground">No indexed documents are currently visible to the chat runtime.</p>
               ) : (
                 selectedDocuments.map((document) => (
-                  <div key={document.document_id} className="flex items-center gap-2 text-xs text-muted-foreground py-1">
-                    <FileText className="w-3 h-3 shrink-0" />
-                    <span className="truncate">{document.name}</span>
+                  <div key={document.document_id} className="py-1.5 border-b last:border-0 border-border/20">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <FileText className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{document.name}</span>
+                    </div>
+                    <div className="ml-5 mt-1 text-[10px] text-muted-foreground flex items-center gap-2 flex-wrap">
+                      <span>{document.status}</span>
+                      {typeof document.chunk_count === 'number' ? <span>{document.chunk_count} chunk(s)</span> : null}
+                      {document.size_label ? <span>{document.size_label}</span> : null}
+                      {document.loader_strategy_label ? <span>{document.loader_strategy_label}</span> : null}
+                    </div>
+                    {document.warnings?.length ? <p className="ml-5 mt-1 text-[10px] text-glow-warning">{document.warnings.join(' · ')}</p> : null}
                   </div>
                 ))
               )}
@@ -507,9 +575,41 @@ export default function ChatPage() {
                 </div>
               ))}
             </div>
+            {groundingOverview.length ? (
+              <div className="mt-3 pt-3 border-t border-border/30 space-y-2 text-[10px] text-muted-foreground">
+                {groundingOverview.map((row) => (
+                  <div key={row.label} className="flex justify-between gap-4">
+                    <span>{row.label}</span>
+                    <span className="text-foreground font-mono text-right">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             {activeSession?.updated_at ? (
               <p className="mt-3 text-[10px] text-muted-foreground">Last updated {new Date(activeSession.updated_at).toLocaleString()}</p>
             ) : null}
+          </GlassCard>
+
+          <GlassCard>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Recent activity</h4>
+              {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
+            </div>
+            <div className="space-y-2">
+              {sessionTimeline.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No persisted timeline yet.</p>
+              ) : (
+                sessionTimeline.map((event) => (
+                  <div key={event.id} className="rounded-lg border border-border/30 bg-secondary/20 p-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] text-foreground font-medium">{event.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : '—'}</span>
+                    </div>
+                    <p className="mt-1 text-[10px] text-muted-foreground">{event.detail ?? 'Recorded event'}</p>
+                  </div>
+                ))
+              )}
+            </div>
           </GlassCard>
         </div>
       </div>

@@ -27,6 +27,35 @@ def append_product_workflow_history_entry(path: Path, entry: dict[str, object]) 
     return entries
 
 
+def get_product_workflow_history_entry(path: Path, run_id: str) -> dict[str, object] | None:
+    normalized_id = str(run_id or "").strip()
+    if not normalized_id:
+        return None
+    entries = load_product_workflow_history(path)
+    for entry in entries:
+        if str(entry.get("id") or "").strip() == normalized_id:
+            return entry
+    return None
+
+
+def update_product_workflow_history_entry(path: Path, run_id: str, patch: dict[str, object]) -> dict[str, object] | None:
+    normalized_id = str(run_id or "").strip()
+    if not normalized_id:
+        return None
+    entries = load_product_workflow_history(path)
+    updated_entry: dict[str, object] | None = None
+    for index, entry in enumerate(entries):
+        if str(entry.get("id") or "").strip() != normalized_id:
+            continue
+        updated_entry = {**entry, **patch}
+        entries[index] = updated_entry
+        break
+    if updated_entry is None:
+        return None
+    save_product_workflow_history(path, entries)
+    return updated_entry
+
+
 def summarize_product_workflow_history(entries: list[dict[str, object]]) -> dict[str, object]:
     if not entries:
         return {

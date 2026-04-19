@@ -2,8 +2,20 @@ import json
 import os
 import re
 import subprocess
+from urllib import error as urllib_error
 from urllib import request as urllib_request
+from types import SimpleNamespace
 from urllib.parse import urlparse
+
+
+class _CompatResponseStream:
+    def __init__(self, content: str, usage: dict[str, object] | None = None) -> None:
+        self.usage = usage or {}
+        self.choices = []
+        self._chunks = [SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=content))])]
+
+    def __iter__(self):
+        return iter(self._chunks)
 
 try:
     from openai import OpenAI
@@ -28,8 +40,9 @@ class OllamaProvider:
 
     def __init__(self, settings: OllamaSettings):
         self.settings = settings
-        self.client = OpenAI(base_url=settings.base_url, api_key=settings.api_key or "ollama") if OpenAI is not None else None
         self.native_base_url = self._build_native_base_url(settings.base_url)
+        self.openai_compat_base_url = self._build_openai_compat_base_url(settings.base_url)
+        self.client = OpenAI(base_url=self.openai_compat_base_url, api_key=settings.api_key or "ollama") if OpenAI is not None else None
         self._last_usage_metrics: dict[str, object] = {}
 
     def reset_last_usage_metrics(self) -> None:
@@ -43,7 +56,18 @@ class OllamaProvider:
         normalized = base_url.rstrip("/")
         if normalized.endswith("/v1"):
             normalized = normalized[:-3]
-        return normalized
+        elif normalized.endswith("/api"):
+            normalized = normalized[:-4]
+        return normalized.rstrip("/")
+
+    @staticmethod
+    def _build_openai_compat_base_url(base_url: str) -> str:
+        normalized = base_url.rstrip("/")
+        if normalized.endswith("/v1"):
+            return normalized
+        if normalized.endswith("/api"):
+            return f"{normalized}/v1"
+        return f"{normalized}/v1"
 
     def _discover_local_models(self) -> list[str]:
         discovered_via_api = self._discover_models_via_api()
@@ -259,6 +283,172 @@ class OllamaProvider:
         )
         return output
 
+    def _stream_chat_completion_openai_compat(
+        self,
+        *,
+        messages: list[dict[str, str]],
+        model: str,
+        temperature: float,
+        top_p: float | None,
+        max_tokens: int | None,
+    ):
+        if self.client is None:
+            raise RuntimeError("OpenAI-compatible Ollama client is unavailable for fallback chat routing.")
+
+        request_kwargs: dict[str, object] = {
+            "messages": messages,
+            "model": model,
+            "temperature": temperature,
+            "stream": True,
+        }
+        if top_p is not None:
+            request_kwargs["top_p"] = float(top_p)
+        if max_tokens is not None:
+            request_kwargs["max_tokens"] = int(max_tokens)
+        return self.client.chat.completions.create(**request_kwargs)
+
+    @staticmethod
+    def _close_http_error(error: Exception) -> None:
+        close_fn = getattr(error, "close", None)
+        if callable(close_fn):
+            try:
+                close_fn()
+            except Exception:
+                pass
+        fp = getattr(error, "fp", None)
+        close_fp = getattr(fp, "close", None)
+        if callable(close_fp):
+            try:
+                close_fp()
+            except Exception:
+                pass
+
+    @staticmethod
+    def _is_not_found_error(error: Exception) -> bool:
+        code = getattr(error, "code", None)
+        status_code = getattr(error, "status_code", None)
+        if code == 404 or status_code == 404:
+            return True
+        message = str(error or "").lower()
+        return "404" in message and ("not found" in message or 'path "' in message or "path '" in message)
+
+    def _openai_compat_headers(self) -> dict[str, str]:
+        headers = {"Content-Type": "application/json"}
+        if self.settings.api_key:
+            headers["Authorization"] = f"Bearer {self.settings.api_key}"
+        return headers
+
+    def _candidate_openai_compat_urls(self) -> list[str]:
+        raw_base = self.settings.base_url.rstrip("/")
+        candidates: list[str] = []
+        if raw_base.endswith("/v1"):
+            candidates.extend([
+                f"{raw_base}/chat/completions",
+                f"{raw_base[:-3].rstrip('/')}/api/v1/chat/completions",
+                f"{raw_base[:-3].rstrip('/')}/api/chat/completions",
+            ])
+        elif raw_base.endswith("/api"):
+            candidates.extend([
+                f"{raw_base}/v1/chat/completions",
+                f"{raw_base[:-4].rstrip('/')}/v1/chat/completions",
+                f"{raw_base}/chat/completions",
+            ])
+        else:
+            candidates.extend([
+                f"{raw_base}/v1/chat/completions",
+                f"{raw_base}/api/v1/chat/completions",
+                f"{raw_base}/chat/completions",
+            ])
+        deduped: list[str] = []
+        for url in candidates:
+            normalized = url.rstrip("/")
+            if normalized and normalized not in deduped:
+                deduped.append(normalized)
+        return deduped
+
+    def _request_openai_compat_completion(
+        self,
+        *,
+        url: str,
+        messages: list[dict[str, str]],
+        model: str,
+        temperature: float,
+        top_p: float | None,
+        max_tokens: int | None,
+    ):
+        payload: dict[str, object] = {
+            "messages": messages,
+            "model": model,
+            "temperature": temperature,
+            "stream": False,
+        }
+        if top_p is not None:
+            payload["top_p"] = float(top_p)
+        if max_tokens is not None:
+            payload["max_tokens"] = int(max_tokens)
+        request = urllib_request.Request(
+            url=url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers=self._openai_compat_headers(),
+            method="POST",
+        )
+        with urllib_request.urlopen(request, timeout=300) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        choices = payload.get("choices") if isinstance(payload, dict) else None
+        if not isinstance(choices, list) or not choices:
+            raise RuntimeError("OpenAI-compatible chat completion returned no choices.")
+        first_choice = choices[0] if isinstance(choices[0], dict) else {}
+        message = first_choice.get("message") if isinstance(first_choice, dict) else {}
+        content = str(message.get("content") or "") if isinstance(message, dict) else ""
+        usage = payload.get("usage") if isinstance(payload, dict) and isinstance(payload.get("usage"), dict) else None
+        return _CompatResponseStream(content=content, usage=usage)
+
+    def _stream_chat_completion_openai_compat_with_fallbacks(
+        self,
+        *,
+        messages: list[dict[str, str]],
+        model: str,
+        temperature: float,
+        top_p: float | None,
+        max_tokens: int | None,
+    ):
+        last_error: Exception | None = None
+        if self.client is not None:
+            try:
+                return self._stream_chat_completion_openai_compat(
+                    messages=messages,
+                    model=model,
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_tokens=max_tokens,
+                )
+            except Exception as error:
+                last_error = error
+                if not self._is_not_found_error(error):
+                    raise
+                self._close_http_error(error)
+
+        for candidate_url in self._candidate_openai_compat_urls():
+            try:
+                return self._request_openai_compat_completion(
+                    url=candidate_url,
+                    messages=messages,
+                    model=model,
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_tokens=max_tokens,
+                )
+            except Exception as error:
+                last_error = error
+                if not self._is_not_found_error(error):
+                    raise
+                self._close_http_error(error)
+                continue
+
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("OpenAI-compatible Ollama fallback could not resolve a working chat route.")
+
     def stream_chat_completion(
         self,
         messages: list[dict[str, str]],
@@ -297,7 +487,20 @@ class OllamaProvider:
             method="POST",
         )
 
-        return urllib_request.urlopen(request, timeout=300)
+        try:
+            return urllib_request.urlopen(request, timeout=300)
+        except urllib_error.HTTPError as error:
+            should_try_openai_compat = error.code == 404 and not self._should_use_native_cli_runtime_hints()
+            if not should_try_openai_compat:
+                raise
+            self._close_http_error(error)
+            return self._stream_chat_completion_openai_compat_with_fallbacks(
+                messages=messages,
+                model=model,
+                temperature=temperature,
+                top_p=resolved_top_p,
+                max_tokens=resolved_max_tokens,
+            )
 
     def create_embeddings(
         self,
@@ -371,6 +574,18 @@ class OllamaProvider:
             content = getattr(delta, "content", None) or ""
             if content:
                 yield content
+
+        final_usage = getattr(stream, "usage", None)
+        if isinstance(final_usage, dict):
+            prompt_tokens = final_usage.get("prompt_tokens")
+            completion_tokens = final_usage.get("completion_tokens")
+            total_tokens = final_usage.get("total_tokens")
+            self._last_usage_metrics = {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "total_tokens": total_tokens,
+                "usage_source": "openai_compat_usage",
+            }
 
     def format_error(self, model: str, error: Exception) -> str:
         return (

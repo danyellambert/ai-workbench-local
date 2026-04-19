@@ -33,8 +33,12 @@ export default function EvalsDiagnosisPage() {
   const cases = data?.cases ?? [];
   const totals = data?.totals ?? { total: 0, pass: 0, warn: 0, fail: 0, review: 0 };
   const passRate = data?.passRate ?? 0;
+  const providerBreakdown = data?.providerBreakdown ?? [];
+  const taskBreakdown = data?.taskBreakdown ?? [];
+  const watchlist = data?.watchlist ?? [];
   const failCases = cases.filter((item) => item.verdict === 'FAIL');
   const warnCases = cases.filter((item) => item.verdict === 'WARN');
+  const statusLabel = data?.status === 'empty' ? 'Waiting for evals' : data?.status === 'live' ? 'Live' : 'Derived live';
 
   const suiteChartData = suites.map((suite) => ({
     name: suite.name,
@@ -76,6 +80,29 @@ export default function EvalsDiagnosisPage() {
           { label: 'Needs Review', value: totals.review, icon: Eye, status: totals.review > 0 ? 'warning' : 'healthy' },
         ]}
       />
+
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+        <GlassCard className="p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Provider spread</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{providerBreakdown.length || '—'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Providers or models represented in persisted eval history.</p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Most tested provider</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{providerBreakdown[0]?.provider ?? 'No provider yet'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{providerBreakdown[0] ? `${providerBreakdown[0].passRate}% pass rate across ${providerBreakdown[0].total} cases.` : 'Eval registry is empty.'}</p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Task watchlist</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{watchlist.length || '—'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Persisted fails or review cases elevated for operator follow-up.</p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Eval posture</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{statusLabel}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{data?.degraded_reason ?? (data?.diagnosis.globalRecommendation || 'Diagnosis is computed from the persisted phase8 SQLite store.')}</p>
+        </GlassCard>
+      </div>
 
       <GlassCard className="mb-6" delay={0.08}>
         <div className="flex items-center gap-2 mb-4">
@@ -177,7 +204,79 @@ export default function EvalsDiagnosisPage() {
         </GlassCard>
       </div>
 
-      {data?.diagnosis.adaptationCandidates?.length ? (
+      <div className="grid xl:grid-cols-3 gap-4 mb-6">
+        <GlassCard delay={0.18}>
+          <div className="flex items-center gap-2 mb-4">
+            <ShieldCheck className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-medium text-foreground">Provider Breakdown</h3>
+            {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
+          </div>
+          {providerBreakdown.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Provider slices appear once eval runs are persisted.</p>
+          ) : (
+            <div className="space-y-2">
+              {providerBreakdown.map((provider) => (
+                <div key={provider.provider} className="flex items-center justify-between gap-4 rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
+                  <div>
+                    <p className="text-xs font-medium text-foreground">{provider.provider}</p>
+                    <p className="text-[10px] text-muted-foreground">{provider.total} cases · {provider.failures} failures</p>
+                  </div>
+                  <span className={`text-xs font-medium ${provider.passRate >= 85 ? 'text-glow-success' : provider.passRate >= 70 ? 'text-glow-warning' : 'text-glow-error'}`}>{provider.passRate}%</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </GlassCard>
+
+        <GlassCard delay={0.2}>
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-medium text-foreground">Task Breakdown</h3>
+            {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
+          </div>
+          {taskBreakdown.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Task slices appear when phase8 history contains repeated task types.</p>
+          ) : (
+            <div className="space-y-2">
+              {taskBreakdown.slice(0, 6).map((task) => (
+                <div key={task.task} className="rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-foreground">{task.task}</span>
+                    <span className={`text-[10px] font-medium ${task.passRate >= 85 ? 'text-glow-success' : task.passRate >= 70 ? 'text-glow-warning' : 'text-glow-error'}`}>{task.passRate}%</span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">{task.total} cases · avg score {Math.round(task.avgScore * 100)}%</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </GlassCard>
+
+        <GlassCard delay={0.22}>
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangle className="w-4 h-4 text-glow-warning" />
+            <h3 className="text-sm font-medium text-foreground">Watchlist</h3>
+            {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
+          </div>
+          {watchlist.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No escalated watchlist items are present in the current eval history.</p>
+          ) : (
+            <div className="space-y-2">
+              {watchlist.slice(0, 6).map((item) => (
+                <div key={item.id} className="rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-foreground truncate">{item.task}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded border font-medium ${verdictStyle[item.verdict]}`}>{item.verdict}</span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">{item.reason}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground/70">{item.suite}{item.timestamp ? ` · ${new Date(item.timestamp).toLocaleString()}` : ''}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </GlassCard>
+      </div>
+
+      {(data?.diagnosis?.adaptationCandidates ?? []).length ? (
         <GlassCard className="mb-6" delay={0.2}>
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-4 h-4 text-glow-warning" />
@@ -185,7 +284,7 @@ export default function EvalsDiagnosisPage() {
             {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
           </div>
           <div className="space-y-2">
-            {data.diagnosis.adaptationCandidates.slice(0, 5).map((candidate) => (
+            {(data?.diagnosis?.adaptationCandidates ?? []).slice(0, 5).map((candidate) => (
               <div key={candidate.task_type} className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-secondary/20 transition-colors gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">

@@ -634,15 +634,16 @@ def _normalize_session_messages_for_ui(session: dict[str, Any]) -> list[dict[str
         role = str(message.get("role") or "user").strip().lower()
         if role not in {"user", "assistant"}:
             continue
-        normalized.append(
-            {
-                "id": str(message.get("id") or _slugify(message.get("timestamp") or len(normalized))),
-                "role": role,
-                "content": str(message.get("content") or ""),
-                "timestamp": _normalize_timestamp(message.get("timestamp")),
-                "sources": [item for item in (message.get("sources") if isinstance(message.get("sources"), list) else []) if isinstance(item, dict)],
-            }
-        )
+        normalized_message = {
+            "id": str(message.get("id") or _slugify(message.get("timestamp") or len(normalized))),
+            "role": role,
+            "content": str(message.get("content") or ""),
+            "timestamp": _normalize_timestamp(message.get("timestamp")),
+            "sources": [item for item in (message.get("sources") if isinstance(message.get("sources"), list) else []) if isinstance(item, dict)],
+        }
+        if isinstance(message.get("diagnostics"), dict):
+            normalized_message["diagnostics"] = message.get("diagnostics")
+        normalized.append(normalized_message)
     return normalized
 
 
@@ -677,10 +678,11 @@ def _build_chat_payload_from_session(
     context_budget = _safe_int(latest_diagnostics.get("context_budget_chars"))
     if context_budget <= 0:
         context_budget = _safe_int(runtime_snapshot.get("contextBudgetTotal"))
+    avg_latency = _safe_float(session_runtime.get('avg_latency_s') or latest_diagnostics.get('latency_s'))
     session_diagnostics = [
         {"label": "Messages", "value": str(len(messages))},
         {"label": "Tokens used", "value": f"{_safe_int(latest_diagnostics.get('total_tokens')):,}" if _safe_int(latest_diagnostics.get('total_tokens')) else "—"},
-        {"label": "Avg latency", "value": _format_duration_label(_safe_float(session_runtime.get('avg_latency_s') or latest_diagnostics.get('latency_s'))) if (_safe_float(session_runtime.get('avg_latency_s') or latest_diagnostics.get('latency_s')) > 0) else "—"},
+        {"label": "Avg latency", "value": _format_duration_label(avg_latency) if avg_latency > 0 else "—"},
         {"label": "Model", "value": str(latest_diagnostics.get("model") or provider_runtime.get("model") or runtime_snapshot.get("generationModel"))},
         {"label": "Top-K", "value": str(latest_diagnostics.get("rag_top_k") or runtime_snapshot.get("topK"))},
         {"label": "Context used", "value": f"{context_used:,} / {context_budget:,}" if context_used and context_budget else "—"},
@@ -701,13 +703,41 @@ def _build_chat_payload_from_session(
         ]
         if prompt
     ]
+    grounded_assistant_messages = [message for message in messages if str(message.get("role") or "") == "assistant" and isinstance(message.get("sources"), list) and message.get("sources")]
+    total_grounding_sources = sum(len(message.get("sources") or []) for message in grounded_assistant_messages)
+    source_scores = [
+        _safe_float(source.get("score"))
+        for message in grounded_assistant_messages
+        for source in (message.get("sources") if isinstance(message.get("sources"), list) else [])
+        if isinstance(source, dict) and source.get("score") is not None
+    ]
+    session_timeline = []
+    for index, message in enumerate(messages[-8:]):
+        session_timeline.append(
+            {
+                "id": str(message.get("id") or f"timeline-{index}"),
+                "kind": str(message.get("role") or "user"),
+                "label": "Assistant response" if str(message.get("role") or "") == "assistant" else "User prompt",
+                "timestamp": message.get("timestamp"),
+                "status": "grounded" if str(message.get("role") or "") == "assistant" and (message.get("sources") or []) else "recorded",
+                "detail": (
+                    f"{len(message.get('sources') or [])} source(s)"
+                    if str(message.get("role") or "") == "assistant"
+                    else str(message.get("content") or "")[:120]
+                ),
+            }
+        )
     notes = [
         "This tab now uses persisted AI LAB chat sessions plus live backend execution instead of replaying a mock conversation.",
     ]
-    if str(session.get("last_error") or "").strip():
-        notes.append(str(session.get("last_error") or "").strip())
+    last_error = str(session.get("last_error") or "").strip()
+    if last_error:
+        notes.append(last_error)
     return {
         "ok": True,
+        "status": "degraded" if last_error else ("live" if can_send else "trace_only"),
+        "degraded_reason": last_error or (capability_reason if not can_send else None),
+        "last_updated_at": _normalize_timestamp(session.get("updated_at")) or _normalize_timestamp(runtime_controls_state.get("updated_at")) or _now_iso(),
         "meta": _build_meta(
             source="live",
             updated_at=_normalize_timestamp(session.get("updated_at")) or _normalize_timestamp(runtime_controls_state.get("updated_at")) or _now_iso(),
@@ -724,8 +754,28 @@ def _build_chat_payload_from_session(
                 "title": session.get("title"),
                 "updated_at": session.get("updated_at"),
                 "message_count": len(messages),
+                "status": str(session.get("status") or "active"),
+                "document_count": len(selected_documents),
+                "last_error": last_error or None,
+                "last_model": str(latest_diagnostics.get("model") or provider_runtime.get("model") or runtime_snapshot.get("generationModel") or "").strip() or None,
+                "avg_latency_s": round(avg_latency, 3) if avg_latency > 0 else None,
             }
         ],
+        "summary": {
+            "total_sessions": 1,
+            "assistant_messages": sum(1 for message in messages if str(message.get("role") or "") == "assistant"),
+            "grounded_messages": len(grounded_assistant_messages),
+            "grounding_sources": total_grounding_sources,
+            "active_documents": len(selected_documents),
+            "avg_latency_s": round(avg_latency, 3) if avg_latency > 0 else None,
+            "last_model": str(latest_diagnostics.get("model") or provider_runtime.get("model") or runtime_snapshot.get("generationModel") or "").strip() or None,
+        },
+        "grounding_overview": [
+            {"label": "Grounded turns", "value": len(grounded_assistant_messages)},
+            {"label": "Grounding sources", "value": total_grounding_sources},
+            {"label": "Average source score", "value": round(sum(source_scores) / max(len(source_scores), 1), 1) if source_scores else None},
+        ],
+        "session_timeline": session_timeline,
         "messages": messages,
         "suggested_prompts": suggestions[:3],
         "selected_documents": selected_documents,
@@ -785,6 +835,8 @@ def _summarize_chat_sessions_for_payload(sessions: list[dict[str, Any]], *, limi
     summaries: list[dict[str, Any]] = []
     for session in sessions[:limit]:
         messages = session.get("messages") if isinstance(session.get("messages"), list) else []
+        assistant_messages = [item for item in messages if isinstance(item, dict) and str(item.get("role") or "").strip().lower() == "assistant"]
+        runtime = session.get("runtime") if isinstance(session.get("runtime"), dict) else {}
         summaries.append(
             {
                 "session_id": str(session.get("session_id") or ""),
@@ -792,9 +844,15 @@ def _summarize_chat_sessions_for_payload(sessions: list[dict[str, Any]], *, limi
                 "updated_at": _normalize_timestamp(session.get("updated_at")) or _normalize_timestamp(session.get("created_at")),
                 "message_count": len(messages),
                 "status": str(session.get("status") or "active"),
+                "document_count": len(session.get("document_ids") if isinstance(session.get("document_ids"), list) else []),
+                "last_error": str(session.get("last_error") or "").strip() or None,
+                "last_model": str(runtime.get("model") or "").strip() or None,
+                "avg_latency_s": round(_safe_float(runtime.get("avg_latency_s")), 3) if _safe_float(runtime.get("avg_latency_s")) > 0 else None,
+                "grounded_messages": len(assistant_messages),
             }
         )
     return summaries
+
 
 
 
@@ -816,6 +874,8 @@ def _workflow_execution_from_run_record(run: dict[str, Any]) -> dict[str, Any]:
 
 
 def _workflow_case_from_run_record(run: dict[str, Any]) -> dict[str, Any]:
+    summary_text = str(run.get("summary") or "").strip() or None
+    artifact_path = str(run.get("artifact_path") or "").strip() or None
     return {
         "id": str(run.get("run_id") or ""),
         "task": _task_label(str(run.get("task_id") or run.get("workflow_id") or "document_review")),
@@ -827,7 +887,10 @@ def _workflow_case_from_run_record(run: dict[str, Any]) -> dict[str, Any]:
         "sourceCount": _safe_int(run.get("source_count")),
         "timestamp": _normalize_timestamp(run.get("updated_at") or run.get("created_at")),
         "reviewReason": str(run.get("review_reason") or "").strip() or None,
+        "artifactPath": artifact_path,
+        "summary": summary_text,
     }
+
 
 
 
@@ -836,6 +899,7 @@ def _workflow_task_detail_from_run_record(run: dict[str, Any], existing: dict[st
     result_payload = run.get("result") if isinstance(run.get("result"), dict) else {}
     raw_json = run.get("raw_json") if isinstance(run.get("raw_json"), dict) else (run.get("response_payload") if isinstance(run.get("response_payload"), dict) else {})
     trace = run.get("trace") if isinstance(run.get("trace"), dict) else {}
+    request_payload = run.get("request_payload") if isinstance(run.get("request_payload"), dict) else {}
     result_items = [
         item
         for item in (result_payload.get("result_items") if isinstance(result_payload.get("result_items"), list) else [])
@@ -852,6 +916,8 @@ def _workflow_task_detail_from_run_record(run: dict[str, Any], existing: dict[st
         recommendation = str(result_payload.get("recommendation") or "").strip()
         if recommendation:
             result_items.append({"label": "Recommendation", "value": recommendation, "confidence": None})
+    artifact_path = str(run.get("artifact_path") or "").strip() or None
+    latest_timestamp = _normalize_timestamp(run.get("updated_at") or run.get("created_at"))
     trace_fields = [
         {"label": "Workflow", "value": str(run.get("workflow_id") or "document_review")},
         {"label": "Provider", "value": str(run.get("provider") or "—")},
@@ -861,8 +927,8 @@ def _workflow_task_detail_from_run_record(run: dict[str, Any], existing: dict[st
         {"label": "Needs Review", "value": "Yes" if bool(run.get("needs_review")) else "No"},
         {"label": "Review Reason", "value": str(run.get("review_reason") or "—")},
         {"label": "Execution Mode", "value": str(run.get("execution_mode") or trace.get("workflow_id") or "product_workflow")},
-        {"label": "Artifact", "value": str(run.get("artifact_path") or "—")},
-        {"label": "Updated", "value": _normalize_timestamp(run.get("updated_at") or run.get("created_at")) or "—"},
+        {"label": "Artifact", "value": artifact_path or "—"},
+        {"label": "Updated", "value": latest_timestamp or "—"},
     ]
     executions = [
         _workflow_execution_from_run_record(run),
@@ -887,7 +953,13 @@ def _workflow_task_detail_from_run_record(run: dict[str, Any], existing: dict[st
         "trace_fields": trace_fields,
         "raw_json": raw_json,
         "executions": deduped_executions[:12],
+        "artifact_path": artifact_path,
+        "latest_request": request_payload,
+        "latest_status": str(run.get("status") or "completed"),
+        "latest_timestamp": latest_timestamp,
+        "latest_summary": str(run.get("summary") or result_payload.get("summary") or "").strip() or None,
     }
+
 
 
 
@@ -1992,6 +2064,11 @@ def build_lab_chat_payload(workspace_root: str | Path, *, session_id: str | None
         )
         payload["sessions"] = _summarize_chat_sessions_for_payload(sessions)
         payload.setdefault("capabilities", {})["reason"] = capability_reason
+        payload["summary"] = {
+            **(payload.get("summary") if isinstance(payload.get("summary"), dict) else {}),
+            "total_sessions": len(sessions),
+            "failed_sessions": sum(1 for item in sessions if str(item.get("status") or "") == "error"),
+        }
         return payload
 
     chat_history = _load_chat_history(resolved_root)
@@ -2065,8 +2142,43 @@ def build_lab_chat_payload(workspace_root: str | Path, *, session_id: str | None
             if len(suggested_prompts) >= 3:
                 break
 
+    assistant_messages = [message for message in messages if str(message.get("role") or "") == "assistant"]
+    grounded_messages = [message for message in assistant_messages if isinstance(message.get("sources"), list) and message.get("sources")]
+    total_grounding_sources = sum(len(message.get("sources") or []) for message in grounded_messages)
+    source_scores = [
+        _safe_float(source.get("score"))
+        for message in grounded_messages
+        for source in (message.get("sources") if isinstance(message.get("sources"), list) else [])
+        if isinstance(source, dict) and source.get("score") is not None
+    ]
+    session_timeline = []
+    for index, message in enumerate(messages[-8:]):
+        session_timeline.append(
+            {
+                "id": str(message.get("id") or f"timeline-{index}"),
+                "kind": str(message.get("role") or "user"),
+                "label": "Assistant trace" if str(message.get("role") or "") == "assistant" else "User prompt",
+                "timestamp": message.get("timestamp"),
+                "status": "grounded" if str(message.get("role") or "") == "assistant" and (message.get("sources") or []) else "recorded",
+                "detail": (
+                    f"{len(message.get('sources') or [])} source(s)"
+                    if str(message.get("role") or "") == "assistant"
+                    else str(message.get("content") or "")[:120]
+                ),
+            }
+        )
+
+    degraded_reason = None
+    if not can_send:
+        degraded_reason = capability_reason
+    elif not chat_runs and not messages:
+        degraded_reason = "No persisted chat session or chat_rag trace has been recorded yet in this workspace."
+
     return {
         "ok": True,
+        "status": "live" if can_send else "degraded",
+        "degraded_reason": degraded_reason,
+        "last_updated_at": _normalize_timestamp(runtime_controls_state.get("updated_at")) or _normalize_timestamp(latest_chat_run.get("timestamp")) or _now_iso(),
         "meta": _build_meta(
             source="live" if can_send else "derived",
             updated_at=_normalize_timestamp(runtime_controls_state.get("updated_at")) or _normalize_timestamp(latest_chat_run.get("timestamp")) or _now_iso(),
@@ -2078,6 +2190,22 @@ def build_lab_chat_payload(workspace_root: str | Path, *, session_id: str | None
         },
         "active_session_id": None,
         "sessions": _summarize_chat_sessions_for_payload(sessions),
+        "summary": {
+            "total_sessions": len(sessions),
+            "assistant_messages": len(assistant_messages),
+            "grounded_messages": len(grounded_messages),
+            "grounding_sources": total_grounding_sources,
+            "active_documents": len(selected_documents),
+            "avg_latency_s": avg_chat_latency if avg_chat_latency else None,
+            "last_model": str(latest_chat_run.get("model") or provider_runtime.get("model") or runtime_snapshot.get("generationModel") or "").strip() or None,
+            "failed_sessions": sum(1 for item in sessions if str(item.get("status") or "") == "error"),
+        },
+        "grounding_overview": [
+            {"label": "Grounded turns", "value": len(grounded_messages)},
+            {"label": "Grounding sources", "value": total_grounding_sources},
+            {"label": "Average source score", "value": round(sum(source_scores) / max(len(source_scores), 1), 1) if source_scores else None},
+        ],
+        "session_timeline": session_timeline,
         "messages": messages,
         "suggested_prompts": suggested_prompts[:3],
         "selected_documents": selected_documents,
@@ -2301,12 +2429,28 @@ def build_lab_workflow_inspector_payload(workspace_root: str | Path, *, task_id:
     elif _safe_float(document_agent_summary.get("avg_confidence")) > 0:
         avg_confidence = round(_safe_float(document_agent_summary.get("avg_confidence")) * 100)
 
+    mode_counts: dict[str, int] = defaultdict(int)
+    review_reasons: dict[str, int] = defaultdict(int)
+    for item in recent_cases:
+        mode_counts[str(item.get("mode") or "observed_trace")] += 1
+        review_reason = str(item.get("reviewReason") or "").strip()
+        if review_reason:
+            review_reasons[review_reason] += 1
+
+    last_run_at = None
+    if recent_cases:
+        last_run_at = recent_cases[0].get("timestamp")
+
     summary = {
         "total_cases": len(recent_cases),
         "needs_review": sum(1 for item in recent_cases if bool(item.get("needsReview"))),
         "avg_confidence": avg_confidence,
         "review_blockers": len(document_agent_summary.get("review_reasons") or {}),
-        "failed": sum(1 for item in recent_cases if str(item.get("status") or "") == "failed"),
+        "failed": sum(1 for item in recent_cases if str(item.get("status") or "") in {"failed", "error"}),
+        "task_count": len(task_options),
+        "document_count": len(documents),
+        "live_runs": len(workflow_runs),
+        "last_run_at": last_run_at,
     }
 
     provider_runtime = _resolve_live_provider_profile(runtime_controls_state, capability="chat")
@@ -2330,9 +2474,12 @@ def build_lab_workflow_inspector_payload(workspace_root: str | Path, *, task_id:
 
     return {
         "ok": True,
+        "status": "live" if can_execute else "degraded",
+        "degraded_reason": None if can_execute else capability_reason,
+        "last_updated_at": _normalize_timestamp(runtime_controls_state.get("updated_at")) or _normalize_timestamp(runtime_summary.get("latest_timestamp")) or last_run_at or _now_iso(),
         "meta": _build_meta(
             source="live" if can_execute else "derived",
-            updated_at=_normalize_timestamp(runtime_controls_state.get("updated_at")) or _normalize_timestamp(runtime_summary.get("latest_timestamp")) or _now_iso(),
+            updated_at=_normalize_timestamp(runtime_controls_state.get("updated_at")) or _normalize_timestamp(runtime_summary.get("latest_timestamp")) or last_run_at or _now_iso(),
             notes=notes,
         ),
         "capabilities": {
@@ -2340,6 +2487,14 @@ def build_lab_workflow_inspector_payload(workspace_root: str | Path, *, task_id:
             "reason": capability_reason,
         },
         "summary": summary,
+        "mode_breakdown": [
+            {"label": _labelize_slug(mode), "value": count}
+            for mode, count in sorted(mode_counts.items(), key=lambda item: (-item[1], item[0]))[:5]
+        ],
+        "review_reasons": [
+            {"label": _labelize_slug(reason), "value": count}
+            for reason, count in sorted(review_reasons.items(), key=lambda item: (-item[1], item[0]))[:5]
+        ],
         "document_options": [
             {
                 "id": item.get("document_id"),
@@ -2528,8 +2683,41 @@ def build_lab_benchmarks_payload(workspace_root: str | Path) -> dict[str, Any]:
     recommended = models[0] if models else None
     best_groundedness = round(max((_safe_float(item.get("groundedness")) for item in models), default=0.0) * 100)
     fastest_latency = min((_safe_float(item.get("latency")) for item in models), default=0.0)
+
+    provider_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for model in models:
+        provider_groups[str(model.get("provider") or "unknown")].append(model)
+    provider_summary = []
+    for provider, items in sorted(provider_groups.items(), key=lambda item: (-len(item[1]), item[0])):
+        provider_summary.append(
+            {
+                "provider": provider,
+                "models": len(items),
+                "avgLatency": round(sum(_safe_float(item.get("latency")) for item in items) / max(len(items), 1), 2),
+                "bestFit": round(max((_safe_float(item.get("useCaseFit")) for item in items), default=0.0) * 100),
+                "bestModel": max(items, key=lambda item: _safe_float(item.get("useCaseFit"))).get("family") if items else None,
+            }
+        )
+
+    leaderboard_highlights = []
+    if models:
+        fastest = min(models, key=lambda item: _safe_float(item.get("latency")) or 999999)
+        best_adherence = max(models, key=lambda item: _safe_float(item.get("adherence")))
+        widest_coverage = max(models, key=lambda item: _safe_int(item.get("runs")))
+        leaderboard_highlights = [
+            {"label": "Recommended production", "model": recommended.get("family") if isinstance(recommended, dict) else None, "detail": f"{round(_safe_float(recommended.get('useCaseFit')) * 100)}% fit" if isinstance(recommended, dict) else None},
+            {"label": "Fastest observed", "model": fastest.get("family"), "detail": f"{round(_safe_float(fastest.get('latency')), 2)}s avg latency"},
+            {"label": "Best adherence", "model": best_adherence.get("family"), "detail": f"{round(_safe_float(best_adherence.get('adherence')) * 100)}% format adherence"},
+            {"label": "Widest coverage", "model": widest_coverage.get("family"), "detail": f"{_safe_int(widest_coverage.get('runs'))} recorded comparison run(s)"},
+        ]
+
+    degraded_reason = None if models else "No phase7 model comparison log was found. Benchmarks will populate when comparison runs are recorded."
+
     return {
         "ok": True,
+        "status": "derived" if models else "empty",
+        "degraded_reason": degraded_reason,
+        "last_updated_at": _now_iso(),
         "meta": _build_meta(
             source="derived",
             updated_at=_now_iso(),
@@ -2541,6 +2729,8 @@ def build_lab_benchmarks_payload(workspace_root: str | Path) -> dict[str, Any]:
             "bestGroundedness": best_groundedness,
             "fastestLatency": round(fastest_latency, 2) if fastest_latency else 0.0,
         },
+        "providerSummary": provider_summary,
+        "leaderboardHighlights": leaderboard_highlights,
         "models": models,
         "presets": presets,
         "retrievalObservations": retrieval_observations,
@@ -2554,8 +2744,12 @@ def build_lab_evals_payload(workspace_root: str | Path) -> dict[str, Any]:
     diagnosis = build_eval_diagnosis(eval_entries)
 
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    provider_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    task_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for entry in eval_entries:
         grouped[str(entry.get("suite_name") or "eval")].append(entry)
+        provider_groups[str(entry.get("provider") or entry.get("model") or "unknown")].append(entry)
+        task_groups[str(entry.get("task_type") or entry.get("case_name") or "unknown")].append(entry)
 
     suites: list[dict[str, Any]] = []
     for suite_name, entries in grouped.items():
@@ -2611,8 +2805,52 @@ def build_lab_evals_payload(workspace_root: str | Path) -> dict[str, Any]:
         "review": sum(1 for item in eval_entries if bool(item.get("needs_review"))),
     }
 
+    provider_breakdown = []
+    for provider, entries in sorted(provider_groups.items(), key=lambda item: (-len(item[1]), item[0]))[:8]:
+        total = len(entries)
+        provider_breakdown.append(
+            {
+                "provider": provider,
+                "total": total,
+                "passRate": round(100 * sum(1 for item in entries if str(item.get("status") or "").upper() == "PASS") / max(total, 1)),
+                "failures": sum(1 for item in entries if str(item.get("status") or "").upper() == "FAIL"),
+            }
+        )
+
+    task_breakdown = []
+    for task, entries in sorted(task_groups.items(), key=lambda item: (-len(item[1]), item[0]))[:10]:
+        total = len(entries)
+        avg_score = round(sum(_safe_float(item.get("score")) / max(_safe_float(item.get("max_score"), 1.0), 1.0) for item in entries) / max(total, 1), 3)
+        task_breakdown.append(
+            {
+                "task": task,
+                "total": total,
+                "passRate": round(100 * sum(1 for item in entries if str(item.get("status") or "").upper() == "PASS") / max(total, 1)),
+                "avgScore": avg_score,
+            }
+        )
+
+    watchlist = []
+    for item in cases:
+        if item["verdict"] == "FAIL" or item["needsReview"]:
+            watchlist.append(
+                {
+                    "id": item["id"],
+                    "task": item["task"],
+                    "suite": item["suite"],
+                    "reason": item["errorDetail"] or ("Needs review" if item["needsReview"] else "Failing case"),
+                    "timestamp": item.get("timestamp"),
+                    "verdict": item["verdict"],
+                }
+            )
+        if len(watchlist) >= 10:
+            break
+
     return {
         "ok": True,
+        "status": "live" if eval_entries else "empty",
+        "degraded_reason": None if eval_entries else "No phase8 eval history is available in this workspace yet.",
+        "last_updated_at": _normalize_timestamp(eval_summary.get("latest_created_at")) or _now_iso(),
         "meta": _build_meta(
             source="live",
             updated_at=_normalize_timestamp(eval_summary.get("latest_created_at")) or _now_iso(),
@@ -2622,6 +2860,9 @@ def build_lab_evals_payload(workspace_root: str | Path) -> dict[str, Any]:
         "totals": totals,
         "suites": suites,
         "cases": cases,
+        "providerBreakdown": provider_breakdown,
+        "taskBreakdown": task_breakdown,
+        "watchlist": watchlist,
         "diagnosis": {
             "topFailureReasons": diagnosis.get("top_failure_reasons") or [],
             "adaptationCandidates": diagnosis.get("adaptation_candidates") or [],
@@ -2784,8 +3025,32 @@ def build_lab_artifacts_payload(workspace_root: str | Path) -> dict[str, Any]:
         },
     ]
 
+    recent_captures = []
+    for artifact in artifacts[:10]:
+        recent_captures.append(
+            {
+                "id": artifact.get("id"),
+                "label": artifact.get("name"),
+                "category": artifact.get("category"),
+                "status": artifact.get("status"),
+                "createdAt": artifact.get("createdAt"),
+                "artifactPath": artifact.get("artifactPath"),
+            }
+        )
+
+    run_registry = {
+        "chatSessions": len(chat_sessions),
+        "workflowRuns": len(workflow_runs),
+        "latestChatSession": chat_sessions[0].get("session_id") if chat_sessions else None,
+        "latestWorkflowRun": workflow_runs[0].get("run_id") if workflow_runs else None,
+        "latestWorkflowArtifact": workflow_runs[0].get("artifact_path") if workflow_runs else None,
+    }
+
     return {
         "ok": True,
+        "status": "live" if artifacts or chat_sessions or workflow_runs else "empty",
+        "degraded_reason": None if (artifacts or chat_sessions or workflow_runs) else "No artifact captures or persisted AI LAB registries were found yet in this workspace.",
+        "last_updated_at": _normalize_timestamp(runtime_controls_state.get("updated_at")) or _normalize_timestamp(runtime_summary.get("latest_timestamp")) or _now_iso(),
         "meta": _build_meta(
             source="live",
             updated_at=_normalize_timestamp(runtime_controls_state.get("updated_at")) or _normalize_timestamp(runtime_summary.get("latest_timestamp")) or _now_iso(),
@@ -2796,7 +3061,11 @@ def build_lab_artifacts_payload(workspace_root: str | Path) -> dict[str, Any]:
             "totalArtifacts": len(artifacts),
             "readyArtifacts": sum(1 for item in artifacts if str(item.get("status") or "") == "ready"),
             "errorArtifacts": sum(1 for item in artifacts if str(item.get("status") or "") == "error"),
+            "chatSessions": len(chat_sessions),
+            "workflowRuns": len(workflow_runs),
         },
+        "runRegistry": run_registry,
+        "recentCaptures": recent_captures,
         "diagnostics": diagnostics,
     }
 
@@ -3018,6 +3287,48 @@ def build_lab_evidenceops_payload(workspace_root: str | Path) -> dict[str, Any]:
         },
     ]
 
+    owner_counts: dict[str, int] = defaultdict(int)
+    for action in actions:
+        owner_counts[str(action.get("owner") or "Unassigned")] += 1
+    ownership_summary = [
+        {"owner": owner, "count": count}
+        for owner, count in sorted(owner_counts.items(), key=lambda item: (-item[1], item[0]))[:6]
+    ]
+
+    operation_breakdown: dict[str, int] = defaultdict(int)
+    for operation in operations:
+        operation_breakdown[str(operation.get("status") or "success")] += 1
+    operation_breakdown_rows = [
+        {"label": _labelize_slug(status), "value": count}
+        for status, count in sorted(operation_breakdown.items(), key=lambda item: (-item[1], item[0]))
+    ]
+
+    timeline = [
+        {
+            "id": item.get("id"),
+            "title": str(item.get("operation") or "operation"),
+            "subtitle": str(item.get("detail") or ""),
+            "timestamp": item.get("timestamp"),
+            "status": item.get("status"),
+        }
+        for item in operations[:10]
+    ]
+
+    categories = []
+    for document in repository_documents:
+        category = str(document.get("category") or "uncategorized")
+        if category not in categories:
+            categories.append(category)
+        if len(categories) >= 5:
+            break
+
+    search_hints = []
+    for item in categories + ["vendor", "policy", "approval"]:
+        if item not in search_hints:
+            search_hints.append(item)
+        if len(search_hints) >= 6:
+            break
+
     notes = []
     if not worklog_entries and (chat_sessions or workflow_runs):
         notes.append("EvidenceOps operations are currently populated from the persisted AI LAB session/run registries plus repository and action-store state.")
@@ -3034,8 +3345,17 @@ def build_lab_evidenceops_payload(workspace_root: str | Path) -> dict[str, Any]:
     if not updated_at:
         updated_at = last_action_timestamp or now_ts
 
+    degraded_reason = None
+    if not repository_documents:
+        degraded_reason = "The active EvidenceOps repository root is empty or unavailable."
+    elif not worklog_entries:
+        degraded_reason = "Operations and telemetry are currently derived from persisted AI LAB registries plus repository state because no dedicated EvidenceOps worklog was found."
+
     return {
         "ok": True,
+        "status": "live" if repository_documents and (action_entries or worklog_entries or chat_sessions or workflow_runs) else "derived",
+        "degraded_reason": degraded_reason,
+        "last_updated_at": updated_at,
         "meta": _build_meta(
             source="live" if (worklog_entries or chat_sessions or workflow_runs or action_entries or repository_documents) else "derived",
             updated_at=updated_at,
@@ -3049,12 +3369,23 @@ def build_lab_evidenceops_payload(workspace_root: str | Path) -> dict[str, Any]:
             "lastSyncAt": last_action_timestamp or now_ts,
             "repositoryRoot": str(repository_root),
             "repositoryDocumentCount": _safe_int(repository_summary.get("total_documents")),
+            "repositoryCategories": categories,
         },
         "tools": tools,
         "actions": actions,
         "operations": operations,
         "telemetry": telemetry,
         "readiness": readiness,
+        "ownershipSummary": ownership_summary,
+        "operationBreakdown": operation_breakdown_rows,
+        "timeline": timeline,
+        "searchHints": search_hints,
+        "repositoryStats": {
+            "totalDocuments": _safe_int(repository_summary.get("total_documents")),
+            "newDocuments": _safe_int(drift_summary.get("new_documents_count")),
+            "changedDocuments": _safe_int(drift_summary.get("changed_documents_count")),
+            "removedDocuments": _safe_int(drift_summary.get("removed_documents_count")),
+        },
     }
 
 

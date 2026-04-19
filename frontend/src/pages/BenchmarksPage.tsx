@@ -43,7 +43,10 @@ export default function BenchmarksPage() {
   const models = data?.models ?? [];
   const retrievalObservations = data?.retrievalObservations ?? [];
   const presets = data?.presets ?? [];
+  const providerSummary = data?.providerSummary ?? [];
+  const leaderboardHighlights = data?.leaderboardHighlights ?? [];
   const recommended = models[0];
+  const statusLabel = data?.status === 'empty' ? 'Waiting for runs' : data?.status === 'derived' ? 'Derived live' : 'Live';
 
   const sorted = useMemo(() => [...models].sort((a, b) => b.useCaseFit - a.useCaseFit), [models]);
   const scatterData = useMemo(
@@ -102,6 +105,41 @@ export default function BenchmarksPage() {
           { label: 'Models Tested', value: data?.summary.modelCount ?? '—', icon: BarChart3, status: 'neutral' },
         ]}
       />
+
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+        <GlassCard className="p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Provider coverage</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{providerSummary.length || '—'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Active providers with recorded model comparisons.</p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Top provider</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{providerSummary[0]?.provider ?? 'No provider yet'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{providerSummary[0]?.bestModel ? `${providerSummary[0].bestModel} · ${providerSummary[0].bestFit}% best fit` : 'Benchmark registry is still empty.'}</p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Leaderboard posture</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{statusLabel}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{data?.degraded_reason ?? `${leaderboardHighlights.length} highlight(s) derived from recorded runs.`}</p>
+        </GlassCard>
+        <GlassCard className="p-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Preset coverage</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{presets.length || '—'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Reusable benchmark presets aggregated from the comparison log.</p>
+        </GlassCard>
+      </div>
+
+      {leaderboardHighlights.length ? (
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+          {leaderboardHighlights.map((highlight, index) => (
+            <GlassCard key={`${highlight.label}-${index}`} className="p-4" delay={0.05 + index * 0.03}>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{highlight.label}</p>
+              <p className="mt-2 text-sm font-semibold text-foreground">{highlight.model ?? '—'}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{highlight.detail ?? 'Recorded from the persisted benchmark leaderboard.'}</p>
+            </GlassCard>
+          ))}
+        </div>
+      ) : null}
 
       <Tabs defaultValue="leaderboard">
         <TabsList className="bg-secondary/30 border border-border/50 mb-4">
@@ -302,6 +340,28 @@ export default function BenchmarksPage() {
               </GlassCard>
             ))
           )}
+          {providerSummary.length ? (
+            <GlassCard delay={0.2}>
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3 className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-medium text-foreground">Provider Summary</h3>
+              </div>
+              <div className="space-y-2">
+                {providerSummary.map((provider) => (
+                  <div key={provider.provider} className="flex items-center justify-between gap-4 rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">{provider.provider}</p>
+                      <p className="text-[10px] text-muted-foreground">{provider.models} model(s) · best {provider.bestFit}% fit</p>
+                    </div>
+                    <div className="text-right text-[10px] text-muted-foreground">
+                      <p className="text-foreground font-medium">{provider.avgLatency}s</p>
+                      <p>{provider.bestModel ?? 'No leader yet'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          ) : null}
         </TabsContent>
 
         <TabsContent value="retrieval" className="mt-0 space-y-4">
