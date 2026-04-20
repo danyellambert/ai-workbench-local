@@ -22,7 +22,6 @@ import {
   buildProductArtifactUrl,
   PRODUCT_API_BASE_URL,
   generateProductWorkflowDeck,
-  publishProductWorkflowToTrello,
   getProductDocumentLibrary,
   getProductGroundingPreview,
   runProductWorkflow,
@@ -273,24 +272,6 @@ export default function ActionPlanPage() {
     },
   });
 
-  const publishTrelloMutation = useMutation({
-    mutationFn: () => {
-      if (!workflowResponse?.result) {
-        throw new Error('Run the action plan workflow before publishing to Trello.');
-      }
-      return publishProductWorkflowToTrello(workflowResponse.result, { runId: workflowResponse.run_id });
-    },
-    onSuccess: (payload) => {
-      setTrelloPublishResult(payload);
-      const count = Number(payload.created_card_count || payload.planned_card_count || 0);
-      toast.success(
-        payload.message || (count > 0 ? `Published ${count} Trello card(s).` : 'Published the current action plan to Trello.'),
-      );
-    },
-    onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Trello publish failed.');
-    },
-  });
 
   const actionPlanView = workflowResponse?.action_plan_view ?? null;
   const summary = actionPlanView?.summary ?? emptyActionPlanSummary(selectedDocumentIds.length, generatedArtifacts.length);
@@ -363,15 +344,6 @@ export default function ActionPlanPage() {
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1440px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Action Plan & Evidence Review" description="Transform grounded findings into actionable tasks with owners, timelines and evidence tracking.">
-        <Button
-          variant="outline"
-          className="h-9 px-4 text-xs"
-          disabled={!workflowResponse?.result || publishTrelloMutation.isPending}
-          onClick={() => publishTrelloMutation.mutate()}
-        >
-          {publishTrelloMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5 mr-2" />}
-          Publish to Trello
-        </Button>
         <Button
           variant="outline"
           className="h-9 px-4 text-xs"
@@ -545,6 +517,27 @@ export default function ActionPlanPage() {
           </div>
         </div>
       </motion.div>
+
+      <GlassCard className="mb-6" delay={0.09}>
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-sm font-medium text-foreground">Workflow progress</h3>
+            <p className="text-xs text-muted-foreground mt-1">Track how the live run moved from grounded document selection to export-ready outputs.</p>
+          </div>
+          <StatusPill status={workflowResponse?.result?.status || (runActionPlanMutation.isPending ? 'running' : 'pending')} />
+        </div>
+        <div className="grid gap-3 md:grid-cols-5">
+          {stepStatuses.map((step, index) => (
+            <div key={step.key} className="rounded-xl border border-border/50 bg-secondary/20 px-3 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Step {index + 1}</span>
+                <StatusPill status={step.status} />
+              </div>
+              <p className="mt-3 text-sm font-medium text-foreground">{step.label}</p>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
@@ -768,85 +761,43 @@ export default function ActionPlanPage() {
       </Tabs>
 
 
-      <div className="mt-6" data-testid="workflow-publish-actions-surface" data-workflow="action-plan">
-        <WorkflowPublishActions
-          workflowId="action_plan_evidence_review"
-          result={workflowResponse?.result ?? null}
-          runId={workflowResponse?.run_id ?? null}
-          title="Publish outputs"
-          description="Preview the Trello action cards or the Notion handoff before publishing this action plan."
-          notionPreviewPayload={{
-            title: 'Action Plan handoff',
-            product_api_base_url: PRODUCT_API_BASE_URL,
-            summary: workflowResponse?.result.summary,
-            recommendation: workflowResponse?.result.recommendation,
-            actions: items.map((item) => ({ title: item.title, owner: item.owner, due_date: item.due_date, priority: item.priority, status: item.status })),
-            evidence_gaps: evidenceGaps.map((gap) => ({ title: gap.title, status: gap.status, detail: gap.detail })),
-            next_steps: highlights,
-            highlights,
-            documents: selectedDocuments.map((document) => document.name),
-            primary_documents: selectedDocuments.map((document) => document.name),
-            source_document_name: selectedDocuments[0]?.name || null,
-            source_document_title: selectedDocuments[0]?.name || null,
-            source_document_filename: selectedDocuments[0]?.name || null,
-            source_document_category: 'action-plan',
-          }}
-          onTrelloPublished={setTrelloPublishResult}
-          onNotionPublished={setNotionPublishResult}
-        />
-      </div>
-
       <div className="grid xl:grid-cols-[1.2fr_0.8fr] gap-4 mt-6">
         <GlassCard>
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Execution notes</h3>
+            <h3 className="text-sm font-medium text-foreground">Run summary</h3>
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Run metadata</p>
-              <div className="space-y-2 text-xs text-muted-foreground">
-                <div>Status: <span className="text-foreground">{runMetadata?.status || 'Awaiting analysis'}</span></div>
-                <div>Workflow: <span className="text-foreground">{runMetadata?.workflow_label || 'Action Plan / Evidence Review'}</span></div>
-                <div>Provider: <span className="text-foreground">{runMetadata?.provider || 'default'}</span></div>
-                <div>Model: <span className="text-foreground">{runMetadata?.model || 'default'}</span></div>
-                <div>Context strategy: <span className="text-foreground">{runMetadata?.context_strategy || groundingPreview?.strategy || 'document_scan'}</span></div>
-                <div>Source blocks: <span className="text-foreground">{runMetadata?.source_block_count ?? groundingPreview?.source_block_count ?? 0}</span></div>
-              </div>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Workflow state</p>
-              <div className="space-y-2">
-                {stepStatuses.map((step) => (
-                  <div key={step.key} className="flex items-center justify-between gap-3 rounded-lg bg-secondary/20 px-3 py-2">
-                    <span className="text-xs text-foreground">{step.label}</span>
-                    <StatusPill status={step.status} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="mt-5 pt-4 border-t border-border/40 grid md:grid-cols-2 gap-4">
-            <div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-border/40 bg-secondary/20 px-4 py-4">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Summary</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{runMetadata?.summary || workflowResponse?.result.summary || 'The normalized action-plan presenter will summarize grounded actions, blockers and evidence coverage here after the run.'}</p>
+              <p className="text-sm text-foreground leading-relaxed">{runMetadata?.summary || workflowResponse?.result.summary || 'Run the workflow to generate a grounded summary of the current action plan, blockers and evidence coverage.'}</p>
               {runMetadata?.recommendation || workflowResponse?.result.recommendation ? (
-                <p className="text-xs text-foreground mt-3 leading-relaxed">Recommendation: {runMetadata?.recommendation || workflowResponse?.result.recommendation}</p>
+                <p className="mt-3 text-xs text-muted-foreground leading-relaxed">Recommendation: <span className="text-foreground">{runMetadata?.recommendation || workflowResponse?.result.recommendation}</span></p>
               ) : null}
             </div>
-            <div>
+            <div className="rounded-xl border border-border/40 bg-secondary/20 px-4 py-4">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Highlights</p>
               {highlights.length ? (
-                <ul className="space-y-1.5 text-xs text-muted-foreground">
-                  {highlights.map((highlight) => (
-                    <li key={highlight} className="leading-relaxed">- {highlight}</li>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  {highlights.slice(0, 5).map((highlight) => (
+                    <li key={highlight} className="leading-relaxed">• {highlight}</li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-xs text-muted-foreground">Run the workflow to capture grounded execution highlights.</p>
+                <p className="text-sm text-muted-foreground">Run the workflow to capture grounded highlights and execution watchouts.</p>
               )}
             </div>
           </div>
+          {warnings.length ? (
+            <div className="mt-4 rounded-xl border border-glow-warning/30 bg-glow-warning/10 px-4 py-3">
+              <p className="text-[10px] uppercase tracking-wide text-glow-warning font-medium mb-2">Watchouts</p>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                {warnings.slice(0, 4).map((warning) => (
+                  <li key={warning}>• {warning}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </GlassCard>
 
         <GlassCard>
@@ -946,6 +897,36 @@ export default function ActionPlanPage() {
           )}
         </GlassCard>
       </div>
+
+      <div className="mt-6" data-testid="workflow-publish-actions-surface" data-workflow="action-plan">
+        <WorkflowPublishActions
+          workflowId="action_plan_evidence_review"
+          result={workflowResponse?.result ?? null}
+          runId={workflowResponse?.run_id ?? null}
+          title="Publish outputs"
+          description="After reviewing the board, evidence gaps and generated artifacts, preview the selected Trello card or the Notion handoff before publishing."
+          notionPreviewPayload={{
+            title: actionPlanView?.objective || workflowResponse?.result.summary || 'Action Plan handoff',
+            product_api_base_url: PRODUCT_API_BASE_URL,
+            summary: workflowResponse?.result.summary,
+            recommendation: workflowResponse?.result.recommendation,
+            next_owner: criticalPath[0]?.owner || items.find((item) => item.owner)?.owner || null,
+            actions: items.map((item) => ({ title: item.title, owner: item.owner, due_date: item.due_date, priority: item.priority, status: item.status })),
+            evidence_gaps: evidenceGaps.map((gap) => ({ title: gap.title, status: gap.status, detail: gap.detail })),
+            next_steps: items.slice(0, 6).map((item) => item.title),
+            highlights,
+            documents: selectedDocuments.map((document) => document.name),
+            primary_documents: selectedDocuments.map((document) => document.name),
+            source_document_name: selectedDocuments[0]?.name || null,
+            source_document_title: selectedDocuments[0]?.name || null,
+            source_document_filename: selectedDocuments[0]?.name || null,
+            source_document_category: 'action-plan',
+          }}
+          onTrelloPublished={setTrelloPublishResult}
+          onNotionPublished={setNotionPublishResult}
+        />
+      </div>
+
     </motion.div>
   );
 }

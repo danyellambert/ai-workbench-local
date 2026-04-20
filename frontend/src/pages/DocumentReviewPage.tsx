@@ -317,36 +317,6 @@ export default function DocumentReviewPage() {
         </div>
       </motion.div>
 
-      <div className="mb-6">
-        <WorkflowPublishActions
-          workflowId="document_review"
-          result={workflowResponse?.result ?? null}
-          runId={workflowResponse?.run_id ?? null}
-          title="Publish outputs"
-          description="Use MCP only at the output layer: preview the finding cards or the Notion review handoff before publishing them."
-          notionPreviewPayload={{
-            product_api_base_url: PRODUCT_API_BASE_URL,
-            title: selectedDocument?.name,
-            summary: workflowResponse?.result.summary,
-            recommendation: workflowResponse?.result.recommendation || decisionSummary.label,
-            findings: findings.map((finding) => ({
-              title: finding.title,
-              severity: finding.severity,
-              category: finding.category,
-              recommendation: finding.recommendation,
-            })),
-            next_steps: reviewView?.next_steps || topBlockers.map((item) => item.title || item.recommendation || 'Review blocker'),
-            documents: selectedDocument ? [selectedDocument.name] : [],
-            primary_documents: selectedDocument ? [selectedDocument.name] : [],
-            source_document_name: selectedDocument?.name || null,
-            source_document_title: selectedDocument?.name || null,
-            source_document_filename: selectedDocument?.name || null,
-            source_document_category: 'review',
-          }}
-          onTrelloPublished={setTrelloPublishResult}
-          onNotionPublished={setNotionPublishResult}
-        />
-      </div>
 
       {documentsError && (
         <div className="glass rounded-xl p-4 mb-6 border border-glow-warning/20 text-xs text-glow-warning flex items-center gap-2">
@@ -567,6 +537,39 @@ export default function DocumentReviewPage() {
           )}
         </div>
       </div>
+
+      <div className="mt-6" data-testid="workflow-publish-actions-surface" data-workflow="document-review">
+        <WorkflowPublishActions
+          workflowId="document_review"
+          result={workflowResponse?.result ?? null}
+          runId={workflowResponse?.run_id ?? null}
+          title="Publish outputs"
+          description="After reviewing findings, evidence and artifacts, preview the Trello cards or the Notion handoff before publishing."
+          notionPreviewPayload={{
+            product_api_base_url: PRODUCT_API_BASE_URL,
+            title: selectedDocument?.name,
+            summary: workflowResponse?.result.summary,
+            recommendation: workflowResponse?.result.recommendation || decisionSummary.label,
+            next_owner: decisionSummary.next_owner || null,
+            findings: findings.map((finding) => ({
+              title: finding.title,
+              severity: finding.severity,
+              category: finding.category,
+              recommendation: finding.recommendation,
+            })),
+            next_steps: reviewView?.next_steps || topBlockers.map((item) => item.title || item.recommendation || 'Review blocker'),
+            documents: selectedDocument ? [selectedDocument.name] : [],
+            primary_documents: selectedDocument ? [selectedDocument.name] : [],
+            source_document_name: selectedDocument?.name || null,
+            source_document_title: selectedDocument?.name || null,
+            source_document_filename: selectedDocument?.name || null,
+            source_document_category: 'review',
+          }}
+          onTrelloPublished={setTrelloPublishResult}
+          onNotionPublished={setNotionPublishResult}
+        />
+      </div>
+
     </motion.div>
   );
 }

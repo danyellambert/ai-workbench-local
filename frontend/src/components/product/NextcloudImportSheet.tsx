@@ -104,7 +104,7 @@ export function NextcloudImportSheet({ open, onOpenChange, onImportStarted }: Ne
 
   const nextcloudQuery = useQuery({
     queryKey: ['product-integrations', 'nextcloud-documents', 'library-import'],
-    queryFn: () => getProductNextcloudDocuments(200),
+    queryFn: () => getProductNextcloudDocuments(0),
     enabled: open,
     refetchOnWindowFocus: false,
   });
@@ -271,7 +271,7 @@ export function NextcloudImportSheet({ open, onOpenChange, onImportStarted }: Ne
                   </Button>
                 ) : null}
               </div>
-              <div className="space-y-1.5" data-testid="nextcloud-folder-list">
+              <div className="max-h-[52vh] space-y-1.5 overflow-y-auto pr-1" data-testid="nextcloud-folder-list">
                 <button
                   type="button"
                   className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left ${!currentPath ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-secondary/10 hover:border-primary/30 hover:bg-secondary/20'}`}
@@ -317,7 +317,7 @@ export function NextcloudImportSheet({ open, onOpenChange, onImportStarted }: Ne
                   {nextcloudQuery.isFetching ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
                 </div>
               </div>
-              <div className="space-y-2" data-testid="nextcloud-file-list">
+              <div className="max-h-[52vh] space-y-2 overflow-y-auto pr-1" data-testid="nextcloud-file-list">
                 {visibleDocuments.length ? visibleDocuments.map((document) => {
                   const relativePath = String(document.relative_path || '');
                   const selected = relativePath === selectedRelativePath;

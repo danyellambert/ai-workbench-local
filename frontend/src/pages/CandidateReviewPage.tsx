@@ -142,7 +142,7 @@ function getStatusCopy(response: ProductRunWorkflowResponse | null): { label: st
 export default function CandidateReviewPage() {
   const queryClient = useQueryClient();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
-  const [inputText, setInputText] = useState('Evaluate this CV for a senior AI engineer role and highlight strengths, watchouts, seniority signals and interview focus areas.');
+  const candidateReviewBrief = 'Evaluate this CV for a senior AI engineer role and highlight strengths, watchouts, seniority signals and interview focus areas.';
   const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
   const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
@@ -199,7 +199,7 @@ export default function CandidateReviewPage() {
       runProductWorkflow({
         workflow_id: 'candidate_review',
         document_ids: selectedDocumentId ? [selectedDocumentId] : [],
-        input_text: inputText,
+        input_text: candidateReviewBrief,
         context_strategy: 'document_scan',
         context_window_mode: 'auto',
         use_document_context: true,
@@ -323,18 +323,30 @@ export default function CandidateReviewPage() {
             </div>
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Evaluation brief</label>
-            <textarea
-              data-testid="candidate-review-brief-input"
-              value={inputText}
-              onChange={(event) => setInputText(event.target.value)}
-              className="w-full min-h-[92px] rounded-lg border border-border/50 bg-secondary/20 px-3 py-2 text-xs text-foreground outline-none focus:border-primary/50"
-              placeholder="Describe the hiring context, role, seniority or signals to validate."
-            />
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Grounding preview</label>
+            <div className="rounded-lg border border-border/50 bg-secondary/20 px-3 py-3 min-h-[92px]">
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div className="rounded-md bg-background/60 px-2 py-2">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
+                  <div className="mt-1 text-sm font-medium text-foreground">{selectedDocumentId ? 1 : 0}</div>
+                </div>
+                <div className="rounded-md bg-background/60 px-2 py-2">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
+                  <div className="mt-1 text-sm font-medium text-foreground">{preview?.source_block_count ?? 0}</div>
+                </div>
+                <div className="rounded-md bg-background/60 px-2 py-2">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
+                  <div className="mt-1 text-sm font-medium text-foreground">{(preview?.context_chars ?? 0).toLocaleString()} chars</div>
+                </div>
+              </div>
+              <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed line-clamp-5">
+                {preview?.preview_text
+                  ? preview.preview_text
+                  : 'Select a candidate document to preview the grounded CV context before running the workflow.'}
+              </p>
+            </div>
             <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-              {preview?.preview_text
-                ? preview.preview_text.slice(0, 260)
-                : 'Grounding preview will appear here as soon as a candidate document is selected.'}
+              This workflow uses a fixed evaluation brief behind the scenes so the surface stays stable and product-like.
             </p>
           </div>
         </div>

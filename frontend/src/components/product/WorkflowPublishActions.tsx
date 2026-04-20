@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 import {
@@ -222,6 +221,30 @@ function parseTrelloCard(card: TrelloPreviewCard | null): { title: string; listL
   return { title, listLabel, summary, sections: cleanedSections };
 }
 
+function extractTrelloLabelNames(card: TrelloPreviewCard | null): string[] {
+  const labels = Array.isArray(card?.labels) ? card.labels : [];
+  return labels
+    .map((label) => (label && typeof label === 'object' ? stripMarkdown(String((label as { name?: unknown }).name || '')) : ''))
+    .filter(Boolean)
+    .slice(0, 6);
+}
+
+function extractTrelloChecklistItems(card: TrelloPreviewCard | null): string[] {
+  const checklist = Array.isArray(card?.checklist_items) ? card.checklist_items : [];
+  return dedupeItems(checklist.map((item) => String(item || '')), 6);
+}
+
+function extractTrelloMetaItems(card: TrelloPreviewCard | null): Array<{ label: string; value: string }> {
+  const items: Array<{ label: string; value: string | null }> = [
+    { label: 'Owner', value: compactText(card?.owner, '', 80) },
+    { label: 'Status', value: compactText(card?.status, '', 80) },
+    { label: 'Severity', value: compactText(card?.severity, '', 80) },
+    { label: 'Category', value: compactText(card?.category, '', 80) },
+    { label: 'Due', value: compactText(card?.due, '', 80) },
+  ];
+  return items.filter((item): item is { label: string; value: string } => Boolean(item.value));
+}
+
 function openExternalUrl(url: string | null, fallbackMessage: string): void {
   if (!url) {
     toast.error(fallbackMessage);
@@ -430,7 +453,12 @@ export function WorkflowPublishActions({
   const publishTrelloMutation = useMutation({
     mutationFn: async () => {
       if (!result) throw new Error('Run the workflow before publishing to Trello.');
-      return publishProductWorkflowToTrello(result, { runId, dryRun: false, previewPayload: notionPreviewPayload ?? undefined });
+      return publishProductWorkflowToTrello(result, {
+        runId,
+        dryRun: false,
+        previewPayload: notionPreviewPayload ?? undefined,
+        selectedCardIndex: selectedTrelloCardIndex,
+      });
     },
     onSuccess: async (payload) => {
       await refreshProductQueries();
@@ -569,31 +597,17 @@ export function WorkflowPublishActions({
               Preview Trello
             </Button>
 
-            <div className="flex items-center gap-2">
-              <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
-                <SelectTrigger data-testid="workflow-template-select" className="h-8 min-w-[180px] border-border/50 bg-background/70 text-[10px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {templateOptions.map((option) => (
-                    <SelectItem key={option.id} value={option.id} className="text-xs">
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 border-border/50 text-[10px]"
-                data-testid="workflow-preview-notion"
-                disabled={!result || previewNotionMutation.isPending || publishNotionMutation.isPending}
-                onClick={() => previewNotionMutation.mutate(selectedTemplateId)}
-              >
-                {previewNotionMutation.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <ScrollText className="mr-1 h-3.5 w-3.5" />}
-                Preview Notion
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 border-border/50 text-[10px]"
+              data-testid="workflow-preview-notion"
+              disabled={!result || previewNotionMutation.isPending || publishNotionMutation.isPending}
+              onClick={() => previewNotionMutation.mutate(selectedTemplateId)}
+            >
+              {previewNotionMutation.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <ScrollText className="mr-1 h-3.5 w-3.5" />}
+              Preview Notion
+            </Button>
           </div>
         </div>
       </GlassCard>
@@ -675,6 +689,21 @@ export function WorkflowPublishActions({
                         <p className="text-sm font-medium text-foreground">{parsedActiveTrelloCard.title}</p>
                         <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{parsedActiveTrelloCard.listLabel}</p>
                         {parsedActiveTrelloCard.summary ? <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{parsedActiveTrelloCard.summary}</p> : null}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {extractTrelloLabelNames(activeTrelloCard).map((label) => (
+                            <Badge key={label} variant="outline" className="text-[10px]">{label}</Badge>
+                          ))}
+                        </div>
+                        {extractTrelloMetaItems(activeTrelloCard).length ? (
+                          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                            {extractTrelloMetaItems(activeTrelloCard).map((item) => (
+                              <div key={`${item.label}-${item.value}`} className="rounded-md border border-border/40 bg-secondary/20 px-2 py-2">
+                                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{item.label}</div>
+                                <div className="mt-1 text-xs text-foreground">{item.value}</div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
                       <ScrollArea className="mt-3 h-[46vh] max-h-[430px] pr-3">
                         <div className="space-y-3">
@@ -686,6 +715,14 @@ export function WorkflowPublishActions({
                               </ul>
                             </div>
                           ))}
+                          {extractTrelloChecklistItems(activeTrelloCard).length ? (
+                            <div className="rounded-md bg-background/80 px-3 py-2">
+                              <p className="text-xs font-medium text-foreground">Suggested checklist</p>
+                              <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
+                                {extractTrelloChecklistItems(activeTrelloCard).map((item) => <li key={item} className="leading-relaxed">• {item}</li>)}
+                              </ul>
+                            </div>
+                          ) : null}
                         </div>
                       </ScrollArea>
                     </>
@@ -696,7 +733,7 @@ export function WorkflowPublishActions({
                 <p className="text-[11px] text-muted-foreground">
                   {canOpenPublishedTrelloPage
                     ? 'Published. You can reopen the created Trello page from here.'
-                    : 'Preview only. Nothing is created in Trello until you click “Publish to Trello”.'}
+                    : 'Preview only. Nothing is created in Trello until you click “Publish selected card”.'}
                 </p>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" onClick={openTrelloPage} disabled={!canOpenPublishedTrelloPage}>
@@ -704,7 +741,7 @@ export function WorkflowPublishActions({
                   </Button>
                   <Button disabled={publishTrelloMutation.isPending} onClick={() => publishTrelloMutation.mutate()}>
                     {publishTrelloMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KanbanSquare className="mr-2 h-4 w-4" />}
-                    Publish to Trello
+                    {trelloCards.length ? `Publish selected card${trelloCards.length > 1 ? ` (#${selectedTrelloCardIndex + 1})` : ""}` : "Publish to Trello"}
                   </Button>
                 </div>
               </DialogFooter>

@@ -9,6 +9,7 @@ import {
   PRODUCT_API_BASE_URL,
   generateProductWorkflowDeck,
   getProductDocumentLibrary,
+  getProductGroundingPreview,
   runProductWorkflow,
   type ProductDocumentLibraryEntry,
   type ProductPolicyComparisonDiff,
@@ -102,6 +103,20 @@ export default function ComparisonPage() {
     [availableDocuments, selectedDocumentBId],
   );
 
+
+  const previewQuery = useQuery({
+    queryKey: ['product-policy-comparison-preview', selectedDocumentAId, selectedDocumentBId],
+    enabled: Boolean(selectedDocumentAId && selectedDocumentBId && selectedDocumentAId !== selectedDocumentBId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    queryFn: () =>
+      getProductGroundingPreview({
+        workflowId: 'policy_contract_comparison',
+        strategy: 'retrieval',
+        documentIds: [selectedDocumentAId, selectedDocumentBId].filter(Boolean),
+      }),
+  });
+
   const runComparisonMutation = useMutation({
     mutationFn: () =>
       runProductWorkflow({
@@ -180,6 +195,7 @@ export default function ComparisonPage() {
     () => dedupeArtifacts([...(comparisonView?.artifacts ?? []), ...generatedArtifacts]),
     [comparisonView?.artifacts, generatedArtifacts],
   );
+  const groundingPreview = workflowResponse?.result?.grounding_preview ?? previewQuery.data?.preview ?? null;
 
   const runDisabled =
     !selectedDocumentAId ||
@@ -273,36 +289,6 @@ export default function ComparisonPage() {
         </div>
       </motion.div>
 
-      <div className="mb-6">
-        <WorkflowPublishActions
-          workflowId="policy_contract_comparison"
-          result={workflowResponse?.result ?? null}
-          runId={workflowResponse?.run_id ?? null}
-          title="Publish outputs"
-          description="Keep the comparison surface focused: preview the remediation cards or the Notion memo before publishing them."
-          notionPreviewPayload={{
-            product_api_base_url: PRODUCT_API_BASE_URL,
-            title: comparisonView?.executive_summary.documents?.join(' vs ') || 'Policy comparison',
-            summary: comparisonView?.executive_summary.narrative || workflowResponse?.result.summary,
-            recommendation: comparisonView?.recommendation.summary || workflowResponse?.result.recommendation,
-            must_fix_items: mustFixItems,
-            negotiation_priorities: negotiationPriorities,
-            differences: differences.map((item) => ({
-              clause: item.clause,
-              impact: item.impact,
-              business_impact: item.business_impact,
-            })),
-            documents: comparisonView?.compared_documents || [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
-            primary_documents: [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
-            source_document_name: selectedDocumentA?.name || null,
-            source_document_title: selectedDocumentA?.name || null,
-            source_document_filename: selectedDocumentA?.name || null,
-            source_document_category: 'comparison',
-          }}
-          onTrelloPublished={setTrelloPublishResult}
-          onNotionPublished={setNotionPublishResult}
-        />
-      </div>
 
       {/* Document Selection */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -331,6 +317,35 @@ export default function ComparisonPage() {
             </Select>
           </div>
         </div>
+          <div className="mt-4 border-t border-border/40 pt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowLeftRight className="w-4 h-4 text-primary" />
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Grounding Preview</h3>
+            </div>
+            <div className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
+                  <div className="mt-1 text-sm font-medium text-foreground">{[selectedDocumentAId, selectedDocumentBId].filter(Boolean).length}</div>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
+                  <div className="mt-1 text-sm font-medium text-foreground">{groundingPreview?.source_block_count ?? 0}</div>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
+                  <div className="mt-1 text-sm font-medium text-foreground">{(groundingPreview?.context_chars ?? 0).toLocaleString()} chars</div>
+                </div>
+              </div>
+              <div className="rounded-lg bg-secondary/20 px-3 py-3">
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
+                  {previewQuery.isLoading
+                    ? 'Loading comparison grounding preview...'
+                    : groundingPreview?.preview_text || 'Select two different indexed documents to preview the grounded comparison context before running the workflow.'}
+                </p>
+              </div>
+            </div>
+          </div>
       </motion.div>
 
       {/* Executive Summary */}
@@ -531,6 +546,38 @@ export default function ComparisonPage() {
           </div>
         </GlassCard>
       </div>
+
+      <div className="mt-6" data-testid="workflow-publish-actions-surface" data-workflow="policy-comparison">
+        <WorkflowPublishActions
+          workflowId="policy_contract_comparison"
+          result={workflowResponse?.result ?? null}
+          runId={workflowResponse?.run_id ?? null}
+          title="Publish outputs"
+          description="After reviewing the comparison summary, deltas and artifacts, preview the remediation cards or Notion memo before publishing."
+          notionPreviewPayload={{
+            product_api_base_url: PRODUCT_API_BASE_URL,
+            title: comparisonView?.executive_summary.documents?.join(' vs ') || 'Policy comparison',
+            summary: comparisonView?.executive_summary.narrative || workflowResponse?.result.summary,
+            recommendation: comparisonView?.recommendation.summary || workflowResponse?.result.recommendation,
+            must_fix_items: mustFixItems,
+            negotiation_priorities: negotiationPriorities,
+            differences: differences.map((item) => ({
+              clause: item.clause,
+              impact: item.impact,
+              business_impact: item.business_impact,
+            })),
+            documents: comparisonView?.compared_documents || [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+            primary_documents: [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+            source_document_name: selectedDocumentA?.name || null,
+            source_document_title: selectedDocumentA?.name || null,
+            source_document_filename: selectedDocumentA?.name || null,
+            source_document_category: 'comparison',
+          }}
+          onTrelloPublished={setTrelloPublishResult}
+          onNotionPublished={setNotionPublishResult}
+        />
+      </div>
+
     </motion.div>
   );
 }
