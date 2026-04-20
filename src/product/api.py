@@ -109,6 +109,19 @@ def _html_bytes(content: str) -> bytes:
     return content.encode("utf-8")
 
 
+def _coerce_bool_flag(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    normalized = str(value or "").strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off", ""}:
+        return False
+    return bool(value)
+
+
 def _resolve_product_artifact_path(*, bootstrap: ProductBootstrap, raw_path: str) -> Path:
     candidate = Path(str(raw_path or "").strip()).expanduser()
     if not str(candidate).strip():
@@ -917,14 +930,15 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             try:
                 result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
                 product_result = ProductWorkflowResult.model_validate(result_payload)
-                dry_run = bool(payload.get("dry_run") or payload.get("publish_options", {}).get("dry_run") if isinstance(payload.get("publish_options"), dict) else False)
+                publish_options = payload.get("publish_options") if isinstance(payload.get("publish_options"), dict) else {}
+                dry_run = _coerce_bool_flag(payload.get("dry_run")) or _coerce_bool_flag(publish_options.get("dry_run"))
                 run_id = str(payload.get("run_id") or "").strip() or None
                 preview_payload = payload.get('preview_payload') if isinstance(payload.get('preview_payload'), dict) else None
                 publish_payload = publish_product_workflow_to_trello(product_result, dry_run=dry_run, preview_payload=preview_payload)
                 publish_payload.setdefault("ok", True)
                 publish_payload.setdefault("workflow_id", product_result.workflow_id)
                 publish_payload.setdefault("workflow_label", product_result.workflow_label)
-                if run_id:
+                if run_id and not dry_run:
                     record_product_delivery_output(self.bootstrap.workspace_root, run_id=run_id, target="trello", payload=publish_payload)
                 self._send_json(HTTPStatus.OK, publish_payload)
             except Exception as error:  # pragma: no cover - defensive API surface
@@ -935,7 +949,8 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             try:
                 result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
                 product_result = ProductWorkflowResult.model_validate(result_payload)
-                dry_run = bool(payload.get("dry_run") or payload.get("publish_options", {}).get("dry_run") if isinstance(payload.get("publish_options"), dict) else False)
+                publish_options = payload.get("publish_options") if isinstance(payload.get("publish_options"), dict) else {}
+                dry_run = _coerce_bool_flag(payload.get("dry_run")) or _coerce_bool_flag(publish_options.get("dry_run"))
                 run_id = str(payload.get("run_id") or "").strip() or None
                 template_id = str(payload.get('template_id') or '').strip() or None
                 preview_payload = payload.get('preview_payload') if isinstance(payload.get('preview_payload'), dict) else None
@@ -943,7 +958,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 publish_payload.setdefault("ok", True)
                 publish_payload.setdefault("workflow_id", product_result.workflow_id)
                 publish_payload.setdefault("workflow_label", product_result.workflow_label)
-                if run_id:
+                if run_id and not dry_run:
                     record_product_delivery_output(self.bootstrap.workspace_root, run_id=run_id, target="notion", payload=publish_payload)
                 self._send_json(HTTPStatus.OK, publish_payload)
             except Exception as error:

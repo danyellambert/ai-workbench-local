@@ -887,7 +887,14 @@ def create_trello_cards_from_product_result(
     if dry_run:
         plan.setdefault(
             "message",
-            "Planned Trello publish by list: " + ", ".join(f"{item['list_label']}: {item['count']}" for item in list_breakdown) if list_breakdown else "Planned Trello publish.",
+            (
+                "Preview only — no Trello cards were created yet. "
+                + (
+                    "Planned publish by list: " + ", ".join(f"{item['list_label']}: {item['count']}" for item in list_breakdown)
+                    if list_breakdown
+                    else "Planned Trello publish."
+                )
+            ),
         )
         return plan
 
@@ -1716,6 +1723,7 @@ def create_notion_page_from_product_result(
         "preview_sections": preview_sections,
     }
     if dry_run:
+        plan.setdefault("message", "Preview only — no Notion page was created yet. Publish to Notion to create the page.")
         return plan
 
     notion = NotionClient(resolved_settings.notion)

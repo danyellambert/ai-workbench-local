@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';

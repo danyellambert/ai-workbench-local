@@ -574,6 +574,79 @@ class ProductApiTests(unittest.TestCase):
             server.server_close()
             thread.join(timeout=2)
 
+    def test_product_api_publish_trello_preview_preserves_dry_run_without_publish_options(self) -> None:
+        from unittest.mock import patch
+
+        server, thread = self._start_server()
+        try:
+            fake_result = ProductWorkflowResult(
+                workflow_id="action_plan_evidence_review",
+                workflow_label="Action Plan / Evidence Review",
+                status="warning",
+                summary="Current run produced 2 actionable items.",
+                deck_export_kind="action_plan_deck",
+                deck_available=True,
+            )
+
+            with patch(
+                "src.product.api.publish_product_workflow_to_trello",
+                return_value={"status": "planned", "dry_run": True, "planned_card_count": 1},
+            ) as publish_mock:
+                response = self._post_json(
+                    server,
+                    "/api/product/publish-trello",
+                    {
+                        "result": fake_result.model_dump(mode="json"),
+                        "dry_run": True,
+                    },
+                )
+
+                self.assertTrue(response["ok"])
+                self.assertTrue(response["dry_run"])
+                publish_mock.assert_called_once()
+                self.assertTrue(publish_mock.call_args.kwargs["dry_run"])
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_product_api_publish_notion_preview_preserves_dry_run_without_publish_options(self) -> None:
+        from unittest.mock import patch
+
+        server, thread = self._start_server()
+        try:
+            fake_result = ProductWorkflowResult(
+                workflow_id="document_review",
+                workflow_label="Document Review",
+                status="warning",
+                summary="Current run produced 2 findings.",
+                deck_export_kind="document_review_deck",
+                deck_available=True,
+            )
+
+            with patch(
+                "src.product.api.publish_product_workflow_to_notion",
+                return_value={"status": "planned", "dry_run": True, "template_id": "review_summary"},
+            ) as publish_mock:
+                response = self._post_json(
+                    server,
+                    "/api/product/publish-notion",
+                    {
+                        "result": fake_result.model_dump(mode="json"),
+                        "dry_run": True,
+                        "template_id": "review_summary",
+                    },
+                )
+
+                self.assertTrue(response["ok"])
+                self.assertTrue(response["dry_run"])
+                publish_mock.assert_called_once()
+                self.assertTrue(publish_mock.call_args.kwargs["dry_run"])
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
     def test_product_api_publish_trello_endpoint(self) -> None:
         from unittest.mock import patch
 

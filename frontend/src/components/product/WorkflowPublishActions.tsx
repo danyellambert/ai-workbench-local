@@ -45,6 +45,11 @@ type TrelloPreviewSection = {
   items: string[];
 };
 
+type PreviewDocumentSection = {
+  heading: string;
+  items: string[];
+};
+
 const NOTION_TEMPLATE_OPTIONS: Record<string, NotionTemplateOption[]> = {
   action_plan_evidence_review: [
     { id: 'action_register', label: 'Action register', description: 'Owners, priorities and due dates.' },
@@ -103,12 +108,47 @@ function buildTrelloBoardFallbackUrl(boardId: unknown): string | null {
   return `https://trello.com/b/${encodeURIComponent(normalized)}`;
 }
 
-function splitPreviewItems(value: string, limit = 6): string[] {
+function escapeHtml(value: string): string {
   return value
-    .split(/\n+|\s+[\u2022\-]\s+|\s+\*\*[^*]+\*\*:?\s*/g)
-    .map((item) => item.replace(/^[-•]\s*/, '').trim())
-    .filter(Boolean)
-    .slice(0, limit);
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function stripMarkdown(value: string): string {
+  return value
+    .replace(/^#+\s*/, '')
+    .replace(/^[-*•]\s+/, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function dedupeItems(items: string[], limit = 8): string[] {
+  const seen = new Set<string>();
+  const normalizedItems: string[] = [];
+  for (const rawItem of items) {
+    const item = stripMarkdown(rawItem);
+    if (!item) continue;
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalizedItems.push(item);
+    if (normalizedItems.length >= limit) break;
+  }
+  return normalizedItems;
+}
+
+function parseMarkdownBullets(value: string): string[] {
+  return value
+    .split(/\n+/)
+    .map((entry) => stripMarkdown(entry))
+    .filter(Boolean);
 }
 
 function parseTrelloCard(card: TrelloPreviewCard | null): { title: string; listLabel: string; summary: string | null; sections: TrelloPreviewSection[] } {
@@ -121,40 +161,65 @@ function parseTrelloCard(card: TrelloPreviewCard | null): { title: string; listL
 
   const lines = description.split('\n').map((line) => line.trim()).filter(Boolean);
   const sections: TrelloPreviewSection[] = [];
+  const seenItems = new Set<string>();
+  let summary: string | null = null;
   let currentHeading = 'Details';
   let currentItems: string[] = [];
-  let summary: string | null = null;
+
+  const pushItem = (value: string) => {
+    const normalized = stripMarkdown(value);
+    if (!normalized) return;
+    const key = normalized.toLowerCase();
+    if (seenItems.has(key)) return;
+    seenItems.add(key);
+    currentItems.push(normalized);
+  };
 
   const flushSection = () => {
-    const normalizedItems = currentItems.flatMap((item) => splitPreviewItems(item, 8)).filter(Boolean);
-    if (normalizedItems.length) {
-      sections.push({ heading: currentHeading, items: Array.from(new Set(normalizedItems)).slice(0, 8) });
+    const heading = currentHeading === 'Summary' && summary ? 'Key details' : currentHeading;
+    const items = dedupeItems(currentItems, 6).filter((item) => item.toLowerCase() !== String(summary || '').toLowerCase());
+    if (items.length) {
+      sections.push({ heading, items });
     }
     currentItems = [];
   };
 
   for (const line of lines) {
-    if (/^##\s+/.test(line)) {
-      continue;
-    }
+    const normalized = stripMarkdown(line);
+    if (!normalized) continue;
+
     if (/^###\s+/.test(line)) {
       flushSection();
-      currentHeading = line.replace(/^###\s+/, '').trim() || 'Details';
+      currentHeading = normalized || 'Details';
       continue;
     }
-    if (!summary) {
-      const candidate = compactText(line, '', 220);
-      summary = candidate || null;
+
+    if (/^##+\s+/.test(line)) {
+      if (!summary && normalized.toLowerCase() !== title.toLowerCase()) {
+        summary = compactText(normalized, '', 180) || null;
+      }
+      continue;
     }
-    currentItems.push(line);
+
+    if (!summary && currentHeading === 'Details') {
+      summary = compactText(normalized, '', 180) || null;
+      continue;
+    }
+
+    pushItem(normalized);
   }
+
   flushSection();
 
-  if (!sections.length && description) {
-    sections.push({ heading: 'Details', items: splitPreviewItems(description, 8) });
+  const cleanedSections = sections.filter((section) => section.items.length);
+  if (!cleanedSections.length) {
+    const fallbackItems = dedupeItems(parseMarkdownBullets(description), 6);
+    if (fallbackItems.length) {
+      cleanedSections.push({ heading: 'Details', items: fallbackItems });
+    }
   }
 
-  return { title, listLabel, summary, sections };
+  return { title, listLabel, summary, sections: cleanedSections };
 }
 
 function openExternalUrl(url: string | null, fallbackMessage: string): void {
@@ -166,6 +231,149 @@ function openExternalUrl(url: string | null, fallbackMessage: string): void {
   if (!opened) {
     toast.error('The browser blocked the preview tab. Allow pop-ups for this site and try again.');
   }
+}
+
+function openLocalPreviewPage(options: {
+  windowTitle: string;
+  badgeLabel: string;
+  badgeTone?: 'trello' | 'notion';
+  pageTitle: string;
+  subtitle?: string | null;
+  note?: string | null;
+  sections: PreviewDocumentSection[];
+}): void {
+  const previewWindow = window.open('', '_blank');
+  if (!previewWindow) {
+    toast.error('The browser blocked the preview tab. Allow pop-ups for this site and try again.');
+    return;
+  }
+
+  const tone = options.badgeTone === 'trello'
+    ? { border: 'rgba(96,165,250,0.35)', bg: 'rgba(59,130,246,0.14)' }
+    : { border: 'rgba(167,139,250,0.35)', bg: 'rgba(139,92,246,0.14)' };
+
+  const sectionsHtml = options.sections.length
+    ? options.sections.map((section) => `
+        <section class="section">
+          <h2>${escapeHtml(section.heading)}</h2>
+          <ul>
+            ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
+        </section>
+      `).join('')
+    : '<section class="section"><p class="empty">No preview content is available yet.</p></section>';
+
+  previewWindow.document.open();
+  previewWindow.document.write(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(options.windowTitle)}</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #020817;
+        --panel: rgba(15, 23, 42, 0.92);
+        --panel-strong: rgba(15, 23, 42, 0.98);
+        --border: rgba(148, 163, 184, 0.18);
+        --text: #e5eefc;
+        --muted: #9fb0cf;
+        --accent-border: ${tone.border};
+        --accent-bg: ${tone.bg};
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, rgba(30, 64, 175, 0.24), transparent 32%), var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      .shell {
+        width: min(980px, calc(100vw - 32px));
+        margin: 24px auto;
+        padding: 28px;
+        border-radius: 24px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: 0 32px 80px rgba(2, 6, 23, 0.55);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--accent-border);
+        background: var(--accent-bg);
+        color: var(--text);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 18px 0 8px;
+        font-size: clamp(28px, 4vw, 40px);
+        line-height: 1.1;
+      }
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.7;
+      }
+      .note {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid var(--accent-border);
+        background: rgba(15, 23, 42, 0.68);
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+        margin-top: 22px;
+      }
+      .section {
+        padding: 18px 18px 16px;
+        border-radius: 18px;
+        background: var(--panel-strong);
+        border: 1px solid var(--border);
+      }
+      .section h2 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+      .section ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+      }
+      .section li {
+        margin: 8px 0;
+        line-height: 1.7;
+      }
+      .empty {
+        margin: 0;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="badge">${escapeHtml(options.badgeLabel)}</div>
+      <h1>${escapeHtml(options.pageTitle)}</h1>
+      ${options.subtitle ? `<p class="subtitle">${escapeHtml(options.subtitle)}</p>` : ''}
+      ${options.note ? `<div class="note">${escapeHtml(options.note)}</div>` : ''}
+      <div class="grid">${sectionsHtml}</div>
+    </main>
+  </body>
+</html>`);
+  previewWindow.document.close();
 }
 
 export function WorkflowPublishActions({
@@ -186,6 +394,8 @@ export function WorkflowPublishActions({
   const [selectedTrelloCardIndex, setSelectedTrelloCardIndex] = useState(0);
   const [trelloPreview, setTrelloPreview] = useState<ProductPublishTrelloResponse | null>(null);
   const [notionPreview, setNotionPreview] = useState<ProductPublishNotionResponse | null>(null);
+  const [lastPublishedTrelloPayload, setLastPublishedTrelloPayload] = useState<ProductPublishTrelloResponse | null>(null);
+  const [lastPublishedNotionPayload, setLastPublishedNotionPayload] = useState<ProductPublishNotionResponse | null>(null);
 
   const hubQuery = useQuery({
     queryKey: ['product-integrations'],
@@ -224,9 +434,11 @@ export function WorkflowPublishActions({
     },
     onSuccess: async (payload) => {
       await refreshProductQueries();
+      setLastPublishedTrelloPayload(payload);
+      setTrelloPreview(payload);
+      setDialogTarget('trello');
       onTrelloPublished?.(payload);
-      setDialogTarget(null);
-      toast.success(payload.message || 'Published to Trello.');
+      toast.success(payload.message || 'Published to Trello. You can open the created page now.');
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : 'Trello publish failed.'),
   });
@@ -242,6 +454,7 @@ export function WorkflowPublishActions({
       });
     },
     onSuccess: (payload) => {
+      if (payload.template_id) setSelectedTemplateId(String(payload.template_id));
       setNotionPreview(payload);
       setDialogTarget('notion');
     },
@@ -260,9 +473,12 @@ export function WorkflowPublishActions({
     },
     onSuccess: async (payload) => {
       await refreshProductQueries();
+      if (payload.template_id) setSelectedTemplateId(String(payload.template_id));
+      setLastPublishedNotionPayload(payload);
+      setNotionPreview(payload);
+      setDialogTarget('notion');
       onNotionPublished?.(payload);
-      setDialogTarget(null);
-      toast.success(payload.message || 'Published to Notion.');
+      toast.success(payload.message || 'Published to Notion. You can open the created page now.');
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : 'Notion publish failed.'),
   });
@@ -278,17 +494,47 @@ export function WorkflowPublishActions({
   }, [selectedTrelloCardIndex, trelloCards]);
   const parsedActiveTrelloCard = useMemo(() => parseTrelloCard(activeTrelloCard), [activeTrelloCard]);
   const trelloOpenUrl = useMemo(() => normalizeExternalUrl(
-    trelloPreview?.board_url
-    || (Array.isArray(trelloPreview?.created_card_urls) ? trelloPreview?.created_card_urls?.[0] : null)
-    || buildTrelloBoardFallbackUrl(trelloPreview?.target_board_id),
-  ), [trelloPreview]);
-  const notionOpenUrl = useMemo(() => normalizeExternalUrl(notionPreview?.page_url), [notionPreview]);
+    lastPublishedTrelloPayload?.board_url
+    || (Array.isArray(lastPublishedTrelloPayload?.created_card_urls) ? lastPublishedTrelloPayload?.created_card_urls?.[0] : null)
+    || buildTrelloBoardFallbackUrl(lastPublishedTrelloPayload?.target_board_id),
+  ), [lastPublishedTrelloPayload]);
+  const notionOpenUrl = useMemo(() => normalizeExternalUrl(lastPublishedNotionPayload?.page_url), [lastPublishedNotionPayload]);
+  const canOpenPublishedTrelloPage = !(lastPublishedTrelloPayload?.dry_run ?? true) && Boolean(trelloOpenUrl);
+  const canOpenPublishedNotionPage = !(lastPublishedNotionPayload?.dry_run ?? true) && Boolean(notionOpenUrl);
+  const availableNotionTemplates = useMemo(() => {
+    if (Array.isArray(notionPreview?.available_templates) && notionPreview.available_templates.length) {
+      return notionPreview.available_templates.map((template) => ({
+        id: String(template.id),
+        label: displayLabel(template.label, 'Template'),
+        description: compactText(template.description, '', 120),
+      }));
+    }
+    return templateOptions;
+  }, [notionPreview?.available_templates, templateOptions]);
 
   useEffect(() => {
     if (dialogTarget === 'trello') {
       setSelectedTrelloCardIndex(0);
     }
   }, [dialogTarget, trelloPreview?.planned_card_count]);
+
+
+  useEffect(() => {
+    setTrelloPreview(null);
+    setNotionPreview(null);
+    setLastPublishedTrelloPayload(null);
+    setLastPublishedNotionPayload(null);
+    setDialogTarget(null);
+  }, [workflowId, runId]);
+
+  const openTrelloPage = () => {
+    openExternalUrl(trelloOpenUrl, 'Publish to Trello first to open the created card or board.');
+  };
+
+  const openNotionPage = () => {
+    openExternalUrl(notionOpenUrl, 'Publish to Notion first to open the created page.');
+  };
+
 
   return (
     <>
@@ -353,7 +599,7 @@ export function WorkflowPublishActions({
       </GlassCard>
 
       <Dialog open={dialogTarget !== null} onOpenChange={(open) => !open && setDialogTarget(null)}>
-        <DialogContent className="max-h-[88vh] overflow-hidden border-border/60 bg-background/95 sm:max-w-5xl">
+        <DialogContent className="flex max-h-[92vh] flex-col overflow-hidden border-border/60 bg-background/95 sm:max-w-5xl">
           {dialogTarget === 'trello' ? (
             <>
               <DialogHeader>
@@ -364,7 +610,7 @@ export function WorkflowPublishActions({
                   Review the cards that will be created before publishing this workflow result.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid min-h-0 gap-4 py-2 md:grid-cols-[0.92fr_1.08fr]">
+              <div className="grid min-h-0 flex-1 gap-4 py-2 md:grid-cols-[0.92fr_1.08fr]">
                 <div className="flex min-h-0 flex-col gap-4">
                   <div className="rounded-lg border border-border/50 bg-secondary/10 p-3">
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Planned cards</p>
@@ -383,8 +629,14 @@ export function WorkflowPublishActions({
                   </div>
 
                   <div className="min-h-0 rounded-lg border border-border/50 bg-secondary/10 p-3">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Card queue</p>
-                    <ScrollArea className="mt-3 h-[360px] pr-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Card queue</p>
+                        <p className="mt-1 text-[11px] text-muted-foreground">Pick a card to inspect its details.</p>
+                      </div>
+                      <Badge variant="outline" className="text-[10px]">{trelloCards.length} item(s)</Badge>
+                    </div>
+                    <ScrollArea className="mt-3 h-[34vh] max-h-[360px] pr-3">
                       <div className="space-y-2">
                         {trelloCards.length ? trelloCards.map((card, index) => {
                           const parsed = parseTrelloCard(card);
@@ -396,7 +648,7 @@ export function WorkflowPublishActions({
                               onClick={() => setSelectedTrelloCardIndex(index)}
                               className={cn(
                                 'w-full rounded-md border px-3 py-3 text-left transition-colors',
-                                isActive ? 'border-primary/40 bg-primary/10' : 'border-border/50 bg-background/80 hover:border-primary/20 hover:bg-background',
+                                isActive ? 'border-primary/50 bg-primary/10 shadow-[0_0_0_1px_rgba(59,130,246,0.12)]' : 'border-border/50 bg-background/80 hover:border-primary/20 hover:bg-background',
                               )}
                             >
                               <div className="flex items-start justify-between gap-3">
@@ -415,7 +667,7 @@ export function WorkflowPublishActions({
                   </div>
                 </div>
 
-                <div className="min-h-0 rounded-lg border border-border/50 bg-secondary/10 p-3">
+                <div className="flex min-h-0 flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Card preview</p>
                   {activeTrelloCard ? (
                     <>
@@ -424,7 +676,7 @@ export function WorkflowPublishActions({
                         <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{parsedActiveTrelloCard.listLabel}</p>
                         {parsedActiveTrelloCard.summary ? <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{parsedActiveTrelloCard.summary}</p> : null}
                       </div>
-                      <ScrollArea className="mt-3 h-[430px] pr-3">
+                      <ScrollArea className="mt-3 h-[46vh] max-h-[430px] pr-3">
                         <div className="space-y-3">
                           {parsedActiveTrelloCard.sections.map((section) => (
                             <div key={section.heading} className="rounded-md bg-background/80 px-3 py-2">
@@ -440,14 +692,16 @@ export function WorkflowPublishActions({
                   ) : <p className="mt-3 text-xs text-muted-foreground">Select a planned card to inspect the publish preview.</p>}
                 </div>
               </div>
-              <DialogFooter className="gap-2 sm:justify-between">
-                <p className="text-[11px] text-muted-foreground">The publish action will create the cards shown in this preview.</p>
+              <DialogFooter className="mt-2 gap-2 border-t border-border/40 pt-3 sm:justify-between">
+                <p className="text-[11px] text-muted-foreground">
+                  {canOpenPublishedTrelloPage
+                    ? 'Published. You can reopen the created Trello page from here.'
+                    : 'Preview only. Nothing is created in Trello until you click “Publish to Trello”.'}
+                </p>
                 <div className="flex items-center gap-2">
-                  {trelloOpenUrl ? (
-                    <Button variant="outline" onClick={() => openExternalUrl(trelloOpenUrl, 'This Trello preview does not expose a board URL yet.')}>
-                      Open page <ExternalLink className="ml-2 h-4 w-4" />
-                    </Button>
-                  ) : null}
+                  <Button variant="outline" onClick={openTrelloPage} disabled={!canOpenPublishedTrelloPage}>
+                    {canOpenPublishedTrelloPage ? 'Open page' : 'Open page after publish'} <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
                   <Button disabled={publishTrelloMutation.isPending} onClick={() => publishTrelloMutation.mutate()}>
                     {publishTrelloMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KanbanSquare className="mr-2 h-4 w-4" />}
                     Publish to Trello
@@ -467,8 +721,8 @@ export function WorkflowPublishActions({
                   Review the template and sections that will be published to Notion.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid min-h-0 gap-4 py-2 md:grid-cols-[0.82fr_1.18fr]">
-                <div className="min-h-0 rounded-lg border border-border/50 bg-secondary/10 p-3">
+              <div className="grid min-h-0 flex-1 gap-4 py-2 md:grid-cols-[0.82fr_1.18fr]">
+                <div className="flex min-h-0 flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected template</p>
                   <p className="mt-1 text-sm font-medium text-foreground">{displayLabel(notionPreview?.template_label || selectedTemplate?.label, 'Executive summary')}</p>
                   <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{displayLabel(notionPreview?.template_description || selectedTemplate?.description, 'Executive handoff template')}</p>
@@ -478,34 +732,44 @@ export function WorkflowPublishActions({
                       <p className="mt-1 text-xs font-medium text-foreground">{displayLabel(notionPreview.page_title || notionPreview.title, 'Executive handoff')}</p>
                     </div>
                   ) : null}
-                  {Array.isArray(notionPreview?.available_templates) && notionPreview.available_templates.length ? (
-                    <ScrollArea className="mt-3 h-[280px] pr-3">
-                      <div className="space-y-2">
-                        {notionPreview.available_templates.map((template) => (
-                          <div key={template.id} className={cn(
-                            'rounded-md border px-3 py-2',
-                            template.id === notionPreview?.template_id ? 'border-primary/40 bg-primary/10' : 'border-border/50 bg-background/80',
-                          )}>
+                  <ScrollArea className="mt-3 h-[36vh] max-h-[320px] pr-3">
+                    <div className="space-y-2">
+                      {availableNotionTemplates.map((template) => {
+                        const isActive = template.id === (notionPreview?.template_id || selectedTemplateId);
+                        return (
+                          <button
+                            key={template.id}
+                            type="button"
+                            disabled={previewNotionMutation.isPending || publishNotionMutation.isPending}
+                            onClick={() => {
+                              setSelectedTemplateId(template.id);
+                              previewNotionMutation.mutate(template.id);
+                            }}
+                            className={cn(
+                              'w-full rounded-md border px-3 py-3 text-left transition-colors',
+                              isActive ? 'border-primary/50 bg-primary/10 shadow-[0_0_0_1px_rgba(59,130,246,0.12)]' : 'border-border/50 bg-background/80 hover:border-primary/20 hover:bg-background',
+                            )}
+                          >
                             <p className="text-xs font-medium text-foreground">{template.label}</p>
                             {template.description ? <p className="mt-1 text-[11px] text-muted-foreground">{template.description}</p> : null}
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
                 </div>
-                <div className="min-h-0 rounded-lg border border-border/50 bg-secondary/10 p-3">
+                <div className="flex min-h-0 flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Preview sections</p>
-                  <ScrollArea className="mt-3 h-[430px] pr-3">
+                  <ScrollArea className="mt-3 h-[46vh] max-h-[430px] pr-3">
                     <div className="space-y-3">
                       {Array.isArray(notionPreview?.preview_sections) && notionPreview.preview_sections.length ? (
                         notionPreview.preview_sections.map((section, index) => {
                           const item = section as { heading?: string; items?: string[] };
                           return (
                             <div key={`${item.heading || 'section'}-${index}`} className="rounded-md bg-background/80 px-3 py-2">
-                              <p className="text-xs font-medium text-foreground">{item.heading || 'Section'}</p>
+                              <p className="text-xs font-medium text-foreground">{displayLabel(item.heading, 'Section')}</p>
                               <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
-                                {(item.items || []).slice(0, 6).map((entry) => (
+                                {dedupeItems(Array.isArray(item.items) ? item.items : [], 8).map((entry) => (
                                   <li key={entry} className="leading-relaxed">• {entry}</li>
                                 ))}
                               </ul>
@@ -519,14 +783,16 @@ export function WorkflowPublishActions({
                   </ScrollArea>
                 </div>
               </div>
-              <DialogFooter className="gap-2 sm:justify-between">
-                <p className="text-[11px] text-muted-foreground">This publish action will create a Notion page using the selected template.</p>
+              <DialogFooter className="mt-2 gap-2 border-t border-border/40 pt-3 sm:justify-between">
+                <p className="text-[11px] text-muted-foreground">
+                  {canOpenPublishedNotionPage
+                    ? 'Published. You can reopen the created Notion page from here.'
+                    : 'Preview only. Nothing is created in Notion until you click “Publish to Notion”.'}
+                </p>
                 <div className="flex items-center gap-2">
-                  {notionOpenUrl ? (
-                    <Button variant="outline" onClick={() => openExternalUrl(notionOpenUrl, 'This preview does not have a published Notion page URL yet. Publish first to open it in Notion.')}>
-                      Open page <ExternalLink className="ml-2 h-4 w-4" />
-                    </Button>
-                  ) : null}
+                  <Button variant="outline" onClick={openNotionPage} disabled={!canOpenPublishedNotionPage}>
+                    {canOpenPublishedNotionPage ? 'Open page' : 'Open page after publish'} <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
                   <Button disabled={publishNotionMutation.isPending} onClick={() => publishNotionMutation.mutate(selectedTemplateId)}>
                     {publishNotionMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ScrollText className="mr-2 h-4 w-4" />}
                     Publish to Notion
