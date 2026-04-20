@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Activity, Search, Wrench, RefreshCw, Radio, Shield, Clock, AlertTriangle, FolderSearch } from 'lucide-react';
 import { AiLabSectionIntro, DataSourceBadge } from '@/components/ai-lab/AiLabSectionIntro';
 import { AiLabMetricGrid } from '@/components/ai-lab/AiLabMetricGrid';
+import { DeliveryLoopPanel } from '@/components/product/DeliveryLoopPanel';
 import { GlassCard, StatusPill } from '@/components/shared/ui-components';
 import { aiLabQueryKeys, getLabEvidenceOpsPage, searchLabEvidenceOps } from '@/lib/ai-lab-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -76,6 +77,7 @@ export default function EvidenceOpsPage() {
         </GlassCard>
       )}
 
+
       <AiLabMetricGrid
         columns={5}
         metrics={[
@@ -109,6 +111,28 @@ export default function EvidenceOpsPage() {
           <p className="text-[10px] text-muted-foreground">{data?.degraded_reason ?? 'Live repository and persisted state connected.'}</p>
         </GlassCard>
       </div>
+
+      <details data-testid="evidenceops-delivery-targets" className="mb-6 rounded-xl border border-border/40 bg-secondary/10 p-0">
+        <summary className="cursor-pointer list-none px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium text-foreground">Connected delivery targets</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Compact MCP summary for Nextcloud import, Trello publishing and Notion handoffs.</p>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+              <StatusPill status={summary?.activeTools === summary?.toolsTotal ? 'ready' : 'warning'} />
+              <span>{summary?.activeTools ?? 0}/{summary?.toolsTotal ?? 0} live targets</span>
+            </div>
+          </div>
+        </summary>
+        <div className="border-t border-border/40 px-4 pb-4 pt-2">
+          <DeliveryLoopPanel
+            title="Delivery surfaces"
+            description="The product surfaces stay clean; use this area when you need a compact MCP health and delivery snapshot."
+            compact
+          />
+        </div>
+      </details>
 
       <Tabs defaultValue="tools">
         <TabsList className="bg-secondary/30 border border-border/50 mb-4">

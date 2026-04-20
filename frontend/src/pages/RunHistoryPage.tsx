@@ -13,6 +13,7 @@ import {
   Play,
   Search,
   Sparkles,
+  Link2,
 } from 'lucide-react';
 
 import { PageHeader, StatusPill, GlassCard, MetricCard } from '@/components/shared/ui-components';
@@ -25,6 +26,7 @@ import {
   getProductRunHistory,
   getProductRunHistoryEntry,
   rerunProductRunHistoryEntry,
+  type ProductDeliveryOutput,
   type ProductRunEntry,
   type ProductWorkflowArtifact,
 } from '@/lib/product-api';
@@ -38,6 +40,15 @@ const WORKFLOW_ROUTE_MAP: Record<string, string> = {
   policy_contract_comparison: '/app/workflows/comparison',
   action_plan_evidence_review: '/app/workflows/action-plan',
   candidate_review: '/app/workflows/candidate-review',
+};
+
+
+type DeliveryEvent = {
+  runId: string;
+  workflowLabel: string;
+  runTimestamp: string | null | undefined;
+  key: string;
+  delivery: ProductDeliveryOutput;
 };
 
 function formatDateTime(value?: string | null): string {
@@ -55,6 +66,12 @@ function stringifyPayload(payload: unknown): string {
   }
 }
 
+function deliveryOutputEntries(run: ProductRunEntry | null | undefined): Array<[string, ProductDeliveryOutput]> {
+  const outputs = run?.delivery_outputs;
+  if (!outputs || typeof outputs !== 'object') return [];
+  return Object.entries(outputs) as Array<[string, ProductDeliveryOutput]>;
+}
+
 function dedupeArtifacts(run: ProductRunEntry | null | undefined): ProductWorkflowArtifact[] {
   const artifacts = run?.artifact_items ?? [];
   const seen = new Set<string>();
@@ -64,6 +81,48 @@ function dedupeArtifacts(run: ProductRunEntry | null | undefined): ProductWorkfl
     seen.add(key);
     return true;
   });
+}
+
+
+
+function buildRecentDeliveryEvents(sourceRuns: ProductRunEntry[], preferredRunId?: string | null, limit = 8): DeliveryEvent[] {
+  const events: DeliveryEvent[] = [];
+  for (const run of sourceRuns) {
+    const outputs = deliveryOutputEntries(run);
+    for (const [key, delivery] of outputs) {
+      events.push({
+        runId: run.id,
+        workflowLabel: run.workflow_label,
+        runTimestamp: run.timestamp,
+        key,
+        delivery,
+      });
+    }
+  }
+
+  const score = (event: DeliveryEvent) => {
+    const deliveryTime = event.delivery.timestamp ? new Date(event.delivery.timestamp).getTime() : 0;
+    const runTime = event.runTimestamp ? new Date(event.runTimestamp).getTime() : 0;
+    const preferredBoost = preferredRunId && event.runId === preferredRunId ? 1 : 0;
+    return { preferredBoost, time: deliveryTime || runTime || 0 };
+  };
+
+  const deduped = new Map<string, DeliveryEvent>();
+  for (const event of events) {
+    const key = `${event.runId}:${event.key}:${event.delivery.timestamp || event.runTimestamp || ''}`;
+    if (!deduped.has(key)) deduped.set(key, event);
+  }
+
+  return Array.from(deduped.values())
+    .sort((left, right) => {
+      const leftScore = score(left);
+      const rightScore = score(right);
+      if (leftScore.preferredBoost !== rightScore.preferredBoost) {
+        return rightScore.preferredBoost - leftScore.preferredBoost;
+      }
+      return rightScore.time - leftScore.time;
+    })
+    .slice(0, limit);
 }
 
 function inWindow(timestamp: string | null | undefined, filter: (typeof WINDOW_FILTERS)[number]): boolean {
@@ -165,6 +224,8 @@ export default function RunHistoryPage() {
 
   const detailRun = detailQuery.data?.run ?? selectedRun;
   const artifacts = dedupeArtifacts(detailRun);
+  const deliveryOutputs = deliveryOutputEntries(detailRun);
+  const recentDeliveryEvents = useMemo(() => buildRecentDeliveryEvents(filteredRuns.length ? filteredRuns : runs, detailRun?.id ?? selectedRun?.id ?? null), [filteredRuns, runs, detailRun?.id, selectedRun?.id]);
   const workflowRoute = detailRun?.workflow_id ? WORKFLOW_ROUTE_MAP[detailRun.workflow_id] : undefined;
   const latestSummary = detailRun?.result_sections && typeof detailRun.result_sections === 'object' && 'summary' in detailRun.result_sections
     ? String((detailRun.result_sections as { summary?: string | null }).summary || '')
@@ -344,6 +405,57 @@ export default function RunHistoryPage() {
                   <p className="mt-1 text-sm font-medium text-foreground">{detailRun.duration_label || 'n/a'}</p>
                 </div>
               </div>
+
+
+              {recentDeliveryEvents.length ? (
+                <div data-testid="delivery-history-section">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">External deliveries</h4>
+                      <p className="mt-1 text-[11px] text-muted-foreground">Recent Trello, Notion and Nextcloud outputs captured in run history. Selected-run deliveries are pinned first.</p>
+                    </div>
+                    <Badge variant="outline" className="border-border/60 text-[10px] text-muted-foreground">{recentDeliveryEvents.length} recent item(s)</Badge>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {recentDeliveryEvents.map((event) => {
+                      const delivery = event.delivery;
+                      const isSelectedRun = event.runId === detailRun?.id;
+                      return (
+                        <div key={`${event.runId}:${event.key}:${delivery.timestamp || event.runTimestamp || ''}`} className={`rounded-lg border p-3 ${isSelectedRun ? 'border-primary/30 bg-primary/5' : 'border-border/40 bg-secondary/10'}`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="text-xs font-medium text-foreground capitalize">{delivery.label || delivery.target || event.key}</p>
+                                {isSelectedRun ? <Badge className="h-5 rounded-full bg-primary/15 px-2 text-[10px] text-primary hover:bg-primary/15">Selected run</Badge> : null}
+                              </div>
+                              <p className="mt-1 text-[11px] text-muted-foreground">{event.workflowLabel}</p>
+                            </div>
+                            <StatusPill status={delivery.status || 'pending'} />
+                          </div>
+                          <p className="mt-2 text-[11px] text-muted-foreground">{delivery.summary || delivery.message || 'External delivery recorded for this run.'}</p>
+                          <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-border/50 px-2 py-1">
+                              <Clock className="h-3 w-3" /> {formatDateTime(delivery.timestamp || event.runTimestamp)}
+                            </span>
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 rounded-full border border-border/50 px-2 py-1 transition hover:border-primary/30 hover:text-primary"
+                              onClick={() => setSelectedRunId(event.runId)}
+                            >
+                              <Link2 className="h-3 w-3" /> Open run
+                            </button>
+                          </div>
+                          {delivery.url ? (
+                            <Button variant="outline" size="sm" className="mt-3 h-7 text-[10px] border-border/50" onClick={() => window.open(delivery.url || '', '_blank', 'noopener,noreferrer')}>
+                              Open target <ExternalLink className="ml-1 h-3 w-3" />
+                            </Button>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
 
               {artifacts.length ? (
                 <div>

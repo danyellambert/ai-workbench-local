@@ -3,13 +3,17 @@ import { motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Sparkles, AlertTriangle, Play, ArrowLeftRight, CheckCircle2, Shield, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { PageHeader, GlassCard, StatusPill } from '@/components/shared/ui-components';
+import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
 import {
   buildProductArtifactUrl,
+  PRODUCT_API_BASE_URL,
   generateProductWorkflowDeck,
   getProductDocumentLibrary,
   runProductWorkflow,
   type ProductDocumentLibraryEntry,
   type ProductPolicyComparisonDiff,
+  type ProductPublishNotionResponse,
+  type ProductPublishTrelloResponse,
   type ProductRunWorkflowResponse,
   type ProductWorkflowArtifact,
 } from '@/lib/product-api';
@@ -51,6 +55,8 @@ export default function ComparisonPage() {
   const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
   const [deckExportState, setDeckExportState] = useState<{ status: string; message: string } | null>(null);
+  const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
+  const [notionPublishResult, setNotionPublishResult] = useState<ProductPublishNotionResponse | null>(null);
 
   const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
     queryKey: ['product-document-library'],
@@ -109,6 +115,8 @@ export default function ComparisonPage() {
       setWorkflowResponse(payload);
       setGeneratedArtifacts([]);
       setDeckExportState(null);
+      setTrelloPublishResult(null);
+      setNotionPublishResult(null);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
@@ -188,6 +196,8 @@ export default function ComparisonPage() {
     setWorkflowResponse(null);
     setGeneratedArtifacts([]);
     setDeckExportState(null);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
   };
 
   const handleDocumentBChange = (documentId: string) => {
@@ -195,6 +205,8 @@ export default function ComparisonPage() {
     setWorkflowResponse(null);
     setGeneratedArtifacts([]);
     setDeckExportState(null);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
   };
 
   const handleOpenArtifact = (artifact: ProductWorkflowArtifact) => {
@@ -260,6 +272,37 @@ export default function ComparisonPage() {
           ))}
         </div>
       </motion.div>
+
+      <div className="mb-6">
+        <WorkflowPublishActions
+          workflowId="policy_contract_comparison"
+          result={workflowResponse?.result ?? null}
+          runId={workflowResponse?.run_id ?? null}
+          title="Publish outputs"
+          description="Keep the comparison surface focused: preview the remediation cards or the Notion memo before publishing them."
+          notionPreviewPayload={{
+            product_api_base_url: PRODUCT_API_BASE_URL,
+            title: comparisonView?.executive_summary.documents?.join(' vs ') || 'Policy comparison',
+            summary: comparisonView?.executive_summary.narrative || workflowResponse?.result.summary,
+            recommendation: comparisonView?.recommendation.summary || workflowResponse?.result.recommendation,
+            must_fix_items: mustFixItems,
+            negotiation_priorities: negotiationPriorities,
+            differences: differences.map((item) => ({
+              clause: item.clause,
+              impact: item.impact,
+              business_impact: item.business_impact,
+            })),
+            documents: comparisonView?.compared_documents || [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+            primary_documents: [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+            source_document_name: selectedDocumentA?.name || null,
+            source_document_title: selectedDocumentA?.name || null,
+            source_document_filename: selectedDocumentA?.name || null,
+            source_document_category: 'comparison',
+          }}
+          onTrelloPublished={setTrelloPublishResult}
+          onNotionPublished={setNotionPublishResult}
+        />
+      </div>
 
       {/* Document Selection */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -435,6 +478,32 @@ export default function ComparisonPage() {
 
         <GlassCard>
           <h3 className="text-sm font-medium text-foreground mb-3">Generated Artifacts</h3>
+          {(trelloPublishResult || notionPublishResult) ? (
+            <div className="mb-4 grid gap-3 md:grid-cols-2">
+              {trelloPublishResult ? (
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Trello publish</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground">{trelloPublishResult.message || 'The current comparison was sent to Trello.'}</p>
+                    </div>
+                    <StatusPill status={trelloPublishResult.status || 'completed'} />
+                  </div>
+                </div>
+              ) : null}
+              {notionPublishResult ? (
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Notion memo</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground">{notionPublishResult.message || notionPublishResult.page_title || 'The current comparison was published to Notion.'}</p>
+                    </div>
+                    <StatusPill status={notionPublishResult.status || 'completed'} />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           {deckExportState && (
             <div className="mb-3 rounded-lg bg-secondary/20 border border-border/40 px-3 py-2">
               <div className="flex items-center gap-2 mb-1">

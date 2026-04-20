@@ -16,9 +16,11 @@ import {
   User,
 } from 'lucide-react';
 
+import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
 import { PageHeader, StatusPill, SeverityBadge, GlassCard } from '@/components/shared/ui-components';
 import {
   buildProductArtifactUrl,
+  PRODUCT_API_BASE_URL,
   generateProductWorkflowDeck,
   publishProductWorkflowToTrello,
   getProductDocumentLibrary,
@@ -29,6 +31,7 @@ import {
   type ProductActionPlanView,
   type ProductDocumentLibraryEntry,
   type ProductRunWorkflowResponse,
+  type ProductPublishNotionResponse,
   type ProductPublishTrelloResponse,
   type ProductWorkflowArtifact,
 } from '@/lib/product-api';
@@ -160,6 +163,7 @@ export default function ActionPlanPage() {
   const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
   const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
+  const [notionPublishResult, setNotionPublishResult] = useState<ProductPublishNotionResponse | null>(null);
 
   const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
     queryKey: ['product-document-library'],
@@ -235,6 +239,7 @@ export default function ActionPlanPage() {
       setWorkflowResponse(payload);
       setGeneratedArtifacts([]);
       setTrelloPublishResult(null);
+      setNotionPublishResult(null);
       setActiveTab('board');
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
@@ -273,7 +278,7 @@ export default function ActionPlanPage() {
       if (!workflowResponse?.result) {
         throw new Error('Run the action plan workflow before publishing to Trello.');
       }
-      return publishProductWorkflowToTrello(workflowResponse.result);
+      return publishProductWorkflowToTrello(workflowResponse.result, { runId: workflowResponse.run_id });
     },
     onSuccess: (payload) => {
       setTrelloPublishResult(payload);
@@ -762,6 +767,35 @@ export default function ActionPlanPage() {
         </TabsContent>
       </Tabs>
 
+
+      <div className="mt-6" data-testid="workflow-publish-actions-surface" data-workflow="action-plan">
+        <WorkflowPublishActions
+          workflowId="action_plan_evidence_review"
+          result={workflowResponse?.result ?? null}
+          runId={workflowResponse?.run_id ?? null}
+          title="Publish outputs"
+          description="Preview the Trello action cards or the Notion handoff before publishing this action plan."
+          notionPreviewPayload={{
+            title: 'Action Plan handoff',
+            product_api_base_url: PRODUCT_API_BASE_URL,
+            summary: workflowResponse?.result.summary,
+            recommendation: workflowResponse?.result.recommendation,
+            actions: items.map((item) => ({ title: item.title, owner: item.owner, due_date: item.due_date, priority: item.priority, status: item.status })),
+            evidence_gaps: evidenceGaps.map((gap) => ({ title: gap.title, status: gap.status, detail: gap.detail })),
+            next_steps: highlights,
+            highlights,
+            documents: selectedDocuments.map((document) => document.name),
+            primary_documents: selectedDocuments.map((document) => document.name),
+            source_document_name: selectedDocuments[0]?.name || null,
+            source_document_title: selectedDocuments[0]?.name || null,
+            source_document_filename: selectedDocuments[0]?.name || null,
+            source_document_category: 'action-plan',
+          }}
+          onTrelloPublished={setTrelloPublishResult}
+          onNotionPublished={setNotionPublishResult}
+        />
+      </div>
+
       <div className="grid xl:grid-cols-[1.2fr_0.8fr] gap-4 mt-6">
         <GlassCard>
           <div className="flex items-center gap-2 mb-3">
@@ -820,8 +854,10 @@ export default function ActionPlanPage() {
             <FileText className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Generated artifacts</h3>
           </div>
-          {trelloPublishResult ? (
-            <div className="mb-4 rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+          {(trelloPublishResult || notionPublishResult) ? (
+            <div className="mb-4 grid gap-3 md:grid-cols-2">
+              {trelloPublishResult ? (
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-medium text-foreground">Trello publish</p>
@@ -839,8 +875,8 @@ export default function ActionPlanPage() {
                   </div>
                 </div>
                 <div className="rounded-md bg-background/70 px-2 py-2">
-                  <div className="uppercase tracking-wide text-muted-foreground">Board</div>
-                  <div className="text-xs font-medium text-foreground mt-1 break-all">{trelloPublishResult.target_board_id || 'Configured target'}</div>
+                  <div className="uppercase tracking-wide text-muted-foreground">Workspace</div>
+                  <div className="text-xs font-medium text-foreground mt-1">{trelloPublishResult.board_name || 'Configured Trello workspace'}</div>
                 </div>
               </div>
               {trelloPublishResult.list_breakdown?.length ? (
@@ -857,6 +893,29 @@ export default function ActionPlanPage() {
                   <p className="mt-2 text-[10px] text-muted-foreground">
                     Action status is mapped to Trello lists as Open → Open, In Progress → Approved, Blocked/Needs review → Review, Done → Done.
                   </p>
+                  {trelloPublishResult.board_url ? (
+                    <Button variant="outline" size="sm" className="mt-3 h-7 px-2 text-[10px]" onClick={() => window.open(trelloPublishResult.board_url || '', '_blank', 'noopener,noreferrer')}>
+                      Open board <ExternalLink className="ml-1 h-3 w-3" />
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
+                </div>
+              ) : null}
+              {notionPublishResult ? (
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Notion handoff</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">{notionPublishResult.message || notionPublishResult.page_title || 'The current action plan was published to Notion.'}</p>
+                    </div>
+                    <StatusPill status={notionPublishResult.status || 'completed'} />
+                  </div>
+                  {notionPublishResult.page_url ? (
+                    <Button variant="outline" size="sm" className="mt-3 h-7 px-2 text-[10px]" onClick={() => window.open(notionPublishResult.page_url || '', '_blank', 'noopener,noreferrer')}>
+                      Open page <ExternalLink className="ml-1 h-3 w-3" />
+                    </Button>
+                  ) : null}
                 </div>
               ) : null}
             </div>

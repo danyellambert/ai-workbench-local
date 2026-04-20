@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { FileText, Upload, Search, Grid, List, AlertTriangle, Check, Database, Layers, AlertCircle, Loader2, FileSearch, HardDrive, ScanSearch, Trash2 } from 'lucide-react';
+import { FileText, Upload, Search, Grid, List, AlertTriangle, Check, Database, Layers, AlertCircle, Loader2, FileSearch, HardDrive, ScanSearch, Trash2, FolderTree } from 'lucide-react';
 import { PageHeader, StatusPill, GlassCard, MetricCard } from '@/components/shared/ui-components';
 import { deleteProductDocuments, getProductDocumentLibrary, getProductUploadJob, type ProductDocumentLibraryEntry, type ProductUploadDocumentsResponse, uploadProductDocuments } from '@/lib/product-api';
+import { NextcloudImportSheet } from '@/components/product/NextcloudImportSheet';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +46,7 @@ export default function DocumentsPage() {
   const [activeUploadJobId, setActiveUploadJobId] = useState<string | null>(null);
   const [uploadJobSeed, setUploadJobSeed] = useState<ProductUploadDocumentsResponse | null>(null);
   const [documentPendingDelete, setDocumentPendingDelete] = useState<ProductDocumentLibraryEntry | null>(null);
+  const [nextcloudSheetOpen, setNextcloudSheetOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const handledUploadTerminalStateRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
@@ -186,9 +188,14 @@ export default function DocumentsPage() {
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" variants={stagger} initial="initial" animate="animate">
       <PageHeader title="Document Library" description="Ingest, index and manage your document corpus for AI-powered analysis.">
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={handleOpenFilePicker} disabled={uploadInProgress}>
-          {uploadInProgress ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-2" />} Upload Documents
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => setNextcloudSheetOpen(true)} disabled={uploadInProgress} data-testid="open-nextcloud-import">
+            <FolderTree className="w-3.5 h-3.5 mr-2" /> Import from Nextcloud
+          </Button>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={handleOpenFilePicker} disabled={uploadInProgress}>
+            {uploadInProgress ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-2" />} Upload Documents
+          </Button>
+        </div>
       </PageHeader>
 
       <input
@@ -198,6 +205,20 @@ export default function DocumentsPage() {
         accept=".pdf,.csv,.txt,.md,.py"
         className="hidden"
         onChange={(event) => handleFilesSelected(event.target.files)}
+      />
+
+      <NextcloudImportSheet
+        open={nextcloudSheetOpen}
+        onOpenChange={setNextcloudSheetOpen}
+        onImportStarted={(payload) => {
+          handledUploadTerminalStateRef.current = null;
+          setActiveUploadJobId(payload.job_id);
+          setUploadJobSeed(payload);
+          setUploadFeedback({
+            type: 'info',
+            message: payload.message || 'Import accepted. Preparing ingestion pipeline.',
+          });
+        }}
       />
 
       {/* Stats */}
@@ -298,6 +319,7 @@ export default function DocumentsPage() {
           )}
           <p className="text-sm text-foreground mb-1">Drop files here or click to browse</p>
           <p className="text-xs text-muted-foreground">Supported now: PDF, CSV, TXT, MD and PY — files are indexed immediately after upload.</p>
+          <p className="mt-2 text-[11px] text-muted-foreground">Need something from the external corpus? Use <span className="font-medium text-foreground">Import from Nextcloud</span> to browse remote folders and ingest one file into this workspace.</p>
         </div>
       </motion.div>
 

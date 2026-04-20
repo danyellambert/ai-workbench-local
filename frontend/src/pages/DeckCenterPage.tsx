@@ -106,7 +106,7 @@ export default function DeckCenterPage() {
     return rankedArtifacts.filter((artifact) => {
       const matchesSearch =
         !needle ||
-        `${artifact.name} ${artifact.title || ''} ${artifact.workflow_label} ${artifact.export_kind || ''} ${artifact.type}`
+        `${artifact.name} ${artifact.title || ''} ${artifact.workflow_label} ${artifact.export_kind || ''} ${artifact.type} deck deck-center presentation executive artifact`
           .toLowerCase()
           .includes(needle);
       const matchesStatus = statusFilter === 'all' || artifact.status === statusFilter;
@@ -213,11 +213,26 @@ export default function DeckCenterPage() {
         ) : null}
       </div>
 
+
+      <div className="mb-6">
+        <GlassCard>
+          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Share-ready outputs</h3>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Keep Deck Center product-facing: open the generated deck, review assets, and use EvidenceOps only when you need the delivery plumbing behind the scenes.
+              </p>
+            </div>
+            <Badge variant="outline" className="w-fit text-[10px] border-border/60 text-muted-foreground">MCP details live in EvidenceOps</Badge>
+          </div>
+        </GlassCard>
+      </div>
+
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)]">
         <div className="space-y-3">
           {!visibleArtifacts.length && (
             <GlassCard>
-              <div className="text-xs text-muted-foreground">
+              <div data-testid="deck-center-detail-empty" className="text-xs text-muted-foreground">
                 {artifactsQuery.isLoading
                   ? 'Loading persisted deck artifacts...'
                   : 'No artifacts matched the current filters. Clear the search or switch the status filter to inspect incomplete exports.'}
@@ -234,6 +249,7 @@ export default function DeckCenterPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.08 + index * 0.03 }}
                 role="button"
+                data-testid="deck-center-artifact-card"
                 tabIndex={0}
                 onClick={() => setSelectedArtifactId(artifact.id)}
                 onKeyDown={(event) => {
@@ -287,7 +303,7 @@ export default function DeckCenterPage() {
           ) : null}
         </div>
 
-        <GlassCard className="min-h-[540px]">
+        <GlassCard className="min-h-[540px]" data-testid="deck-center-detail-panel">
           {!detailArtifact ? (
             <div className="text-xs text-muted-foreground">Select an artifact to inspect its readiness, review snapshot, preview assets and export files.</div>
           ) : (

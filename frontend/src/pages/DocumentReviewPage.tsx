@@ -4,8 +4,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, Clock, ExternalLink, FileText, Info, Loader2, Play, Sparkles, User } from 'lucide-react';
 
 import { PageHeader, StatusPill, SeverityBadge, GlassCard } from '@/components/shared/ui-components';
+import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
 import {
   buildProductArtifactUrl,
+  PRODUCT_API_BASE_URL,
   generateProductWorkflowDeck,
   getProductDocumentLibrary,
   getProductGroundingPreview,
@@ -13,6 +15,8 @@ import {
   type ProductDocumentLibraryEntry,
   type ProductDocumentReviewFinding,
   type ProductDocumentReviewView,
+  type ProductPublishNotionResponse,
+  type ProductPublishTrelloResponse,
   type ProductRunWorkflowResponse,
   type ProductWorkflowArtifact,
 } from '@/lib/product-api';
@@ -94,6 +98,8 @@ export default function DocumentReviewPage() {
   const [activeTab, setActiveTab] = useState<'findings' | 'evidence' | 'artifacts'>(defaultTab);
   const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
+  const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
+  const [notionPublishResult, setNotionPublishResult] = useState<ProductPublishNotionResponse | null>(null);
 
   const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
     queryKey: ['product-document-library'],
@@ -147,6 +153,8 @@ export default function DocumentReviewPage() {
     onSuccess: async (payload) => {
       setWorkflowResponse(payload);
       setGeneratedArtifacts([]);
+      setTrelloPublishResult(null);
+      setNotionPublishResult(null);
       setActiveTab('findings');
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
@@ -219,6 +227,8 @@ export default function DocumentReviewPage() {
     setSelectedDocumentId(documentId);
     setWorkflowResponse(null);
     setGeneratedArtifacts([]);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
     setActiveTab(defaultTab);
   };
 
@@ -306,6 +316,37 @@ export default function DocumentReviewPage() {
           </div>
         </div>
       </motion.div>
+
+      <div className="mb-6">
+        <WorkflowPublishActions
+          workflowId="document_review"
+          result={workflowResponse?.result ?? null}
+          runId={workflowResponse?.run_id ?? null}
+          title="Publish outputs"
+          description="Use MCP only at the output layer: preview the finding cards or the Notion review handoff before publishing them."
+          notionPreviewPayload={{
+            product_api_base_url: PRODUCT_API_BASE_URL,
+            title: selectedDocument?.name,
+            summary: workflowResponse?.result.summary,
+            recommendation: workflowResponse?.result.recommendation || decisionSummary.label,
+            findings: findings.map((finding) => ({
+              title: finding.title,
+              severity: finding.severity,
+              category: finding.category,
+              recommendation: finding.recommendation,
+            })),
+            next_steps: reviewView?.next_steps || topBlockers.map((item) => item.title || item.recommendation || 'Review blocker'),
+            documents: selectedDocument ? [selectedDocument.name] : [],
+            primary_documents: selectedDocument ? [selectedDocument.name] : [],
+            source_document_name: selectedDocument?.name || null,
+            source_document_title: selectedDocument?.name || null,
+            source_document_filename: selectedDocument?.name || null,
+            source_document_category: 'review',
+          }}
+          onTrelloPublished={setTrelloPublishResult}
+          onNotionPublished={setNotionPublishResult}
+        />
+      </div>
 
       {documentsError && (
         <div className="glass rounded-xl p-4 mb-6 border border-glow-warning/20 text-xs text-glow-warning flex items-center gap-2">
@@ -482,6 +523,32 @@ export default function DocumentReviewPage() {
             <div id="document-review-panel-artifacts" role="tabpanel" className="mt-0">
               <GlassCard>
                 <h3 className="text-sm font-medium text-foreground mb-3">Generated Artifacts</h3>
+                {(trelloPublishResult || notionPublishResult) ? (
+                  <div className="mb-4 grid gap-3 md:grid-cols-2">
+                    {trelloPublishResult ? (
+                      <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">Trello publish</p>
+                            <p className="mt-1 text-[10px] text-muted-foreground">{trelloPublishResult.message || 'The current review was sent to Trello.'}</p>
+                          </div>
+                          <StatusPill status={trelloPublishResult.status || 'completed'} />
+                        </div>
+                      </div>
+                    ) : null}
+                    {notionPublishResult ? (
+                      <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">Notion handoff</p>
+                            <p className="mt-1 text-[10px] text-muted-foreground">{notionPublishResult.message || notionPublishResult.page_title || 'The current review was published to Notion.'}</p>
+                          </div>
+                          <StatusPill status={notionPublishResult.status || 'completed'} />
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
                 <div className="space-y-2">
                   {allArtifacts.length > 0 ? allArtifacts.map((artifact) => (
                     <div key={`${artifact.artifact_type}-${artifact.path || artifact.label}`} className="flex items-center justify-between py-2 px-3 rounded-lg bg-secondary/20 hover:bg-secondary/30 transition-colors">

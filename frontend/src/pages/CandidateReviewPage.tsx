@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -8,7 +8,6 @@ import {
   Briefcase,
   GraduationCap,
   CheckCircle2,
-  Upload,
   Target,
   Search,
   ShieldAlert,
@@ -18,6 +17,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
+import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
 import { PageHeader, GlassCard, StatusPill } from '@/components/shared/ui-components';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -25,16 +25,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/components/ui/sonner';
 import {
   buildProductArtifactUrl,
+  PRODUCT_API_BASE_URL,
   generateProductWorkflowDeck,
   getProductDocumentLibrary,
   getProductGroundingPreview,
-  getProductUploadJob,
   runProductWorkflow,
-  uploadProductDocuments,
   type ProductDocumentLibraryEntry,
   type ProductResultSections,
+  type ProductPublishNotionResponse,
+  type ProductPublishTrelloResponse,
   type ProductRunWorkflowResponse,
-  type ProductUploadDocumentsResponse,
   type ProductWorkflowArtifact,
 } from '@/lib/product-api';
 
@@ -141,13 +141,12 @@ function getStatusCopy(response: ProductRunWorkflowResponse | null): { label: st
 
 export default function CandidateReviewPage() {
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [inputText, setInputText] = useState('Evaluate this CV for a senior AI engineer role and highlight strengths, watchouts, seniority signals and interview focus areas.');
   const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
-  const [activeUploadJobId, setActiveUploadJobId] = useState<string | null>(null);
-  const [uploadJobSeed, setUploadJobSeed] = useState<ProductUploadDocumentsResponse | null>(null);
+  const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
+  const [notionPublishResult, setNotionPublishResult] = useState<ProductPublishNotionResponse | null>(null);
 
   const documentLibraryQuery = useQuery({
     queryKey: ['product-document-library'],
@@ -156,57 +155,11 @@ export default function CandidateReviewPage() {
     refetchOnReconnect: false,
   });
 
-  const uploadJobQuery = useQuery({
-    queryKey: ['product-upload-job', activeUploadJobId],
-    queryFn: () => getProductUploadJob(activeUploadJobId || ''),
-    enabled: Boolean(activeUploadJobId),
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchInterval: (query) => {
-      const payload = query.state.data as ProductUploadDocumentsResponse | undefined;
-      if (!payload) return 1000;
-      return payload.status === 'completed' || payload.status === 'error' ? false : 1000;
-    },
-  });
-
-  const uploadMutation = useMutation({
-    mutationFn: uploadProductDocuments,
-    onSuccess: (payload) => {
-      setActiveUploadJobId(payload.job_id);
-      setUploadJobSeed(payload);
-      toast.success(payload.message || 'Candidate document upload accepted. Indexing started.');
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    },
-    onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Candidate document upload failed.');
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    },
-  });
-
-  useEffect(() => {
-    const uploadJob = uploadJobQuery.data;
-    if (!uploadJob) return;
-    if (uploadJob.status === 'completed') {
-      setActiveUploadJobId(null);
-      setUploadJobSeed(uploadJob);
-      void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['product-document-library'] }),
-        queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
-      ]);
-      toast.success(uploadJob.message || 'Candidate document indexed successfully.');
-      return;
-    }
-    if (uploadJob.status === 'error') {
-      setActiveUploadJobId(null);
-      setUploadJobSeed(uploadJob);
-      toast.error(uploadJob.error || uploadJob.message || 'Candidate document upload failed.');
-    }
-  }, [queryClient, uploadJobQuery.data]);
-
   const availableDocuments = useMemo(
     () => (documentLibraryQuery.data?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
     [documentLibraryQuery.data?.documents],
   );
+
 
   const preferredCandidateDocuments = useMemo(
     () => availableDocuments.filter(isCandidateLikeDocument),
@@ -254,6 +207,8 @@ export default function CandidateReviewPage() {
     onSuccess: async (payload) => {
       setWorkflowResponse(payload);
       setGeneratedArtifacts([]);
+      setTrelloPublishResult(null);
+      setNotionPublishResult(null);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
@@ -299,16 +254,9 @@ export default function CandidateReviewPage() {
     () => dedupeArtifacts([...(sections?.artifacts ?? []), ...generatedArtifacts]),
     [generatedArtifacts, sections?.artifacts],
   );
-  const uploadJob = uploadJobQuery.data ?? uploadJobSeed;
-  const uploadInProgress = uploadMutation.isPending || ['queued', 'running'].includes(uploadJob?.status || '');
   const selectedDocumentDate = formatDate(selectedDocument?.indexed_at || null);
   const preview = workflowResponse?.result?.grounding_preview ?? previewQuery.data?.preview ?? null;
 
-  const handleFilesSelected = (fileList: FileList | File[] | null) => {
-    const files = Array.from(fileList ?? []);
-    if (!files.length) return;
-    uploadMutation.mutate(files.slice(0, 1));
-  };
 
   const handleOpenArtifact = (artifact: ProductWorkflowArtifact) => {
     if (!artifact.path) {
@@ -321,16 +269,6 @@ export default function CandidateReviewPage() {
   return (
     <motion.div data-testid="candidate-review-page" className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Candidate Review" description="Live hiring intelligence backed by the Product API, the indexed document corpus and structured candidate-analysis output.">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,.txt,.md"
-          className="hidden"
-          onChange={(event) => handleFilesSelected(event.target.files)}
-        />
-        <Button data-testid="candidate-review-upload-button" variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={uploadInProgress} onClick={() => fileInputRef.current?.click()}>
-          {uploadInProgress ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-2" />} Upload CV
-        </Button>
         <Button data-testid="candidate-review-run-button" className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" disabled={!selectedDocumentId || runReviewMutation.isPending} onClick={() => runReviewMutation.mutate()}>
           {runReviewMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Run Candidate Review
         </Button>
@@ -352,7 +290,7 @@ export default function CandidateReviewPage() {
         <GlassCard className="mb-6 border border-glow-warning/20">
           <div className="flex items-center gap-2 text-xs text-glow-warning">
             <AlertTriangle className="w-4 h-4" />
-            No indexed documents are available yet. Upload a resume/CV or use the Document Library to index one before running Candidate Review.
+            No indexed documents are available yet. Use the Document Library to import or index a CV before running Candidate Review.
           </div>
         </GlassCard>
       )}
@@ -361,7 +299,7 @@ export default function CandidateReviewPage() {
         <GlassCard className="mb-6 border border-glow-warning/20">
           <div className="flex items-center gap-2 text-xs text-glow-warning">
             <AlertTriangle className="w-4 h-4" />
-            The current corpus is live, but no CV-like filename was detected. Candidate Review can still run on the selected document, though the output may be derived from a non-resume source.
+            The current corpus is live, but no CV-like filename was detected. Candidate Review can still run on the selected document, though a CV imported through the Document Library is preferred.
           </div>
         </GlassCard>
       )}
@@ -583,6 +521,45 @@ export default function CandidateReviewPage() {
             </GlassCard>
           )}
 
+          <div data-testid="workflow-publish-actions-surface" data-workflow="candidate-review">
+          <WorkflowPublishActions
+            workflowId="candidate_review"
+            result={workflowResponse?.result ?? null}
+            runId={workflowResponse?.run_id ?? null}
+            className="p-4"
+            title="Publish outputs"
+            description="Keep the hiring workflow focused: preview the interview tasks or the hiring brief before publishing them."
+            notionPreviewPayload={{
+              product_api_base_url: PRODUCT_API_BASE_URL,
+              title: candidateProfile?.headline || candidateProfile?.name || selectedDocument?.name,
+              candidate_name: candidateProfile?.name || selectedDocument?.name,
+              candidate_headline: candidateProfile?.headline || null,
+              candidate_location: candidateProfile?.location || null,
+              summary: workflowResponse?.result.summary,
+              recommendation: workflowResponse?.result.recommendation,
+              strengths: sections?.strengths || [],
+              watchouts: sections?.watchouts || [],
+              highlights: sections?.strengths || [],
+              next_steps: sections?.next_steps || [],
+              interview_focus: sections?.watchouts || [],
+              interview_questions: sections?.watchouts || [],
+              experience_snapshot: experienceRows.map((row) => ({ role: String(row[0] || ''), company: String(row[1] || ''), tenure: String(row[2] || ''), impact: String(row[3] || '') })),
+              evidence_rows: evidenceTableRows.map((row) => row.map((cell) => String(cell ?? ''))),
+              documents: selectedDocument ? [selectedDocument.name] : [],
+              primary_documents: selectedDocument ? [selectedDocument.name] : [],
+              source_document_name: selectedDocument?.name || null,
+              source_document_title: selectedDocument?.name || null,
+              source_document_filename: selectedDocument?.name || null,
+              source_document_id: selectedDocument?.document_id || null,
+              source_document_relative_path: (selectedDocument as unknown as { relative_path?: string | null })?.relative_path || null,
+              source_document_webdav_url: (selectedDocument as unknown as { webdav_url?: string | null })?.webdav_url || null,
+              source_document_category: 'candidate',
+            }}
+            onTrelloPublished={setTrelloPublishResult}
+            onNotionPublished={setNotionPublishResult}
+          />
+          </div>
+
           <GlassCard delay={0.3}>
             <div className="flex items-center justify-between gap-3 mb-3">
               <div>
@@ -591,6 +568,39 @@ export default function CandidateReviewPage() {
               </div>
               <StatusPill status={allArtifacts.length ? 'ready' : workflowResponse?.result ? workflowResponse.result.status : 'pending'} />
             </div>
+            {(trelloPublishResult || notionPublishResult) ? (
+              <div className="mb-4 grid gap-3 md:grid-cols-2">
+                {trelloPublishResult ? (
+                  <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">Trello publish</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground">{trelloPublishResult.message || 'The current review was sent to Trello.'}</p>
+                      </div>
+                      <StatusPill status={trelloPublishResult.status || 'completed'} />
+                    </div>
+                    <p className="mt-3 text-[10px] text-muted-foreground">Cards: {trelloPublishResult.created_card_count ?? trelloPublishResult.planned_card_count ?? 0}</p>
+                  </div>
+                ) : null}
+                {notionPublishResult ? (
+                  <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">Notion handoff</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground">{notionPublishResult.message || notionPublishResult.page_title || 'The current review was published to Notion.'}</p>
+                      </div>
+                      <StatusPill status={notionPublishResult.status || 'completed'} />
+                    </div>
+                    {notionPublishResult.page_url ? (
+                      <Button variant="outline" size="sm" className="mt-3 h-7 text-[10px]" onClick={() => window.open(notionPublishResult.page_url || '', '_blank', 'noopener,noreferrer')}>
+                        Open page <ExternalLink className="ml-1 h-3 w-3" />
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             {allArtifacts.length ? (
               <div className="space-y-2">
                 {allArtifacts.map((artifact) => (
