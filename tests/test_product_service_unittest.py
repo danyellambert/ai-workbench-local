@@ -288,11 +288,12 @@ class ProductServiceTests(unittest.TestCase):
                 "dry_run": False,
                 "created_card_count": 2,
                 "target_board_id": "board-1",
+                "message": "Published 2 card(s) to Trello — Open: 2",
             },
         ) as trello_mock:
             payload = publish_product_workflow_to_trello(result, dry_run=False)
 
-        trello_mock.assert_called_once_with(result, dry_run=False)
+        trello_mock.assert_called_once_with(result, dry_run=False, max_cards=8, preview_payload=None, selected_card_index=None)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["created_card_count"], 2)
         self.assertIn("Published 2 card(s) to Trello", payload["message"])

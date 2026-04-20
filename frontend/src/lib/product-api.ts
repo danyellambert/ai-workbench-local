@@ -1095,7 +1095,7 @@ export async function generateProductWorkflowDeck(
 
 export async function publishProductWorkflowToTrello(
   result: Record<string, unknown>,
-  options?: { runId?: string | null; dryRun?: boolean; previewPayload?: Record<string, unknown> | null },
+  options?: { runId?: string | null; dryRun?: boolean; previewPayload?: Record<string, unknown> | null; selectedCardIndex?: number | null },
 ): Promise<ProductPublishTrelloResponse> {
   const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-trello`, {
     method: 'POST',
@@ -1105,6 +1105,7 @@ export async function publishProductWorkflowToTrello(
       run_id: options?.runId || undefined,
       dry_run: options?.dryRun ?? false,
       preview_payload: options?.previewPayload || undefined,
+      selected_card_index: typeof options?.selectedCardIndex === 'number' ? options.selectedCardIndex : undefined,
     }),
   });
   if (!response.ok) {
@@ -1159,7 +1160,8 @@ export function getProductNotionEntries(limit = 8): Promise<ProductNotionEntries
 }
 
 export function getProductNextcloudDocuments(limit = 8): Promise<ProductNextcloudDocumentsResponse> {
-  return fetchProductApi<ProductNextcloudDocumentsResponse>(`/api/product/integrations/nextcloud?limit=${encodeURIComponent(String(limit))}`);
+  const normalizedLimit = Number.isFinite(limit) ? Math.trunc(limit) : 8;
+  return fetchProductApi<ProductNextcloudDocumentsResponse>(`/api/product/integrations/nextcloud?limit=${encodeURIComponent(String(normalizedLimit))}`);
 }
 
 export async function importProductDocumentFromNextcloud(options: {

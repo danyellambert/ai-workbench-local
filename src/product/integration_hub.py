@@ -310,8 +310,17 @@ def build_product_notion_entries_payload(*, limit: int = 10) -> dict[str, Any]:
     return result
 
 
-def build_product_nextcloud_documents_payload(*, limit: int = 10) -> dict[str, Any]:
-    documents = list_nextcloud_repository_documents(limit=max(1, min(int(limit), 25)))
+def build_product_nextcloud_documents_payload(*, limit: int | None = 10) -> dict[str, Any]:
+    normalized_limit: int | None
+    if limit is None:
+        normalized_limit = None
+    else:
+        try:
+            parsed_limit = int(limit)
+        except (TypeError, ValueError):
+            parsed_limit = 10
+        normalized_limit = None if parsed_limit <= 0 else min(parsed_limit, 5000)
+    documents = list_nextcloud_repository_documents(limit=normalized_limit)
     normalized_documents = [
         {
             "document_id": item.get("document_id"),
@@ -348,12 +357,14 @@ def publish_product_workflow_to_notion(
     dry_run: bool = False,
     template_id: str | None = None,
     preview_payload: dict[str, Any] | None = None,
+    run_id: str | None = None,
 ) -> dict[str, Any]:
     payload = create_notion_page_from_product_result(
         result,
         dry_run=bool(dry_run),
         template_id=template_id,
         preview_payload=preview_payload,
+        run_id=run_id,
     )
     payload.setdefault("ok", True)
     payload.setdefault("timestamp", _now_iso())

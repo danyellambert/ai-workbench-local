@@ -931,14 +931,21 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
                 product_result = ProductWorkflowResult.model_validate(result_payload)
                 publish_options = payload.get("publish_options") if isinstance(payload.get("publish_options"), dict) else {}
-                dry_run = _coerce_bool_flag(payload.get("dry_run")) or _coerce_bool_flag(publish_options.get("dry_run"))
+                dry_run = _coerce_bool_flag(payload.get("dry_run") if "dry_run" in payload else publish_options.get("dry_run"))
                 run_id = str(payload.get("run_id") or "").strip() or None
                 preview_payload = payload.get('preview_payload') if isinstance(payload.get('preview_payload'), dict) else None
-                publish_payload = publish_product_workflow_to_trello(product_result, dry_run=dry_run, preview_payload=preview_payload)
+                raw_selected_card_index = payload.get('selected_card_index') if 'selected_card_index' in payload else publish_options.get('selected_card_index')
+                selected_card_index = int(raw_selected_card_index) if isinstance(raw_selected_card_index, int) or (isinstance(raw_selected_card_index, str) and raw_selected_card_index.strip()) else None
+                publish_payload = publish_product_workflow_to_trello(
+                    product_result,
+                    dry_run=dry_run,
+                    preview_payload=preview_payload,
+                    selected_card_index=selected_card_index,
+                )
                 publish_payload.setdefault("ok", True)
                 publish_payload.setdefault("workflow_id", product_result.workflow_id)
                 publish_payload.setdefault("workflow_label", product_result.workflow_label)
-                if run_id and not dry_run:
+                if run_id:
                     record_product_delivery_output(self.bootstrap.workspace_root, run_id=run_id, target="trello", payload=publish_payload)
                 self._send_json(HTTPStatus.OK, publish_payload)
             except Exception as error:  # pragma: no cover - defensive API surface
@@ -950,15 +957,15 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
                 product_result = ProductWorkflowResult.model_validate(result_payload)
                 publish_options = payload.get("publish_options") if isinstance(payload.get("publish_options"), dict) else {}
-                dry_run = _coerce_bool_flag(payload.get("dry_run")) or _coerce_bool_flag(publish_options.get("dry_run"))
+                dry_run = _coerce_bool_flag(payload.get("dry_run") if "dry_run" in payload else publish_options.get("dry_run"))
                 run_id = str(payload.get("run_id") or "").strip() or None
                 template_id = str(payload.get('template_id') or '').strip() or None
                 preview_payload = payload.get('preview_payload') if isinstance(payload.get('preview_payload'), dict) else None
-                publish_payload = publish_product_workflow_to_notion(product_result, dry_run=dry_run, template_id=template_id, preview_payload=preview_payload)
+                publish_payload = publish_product_workflow_to_notion(product_result, dry_run=dry_run, template_id=template_id, preview_payload=preview_payload, run_id=run_id)
                 publish_payload.setdefault("ok", True)
                 publish_payload.setdefault("workflow_id", product_result.workflow_id)
                 publish_payload.setdefault("workflow_label", product_result.workflow_label)
-                if run_id and not dry_run:
+                if run_id:
                     record_product_delivery_output(self.bootstrap.workspace_root, run_id=run_id, target="notion", payload=publish_payload)
                 self._send_json(HTTPStatus.OK, publish_payload)
             except Exception as error:
