@@ -91,7 +91,7 @@ export default function AppSidebar() {
         {!collapsed && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
             <h1 className="text-sm font-semibold text-foreground truncate">{APP_CONFIG.name}</h1>
-            <p className="text-[10px] text-muted-foreground">{APP_CONFIG.environment} · {APP_CONFIG.version}</p>
+            <p className="text-[10px] text-muted-foreground">by Danyel Lambert</p>
           </motion.div>
         )}
       </div>
