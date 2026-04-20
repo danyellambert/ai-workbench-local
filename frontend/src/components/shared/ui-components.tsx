@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 
@@ -115,12 +116,23 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("shimmer rounded-lg", className)} />;
 }
 
-export function GlassCard({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+type GlassCardProps = {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  id?: string;
+  style?: CSSProperties;
+  onClick?: MouseEventHandler<HTMLDivElement>;
+  ['data-testid']?: string;
+};
+
+export function GlassCard({ children, className, delay = 0, ...props }: GlassCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn("glass rounded-xl p-5", className)}
+      {...props}
     >
       {children}
     </motion.div>

@@ -71,6 +71,7 @@ export interface ProductRunEntry {
   request_payload?: Record<string, unknown> | null;
   response_payload?: ProductWorkflowResultPayload | Record<string, unknown> | null;
   result_sections?: ProductResultSections | Record<string, unknown> | null;
+  delivery_outputs?: Record<string, ProductDeliveryOutput> | null;
   can_rerun?: boolean;
   notes?: string[];
   source?: string;
@@ -599,6 +600,162 @@ export interface ProductPublishTrelloResponse {
   error?: string | null;
 }
 
+export interface ProductDeliveryOutput {
+  target: string;
+  label?: string | null;
+  status: string;
+  dry_run?: boolean;
+  timestamp?: string | null;
+  message?: string | null;
+  summary?: string | null;
+  url?: string | null;
+  metrics?: Record<string, string | number | boolean | null>;
+}
+
+
+export interface ProductPublishNotionTemplate {
+  id: string;
+  label: string;
+  description?: string | null;
+}
+
+export interface ProductPublishNotionPreviewSection {
+  heading?: string | null;
+  items?: string[];
+}
+
+export interface ProductPublishNotionResponse {
+  [key: string]: unknown;
+  ok: boolean;
+  workflow_id?: string | null;
+  workflow_label?: string | null;
+  status?: 'success' | 'warning' | 'error' | string;
+  dry_run?: boolean;
+  page_id?: string | null;
+  page_title?: string | null;
+  page_url?: string | null;
+  database_id?: string | null;
+  message?: string | null;
+  children_count?: number;
+  template_id?: string | null;
+  template_label?: string | null;
+  template_description?: string | null;
+  available_templates?: ProductPublishNotionTemplate[];
+  preview_sections?: ProductPublishNotionPreviewSection[];
+  title?: string | null;
+  error?: string | null;
+}
+
+export interface ProductIntegrationTargetMetric {
+  label: string;
+  value: string | number;
+}
+
+export interface ProductIntegrationTarget {
+  key: string;
+  label: string;
+  role: string;
+  configured: boolean;
+  status: 'ready' | 'degraded' | string;
+  detail: string;
+  metrics: ProductIntegrationTargetMetric[];
+  last_delivery_at?: string | null;
+  last_delivery_summary?: string | null;
+}
+
+export interface ProductIntegrationWorkflowTarget {
+  workflow_id: string;
+  workflow_label: string;
+  narrative: string;
+  source_target: string;
+  execution_target: string;
+  handoff_target: string;
+  latest_delivery?: ProductDeliveryOutput | null;
+}
+
+export interface ProductIntegrationRecentDelivery {
+  run_id?: string | null;
+  workflow_id?: string | null;
+  workflow_label?: string | null;
+  target: string;
+  target_label: string;
+  status: string;
+  summary?: string | null;
+  timestamp?: string | null;
+  url?: string | null;
+  dry_run?: boolean;
+  delivery?: ProductDeliveryOutput | null;
+}
+
+export interface ProductIntegrationHubResponse {
+  ok: boolean;
+  status: string;
+  updated_at?: string | null;
+  summary: {
+    ready_targets: number;
+    total_targets: number;
+    recent_deliveries: number;
+    corpus_files: number;
+  };
+  cycle: Array<{
+    step: string;
+    target: string;
+    description: string;
+  }>;
+  targets: ProductIntegrationTarget[];
+  workflow_targets: ProductIntegrationWorkflowTarget[];
+  recent_deliveries: ProductIntegrationRecentDelivery[];
+}
+
+export interface ProductNotionEntry {
+  id: string;
+  page_url?: string | null;
+  title: string;
+  created_time?: string | null;
+  last_edited_time?: string | null;
+}
+
+export interface ProductNotionEntriesResponse {
+  ok: boolean;
+  status: string;
+  timestamp?: string | null;
+  entry_count: number;
+  database_id?: string | null;
+  entries: ProductNotionEntry[];
+}
+
+export interface ProductNextcloudDocument {
+  document_id?: string | null;
+  title: string;
+  relative_path?: string | null;
+  category?: string | null;
+  size_bytes?: number | null;
+  modified_at?: string | number | null;
+  webdav_url?: string | null;
+}
+
+export interface ProductNextcloudDocumentsResponse {
+  ok: boolean;
+  status: string;
+  timestamp?: string | null;
+  entry_count: number;
+  remote_root_path?: string | null;
+  documents: ProductNextcloudDocument[];
+}
+
+export interface ProductNextcloudSyncResponse {
+  [key: string]: unknown;
+  ok: boolean;
+  status?: string;
+  dry_run?: boolean;
+  timestamp?: string | null;
+  message?: string | null;
+  remote_root_path?: string | null;
+  upload_count?: number;
+  uploaded_file_count?: number;
+  directories?: Array<Record<string, unknown>>;
+}
+
 export interface LabOverviewKpi {
   label: string;
   value: string | number;
@@ -936,11 +1093,19 @@ export async function generateProductWorkflowDeck(
   return response.json() as Promise<ProductGenerateDeckResponse>;
 }
 
-export async function publishProductWorkflowToTrello(payload: Record<string, unknown>): Promise<ProductPublishTrelloResponse> {
+export async function publishProductWorkflowToTrello(
+  result: Record<string, unknown>,
+  options?: { runId?: string | null; dryRun?: boolean; previewPayload?: Record<string, unknown> | null },
+): Promise<ProductPublishTrelloResponse> {
   const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-trello`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      result,
+      run_id: options?.runId || undefined,
+      dry_run: options?.dryRun ?? false,
+      preview_payload: options?.previewPayload || undefined,
+    }),
   });
   if (!response.ok) {
     let message = `Product API Trello publish failed: ${response.status}`;
@@ -956,9 +1121,137 @@ export async function publishProductWorkflowToTrello(payload: Record<string, unk
   return response.json() as Promise<ProductPublishTrelloResponse>;
 }
 
+export async function publishProductWorkflowToNotion(
+  result: Record<string, unknown>,
+  options?: { runId?: string | null; dryRun?: boolean; templateId?: string | null; previewPayload?: Record<string, unknown> | null },
+): Promise<ProductPublishNotionResponse> {
+  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-notion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      result,
+      run_id: options?.runId || undefined,
+      dry_run: options?.dryRun ?? false,
+      template_id: options?.templateId || undefined,
+      preview_payload: options?.previewPayload || undefined,
+    }),
+  });
+  if (!response.ok) {
+    let message = `Product API Notion publish failed: ${response.status}`;
+    try {
+      const errorPayload = await response.json() as { error?: string; message?: string };
+      if (errorPayload?.error) message = errorPayload.error;
+      else if (errorPayload?.message) message = errorPayload.message;
+    } catch {
+      // ignore JSON parsing error and keep fallback message
+    }
+    throw new Error(message);
+  }
+  return response.json() as Promise<ProductPublishNotionResponse>;
+}
+
+export function getProductIntegrationHub(): Promise<ProductIntegrationHubResponse> {
+  return fetchProductApi<ProductIntegrationHubResponse>('/api/product/integrations');
+}
+
+export function getProductNotionEntries(limit = 8): Promise<ProductNotionEntriesResponse> {
+  return fetchProductApi<ProductNotionEntriesResponse>(`/api/product/integrations/notion?limit=${encodeURIComponent(String(limit))}`);
+}
+
+export function getProductNextcloudDocuments(limit = 8): Promise<ProductNextcloudDocumentsResponse> {
+  return fetchProductApi<ProductNextcloudDocumentsResponse>(`/api/product/integrations/nextcloud?limit=${encodeURIComponent(String(limit))}`);
+}
+
+export async function importProductDocumentFromNextcloud(options: {
+  relativePath?: string | null;
+  documentId?: string | null;
+  filename?: string | null;
+  title?: string | null;
+  category?: string | null;
+  webdavUrl?: string | null;
+}): Promise<ProductUploadDocumentsResponse> {
+  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/integrations/nextcloud/import`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      relative_path: options.relativePath || undefined,
+      document_id: options.documentId || undefined,
+      filename: options.filename || undefined,
+      title: options.title || undefined,
+      category: options.category || undefined,
+      webdav_url: options.webdavUrl || undefined,
+    }),
+  });
+  if (!response.ok) {
+    let message = `Product API Nextcloud import failed: ${response.status}`;
+    try {
+      const errorPayload = await response.json() as { error?: string; message?: string };
+      if (errorPayload?.error) message = errorPayload.error;
+      else if (errorPayload?.message) message = errorPayload.message;
+    } catch {
+      // ignore JSON parsing error and keep fallback message
+    }
+    throw new Error(message);
+  }
+  return response.json() as Promise<ProductUploadDocumentsResponse>;
+}
+
+export async function syncProductEvidenceToNextcloud(options?: { dryRun?: boolean }): Promise<ProductNextcloudSyncResponse> {
+  return postProductApi<ProductNextcloudSyncResponse>('/api/product/integrations/nextcloud/sync', { dry_run: options?.dryRun ?? false });
+}
+
 export function buildProductArtifactUrl(path: string): string {
   const params = new URLSearchParams({ path });
   return `${PRODUCT_API_BASE_URL}/api/product/artifact?${params.toString()}`;
+}
+
+export function buildProductNextcloudOpenUrl(options: {
+  relativePath?: string | null;
+  documentId?: string | null;
+  filename?: string | null;
+  title?: string | null;
+  category?: string | null;
+  webdavUrl?: string | null;
+}): string {
+  const params = new URLSearchParams();
+  if (options.relativePath) params.set('relative_path', options.relativePath);
+  if (options.documentId) params.set('document_id', options.documentId);
+  if (options.filename) params.set('filename', options.filename);
+  if (options.title) params.set('title', options.title);
+  if (options.category) params.set('category', options.category);
+  if (options.webdavUrl) params.set('webdav_url', options.webdavUrl);
+  return `${PRODUCT_API_BASE_URL}/api/product/integrations/nextcloud/open?${params.toString()}`;
+}
+
+
+export async function fetchProductNextcloudDocumentBlob(options: {
+  relativePath?: string | null;
+  documentId?: string | null;
+  filename?: string | null;
+  title?: string | null;
+  category?: string | null;
+  webdavUrl?: string | null;
+}): Promise<{ blob: Blob; filename: string; contentType: string }> {
+  const url = buildProductNextcloudOpenUrl(options);
+  const response = await fetch(url, { credentials: 'omit' });
+  if (!response.ok) {
+    let message = `Product API Nextcloud open failed: ${response.status}`;
+    try {
+      const errorPayload = await response.json() as { error?: string; message?: string };
+      if (errorPayload?.error) message = errorPayload.error;
+      else if (errorPayload?.message) message = errorPayload.message;
+    } catch {
+      // ignore JSON parsing error and keep fallback message
+    }
+    throw new Error(message);
+  }
+  const contentType = response.headers.get('content-type') || 'application/octet-stream';
+  const contentDisposition = response.headers.get('content-disposition') || '';
+  const match = /filename="?([^";]+)"?/i.exec(contentDisposition);
+  const fallbackName = String(options.filename || options.title || options.relativePath || 'remote-document').split('/').pop() || 'remote-document';
+  const filename = match?.[1] || fallbackName;
+  const blob = await response.blob();
+  return { blob, filename, contentType };
 }
 
 export async function deleteProductDocuments(documentIds: string[]): Promise<ProductDeleteDocumentsResponse> {

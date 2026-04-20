@@ -401,6 +401,7 @@ def _normalize_history_entry(
         str(entry.get("workflow_id") or (request_payload or {}).get("workflow_id") or "").strip()
         and (document_ids or input_text)
     )
+    delivery_outputs = entry.get("delivery_outputs") if isinstance(entry.get("delivery_outputs"), dict) else None
 
     return {
         "id": str(entry.get("id") or "").strip(),
@@ -424,6 +425,7 @@ def _normalize_history_entry(
         "request_payload": request_payload,
         "response_payload": response_payload,
         "result_sections": result_sections,
+        "delivery_outputs": delivery_outputs,
         "can_rerun": can_rerun,
         "notes": notes,
         "source": source,

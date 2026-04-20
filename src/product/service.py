@@ -931,10 +931,12 @@ def publish_product_workflow_to_trello(
     *,
     dry_run: bool = True,
     max_cards: int = 8,
+    preview_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create or plan Trello cards for a workflow result without leaking EvidenceOps internals to the API layer."""
     return create_trello_cards_from_product_result(
         result,
         dry_run=dry_run,
         max_cards=max_cards,
+        preview_payload=preview_payload,
     )

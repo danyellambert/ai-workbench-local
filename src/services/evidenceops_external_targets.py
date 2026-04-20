@@ -715,11 +715,10 @@ def _build_trello_list_breakdown(cards: list[dict[str, Any]], settings: Evidence
 
 
 def _candidate_card_name(result: ProductWorkflowResult, payload: CVAnalysisPayload) -> str:
-    personal_info = payload.personal_info
-    full_name = _trim_text(getattr(personal_info, "full_name", "") if personal_info is not None else "", max_chars=64)
-    if full_name:
-        return _trim_text(f"[{result.workflow_label}] {full_name}", max_chars=120)
-    return _trim_text(f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}", max_chars=120)
+    candidate_name = _candidate_full_name(payload)
+    if candidate_name:
+        return _trim_text(f"Candidate brief — {candidate_name}", max_chars=120)
+    return _trim_text(f"Candidate brief — {result.recommendation or result.summary or result.workflow_id}", max_chars=120)
 
 
 def _build_product_result_card_description(
@@ -727,38 +726,31 @@ def _build_product_result_card_description(
     result: ProductWorkflowResult,
     document_ids: list[str],
     action_item: dict[str, Any] | None = None,
+    preview_payload: dict[str, Any] | None = None,
 ) -> str:
-    description_lines = [
-        f"Workflow: {result.workflow_label}",
-        f"Workflow ID: {result.workflow_id}",
-        f"Run status: {result.status}",
-        f"Summary: {_trim_text(result.summary, max_chars=900)}",
-    ]
-    if result.recommendation:
-        description_lines.append(f"Recommendation: {_trim_text(result.recommendation, max_chars=400)}")
-    if isinstance(action_item, dict):
-        if str(action_item.get("owner") or "").strip():
-            description_lines.append(f"Owner: {_trim_text(action_item.get('owner'), max_chars=120)}")
-        if str(action_item.get("due_date") or "").strip():
-            description_lines.append(f"Due date: {_trim_text(action_item.get('due_date'), max_chars=120)}")
-        if str(action_item.get("status") or "").strip():
-            description_lines.append(f"Action status: {_trim_text(action_item.get('status'), max_chars=120)}")
-        if str(action_item.get("source") or "").strip():
-            description_lines.append(f"Source: {_trim_text(action_item.get('source'), max_chars=240)}")
-        if str(action_item.get("evidence") or "").strip():
-            description_lines.append(f"Evidence: {_trim_text(action_item.get('evidence'), max_chars=600)}")
-    if result.highlights:
-        description_lines.append(
-            "Highlights: " + "; ".join(_trim_text(item, max_chars=120) for item in result.highlights[:5] if str(item).strip())
-        )
-    if result.warnings:
-        description_lines.append(
-            "Warnings: " + "; ".join(_trim_text(item, max_chars=120) for item in result.warnings[:4] if str(item).strip())
-        )
-    if document_ids:
-        description_lines.append("Documents: " + ", ".join(document_ids[:8]))
-    description_lines.append("Source surface: Gradio UI")
-    return "\n".join(line for line in description_lines if str(line).strip())
+    del document_ids
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    summary = _preview_string((preview_payload or {}).get("summary"), max_chars=220) or _trim_text(_derive_publish_summary(result), max_chars=220)
+    highlights = _preview_items_from_keys(preview_payload, "highlights", "strengths", max_items=3) or _derive_publish_highlights(result)[:3]
+    recommendation = _preview_string((preview_payload or {}).get("recommendation"), max_chars=220)
+    if not recommendation:
+        fallback_recommendation = _derive_publish_recommendation(result)
+        recommendation = _trim_text(fallback_recommendation, max_chars=220) if fallback_recommendation else None
+    evidence = _preview_documents(preview_payload, result)[:4]
+    warnings = _preview_items_from_keys(preview_payload, "watchouts", max_items=3) or _derive_publish_warnings(result)[:3]
+    interview_focus = _preview_items_from_keys(preview_payload, "interview_focus", "interview_questions", max_items=3)
+    if not interview_focus and isinstance(payload, CVAnalysisPayload):
+        interview_focus = _derive_candidate_interview_focus(payload)[:3]
+    return _build_trello_markdown_sections(
+        title=_derive_publish_title(result),
+        summary=summary,
+        highlights=highlights,
+        recommendation=recommendation,
+        evidence=evidence,
+        warnings=warnings,
+        action_item=action_item,
+        interview_focus=interview_focus,
+    )
 
 
 def _build_product_result_trello_cards(
@@ -766,6 +758,7 @@ def _build_product_result_trello_cards(
     result: ProductWorkflowResult,
     settings: EvidenceOpsExternalSettings,
     max_cards: int = 8,
+    preview_payload: dict[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], str]:
     document_ids = _result_document_ids(result)
     payload = result.structured_result.validated_output if result.structured_result is not None else None
@@ -789,6 +782,7 @@ def _build_product_result_trello_cards(
                             result=result,
                             document_ids=document_ids,
                             action_item=item,
+                            preview_payload=preview_payload,
                         ),
                         "list_id": _resolve_trello_target_list_id_for_action_item(
                             action_item=item,
@@ -835,14 +829,11 @@ def _build_product_result_trello_cards(
     if isinstance(payload, CVAnalysisPayload):
         card_name = _candidate_card_name(result, payload)
     else:
-        card_name = _trim_text(
-            f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}",
-            max_chars=120,
-        )
+        card_name = _derive_publish_title(result)
     cards.append(
         {
             "name": card_name,
-            "description": _build_product_result_card_description(result=result, document_ids=document_ids),
+            "description": _build_product_result_card_description(result=result, document_ids=document_ids, preview_payload=preview_payload),
             "list_id": target_list_id,
         }
     )
@@ -855,6 +846,7 @@ def create_trello_cards_from_product_result(
     settings: EvidenceOpsExternalSettings | None = None,
     dry_run: bool = True,
     max_cards: int = 8,
+    preview_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if not isinstance(result, ProductWorkflowResult):
         raise ValueError("A valid ProductWorkflowResult is required to create Trello cards.")
@@ -877,6 +869,7 @@ def create_trello_cards_from_product_result(
         result=result,
         settings=resolved_settings,
         max_cards=max_cards,
+        preview_payload=preview_payload,
     )
     list_breakdown = _build_trello_list_breakdown(cards, resolved_settings)
     plan = {
@@ -886,6 +879,7 @@ def create_trello_cards_from_product_result(
         "workflow_label": result.workflow_label,
         "card_mode": card_mode,
         "target_board_id": resolved_settings.trello.board_id or None,
+        "board_url": (f"https://trello.com/b/{resolved_settings.trello.board_id}" if str(resolved_settings.trello.board_id or "").strip() else None),
         "planned_card_count": len(cards),
         "planned_cards": cards,
         "list_breakdown": list_breakdown,
@@ -998,6 +992,9 @@ class NotionClient:
     def query_database(self, *, body: dict[str, Any] | None = None) -> dict[str, Any]:
         return self._request("POST", f"databases/{self.settings.database_id}/query", body=body or {})
 
+    def retrieve_database(self) -> dict[str, Any]:
+        return self._request("GET", f"databases/{self.settings.database_id}")
+
     def create_page(self, *, title: str, properties: dict[str, Any], children: list[dict[str, Any]] | None = None) -> dict[str, Any]:
         payload = {
             "parent": {"database_id": self.settings.database_id},
@@ -1069,6 +1066,320 @@ def _extract_notion_page_title(page: dict[str, Any]) -> str:
     return str(page.get("id") or "Untitled Notion page")
 
 
+def _build_notion_heading_block(content: object, *, level: int = 2) -> dict[str, Any] | None:
+    rich_text = _build_notion_rich_text(content)
+    if not rich_text:
+        return None
+    block_type = "heading_3" if int(level) >= 3 else "heading_2"
+    return {
+        "object": "block",
+        "type": block_type,
+        block_type: {"rich_text": rich_text},
+    }
+
+
+def _build_notion_bulleted_list_item(content: object) -> dict[str, Any] | None:
+    rich_text = _build_notion_rich_text(content)
+    if not rich_text:
+        return None
+    return {
+        "object": "block",
+        "type": "bulleted_list_item",
+        "bulleted_list_item": {"rich_text": rich_text},
+    }
+
+
+def _normalize_notion_property_key(value: object) -> str:
+    return re.sub(r"[^a-z0-9]+", "", str(value or "").strip().lower())
+
+
+def _looks_like_document_hash(value: object) -> bool:
+    normalized = str(value or "").strip().lower()
+    return bool(normalized) and len(normalized) >= 32 and all(character in "0123456789abcdef" for character in normalized)
+
+
+def _candidate_full_name(payload: CVAnalysisPayload | None) -> str | None:
+    if payload is None or payload.personal_info is None:
+        return None
+    full_name = _trim_text(getattr(payload.personal_info, "full_name", ""), max_chars=80)
+    return full_name or None
+
+
+def _extract_result_document_labels(result: ProductWorkflowResult) -> list[str]:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    labels: list[str] = []
+    if isinstance(payload, DocumentAgentPayload):
+        for source in payload.sources[:8]:
+            source_label = _trim_text(getattr(source, "source", ""), max_chars=120)
+            if source_label and not _looks_like_document_hash(source_label):
+                labels.append(source_label)
+        for name in payload.compared_documents[:6]:
+            normalized = _trim_text(name, max_chars=120)
+            if normalized and not _looks_like_document_hash(normalized):
+                labels.append(normalized)
+    if isinstance(payload, CVAnalysisPayload):
+        candidate_name = _candidate_full_name(payload)
+        if candidate_name:
+            labels.append(f"{candidate_name} CV")
+    debug_document_names = result.debug_metadata.get("documents") if isinstance(result.debug_metadata, dict) else None
+    if isinstance(debug_document_names, list):
+        for item in debug_document_names[:8]:
+            normalized = _trim_text(item, max_chars=120)
+            if normalized and not _looks_like_document_hash(normalized):
+                labels.append(normalized)
+    return list(dict.fromkeys(item for item in labels if item))
+
+
+def _result_storyline_id(result: ProductWorkflowResult) -> str | None:
+    workflow_id = str(result.workflow_id or "").strip()
+    primary_document = next((item for item in _result_document_ids(result) if str(item).strip()), None)
+    if workflow_id and primary_document:
+        return f"{workflow_id}:{primary_document[:12]}"
+    return workflow_id or None
+
+
+def _result_corpus_label(result: ProductWorkflowResult) -> str | None:
+    return "Hiring packet" if result.workflow_id == "candidate_review" else "Northwind vendor operations"
+
+
+def _split_summary_sentences(text: object, *, limit: int = 3) -> list[str]:
+    normalized = str(text or "").strip()
+    if not normalized:
+        return []
+    pieces = [
+        piece.strip(" -•\n\t")
+        for piece in re.split(r"(?<=[.!?])\s+|\n+", normalized)
+        if piece.strip(" -•\n\t")
+    ]
+    deduped: list[str] = []
+    for piece in pieces:
+        compact = _trim_text(piece, max_chars=220)
+        if compact and compact not in deduped:
+            deduped.append(compact)
+        if len(deduped) >= limit:
+            break
+    return deduped
+
+
+def _derive_publish_title(result: ProductWorkflowResult) -> str:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    document_labels = _extract_result_document_labels(result)
+    if isinstance(payload, CVAnalysisPayload):
+        candidate_name = _candidate_full_name(payload) or "Candidate"
+        return _trim_text(f"Candidate brief — {candidate_name}", max_chars=120)
+    if result.workflow_id == "policy_contract_comparison":
+        if len(document_labels) >= 2:
+            left = document_labels[0].replace('.pdf', '')
+            right = document_labels[1].replace('.pdf', '')
+            return _trim_text(f"Policy comparison — {left} vs {right}", max_chars=120)
+        return _trim_text("Policy comparison — evidence and access governance", max_chars=120)
+    if result.workflow_id == "document_review":
+        if document_labels:
+            return _trim_text(f"Document review — {document_labels[0].replace('.pdf', '')}", max_chars=120)
+        return _trim_text(f"Document review — {result.recommendation or result.summary}", max_chars=120)
+    if result.workflow_id == "action_plan_evidence_review":
+        return _trim_text(f"Action plan — {result.recommendation or result.summary}", max_chars=120)
+    if isinstance(payload, CVAnalysisPayload) and payload.personal_info is not None:
+        full_name = _trim_text(getattr(payload.personal_info, "full_name", ""), max_chars=64)
+        if full_name:
+            return _trim_text(f"[{result.workflow_label}] {full_name}", max_chars=120)
+    return _trim_text(f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}", max_chars=120)
+
+
+def _derive_publish_summary(result: ProductWorkflowResult) -> str:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    if isinstance(payload, CVAnalysisPayload):
+        candidate_name = _candidate_full_name(payload) or "The candidate"
+        strengths = list(dict.fromkeys(_trim_text(item, max_chars=80) for item in payload.strengths[:3] if str(item).strip()))
+        bits = [f"{candidate_name} reads as a strong senior-profile candidate."]
+        if strengths:
+            bits.append(f"Best-supported strengths: {', '.join(strengths)}.")
+        if result.recommendation:
+            bits.append(_trim_text(result.recommendation, max_chars=220))
+        return " ".join(bits)
+    sentences = _split_summary_sentences(result.summary, limit=2)
+    return " ".join(sentences) if sentences else _trim_text(result.summary, max_chars=280)
+
+
+def _derive_publish_highlights(result: ProductWorkflowResult) -> list[str]:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    highlights: list[str] = []
+    if isinstance(payload, CVAnalysisPayload):
+        highlights.extend(_trim_text(item, max_chars=140) for item in (payload.strengths or [])[:4] if str(item).strip())
+        if payload.improvement_areas:
+            highlights.append("Validation focus: " + ", ".join(_trim_text(item, max_chars=40) for item in payload.improvement_areas[:3] if str(item).strip()))
+    elif isinstance(payload, DocumentAgentPayload) and payload.key_points:
+        highlights.extend(_trim_text(item, max_chars=160) for item in payload.key_points[:5] if str(item).strip())
+    if not highlights:
+        highlights.extend(_trim_text(item, max_chars=160) for item in result.highlights[:5] if str(item).strip())
+    return list(dict.fromkeys(item for item in highlights if item))[:5]
+
+
+def _derive_publish_recommendation(result: ProductWorkflowResult) -> str | None:
+    if result.recommendation:
+        return _trim_text(result.recommendation, max_chars=240)
+    sentences = _split_summary_sentences(result.summary, limit=1)
+    return sentences[0] if sentences else None
+
+
+def _derive_candidate_interview_focus(payload: CVAnalysisPayload | None) -> list[str]:
+    if payload is None:
+        return []
+    focus_items = [_trim_text(item, max_chars=120) for item in payload.improvement_areas[:4] if str(item).strip()]
+    if not focus_items and payload.projects:
+        focus_items = [_trim_text(item, max_chars=120) for item in payload.projects[:3] if str(item).strip()]
+    return list(dict.fromkeys(item for item in focus_items if item))[:4]
+
+
+def _derive_publish_warnings(result: ProductWorkflowResult) -> list[str]:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    warnings = [_trim_text(item, max_chars=160) for item in result.warnings[:4] if str(item).strip()]
+    if isinstance(payload, DocumentAgentPayload):
+        warnings.extend(_trim_text(item, max_chars=160) for item in payload.limitations[:3] if str(item).strip())
+    return list(dict.fromkeys(item for item in warnings if item))[:4]
+
+
+def _build_trello_markdown_sections(*, title: str, summary: str, highlights: list[str], recommendation: str | None, evidence: list[str], warnings: list[str], action_item: dict[str, Any] | None = None, interview_focus: list[str] | None = None) -> str:
+    lines: list[str] = [f"## {title}", ""]
+    if summary:
+        lines.extend(["### Summary", summary, ""])
+    if highlights:
+        lines.append("### Highlights")
+        lines.extend([f"- {item}" for item in highlights])
+        lines.append("")
+    if interview_focus:
+        lines.append("### Interview focus")
+        lines.extend([f"- {item}" for item in interview_focus if str(item).strip()])
+        lines.append("")
+    if action_item:
+        action_details = []
+        for label, key in [("Owner", "owner"), ("Due date", "due_date"), ("Status", "status"), ("Evidence", "evidence")]:
+            value = _trim_text(action_item.get(key), max_chars=180)
+            if value:
+                action_details.append(f"- **{label}:** {value}")
+        if action_details:
+            lines.append("### Action details")
+            lines.extend(action_details)
+            lines.append("")
+    if recommendation:
+        lines.extend(["### Recommendation", recommendation, ""])
+    if evidence:
+        lines.append("### Evidence used")
+        lines.extend([f"- {item}" for item in evidence])
+        lines.append("")
+    if warnings:
+        lines.append("### Watchouts")
+        lines.extend([f"- {item}" for item in warnings])
+        lines.append("")
+    return "\n".join(line for line in lines).strip()
+
+
+def _build_notion_property_value(property_type: str, value: object) -> dict[str, Any] | None:
+    normalized_type = str(property_type or "").strip().lower()
+    if normalized_type == "title":
+        rich_text = _build_notion_rich_text(value)
+        return {"title": rich_text} if rich_text else None
+    if normalized_type in {"rich_text", "text"}:
+        rich_text = _build_notion_rich_text(value)
+        return {"rich_text": rich_text} if rich_text else None
+    if normalized_type == "select":
+        name = _trim_text(value, max_chars=90)
+        return {"select": {"name": name}} if name else None
+    if normalized_type == "multi_select":
+        if isinstance(value, list):
+            items = [{"name": _trim_text(item, max_chars=90)} for item in value if _trim_text(item, max_chars=90)]
+        else:
+            items = [{"name": _trim_text(value, max_chars=90)}] if _trim_text(value, max_chars=90) else []
+        return {"multi_select": items} if items else None
+    if normalized_type == "url":
+        url = str(value or "").strip()
+        return {"url": url} if url else None
+    return None
+
+
+def _select_notion_property(database_properties: dict[str, Any], candidate_names: list[str], allowed_types: set[str]) -> tuple[str, str] | None:
+    normalized_candidates = {_normalize_notion_property_key(item) for item in candidate_names if str(item).strip()}
+    for property_name, property_payload in database_properties.items():
+        if not isinstance(property_payload, dict):
+            continue
+        property_type = str(property_payload.get("type") or "").strip().lower()
+        if property_type not in allowed_types:
+            continue
+        if _normalize_notion_property_key(property_name) in normalized_candidates:
+            return property_name, property_type
+    return None
+
+
+def _build_notion_properties_for_result(*, result: ProductWorkflowResult, database_properties: dict[str, Any]) -> dict[str, Any]:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    summary = _derive_publish_summary(result)
+    recommendation = _derive_publish_recommendation(result)
+    document_labels = _extract_result_document_labels(result)
+    primary_document = document_labels[0] if document_labels else None
+    supporting_documents = document_labels[1:4] if len(document_labels) > 1 else []
+    property_values: list[tuple[list[str], object]] = [
+        (["Storyline ID", "StorylineID", "Storyline"], _result_storyline_id(result)),
+        (["Corpus"], _result_corpus_label(result)),
+        (["Primary Document", "Primary Documents"], primary_document),
+        (["Supporting Documents", "Supporting Document"], supporting_documents if supporting_documents else None),
+        (["Workflow"], result.workflow_label),
+        (["Status", "Run status", "Run Status"], result.status.title()),
+        (["Recommendation"], recommendation),
+        (["Summary", "Executive Summary"], summary),
+        (["Highlights", "Key Highlights"], _derive_publish_highlights(result)),
+    ]
+    if isinstance(payload, CVAnalysisPayload):
+        interview_focus = _derive_candidate_interview_focus(payload)
+        property_values.append((["Interview Focus", "Interview focus"], interview_focus if interview_focus else None))
+        candidate_name = _candidate_full_name(payload)
+        if candidate_name:
+            property_values.append((["Candidate", "Candidate Name"], candidate_name))
+    properties: dict[str, Any] = {}
+    for candidate_names, raw_value in property_values:
+        if raw_value in (None, "", [], {}):
+            continue
+        match = _select_notion_property(database_properties, candidate_names, {"rich_text", "select", "multi_select", "url", "title"})
+        if not match:
+            continue
+        property_name, property_type = match
+        property_payload = _build_notion_property_value(property_type, raw_value)
+        if property_payload:
+            properties[property_name] = property_payload
+    return properties
+
+
+def _build_notion_children_for_result(result: ProductWorkflowResult) -> list[dict[str, Any]]:
+    payload = result.structured_result.validated_output if result.structured_result is not None else None
+    summary = _derive_publish_summary(result)
+    recommendation = _derive_publish_recommendation(result)
+    highlights = _derive_publish_highlights(result)
+    warnings = _derive_publish_warnings(result)
+    document_labels = _extract_result_document_labels(result)
+    interview_focus = _derive_candidate_interview_focus(payload) if isinstance(payload, CVAnalysisPayload) else []
+    blocks: list[dict[str, Any] | None] = [
+        _build_notion_heading_block("Executive summary", level=2),
+        _build_notion_paragraph_block(summary),
+    ]
+    if highlights:
+        blocks.append(_build_notion_heading_block("Key highlights", level=2))
+        blocks.extend(_build_notion_bulleted_list_item(item) for item in highlights)
+    if interview_focus:
+        blocks.append(_build_notion_heading_block("Interview focus", level=2))
+        blocks.extend(_build_notion_bulleted_list_item(item) for item in interview_focus)
+    if recommendation:
+        blocks.extend([
+            _build_notion_heading_block("Recommendation", level=2),
+            _build_notion_paragraph_block(recommendation),
+        ])
+    if document_labels:
+        blocks.append(_build_notion_heading_block("Evidence used", level=2))
+        blocks.extend(_build_notion_bulleted_list_item(item) for item in document_labels[:5])
+    if warnings:
+        blocks.append(_build_notion_heading_block("Watchouts", level=2))
+        blocks.extend(_build_notion_bulleted_list_item(item) for item in warnings[:4])
+    return [item for item in blocks if item is not None]
+
+
 def list_notion_database_entries(
     *,
     settings: EvidenceOpsExternalSettings | None = None,
@@ -1134,16 +1445,223 @@ def create_notion_smoke_page(
     }
 
 
-def _product_result_notion_title(result: ProductWorkflowResult) -> str:
-    payload = result.structured_result.validated_output if result.structured_result is not None else None
-    if isinstance(payload, CVAnalysisPayload) and payload.personal_info is not None:
-        full_name = _trim_text(getattr(payload.personal_info, "full_name", ""), max_chars=64)
-        if full_name:
-            return _trim_text(f"[{result.workflow_label}] {full_name}", max_chars=120)
-    return _trim_text(
-        f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}",
-        max_chars=120,
-    )
+
+_PRODUCT_NOTION_TEMPLATE_CATALOG: dict[str, list[dict[str, str]]] = {
+    "action_plan_evidence_review": [
+        {"id": "action_register", "label": "Action register", "description": "Owners, priorities and due dates."},
+        {"id": "executive_summary", "label": "Executive summary", "description": "Narrative handoff for stakeholders."},
+        {"id": "evidence_gaps", "label": "Evidence gaps", "description": "Missing evidence before execution."},
+    ],
+    "candidate_review": [
+        {"id": "candidate_brief", "label": "Candidate brief", "description": "Hiring summary with strengths and risks."},
+        {"id": "interview_plan", "label": "Interview plan", "description": "Validation focus for interviewers."},
+    ],
+    "document_review": [
+        {"id": "review_summary", "label": "Review summary", "description": "Decision summary and next steps."},
+        {"id": "findings_register", "label": "Findings register", "description": "Structured finding log and remediation."},
+    ],
+    "policy_contract_comparison": [
+        {"id": "comparison_memo", "label": "Comparison memo", "description": "Executive delta summary."},
+        {"id": "remediation_register", "label": "Remediation register", "description": "Must-fix items and negotiation priorities."},
+    ],
+}
+
+
+def _product_notion_template_options(workflow_id: str) -> list[dict[str, str]]:
+    options = _PRODUCT_NOTION_TEMPLATE_CATALOG.get(str(workflow_id or "").strip(), [])
+    if options:
+        return [dict(item) for item in options]
+    return [{"id": "executive_summary", "label": "Executive summary", "description": "Default workflow handoff."}]
+
+
+def _resolve_product_notion_template(workflow_id: str, template_id: str | None) -> dict[str, str]:
+    options = _product_notion_template_options(workflow_id)
+    requested_template_id = str(template_id or "").strip()
+    for option in options:
+        if option.get("id") == requested_template_id:
+            return dict(option)
+    return dict(options[0])
+
+
+def _preview_string(value: object, *, max_chars: int = 180) -> str | None:
+    normalized = _trim_text(value, max_chars=max_chars)
+    return normalized or None
+
+
+def _preview_items_from_value(value: object, *, max_items: int = 6) -> list[str]:
+    items: list[str] = []
+    if isinstance(value, list):
+        for entry in value:
+            if isinstance(entry, dict):
+                pieces = [_preview_string(entry.get(key), max_chars=72) for key in ("title", "name", "label", "summary", "detail", "impact", "recommendation", "owner", "priority", "status")]
+                compact = " — ".join(piece for piece in pieces if piece)
+                if compact:
+                    items.append(compact)
+            else:
+                normalized = _preview_string(entry)
+                if normalized:
+                    items.append(normalized)
+    elif isinstance(value, dict):
+        pieces = [_preview_string(value.get(key), max_chars=72) for key in ("title", "name", "label", "summary", "detail", "impact", "recommendation", "owner", "priority", "status")]
+        compact = " — ".join(piece for piece in pieces if piece)
+        if compact:
+            items.append(compact)
+    else:
+        normalized = _preview_string(value)
+        if normalized:
+            items.append(normalized)
+    deduped: list[str] = []
+    for item in items:
+        if item not in deduped:
+            deduped.append(item)
+        if len(deduped) >= max_items:
+            break
+    return deduped
+
+
+def _preview_items_from_keys(preview_payload: dict[str, Any] | None, *keys: str, max_items: int = 6) -> list[str]:
+    if not isinstance(preview_payload, dict):
+        return []
+    collected: list[str] = []
+    for key in keys:
+        collected.extend(_preview_items_from_value(preview_payload.get(key), max_items=max_items))
+        if len(collected) >= max_items:
+            break
+    deduped: list[str] = []
+    for item in collected:
+        if item not in deduped:
+            deduped.append(item)
+        if len(deduped) >= max_items:
+            break
+    return deduped
+
+
+def _preview_documents(preview_payload: dict[str, Any] | None, result: ProductWorkflowResult) -> list[str]:
+    documents = _preview_items_from_keys(preview_payload, "documents", "primary_documents", max_items=5)
+    if documents:
+        return documents
+    return _extract_result_document_labels(result)[:5]
+
+
+def _build_product_notion_preview_sections(
+    result: ProductWorkflowResult,
+    *,
+    template_id: str | None = None,
+    preview_payload: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    template = _resolve_product_notion_template(result.workflow_id, template_id)
+    summary = _preview_string((preview_payload or {}).get("summary")) or _derive_publish_summary(result)
+    recommendation = _preview_string((preview_payload or {}).get("recommendation")) or _derive_publish_recommendation(result)
+    highlights = _preview_items_from_keys(preview_payload, "highlights", "strengths") or _derive_publish_highlights(result)
+    next_steps = _preview_items_from_keys(preview_payload, "next_steps")
+    findings = _preview_items_from_keys(preview_payload, "findings", "differences")
+    actions = _preview_items_from_keys(preview_payload, "actions")
+    evidence_gaps = _preview_items_from_keys(preview_payload, "evidence_gaps")
+    must_fix_items = _preview_items_from_keys(preview_payload, "must_fix_items")
+    negotiation_priorities = _preview_items_from_keys(preview_payload, "negotiation_priorities")
+    watchouts = _preview_items_from_keys(preview_payload, "watchouts") or _derive_publish_warnings(result)
+    interview_focus = _preview_items_from_keys(preview_payload, "interview_focus", "interview_questions")
+    documents = _preview_documents(preview_payload, result)
+    candidate_bits = _preview_items_from_keys(preview_payload, "candidate_name", "candidate_headline", "candidate_location", max_items=4)
+
+    sections: list[dict[str, Any]] = []
+
+    def add_section(heading: str, items: list[str] | None = None) -> None:
+        normalized_items = [item for item in (items or []) if str(item).strip()]
+        if normalized_items:
+            sections.append({"heading": heading, "items": normalized_items[:6]})
+
+    template_key = template.get("id") or "executive_summary"
+    if template_key == "action_register":
+        add_section("Executive summary", [summary] if summary else [])
+        add_section("Actions", actions)
+        add_section("Evidence gaps", evidence_gaps)
+        add_section("Next steps", next_steps)
+        add_section("Evidence used", documents)
+    elif template_key == "evidence_gaps":
+        add_section("Executive summary", [summary] if summary else [])
+        add_section("Evidence gaps", evidence_gaps)
+        add_section("Recommendation", [recommendation] if recommendation else [])
+        add_section("Evidence used", documents)
+    elif template_key == "candidate_brief":
+        add_section("Candidate profile", candidate_bits)
+        add_section("Executive summary", [summary] if summary else [])
+        add_section("Strengths", highlights)
+        add_section("Watchouts", watchouts)
+        add_section("Interview focus", interview_focus)
+        add_section("Next steps", next_steps)
+        add_section("Evidence used", documents)
+    elif template_key == "interview_plan":
+        add_section("Candidate profile", candidate_bits)
+        add_section("Recommendation", [recommendation] if recommendation else [])
+        add_section("Interview focus", interview_focus)
+        add_section("Next steps", next_steps)
+        add_section("Evidence used", documents)
+    elif template_key == "review_summary":
+        add_section("Executive summary", [summary] if summary else [])
+        add_section("Findings", findings or highlights)
+        add_section("Recommendation", [recommendation] if recommendation else [])
+        add_section("Next steps", next_steps)
+        add_section("Evidence used", documents)
+    elif template_key == "findings_register":
+        add_section("Executive summary", [summary] if summary else [])
+        add_section("Findings", findings or highlights)
+        add_section("Remediation", next_steps or ([recommendation] if recommendation else []))
+        add_section("Evidence used", documents)
+    elif template_key == "comparison_memo":
+        add_section("Executive summary", [summary] if summary else [])
+        add_section("Must-fix items", must_fix_items or findings)
+        add_section("Negotiation priorities", negotiation_priorities)
+        add_section("Evidence used", documents)
+    elif template_key == "remediation_register":
+        add_section("Executive summary", [summary] if summary else [])
+        add_section("Must-fix items", must_fix_items or findings)
+        add_section("Negotiation priorities", negotiation_priorities)
+        add_section("Evidence used", documents)
+    else:
+        add_section("Executive summary", [summary] if summary else [])
+        add_section("Key highlights", highlights)
+        add_section("Recommendation", [recommendation] if recommendation else [])
+        add_section("Next steps", next_steps)
+        add_section("Evidence used", documents)
+
+    if not sections:
+        add_section("Executive summary", [_derive_publish_summary(result)])
+        add_section("Evidence used", _extract_result_document_labels(result)[:5])
+    return sections
+
+
+def _build_notion_children_from_preview_sections(sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    blocks: list[dict[str, Any] | None] = []
+    for section in sections:
+        heading = _preview_string(section.get("heading"), max_chars=80) if isinstance(section, dict) else None
+        items = section.get("items") if isinstance(section, dict) else None
+        normalized_items = [
+            _preview_string(item, max_chars=220)
+            for item in (items if isinstance(items, list) else [])
+        ]
+        normalized_items = [item for item in normalized_items if item]
+        if not heading or not normalized_items:
+            continue
+        blocks.append(_build_notion_heading_block(heading, level=2))
+        if len(normalized_items) == 1 and heading.lower() in {"executive summary", "recommendation"}:
+            blocks.append(_build_notion_paragraph_block(normalized_items[0]))
+        else:
+            blocks.extend(_build_notion_bulleted_list_item(item) for item in normalized_items)
+    return [item for item in blocks if item is not None]
+
+
+def _product_result_notion_title(
+    result: ProductWorkflowResult,
+    *,
+    template_id: str | None = None,
+    preview_payload: dict[str, Any] | None = None,
+) -> str:
+    template = _resolve_product_notion_template(result.workflow_id, template_id)
+    title_hint = _preview_string((preview_payload or {}).get("title"), max_chars=96)
+    if title_hint:
+        return _trim_text(f"{template.get('label', 'Executive summary')} — {title_hint}", max_chars=120)
+    return _derive_publish_title(result)
 
 
 def create_notion_page_from_product_result(
@@ -1151,6 +1669,8 @@ def create_notion_page_from_product_result(
     *,
     settings: EvidenceOpsExternalSettings | None = None,
     dry_run: bool = True,
+    template_id: str | None = None,
+    preview_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if not isinstance(result, ProductWorkflowResult):
         raise ValueError("A valid ProductWorkflowResult is required to create a Notion page.")
@@ -1158,25 +1678,27 @@ def create_notion_page_from_product_result(
     resolved_settings = settings or get_evidenceops_external_settings()
     _require_notion_settings(resolved_settings)
 
-    document_ids = _result_document_ids(result)
-    children = [
-        _build_notion_paragraph_block(f"Workflow: {result.workflow_label}"),
-        _build_notion_paragraph_block(f"Workflow ID: {result.workflow_id}"),
-        _build_notion_paragraph_block(f"Run status: {result.status}"),
-        _build_notion_paragraph_block(f"Summary: {result.summary}"),
-    ]
-    if result.recommendation:
-        children.append(_build_notion_paragraph_block(f"Recommendation: {result.recommendation}"))
-    if result.highlights:
-        children.append(_build_notion_paragraph_block("Highlights: " + "; ".join(_trim_text(item, max_chars=120) for item in result.highlights[:5])))
-    if result.warnings:
-        children.append(_build_notion_paragraph_block("Warnings: " + "; ".join(_trim_text(item, max_chars=120) for item in result.warnings[:5])))
-    if document_ids:
-        children.append(_build_notion_paragraph_block("Documents: " + ", ".join(document_ids[:8])))
-    children.append(_build_notion_paragraph_block("Source surface: Gradio UI"))
-    children = [item for item in children if item is not None]
+    template = _resolve_product_notion_template(result.workflow_id, template_id)
+    title = _product_result_notion_title(result, template_id=template.get("id"), preview_payload=preview_payload)
+    preview_sections = _build_product_notion_preview_sections(
+        result,
+        template_id=template.get("id"),
+        preview_payload=preview_payload,
+    )
+    children = _build_notion_children_from_preview_sections(preview_sections)
+    if not children:
+        children = _build_notion_children_for_result(result)
 
-    title = _product_result_notion_title(result)
+    properties: dict[str, Any] = {}
+    if not dry_run:
+        notion = NotionClient(resolved_settings.notion)
+        database = notion.retrieve_database()
+        database_properties = database.get("properties") if isinstance(database.get("properties"), dict) else {}
+        properties = _build_notion_properties_for_result(result=result, database_properties=database_properties)
+    else:
+        # Keep dry-run preview independent from remote Notion calls when possible.
+        properties = {}
+
     plan = {
         "status": "planned" if dry_run else "success",
         "dry_run": bool(dry_run),
@@ -1185,12 +1707,19 @@ def create_notion_page_from_product_result(
         "database_id": resolved_settings.notion.database_id,
         "title": title,
         "children_count": len(children),
+        "property_count": len(properties),
+        "filled_properties": sorted(properties.keys()),
+        "template_id": template.get("id"),
+        "template_label": template.get("label"),
+        "template_description": template.get("description"),
+        "available_templates": _product_notion_template_options(result.workflow_id),
+        "preview_sections": preview_sections,
     }
     if dry_run:
         return plan
 
     notion = NotionClient(resolved_settings.notion)
-    page = notion.create_page(title=title, properties={}, children=children)
+    page = notion.create_page(title=title, properties=properties, children=children)
     return {
         **plan,
         "status": "success",
@@ -1199,7 +1728,6 @@ def create_notion_page_from_product_result(
         "page_title": title,
         "page_url": page.get("url"),
     }
-
 
 def sync_phase95_corpus_to_nextcloud(
     *,
@@ -1331,6 +1859,139 @@ def get_nextcloud_repository_document(
         if normalized_document_id and str(document.get("document_id") or "") == normalized_document_id:
             return document
     return None
+
+
+def _find_nextcloud_repository_document(
+    *,
+    settings: EvidenceOpsExternalSettings,
+    relative_path: str | None = None,
+    document_id: str | None = None,
+    filename: str | None = None,
+    title: str | None = None,
+    category: str | None = None,
+    webdav_url: str | None = None,
+) -> dict[str, Any] | None:
+    normalized_relative_path = _normalize_optional_str(relative_path)
+    normalized_document_id = _normalize_optional_str(document_id)
+    normalized_filename = _normalize_optional_str(filename).lower()
+    normalized_title = _normalize_optional_str(title).lower()
+    normalized_category = _normalize_optional_str(category).lower()
+    normalized_webdav_url = _normalize_optional_str(webdav_url)
+
+    webdav = WebDavClient(settings.nextcloud)
+    if normalized_webdav_url and not normalized_relative_path:
+        derived_relative_path = webdav._normalize_remote_relative_path(normalized_webdav_url)
+        if derived_relative_path:
+            normalized_relative_path = derived_relative_path
+
+    direct_match = get_nextcloud_repository_document(
+        settings=settings,
+        relative_path=normalized_relative_path or None,
+        document_id=normalized_document_id or None,
+    )
+    if direct_match is not None:
+        return direct_match
+
+    documents = list_nextcloud_repository_documents(settings=settings)
+    exact_matches: list[dict[str, Any]] = []
+    fuzzy_matches: list[dict[str, Any]] = []
+    for document in documents:
+        document_relative_path = str(document.get("relative_path") or "").strip()
+        document_filename = Path(document_relative_path).name.lower()
+        document_title = str(document.get("title") or "").strip().lower()
+        document_category = str(document.get("category") or "").strip().lower()
+        document_webdav_url = str(document.get("path") or document.get("webdav_url") or "").strip()
+
+        if normalized_category and document_category != normalized_category:
+            continue
+        if normalized_webdav_url and document_webdav_url and document_webdav_url == normalized_webdav_url:
+            return document
+
+        score = 0
+        exact = False
+        if normalized_filename:
+            if document_filename == normalized_filename:
+                score += 6
+                exact = True
+            elif normalized_filename in document_filename:
+                score += 3
+        if normalized_title:
+            if document_title == normalized_title:
+                score += 5
+                exact = True
+            elif normalized_title in document_title:
+                score += 2
+        if normalized_relative_path:
+            if document_relative_path == normalized_relative_path:
+                score += 10
+                exact = True
+            elif normalized_relative_path in document_relative_path:
+                score += 4
+        if normalized_document_id and str(document.get("document_id") or "").strip().lower() == normalized_document_id.lower():
+            score += 8
+            exact = True
+        if score <= 0:
+            continue
+        if exact:
+            exact_matches.append((score, document))
+        else:
+            fuzzy_matches.append((score, document))
+
+    if exact_matches:
+        exact_matches.sort(key=lambda item: (-item[0], str(item[1].get("relative_path") or "")))
+        return exact_matches[0][1]
+    if fuzzy_matches:
+        fuzzy_matches.sort(key=lambda item: (-item[0], str(item[1].get("relative_path") or "")))
+        return fuzzy_matches[0][1]
+    return None
+
+
+def download_nextcloud_repository_document(
+    *,
+    settings: EvidenceOpsExternalSettings | None = None,
+    relative_path: str | None = None,
+    document_id: str | None = None,
+    filename: str | None = None,
+    title: str | None = None,
+    category: str | None = None,
+    webdav_url: str | None = None,
+) -> dict[str, Any]:
+    resolved_settings = settings or get_evidenceops_external_settings()
+    document = _find_nextcloud_repository_document(
+        settings=resolved_settings,
+        relative_path=relative_path,
+        document_id=document_id,
+        filename=filename,
+        title=title,
+        category=category,
+        webdav_url=webdav_url,
+    )
+    if document is None:
+        identifier = (
+            _normalize_optional_str(relative_path)
+            or _normalize_optional_str(document_id)
+            or _normalize_optional_str(filename)
+            or _normalize_optional_str(title)
+            or _normalize_optional_str(webdav_url)
+            or "requested document"
+        )
+        raise FileNotFoundError(f"Nextcloud repository document not found: {identifier}")
+
+    resolved_relative_path = str(document.get("relative_path") or "").strip()
+    if not resolved_relative_path:
+        raise FileNotFoundError("Nextcloud repository document is missing a relative_path.")
+
+    webdav = WebDavClient(resolved_settings.nextcloud)
+    _, content = webdav._request("GET", resolved_relative_path, expected_statuses=(200,))
+    resolved_filename = Path(resolved_relative_path).name or _normalize_optional_str(filename) or "remote-document"
+    content_type = mimetypes.guess_type(resolved_filename)[0] or "application/octet-stream"
+    return {
+        **document,
+        "filename": resolved_filename,
+        "content": content,
+        "content_type": content_type,
+        "webdav_url": document.get("path") or document.get("webdav_url") or webdav._build_url(resolved_relative_path),
+    }
 
 
 def build_nextcloud_repository_snapshot(

@@ -34,6 +34,15 @@ from src.product.ingestion_jobs import (
     update_product_upload_job_stage,
 )
 from src.product.action_plan_presenter import build_action_plan_view
+from src.product.integration_hub import (
+    build_product_integration_hub_payload,
+    build_product_nextcloud_documents_payload,
+    build_product_nextcloud_sync_payload,
+    build_product_notion_entries_payload,
+    publish_product_workflow_to_notion,
+    record_product_delivery_output,
+)
+from src.services.evidenceops_external_targets import download_nextcloud_repository_document
 from src.product.lab import (
     build_lab_artifacts_payload,
     build_lab_benchmarks_payload,
@@ -350,6 +359,37 @@ def start_product_upload_job(
     return job_payload
 
 
+def start_product_nextcloud_import_job(
+    *,
+    bootstrap: ProductBootstrap,
+    relative_path: str | None = None,
+    document_id: str | None = None,
+    filename: str | None = None,
+    title: str | None = None,
+    category: str | None = None,
+    webdav_url: str | None = None,
+) -> dict[str, Any]:
+    remote_document = download_nextcloud_repository_document(
+        relative_path=relative_path,
+        document_id=document_id,
+        filename=filename,
+        title=title,
+        category=category,
+        webdav_url=webdav_url,
+    )
+    filename = str(remote_document.get("filename") or Path(str(remote_document.get("relative_path") or "remote-document")).name or "remote-document")
+    uploaded = _ApiUploadedFile(name=filename, content=bytes(remote_document.get("content") or b""))
+    job_payload = start_product_upload_job(bootstrap=bootstrap, uploaded_files=[uploaded], ignored_count=0)
+    job_payload["message"] = f"Import accepted for {filename}. Preparing ingestion pipeline."
+    job_payload["source"] = {
+        "kind": "nextcloud",
+        "relative_path": remote_document.get("relative_path"),
+        "title": remote_document.get("title"),
+        "document_id": remote_document.get("document_id"),
+    }
+    return job_payload
+
+
 class ProductApiHandler(BaseHTTPRequestHandler):
     bootstrap: ProductBootstrap
     settings: ProductApiSettings
@@ -383,6 +423,17 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type or "application/octet-stream")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Content-Disposition", f'inline; filename="{path.name}"')
+        if getattr(self, "settings", None) and self.settings.allow_cors:
+            self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _send_bytes(self, status: int, body: bytes, *, content_type: str, filename: str | None = None) -> None:
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        if filename:
+            self.send_header("Content-Disposition", f'inline; filename="{filename}"')
         if getattr(self, "settings", None) and self.settings.allow_cors:
             self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
@@ -475,6 +526,36 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.OK, build_product_document_library_payload(self.bootstrap))
             return
 
+        if path == "/api/product/integrations/nextcloud/open":
+            try:
+                relative_path = str((query.get("relative_path") or [""])[0]).strip() or None
+                document_id = str((query.get("document_id") or [""])[0]).strip() or None
+                filename = str((query.get("filename") or [""])[0]).strip() or None
+                title = str((query.get("title") or [""])[0]).strip() or None
+                category = str((query.get("category") or [""])[0]).strip() or None
+                webdav_url = str((query.get("webdav_url") or [""])[0]).strip() or None
+                if not any([relative_path, document_id, filename, title, webdav_url]):
+                    self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "relative_path, document_id, filename, title or webdav_url is required."})
+                    return
+                remote_document = download_nextcloud_repository_document(
+                    relative_path=relative_path,
+                    document_id=document_id,
+                    filename=filename,
+                    title=title,
+                    category=category,
+                    webdav_url=webdav_url,
+                )
+                resolved_filename = str(remote_document.get("filename") or Path(str(remote_document.get("relative_path") or "remote-document")).name or "remote-document")
+                content = bytes(remote_document.get("content") or b"")
+                content_type, _ = mimetypes.guess_type(resolved_filename)
+                self._send_bytes(HTTPStatus.OK, content, content_type=content_type or "application/octet-stream", filename=resolved_filename)
+            except FileNotFoundError as error:
+                self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": str(error)})
+            except Exception as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+
         if path == "/api/lab/overview":
             self._send_json(HTTPStatus.OK, build_lab_overview_payload(self.bootstrap.workspace_root))
             return
@@ -523,6 +604,26 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
         if path == "/api/product/command-center":
             self._send_json(HTTPStatus.OK, build_product_command_center_payload(self.bootstrap))
+            return
+
+        if path == "/api/product/integrations":
+            self._send_json(HTTPStatus.OK, build_product_integration_hub_payload(self.bootstrap.workspace_root))
+            return
+
+        if path == "/api/product/integrations/notion":
+            try:
+                limit = int((query.get("limit") or ["10"])[0])
+                self._send_json(HTTPStatus.OK, build_product_notion_entries_payload(limit=limit))
+            except Exception as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path == "/api/product/integrations/nextcloud":
+            try:
+                limit = int((query.get("limit") or ["10"])[0])
+                self._send_json(HTTPStatus.OK, build_product_nextcloud_documents_payload(limit=limit))
+            except Exception as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
 
         if path == "/api/product/run-history":
@@ -611,6 +712,33 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             payload = _read_json_body(self)
         except ValueError as error:
             self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path == "/api/product/integrations/nextcloud/import":
+            try:
+                relative_path = str(payload.get("relative_path") or "").strip() or None
+                document_id = str(payload.get("document_id") or "").strip() or None
+                filename = str(payload.get("filename") or "").strip() or None
+                title = str(payload.get("title") or "").strip() or None
+                category = str(payload.get("category") or "").strip() or None
+                webdav_url = str(payload.get("webdav_url") or "").strip() or None
+                if not any([relative_path, document_id, filename, title, webdav_url]):
+                    self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "relative_path, document_id, filename, title or webdav_url is required."})
+                    return
+                job_payload = start_product_nextcloud_import_job(
+                    bootstrap=self.bootstrap,
+                    relative_path=relative_path,
+                    document_id=document_id,
+                    filename=filename,
+                    title=title,
+                    category=category,
+                    webdav_url=webdav_url,
+                )
+                self._send_json(HTTPStatus.OK, job_payload)
+            except FileNotFoundError as error:
+                self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": str(error)})
+            except Exception as error:  # pragma: no cover - defensive API surface
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
 
         if path == "/api/product/delete-documents":
@@ -790,12 +918,44 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
                 product_result = ProductWorkflowResult.model_validate(result_payload)
                 dry_run = bool(payload.get("dry_run") or payload.get("publish_options", {}).get("dry_run") if isinstance(payload.get("publish_options"), dict) else False)
-                publish_payload = publish_product_workflow_to_trello(product_result, dry_run=dry_run)
+                run_id = str(payload.get("run_id") or "").strip() or None
+                preview_payload = payload.get('preview_payload') if isinstance(payload.get('preview_payload'), dict) else None
+                publish_payload = publish_product_workflow_to_trello(product_result, dry_run=dry_run, preview_payload=preview_payload)
                 publish_payload.setdefault("ok", True)
                 publish_payload.setdefault("workflow_id", product_result.workflow_id)
                 publish_payload.setdefault("workflow_label", product_result.workflow_label)
+                if run_id:
+                    record_product_delivery_output(self.bootstrap.workspace_root, run_id=run_id, target="trello", payload=publish_payload)
                 self._send_json(HTTPStatus.OK, publish_payload)
             except Exception as error:  # pragma: no cover - defensive API surface
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path in {"/api/product/publish-to-notion", "/api/product/publish-notion"}:
+            try:
+                result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
+                product_result = ProductWorkflowResult.model_validate(result_payload)
+                dry_run = bool(payload.get("dry_run") or payload.get("publish_options", {}).get("dry_run") if isinstance(payload.get("publish_options"), dict) else False)
+                run_id = str(payload.get("run_id") or "").strip() or None
+                template_id = str(payload.get('template_id') or '').strip() or None
+                preview_payload = payload.get('preview_payload') if isinstance(payload.get('preview_payload'), dict) else None
+                publish_payload = publish_product_workflow_to_notion(product_result, dry_run=dry_run, template_id=template_id, preview_payload=preview_payload)
+                publish_payload.setdefault("ok", True)
+                publish_payload.setdefault("workflow_id", product_result.workflow_id)
+                publish_payload.setdefault("workflow_label", product_result.workflow_label)
+                if run_id:
+                    record_product_delivery_output(self.bootstrap.workspace_root, run_id=run_id, target="notion", payload=publish_payload)
+                self._send_json(HTTPStatus.OK, publish_payload)
+            except Exception as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path == "/api/product/integrations/nextcloud/sync":
+            try:
+                dry_run = bool(payload.get("dry_run") if isinstance(payload, dict) else False)
+                sync_payload = build_product_nextcloud_sync_payload(dry_run=dry_run)
+                self._send_json(HTTPStatus.OK, sync_payload)
+            except Exception as error:
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
 
