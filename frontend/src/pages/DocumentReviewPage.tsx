@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, Clock, ExternalLink, FileText, Info, Loader2, Play, Sparkles, User } from 'lucide-react';
 
-import { PageHeader, StatusPill, SeverityBadge, GlassCard } from '@/components/shared/ui-components';
+import { PageHeader, StatusPill, SeverityBadge, GlassCard, WorkflowProgressHeader } from '@/components/shared/ui-components';
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
 import {
   buildProductArtifactUrl,
@@ -242,7 +242,7 @@ export default function DocumentReviewPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Document Review" description="Review documents for risks, gaps and findings with grounded evidence.">
+      <PageHeader title="Document Review" description="Review a document for risks, gaps and grounded findings.">
         <Button
           className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"
           disabled={!selectedDocumentId || runReviewMutation.isPending}
@@ -261,36 +261,11 @@ export default function DocumentReviewPage() {
           {generateDeckMutation.isPending ? 'Generating Deck' : 'Generate Deck'}
         </Button>
       </PageHeader>
-
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass rounded-xl p-4 mb-6">
-        <div className="flex items-center gap-1">
-          {stepStatuses.map((step, index) => (
-            <div key={step.key} className="flex items-center gap-1 flex-1">
-              <div
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  step.status === 'completed'
-                    ? 'text-glow-success'
-                    : step.status === 'running'
-                      ? 'text-primary bg-primary/10'
-                      : step.status === 'error'
-                        ? 'text-glow-error bg-glow-error/10'
-                        : 'text-muted-foreground'
-                }`}
-              >
-                {step.status === 'completed' ? (
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                ) : step.status === 'running' ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <span className="w-5 h-5 rounded-full border border-current flex items-center justify-center text-[10px]">{index + 1}</span>
-                )}
-                <span className="hidden sm:inline">{step.label}</span>
-              </div>
-              {index < stepStatuses.length - 1 && <div className={`flex-1 h-px ${step.status === 'completed' ? 'bg-glow-success/40' : 'bg-border'}`} />}
-            </div>
-          ))}
-        </div>
-      </motion.div>
+      <WorkflowProgressHeader
+        steps={stepStatuses}
+        title="Workflow progress"
+        description="Track how the live run moves from document selection to export-ready review outputs."
+      />
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass rounded-xl p-4 mb-6 border-glow-warning/30">
         <div className="flex items-center justify-between flex-wrap gap-3">
@@ -344,22 +319,23 @@ export default function DocumentReviewPage() {
               <div className="flex justify-between text-[10px] text-muted-foreground"><span>Characters</span><span>{selectedDocument?.char_count ? selectedDocument.char_count.toLocaleString() : '—'}</span></div>
               <div className="flex justify-between text-[10px] text-muted-foreground"><span>Strategy</span><span className="font-mono">{currentStrategy}</span></div>
             </div>
-          </GlassCard>
 
-          <GlassCard delay={0.2}>
-            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Grounding Preview</h3>
-            <div className="bg-secondary/30 rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-2">
-                {previewQuery.isLoading ? <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" /> : <div className={`w-1.5 h-1.5 rounded-full ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'bg-glow-warning' : 'bg-glow-success'}`} />}
-                <span className={`text-[10px] font-medium ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'text-glow-warning' : 'text-glow-success'}`}>
-                  {previewQuery.isLoading ? 'Loading context...' : (groundingPreview?.warnings?.length ?? 0) > 0 ? 'Context loaded with caveats' : 'Context loaded'}
-                </span>
+            <div className="mt-4 border-t border-border/40 pt-4">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Grounding Preview</h3>
+              <div className="bg-secondary/30 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  {previewQuery.isLoading ? <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" /> : <div className={`w-1.5 h-1.5 rounded-full ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'bg-glow-warning' : 'bg-glow-success'}`} />}
+                  <span className={`text-[10px] font-medium ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'text-glow-warning' : 'text-glow-success'}`}>
+                    {previewQuery.isLoading ? 'Loading context...' : (groundingPreview?.warnings?.length ?? 0) > 0 ? 'Context loaded with caveats' : 'Context loaded'}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
+                  {groundingPreview?.preview_text || 'Select an indexed document to preview the grounded context before running the workflow.'}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
-                {groundingPreview?.preview_text || 'Select an indexed document to preview the grounded context before running the workflow.'}
-              </p>
             </div>
           </GlassCard>
+
 
           <GlassCard delay={0.25}>
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Top Blockers Before Signature</h3>

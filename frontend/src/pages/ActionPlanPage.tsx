@@ -12,12 +12,11 @@ import {
   Loader2,
   Play,
   Sparkles,
-  Target,
   User,
 } from 'lucide-react';
 
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
-import { PageHeader, StatusPill, SeverityBadge, GlassCard } from '@/components/shared/ui-components';
+import { PageHeader, StatusPill, SeverityBadge, GlassCard, WorkflowProgressHeader } from '@/components/shared/ui-components';
 import {
   buildProductArtifactUrl,
   PRODUCT_API_BASE_URL,
@@ -36,6 +35,7 @@ import {
 } from '@/lib/product-api';
 import { toast } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -99,13 +99,6 @@ function getGapLabel(status: ProductActionPlanEvidenceGap['status']): string {
   return 'Missing';
 }
 
-function buildObjectiveSubtitle(view?: ProductActionPlanView | null): string {
-  if (!view) {
-    return 'Run the live workflow to convert grounded findings into tracked tasks, priorities and evidence coverage.';
-  }
-  const summary = view.summary;
-  return `${summary.completed} of ${summary.total} actions completed - ${summary.blocked} blocked - ${summary.critical_path} on critical path`;
-}
 
 function emptyActionPlanSummary(documentCount = 0, artifactCount = 0): ProductActionPlanView['summary'] {
   return {
@@ -343,7 +336,7 @@ export default function ActionPlanPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1440px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Action Plan & Evidence Review" description="Transform grounded findings into actionable tasks with owners, timelines and evidence tracking.">
+      <PageHeader title="Action Plan & Evidence Review" description="Turn grounded findings into action items with owners, timelines and evidence tracking.">
         <Button
           variant="outline"
           className="h-9 px-4 text-xs"
@@ -362,6 +355,12 @@ export default function ActionPlanPage() {
           Run Action Plan
         </Button>
       </PageHeader>
+
+      <WorkflowProgressHeader
+        steps={stepStatuses}
+        title="Workflow progress"
+        description="Track how the live run moves from document selection to export-ready action items."
+      />
 
       {documentsError && (
         <GlassCard className="mb-6 border border-glow-error/20">
@@ -402,142 +401,142 @@ export default function ActionPlanPage() {
 
       {!!availableDocuments.length && (
         <GlassCard className="mb-6" delay={0.04}>
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div>
-              <h2 className="text-sm font-medium text-foreground">Grounded document selection</h2>
-              <p className="text-xs text-muted-foreground mt-1">{selectedDocumentSummary(selectedDocuments)}</p>
-            </div>
-            <div className="text-right text-[10px] text-muted-foreground">
-              <div>{availableDocuments.length} available</div>
-              <div>{documentLibrary?.summary.total_chunks || 0} total chunks</div>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
-            {availableDocuments.map((document) => {
-              const selected = selectedDocumentIds.includes(document.document_id);
-              return (
-                <button
-                  key={document.document_id}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => handleToggleDocument(document.document_id)}
-                  className={cn(
-                    'rounded-xl border text-left p-4 transition-all duration-200',
-                    selected
-                      ? 'border-primary/50 bg-primary/10 shadow-[0_0_0_1px_rgba(80,120,255,0.15)]'
-                      : 'border-border/60 bg-secondary/20 hover:border-primary/20 hover:bg-secondary/30',
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{document.name}</p>
-                      <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wide">{document.file_type || 'document'}</p>
-                    </div>
-                    <StatusPill status={document.status} />
-                  </div>
-                  <div className="space-y-1 text-[10px] text-muted-foreground">
-                    <div>{document.chunk_count} chunks - {document.char_count.toLocaleString()} chars</div>
-                    <div>{document.loader_strategy_label || 'Grounded ingest'}</div>
-                    {document.size_label ? <div>{document.size_label}</div> : null}
-                    {document.warnings?.length ? <div className="text-glow-warning">{document.warnings[0]}</div> : null}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-5 pt-4 border-t border-border/40">
-            <div className="flex items-center gap-2 mb-2">
-              <Info className="w-4 h-4 text-primary" />
-              <h3 className="text-xs font-medium text-foreground">Grounding preview</h3>
-            </div>
-            {previewQuery.isLoading ? (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                Building preview from selected evidence...
-              </div>
-            ) : groundingPreview ? (
-              <div className="space-y-3">
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  Quick signal check before execution: confirm the workflow is using the intended documents, enough source blocks and the expected evidence themes.
-                </p>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
-                    <div className="text-sm font-medium text-foreground">{groundingPreview.document_ids.length}</div>
-                  </div>
-                  <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
-                    <div className="text-sm font-medium text-foreground">{groundingPreview.source_block_count}</div>
-                  </div>
-                  <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
-                    <div className="text-sm font-medium text-foreground">{groundingPreview.context_chars.toLocaleString()} chars</div>
-                  </div>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+            <div className="min-w-0">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div>
+                  <h2 className="text-sm font-medium text-foreground">Grounded document selection</h2>
+                  <p className="text-xs text-muted-foreground mt-1">{selectedDocumentSummary(selectedDocuments)}</p>
                 </div>
+                <div className="text-right text-[10px] text-muted-foreground">
+                  <div>{availableDocuments.length} available</div>
+                  <div>{documentLibrary?.summary.total_chunks || 0} total chunks</div>
+                </div>
+              </div>
+
+              <ScrollArea className="h-[340px] pr-3">
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-                    <FileText className="w-3.5 h-3.5" />
-                    Context highlights
+                  {availableDocuments.map((document) => {
+                    const selected = selectedDocumentIds.includes(document.document_id);
+                    return (
+                      <button
+                        key={document.document_id}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => handleToggleDocument(document.document_id)}
+                        className={cn(
+                          'w-full rounded-xl border px-3 py-3 text-left transition-all duration-200',
+                          selected
+                            ? 'border-primary/50 bg-primary/10 shadow-[0_0_0_1px_rgba(80,120,255,0.15)]'
+                            : 'border-border/60 bg-secondary/20 hover:border-primary/20 hover:bg-secondary/30',
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={cn(
+                                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full border px-1.5 text-[10px] font-semibold',
+                                  selected ? 'border-primary/40 bg-primary/15 text-primary' : 'border-border bg-background/70 text-muted-foreground',
+                                )}
+                              >
+                                {selected ? '✓' : '○'}
+                              </span>
+                              <p className="text-xs font-medium text-foreground line-clamp-2">{document.name}</p>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+                              <span>{document.chunk_count} chunks</span>
+                              <span>{document.char_count.toLocaleString()} chars</span>
+                              <span>{document.loader_strategy_label || 'Grounded ingest'}</span>
+                              {document.size_label ? <span>{document.size_label}</span> : null}
+                            </div>
+                            {document.warnings?.length ? (
+                              <p className="mt-2 text-[10px] text-glow-warning leading-relaxed">{document.warnings[0]}</p>
+                            ) : null}
+                          </div>
+                          <StatusPill status={document.status} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+
+            <div className="min-w-0 rounded-xl border border-border/50 bg-secondary/20 px-4 py-4">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-primary" />
+                  <h3 className="text-xs font-medium text-foreground">Grounding preview</h3>
+                </div>
+                <StatusPill
+                  status={
+                    previewQuery.isLoading
+                      ? 'running'
+                      : groundingPreview?.warnings?.length
+                        ? 'warning'
+                        : groundingPreview
+                          ? 'ready'
+                          : 'pending'
+                  }
+                />
+              </div>
+              {previewQuery.isLoading ? (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Building preview from selected evidence...
+                </div>
+              ) : groundingPreview ? (
+                <div className="space-y-3">
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Quick signal check before execution: confirm the workflow is using the intended documents, enough source blocks and the expected evidence themes.
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <div className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
+                      <div className="text-sm font-medium text-foreground">{groundingPreview.document_ids.length}</div>
+                    </div>
+                    <div className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
+                      <div className="text-sm font-medium text-foreground">{groundingPreview.source_block_count}</div>
+                    </div>
+                    <div className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
+                      <div className="text-sm font-medium text-foreground">{groundingPreview.context_chars.toLocaleString()} chars</div>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    {groundingPreviewBlocks.slice(0, 2).map((block) => (
-                      <div key={`${block.source}-${block.excerpt.slice(0, 24)}`} className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
-                        <div className="text-[10px] font-medium uppercase tracking-wide text-primary">{block.source}</div>
-                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{truncatePreviewText(block.excerpt)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {groundingPreview.warnings?.length ? (
-                  <div className="rounded-lg border border-glow-warning/30 bg-glow-warning/10 px-3 py-2">
-                    <div className="text-[10px] uppercase tracking-wide text-glow-warning font-medium">Context caveats</div>
-                    <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
-                      {groundingPreview.warnings.map((warning) => (
-                        <li key={warning}>• {warning}</li>
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground">
+                      <FileText className="w-3.5 h-3.5" />
+                      Context highlights
+                    </div>
+                    <div className="space-y-2">
+                      {groundingPreviewBlocks.slice(0, 2).map((block) => (
+                        <div key={`${block.source}-${block.excerpt.slice(0, 24)}`} className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-wide text-primary">{block.source}</div>
+                          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{truncatePreviewText(block.excerpt)}</p>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
-                ) : null}
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">Select at least one indexed document to preview the grounded context.</p>
-            )}
+                  {groundingPreview.warnings?.length ? (
+                    <div className="rounded-lg border border-glow-warning/30 bg-glow-warning/10 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-glow-warning font-medium">Context caveats</div>
+                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                        {groundingPreview.warnings.map((warning) => (
+                          <li key={warning}>• {warning}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Select at least one indexed document to preview the grounded context.</p>
+              )}
+            </div>
           </div>
         </GlassCard>
       )}
-
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="glass rounded-xl p-4 mb-6">
-        <div className="flex items-start gap-3">
-          <Target className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-          <div>
-            <p className="text-xs text-foreground font-medium">Objective: {actionPlanView?.objective || 'Turn grounded workflow findings into an action plan with execution-ready ownership and evidence coverage.'}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">{buildObjectiveSubtitle(actionPlanView)}</p>
-          </div>
-        </div>
-      </motion.div>
-
-      <GlassCard className="mb-6" delay={0.09}>
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <div>
-            <h3 className="text-sm font-medium text-foreground">Workflow progress</h3>
-            <p className="text-xs text-muted-foreground mt-1">Track how the live run moved from grounded document selection to export-ready outputs.</p>
-          </div>
-          <StatusPill status={workflowResponse?.result?.status || (runActionPlanMutation.isPending ? 'running' : 'pending')} />
-        </div>
-        <div className="grid gap-3 md:grid-cols-5">
-          {stepStatuses.map((step, index) => (
-            <div key={step.key} className="rounded-xl border border-border/50 bg-secondary/20 px-3 py-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Step {index + 1}</span>
-                <StatusPill status={step.status} />
-              </div>
-              <p className="mt-3 text-sm font-medium text-foreground">{step.label}</p>
-            </div>
-          ))}
-        </div>
-      </GlassCard>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[

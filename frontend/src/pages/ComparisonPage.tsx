@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Sparkles, AlertTriangle, Play, ArrowLeftRight, CheckCircle2, Shield, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
-import { PageHeader, GlassCard, StatusPill } from '@/components/shared/ui-components';
+import { PageHeader, GlassCard, StatusPill, WorkflowProgressHeader } from '@/components/shared/ui-components';
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
 import {
   buildProductArtifactUrl,
@@ -204,6 +204,14 @@ export default function ComparisonPage() {
     availableDocuments.length < 2 ||
     runComparisonMutation.isPending;
 
+  const comparisonSteps = comparisonView?.run_state.steps ?? [
+    { key: 'select', label: 'Select', status: selectedDocumentAId && selectedDocumentBId ? 'completed' : 'pending' },
+    { key: 'ground', label: 'Ground', status: workflowResponse?.result?.grounding_preview ? 'completed' : 'pending' },
+    { key: 'analyze', label: 'Analyze', status: runComparisonMutation.isPending ? 'running' : workflowResponse?.result ? (workflowResponse.result.status === 'error' ? 'error' : 'completed') : 'pending' },
+    { key: 'review', label: 'Review', status: differences.length > 0 ? 'completed' : 'pending' },
+    { key: 'export', label: 'Export', status: generateDeckMutation.isPending ? 'running' : allArtifacts.length > 0 ? 'completed' : 'pending' },
+  ];
+
   const handleDocumentAChange = (documentId: string) => {
     setSelectedDocumentAId(documentId);
     if (documentId === selectedDocumentBId) {
@@ -235,7 +243,7 @@ export default function ComparisonPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Policy & Contract Comparison" description="Compare documents side-by-side with impact analysis and grounded recommendations.">
+      <PageHeader title="Policy & Contract Comparison" description="Compare two documents side by side and surface grounded deltas.">
         <Button
           className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"
           disabled={runDisabled}
@@ -268,26 +276,11 @@ export default function ComparisonPage() {
           At least two indexed documents are required to run a grounded policy comparison.
         </div>
       )}
-
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="glass rounded-xl p-4 mb-6">
-        <div className="flex items-center gap-1">
-          {(comparisonView?.run_state.steps ?? [
-            { key: 'select', label: 'Select', status: selectedDocumentAId && selectedDocumentBId ? 'completed' : 'pending' },
-            { key: 'ground', label: 'Ground', status: workflowResponse?.result?.grounding_preview ? 'completed' : 'pending' },
-            { key: 'analyze', label: 'Analyze', status: runComparisonMutation.isPending ? 'running' : workflowResponse?.result ? 'completed' : 'pending' },
-            { key: 'review', label: 'Review', status: differences.length > 0 ? 'completed' : 'pending' },
-            { key: 'export', label: 'Export', status: generateDeckMutation.isPending ? 'running' : allArtifacts.length > 0 ? 'completed' : 'pending' },
-          ]).map((step, index, steps) => (
-            <div key={step.key} className="flex items-center gap-1 flex-1">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-muted-foreground">
-                <StatusPill status={step.status} />
-                <span className="hidden sm:inline">{step.label}</span>
-              </div>
-              {index < steps.length - 1 && <div className={`flex-1 h-px ${step.status === 'completed' ? 'bg-glow-success/40' : 'bg-border'}`} />}
-            </div>
-          ))}
-        </div>
-      </motion.div>
+      <WorkflowProgressHeader
+        steps={comparisonSteps}
+        title="Workflow progress"
+        description="Track how the grounded comparison moves from document selection to export-ready outputs."
+      />
 
 
       {/* Document Selection */}

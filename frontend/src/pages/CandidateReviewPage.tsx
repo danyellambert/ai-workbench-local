@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
-import { PageHeader, GlassCard, StatusPill } from '@/components/shared/ui-components';
+import { PageHeader, GlassCard, StatusPill, WorkflowProgressHeader } from '@/components/shared/ui-components';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,6 +37,14 @@ import {
   type ProductRunWorkflowResponse,
   type ProductWorkflowArtifact,
 } from '@/lib/product-api';
+
+const workflowSteps = [
+  { key: 'select', label: 'Select' },
+  { key: 'ground', label: 'Ground' },
+  { key: 'analyze', label: 'Analyze' },
+  { key: 'review', label: 'Review' },
+  { key: 'export', label: 'Export' },
+] as const;
 
 function isCandidateLikeDocument(document: ProductDocumentLibraryEntry): boolean {
   const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`.toLowerCase();
@@ -257,6 +265,18 @@ export default function CandidateReviewPage() {
   const selectedDocumentDate = formatDate(selectedDocument?.indexed_at || null);
   const preview = workflowResponse?.result?.grounding_preview ?? previewQuery.data?.preview ?? null;
 
+  const stepStatuses = useMemo(() => workflowSteps.map((step) => {
+    let status = 'pending';
+    if (step.key === 'select' && selectedDocumentId) status = 'completed';
+    if (step.key === 'ground' && preview) status = 'completed';
+    if (step.key === 'analyze' && runReviewMutation.isPending) status = 'running';
+    if (step.key === 'analyze' && workflowResponse?.result) status = workflowResponse.result.status === 'error' ? 'error' : 'completed';
+    if (step.key === 'review' && sections) status = 'completed';
+    if (step.key === 'export' && generateDeckMutation.isPending) status = 'running';
+    if (step.key === 'export' && allArtifacts.length > 0) status = 'completed';
+    return { ...step, status };
+  }), [allArtifacts.length, generateDeckMutation.isPending, preview, runReviewMutation.isPending, sections, selectedDocumentId, workflowResponse?.result]);
+
 
   const handleOpenArtifact = (artifact: ProductWorkflowArtifact) => {
     if (!artifact.path) {
@@ -268,7 +288,7 @@ export default function CandidateReviewPage() {
 
   return (
     <motion.div data-testid="candidate-review-page" className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Candidate Review" description="Live hiring intelligence backed by the Product API, the indexed document corpus and structured candidate-analysis output.">
+      <PageHeader title="Candidate Review" description="Review a candidate profile with grounded strengths, watchouts and interview focus.">
         <Button data-testid="candidate-review-run-button" className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" disabled={!selectedDocumentId || runReviewMutation.isPending} onClick={() => runReviewMutation.mutate()}>
           {runReviewMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Run Candidate Review
         </Button>
@@ -276,6 +296,12 @@ export default function CandidateReviewPage() {
           {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Generate Deck
         </Button>
       </PageHeader>
+
+      <WorkflowProgressHeader
+        steps={stepStatuses}
+        title="Workflow progress"
+        description="Track how the candidate review moves from document selection to publish-ready outputs."
+      />
 
       {(documentLibraryQuery.isError || previewQuery.isError) && (
         <GlassCard className="mb-6 border border-glow-warning/20">
@@ -345,9 +371,6 @@ export default function CandidateReviewPage() {
                   : 'Select a candidate document to preview the grounded CV context before running the workflow.'}
               </p>
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-              This workflow uses a fixed evaluation brief behind the scenes so the surface stays stable and product-like.
-            </p>
           </div>
         </div>
       </GlassCard>
