@@ -312,6 +312,16 @@ export default function ChatPage() {
     },
   });
 
+  const createSessionMutation = useMutation({
+    mutationFn: async () => createLabChatSession({ document_ids: selectedDocumentIds }),
+    onSuccess: (response) => {
+      const nextSessionId = response.page.active_session_id ?? response.session.session_id;
+      setSessionId(nextSessionId);
+      queryClient.setQueryData(aiLabQueryKeys.chat(nextSessionId), response.page);
+      queryClient.invalidateQueries({ queryKey: ['ai-lab', 'chat'] });
+    },
+  });
+
   const canSend = Boolean(data?.capabilities?.can_send);
   const hasVisibleRuntimeError = isError || sendMutation.isError;
   const shouldSuppressStaleProviderError = canSend && !hasVisibleRuntimeError;
@@ -328,6 +338,9 @@ export default function ChatPage() {
   const showActiveSessionError = Boolean(activeSessionError && !(shouldSuppressStaleProviderError && /^HTTP Error\s+\d+:/i.test(activeSessionError)));
   const effectiveStatus = shouldSuppressStaleProviderError && data?.status === 'degraded' ? 'live' : data?.status;
   const activeStatusLabel = effectiveStatus === 'degraded' ? 'Degraded' : effectiveStatus === 'trace_only' ? 'Trace only' : 'Live';
+  const groundedRate = typeof chatSummary?.groundedMessageRate === 'number' ? Math.round(chatSummary.groundedMessageRate * 100) : 0;
+  const artifactCount = typeof chatSummary?.artifactCount === 'number' ? chatSummary.artifactCount : 0;
+  const avgSourcesPerAssistant = typeof chatSummary?.avgSourcesPerAssistant === 'number' ? chatSummary.avgSourcesPerAssistant : 0;
 
   const handleSend = async () => {
     if (!canSend || sendMutation.isPending || !input.trim()) {
@@ -341,6 +354,13 @@ export default function ChatPage() {
       event.preventDefault();
       await handleSend();
     }
+  };
+
+  const handleNewSession = async () => {
+    if (createSessionMutation.isPending) {
+      return;
+    }
+    await createSessionMutation.mutateAsync();
   };
 
   return (
@@ -377,6 +397,24 @@ export default function ChatPage() {
               {visibleMetaNotes.join(' ')}
             </div>
           ) : null}
+
+          <div className="grid gap-3 md:grid-cols-3 mb-4">
+            <GlassCard>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Grounded reply rate</p>
+              <p className="text-lg font-semibold text-foreground">{groundedRate}%</p>
+              <p className="text-[10px] text-muted-foreground">assistant replies with cited grounding</p>
+            </GlassCard>
+            <GlassCard>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Captured artifacts</p>
+              <p className="text-lg font-semibold text-foreground">{artifactCount}</p>
+              <p className="text-[10px] text-muted-foreground">exports or workflow captures linked to this chat surface</p>
+            </GlassCard>
+            <GlassCard>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Avg sources / reply</p>
+              <p className="text-lg font-semibold text-foreground">{avgSourcesPerAssistant.toFixed(1)}</p>
+              <p className="text-[10px] text-muted-foreground">grounding density per assistant message</p>
+            </GlassCard>
+          </div>
 
           <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
             {isLoading && !messages.length ? (
@@ -474,7 +512,17 @@ export default function ChatPage() {
           <GlassCard>
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Sessions</h4>
-              {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    void handleNewSession();
+                  }}
+                  className="text-[10px] px-2 py-1 rounded-md border border-border/50 bg-secondary/20 text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors"
+                >
+                  New
+                </button>
+                {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
+              </div>
             </div>
             <div className="space-y-2">
               {sessions.length === 0 ? (

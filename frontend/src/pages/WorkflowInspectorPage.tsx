@@ -61,6 +61,8 @@ export default function WorkflowInspectorPage() {
   }, {});
   const modeBreakdown = data?.mode_breakdown ?? [];
   const reviewReasons = data?.review_reasons ?? [];
+  const taskHealth = data?.task_health ?? [];
+  const latestRuns = data?.latest_runs ?? [];
 
   useEffect(() => {
     if (!instructions && selectedDetail?.document_names?.length) {
@@ -131,7 +133,7 @@ export default function WorkflowInspectorPage() {
         metrics={[
           { label: 'Total Cases', value: summary?.total_cases ?? '—', icon: Workflow, status: 'neutral' },
           { label: 'Needs Review', value: summary?.needs_review ?? '—', icon: Eye, status: (summary?.needs_review ?? 0) > 2 ? 'warning' : 'healthy' },
-          { label: 'Avg Confidence', value: summary ? `${summary.avg_confidence}%` : '—', icon: Zap, status: 'healthy' },
+          { label: 'Avg Confidence', value: summary ? `${Math.round(summary.avg_confidence * 100)}%` : '—', icon: Zap, status: 'healthy' },
           { label: 'Review Blockers', value: summary?.review_blockers ?? '—', icon: ShieldAlert, status: (summary?.review_blockers ?? 0) > 0 ? 'warning' : 'healthy' },
           { label: 'Failed', value: summary?.failed ?? '—', icon: AlertTriangle, status: (summary?.failed ?? 0) > 0 ? 'error' : 'healthy' },
         ]}
@@ -427,6 +429,71 @@ export default function WorkflowInspectorPage() {
           </table>
         </div>
       </GlassCard>
+
+      <div className="grid lg:grid-cols-2 gap-4 mt-4">
+        <GlassCard>
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <Zap className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-medium text-foreground">Task Health</h3>
+            {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
+          </div>
+          <div className="space-y-2">
+            {taskHealth.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No persisted task health exists yet.</p>
+            ) : (
+              taskHealth.map((task) => (
+                <div key={task.id} className="rounded-lg border border-border/30 bg-secondary/20 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">{task.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{task.runs} run(s) · last {task.last_run_at ? new Date(task.last_run_at).toLocaleString() : 'never'}</p>
+                    </div>
+                    <StatusPill status={toStatus(task.last_status)} />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground gap-4">
+                    <span>needs review {Math.round(task.needs_review_rate * 100)}%</span>
+                    <span>{task.avg_latency_s > 0 ? `${task.avg_latency_s.toFixed(1)}s avg` : 'latency n/a'}</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </GlassCard>
+
+        <GlassCard>
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <GitBranch className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-medium text-foreground">Latest Live Runs</h3>
+            {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
+          </div>
+          <div className="space-y-2">
+            {latestRuns.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No live inspector runs were captured yet.</p>
+            ) : (
+              latestRuns.map((run) => (
+                <div key={run.id} className="rounded-lg border border-border/30 bg-secondary/20 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">{run.task_label}</p>
+                      <p className="text-[10px] text-muted-foreground">{run.provider ?? 'provider n/a'} · {run.model ?? 'model n/a'}</p>
+                    </div>
+                    <StatusPill status={toStatus(run.status)} />
+                  </div>
+                  <div className="mt-2 text-[10px] text-muted-foreground flex flex-wrap items-center gap-2">
+                    <span>{run.timestamp ? new Date(run.timestamp).toLocaleString() : '—'}</span>
+                    <span>·</span>
+                    <span>{typeof run.latency_s === 'number' && run.latency_s > 0 ? `${run.latency_s.toFixed(1)}s` : 'latency n/a'}</span>
+                    <span>·</span>
+                    <span>{run.source_count ?? 0} source(s)</span>
+                    {run.artifact_label ? <><span>·</span><span>{run.artifact_label}</span></> : null}
+                  </div>
+                  {run.review_reason ? <p className="mt-2 text-[10px] text-glow-warning">{run.review_reason}</p> : null}
+                </div>
+              ))
+            )}
+          </div>
+        </GlassCard>
+      </div>
     </motion.div>
   );
 }

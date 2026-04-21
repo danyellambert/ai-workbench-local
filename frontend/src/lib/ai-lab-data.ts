@@ -227,7 +227,17 @@ export interface LabChatPageData {
   retrieval_quality?: Array<{ label: string; value: string | number }> | Record<string, unknown>;
   grounding_overview?: Array<{ label: string; value: string | number }> | Record<string, unknown>;
   session_timeline?: LabTimelineEntry[];
-  summary?: Record<string, unknown>;
+  summary?: {
+    sessionCount?: number;
+    selectedDocumentIds?: string[];
+    activeSessionStatus?: string;
+    groundedMessageRate?: number;
+    artifactCount?: number;
+    warningCount?: number;
+    avgSourcesPerAssistant?: number;
+    lastLatencyS?: number;
+    [key: string]: unknown;
+  };
 }
 
 export interface CreateLabChatSessionResponse {
@@ -284,6 +294,10 @@ export interface LabWorkflowInspectorPageData {
       source_count?: number;
     }>;
     trace_fields?: Array<{ label: string; value: string | number }>;
+    stage_timeline?: Array<{ label: string; status: string; detail?: string | null; duration_ms?: number | null }>;
+    guardrails?: Array<{ label: string; severity: string; detail?: string | null }>;
+    artifacts?: Array<{ label: string; path?: string | null }>;
+    run_summary?: { runs?: number; needsReviewRate?: number; avgLatencyS?: number; lastRunAt?: string | null };
   }>;
   recent_cases: Array<{
     id: string;
@@ -297,6 +311,23 @@ export interface LabWorkflowInspectorPageData {
   }>;
   mode_breakdown?: Array<{ label: string; value: number }>;
   review_reasons?: Array<{ label: string; value: number }>;
+  task_health?: Array<{ id: string; label: string; runs: number; last_status: string; needs_review_rate: number; avg_latency_s: number; last_run_at?: string | null }>;
+  latest_runs?: Array<{
+    id: string;
+    task_id: string;
+    task_label: string;
+    status: string;
+    timestamp?: string | null;
+    provider?: string | null;
+    model?: string | null;
+    latency_s?: number | null;
+    source_count?: number;
+    needs_review?: boolean;
+    review_reason?: string | null;
+    artifact_label?: string | null;
+    artifact_path?: string | null;
+    document_names?: string[];
+  }>;
 }
 
 export interface RunLabWorkflowInspectorResponse {
@@ -399,8 +430,11 @@ export interface LabEvidenceOpsPageData {
     repositoryDocumentCount: number;
     repositoryRoot?: string | null;
     lastSyncAt?: string | null;
+    overdueActions?: number;
+    unassignedActions?: number;
+    needsReviewActions?: number;
   };
-  repositoryStats?: { changedDocuments: number; newDocuments: number };
+  repositoryStats?: { changedDocuments: number; newDocuments: number; categories?: number; totalSizeLabel?: string };
   searchHints?: string[];
   tools: Array<{ name: string; description: string; status: string; lastCall?: string | null }>;
   actions: Array<{ id: string; title: string; status: string; owner: string; target: string; priority: string; dueDate: string; [key: string]: unknown }>;
@@ -410,6 +444,9 @@ export interface LabEvidenceOpsPageData {
   readiness?: Array<{ target: string; status: string; detail: string }>;
   ownershipSummary?: Array<{ owner: string; count: number }>;
   operationBreakdown?: Array<{ label: string; value: number }>;
+  categoryBreakdown?: Array<{ label: string; value: number }>;
+  statusBreakdown?: Array<{ label: string; value: number }>;
+  recentSearches?: Array<{ query: string; timestamp?: string | null; hits: number }>;
 }
 
 export interface LabEvidenceOpsSearchResult {
@@ -517,4 +554,12 @@ export function getLabEvidenceOpsPage() {
 
 export function searchLabEvidenceOps(query: string) {
   return fetchJson<LabEvidenceOpsSearchResponse>(`/api/lab/evidenceops/search?q=${encodeURIComponent(query)}`);
+}
+
+export function syncLabEvidenceOps() {
+  return postJson<{ ok: boolean; diff?: Record<string, unknown>; page: LabEvidenceOpsPageData }>('/api/lab/evidenceops/sync', {});
+}
+
+export function updateLabEvidenceOpsAction(actionId: string | number, payload: { status?: string | null; owner?: string | null }) {
+  return postJson<{ ok: boolean; action?: Record<string, unknown>; page: LabEvidenceOpsPageData }>(`/api/lab/evidenceops/actions/${encodeURIComponent(String(actionId))}`, payload);
 }

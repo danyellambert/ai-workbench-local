@@ -55,6 +55,8 @@ from src.product.lab import (
     build_lab_workflow_inspector_payload,
     execute_lab_chat_turn,
     execute_lab_workflow_inspector_run,
+    sync_lab_evidenceops_state,
+    update_lab_evidenceops_action,
 )
 from src.product.models import ProductWorkflowRequest, ProductWorkflowResult
 from src.product.presenters import build_document_review_view, build_policy_comparison_view, build_product_result_sections
@@ -1043,6 +1045,30 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     "artifact_path": response_payload.get("artifact_path"),
                     "page": build_lab_chat_payload(self.bootstrap.workspace_root, session_id=session_id),
                 })
+            except Exception as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path == "/api/lab/evidenceops/sync":
+            try:
+                self._send_json(HTTPStatus.OK, sync_lab_evidenceops_state(self.bootstrap.workspace_root))
+            except Exception as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path.startswith("/api/lab/evidenceops/actions/"):
+            try:
+                action_id_text = path.removeprefix("/api/lab/evidenceops/actions/").strip("/")
+                action_id = int(action_id_text)
+                self._send_json(
+                    HTTPStatus.OK,
+                    update_lab_evidenceops_action(
+                        self.bootstrap.workspace_root,
+                        action_id=action_id,
+                        status=(str(payload.get("status")) if payload.get("status") is not None else None),
+                        owner=(str(payload.get("owner")) if payload.get("owner") is not None else None),
+                    ),
+                )
             except Exception as error:
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
