@@ -1,80 +1,164 @@
 import { PRODUCT_API_BASE_URL } from '@/lib/product-api';
 import type { DataSource } from '@/types/ai-lab';
 
-export interface LabApiMeta {
+export type LabEvalVerdict = 'PASS' | 'WARN' | 'FAIL';
+
+export interface LabMeta {
   source: DataSource;
   updated_at?: string | null;
-  notes: string[];
+  notes?: string[];
 }
 
-export interface LabRuntimeSnapshot {
-  generationProvider: string;
-  generationModel: string;
-  promptProfile: string;
-  contextWindowMode: string;
-  resolvedContext: number;
-  embeddingProvider: string;
-  embeddingModel: string;
-  retrievalStrategy: string;
-  chunkSize: number;
-  chunkOverlap: number;
-  topK: number;
-  rerankPoolSize: number;
-  rerankLexicalWeight: number;
-  vectorBackend: string;
-  vectorBackendStatus: 'healthy' | 'degraded' | 'offline';
-  indexedDocumentCount: number;
-  ingestionHealth: 'healthy' | 'warning' | 'error';
-  contextPressure: number;
-  contextBudgetUsed: number;
-  contextBudgetTotal: number;
-}
-
-export interface LabMetricEntry {
+export interface LabKeyValueRow {
   label: string;
   value: string | number;
-  status: string;
-  trend?: string;
+  status?: 'healthy' | 'warning' | 'error' | 'neutral';
+  detail?: string | null;
 }
 
-export interface LabAlertEntry {
+export interface LabOverviewKpi {
+  label: string;
+  value: string | number;
+  status: 'healthy' | 'warning' | 'error' | 'neutral';
+  trend?: string | null;
+}
+
+export interface LabOverviewAlert {
   id: string;
   severity: 'critical' | 'warning' | 'info';
   title: string;
   detail: string;
   source: string;
-  timestamp?: string | null;
+  timestamp: string;
 }
 
-export interface LabPieEntry {
-  name: string;
-  value: number;
-}
-
-export interface LabKeyValueRow {
-  label: string;
-  value: string;
-}
-
-export interface LabOverviewResponse {
-  ok: boolean;
-  meta: LabApiMeta;
-  runtime: LabRuntimeSnapshot;
-  kpis: LabMetricEntry[];
-  alerts: LabAlertEntry[];
-  workflow_mix_label: string;
-  workflow_mix: LabPieEntry[];
+export interface LabOverviewPageData {
+  meta: LabMeta;
+  status?: string;
+  degraded_reason?: string | null;
+  runtime: Record<string, unknown> & {
+    generationProvider?: string;
+    generationModel?: string;
+    vectorBackendStatus?: string;
+    indexedDocumentCount?: number;
+    totalChunks?: number;
+    contextPressure?: number;
+    ingestionHealth?: string;
+  };
+  kpis: LabOverviewKpi[];
+  alerts: LabOverviewAlert[];
+  workflow_mix: Array<{ name: string; value: number }>;
   review_rate: number;
+  cross_surface_notes?: string[];
 }
 
-export interface LabRuntimeResponse {
-  ok: boolean;
-  meta: LabApiMeta;
-  runtime: LabRuntimeSnapshot;
+export interface LabRuntimePayload {
+  meta: LabMeta;
+  status?: string;
+  degraded_reason?: string | null;
+  runtime: Record<string, unknown> & {
+    generationProvider?: string;
+    generationModel?: string;
+    promptProfile?: string;
+    contextWindowMode?: string;
+    resolvedContext?: number;
+    embeddingProvider?: string;
+    embeddingModel?: string;
+    retrievalStrategy?: string;
+    chunkSize?: number;
+    chunkOverlap?: number;
+    topK?: number;
+    rerankPoolSize?: number;
+    rerankLexicalWeight?: number;
+    vectorBackend?: string;
+    vectorBackendStatus?: string;
+    indexedDocumentCount?: number;
+    totalChunks?: number;
+    ingestionHealth?: string;
+    contextPressure?: number;
+    contextBudgetUsed?: number;
+    contextBudgetTotal?: number;
+    contextPressurePct?: number;
+    contextUtilizationPct?: number;
+    pdfExtractionMode?: string;
+    ocrBackend?: string;
+    vlmEnhancement?: boolean;
+    executionPolicy?: string;
+  };
   generation_rows: LabKeyValueRow[];
   retrieval_rows: LabKeyValueRow[];
   vector_rows: LabKeyValueRow[];
   diagnostics_rows: LabKeyValueRow[];
+  ops_summary?: {
+    totalRuns?: number;
+    successfulRuns?: number;
+    errorRate?: number;
+    successRate?: number;
+    needsReviewRate?: number;
+    avgLatencyS?: number;
+    p95LatencyS?: number;
+    avgTotalTokens?: number;
+    throughput24h?: number;
+    providerSwitchRate?: number;
+    recentWindowLabel?: string;
+    lastTraceAt?: string | null;
+  };
+  retrieval_health?: {
+    avgRetrievedChunks?: number;
+    emptyRetrievalRate?: number;
+    truncatedPromptRate?: number;
+    avgContextPressurePct?: number;
+    maxContextPressurePct?: number;
+    avgContextUtilizationPct?: number;
+  };
+  cost_summary?: {
+    totalTokens?: number;
+    avgTotalTokens?: number;
+    totalCostUsd?: number;
+    avgCostUsd?: number;
+    pricedRunRate?: number;
+  };
+  latency_breakdown?: Array<{ stage: string; seconds: number }>;
+  provider_breakdown?: Array<{
+    key: string;
+    provider: string;
+    model: string;
+    runs: number;
+    errorRate: number;
+    needsReviewRate: number;
+    avgLatencyS: number;
+    avgTotalTokens: number;
+  }>;
+  failure_modes?: Array<{
+    id: string;
+    label: string;
+    count: number;
+    severity: 'warning' | 'error';
+    detail?: string | null;
+  }>;
+  recent_traces?: Array<{
+    id: string;
+    timestamp: string;
+    flow: string;
+    task: string;
+    provider: string;
+    model: string;
+    latencyS: number;
+    success: boolean;
+    needsReview: boolean;
+    totalTokens: number;
+    sourceCount: number;
+    contextPressurePct: number;
+    errorMessage?: string | null;
+  }>;
+  timeline?: Array<{
+    label: string;
+    latencyS: number;
+    contextPressurePct: number;
+    error: number;
+  }>;
+  watchouts?: string[];
+  cross_surface_notes?: string[];
 }
 
 export interface LabChatMessageSource {
@@ -91,10 +175,23 @@ export interface LabChatMessage {
   sources?: LabChatMessageSource[];
 }
 
+export interface LabChatSessionSummary {
+  session_id: string;
+  title: string;
+  updated_at?: string | null;
+  message_count?: number;
+  status?: string | null;
+  document_count?: number;
+  last_error?: string | null;
+  last_model?: string | null;
+  avg_latency_s?: number | null;
+  grounded_messages?: number;
+}
+
 export interface LabDocumentOption {
   document_id: string;
   name: string;
-  status: string;
+  status?: string;
   chunk_count?: number;
   char_count?: number;
   indexed_at?: string | null;
@@ -106,154 +203,52 @@ export interface LabDocumentOption {
   warnings?: string[];
 }
 
-export interface LabCapabilityState {
-  can_send?: boolean;
-  can_execute?: boolean;
-  reason?: string | null;
-}
-
-export interface LabChatSessionSummary {
-  session_id: string;
-  title: string;
-  updated_at?: string | null;
-  message_count: number;
-  status?: string | null;
-  document_count?: number;
-  last_error?: string | null;
-  last_model?: string | null;
-  avg_latency_s?: number | null;
-  grounded_messages?: number;
-}
-
 export interface LabTimelineEntry {
   id: string;
-  kind?: string | null;
-  label: string;
+  title?: string;
+  subtitle?: string;
+  label?: string;
+  detail?: string;
   timestamp?: string | null;
-  status?: string | null;
-  detail?: string | null;
+  status: string;
 }
 
-export interface LabChatSummary {
-  total_sessions?: number;
-  assistant_messages?: number;
-  grounded_messages?: number;
-  grounding_sources?: number;
-  active_documents?: number;
-  avg_latency_s?: number | null;
-  last_model?: string | null;
-  failed_sessions?: number;
-}
-
-export interface LabChatResponse {
-  ok: boolean;
-  status?: string | null;
+export interface LabChatPageData {
+  meta: LabMeta;
+  status?: string;
   degraded_reason?: string | null;
-  last_updated_at?: string | null;
-  meta: LabApiMeta;
-  capabilities: LabCapabilityState;
+  capabilities: { can_send: boolean; reason?: string | null };
   active_session_id?: string | null;
-  sessions?: LabChatSessionSummary[];
-  summary?: LabChatSummary;
-  grounding_overview?: LabKeyValueRow[];
-  session_timeline?: LabTimelineEntry[];
+  sessions: LabChatSessionSummary[];
   messages: LabChatMessage[];
   suggested_prompts: string[];
   selected_documents: LabDocumentOption[];
-  session_diagnostics: LabKeyValueRow[];
-  retrieval_quality: LabKeyValueRow[];
+  session_diagnostics?: Array<{ label: string; value: string | number }> | Record<string, unknown>;
+  retrieval_quality?: Array<{ label: string; value: string | number }> | Record<string, unknown>;
+  grounding_overview?: Array<{ label: string; value: string | number }> | Record<string, unknown>;
+  session_timeline?: LabTimelineEntry[];
+  summary?: Record<string, unknown>;
 }
 
-export interface LabCreateChatSessionPayload {
-  title?: string;
-  document_ids?: string[];
-}
-
-export interface LabCreateChatSessionResponse {
+export interface CreateLabChatSessionResponse {
   ok: boolean;
-  session: LabChatSessionSummary & Record<string, unknown>;
-  page: LabChatResponse;
+  session: { session_id: string; [key: string]: unknown };
+  page: LabChatPageData;
 }
 
-export interface LabSendChatMessagePayload {
-  content: string;
-  document_ids?: string[];
-}
-
-export interface LabSendChatMessageResponse {
+export interface SendLabChatMessageResponse {
   ok: boolean;
   session_id: string;
   assistant_message?: LabChatMessage;
   artifact_path?: string | null;
-  page: LabChatResponse;
+  page: LabChatPageData;
 }
 
-export interface LabWorkflowTaskOption {
-  id: string;
-  label: string;
-  description: string;
-  recent_count: number;
-}
-
-export interface LabWorkflowResultItem {
-  label: string;
-  value: string;
-  confidence?: number | null;
-}
-
-export interface LabWorkflowExecution {
-  id: string;
-  mode: string;
-  status: string;
-  confidence: number;
-  source_count: number;
-  latency_s?: number | null;
-  provider?: string | null;
-  model?: string | null;
-  needs_review: boolean;
-  review_reason?: string | null;
-  timestamp?: string | null;
-}
-
-export interface LabWorkflowTaskDetail {
-  id: string;
-  label: string;
-  description: string;
-  document_names: string[];
-  result_title: string;
-  result_items: LabWorkflowResultItem[];
-  trace_fields: LabKeyValueRow[];
-  raw_json: Record<string, unknown>;
-  executions: LabWorkflowExecution[];
-  artifact_path?: string | null;
-  latest_request?: Record<string, unknown>;
-  latest_status?: string | null;
-  latest_timestamp?: string | null;
-  latest_summary?: string | null;
-}
-
-export interface LabWorkflowCase {
-  id: string;
-  task: string;
-  document: string;
-  mode: string;
-  status: string;
-  needsReview: boolean;
-  confidence: number;
-  sourceCount: number;
-  timestamp?: string | null;
-  reviewReason?: string | null;
-  artifactPath?: string | null;
-  summary?: string | null;
-}
-
-export interface LabWorkflowInspectorResponse {
-  ok: boolean;
-  status?: string | null;
+export interface LabWorkflowInspectorPageData {
+  meta: LabMeta;
+  status?: string;
   degraded_reason?: string | null;
-  last_updated_at?: string | null;
-  meta: LabApiMeta;
-  capabilities: LabCapabilityState;
+  capabilities: { can_execute: boolean; reason?: string | null };
   summary: {
     total_cases: number;
     needs_review: number;
@@ -265,389 +260,261 @@ export interface LabWorkflowInspectorResponse {
     live_runs?: number;
     last_run_at?: string | null;
   };
-  mode_breakdown?: LabKeyValueRow[];
-  review_reasons?: LabKeyValueRow[];
-  task_options: LabWorkflowTaskOption[];
-  document_options: Array<{ id: string; name: string; status: string }>;
-  selected_task_id?: string | null;
-  task_details: Record<string, LabWorkflowTaskDetail>;
-  recent_cases: LabWorkflowCase[];
+  task_options: Array<{ id: string; label: string; description: string; recent_count: number }>;
+  document_options: Array<{ id: string; name: string; status?: string }>;
+  selected_task_id?: string;
+  task_details: Record<string, {
+    id: string;
+    label: string;
+    description: string;
+    document_names?: string[];
+    result_title?: string;
+    result_items: Array<{ label: string; value: string; confidence?: number | null }>;
+    raw_json?: Record<string, unknown>;
+    executions?: Array<{
+      id: string;
+      mode: string;
+      status: string;
+      needs_review: boolean;
+      review_reason?: string | null;
+      latency_s?: number | null;
+      confidence?: number | null;
+      provider?: string | null;
+      model?: string | null;
+      source_count?: number;
+    }>;
+    trace_fields?: Array<{ label: string; value: string | number }>;
+  }>;
+  recent_cases: Array<{
+    id: string;
+    task: string;
+    document: string;
+    mode: string;
+    status: string;
+    confidence: number;
+    sourceCount: number;
+    needsReview: boolean;
+  }>;
+  mode_breakdown?: Array<{ label: string; value: number }>;
+  review_reasons?: Array<{ label: string; value: number }>;
 }
 
-export interface LabRunWorkflowInspectorPayload {
-  task_id: string;
-  document_id?: string | null;
-  input_text?: string | null;
-  provider?: string | null;
-  model?: string | null;
-}
-
-export interface LabRunWorkflowInspectorResponse {
+export interface RunLabWorkflowInspectorResponse {
   ok: boolean;
-  run: Record<string, unknown>;
-  result: Record<string, unknown>;
-  page: LabWorkflowInspectorResponse;
-  result_view?: Record<string, unknown>;
-  comparison_view?: Record<string, unknown>;
-  action_plan_view?: Record<string, unknown>;
+  run?: Record<string, unknown>;
+  result?: Record<string, unknown>;
+  page: LabWorkflowInspectorPageData;
 }
 
-export interface LabBenchmarkModel {
-  id: string;
-  provider: string;
-  model: string;
-  family: string;
-  quantization: string;
-  latency: number;
-  outputChars: number;
-  adherence: number;
-  groundedness: number;
-  useCaseFit: number;
-  runtimeBucket: string;
-  runs: number;
-  successRate: number;
-  source: string;
-  profileTag?: string | null;
-}
-
-export interface LabBenchmarkPreset {
-  id: string;
-  name: string;
-  description: string;
-  metrics: string[];
-  models: string[];
-}
-
-export interface LabRetrievalObservation {
-  strategy: string;
-  outputDiscipline: number;
-  contextRetention: number;
-  composite: number;
-  latency: number;
-  description: string;
-  coverage: number;
-}
-
-export interface LabBenchmarksResponse {
-  ok: boolean;
-  status?: string | null;
+export interface LabBenchmarksPageData {
+  meta: LabMeta;
+  status?: string;
   degraded_reason?: string | null;
-  last_updated_at?: string | null;
-  meta: LabApiMeta;
   summary: {
     modelCount: number;
-    recommendedModel?: string | null;
     bestGroundedness: number;
     fastestLatency: number;
+    bestModel?: string | null;
+    totalRuns?: number;
   };
-  providerSummary?: Array<{ provider: string; models: number; avgLatency: number; bestFit: number; bestModel?: string | null }>;
+  models: Array<{
+    id: string;
+    family: string;
+    provider: string;
+    model: string;
+    profileTag?: string;
+    useCaseFit: number;
+    groundedness: number;
+    adherence: number;
+    latency: number;
+    outputChars: number;
+    runtimeBucket?: string;
+    quantization?: string;
+    runs: number;
+  }>;
+  presets: Array<{ id: string; name: string; description: string; metrics: string[]; models: string[] }>;
+  providerSummary?: Array<{ provider: string; models: number; bestFit: number; avgLatency: number; bestModel?: string | null }>;
   leaderboardHighlights?: Array<{ label: string; model?: string | null; detail?: string | null }>;
-  models: LabBenchmarkModel[];
-  presets: LabBenchmarkPreset[];
-  retrievalObservations: LabRetrievalObservation[];
+  retrievalObservations: Array<{
+    strategy: string;
+    outputDiscipline: number;
+    contextRetention: number;
+    composite: number;
+    latency: number;
+    coverage: number;
+    description: string;
+  }>;
 }
 
-export interface LabEvalSuite {
-  name: string;
-  total: number;
-  pass: number;
-  warn: number;
-  fail: number;
-  needsReview: number;
-  lastRun?: string | null;
-}
-
-export type LabEvalVerdict = 'PASS' | 'WARN' | 'FAIL';
-
-export interface LabEvalCase {
-  id: string;
-  task: string;
-  suite: string;
-  verdict: LabEvalVerdict;
-  score: number;
-  needsReview: boolean;
-  model: string;
-  latency: number;
-  timestamp?: string | null;
-  errorDetail?: string | null;
-}
-
-export interface LabEvalDiagnosisFailureReason {
-  reason: string;
-  count: number;
-}
-
-export interface LabEvalDiagnosisCandidate {
-  task_type: string;
-  fail_rate: number;
-  recent_fail_rate: number;
-  avg_score_ratio: number;
-  health_label: string;
-  adaptation_priority: string;
-  recommended_action: string;
-  top_reasons: LabEvalDiagnosisFailureReason[];
-}
-
-export interface LabEvalDiagnosisPriority {
-  task_type: string;
-  fail_rate: number;
-  recent_fail_rate: number;
-  recommended_action: string;
-}
-
-export interface LabEvalsResponse {
-  ok: boolean;
-  status?: string | null;
+export interface LabEvalsPageData {
+  meta: LabMeta;
+  status?: string;
   degraded_reason?: string | null;
-  last_updated_at?: string | null;
-  meta: LabApiMeta;
   passRate: number;
-  totals: {
-    total: number;
-    pass: number;
-    warn: number;
-    fail: number;
-    review: number;
-  };
-  suites: LabEvalSuite[];
-  cases: LabEvalCase[];
-  providerBreakdown?: Array<{ provider: string; total: number; passRate: number; failures: number }>;
+  totals: { pass: number; warn: number; fail: number; review: number; total: number };
+  suites: Array<{ name: string; total: number; pass: number; warn: number; fail: number; needsReview: number; lastRun: string }>;
+  cases: Array<{ id: string; task: string; suite: string; verdict: LabEvalVerdict; score: number; needsReview: boolean; model: string; latency: number; timestamp: string; errorDetail?: string | null }>;
+  providerBreakdown?: Array<{ provider: string; total: number; failures: number; passRate: number }>;
   taskBreakdown?: Array<{ task: string; total: number; passRate: number; avgScore: number }>;
-  watchlist?: Array<{ id: string; task: string; suite: string; reason: string; timestamp?: string | null; verdict: LabEvalVerdict }>;
-  diagnosis: {
-    topFailureReasons: LabEvalDiagnosisFailureReason[];
-    adaptationCandidates: LabEvalDiagnosisCandidate[];
-    nextEvalPriorities: LabEvalDiagnosisPriority[];
-    globalRecommendation?: string | null;
-  };
+  watchlist?: Array<{ id: string; task: string; suite: string; verdict: 'WARN' | 'FAIL'; score: number; model: string; latency: number; reason?: string | null; timestamp?: string | null; errorDetail?: string | null }>;
+  diagnosis: any;
 }
 
-export interface LabArtifact {
-  id: string;
-  name: string;
-  type: 'report' | 'benchmark' | 'eval' | 'extraction' | 'ocr_diagnostic' | 'embedding_experiment';
-  category: string;
-  version: string;
-  createdAt: string;
-  size: string;
-  status: 'ready' | 'generating' | 'error';
-  description: string;
-  artifactPath?: string | null;
-}
-
-export interface LabDiagnosticEntry {
-  label: string;
-  detail: string;
-  status: string;
-  health: 'healthy' | 'warning' | 'neutral';
-}
-
-export interface LabArtifactsResponse {
-  ok: boolean;
-  status?: string | null;
+export interface LabArtifactsPageData {
+  meta: LabMeta;
+  status?: string;
   degraded_reason?: string | null;
-  last_updated_at?: string | null;
-  meta: LabApiMeta;
-  artifacts: LabArtifact[];
-  summary: {
-    totalArtifacts: number;
-    readyArtifacts: number;
-    errorArtifacts: number;
+  artifacts: Array<{
+    id: string;
+    name: string;
+    type: 'report' | 'benchmark' | 'eval' | 'extraction' | 'ocr_diagnostic' | 'embedding_experiment';
+    category: string;
+    version: string;
+    createdAt: string;
+    size: string;
+    status: 'ready' | 'generating' | 'error';
+    description: string;
+  }>;
+  summary: { totalArtifacts: number; readyArtifacts: number; errorArtifacts: number; chatSessions?: number; workflowRuns?: number };
+  diagnostics: Array<{ label: string; detail: string; status: string; health: 'healthy' | 'warning' | 'neutral' }>;
+  runRegistry?: {
     chatSessions?: number;
     workflowRuns?: number;
-  };
-  runRegistry?: {
-    chatSessions: number;
-    workflowRuns: number;
     latestChatSession?: string | null;
     latestWorkflowRun?: string | null;
     latestWorkflowArtifact?: string | null;
   };
   recentCaptures?: Array<{ id: string; label: string; category?: string | null; status?: string | null; createdAt?: string | null; artifactPath?: string | null }>;
-  diagnostics: LabDiagnosticEntry[];
 }
 
-export interface LabEvidenceTool {
-  name: string;
-  description: string;
-  status: string;
-  lastCall?: string | null;
-}
-
-export interface LabEvidenceAction {
-  id: string;
-  title: string;
-  status: 'open' | 'in_progress' | 'blocked' | 'done';
-  owner: string;
-  dueDate: string;
-  target: string;
-  priority: 'high' | 'medium' | 'low';
-  rawStatus?: string;
-  evidence?: string | null;
-  sourceCount?: number;
-}
-
-export interface LabEvidenceOperation {
-  id: string;
-  operation: string;
-  tool: string;
-  status: 'success' | 'warning' | 'error';
-  timestamp?: string | null;
-  durationMs: number;
-  detail: string;
-}
-
-export interface LabEvidenceTelemetry {
-  event: string;
-  tool: string;
-  status: 'ok' | 'warning' | 'skipped';
-  latency: string;
-  ts?: string | null;
-}
-
-export interface LabEvidenceReadiness {
-  target: string;
-  status: 'ready' | 'degraded';
-  detail: string;
-}
-
-export interface LabEvidenceOpsResponse {
-  ok: boolean;
-  status?: string | null;
+export interface LabEvidenceOpsPageData {
+  meta: LabMeta;
+  status?: string;
   degraded_reason?: string | null;
-  last_updated_at?: string | null;
-  meta: LabApiMeta;
   summary: {
     toolsTotal: number;
     activeTools: number;
     openActions: number;
     operationsCount: number;
-    lastSyncAt?: string | null;
-    repositoryRoot: string;
     repositoryDocumentCount: number;
-    repositoryCategories?: string[];
+    repositoryRoot?: string | null;
+    lastSyncAt?: string | null;
   };
-  tools: LabEvidenceTool[];
-  actions: LabEvidenceAction[];
-  operations: LabEvidenceOperation[];
-  telemetry: LabEvidenceTelemetry[];
-  readiness: LabEvidenceReadiness[];
-  ownershipSummary?: Array<{ owner: string; count: number }>;
-  operationBreakdown?: LabKeyValueRow[];
-  timeline?: Array<{ id: string; title: string; subtitle?: string | null; timestamp?: string | null; status?: string | null }>;
+  repositoryStats?: { changedDocuments: number; newDocuments: number };
   searchHints?: string[];
-  repositoryStats?: { totalDocuments: number; newDocuments: number; changedDocuments: number; removedDocuments: number };
+  tools: Array<{ name: string; description: string; status: string; lastCall?: string | null }>;
+  actions: Array<{ id: string; title: string; status: string; owner: string; target: string; priority: string; dueDate: string; [key: string]: unknown }>;
+  operations: Array<{ id: string; operation: string; tool: string; status: string; timestamp: string; durationMs: number; detail: string }>;
+  timeline?: LabTimelineEntry[];
+  telemetry?: Array<{ event: string; tool: string; status: string; latency: string; ts?: string | null }>;
+  readiness?: Array<{ target: string; status: string; detail: string }>;
+  ownershipSummary?: Array<{ owner: string; count: number }>;
+  operationBreakdown?: Array<{ label: string; value: number }>;
 }
 
-export interface LabEvidenceSearchResult {
-  documentId?: string | null;
+export interface LabEvidenceOpsSearchResult {
   title: string;
-  category?: string | null;
   relativePath: string;
+  category?: string | null;
   suffix?: string | null;
   sizeKb?: number | null;
-  matchScore: number;
   modifiedAt?: string | null;
+  matchScore: number;
 }
 
-export interface LabEvidenceSearchResponse {
-  ok: boolean;
-  meta: LabApiMeta;
+export interface LabEvidenceOpsSearchResponse {
+  meta: LabMeta;
   query: string;
   repositoryRoot: string;
-  results: LabEvidenceSearchResult[];
+  results: LabEvidenceOpsSearchResult[];
 }
 
-async function requestLabApi<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${PRODUCT_API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-    ...init,
-  });
+async function parseError(response: Response, fallback: string) {
+  try {
+    const payload = await response.json() as { error?: string };
+    return payload?.error || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+async function fetchJson<T>(path: string): Promise<T> {
+  const response = await fetch(`${PRODUCT_API_BASE_URL}${path}`);
   if (!response.ok) {
-    let detail = '';
-    try {
-      const payload = await response.json();
-      detail = typeof payload?.error === 'string' ? payload.error : JSON.stringify(payload);
-    } catch {
-      detail = response.statusText;
-    }
-    throw new Error(detail ? `AI Lab API request failed: ${response.status} ${detail}` : `AI Lab API request failed: ${response.status}`);
+    throw new Error(await parseError(response, `Product API request failed: ${response.status}`));
   }
   return response.json() as Promise<T>;
 }
 
-async function fetchLabApi<T>(path: string): Promise<T> {
-  return requestLabApi<T>(path);
-}
-
-async function postLabApi<T>(path: string, payload: unknown): Promise<T> {
-  return requestLabApi<T>(path, {
+async function postJson<T>(path: string, payload: object): Promise<T> {
+  const response = await fetch(`${PRODUCT_API_BASE_URL}${path}`, {
     method: 'POST',
-    body: JSON.stringify(payload ?? {}),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   });
+  if (!response.ok) {
+    throw new Error(await parseError(response, `Product API post failed: ${response.status}`));
+  }
+  return response.json() as Promise<T>;
 }
 
 export const aiLabQueryKeys = {
   overview: ['ai-lab', 'overview'] as const,
   runtime: ['ai-lab', 'runtime'] as const,
   chat: (sessionId?: string | null) => ['ai-lab', 'chat', sessionId ?? 'latest'] as const,
-  workflowInspector: (taskId?: string | null) => ['ai-lab', 'workflow-inspector', taskId ?? 'default'] as const,
+  workflowInspector: () => ['ai-lab', 'workflow-inspector'] as const,
   benchmarks: ['ai-lab', 'benchmarks'] as const,
   evals: ['ai-lab', 'evals'] as const,
   artifacts: ['ai-lab', 'artifacts'] as const,
   evidenceOps: ['ai-lab', 'evidenceops'] as const,
-  evidenceSearch: (query: string) => ['ai-lab', 'evidenceops', 'search', query] as const,
+  evidenceSearch: (query: string) => ['ai-lab', 'evidenceops-search', query] as const,
 };
 
-export function getLabOverviewPage(): Promise<LabOverviewResponse> {
-  return fetchLabApi<LabOverviewResponse>('/api/lab/overview');
+export function getLabOverviewPage() {
+  return fetchJson<LabOverviewPageData>('/api/lab/overview');
 }
 
-export function getLabRuntimePage(): Promise<LabRuntimeResponse> {
-  return fetchLabApi<LabRuntimeResponse>('/api/lab/runtime');
+export function getLabRuntimePage() {
+  return fetchJson<LabRuntimePayload>('/api/lab/runtime');
 }
 
-export function getLabChatPage(sessionId?: string | null): Promise<LabChatResponse> {
-  const suffix = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '';
-  return fetchLabApi<LabChatResponse>(`/api/lab/chat${suffix}`);
+export function getLabChatPage(sessionId?: string | null) {
+  const query = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '';
+  return fetchJson<LabChatPageData>(`/api/lab/chat${query}`);
 }
 
-export function createLabChatSession(payload: LabCreateChatSessionPayload): Promise<LabCreateChatSessionResponse> {
-  return postLabApi<LabCreateChatSessionResponse>('/api/lab/chat/sessions', payload);
+export function createLabChatSession(payload: { document_ids?: string[]; title?: string | null }) {
+  return postJson<CreateLabChatSessionResponse>('/api/lab/chat/sessions', payload);
 }
 
-export function sendLabChatMessage(sessionId: string, payload: LabSendChatMessagePayload): Promise<LabSendChatMessageResponse> {
-  return postLabApi<LabSendChatMessageResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/messages`, payload);
+export function sendLabChatMessage(sessionId: string, payload: { content: string; document_ids?: string[] }) {
+  return postJson<SendLabChatMessageResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/messages`, payload);
 }
 
-export function getLabWorkflowInspectorPage(taskId?: string | null): Promise<LabWorkflowInspectorResponse> {
-  const suffix = taskId ? `?task_id=${encodeURIComponent(taskId)}` : '';
-  return fetchLabApi<LabWorkflowInspectorResponse>(`/api/lab/workflow-inspector${suffix}`);
+export function getLabWorkflowInspectorPage() {
+  return fetchJson<LabWorkflowInspectorPageData>('/api/lab/workflow-inspector');
 }
 
-export function runLabWorkflowInspector(payload: LabRunWorkflowInspectorPayload): Promise<LabRunWorkflowInspectorResponse> {
-  return postLabApi<LabRunWorkflowInspectorResponse>('/api/lab/workflow-inspector/run', payload);
+export function runLabWorkflowInspector(payload: { task_id: string; document_id?: string | null; input_text?: string | null; provider?: string | null; model?: string | null }) {
+  return postJson<RunLabWorkflowInspectorResponse>('/api/lab/workflow-inspector/run', payload);
 }
 
-export function getLabBenchmarksPage(): Promise<LabBenchmarksResponse> {
-  return fetchLabApi<LabBenchmarksResponse>('/api/lab/benchmarks');
+export function getLabBenchmarksPage() {
+  return fetchJson<LabBenchmarksPageData>('/api/lab/benchmarks');
 }
 
-export function getLabEvalsPage(): Promise<LabEvalsResponse> {
-  return fetchLabApi<LabEvalsResponse>('/api/lab/evals');
+export function getLabEvalsPage() {
+  return fetchJson<LabEvalsPageData>('/api/lab/evals');
 }
 
-export function getLabArtifactsPage(): Promise<LabArtifactsResponse> {
-  return fetchLabApi<LabArtifactsResponse>('/api/lab/artifacts');
+export function getLabArtifactsPage() {
+  return fetchJson<LabArtifactsPageData>('/api/lab/artifacts');
 }
 
-export function getLabEvidenceOpsPage(): Promise<LabEvidenceOpsResponse> {
-  return fetchLabApi<LabEvidenceOpsResponse>('/api/lab/evidenceops');
+export function getLabEvidenceOpsPage() {
+  return fetchJson<LabEvidenceOpsPageData>('/api/lab/evidenceops');
 }
 
-export function searchLabEvidenceOps(query: string): Promise<LabEvidenceSearchResponse> {
-  return fetchLabApi<LabEvidenceSearchResponse>(`/api/lab/evidenceops/search?q=${encodeURIComponent(query)}`);
+export function searchLabEvidenceOps(query: string) {
+  return fetchJson<LabEvidenceOpsSearchResponse>(`/api/lab/evidenceops/search?q=${encodeURIComponent(query)}`);
 }

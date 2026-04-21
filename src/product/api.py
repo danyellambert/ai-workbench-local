@@ -578,7 +578,8 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/lab/chat":
-            self._send_json(HTTPStatus.OK, build_lab_chat_payload(self.bootstrap.workspace_root))
+            session_id = str((query.get("session_id") or [""])[0]).strip() or None
+            self._send_json(HTTPStatus.OK, build_lab_chat_payload(self.bootstrap.workspace_root, session_id=session_id))
             return
 
         if path == "/api/lab/workflow-inspector":

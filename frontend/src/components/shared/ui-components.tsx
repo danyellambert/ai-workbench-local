@@ -88,6 +88,46 @@ export function SeverityBadge({ severity }: SeverityBadgeProps) {
   );
 }
 
+type WorkflowProgressStep = { key: string; label: string; status: string };
+
+export function WorkflowProgressHeader({
+  steps,
+  title = 'Workflow progress',
+  description = 'Track how the live run is moving across the workflow.',
+  className,
+}: {
+  steps: WorkflowProgressStep[];
+  title?: string;
+  description?: string;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn('glass rounded-xl p-4 mb-6', className)}
+    >
+      <div className="flex flex-col gap-1.5 mb-4">
+        <h3 className="text-sm font-medium text-foreground">{title}</h3>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+      <div className="flex items-center gap-1">
+        {steps.map((step, index) => (
+          <div key={step.key} className="flex items-center gap-1 flex-1 min-w-0">
+            <div className="flex min-w-0 items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-muted-foreground">
+              <StatusPill status={step.status} />
+              <span className="hidden sm:inline truncate">{step.label}</span>
+            </div>
+            {index < steps.length - 1 && (
+              <div className={cn('flex-1 h-px', step.status === 'completed' ? 'bg-glow-success/40' : 'bg-border')} />
+            )}
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 export function PageHeader({ title, description, children }: { title: string; description?: string; children?: React.ReactNode }) {
   return (
     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between mb-8">
