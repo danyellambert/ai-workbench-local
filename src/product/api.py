@@ -68,8 +68,8 @@ from src.product.service import (
     index_loaded_documents,
     list_product_documents,
     publish_product_workflow_to_trello,
-    run_product_workflow,
 )
+from src.product.telemetry import attach_artifact_lineage, attach_delivery_lineage, execute_product_workflow_with_telemetry
 from src.services.preferences import (
     apply_preferences_to_product_request,
     build_preferences_payload,
@@ -802,40 +802,26 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     }
                 except Exception:
                     document_lookup = {}
-                started_at = time.perf_counter()
-                result = run_product_workflow(request)
-                history_entry = build_product_workflow_history_entry(
+                telemetry_execution = execute_product_workflow_with_telemetry(
+                    bootstrap=self.bootstrap,
                     request=request,
                     document_lookup=document_lookup,
-                    result=result,
-                    duration_s=time.perf_counter() - started_at,
+                    surface="product_api",
                 )
-                append_product_workflow_history_entry(
-                    get_product_workflow_history_path(self.bootstrap.workspace_root),
-                    history_entry,
-                )
+                result = telemetry_execution["result"]
+                history_entry = telemetry_execution.get("history_entry") if isinstance(telemetry_execution, dict) else None
                 self._send_json(
                     HTTPStatus.OK,
                     _build_product_workflow_response_payload(
                         result=result,
-                        run_id=str(history_entry.get("id") or "").strip() or None,
+                        run_id=str((history_entry or {}).get("id") or "").strip() or None,
+                        extra={
+                            "trace_id": str((history_entry or {}).get("trace_id") or "").strip() or None,
+                            "surface": str((history_entry or {}).get("surface") or "").strip() or None,
+                        },
                     ),
                 )
             except Exception as error:  # pragma: no cover - defensive API surface
-                if "request" in locals():
-                    try:
-                        append_product_workflow_history_entry(
-                            get_product_workflow_history_path(self.bootstrap.workspace_root),
-                            build_product_workflow_history_entry(
-                                request=request,
-                                document_lookup=document_lookup if "document_lookup" in locals() else {},
-                                result=None,
-                                duration_s=time.perf_counter() - started_at if "started_at" in locals() else 0.0,
-                                error_message=str(error),
-                            ),
-                        )
-                    except Exception:
-                        pass
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
 
@@ -869,24 +855,23 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     document_lookup = {item.document_id: item.name for item in list_product_documents(self.bootstrap.rag_settings)}
                 except Exception:
                     document_lookup = {}
-                started_at = time.perf_counter()
-                result = run_product_workflow(request)
-                history_entry = build_product_workflow_history_entry(
+                telemetry_execution = execute_product_workflow_with_telemetry(
+                    bootstrap=self.bootstrap,
                     request=request,
                     document_lookup=document_lookup,
-                    result=result,
-                    duration_s=time.perf_counter() - started_at,
+                    surface="product_api_rerun",
+                    reran_from_run_id=run_id,
                 )
-                append_product_workflow_history_entry(
-                    get_product_workflow_history_path(self.bootstrap.workspace_root),
-                    history_entry,
-                )
+                result = telemetry_execution["result"]
+                history_entry = telemetry_execution.get("history_entry") if isinstance(telemetry_execution, dict) else None
                 self._send_json(
                     HTTPStatus.OK,
                     _build_product_workflow_response_payload(
                         result=result,
-                        run_id=str(history_entry.get("id") or "").strip() or None,
+                        run_id=str((history_entry or {}).get("id") or "").strip() or None,
                         extra={
+                            "trace_id": str((history_entry or {}).get("trace_id") or "").strip() or None,
+                            "surface": str((history_entry or {}).get("surface") or "").strip() or None,
                             "reran_from_run_id": run_id,
                             "source_run": run_entry,
                         },
@@ -907,16 +892,18 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     workspace_root=self.bootstrap.workspace_root,
                 )
                 if run_id:
+                    artifact_items = [artifact.model_dump(mode="json") for artifact in artifacts]
                     update_product_workflow_history_entry(
                         get_product_workflow_history_path(self.bootstrap.workspace_root),
                         run_id,
                         {
                             "artifacts": [artifact.download_name or artifact.label for artifact in artifacts if artifact.available],
-                            "artifact_items": [artifact.model_dump(mode="json") for artifact in artifacts],
+                            "artifact_items": artifact_items,
                             "deck_export_kind": product_result.deck_export_kind,
                             "export_result": export_result,
                         },
                     )
+                    attach_artifact_lineage(self.bootstrap.workspace_root, run_id=run_id, artifacts=artifact_items, export_result=export_result)
                 self._send_json(
                     HTTPStatus.OK,
                     {
@@ -950,6 +937,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 publish_payload.setdefault("workflow_label", product_result.workflow_label)
                 if run_id:
                     record_product_delivery_output(self.bootstrap.workspace_root, run_id=run_id, target="trello", payload=publish_payload)
+                    attach_delivery_lineage(self.bootstrap.workspace_root, run_id=run_id, target="trello", payload=publish_payload)
                 self._send_json(HTTPStatus.OK, publish_payload)
             except Exception as error:  # pragma: no cover - defensive API surface
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
@@ -970,6 +958,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 publish_payload.setdefault("workflow_label", product_result.workflow_label)
                 if run_id:
                     record_product_delivery_output(self.bootstrap.workspace_root, run_id=run_id, target="notion", payload=publish_payload)
+                    attach_delivery_lineage(self.bootstrap.workspace_root, run_id=run_id, target="notion", payload=publish_payload)
                 self._send_json(HTTPStatus.OK, publish_payload)
             except Exception as error:
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})

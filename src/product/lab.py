@@ -4,15 +4,22 @@ import json
 import math
 import statistics
 from collections import Counter, defaultdict
+import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 from src.app.product_bootstrap import ProductBootstrap
+from src.product.command_center import _normalize_artifact_entry_from_metadata
 from src.product.models import ProductWorkflowRequest
 from src.product.service import build_product_workflow_catalog, list_product_documents, run_product_workflow
 from src.services.evidenceops_local_ops import compare_evidenceops_repository_state, register_evidenceops_entry, update_evidenceops_action_item
-from src.services.evidenceops_repository import list_evidenceops_repository_documents, summarize_evidenceops_repository_documents
+from src.services.evidenceops_repository import (
+    build_evidenceops_repository_snapshot,
+    diff_evidenceops_repository_snapshots,
+    list_evidenceops_repository_documents,
+    summarize_evidenceops_repository_documents,
+)
 from src.services.runtime_controls import build_effective_rag_settings, load_runtime_controls_state
 from src.storage.lab_state import (
     append_lab_chat_message,
@@ -26,7 +33,9 @@ from src.storage.lab_state import (
 from src.storage.phase7_model_comparison_log import load_model_comparison_log, summarize_model_comparison_log
 from src.storage.phase8_eval_diagnosis import build_eval_diagnosis
 from src.storage.phase8_eval_store import load_eval_runs, summarize_eval_runs
+from src.storage.product_telemetry import load_product_telemetry_runs
 from src.storage.phase95_evidenceops_action_store import load_evidenceops_actions, summarize_evidenceops_actions
+from src.storage.phase95_evidenceops_repository_snapshot import load_evidenceops_repository_snapshot
 from src.storage.phase95_evidenceops_worklog import load_evidenceops_worklog, summarize_evidenceops_worklog
 from src.storage.rag_store import load_rag_document_catalog, load_rag_store
 from src.storage.runtime_execution_log import load_runtime_execution_log, summarize_runtime_execution_log
@@ -39,6 +48,7 @@ from src.storage.runtime_paths import (
     get_phase8_eval_db_path,
     get_phase95_evidenceops_action_store_path,
     get_phase95_evidenceops_worklog_path,
+    get_product_telemetry_path,
     get_product_workflow_history_path,
     get_rag_store_path,
     get_runtime_controls_state_path,
@@ -75,6 +85,103 @@ WORKFLOW_INPUT_HINTS = {
     'action_plan_evidence_review': 'Extract operational action items, owners, due dates and blockers from the evidence.',
     'candidate_review': 'Review the selected candidate material and summarize strengths, risks and fit.',
 }
+
+RUNTIME_SURFACE_MAX_RUNS = 10
+WORKFLOW_INSPECTOR_TASK_IDS = tuple(WORKFLOW_TASK_LABELS.keys())
+
+
+def _looks_like_document_hash(value: str) -> bool:
+    normalized = str(value or '').strip()
+    return bool(normalized) and bool(re.fullmatch(r'[0-9a-f]{32,64}', normalized))
+
+
+def _resolve_workflow_document_label(value: str | None, document_lookup: dict[str, dict[str, Any]]) -> str:
+    normalized = str(value or '').strip()
+    if not normalized:
+        return 'Workspace document'
+    if normalized in document_lookup:
+        return str(document_lookup[normalized].get('name') or normalized)
+    for payload in document_lookup.values():
+        name = str(payload.get('name') or '').strip()
+        if name and name == normalized:
+            return name
+    if _looks_like_document_hash(normalized):
+        return f'Document {normalized[:8]}…'
+    return normalized
+
+
+def _split_workflow_review_reasons(reason_text: str | None) -> list[str]:
+    normalized = str(reason_text or '').strip()
+    if not normalized:
+        return []
+    parts = [part.strip() for part in normalized.split(';') if part.strip()]
+    return parts or [normalized]
+
+
+def _humanize_workflow_review_reason(reason_text: str | None) -> str:
+    normalized = str(reason_text or '').strip()
+    if not normalized:
+        return ''
+    if normalized == 'operational_extraction_without_grounded_actions':
+        return 'Operational extraction returned actions without grounded evidence.'
+    if normalized == 'risk_review_has_gaps_without_grounded_risks':
+        return 'Risk review surfaced gaps without grounded risks.'
+    if normalized == 'Multiple documents are selected':
+        return 'Multiple documents were selected; verify that the synthesis stayed scoped.'
+    if normalized == 'confirm that the response did not improperly combine distinct contexts.':
+        return 'Check that the response did not merge distinct document contexts.'
+    if normalized.startswith('document_agent_confidence_below_review_threshold:'):
+        threshold = normalized.split(':', 1)[1].strip()
+        return f'Document agent confidence stayed below the review threshold ({threshold}).'
+    if '_' in normalized and normalized.lower() == normalized:
+        return normalized.replace('_', ' ').capitalize()
+    return normalized
+
+
+def _workflow_execution_label(run: dict[str, Any]) -> str:
+    raw_mode = str(run.get('execution_mode') or '').strip()
+    if raw_mode and raw_mode not in {'product_api', 'workflow_inspector', 'workflow_run'}:
+        return raw_mode
+    response_payload = run.get('response_payload') if isinstance(run.get('response_payload'), dict) else {}
+    debug_metadata = response_payload.get('debug_metadata') if isinstance(response_payload.get('debug_metadata'), dict) else {}
+    context_strategy = str(debug_metadata.get('context_strategy') or '').strip()
+    if context_strategy:
+        return context_strategy
+    trace = run.get('trace') if isinstance(run.get('trace'), dict) else {}
+    spans = trace.get('spans') if isinstance(trace.get('spans'), list) else []
+    for span in spans:
+        if not isinstance(span, dict):
+            continue
+        if str(span.get('name') or '') == 'route_agent_context_strategy':
+            detail = str(span.get('detail') or '').strip()
+            if ':' in detail:
+                return detail.split(':', 1)[1].strip()
+            if detail:
+                return detail
+    return raw_mode or 'workflow_run'
+
+
+def _workflow_surface_label(run: dict[str, Any]) -> str:
+    raw_surface = str(run.get('surface') or run.get('execution_mode') or '').strip()
+    if raw_surface == 'workflow_inspector':
+        return 'Workflow Inspector'
+    if raw_surface == 'product_api':
+        return 'Product API'
+    if raw_surface == 'workflow_run':
+        return 'Workflow Run'
+    return raw_surface.replace('_', ' ') if raw_surface else 'Workflow Run'
+
+
+def _pick_preferred_workflow_run(task_runs: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if not task_runs:
+        return None
+    preferred_surfaces = ('workflow_inspector', 'product_api', 'workflow_run')
+    for surface in preferred_surfaces:
+        for run in task_runs:
+            raw_surface = str(run.get('surface') or run.get('execution_mode') or '').strip()
+            if raw_surface == surface:
+                return run
+    return task_runs[0]
 
 
 def _now_iso() -> str:
@@ -189,9 +296,55 @@ def _safe_iso_datetime(value: Any) -> datetime | None:
         return None
     normalized = text.replace('Z', '+00:00')
     try:
-        return datetime.fromisoformat(normalized)
+        parsed = datetime.fromisoformat(normalized)
     except ValueError:
         return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def _runtime_entry_sort_key(entry: dict[str, Any]) -> datetime:
+    parsed = _safe_iso_datetime(entry.get('timestamp'))
+    return parsed if parsed is not None else datetime.min.replace(tzinfo=timezone.utc)
+
+
+def _sort_runtime_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized = [entry for entry in entries if isinstance(entry, dict)]
+    return sorted(normalized, key=_runtime_entry_sort_key, reverse=True)
+
+
+def _is_product_runtime_entry(entry: dict[str, Any], product_workflow_ids: set[str]) -> bool:
+    workflow_id = str(entry.get('workflow_id') or '').strip()
+    flow_type = str(entry.get('flow_type') or '').strip()
+    return workflow_id in product_workflow_ids or flow_type == 'product_workflow'
+
+
+def _runtime_window_label(scope: str, size: int, max_size: int) -> str:
+    if size <= 0:
+        return 'recent runtime traces'
+    noun = 'product run' if scope == 'product' else 'runtime trace'
+    suffix = '' if size == 1 else 's'
+    if size >= max_size:
+        return f'last {max_size} {noun}{suffix}'
+    return f'last {size} {noun}{suffix}'
+
+
+def _format_runtime_timeline_label(value: Any) -> str:
+    parsed = _safe_iso_datetime(value)
+    if parsed is None:
+        return str(value or 'runtime').strip() or 'runtime'
+    return parsed.astimezone(timezone.utc).strftime('%m/%d %H:%M')
+
+
+def _display_runtime_task(entry: dict[str, Any]) -> tuple[str, str | None]:
+    workflow_id = str(entry.get('workflow_id') or '').strip()
+    task_type = str(entry.get('task_type') or entry.get('flow_type') or 'runtime').strip() or 'runtime'
+    workflow_label = WORKFLOW_TASK_LABELS.get(workflow_id)
+    if workflow_label:
+        detail = task_type if task_type and task_type != workflow_id else None
+        return workflow_label, detail
+    return task_type.replace('_', ' '), None
 
 
 def _parse_due_date(value: Any):
@@ -202,6 +355,39 @@ def _parse_due_date(value: Any):
         return datetime.fromisoformat(text).date() if 'T' in text else datetime.strptime(text, '%Y-%m-%d').date()
     except ValueError:
         return None
+
+
+def _sorted_worklog_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    minimum = datetime.min.replace(tzinfo=timezone.utc)
+    normalized = [entry for entry in entries if isinstance(entry, dict)]
+    return sorted(normalized, key=lambda entry: _safe_iso_datetime(entry.get('timestamp')) or minimum, reverse=True)
+
+
+def _latest_worklog_timestamp(
+    entries: list[dict[str, Any]],
+    *,
+    tool_names: set[str] | None = None,
+    operations: set[str] | None = None,
+) -> str | None:
+    for entry in _sorted_worklog_entries(entries):
+        tool_name = str(entry.get('tool_used') or '').strip()
+        operation = str(entry.get('operation') or '').strip()
+        if tool_names and tool_name in tool_names:
+            return _format_timestamp(entry.get('timestamp'))
+        if operations and operation in operations:
+            return _format_timestamp(entry.get('timestamp'))
+        if not tool_names and not operations:
+            return _format_timestamp(entry.get('timestamp'))
+    return None
+
+
+def _latest_repository_sync_timestamp(entries: list[dict[str, Any]], repository_snapshot: dict[str, Any] | None) -> str | None:
+    synced_at = _latest_worklog_timestamp(entries, tool_names={'local_repository_scan'}, operations={'repository_sync'})
+    if synced_at:
+        return synced_at
+    if isinstance(repository_snapshot, dict):
+        return _format_timestamp(repository_snapshot.get('captured_at'))
+    return None
 
 
 def _workspace_documents(workspace_root: Path) -> list[dict[str, Any]]:
@@ -246,8 +432,7 @@ def _load_runtime_state(workspace_root: Path) -> dict[str, Any]:
     controls_state = load_runtime_controls_state(get_runtime_controls_state_path(workspace_root)) or {}
     profile = controls_state.get('profile') if isinstance(controls_state.get('profile'), dict) else {}
     rag_store = load_rag_store(get_rag_store_path(workspace_root)) or {}
-    runtime_entries = load_runtime_execution_log(get_runtime_execution_log_path(workspace_root))
-    runtime_summary = summarize_runtime_execution_log(runtime_entries)
+    runtime_entries = _sort_runtime_entries(load_runtime_execution_log(get_runtime_execution_log_path(workspace_root)))
     documents = _workspace_documents(workspace_root)
     document_lookup = _document_lookup(documents)
     chunks = rag_store.get('chunks') if isinstance(rag_store.get('chunks'), list) else []
@@ -257,24 +442,43 @@ def _load_runtime_state(workspace_root: Path) -> dict[str, Any]:
     retrieval = profile.get('retrieval') if isinstance(profile.get('retrieval'), dict) else {}
     doc_processing = profile.get('docProcessing') if isinstance(profile.get('docProcessing'), dict) else {}
 
+    product_workflow_ids = set(build_product_workflow_catalog().keys())
+    product_runtime_entries = [entry for entry in runtime_entries if _is_product_runtime_entry(entry, product_workflow_ids)]
+    surface_scope = 'product' if product_runtime_entries else 'runtime'
+    surface_runtime_entries = (product_runtime_entries or runtime_entries)[:RUNTIME_SURFACE_MAX_RUNS]
+    telemetry_entries = product_runtime_entries or runtime_entries
+    runtime_summary = summarize_runtime_execution_log(telemetry_entries)
+
+    latest_entry = telemetry_entries[0] if telemetry_entries else {}
+    latest_budget_entry = next(
+        (
+            entry
+            for entry in telemetry_entries
+            if _safe_int(entry.get('context_budget_chars') or entry.get('context_window') or 0) > 0
+            or _safe_int(entry.get('context_chars') or 0) > 0
+        ),
+        latest_entry,
+    )
+
     context_pressure_values = [
         _normalize_ratio_to_unit(entry.get('context_pressure_ratio'))
-        for entry in runtime_entries
+        for entry in telemetry_entries
         if _normalize_ratio_to_unit(entry.get('context_pressure_ratio')) > 0
     ]
     avg_context_pressure = _mean(context_pressure_values)
-    latest_entry = runtime_entries[0] if runtime_entries else {}
     latest_context_pressure = _normalize_ratio_to_unit(latest_entry.get('context_pressure_ratio'))
 
     context_budget_total = 0
-    if isinstance(latest_entry.get('context_window'), (int, float)):
-        context_budget_total = _safe_int(latest_entry.get('context_window'))
+    if isinstance(latest_budget_entry.get('context_budget_chars'), (int, float)):
+        context_budget_total = _safe_int(latest_budget_entry.get('context_budget_chars'))
+    elif isinstance(latest_budget_entry.get('context_window'), (int, float)):
+        context_budget_total = _safe_int(latest_budget_entry.get('context_window'))
     elif isinstance(generation.get('contextWindow'), (int, float)):
         context_budget_total = _safe_int(generation.get('contextWindow'))
     else:
         context_budget_total = 32768
 
-    context_budget_used = _safe_int(latest_entry.get('context_chars') or 0)
+    context_budget_used = _safe_int(latest_budget_entry.get('context_chars') or 0)
     context_utilization = min((context_budget_used / context_budget_total), 1.0) if context_budget_total > 0 else 0.0
     context_pressure = latest_context_pressure or avg_context_pressure or context_utilization
 
@@ -294,8 +498,12 @@ def _load_runtime_state(workspace_root: Path) -> dict[str, Any]:
         'documents': documents,
         'document_lookup': document_lookup,
         'runtime_entries': runtime_entries,
+        'product_runtime_entries': product_runtime_entries,
+        'surface_runtime_entries': surface_runtime_entries,
+        'surface_scope': surface_scope,
         'runtime_summary': runtime_summary,
         'latest_entry': latest_entry,
+        'latest_budget_entry': latest_budget_entry,
         'indexed_document_count': len(doc_list) or len(documents),
         'total_chunks': len(chunks),
         'context_budget_total': context_budget_total,
@@ -317,6 +525,18 @@ def _runtime_meta(workspace_root: Path, notes: list[str] | None = None) -> dict[
     if notes:
         payload['notes'] = notes
     return payload
+
+
+def _derive_benchmark_surface_status(latest_timestamp: Any, *, has_models: bool) -> str:
+    if not has_models:
+        return 'empty'
+    observed_at = _safe_iso_datetime(latest_timestamp)
+    if observed_at is None:
+        return 'derived-live'
+    if observed_at.tzinfo is None:
+        observed_at = observed_at.replace(tzinfo=timezone.utc)
+    age = datetime.now(timezone.utc) - observed_at.astimezone(timezone.utc)
+    return 'historical' if age > timedelta(days=7) else 'derived-live'
 
 
 def _build_runtime_core_payload(runtime_state: dict[str, Any]) -> dict[str, Any]:
@@ -403,14 +623,16 @@ def _build_runtime_diagnostics_rows(runtime: dict[str, Any], runtime_state: dict
 
 def _build_recent_trace_rows(runtime_entries: list[dict[str, Any]], document_lookup: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for index, entry in enumerate(runtime_entries[:8]):
+    for index, entry in enumerate(runtime_entries[:RUNTIME_SURFACE_MAX_RUNS]):
         source_ids = [str(item) for item in (entry.get('source_document_ids') or []) if str(item or '').strip()]
+        task_label, task_detail = _display_runtime_task(entry)
         rows.append(
             {
                 'id': f"trace-{index + 1}",
                 'timestamp': str(entry.get('timestamp') or _now_iso()),
                 'flow': str(entry.get('flow_type') or 'runtime'),
-                'task': str(entry.get('task_type') or entry.get('workflow_id') or 'runtime'),
+                'task': task_label,
+                'taskDetail': task_detail,
                 'provider': str(entry.get('provider') or 'unknown'),
                 'model': str(entry.get('model') or 'unknown'),
                 'latencyS': round(_safe_float(entry.get('latency_s')), 3),
@@ -428,11 +650,13 @@ def _build_recent_trace_rows(runtime_entries: list[dict[str, Any]], document_loo
 
 def _build_runtime_timeline(runtime_entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
     timeline: list[dict[str, Any]] = []
-    recent = list(reversed(runtime_entries[:12]))
-    for entry in recent:
+    ordered = list(reversed(runtime_entries[:RUNTIME_SURFACE_MAX_RUNS]))
+    for entry in ordered:
+        task_label, _task_detail = _display_runtime_task(entry)
         timeline.append(
             {
-                'label': str(entry.get('task_type') or entry.get('flow_type') or 'runtime'),
+                'label': _format_runtime_timeline_label(entry.get('timestamp')),
+                'task': task_label,
                 'latencyS': round(_safe_float(entry.get('latency_s')), 3),
                 'contextPressurePct': round(_normalize_ratio_to_unit(entry.get('context_pressure_ratio')) * 100, 1),
                 'error': 0 if bool(entry.get('success')) else 1,
@@ -485,70 +709,112 @@ def _build_runtime_failure_modes(runtime_entries: list[dict[str, Any]]) -> list[
 
 
 def _build_runtime_watchouts(runtime_state: dict[str, Any], runtime_payload: dict[str, Any]) -> list[str]:
-    summary = runtime_state['runtime_summary']
+    ops_summary = runtime_payload.get('ops_summary') if isinstance(runtime_payload.get('ops_summary'), dict) else {}
+    window_label = str(runtime_payload.get('surface_window', {}).get('label') or 'recent runtime traces')
     notes: list[str] = []
-    if _safe_float(summary.get('error_rate')) >= 0.2:
-        notes.append(f"Runtime error rate is elevated at {_percent_label(_safe_float(summary.get('error_rate')))} across persisted traces.")
-    if _safe_float(summary.get('needs_review_rate')) >= 0.15:
-        notes.append(f"Manual review pressure is non-trivial at {_percent_label(_safe_float(summary.get('needs_review_rate')))}.")
-    if _safe_float(summary.get('avg_latency_s')) >= 10:
-        notes.append(f"Average runtime latency is {_safe_float(summary.get('avg_latency_s')):.1f}s; investigate provider, prompt size or retrieval overhead.")
+    if _safe_float(ops_summary.get('errorRate')) >= 0.2:
+        notes.append(f"Runtime error rate is elevated at {_percent_label(_safe_float(ops_summary.get('errorRate')))} across the {window_label}.")
+    if _safe_float(ops_summary.get('needsReviewRate')) >= 0.15:
+        notes.append(f"Manual review pressure is non-trivial at {_percent_label(_safe_float(ops_summary.get('needsReviewRate')))} in the {window_label}.")
+    if _safe_float(ops_summary.get('avgLatencyS')) >= 10:
+        notes.append(f"Average runtime latency is {_safe_float(ops_summary.get('avgLatencyS')):.1f}s in the {window_label}; investigate provider, prompt size or retrieval overhead.")
     if runtime_payload['runtime']['contextPressure'] >= 0.8:
-        notes.append('Context pressure is high; this tab shows the pressure signal, while Evals & Diagnosis should confirm whether quality actually regressed.')
+        notes.append('The latest observed product trace is under high context pressure; confirm whether the most recent run needs fewer sources or a tighter prompt envelope.')
     if runtime_payload.get('retrieval_health', {}).get('emptyRetrievalRate', 0) >= 0.1:
-        notes.append('Some traces return zero retrieved chunks; inspect retrieval quality here before escalating to Workflow Inspector or Evals.')
+        notes.append('Some recent runs returned zero retrieved chunks; inspect retrieval quality here before escalating to Workflow Inspector or Evals.')
     return notes[:4]
 
 
 def build_lab_runtime_payload(workspace_root: Path) -> dict[str, Any]:
     runtime_state = _load_runtime_state(workspace_root)
     runtime = _build_runtime_core_payload(runtime_state)
-    summary = runtime_state['runtime_summary']
-    runtime_entries = runtime_state['runtime_entries']
+    all_runtime_entries = runtime_state['runtime_entries']
+    product_runtime_entries = runtime_state['product_runtime_entries']
+    surface_entries = runtime_state['surface_runtime_entries']
+    surface_scope = runtime_state['surface_scope']
+    summary = summarize_runtime_execution_log(surface_entries)
 
-    latency_values = [_safe_float(entry.get('latency_s')) for entry in runtime_entries if _safe_float(entry.get('latency_s')) > 0]
+    latency_values = [_safe_float(entry.get('latency_s')) for entry in surface_entries if _safe_float(entry.get('latency_s')) > 0]
     throughput_24h = 0
     now = datetime.now(timezone.utc)
-    for entry in runtime_entries:
-        timestamp_text = str(entry.get('timestamp') or '').strip()
-        try:
-            timestamp = datetime.fromisoformat(timestamp_text.replace('Z', '+00:00'))
-        except Exception:
-            continue
-        if timestamp.tzinfo is None:
-            timestamp = timestamp.replace(tzinfo=timezone.utc)
-        if timestamp >= now - timedelta(hours=24):
+    for entry in product_runtime_entries or all_runtime_entries:
+        timestamp = _safe_iso_datetime(entry.get('timestamp'))
+        if timestamp is not None and timestamp >= now - timedelta(hours=24):
             throughput_24h += 1
 
-    retrieved_chunk_counts = [_safe_float(entry.get('retrieved_chunks_count')) for entry in runtime_entries]
-    retrieval_count = max(len(runtime_entries), 1)
+    retrieved_chunk_counts = [_safe_float(entry.get('retrieved_chunks_count')) for entry in surface_entries]
+    retrieval_count = max(len(surface_entries), 1)
     empty_retrieval_rate = sum(1 for value in retrieved_chunk_counts if value <= 0) / retrieval_count
     context_utilization_values = []
-    for entry in runtime_entries:
-        budget = _safe_float(entry.get('context_budget_chars') or 0.0)
+    for entry in surface_entries:
+        budget = _safe_float(entry.get('context_budget_chars') or entry.get('context_window') or 0.0)
         used = _safe_float(entry.get('context_chars') or 0.0)
         if budget > 0:
             context_utilization_values.append(min(used / budget, 1.0))
 
-    other_latency = max(
-        _safe_float(summary.get('avg_latency_s'))
-        - _safe_float(summary.get('avg_retrieval_latency_s'))
-        - _safe_float(summary.get('avg_generation_latency_s'))
-        - _safe_float(summary.get('avg_prompt_build_latency_s')),
-        0.0,
+    total_prompt_tokens = _safe_int(summary.get('total_prompt_tokens'))
+    if total_prompt_tokens <= 0:
+        total_prompt_tokens = sum(_safe_int(entry.get('prompt_tokens') or 0) for entry in surface_entries)
+    total_completion_tokens = _safe_int(summary.get('total_completion_tokens'))
+    if total_completion_tokens <= 0:
+        total_completion_tokens = sum(_safe_int(entry.get('completion_tokens') or 0) for entry in surface_entries)
+    avg_prompt_tokens = _safe_float(summary.get('avg_prompt_tokens'))
+    if avg_prompt_tokens <= 0 and surface_entries:
+        avg_prompt_tokens = total_prompt_tokens / max(len(surface_entries), 1)
+    avg_completion_tokens = _safe_float(summary.get('avg_completion_tokens'))
+    if avg_completion_tokens <= 0 and surface_entries:
+        avg_completion_tokens = total_completion_tokens / max(len(surface_entries), 1)
+
+    instrumented_stage_runs = sum(
+        1
+        for entry in surface_entries
+        if any(
+            _safe_float(entry.get(field)) > 0
+            for field in ('retrieval_latency_s', 'generation_latency_s', 'prompt_build_latency_s')
+        )
     )
+    latency_breakdown = [
+        {'stage': 'Retrieval', 'seconds': round(_safe_float(summary.get('avg_retrieval_latency_s')), 3)},
+        {'stage': 'Generation', 'seconds': round(_safe_float(summary.get('avg_generation_latency_s')), 3)},
+        {'stage': 'Prompt build', 'seconds': round(_safe_float(summary.get('avg_prompt_build_latency_s')), 3)},
+    ]
+    total_known_latency = sum(item['seconds'] for item in latency_breakdown)
+    other_latency = max(_safe_float(summary.get('avg_latency_s')) - total_known_latency, 0.0)
+    if other_latency > 0 or not latency_breakdown:
+        latency_breakdown.append({'stage': 'Other', 'seconds': round(other_latency, 3)})
+    non_zero_latency_breakdown = [item for item in latency_breakdown if item['seconds'] > 0]
+    if len(non_zero_latency_breakdown) == 1 and non_zero_latency_breakdown[0]['stage'] == 'Other':
+        non_zero_latency_breakdown[0]['stage'] = 'Observed runtime'
+    if not non_zero_latency_breakdown and _safe_float(summary.get('avg_latency_s')) > 0:
+        non_zero_latency_breakdown = [{'stage': 'Observed runtime', 'seconds': round(_safe_float(summary.get('avg_latency_s')), 3)}]
+
+    surface_window = {
+        'scope': surface_scope,
+        'size': len(surface_entries),
+        'maxSize': RUNTIME_SURFACE_MAX_RUNS,
+        'label': _runtime_window_label(surface_scope, len(surface_entries), RUNTIME_SURFACE_MAX_RUNS),
+    }
+
+    status = 'live' if surface_entries else 'empty'
+    degraded_reason = None
+    if not surface_entries:
+        degraded_reason = 'No persisted runtime_execution_log entries were found in this workspace yet.'
+    elif not product_runtime_entries and all_runtime_entries:
+        status = 'degraded'
+        degraded_reason = 'No product workflow traces were found yet; showing the most recent generic runtime entries instead.'
 
     payload: dict[str, Any] = {
         'ok': True,
         'meta': _runtime_meta(
             workspace_root,
             notes=[
-                'This surface is intentionally focused on runtime posture, throughput, retrieval health and recent trace issues.',
+                'This surface is intentionally focused on current product runtime posture, throughput, retrieval health and recent trace issues.',
                 'It does not replace Workflow Inspector, Benchmarks, Evals & Diagnosis, Experiments & Artifacts, or EvidenceOps / MCP.',
             ],
         ),
-        'status': 'live' if runtime_entries else 'empty',
-        'degraded_reason': None if runtime_entries else 'No persisted runtime_execution_log entries were found in this workspace yet.',
+        'status': status,
+        'degraded_reason': degraded_reason,
+        'surface_window': surface_window,
         'runtime': runtime,
         'generation_rows': _build_runtime_generation_rows(runtime),
         'retrieval_rows': _build_runtime_retrieval_rows(runtime),
@@ -564,9 +830,9 @@ def build_lab_runtime_payload(workspace_root: Path) -> dict[str, Any]:
             'p95LatencyS': round(_percentile(latency_values, 0.95), 3),
             'avgTotalTokens': round(_safe_float(summary.get('avg_total_tokens')), 1),
             'throughput24h': throughput_24h,
-            'providerSwitchRate': round(sum(1 for entry in runtime_entries if bool(entry.get('provider_switch_applied'))) / retrieval_count, 3),
-            'recentWindowLabel': 'last 24h' if throughput_24h else 'persisted traces',
-            'lastTraceAt': _format_timestamp(summary.get('latest_timestamp')),
+            'providerSwitchRate': round(sum(1 for entry in surface_entries if bool(entry.get('provider_switch_applied'))) / retrieval_count, 3),
+            'recentWindowLabel': surface_window['label'],
+            'lastTraceAt': _format_timestamp(surface_entries[0].get('timestamp') if surface_entries else summary.get('latest_timestamp')),
         },
         'retrieval_health': {
             'avgRetrievedChunks': round(_safe_float(summary.get('avg_retrieved_chunks_count')), 2),
@@ -582,17 +848,21 @@ def build_lab_runtime_payload(workspace_root: Path) -> dict[str, Any]:
             'totalCostUsd': round(_safe_float(summary.get('total_cost_usd')), 4),
             'avgCostUsd': round(_safe_float(summary.get('avg_cost_usd')), 4),
             'pricedRunRate': round(_safe_int(summary.get('costed_runs')) / max(_safe_int(summary.get('total_runs')), 1), 3),
+            'totalPromptTokens': total_prompt_tokens,
+            'avgPromptTokens': round(avg_prompt_tokens, 1),
+            'totalCompletionTokens': total_completion_tokens,
+            'avgCompletionTokens': round(avg_completion_tokens, 1),
         },
-        'latency_breakdown': [
-            {'stage': 'Retrieval', 'seconds': round(_safe_float(summary.get('avg_retrieval_latency_s')), 3)},
-            {'stage': 'Generation', 'seconds': round(_safe_float(summary.get('avg_generation_latency_s')), 3)},
-            {'stage': 'Prompt build', 'seconds': round(_safe_float(summary.get('avg_prompt_build_latency_s')), 3)},
-            {'stage': 'Other', 'seconds': round(other_latency, 3)},
-        ],
-        'provider_breakdown': _build_runtime_provider_breakdown(runtime_entries),
-        'failure_modes': _build_runtime_failure_modes(runtime_entries),
-        'recent_traces': _build_recent_trace_rows(runtime_entries, runtime_state['document_lookup']),
-        'timeline': _build_runtime_timeline(runtime_entries),
+        'latency_breakdown': non_zero_latency_breakdown,
+        'latency_breakdown_meta': {
+            'instrumentedRuns': instrumented_stage_runs,
+            'totalRuns': len(surface_entries),
+            'label': surface_window['label'],
+        },
+        'provider_breakdown': _build_runtime_provider_breakdown(surface_entries),
+        'failure_modes': _build_runtime_failure_modes(surface_entries),
+        'recent_traces': _build_recent_trace_rows(surface_entries, runtime_state['document_lookup']),
+        'timeline': _build_runtime_timeline(surface_entries),
         'cross_surface_notes': LAB_CROSS_SURFACE_NOTES,
     }
     payload['watchouts'] = _build_runtime_watchouts(runtime_state, payload)
@@ -900,7 +1170,9 @@ def execute_lab_chat_turn(
     )
 
     try:
-        result = run_product_workflow(request)
+        from src.product.service import run_product_workflow as _run_product_workflow
+
+        result = _run_product_workflow(request)
         debug_metadata = getattr(result, 'debug_metadata', {}) if isinstance(getattr(result, 'debug_metadata', None), dict) else {}
         highlights = [str(item) for item in (result.highlights or []) if str(item or '').strip()]
         assistant_parts = [str(result.summary or '').strip()]
@@ -1093,13 +1365,39 @@ def _build_task_details(workspace_root: Path, task_options: list[dict[str, Any]]
     return task_details, recent_cases, dict(mode_counter), review_reason_counter
 
 
+def _resolve_inspector_document_ids(workspace_root: Path, workflow_id: str, requested_document_id: str | None) -> list[str]:
+    available_document_ids = [
+        str(document.get('document_id') or '').strip()
+        for document in _workspace_documents(workspace_root)
+        if str(document.get('document_id') or '').strip()
+    ]
+    if workflow_id == 'candidate_review':
+        if requested_document_id and requested_document_id in available_document_ids:
+            return [requested_document_id]
+        return available_document_ids[:1]
+
+    minimum_documents = 2 if workflow_id in {'policy_contract_comparison', 'action_plan_evidence_review'} else 1
+    selected: list[str] = []
+    if requested_document_id and requested_document_id in available_document_ids:
+        selected.append(requested_document_id)
+    for document_id in available_document_ids:
+        if document_id not in selected:
+            selected.append(document_id)
+        if len(selected) >= minimum_documents:
+            break
+    return selected
+
+
 def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]:
     documents = _workspace_documents(workspace_root)
     document_lookup = _document_lookup(documents)
     task_options = _build_workflow_task_options(workspace_root)
     document_options = _document_options_for_inspector(workspace_root)
-    workflow_runs = load_lab_workflow_runs(get_lab_workflow_runs_path(workspace_root))
-    runtime_entries = load_runtime_execution_log(get_runtime_execution_log_path(workspace_root))
+    workflow_runs = [
+        run
+        for run in load_lab_workflow_runs(get_lab_workflow_runs_path(workspace_root))
+        if str(run.get('workflow_id') or run.get('task_id') or '').strip() in WORKFLOW_INSPECTOR_TASK_IDS
+    ]
 
     recent_cases: list[dict[str, Any]] = []
     mode_counter: Counter[str] = Counter()
@@ -1112,29 +1410,38 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
         workflow_id = str(run.get('workflow_id') or run.get('task_id') or 'document_review')
         runs_by_workflow[workflow_id].append(run)
 
-    for entry in runtime_entries[:30]:
-        workflow_id = str(entry.get('workflow_id') or '') or 'document_review'
-        mode = str(entry.get('execution_strategy_used') or entry.get('flow_type') or 'runtime')
-        mode_counter[mode] += 1
-        review_reason = str(entry.get('needs_review_reason') or '').strip()
-        if review_reason:
-            review_reason_counter[review_reason] += 1
-        source_ids = [str(item) for item in (entry.get('source_document_ids') or []) if str(item or '').strip()]
+    recent_runs = workflow_runs[:30]
+    for run in recent_runs:
+        workflow_id = str(run.get('workflow_id') or run.get('task_id') or 'document_review')
+        document_labels = [
+            _resolve_workflow_document_label(item, document_lookup)
+            for item in ([str(item) for item in (run.get('document_names') or []) if str(item or '').strip()] or [str(item) for item in (run.get('document_ids') or []) if str(item or '').strip()])
+        ]
+        execution_label = _workflow_execution_label(run)
+        mode_counter[execution_label] += 1
+        for reason in _split_workflow_review_reasons(str(run.get('review_reason') or '')):
+            human_reason = _humanize_workflow_review_reason(reason)
+            if human_reason:
+                review_reason_counter[human_reason] += 1
         recent_cases.append(
             {
-                'id': f"runtime-{len(recent_cases) + 1}",
+                'id': str(run.get('run_id') or ''),
                 'task': WORKFLOW_TASK_LABELS.get(workflow_id, workflow_id),
-                'document': ', '.join(str(document_lookup.get(doc_id, {}).get('name') or doc_id) for doc_id in source_ids[:2]) or 'Workspace documents',
-                'mode': mode,
-                'status': 'completed' if bool(entry.get('success')) else 'error',
-                'confidence': _safe_float(entry.get('confidence') or 0.0),
-                'sourceCount': max(len(source_ids), _safe_int(entry.get('retrieved_chunks_count') or 0)),
-                'needsReview': bool(entry.get('needs_review')),
+                'document': ', '.join(document_labels[:2]) or 'Workspace documents',
+                'mode': execution_label,
+                'status': str(run.get('status') or 'completed'),
+                'confidence': _safe_float(run.get('confidence') or 0.0),
+                'sourceCount': _safe_int(run.get('source_count') or 0),
+                'needsReview': bool(run.get('needs_review')),
             }
         )
 
     latest_runs = []
     for run in workflow_runs[:8]:
+        document_labels = [
+            _resolve_workflow_document_label(item, document_lookup)
+            for item in ([str(item) for item in (run.get('document_names') or []) if str(item or '').strip()] or [str(item) for item in (run.get('document_ids') or []) if str(item or '').strip()])
+        ]
         latest_runs.append(
             {
                 'id': str(run.get('run_id') or ''),
@@ -1147,17 +1454,18 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
                 'latency_s': _safe_float(run.get('latency_s') or 0.0) or None,
                 'source_count': _safe_int(run.get('source_count') or 0),
                 'needs_review': bool(run.get('needs_review')),
-                'review_reason': str(run.get('review_reason') or '').strip() or None,
+                'review_reason': '; '.join(_humanize_workflow_review_reason(item) for item in _split_workflow_review_reasons(str(run.get('review_reason') or '')) if _humanize_workflow_review_reason(item)) or None,
                 'artifact_label': str(run.get('artifact_label') or '').strip() or None,
                 'artifact_path': str(run.get('artifact_path') or '').strip() or None,
-                'document_names': [str(item) for item in (run.get('document_names') or []) if str(item or '').strip()],
+                'document_names': document_labels,
             }
         )
 
     for task in task_options:
         workflow_id = str(task.get('id') or 'document_review')
         task_runs = runs_by_workflow.get(workflow_id, [])
-        latest_run = task_runs[0] if task_runs else None
+        latest_run = _pick_preferred_workflow_run(task_runs)
+        latest_overall_run = task_runs[0] if task_runs else None
         run_latencies = [_safe_float(run.get('latency_s') or 0.0) for run in task_runs if _safe_float(run.get('latency_s') or 0.0) > 0]
         needs_review_count = sum(1 for run in task_runs if bool(run.get('needs_review')))
         task_health.append(
@@ -1165,14 +1473,22 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
                 'id': workflow_id,
                 'label': str(task.get('label') or workflow_id),
                 'runs': len(task_runs),
-                'last_status': str(latest_run.get('status') or 'not_run') if latest_run else 'not_run',
+                'last_status': str(latest_overall_run.get('status') or 'not_run') if latest_overall_run else 'not_run',
                 'needs_review_rate': round(needs_review_count / max(len(task_runs), 1), 3) if task_runs else 0.0,
                 'avg_latency_s': round(_mean(run_latencies), 3) if run_latencies else 0.0,
-                'last_run_at': _format_timestamp(latest_run.get('updated_at') or latest_run.get('created_at')) if latest_run else None,
+                'last_run_at': _format_timestamp(latest_overall_run.get('updated_at') or latest_overall_run.get('created_at')) if latest_overall_run else None,
             }
         )
 
-        document_names = [str(item) for item in (latest_run.get('document_names') or []) if str(item or '').strip()] if latest_run else []
+        document_names = [
+            _resolve_workflow_document_label(item, document_lookup)
+            for item in ([str(item) for item in (latest_run.get('document_names') or []) if str(item or '').strip()] if latest_run else [])
+        ]
+        if latest_run and not document_names:
+            document_names = [
+                _resolve_workflow_document_label(item, document_lookup)
+                for item in [str(item) for item in (latest_run.get('document_ids') or []) if str(item or '').strip()]
+            ]
         raw_json = latest_run.get('result') if isinstance(latest_run, dict) and isinstance(latest_run.get('result'), dict) else latest_run.get('response_payload') if isinstance(latest_run, dict) and isinstance(latest_run.get('response_payload'), dict) else {}
         trace = latest_run.get('trace') if isinstance(latest_run, dict) and isinstance(latest_run.get('trace'), dict) else {}
         executions = []
@@ -1180,20 +1496,26 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
             executions.append(
                 {
                     'id': str(run.get('run_id') or ''),
-                    'mode': str(run.get('execution_mode') or 'workflow_run'),
+                    'mode': _workflow_execution_label(run),
                     'status': str(run.get('status') or 'completed'),
                     'needs_review': bool(run.get('needs_review')),
-                    'review_reason': str(run.get('review_reason') or '').strip() or None,
+                    'review_reason': '; '.join(_humanize_workflow_review_reason(item) for item in _split_workflow_review_reasons(str(run.get('review_reason') or '')) if _humanize_workflow_review_reason(item)) or None,
                     'latency_s': _safe_float(run.get('latency_s') or 0.0) or None,
                     'confidence': _safe_float(run.get('confidence') or 0.0),
                     'provider': str(run.get('provider') or '').strip() or None,
                     'model': str(run.get('model') or '').strip() or None,
                     'source_count': _safe_int(run.get('source_count') or 0),
+                    'surface': _workflow_surface_label(run),
                 }
             )
         result_items = []
         if latest_run:
             result_items.append({'label': 'Summary', 'value': str(latest_run.get('summary') or 'Persisted workflow summary unavailable.'), 'confidence': _safe_float(latest_run.get('confidence') or 0.0)})
+            if workflow_id in {'policy_contract_comparison', 'action_plan_evidence_review'} and document_names:
+                visible_documents = document_names[:2]
+                extra_document_count = max(len(document_names) - len(visible_documents), 0)
+                suffix = f' +{extra_document_count} more' if extra_document_count else ''
+                result_items.append({'label': 'Documents', 'value': ', '.join(visible_documents) + suffix, 'confidence': None})
             result_items.append({'label': 'Input', 'value': str(latest_run.get('input_text') or '—'), 'confidence': None})
             if latest_run.get('artifact_label') or latest_run.get('artifact_path'):
                 result_items.append({'label': 'Artifact', 'value': str(latest_run.get('artifact_label') or latest_run.get('artifact_path') or 'Artifact captured'), 'confidence': None})
@@ -1210,13 +1532,26 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
                     'duration_ms': _safe_int(stage.get('duration_ms') or 0) or None,
                 }
             )
+        if not stage_timeline:
+            for span in (trace.get('spans') if isinstance(trace.get('spans'), list) else []):
+                if not isinstance(span, dict):
+                    continue
+                stage_timeline.append(
+                    {
+                        'label': str(span.get('name') or span.get('stage') or 'stage').replace('_', ' '),
+                        'status': str(span.get('status') or 'completed'),
+                        'detail': str(span.get('detail') or '').strip() or None,
+                        'duration_ms': _safe_int(span.get('duration_ms') or 0) or None,
+                    }
+                )
         guardrails = [
             {
-                'label': _trim_text(item, max_chars=64),
+                'label': _humanize_workflow_review_reason(item),
                 'severity': 'warning',
-                'detail': item,
+                'detail': _humanize_workflow_review_reason(item),
             }
-            for item in ([str(latest_run.get('review_reason') or '').strip()] if latest_run and str(latest_run.get('review_reason') or '').strip() else [])
+            for item in _split_workflow_review_reasons(str(latest_run.get('review_reason') or ''))
+            if latest_run and _humanize_workflow_review_reason(item)
         ]
         artifacts = []
         if latest_run and (latest_run.get('artifact_label') or latest_run.get('artifact_path')):
@@ -1229,10 +1564,12 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
         trace_fields = []
         if latest_run:
             trace_fields = [
-                {'label': 'Mode', 'value': str(latest_run.get('execution_mode') or 'workflow_run')},
+                {'label': 'Surface', 'value': _workflow_surface_label(latest_run)},
+                {'label': 'Route', 'value': _workflow_execution_label(latest_run)},
                 {'label': 'Status', 'value': str(latest_run.get('status') or 'completed')},
                 {'label': 'Provider', 'value': str(latest_run.get('provider') or '—')},
                 {'label': 'Model', 'value': str(latest_run.get('model') or '—')},
+                {'label': 'Documents', 'value': len(document_names)},
                 {'label': 'Sources', 'value': _safe_int(latest_run.get('source_count') or 0)},
                 {'label': 'Tokens', 'value': _safe_int(latest_run.get('total_tokens') or 0)},
                 {'label': 'Context Chars', 'value': _safe_int(latest_run.get('context_chars') or 0)},
@@ -1254,17 +1591,18 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
                 'runs': len(task_runs),
                 'needsReviewRate': round(needs_review_count / max(len(task_runs), 1), 3) if task_runs else 0.0,
                 'avgLatencyS': round(_mean(run_latencies), 3) if run_latencies else 0.0,
-                'lastRunAt': _format_timestamp(latest_run.get('updated_at') or latest_run.get('created_at')) if latest_run else None,
+                'lastRunAt': _format_timestamp(latest_overall_run.get('updated_at') or latest_overall_run.get('created_at')) if latest_overall_run else None,
             },
         }
 
     selected_task_id = task_options[0]['id'] if task_options else 'document_review'
+    confidence_values = [float(item['confidence']) for item in recent_cases if float(item['confidence']) > 0]
     summary = {
         'total_cases': len(recent_cases),
         'needs_review': sum(1 for item in recent_cases if item['needsReview']),
-        'avg_confidence': round(_mean([float(item['confidence']) for item in recent_cases]), 3) if recent_cases else 0.0,
-        'review_blockers': sum(value for _, value in review_reason_counter.items()),
-        'failed': sum(1 for item in recent_cases if item['status'] == 'error'),
+        'avg_confidence': round(_mean(confidence_values), 3) if confidence_values else 0.0,
+        'review_blockers': sum(1 for item in recent_cases if item['needsReview']),
+        'failed': sum(1 for item in recent_cases if item['status'] in {'error', 'failed'}),
         'task_count': len(task_options),
         'document_count': len(document_options),
         'live_runs': len(workflow_runs),
@@ -1289,7 +1627,6 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
         'latest_runs': latest_runs,
     }
 
-
 def execute_lab_workflow_inspector_run(
     *,
     bootstrap: ProductBootstrap,
@@ -1302,9 +1639,11 @@ def execute_lab_workflow_inspector_run(
     workflow_id = str(task_id or 'document_review').strip() or 'document_review'
     if workflow_id not in WORKFLOW_TASK_LABELS:
         workflow_id = 'document_review'
-    document_ids = [str(document_id).strip()] if str(document_id or '').strip() else []
-    if not document_ids:
-        document_ids = [str(document.get('document_id') or '') for document in _workspace_documents(bootstrap.workspace_root)[:1] if str(document.get('document_id') or '').strip()]
+    document_ids = _resolve_inspector_document_ids(bootstrap.workspace_root, workflow_id, str(document_id or '').strip() or None)
+    minimum_documents = 2 if workflow_id == 'policy_contract_comparison' else 1
+    if len(document_ids) < minimum_documents:
+        requirement = 'at least 2 indexed documents' if workflow_id == 'policy_contract_comparison' else 'at least 1 indexed document'
+        raise ValueError(f"{WORKFLOW_TASK_LABELS.get(workflow_id, workflow_id)} requires {requirement} in the workspace.")
     resolved_provider, resolved_model = _workflow_request_defaults(bootstrap.workspace_root)
     request = ProductWorkflowRequest(
         workflow_id=workflow_id,
@@ -1314,14 +1653,19 @@ def execute_lab_workflow_inspector_run(
         model=str(model or resolved_model or '') or None,
         context_strategy='retrieval',
     )
-    result = run_product_workflow(request)
+    from src.product.service import run_product_workflow as _run_product_workflow
+
+    result = _run_product_workflow(request)
     debug_metadata = getattr(result, 'debug_metadata', {}) if isinstance(getattr(result, 'debug_metadata', None), dict) else {}
     document_lookup = _document_lookup(_workspace_documents(bootstrap.workspace_root))
     artifact_path = None
     artifact_label = None
-    if result.artifacts and isinstance(result.artifacts[0], dict):
-        artifact_path = str(result.artifacts[0].get('path') or result.artifacts[0].get('artifact_path') or '').strip() or None
-        artifact_label = str(result.artifacts[0].get('label') or result.artifacts[0].get('name') or '').strip() or None
+    if result.artifacts:
+        first_artifact = result.artifacts[0]
+        artifact_payload = first_artifact.model_dump(mode='json') if hasattr(first_artifact, 'model_dump') else first_artifact if isinstance(first_artifact, dict) else {}
+        if isinstance(artifact_payload, dict):
+            artifact_path = str(artifact_payload.get('path') or artifact_payload.get('artifact_path') or '').strip() or None
+            artifact_label = str(artifact_payload.get('label') or artifact_payload.get('name') or '').strip() or None
     trace = {
         'stages': [
             {'stage': 'request', 'label': 'Request prepared', 'status': 'completed', 'detail': f"{len(document_ids)} document(s) selected", 'duration_ms': None},
@@ -1363,24 +1707,42 @@ def execute_lab_workflow_inspector_run(
 def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
     entries = load_model_comparison_log(get_phase7_model_comparison_log_path(workspace_root))
     summary = summarize_model_comparison_log(entries)
+
     model_rows: dict[str, dict[str, Any]] = {}
-    preset_map: dict[str, dict[str, Any]] = {}
+    prompt_profile_map: dict[str, dict[str, Any]] = {}
     strategy_buckets: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    use_case_labels: set[str] = set()
+
+    latest_timestamp = _format_timestamp(summary.get('latest_timestamp'))
 
     for entry in entries:
         retrieval_strategy = str(entry.get('retrieval_strategy') or 'manual_hybrid')
         strategy_buckets[retrieval_strategy].append(entry)
-        preset_name = str(entry.get('prompt_profile') or 'default') or 'default'
-        preset = preset_map.setdefault(
-            preset_name,
-            {'id': preset_name.replace(' ', '-').lower(), 'name': preset_name, 'description': f'{preset_name} benchmark preset derived from recorded comparison runs.', 'metrics': ['use case fit', 'groundedness', 'format adherence', 'latency'], 'models': []},
+
+        prompt_profile_name = str(entry.get('prompt_profile') or 'default') or 'default'
+        prompt_profile = prompt_profile_map.setdefault(
+            prompt_profile_name,
+            {
+                'id': prompt_profile_name.replace(' ', '-').lower(),
+                'name': prompt_profile_name,
+                'description': f'{prompt_profile_name} prompt profile observed in recorded product comparison runs.',
+                'metrics': ['use case fit', 'groundedness', 'format adherence', 'latency'],
+                'models': [],
+            },
         )
+
+        benchmark_use_case = str(entry.get('benchmark_use_case') or '').strip()
+        if benchmark_use_case:
+            use_case_labels.add(benchmark_use_case)
+
         for candidate in entry.get('candidate_results') or []:
             if not isinstance(candidate, dict):
                 continue
+
             model_name = str(candidate.get('model_effective') or candidate.get('model_requested') or 'unknown')
             provider_name = str(candidate.get('provider_effective') or candidate.get('provider_requested') or 'unknown')
             key = f'{provider_name}:{model_name}'
+
             bucket = model_rows.setdefault(
                 key,
                 {
@@ -1399,17 +1761,48 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
                     'runs': 0,
                 },
             )
-            bucket['runs'] += 1
-            bucket['useCaseFitValues'].append(_safe_float(candidate.get('use_case_fit_score') or candidate.get('use_case_fit') or candidate.get('format_adherence') or 0.0))
-            bucket['groundednessValues'].append(_safe_float(candidate.get('groundedness_score') or candidate.get('groundedness') or 0.0))
-            bucket['adherenceValues'].append(_safe_float(candidate.get('format_adherence') or 0.0))
-            bucket['latencyValues'].append(_safe_float(candidate.get('latency_s') or 0.0))
-            bucket['outputCharsValues'].append(_safe_float(candidate.get('output_chars') or 0.0))
-            if model_name not in preset['models']:
-                preset['models'].append(model_name)
 
-    models = []
+            bucket['runs'] += 1
+
+            adherence_value = candidate.get('format_adherence')
+            if isinstance(adherence_value, (int, float)):
+                bucket['adherenceValues'].append(_safe_float(adherence_value))
+
+            groundedness_value = candidate.get('groundedness_score') if isinstance(candidate.get('groundedness_score'), (int, float)) else candidate.get('groundedness')
+            if isinstance(groundedness_value, (int, float)):
+                bucket['groundednessValues'].append(_safe_float(groundedness_value))
+
+            use_case_fit_value = candidate.get('use_case_fit_score') if isinstance(candidate.get('use_case_fit_score'), (int, float)) else candidate.get('use_case_fit')
+            if isinstance(use_case_fit_value, (int, float)):
+                bucket['useCaseFitValues'].append(_safe_float(use_case_fit_value))
+
+            latency_value = candidate.get('latency_s')
+            if isinstance(latency_value, (int, float)):
+                bucket['latencyValues'].append(_safe_float(latency_value))
+
+            output_chars_value = candidate.get('output_chars')
+            if isinstance(output_chars_value, (int, float)):
+                bucket['outputCharsValues'].append(_safe_float(output_chars_value))
+
+            if model_name not in prompt_profile['models']:
+                prompt_profile['models'].append(model_name)
+
+    models: list[dict[str, Any]] = []
     for row in model_rows.values():
+        use_case_fit_values = list(row['useCaseFitValues'])
+        groundedness_values = list(row['groundednessValues'])
+        adherence_values = list(row['adherenceValues'])
+        latency_values = list(row['latencyValues'])
+        output_chars_values = list(row['outputCharsValues'])
+
+        use_case_fit = round(_mean(use_case_fit_values), 3) if use_case_fit_values else None
+        groundedness = round(_mean(groundedness_values), 3) if groundedness_values else None
+        adherence = round(_mean(adherence_values), 3) if adherence_values else None
+        latency = round(_mean(latency_values), 3) if latency_values else None
+        output_chars = round(_mean(output_chars_values), 0) if output_chars_values else None
+
+        score_status = 'scored' if use_case_fit is not None else 'partial'
+
         models.append(
             {
                 'id': row['id'],
@@ -1417,101 +1810,407 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
                 'provider': row['provider'],
                 'model': row['model'],
                 'profileTag': row['profileTag'],
-                'useCaseFit': round(_mean(row['useCaseFitValues']), 3),
-                'groundedness': round(_mean(row['groundednessValues']), 3),
-                'adherence': round(_mean(row['adherenceValues']), 3),
-                'latency': round(_mean(row['latencyValues']), 3),
-                'outputChars': round(_mean(row['outputCharsValues']), 0),
+                'useCaseFit': use_case_fit,
+                'groundedness': groundedness,
+                'adherence': adherence,
+                'latency': latency,
+                'outputChars': output_chars,
                 'runtimeBucket': row['runtimeBucket'],
                 'quantization': row['quantization'],
                 'runs': row['runs'],
+                'scoreStatus': score_status,
+                'metricCoverage': {
+                    'useCaseFit': len(use_case_fit_values),
+                    'groundedness': len(groundedness_values),
+                    'adherence': len(adherence_values),
+                    'latency': len(latency_values),
+                    'outputChars': len(output_chars_values),
+                },
             }
         )
-    models.sort(key=lambda item: (-item['useCaseFit'], item['latency']))
+
+    def _sort_fit(value: Any) -> float:
+        return float(value) if isinstance(value, (int, float)) else -1.0
+
+    def _sort_groundedness(value: Any) -> float:
+        return float(value) if isinstance(value, (int, float)) else -1.0
+
+    def _sort_latency(value: Any) -> float:
+        return float(value) if isinstance(value, (int, float)) else 10**9
+
+    models.sort(
+        key=lambda item: (
+            0 if item.get('useCaseFit') is not None else 1,
+            -_sort_fit(item.get('useCaseFit')),
+            -_sort_groundedness(item.get('groundedness')),
+            -_sort_groundedness(item.get('adherence')),
+            _sort_latency(item.get('latency')),
+        )
+    )
+
+    scored_models = [item for item in models if isinstance(item.get('useCaseFit'), (int, float))]
+    partially_scored_models = [item for item in models if item not in scored_models]
+
+    if scored_models:
+        scored_models[0]['profileTag'] = 'Recommended production'
+
     if models:
-        models[0]['profileTag'] = 'Recommended production'
-        fastest = min(models, key=lambda item: item['latency'])
-        if fastest['id'] != models[0]['id']:
-            fastest['profileTag'] = 'Fastest observed'
+        fastest_candidates = [item for item in models if isinstance(item.get('latency'), (int, float))]
+        if fastest_candidates:
+            fastest = min(fastest_candidates, key=lambda item: float(item.get('latency') or 10**9))
+            if fastest['id'] != scored_models[0]['id'] if scored_models else True:
+                fastest['profileTag'] = 'Fastest observed'
         for item in models:
-            if item['provider'] not in {'ollama', 'ollama_hosted'} and not item['profileTag']:
+            if item['provider'] not in {'ollama', 'ollama_hosted'} and not item.get('profileTag'):
                 item['profileTag'] = 'External reference'
 
-    provider_summary = []
-    for provider_name, provider_models in defaultdict(list, {item['provider']: [] for item in models}).items():
-        pass
+    provider_summary: list[dict[str, Any]] = []
     grouped_providers: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for model in models:
         grouped_providers[model['provider']].append(model)
     for provider_name, provider_models in grouped_providers.items():
-        best_model = max(provider_models, key=lambda item: item['useCaseFit'])
+        scored_provider_models = [item for item in provider_models if isinstance(item.get('useCaseFit'), (int, float))]
+        latency_values = [float(item['latency']) for item in provider_models if isinstance(item.get('latency'), (int, float))]
+        best_model = max(scored_provider_models, key=lambda item: float(item.get('useCaseFit') or 0.0)) if scored_provider_models else None
         provider_summary.append(
             {
                 'provider': provider_name,
                 'models': len(provider_models),
-                'bestFit': round(best_model['useCaseFit'] * 100),
-                'avgLatency': round(_mean([_safe_float(item['latency']) for item in provider_models]), 2),
-                'bestModel': best_model['model'],
+                'scoredModels': len(scored_provider_models),
+                'bestFit': round(float(best_model.get('useCaseFit') or 0.0) * 100) if best_model else None,
+                'avgLatency': round(_mean(latency_values), 2) if latency_values else None,
+                'bestModel': best_model['model'] if best_model else None,
             }
         )
-    provider_summary.sort(key=lambda item: (-item['bestFit'], item['avgLatency']))
+    provider_summary.sort(
+        key=lambda item: (
+            0 if item.get('bestFit') is not None else 1,
+            -(item.get('bestFit') or 0),
+            item.get('avgLatency') if isinstance(item.get('avgLatency'), (int, float)) else 10**9,
+        )
+    )
 
-    retrieval_observations = []
+    retrieval_observations: list[dict[str, Any]] = []
     for strategy, strategy_entries in strategy_buckets.items():
         candidate_rows = [candidate for entry in strategy_entries for candidate in (entry.get('candidate_results') or []) if isinstance(candidate, dict)]
+        adherence_values = [_safe_float(candidate.get('format_adherence')) for candidate in candidate_rows if isinstance(candidate.get('format_adherence'), (int, float))]
+        groundedness_values = [
+            _safe_float(candidate.get('groundedness_score') if isinstance(candidate.get('groundedness_score'), (int, float)) else candidate.get('groundedness'))
+            for candidate in candidate_rows
+            if isinstance(candidate.get('groundedness_score'), (int, float)) or isinstance(candidate.get('groundedness'), (int, float))
+        ]
+        retention_values = [
+            _safe_float(candidate.get('used_chunks') or 0.0) / max((_safe_float(candidate.get('used_chunks') or 0.0) + _safe_float(candidate.get('dropped_chunks') or 0.0)), 1.0)
+            for candidate in candidate_rows
+        ]
+        latency_values = [_safe_float(candidate.get('latency_s')) for candidate in candidate_rows if isinstance(candidate.get('latency_s'), (int, float))]
+        context_char_values = [_safe_float(candidate.get('context_preview_chars')) for candidate in candidate_rows if isinstance(candidate.get('context_preview_chars'), (int, float))]
+        composite_values = [
+            (float(candidate.get('format_adherence')) * 0.5) + (float(candidate.get('groundedness_score') if isinstance(candidate.get('groundedness_score'), (int, float)) else candidate.get('groundedness')) * 0.5)
+            for candidate in candidate_rows
+            if isinstance(candidate.get('format_adherence'), (int, float)) and (isinstance(candidate.get('groundedness_score'), (int, float)) or isinstance(candidate.get('groundedness'), (int, float)))
+        ]
+
         retrieval_observations.append(
             {
                 'strategy': strategy,
-                'outputDiscipline': round(_mean([_safe_float(candidate.get('format_adherence') or 0.0) for candidate in candidate_rows]), 3),
-                'contextRetention': round(min(_mean([_safe_float(candidate.get('used_chunks') or 0.0) / max((_safe_float(candidate.get('used_chunks') or 0.0) + _safe_float(candidate.get('dropped_chunks') or 0.0)), 1.0) for candidate in candidate_rows]), 1.0), 3) if candidate_rows else 0.0,
-                'composite': round(_mean([_safe_float(candidate.get('format_adherence') or 0.0) * 0.5 + _safe_float(candidate.get('groundedness_score') or candidate.get('groundedness') or 0.0) * 0.5 for candidate in candidate_rows]), 3),
-                'latency': round(_mean([_safe_float(candidate.get('latency_s') or 0.0) for candidate in candidate_rows]), 3),
-                'coverage': round(_mean([_safe_float(candidate.get('context_preview_chars') or 0.0) for candidate in candidate_rows]), 0),
-                'description': f'{strategy.replace("_", " ")} derived from persisted phase7 comparison runs.',
+                'outputDiscipline': round(_mean(adherence_values), 3) if adherence_values else None,
+                'contextRetention': round(min(_mean(retention_values), 1.0), 3) if retention_values else None,
+                'composite': round(_mean(composite_values), 3) if composite_values else None,
+                'latency': round(_mean(latency_values), 3) if latency_values else None,
+                'candidateCount': len(candidate_rows),
+                'scoredCandidateCount': len(composite_values),
+                'avgContextChars': round(_mean(context_char_values), 0) if context_char_values else None,
+                'description': f'{strategy.replace("_", " ")} derived from recorded benchmark runs for this workspace.',
             }
         )
-    retrieval_observations.sort(key=lambda item: (-item['composite'], item['latency']))
+    retrieval_observations.sort(
+        key=lambda item: (
+            0 if item.get('composite') is not None else 1,
+            -(item.get('composite') or 0),
+            item.get('latency') if isinstance(item.get('latency'), (int, float)) else 10**9,
+        )
+    )
 
-    leaderboard_highlights = []
-    if models:
-        leaderboard_highlights.append({'label': 'Best overall fit', 'model': models[0]['model'], 'detail': f"{round(models[0]['useCaseFit'] * 100)}% use-case fit"})
-        fastest = min(models, key=lambda item: item['latency'])
-        leaderboard_highlights.append({'label': 'Fastest observed', 'model': fastest['model'], 'detail': f"{fastest['latency']:.2f}s average latency"})
-        best_grounded = max(models, key=lambda item: item['groundedness'])
-        leaderboard_highlights.append({'label': 'Best groundedness', 'model': best_grounded['model'], 'detail': f"{round(best_grounded['groundedness'] * 100)}% groundedness"})
+    leaderboard_highlights: list[dict[str, Any]] = []
+    if scored_models:
+        leaderboard_highlights.append(
+            {
+                'label': 'Best scored fit',
+                'model': scored_models[0]['model'],
+                'detail': f"{round(float(scored_models[0]['useCaseFit']) * 100)}% use-case fit across {scored_models[0]['metricCoverage']['useCaseFit']} scored run(s)",
+            }
+        )
+    fastest_candidates = [item for item in models if isinstance(item.get('latency'), (int, float))]
+    if fastest_candidates:
+        fastest_model = min(fastest_candidates, key=lambda item: float(item.get('latency') or 10**9))
+        leaderboard_highlights.append(
+            {
+                'label': 'Fastest observed',
+                'model': fastest_model['model'],
+                'detail': f"{float(fastest_model['latency']):.2f}s average latency",
+            }
+        )
+    grounded_candidates = [item for item in models if isinstance(item.get('groundedness'), (int, float))]
+    if grounded_candidates:
+        best_grounded = max(grounded_candidates, key=lambda item: float(item.get('groundedness') or 0.0))
+        leaderboard_highlights.append(
+            {
+                'label': 'Best groundedness',
+                'model': best_grounded['model'],
+                'detail': f"{round(float(best_grounded['groundedness']) * 100)}% groundedness across {best_grounded['metricCoverage']['groundedness']} scored run(s)",
+            }
+        )
+
+    notes = ['Benchmarks owns model-vs-model tradeoff evaluation from persisted comparison runs, not live product traffic.']
+    if partially_scored_models:
+        notes.append('Some historical rows predate groundedness/use-case-fit scoring; unmeasured metrics remain visible as not scored instead of being inferred.')
+
+    meta = _runtime_meta(workspace_root, notes=notes)
+    if latest_timestamp:
+        meta['updated_at'] = latest_timestamp
+
+    scored_candidate_count = sum(item['metricCoverage']['useCaseFit'] for item in models)
+    best_groundedness = max((float(item['groundedness']) for item in grounded_candidates), default=None) if grounded_candidates else None
+    fastest_latency = min((float(item['latency']) for item in fastest_candidates), default=None) if fastest_candidates else None
 
     return {
         'ok': True,
-        'meta': _runtime_meta(workspace_root, notes=['Benchmarks owns model-vs-model tradeoff evaluation. Runtime only links to provider posture, not benchmark scoring.']),
-        'status': 'live' if models else 'empty',
-        'degraded_reason': None if models else 'No phase7 model comparison log has been recorded yet.',
+        'meta': meta,
+        'status': _derive_benchmark_surface_status(latest_timestamp, has_models=bool(models)),
+        'degraded_reason': (
+            'No phase7 model comparison log has been recorded yet.'
+            if not models
+            else 'Recorded benchmark runs exist, but this workspace has no scored use-case-fit telemetry yet.'
+            if not scored_models
+            else None
+        ),
         'summary': {
             'modelCount': len(models),
-            'bestGroundedness': round(max((item['groundedness'] for item in models), default=0.0), 3),
-            'fastestLatency': round(min((item['latency'] for item in models), default=0.0), 3),
-            'bestModel': models[0]['model'] if models else None,
+            'scoredModelCount': len(scored_models),
+            'partialModelCount': len(partially_scored_models),
+            'promptProfileCount': len(prompt_profile_map),
+            'useCaseCount': len(use_case_labels),
+            'scoredCandidateCount': scored_candidate_count,
+            'bestGroundedness': round(best_groundedness, 3) if isinstance(best_groundedness, (int, float)) else None,
+            'fastestLatency': round(fastest_latency, 3) if isinstance(fastest_latency, (int, float)) else None,
+            'bestModel': scored_models[0]['model'] if scored_models else None,
             'totalRuns': _safe_int(summary.get('total_runs')),
+            'lastRecordedAt': latest_timestamp,
         },
         'models': models,
-        'presets': list(preset_map.values()),
+        'presets': list(prompt_profile_map.values()),
         'providerSummary': provider_summary,
         'leaderboardHighlights': leaderboard_highlights,
         'retrievalObservations': retrieval_observations,
     }
 
 
+def _build_product_eval_scope(workspace_root: Path) -> dict[str, Any]:
+    catalog = build_product_workflow_catalog()
+    workflow_labels = {workflow_id: definition.label for workflow_id, definition in catalog.items()}
+    capable_task_types = sorted({task_type for definition in catalog.values() for task_type in definition.backend_task_types})
+
+    observed_workflow_ids: set[str] = set()
+    workflow_history = _read_json(get_product_workflow_history_path(workspace_root), [])
+    for entry in workflow_history:
+        if not isinstance(entry, dict):
+            continue
+        workflow_id = str(entry.get('workflow_id') or '').strip()
+        if workflow_id in catalog:
+            observed_workflow_ids.add(workflow_id)
+
+    telemetry_runs = load_product_telemetry_runs(get_product_telemetry_path(workspace_root))
+    for run in telemetry_runs:
+        if not isinstance(run, dict):
+            continue
+        workflow_id = str(run.get('workflow_id') or '').strip()
+        if workflow_id in catalog:
+            observed_workflow_ids.add(workflow_id)
+
+    observed_task_types = sorted({
+        task_type
+        for workflow_id in observed_workflow_ids
+        for task_type in catalog[workflow_id].backend_task_types
+    })
+
+    return {
+        'catalog': catalog,
+        'workflow_labels': workflow_labels,
+        'capable_task_types': capable_task_types,
+        'observed_workflow_ids': sorted(observed_workflow_ids),
+        'observed_workflow_labels': [workflow_labels[workflow_id] for workflow_id in sorted(observed_workflow_ids)],
+        'observed_task_types': observed_task_types,
+        'telemetry_runs': telemetry_runs,
+        'workflow_history_count': len([entry for entry in workflow_history if isinstance(entry, dict)]),
+    }
+
+
+def _build_live_product_eval_cases(scope: dict[str, Any], historical_entries: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    catalog = scope.get('catalog') if isinstance(scope.get('catalog'), dict) else {}
+    workflow_labels = scope.get('workflow_labels') if isinstance(scope.get('workflow_labels'), dict) else {}
+    observed_workflow_ids = [workflow_id for workflow_id in (scope.get('observed_workflow_ids') or []) if workflow_id in catalog]
+    telemetry_runs = [run for run in (scope.get('telemetry_runs') or []) if isinstance(run, dict)]
+
+    live_cases: list[dict[str, Any]] = []
+    workflow_buckets: dict[str, dict[str, Any]] = {}
+    provider_buckets: dict[str, dict[str, Any]] = {}
+    task_buckets: dict[str, dict[str, Any]] = {}
+
+    filtered_runs = [run for run in telemetry_runs if str(run.get('workflow_id') or '').strip() in observed_workflow_ids]
+    filtered_runs.sort(key=lambda item: str(item.get('completed_at') or item.get('started_at') or ''), reverse=True)
+
+    for index, run in enumerate(filtered_runs):
+        workflow_id = str(run.get('workflow_id') or '').strip()
+        runtime = run.get('runtime') if isinstance(run.get('runtime'), dict) else {}
+        status = str(run.get('status') or '').strip().lower()
+        verdict = 'PASS' if status == 'completed' and not bool(run.get('needs_review')) else 'WARN' if status in {'completed', 'warning'} else 'FAIL'
+        score = 1.0 if verdict == 'PASS' else 0.72 if verdict == 'WARN' else 0.35
+        provider = str(runtime.get('provider') or 'unknown')
+        model = str(runtime.get('model') or 'unknown')
+        latency = round(_safe_float(runtime.get('latency_s') or 0.0), 3)
+        timestamp = _format_timestamp(run.get('completed_at') or run.get('started_at')) or _now_iso()
+        reasons: list[str] = []
+        review_reason = str(run.get('review_reason') or '').strip()
+        error_message = str(run.get('error_message') or '').strip()
+        if review_reason:
+            reasons.append(review_reason)
+        if error_message:
+            reasons.append(error_message)
+        task_type = workflow_id
+        live_case = {
+            'id': str(run.get('run_id') or f'live-{workflow_id}-{index + 1}'),
+            'task': workflow_labels.get(workflow_id, workflow_id.replace('_', ' ').title()),
+            'taskType': task_type,
+            'workflowId': workflow_id,
+            'suite': 'live_product_workflows',
+            'verdict': verdict,
+            'score': round(score, 3),
+            'needsReview': bool(run.get('needs_review')),
+            'model': model,
+            'provider': provider,
+            'latency': latency,
+            'timestamp': timestamp,
+            'reason': '; '.join(reasons[:2]) or None,
+            'errorDetail': '; '.join(reasons[:3]) or None,
+            'sourceKind': 'live',
+            'traceId': str(run.get('trace_id') or '').strip() or None,
+            'runId': str(run.get('run_id') or '').strip() or None,
+        }
+        live_cases.append(live_case)
+
+        workflow_bucket = workflow_buckets.setdefault(workflow_id, {'workflowId': workflow_id, 'label': workflow_labels.get(workflow_id, workflow_id), 'pass': 0, 'warn': 0, 'fail': 0, 'total': 0})
+        workflow_bucket[verdict.lower()] += 1
+        workflow_bucket['total'] += 1
+
+        provider_bucket = provider_buckets.setdefault(provider, {'provider': provider, 'total': 0, 'passes': 0, 'failures': 0, 'warnings': 0})
+        provider_bucket['total'] += 1
+        provider_bucket['passes'] += 1 if verdict == 'PASS' else 0
+        provider_bucket['warnings'] += 1 if verdict == 'WARN' else 0
+        provider_bucket['failures'] += 1 if verdict == 'FAIL' else 0
+
+        for backend_task_type in catalog.get(workflow_id).backend_task_types if workflow_id in catalog else []:
+            task_bucket = task_buckets.setdefault(backend_task_type, {'task': backend_task_type, 'total': 0, 'passes': 0, 'score_values': [], 'warnings': 0, 'failures': 0})
+            task_bucket['total'] += 1
+            task_bucket['passes'] += 1 if verdict == 'PASS' else 0
+            task_bucket['warnings'] += 1 if verdict == 'WARN' else 0
+            task_bucket['failures'] += 1 if verdict == 'FAIL' else 0
+            task_bucket['score_values'].append(score)
+
+    if not live_cases:
+        for entry in historical_entries:
+            metadata = entry.get('metadata') if isinstance(entry.get('metadata'), dict) else {}
+            if str(metadata.get('source') or '').strip() != 'product_runtime_sample':
+                continue
+            workflow_id = str(entry.get('task_type') or '').strip()
+            if workflow_id not in observed_workflow_ids:
+                continue
+            status = str(entry.get('status') or 'WARN').upper()
+            verdict = 'PASS' if status == 'PASS' else 'FAIL' if status == 'FAIL' else 'WARN'
+            score_ratio = 0.0
+            max_score = _safe_float(entry.get('max_score') or 0.0)
+            if max_score > 0:
+                score_ratio = _safe_float(entry.get('score') or 0.0) / max_score
+            score_ratio = min(max(score_ratio, 0.0), 1.0)
+            live_cases.append({
+                'id': str(entry.get('id') or f'live-fallback-{len(live_cases) + 1}'),
+                'task': workflow_labels.get(workflow_id, workflow_id.replace('_', ' ').title()),
+                'taskType': workflow_id,
+                'workflowId': workflow_id,
+                'suite': 'live_product_workflows',
+                'verdict': verdict,
+                'score': round(score_ratio, 3),
+                'needsReview': bool(entry.get('needs_review')),
+                'model': str(entry.get('model') or 'unknown'),
+                'provider': str(entry.get('provider') or 'unknown'),
+                'latency': round(_safe_float(entry.get('latency_s') or 0.0), 3),
+                'timestamp': _format_timestamp(entry.get('created_at')) or _now_iso(),
+                'reason': '; '.join(str(reason) for reason in (entry.get('reasons') or [])[:2]) or None,
+                'errorDetail': '; '.join(str(reason) for reason in (entry.get('reasons') or [])[:3]) or None,
+                'sourceKind': 'live',
+                'traceId': str(metadata.get('trace_id') or '').strip() or None,
+                'runId': str(metadata.get('run_id') or '').strip() or None,
+            })
+
+    live_cases.sort(key=lambda item: str(item.get('timestamp') or ''), reverse=True)
+    verdict_counter = Counter(str(item.get('verdict') or 'WARN') for item in live_cases)
+    live_summary = {
+        'total': len(live_cases),
+        'pass': int(verdict_counter.get('PASS', 0)),
+        'warn': int(verdict_counter.get('WARN', 0)),
+        'fail': int(verdict_counter.get('FAIL', 0)),
+        'review': sum(1 for item in live_cases if bool(item.get('needsReview'))),
+        'passRate': round((int(verdict_counter.get('PASS', 0)) / max(len(live_cases), 1)) * 100) if live_cases else 0,
+        'workflowBreakdown': sorted(workflow_buckets.values(), key=lambda item: (-int(item.get('total') or 0), str(item.get('label') or ''))),
+        'providerBreakdown': sorted([
+            {
+                'provider': bucket['provider'],
+                'total': bucket['total'],
+                'failures': bucket['failures'],
+                'warnings': bucket['warnings'],
+                'passRate': round((bucket['passes'] / max(bucket['total'], 1)) * 100),
+            }
+            for bucket in provider_buckets.values()
+        ], key=lambda item: (-int(item.get('total') or 0), str(item.get('provider') or ''))),
+        'taskBreakdown': sorted([
+            {
+                'task': bucket['task'],
+                'total': bucket['total'],
+                'passRate': round((bucket['passes'] / max(bucket['total'], 1)) * 100),
+                'avgScore': round(_mean(bucket['score_values']), 3),
+                'warnings': bucket['warnings'],
+                'failures': bucket['failures'],
+            }
+            for bucket in task_buckets.values()
+        ], key=lambda item: (-int(item.get('total') or 0), str(item.get('task') or ''))),
+    }
+    return live_cases, live_summary
+
+
 def build_lab_evals_payload(workspace_root: Path) -> dict[str, Any]:
-    entries = load_eval_runs(get_phase8_eval_db_path(workspace_root))
-    summary = summarize_eval_runs(entries)
-    diagnosis = build_eval_diagnosis(entries)
+    scope = _build_product_eval_scope(workspace_root)
+    observed_task_types = [task_type for task_type in (scope.get('observed_task_types') or []) if str(task_type or '').strip()]
+    all_entries = load_eval_runs(get_phase8_eval_db_path(workspace_root))
+    historical_entries = []
+    for entry in all_entries:
+        if not isinstance(entry, dict):
+            continue
+        metadata = entry.get('metadata') if isinstance(entry.get('metadata'), dict) else {}
+        if str(metadata.get('source') or '').strip() == 'product_runtime_sample':
+            continue
+        if str(entry.get('task_type') or '').strip() in observed_task_types:
+            historical_entries.append(entry)
+
+    summary = summarize_eval_runs(historical_entries)
+    diagnosis = build_eval_diagnosis(historical_entries)
 
     suites_map: dict[str, dict[str, Any]] = {}
     provider_map: dict[str, dict[str, Any]] = {}
     task_map: dict[str, dict[str, Any]] = {}
-    cases = []
+    historical_cases = []
     watchlist = []
 
-    for entry in entries:
+    for entry in historical_entries:
         suite_name = str(entry.get('suite_name') or 'general')
         task_type = str(entry.get('task_type') or 'task')
         status = str(entry.get('status') or 'WARN').upper()
@@ -1523,18 +2222,23 @@ def build_lab_evals_payload(workspace_root: Path) -> dict[str, Any]:
             score_ratio = _safe_float(entry.get('score') or 0.0) / max_score
         score_ratio = min(max(score_ratio, 0.0), 1.0)
         case_payload = {
-            'id': str(entry.get('id') or f'{suite_name}-{task_type}-{len(cases) + 1}'),
+            'id': str(entry.get('id') or f'{suite_name}-{task_type}-{len(historical_cases) + 1}'),
             'task': task_type,
+            'taskType': task_type,
+            'workflowId': None,
             'suite': suite_name,
             'verdict': verdict,
             'score': round(score_ratio, 3),
             'needsReview': needs_review,
             'model': str(entry.get('model') or 'unknown'),
+            'provider': str(entry.get('provider') or 'unknown'),
             'latency': round(_safe_float(entry.get('latency_s') or 0.0), 3),
             'timestamp': _format_timestamp(entry.get('created_at')) or _now_iso(),
+            'reason': '; '.join(str(reason) for reason in (entry.get('reasons') or [])[:2]) or None,
             'errorDetail': '; '.join(str(reason) for reason in (entry.get('reasons') or [])[:3]) or None,
+            'sourceKind': 'historical',
         }
-        cases.append(case_payload)
+        historical_cases.append(case_payload)
         if verdict in {'WARN', 'FAIL'} or needs_review:
             watchlist.append(case_payload)
 
@@ -1545,142 +2249,278 @@ def build_lab_evals_payload(workspace_root: Path) -> dict[str, Any]:
         suite_bucket['lastRun'] = max(str(suite_bucket['lastRun']), str(entry.get('created_at') or suite_bucket['lastRun']))
 
         provider_name = str(entry.get('provider') or 'unknown')
-        provider_bucket = provider_map.setdefault(provider_name, {'provider': provider_name, 'total': 0, 'failures': 0, 'passes': 0})
+        provider_bucket = provider_map.setdefault(provider_name, {'provider': provider_name, 'total': 0, 'failures': 0, 'warnings': 0, 'passes': 0})
         provider_bucket['total'] += 1
         provider_bucket['failures'] += 1 if verdict == 'FAIL' else 0
+        provider_bucket['warnings'] += 1 if verdict == 'WARN' else 0
         provider_bucket['passes'] += 1 if verdict == 'PASS' else 0
 
-        task_bucket = task_map.setdefault(task_type, {'task': task_type, 'total': 0, 'passes': 0, 'score_values': []})
+        task_bucket = task_map.setdefault(task_type, {'task': task_type, 'total': 0, 'passes': 0, 'warnings': 0, 'failures': 0, 'score_values': []})
         task_bucket['total'] += 1
         task_bucket['passes'] += 1 if verdict == 'PASS' else 0
+        task_bucket['warnings'] += 1 if verdict == 'WARN' else 0
+        task_bucket['failures'] += 1 if verdict == 'FAIL' else 0
         task_bucket['score_values'].append(score_ratio)
 
     suites = list(suites_map.values())
     suites.sort(key=lambda item: item['name'])
-    provider_breakdown = []
-    for bucket in provider_map.values():
-        provider_breakdown.append({'provider': bucket['provider'], 'total': bucket['total'], 'failures': bucket['failures'], 'passRate': round((bucket['passes'] / max(bucket['total'], 1)) * 100)})
-    provider_breakdown.sort(key=lambda item: (-item['total'], item['provider']))
+    provider_breakdown = sorted([
+        {
+            'provider': bucket['provider'],
+            'total': bucket['total'],
+            'failures': bucket['failures'],
+            'warnings': bucket['warnings'],
+            'passRate': round((bucket['passes'] / max(bucket['total'], 1)) * 100),
+        }
+        for bucket in provider_map.values()
+    ], key=lambda item: (-item['total'], item['provider']))
 
-    task_breakdown = []
-    for bucket in task_map.values():
-        task_breakdown.append({'task': bucket['task'], 'total': bucket['total'], 'passRate': round((bucket['passes'] / max(bucket['total'], 1)) * 100), 'avgScore': round(_mean(bucket['score_values']), 3)})
-    task_breakdown.sort(key=lambda item: (-item['total'], item['task']))
+    task_breakdown = sorted([
+        {
+            'task': bucket['task'],
+            'total': bucket['total'],
+            'passRate': round((bucket['passes'] / max(bucket['total'], 1)) * 100),
+            'avgScore': round(_mean(bucket['score_values']), 3),
+            'warnings': bucket['warnings'],
+            'failures': bucket['failures'],
+        }
+        for bucket in task_map.values()
+    ], key=lambda item: (-item['total'], item['task']))
 
-    pass_rate = round((_safe_int(summary.get('pass')) / max(_safe_int(summary.get('total_runs')), 1)) * 100) if _safe_int(summary.get('total_runs')) else 0
-    totals = {
-        'pass': _safe_int(summary.get('pass')),
-        'warn': _safe_int(summary.get('warn')),
-        'fail': _safe_int(summary.get('fail')),
-        'review': _safe_int(summary.get('needs_review')),
+    status_counts = summary.get('status_counts') if isinstance(summary.get('status_counts'), dict) else {}
+    pass_count = _safe_int(status_counts.get('PASS'))
+    warn_count = _safe_int(status_counts.get('WARN'))
+    fail_count = _safe_int(status_counts.get('FAIL'))
+    historical_totals = {
+        'pass': pass_count,
+        'warn': warn_count,
+        'fail': fail_count,
+        'review': sum(1 for entry in historical_entries if bool(entry.get('needs_review'))),
         'total': _safe_int(summary.get('total_runs')),
     }
+    historical_pass_rate = round(_safe_float(summary.get('pass_rate')) * 100) if historical_totals['total'] else 0
+
+    live_cases, live_summary = _build_live_product_eval_cases(scope, historical_entries)
+
+    combined_cases = sorted([*live_cases, *historical_cases], key=lambda item: str(item.get('timestamp') or ''), reverse=True)
+    combined_watchlist = [item for item in combined_cases if str(item.get('verdict') or '') in {'WARN', 'FAIL'} or bool(item.get('needsReview'))]
+    fail_cases = [item for item in combined_cases if str(item.get('verdict') or '') == 'FAIL']
     global_recommendation = diagnosis.get('decision_summary', {}).get('global_recommendation') if isinstance(diagnosis, dict) else None
     diagnosis_payload = dict(diagnosis) if isinstance(diagnosis, dict) else {}
     diagnosis_payload['globalRecommendation'] = str(global_recommendation or '').replace('_', ' ') or 'Review the worst-performing task slices and rerun the impacted eval suites.'
 
+    historical_present = historical_totals['total'] > 0
+    live_present = live_summary.get('total', 0) > 0
+    if live_present:
+        status = 'live'
+    elif historical_present:
+        status = 'derived-live'
+    else:
+        status = 'empty'
+
+    if not observed_task_types:
+        degraded_reason = 'This surface now scopes to workflows actually observed in the product. Run product workflows first so live and historical product-only evals can appear.'
+    elif not historical_present and not live_present:
+        degraded_reason = 'No eval history matched the workflows currently observed in the product.'
+    elif live_present and not historical_present:
+        degraded_reason = 'Live product evals are available. Historical baseline is still empty for the currently observed workflows.'
+    elif historical_present and not live_present:
+        degraded_reason = 'Historical product-scoped evals are available. No recent live product evals were sampled yet.'
+    else:
+        degraded_reason = None
+
     return {
         'ok': True,
-        'meta': _runtime_meta(workspace_root, notes=['Evals & Diagnosis is the source of truth for regression posture; runtime only surfaces coarse operational symptoms.']),
-        'status': 'live' if entries else 'empty',
-        'degraded_reason': None if entries else 'No phase8 eval runs were found in this workspace yet.',
-        'passRate': pass_rate,
-        'totals': totals,
+        'meta': _runtime_meta(workspace_root, notes=['Evals & Diagnosis is now scoped to workflows actually observed in the product and separates live product evals from historical baselines.']),
+        'status': status,
+        'degraded_reason': degraded_reason,
+        'scope': {
+            'observedWorkflowIds': scope.get('observed_workflow_ids') or [],
+            'observedWorkflowLabels': scope.get('observed_workflow_labels') or [],
+            'observedTaskTypes': observed_task_types,
+            'capableTaskTypes': scope.get('capable_task_types') or [],
+        },
+        'passRate': historical_pass_rate,
+        'totals': historical_totals,
         'suites': suites,
-        'cases': cases[:80],
+        'cases': combined_cases[:120],
+        'historicalCases': historical_cases[:80],
+        'liveCases': live_cases[:40],
         'providerBreakdown': provider_breakdown,
         'taskBreakdown': task_breakdown,
-        'watchlist': watchlist[:12],
+        'liveProviderBreakdown': live_summary.get('providerBreakdown') or [],
+        'liveTaskBreakdown': live_summary.get('taskBreakdown') or [],
+        'liveWorkflowBreakdown': live_summary.get('workflowBreakdown') or [],
+        'liveTotals': {
+            'pass': int(live_summary.get('pass') or 0),
+            'warn': int(live_summary.get('warn') or 0),
+            'fail': int(live_summary.get('fail') or 0),
+            'review': int(live_summary.get('review') or 0),
+            'total': int(live_summary.get('total') or 0),
+        },
+        'livePassRate': int(live_summary.get('passRate') or 0),
+        'watchlist': combined_watchlist[:16],
+        'liveWatchlist': [item for item in live_cases if str(item.get('verdict') or '') in {'WARN', 'FAIL'} or bool(item.get('needsReview'))][:10],
+        'historicalWatchlist': [item for item in historical_cases if str(item.get('verdict') or '') in {'WARN', 'FAIL'} or bool(item.get('needsReview'))][:10],
+        'investigateFirst': fail_cases[:12],
         'diagnosis': diagnosis_payload,
     }
 
 
-def _artifact_inventory(workspace_root: Path) -> list[dict[str, Any]]:
-    artifact_root = get_artifact_root(workspace_root)
-    if not artifact_root.exists():
+def _normalize_lab_artifact_status(status: Any) -> str:
+    normalized = str(status or '').strip().lower()
+    if normalized == 'ready':
+        return 'ready'
+    if normalized == 'error':
+        return 'error'
+    if normalized in {'warning', 'disabled', 'service_unavailable'}:
+        return 'warning'
+    return 'pending'
+
+
+def _lab_artifact_type(entry: dict[str, Any]) -> str:
+    export_kind = str(entry.get('export_kind') or '').strip().lower()
+    workflow_label = str(entry.get('workflow_label') or '').strip().lower()
+    if export_kind == 'benchmark_eval_executive_deck':
+        return 'benchmark_bundle'
+    if export_kind == 'evidence_pack_deck' or 'evidence' in workflow_label:
+        return 'evidence_bundle'
+    return 'deck_bundle'
+
+
+def _build_lab_artifact_inventory(workspace_root: Path) -> list[dict[str, Any]]:
+    artifact_root = get_artifact_root(workspace_root) / 'presentation_exports'
+    if not artifact_root.exists() or not artifact_root.is_dir():
         return []
-    items: list[dict[str, Any]] = []
-    for path in sorted(artifact_root.rglob('*')):
-        if not path.is_file():
+
+    metadata_paths = sorted(artifact_root.glob('deckexp_*/metadata.json'), key=lambda item: item.stat().st_mtime, reverse=True)
+    bundles: list[dict[str, Any]] = []
+    for metadata_path in metadata_paths:
+        normalized = _normalize_artifact_entry_from_metadata(metadata_path)
+        if not isinstance(normalized, dict):
             continue
-        if path.name.startswith('.'):
-            continue
-        relative = path.relative_to(artifact_root)
-        suffix = path.suffix.lower()
-        if suffix not in {'.json', '.pptx', '.png', '.md'}:
-            continue
-        status = 'ready'
-        if 'error' in path.name.lower():
-            status = 'error'
-        artifact_type = 'report'
-        category = relative.parts[0] if len(relative.parts) > 1 else 'root'
-        if 'benchmark' in path.name.lower():
-            artifact_type = 'benchmark'
-        elif 'eval' in path.name.lower() or 'diagnosis' in path.name.lower():
-            artifact_type = 'eval'
-        elif 'ocr' in path.name.lower():
-            artifact_type = 'ocr_diagnostic'
-        elif 'embedding' in path.name.lower():
-            artifact_type = 'embedding_experiment'
-        elif 'run' in path.name.lower() or 'preview' in path.name.lower() or suffix == '.pptx':
-            artifact_type = 'extraction'
-        items.append(
+        status = _normalize_lab_artifact_status(normalized.get('status'))
+        workflow_label = str(normalized.get('workflow_label') or '').strip() or 'Unlabeled workflow'
+        export_kind = str(normalized.get('export_kind') or '').strip() or 'deck_export'
+        slide_count = _safe_int(normalized.get('slide_count') or 0)
+        preview_count = _safe_int(normalized.get('preview_count') or 0)
+        issue_count = _safe_int(normalized.get('issue_count') or 0)
+        warning_count = _safe_int(normalized.get('warning_count') or 0)
+        asset_count = _safe_int(normalized.get('asset_count') or 0)
+        average_score = normalized.get('average_score')
+        review_status = str(normalized.get('review_status') or '').strip() or None
+        description_parts: list[str] = [export_kind.replace('_', ' ')]
+        if slide_count:
+            description_parts.append(f'{slide_count} slide(s)')
+        if preview_count:
+            description_parts.append(f'{preview_count} preview(s)')
+        if issue_count:
+            description_parts.append(f'{issue_count} issue(s)')
+        elif warning_count:
+            description_parts.append(f'{warning_count} warning(s)')
+        if isinstance(average_score, (int, float)) and average_score > 0:
+            description_parts.append(f'avg score {average_score:.2f}')
+        if review_status:
+            description_parts.append(f'review {review_status}')
+
+        bundles.append(
             {
-                'id': str(relative).replace('/', '__'),
-                'name': path.name,
-                'type': artifact_type,
-                'category': category,
-                'version': relative.parts[1] if len(relative.parts) > 1 else 'workspace',
-                'createdAt': datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).isoformat(),
-                'size': _bytes_label(path.stat().st_size),
+                'id': str(normalized.get('id') or metadata_path.parent.name),
+                'name': str(normalized.get('title') or normalized.get('name') or metadata_path.parent.name),
+                'type': _lab_artifact_type(normalized),
+                'category': workflow_label,
+                'version': str(normalized.get('id') or metadata_path.parent.name),
+                'createdAt': _format_timestamp(normalized.get('created_at')) or datetime.fromtimestamp(metadata_path.stat().st_mtime, tz=timezone.utc).isoformat(),
+                'size': str(normalized.get('size') or _bytes_label(normalized.get('pptx_size_bytes') or 0)),
                 'status': status,
-                'description': f'Captured from {relative.parent.as_posix() or "artifact root"}.',
-                'path': str(path),
+                'description': ' · '.join(part for part in description_parts if part),
+                'workflowLabel': workflow_label,
+                'exportKind': export_kind,
+                'slideCount': slide_count,
+                'previewCount': preview_count,
+                'issueCount': issue_count,
+                'warningCount': warning_count,
+                'assetCount': asset_count,
             }
         )
-    items.sort(key=lambda item: str(item['createdAt']), reverse=True)
-    return items
+    bundles.sort(key=lambda item: str(item.get('createdAt') or ''), reverse=True)
+    return bundles
 
 
 def build_lab_artifacts_payload(workspace_root: Path) -> dict[str, Any]:
-    artifacts = _artifact_inventory(workspace_root)
+    artifacts = _build_lab_artifact_inventory(workspace_root)
     chat_sessions = load_lab_chat_sessions(get_lab_chat_sessions_path(workspace_root))
     workflow_runs = load_lab_workflow_runs(get_lab_workflow_runs_path(workspace_root))
+
+    def _is_bundle_link(run: dict[str, Any]) -> bool:
+        artifact_path = str(run.get('artifact_path') or '').strip().lower()
+        artifact_label = str(run.get('artifact_label') or '').strip().lower()
+        return 'deckexp_' in artifact_path or artifact_path.endswith('.pptx') or 'deck' in artifact_label
+
+    linked_workflow_runs = [run for run in workflow_runs if _is_bundle_link(run)]
+    latest_linked_run = linked_workflow_runs[0] if linked_workflow_runs else None
+
+    ready_count = sum(1 for item in artifacts if item['status'] == 'ready')
+    warning_count = sum(1 for item in artifacts if item['status'] == 'warning')
+    error_count = sum(1 for item in artifacts if item['status'] == 'error')
+    preview_assets = sum(_safe_int(item.get('previewCount') or 0) for item in artifacts)
+    total_issues = sum(_safe_int(item.get('issueCount') or 0) for item in artifacts)
+    workflow_count = len({str(item.get('workflowLabel') or '').strip() for item in artifacts if str(item.get('workflowLabel') or '').strip()})
+    benchmark_count = sum(1 for item in artifacts if item.get('type') == 'benchmark_bundle')
+
     diagnostics = [
-        {'label': 'Artifact root', 'detail': str(get_artifact_root(workspace_root)), 'status': 'connected', 'health': 'healthy'},
-        {'label': 'Runtime linked runs', 'detail': f'{len(workflow_runs)} persisted workflow run(s) linked into AI LAB.', 'status': 'linked', 'health': 'healthy' if workflow_runs else 'neutral'},
-        {'label': 'Chat capture registry', 'detail': f'{len(chat_sessions)} persisted chat session(s) are visible to the artifact surface.', 'status': 'linked', 'health': 'healthy' if chat_sessions else 'neutral'},
+        {'label': 'Artifact root', 'detail': 'presentation_exports metadata registry is connected.', 'status': 'connected', 'health': 'healthy' if artifacts else 'neutral'},
+        {'label': 'Bundle registry', 'detail': f'{len(artifacts)} product-visible export bundle(s) were derived from top-level metadata manifests.', 'status': 'ready' if artifacts else 'empty', 'health': 'healthy' if artifacts else 'neutral'},
+        {'label': 'Workflow linkage', 'detail': f'{len(linked_workflow_runs)} of {len(workflow_runs)} persisted workflow run(s) currently point to a captured artifact bundle.', 'status': 'linked' if linked_workflow_runs else ('warning' if workflow_runs else 'empty'), 'health': 'healthy' if linked_workflow_runs else ('warning' if workflow_runs else 'neutral')},
+        {'label': 'Attention required', 'detail': f'{error_count} failed bundle(s) and {warning_count} bundle(s) with degraded or disabled posture.', 'status': 'warning' if (error_count or warning_count) else 'ready', 'health': 'warning' if (error_count or warning_count) else 'healthy'},
+        {'label': 'Chat capture registry', 'detail': f'{len(chat_sessions)} persisted chat session(s) are visible to the artifact surface.', 'status': 'linked' if chat_sessions else 'empty', 'health': 'healthy' if chat_sessions else 'neutral'},
     ]
     summary = {
         'totalArtifacts': len(artifacts),
-        'readyArtifacts': sum(1 for item in artifacts if item['status'] == 'ready'),
-        'errorArtifacts': sum(1 for item in artifacts if item['status'] == 'error'),
+        'readyArtifacts': ready_count,
+        'warningArtifacts': warning_count,
+        'errorArtifacts': error_count,
         'chatSessions': len(chat_sessions),
         'workflowRuns': len(workflow_runs),
+        'linkedWorkflowRuns': len(linked_workflow_runs),
+        'unlinkedWorkflowRuns': max(len(workflow_runs) - len(linked_workflow_runs), 0),
+        'previewAssets': preview_assets,
+        'issueCount': total_issues,
+        'workflowCount': workflow_count,
+        'benchmarkArtifacts': benchmark_count,
     }
     run_registry = {
         'chatSessions': len(chat_sessions),
         'workflowRuns': len(workflow_runs),
         'latestChatSession': str(chat_sessions[0].get('session_id') or '') if chat_sessions else None,
         'latestWorkflowRun': str(workflow_runs[0].get('run_id') or '') if workflow_runs else None,
-        'latestWorkflowArtifact': str(workflow_runs[0].get('artifact_path') or '') if workflow_runs and str(workflow_runs[0].get('artifact_path') or '').strip() else None,
+        'latestWorkflowArtifact': {
+            'label': str((latest_linked_run or {}).get('artifact_label') or Path(str((latest_linked_run or {}).get('artifact_path') or '')).name or 'Workflow artifact').strip() or 'Workflow artifact',
+            'runId': str((latest_linked_run or {}).get('run_id') or '').strip() or None,
+            'updatedAt': _format_timestamp((latest_linked_run or {}).get('updated_at') or (latest_linked_run or {}).get('created_at')),
+        } if latest_linked_run else None,
     }
     recent_captures = [
         {
             'id': item['id'],
             'label': item['name'],
-            'category': item['category'],
+            'workflowLabel': item.get('workflowLabel'),
+            'exportKind': item.get('exportKind'),
             'status': item['status'],
             'createdAt': item['createdAt'],
-            'artifactPath': item.get('path'),
+            'slideCount': item.get('slideCount'),
+            'previewCount': item.get('previewCount'),
+            'issueCount': item.get('issueCount'),
+            'warningCount': item.get('warningCount'),
+            'assetCount': item.get('assetCount'),
         }
         for item in artifacts[:8]
     ]
     return {
         'ok': True,
-        'meta': _runtime_meta(workspace_root, notes=['Artifacts stores technical evidence. It complements, but does not replace, Benchmarks, Evals or Workflow Inspector.']),
+        'meta': _runtime_meta(workspace_root, notes=['This surface is scoped to product-visible export bundles and workflow linkage. Raw sidecars, nested test suites and filesystem-only noise are intentionally suppressed.']),
         'status': 'live' if artifacts else 'empty',
-        'degraded_reason': None if artifacts else 'Artifact inventory is empty in this workspace.',
+        'degraded_reason': None if artifacts else 'No persisted export bundles were found in the top-level presentation export registry yet.',
         'artifacts': artifacts[:80],
         'summary': summary,
         'diagnostics': diagnostics,
@@ -1693,24 +2533,43 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
     repository_root = workspace_root / 'data' / 'corpus_revisado'
     repository_documents = list_evidenceops_repository_documents(repository_root)
     repository_summary = summarize_evidenceops_repository_documents(repository_documents)
+    repository_snapshot_path = get_phase95_evidenceops_repository_snapshot_path(workspace_root)
+    previous_repository_snapshot = load_evidenceops_repository_snapshot(repository_snapshot_path)
+    current_repository_snapshot = build_evidenceops_repository_snapshot(repository_root)
+    repository_diff = diff_evidenceops_repository_snapshots(previous_repository_snapshot, current_repository_snapshot)
+
     actions = load_evidenceops_actions(get_phase95_evidenceops_action_store_path(workspace_root))
     action_summary = summarize_evidenceops_actions(actions)
     worklog = load_evidenceops_worklog(get_phase95_evidenceops_worklog_path(workspace_root))
     worklog_summary = summarize_evidenceops_worklog(worklog)
+    sorted_worklog = _sorted_worklog_entries(worklog)
 
     tools = [
-        {'name': 'local_repository_scan', 'description': 'Scans the grounded evidence repository for searchable documents.', 'status': 'active', 'lastCall': _format_timestamp(worklog_summary.get('latest_timestamp'))},
-        {'name': 'action_store', 'description': 'Persists EvidenceOps action recommendations and operator follow-up.', 'status': 'active' if actions else 'inactive', 'lastCall': _format_timestamp(action_summary.get('latest_created_at'))},
-        {'name': 'worklog_registry', 'description': 'Tracks EvidenceOps operation telemetry and readiness.', 'status': 'active' if worklog else 'degraded', 'lastCall': _format_timestamp(worklog_summary.get('latest_timestamp'))},
+        {
+            'name': 'local_repository_scan',
+            'description': 'Scans the grounded evidence repository for searchable documents.',
+            'status': 'active' if repository_documents else 'degraded',
+            'lastCall': _latest_worklog_timestamp(sorted_worklog, tool_names={'local_repository_scan'}, operations={'repository_sync', 'repository_search'}),
+        },
+        {
+            'name': 'action_store',
+            'description': 'Persists EvidenceOps action recommendations and operator follow-up.',
+            'status': 'active' if actions else 'inactive',
+            'lastCall': _latest_worklog_timestamp(sorted_worklog, tool_names={'action_store'}, operations={'action_update'}) or _format_timestamp(action_summary.get('latest_created_at')),
+        },
+        {
+            'name': 'worklog_registry',
+            'description': 'Tracks EvidenceOps operation telemetry and readiness.',
+            'status': 'active' if worklog else 'degraded',
+            'lastCall': _latest_worklog_timestamp(sorted_worklog),
+        },
     ]
 
     operation_rows = []
-    for index, entry in enumerate(worklog[:12]):
-        if not isinstance(entry, dict):
-            continue
+    for index, entry in enumerate(sorted_worklog[:12]):
         operation_rows.append(
             {
-                'id': f'op-{index + 1}',
+                'id': str(entry.get('timestamp') or f'op-{index + 1}'),
                 'operation': str(entry.get('operation') or entry.get('tool_used') or 'operation'),
                 'tool': str(entry.get('tool_used') or 'evidenceops'),
                 'status': str(entry.get('status') or 'success'),
@@ -1732,23 +2591,12 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
             }
         ]
 
-    today = datetime.now(timezone.utc).date()
-    overdue_actions = 0
-    unassigned_actions = 0
-    needs_review_actions = 0
-    action_rows = []
     status_counter: Counter[str] = Counter()
-    for entry in actions[:24]:
+    action_rows = []
+    for entry in actions:
         status = 'open' if str(entry.get('status') or '').strip() in {'recommended', 'open', 'pending'} else str(entry.get('status') or 'open')
         owner = str(entry.get('owner') or 'Unassigned')
         due_date = str(entry.get('due_date') or '—')
-        if owner == 'Unassigned':
-            unassigned_actions += 1
-        if bool(entry.get('needs_review')):
-            needs_review_actions += 1
-        parsed_due = _parse_due_date(due_date)
-        if parsed_due and parsed_due < today and status not in {'done', 'closed', 'resolved'}:
-            overdue_actions += 1
         status_counter[status] += 1
         action_rows.append(
             {
@@ -1767,29 +2615,27 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
             }
         )
 
-    timeline = []
-    for operation in operation_rows[:8]:
-        timeline.append(
-            {
-                'id': operation['id'],
-                'label': operation['operation'],
-                'detail': operation['detail'],
-                'timestamp': operation['timestamp'],
-                'status': operation['status'],
-            }
-        )
+    timeline = [
+        {
+            'id': operation['id'],
+            'label': operation['operation'],
+            'detail': operation['detail'],
+            'timestamp': operation['timestamp'],
+            'status': operation['status'],
+        }
+        for operation in operation_rows[:8]
+    ]
 
-    telemetry = []
-    for operation in operation_rows[:12]:
-        telemetry.append(
-            {
-                'event': operation['operation'],
-                'tool': operation['tool'],
-                'status': 'ok' if operation['status'] == 'success' else 'warning',
-                'latency': f"{_safe_int(operation['durationMs'])}ms",
-                'ts': operation['timestamp'],
-            }
-        )
+    telemetry = [
+        {
+            'event': operation['operation'],
+            'tool': operation['tool'],
+            'status': 'ok' if operation['status'] == 'success' else 'warning',
+            'latency': f"{_safe_int(operation['durationMs'])}ms",
+            'ts': operation['timestamp'],
+        }
+        for operation in operation_rows[:12]
+    ]
 
     readiness = [
         {'target': 'Repository', 'status': 'ready' if repository_documents else 'degraded', 'detail': f"{repository_summary.get('total_documents', 0)} documents visible under corpus_revisado."},
@@ -1800,10 +2646,9 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
     ownership_summary = [{'owner': owner or 'Unassigned', 'count': count} for owner, count in Counter(str(entry.get('owner') or 'Unassigned') for entry in actions if isinstance(entry, dict)).most_common(6)]
     operation_breakdown = [{'label': label, 'value': value} for label, value in Counter(operation['operation'] for operation in operation_rows).most_common(6)]
     category_breakdown = [{'label': label, 'value': value} for label, value in Counter(str(item.get('category') or 'root') for item in repository_documents if isinstance(item, dict)).most_common(8)]
+
     recent_searches = []
-    for entry in worklog:
-        if not isinstance(entry, dict):
-            continue
+    for entry in sorted_worklog:
         if str(entry.get('operation') or entry.get('tool_used') or '').strip() != 'repository_search':
             continue
         recent_searches.append(
@@ -1815,6 +2660,12 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
         )
         if len(recent_searches) >= 6:
             break
+
+    changed_documents = _safe_int(repository_diff.get('changed_documents_count'))
+    new_documents = _safe_int(repository_diff.get('new_documents_count'))
+    if not bool(repository_diff.get('has_previous_snapshot')):
+        changed_documents = _safe_int(repository_summary.get('total_documents'))
+        new_documents = _safe_int(repository_summary.get('total_documents'))
 
     return {
         'ok': True,
@@ -1828,18 +2679,18 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
             'operationsCount': len(operation_rows),
             'repositoryDocumentCount': _safe_int(repository_summary.get('total_documents')),
             'repositoryRoot': str(repository_root),
-            'lastSyncAt': _format_timestamp(action_summary.get('latest_created_at') or worklog_summary.get('latest_timestamp')),
-            'overdueActions': overdue_actions,
-            'unassignedActions': unassigned_actions,
-            'needsReviewActions': needs_review_actions,
+            'lastSyncAt': _latest_repository_sync_timestamp(sorted_worklog, previous_repository_snapshot) or _format_timestamp(worklog_summary.get('latest_timestamp')) or _format_timestamp(action_summary.get('latest_created_at')),
+            'overdueActions': _safe_int(action_summary.get('overdue_actions')),
+            'unassignedActions': _safe_int(action_summary.get('unassigned_open_actions')),
+            'needsReviewActions': sum(1 for entry in actions if bool(entry.get('needs_review'))),
         },
         'repositoryStats': {
-            'changedDocuments': _safe_int(repository_summary.get('total_documents')),
-            'newDocuments': _safe_int(repository_summary.get('total_documents')),
+            'changedDocuments': changed_documents,
+            'newDocuments': new_documents,
             'categories': _safe_int(repository_summary.get('total_categories')),
             'totalSizeLabel': _bytes_label(_safe_int(repository_summary.get('total_size_bytes') or 0)),
         },
-        'searchHints': ['vendor', 'policy', 'access review', 'candidate'],
+        'searchHints': ['vendor', 'policy', 'access review', 'audit'],
         'tools': tools,
         'actions': action_rows,
         'operations': operation_rows,
@@ -1908,6 +2759,10 @@ def sync_lab_evidenceops_state(workspace_root: Path) -> dict[str, Any]:
         repository_root,
         snapshot_path=get_phase95_evidenceops_repository_snapshot_path(workspace_root),
     )
+    current_total_documents = _safe_int(diff_payload.get('current_total_documents') or 0)
+    new_documents_count = _safe_int(diff_payload.get('new_documents_count') or 0)
+    changed_documents_count = _safe_int(diff_payload.get('changed_documents_count') or 0)
+    removed_documents_count = _safe_int(diff_payload.get('removed_documents_count') or 0)
     register_evidenceops_entry(
         get_phase95_evidenceops_worklog_path(workspace_root),
         get_phase95_evidenceops_action_store_path(workspace_root),
@@ -1917,9 +2772,9 @@ def sync_lab_evidenceops_state(workspace_root: Path) -> dict[str, Any]:
             'tool_used': 'local_repository_scan',
             'status': 'success',
             'latency_s': 0.02,
-            'summary': f"Repository sync captured {diff_payload.get('total_documents', 0)} document(s).",
-            'detail': f"new={diff_payload.get('new_documents', 0)} changed={diff_payload.get('changed_documents', 0)} removed={diff_payload.get('removed_documents', 0)}",
-            'source_count': _safe_int(diff_payload.get('total_documents') or 0),
+            'summary': f"Repository sync captured {current_total_documents} document(s).",
+            'detail': f"new={new_documents_count} changed={changed_documents_count} removed={removed_documents_count}",
+            'source_count': current_total_documents,
             'document_ids': [],
             'findings': [],
             'action_items': [],

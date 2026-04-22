@@ -263,6 +263,9 @@ def load_lab_workflow_runs(path: Path) -> list[dict[str, object]]:
             "artifact_label",
             "execution_mode",
             "result_title",
+            "trace_id",
+            "surface",
+            "reran_from_run_id",
         ]:
             optional_value = item.get(optional_key)
             if optional_value is not None:
@@ -307,6 +310,9 @@ def append_lab_workflow_run(path: Path, run_record: dict[str, object]) -> dict[s
         "artifact_label",
         "execution_mode",
         "result_title",
+        "trace_id",
+        "surface",
+        "reran_from_run_id",
     ]:
         optional_value = run_record.get(optional_key)
         if optional_value is not None:

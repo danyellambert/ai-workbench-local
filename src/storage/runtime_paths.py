@@ -108,3 +108,8 @@ def get_lab_chat_sessions_path(base_dir: Path) -> Path:
 def get_lab_workflow_runs_path(base_dir: Path) -> Path:
     runtime_root = get_runtime_root(base_dir)
     return runtime_root / "state" / "lab" / "workflow_runs.json"
+
+
+def get_product_telemetry_path(base_dir: Path) -> Path:
+    runtime_root = get_runtime_root(base_dir)
+    return _prefer_existing_legacy_path(runtime_root / "logs" / "product" / "telemetry_runs.json", base_dir / ".product_telemetry_runs.json")
