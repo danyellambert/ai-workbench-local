@@ -34,10 +34,12 @@ interface AiLabSectionIntroProps {
   operatorQuestion: string;
   badges?: Array<{ label: string; variant?: 'default' | 'success' | 'warning' | 'error' }>;
   dataSource?: DataSource;
+  surfaceStatus?: string;
+  degradedReason?: string | null;
   children?: React.ReactNode;
 }
 
-export function AiLabSectionIntro({ title, description, operatorQuestion, badges, dataSource, children }: AiLabSectionIntroProps) {
+export function AiLabSectionIntro({ title, description, operatorQuestion, badges, dataSource, surfaceStatus, degradedReason, children }: AiLabSectionIntroProps) {
   return (
     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
       <div className="flex items-start justify-between">
@@ -48,6 +50,24 @@ export function AiLabSectionIntro({ title, description, operatorQuestion, badges
           </div>
           <p className="text-sm text-muted-foreground mt-1">{description}</p>
           <p className="text-xs text-primary/70 mt-2 italic">↳ {operatorQuestion}</p>
+          {(surfaceStatus || degradedReason) && (
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+              {surfaceStatus ? (
+                <span className={cn('px-2 py-0.5 rounded text-[10px] font-medium border',
+                  surfaceStatus === 'live' && 'bg-glow-success/10 text-glow-success border-glow-success/20',
+                  surfaceStatus === 'derived-live' && 'bg-primary/10 text-primary border-primary/20',
+                  surfaceStatus === 'historical' && 'bg-glow-warning/10 text-glow-warning border-glow-warning/20',
+                  surfaceStatus === 'degraded' && 'bg-glow-warning/10 text-glow-warning border-glow-warning/20',
+                  surfaceStatus === 'empty' && 'bg-secondary text-secondary-foreground border-border',
+                )}>
+                  {surfaceStatus}
+                </span>
+              ) : null}
+              {degradedReason ? (
+                <span className="text-[10px] text-muted-foreground">{degradedReason}</span>
+              ) : null}
+            </div>
+          )}
           {badges && badges.length > 0 && (
             <div className="flex items-center gap-2 mt-3">
               {badges.map(b => {

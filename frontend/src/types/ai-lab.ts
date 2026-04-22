@@ -107,13 +107,20 @@ export interface WorkflowCase {
 export interface LabArtifact {
   id: string;
   name: string;
-  type: 'report' | 'benchmark' | 'eval' | 'extraction' | 'ocr_diagnostic' | 'embedding_experiment';
+  type: 'deck_bundle' | 'benchmark_bundle' | 'evidence_bundle';
   category: string;
   version: string;
   createdAt: string;
   size: string;
-  status: 'ready' | 'generating' | 'error';
+  status: 'ready' | 'warning' | 'pending' | 'error';
   description: string;
+  workflowLabel?: string;
+  exportKind?: string;
+  slideCount?: number;
+  previewCount?: number;
+  issueCount?: number;
+  warningCount?: number;
+  assetCount?: number;
 }
 
 export interface OpenAction {

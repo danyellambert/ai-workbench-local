@@ -117,8 +117,23 @@ export interface LabRuntimePayload {
     totalCostUsd?: number;
     avgCostUsd?: number;
     pricedRunRate?: number;
+    totalPromptTokens?: number;
+    avgPromptTokens?: number;
+    totalCompletionTokens?: number;
+    avgCompletionTokens?: number;
+  };
+  surface_window?: {
+    scope?: 'product' | 'runtime';
+    size?: number;
+    maxSize?: number;
+    label?: string;
   };
   latency_breakdown?: Array<{ stage: string; seconds: number }>;
+  latency_breakdown_meta?: {
+    instrumentedRuns?: number;
+    totalRuns?: number;
+    label?: string;
+  };
   provider_breakdown?: Array<{
     key: string;
     provider: string;
@@ -141,6 +156,7 @@ export interface LabRuntimePayload {
     timestamp: string;
     flow: string;
     task: string;
+    taskDetail?: string | null;
     provider: string;
     model: string;
     latencyS: number;
@@ -292,6 +308,7 @@ export interface LabWorkflowInspectorPageData {
       provider?: string | null;
       model?: string | null;
       source_count?: number;
+      surface?: string | null;
     }>;
     trace_fields?: Array<{ label: string; value: string | number }>;
     stage_timeline?: Array<{ label: string; status: string; detail?: string | null; duration_ms?: number | null }>;
@@ -343,51 +360,103 @@ export interface LabBenchmarksPageData {
   degraded_reason?: string | null;
   summary: {
     modelCount: number;
-    bestGroundedness: number;
-    fastestLatency: number;
+    scoredModelCount?: number;
+    partialModelCount?: number;
+    promptProfileCount?: number;
+    useCaseCount?: number;
+    scoredCandidateCount?: number;
+    bestGroundedness?: number | null;
+    fastestLatency?: number | null;
     bestModel?: string | null;
     totalRuns?: number;
+    lastRecordedAt?: string | null;
   };
   models: Array<{
     id: string;
     family: string;
     provider: string;
     model: string;
-    profileTag?: string;
-    useCaseFit: number;
-    groundedness: number;
-    adherence: number;
-    latency: number;
-    outputChars: number;
+    profileTag?: string | null;
+    useCaseFit?: number | null;
+    groundedness?: number | null;
+    adherence?: number | null;
+    latency?: number | null;
+    outputChars?: number | null;
     runtimeBucket?: string;
     quantization?: string;
     runs: number;
+    scoreStatus?: 'scored' | 'partial';
+    metricCoverage?: {
+      useCaseFit?: number;
+      groundedness?: number;
+      adherence?: number;
+      latency?: number;
+      outputChars?: number;
+    };
   }>;
   presets: Array<{ id: string; name: string; description: string; metrics: string[]; models: string[] }>;
-  providerSummary?: Array<{ provider: string; models: number; bestFit: number; avgLatency: number; bestModel?: string | null }>;
+  providerSummary?: Array<{ provider: string; models: number; scoredModels?: number; bestFit?: number | null; avgLatency?: number | null; bestModel?: string | null }>;
   leaderboardHighlights?: Array<{ label: string; model?: string | null; detail?: string | null }>;
   retrievalObservations: Array<{
     strategy: string;
-    outputDiscipline: number;
-    contextRetention: number;
-    composite: number;
-    latency: number;
-    coverage: number;
+    outputDiscipline?: number | null;
+    contextRetention?: number | null;
+    composite?: number | null;
+    latency?: number | null;
+    candidateCount?: number;
+    scoredCandidateCount?: number;
+    avgContextChars?: number | null;
     description: string;
   }>;
+}
+
+export interface LabEvalsCase {
+  id: string;
+  task: string;
+  taskType?: string | null;
+  workflowId?: string | null;
+  suite: string;
+  verdict: LabEvalVerdict;
+  score: number;
+  needsReview: boolean;
+  model: string;
+  provider?: string;
+  latency: number;
+  timestamp: string;
+  sourceKind?: 'live' | 'historical';
+  reason?: string | null;
+  errorDetail?: string | null;
+  traceId?: string | null;
+  runId?: string | null;
 }
 
 export interface LabEvalsPageData {
   meta: LabMeta;
   status?: string;
   degraded_reason?: string | null;
+  scope?: {
+    observedWorkflowIds?: string[];
+    observedWorkflowLabels?: string[];
+    observedTaskTypes?: string[];
+    capableTaskTypes?: string[];
+  };
   passRate: number;
+  livePassRate?: number;
   totals: { pass: number; warn: number; fail: number; review: number; total: number };
+  liveTotals?: { pass: number; warn: number; fail: number; review: number; total: number };
   suites: Array<{ name: string; total: number; pass: number; warn: number; fail: number; needsReview: number; lastRun: string }>;
-  cases: Array<{ id: string; task: string; suite: string; verdict: LabEvalVerdict; score: number; needsReview: boolean; model: string; latency: number; timestamp: string; errorDetail?: string | null }>;
-  providerBreakdown?: Array<{ provider: string; total: number; failures: number; passRate: number }>;
-  taskBreakdown?: Array<{ task: string; total: number; passRate: number; avgScore: number }>;
-  watchlist?: Array<{ id: string; task: string; suite: string; verdict: 'WARN' | 'FAIL'; score: number; model: string; latency: number; reason?: string | null; timestamp?: string | null; errorDetail?: string | null }>;
+  cases: LabEvalsCase[];
+  historicalCases?: LabEvalsCase[];
+  liveCases?: LabEvalsCase[];
+  providerBreakdown?: Array<{ provider: string; total: number; failures: number; warnings?: number; passRate: number }>;
+  taskBreakdown?: Array<{ task: string; total: number; passRate: number; avgScore: number; warnings?: number; failures?: number }>;
+  liveProviderBreakdown?: Array<{ provider: string; total: number; failures: number; warnings?: number; passRate: number }>;
+  liveTaskBreakdown?: Array<{ task: string; total: number; passRate: number; avgScore: number; warnings?: number; failures?: number }>;
+  liveWorkflowBreakdown?: Array<{ workflowId: string; label: string; pass: number; warn: number; fail: number; total: number }>;
+  watchlist?: Array<{ id: string; task: string; suite: string; verdict: 'WARN' | 'FAIL'; score: number; model: string; latency: number; reason?: string | null; timestamp?: string | null; errorDetail?: string | null; sourceKind?: 'live' | 'historical' }>;
+  liveWatchlist?: Array<{ id: string; task: string; suite: string; verdict: 'WARN' | 'FAIL'; score: number; model: string; latency: number; reason?: string | null; timestamp?: string | null; errorDetail?: string | null; sourceKind?: 'live' | 'historical' }>;
+  historicalWatchlist?: Array<{ id: string; task: string; suite: string; verdict: 'WARN' | 'FAIL'; score: number; model: string; latency: number; reason?: string | null; timestamp?: string | null; errorDetail?: string | null; sourceKind?: 'live' | 'historical' }>;
+  investigateFirst?: LabEvalsCase[];
   diagnosis: any;
 }
 
@@ -398,24 +467,60 @@ export interface LabArtifactsPageData {
   artifacts: Array<{
     id: string;
     name: string;
-    type: 'report' | 'benchmark' | 'eval' | 'extraction' | 'ocr_diagnostic' | 'embedding_experiment';
+    type: 'deck_bundle' | 'benchmark_bundle' | 'evidence_bundle';
     category: string;
     version: string;
     createdAt: string;
     size: string;
-    status: 'ready' | 'generating' | 'error';
+    status: 'ready' | 'warning' | 'pending' | 'error';
     description: string;
+    workflowLabel?: string;
+    exportKind?: string;
+    slideCount?: number;
+    previewCount?: number;
+    issueCount?: number;
+    warningCount?: number;
+    assetCount?: number;
   }>;
-  summary: { totalArtifacts: number; readyArtifacts: number; errorArtifacts: number; chatSessions?: number; workflowRuns?: number };
+  summary: {
+    totalArtifacts: number;
+    readyArtifacts: number;
+    warningArtifacts?: number;
+    errorArtifacts: number;
+    chatSessions?: number;
+    workflowRuns?: number;
+    linkedWorkflowRuns?: number;
+    unlinkedWorkflowRuns?: number;
+    previewAssets?: number;
+    issueCount?: number;
+    workflowCount?: number;
+    benchmarkArtifacts?: number;
+  };
   diagnostics: Array<{ label: string; detail: string; status: string; health: 'healthy' | 'warning' | 'neutral' }>;
   runRegistry?: {
     chatSessions?: number;
     workflowRuns?: number;
     latestChatSession?: string | null;
     latestWorkflowRun?: string | null;
-    latestWorkflowArtifact?: string | null;
+    latestWorkflowArtifact?: {
+      label?: string | null;
+      runId?: string | null;
+      updatedAt?: string | null;
+    } | null;
   };
-  recentCaptures?: Array<{ id: string; label: string; category?: string | null; status?: string | null; createdAt?: string | null; artifactPath?: string | null }>;
+  recentCaptures?: Array<{
+    id: string;
+    label: string;
+    workflowLabel?: string | null;
+    exportKind?: string | null;
+    status?: string | null;
+    createdAt?: string | null;
+    slideCount?: number | null;
+    previewCount?: number | null;
+    issueCount?: number | null;
+    warningCount?: number | null;
+    assetCount?: number | null;
+  }>;
 }
 
 export interface LabEvidenceOpsPageData {

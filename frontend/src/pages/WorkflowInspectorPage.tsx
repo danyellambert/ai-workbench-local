@@ -55,6 +55,19 @@ export default function WorkflowInspectorPage() {
   const selectedDetail = currentTask ? data?.task_details[currentTask] : undefined;
   const summary = data?.summary;
   const canExecute = Boolean(data?.capabilities.can_execute);
+  const minimumDocumentsRequired = ['policy_contract_comparison', 'action_plan_evidence_review'].includes(currentTask) ? 2 : 1;
+  const taskCanExecute = canExecute && documentOptions.length >= minimumDocumentsRequired;
+  const taskExecutionReason = !canExecute
+    ? (data?.capabilities.reason ?? 'Execution is unavailable in the current runtime.')
+    : documentOptions.length < minimumDocumentsRequired
+      ? currentTask === 'action_plan_evidence_review'
+        ? 'Action Plan / Evidence Review needs at least 2 indexed documents. The inspector pairs the selected evidence with one supporting document so the action plan stays grounded.'
+        : 'Policy / Contract Comparison needs at least 2 indexed documents. The inspector will automatically pair the selected file with a second indexed document when available.'
+      : currentTask === 'policy_contract_comparison'
+        ? 'This task automatically pairs the selected document with a second indexed document from the workspace.'
+        : currentTask === 'action_plan_evidence_review'
+          ? 'This task automatically pairs the selected evidence with one supporting document from the workspace.'
+          : null;
   const modeCounts = recentCases.reduce<Record<string, number>>((acc, item) => {
     acc[item.mode] = (acc[item.mode] || 0) + 1;
     return acc;
@@ -89,7 +102,7 @@ export default function WorkflowInspectorPage() {
   });
 
   const handleRun = async () => {
-    if (!canExecute || runMutation.isPending || !currentTask) {
+    if (!taskCanExecute || runMutation.isPending || !currentTask) {
       return;
     }
     await runMutation.mutateAsync();
@@ -108,11 +121,13 @@ export default function WorkflowInspectorPage() {
             variant: (summary?.needs_review ?? 0) > 0 ? 'warning' : 'success',
           },
           {
-            label: canExecute ? 'Live execution' : 'Degraded',
-            variant: canExecute ? 'success' : 'warning',
+            label: taskCanExecute ? 'Live execution' : 'Degraded',
+            variant: taskCanExecute ? 'success' : 'warning',
           },
         ]}
         dataSource={data?.meta.source}
+        surfaceStatus={data?.status}
+        degradedReason={data?.degraded_reason}
       />
 
       {(isError || runMutation.isError) && (
@@ -206,18 +221,18 @@ export default function WorkflowInspectorPage() {
               </SelectContent>
             </Select>
             <p className="mt-2 text-[10px] text-muted-foreground">
-              This selector now feeds real AI LAB workflow execution and persists the resulting trace for later inspection.
+              {taskExecutionReason ?? 'This selector now feeds real AI LAB workflow execution and persists the resulting trace for later inspection.'}
             </p>
           </GlassCard>
 
           <GlassCard delay={0.2}>
             <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Instructions</h4>
             <Textarea
-              placeholder={canExecute ? 'Describe the run you want to execute…' : 'Workflow execution is unavailable in the current runtime…'}
+              placeholder={taskCanExecute ? 'Describe the run you want to execute…' : 'Workflow execution is unavailable for the selected task…'}
               className="text-xs bg-secondary/30 border-border/50 min-h-[84px]"
               value={instructions}
               onChange={(event) => setInstructions(event.target.value)}
-              disabled={!canExecute || runMutation.isPending}
+              disabled={!taskCanExecute || runMutation.isPending}
             />
           </GlassCard>
 
@@ -248,11 +263,11 @@ export default function WorkflowInspectorPage() {
             ) : null}
           </GlassCard>
 
-          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-xs" disabled={!canExecute || runMutation.isPending || !currentTask} onClick={() => void handleRun()}>
+          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-xs" disabled={!taskCanExecute || runMutation.isPending || !currentTask} onClick={() => void handleRun()}>
             {runMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />}
-            {runMutation.isPending ? 'Executing…' : canExecute ? 'Execute Task' : 'Execution unavailable'}
+            {runMutation.isPending ? 'Executing…' : taskCanExecute ? 'Execute Task' : 'Execution unavailable'}
           </Button>
-          {data?.capabilities.reason ? <p className="text-[10px] text-muted-foreground">{data.capabilities.reason}</p> : null}
+          {taskExecutionReason ? <p className="text-[10px] text-muted-foreground">{taskExecutionReason}</p> : null}
         </div>
 
         <div className="lg:col-span-8">
@@ -275,15 +290,24 @@ export default function WorkflowInspectorPage() {
                   {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
                 </div>
 
-                {selectedDetail?.document_names?.length ? (
-                  <div className="flex items-center gap-2 flex-wrap mb-4">
-                    {selectedDetail.document_names.map((name) => (
-                      <span key={name} className="text-[10px] px-2 py-1 rounded bg-secondary/30 text-muted-foreground border border-border/40">
-                        {name}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
+                {selectedDetail?.document_names?.length ? (() => {
+                  const visibleDocumentNames = selectedDetail.document_names.slice(0, currentTask === 'action_plan_evidence_review' ? 2 : 3);
+                  const hiddenDocumentCount = Math.max(selectedDetail.document_names.length - visibleDocumentNames.length, 0);
+                  return (
+                    <div className="flex items-center gap-2 flex-wrap mb-4">
+                      {visibleDocumentNames.map((name) => (
+                        <span key={name} className="text-[10px] px-2 py-1 rounded bg-secondary/30 text-muted-foreground border border-border/40">
+                          {name}
+                        </span>
+                      ))}
+                      {hiddenDocumentCount > 0 ? (
+                        <span className="text-[10px] px-2 py-1 rounded bg-secondary/20 text-muted-foreground border border-border/30">
+                          +{hiddenDocumentCount} more
+                        </span>
+                      ) : null}
+                    </div>
+                  );
+                })() : null}
 
                 {selectedDetail?.result_items?.length ? (
                   <div className="space-y-2">
@@ -333,6 +357,9 @@ export default function WorkflowInspectorPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <GitBranch className="w-4 h-4 text-primary" />
                         <span className="text-xs font-medium text-foreground capitalize">{execution.mode.replace(/_/g, ' ')}</span>
+                        {execution.surface ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-secondary/30 text-muted-foreground border border-border/30">{execution.surface}</span>
+                        ) : null}
                         <StatusPill status={toStatus(execution.status)} />
                         {execution.needs_review && (
                           <span className="text-[10px] px-2 py-0.5 rounded bg-glow-warning/10 text-glow-warning border border-glow-warning/20">Needs Review</span>

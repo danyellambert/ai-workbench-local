@@ -81,6 +81,8 @@ export default function EvidenceOpsPage() {
           { label: `${summary?.repositoryDocumentCount ?? 0} corpus docs`, variant: 'default' },
         ]}
         dataSource={data?.meta.source}
+        surfaceStatus={data?.status}
+        degradedReason={data?.degraded_reason}
       >
         <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => {
           void syncMutation.mutateAsync();

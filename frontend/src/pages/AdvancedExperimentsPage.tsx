@@ -1,11 +1,17 @@
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Archive, Eye, FlaskConical, Cpu, AlertTriangle } from 'lucide-react';
+import { Archive, Eye, FlaskConical, Cpu, AlertTriangle, Link2 } from 'lucide-react';
 import { AiLabSectionIntro, DataSourceBadge } from '@/components/ai-lab/AiLabSectionIntro';
 import { AiLabMetricGrid } from '@/components/ai-lab/AiLabMetricGrid';
 import { ArtifactExplorerPanel } from '@/components/ai-lab/ArtifactExplorerPanel';
 import { GlassCard } from '@/components/shared/ui-components';
 import { aiLabQueryKeys, getLabArtifactsPage } from '@/lib/ai-lab-data';
+
+function formatDateTime(value?: string | null): string {
+  if (!value) return 'n/a';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
 
 export default function AdvancedExperimentsPage() {
   const { data, isLoading, isError } = useQuery({
@@ -20,27 +26,30 @@ export default function AdvancedExperimentsPage() {
   const summary = data?.summary;
   const runRegistry = data?.runRegistry;
   const recentCaptures = data?.recentCaptures ?? [];
-  const statusLabel = data?.status === 'empty' ? 'Waiting for captures' : data?.status === 'live' ? 'Live' : 'Derived live';
+  const attentionCount = (summary?.warningArtifacts ?? 0) + (summary?.errorArtifacts ?? 0);
+  const statusLabel = data?.status === 'empty' ? 'Waiting for bundles' : data?.status === 'live' ? 'Live' : 'Derived live';
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <AiLabSectionIntro
         title="Experiments & Artifacts"
-        description="Technical evidence archive, experimentation results and diagnostic reports for the AI pipeline."
-        operatorQuestion="Where is the technical evidence that explains current behavior?"
+        description="Product-visible export bundles, workflow-linked evidence and capture posture for the AI Lab surfaces."
+        operatorQuestion="Which persisted artifact bundles explain the latest workflow behavior?"
         badges={[
-          { label: `${summary?.totalArtifacts ?? 0} artifacts`, variant: 'default' },
+          { label: `${summary?.totalArtifacts ?? 0} export bundles`, variant: 'default' },
           { label: `${summary?.readyArtifacts ?? 0} ready`, variant: 'success' },
-          { label: `${summary ? summary.totalArtifacts - summary.readyArtifacts : 0} pending/error`, variant: summary && summary.errorArtifacts > 0 ? 'warning' : 'default' },
+          { label: `${attentionCount} need attention`, variant: attentionCount > 0 ? 'warning' : 'default' },
         ]}
         dataSource={data?.meta.source}
+        surfaceStatus={data?.status}
+        degradedReason={data?.degraded_reason}
       />
 
       {isError && (
         <GlassCard className="mb-6 border border-glow-warning/20 bg-glow-warning/5">
           <div className="flex items-center gap-2 text-xs text-glow-warning">
             <AlertTriangle className="w-4 h-4" />
-            This page now reflects the actual artifact directory and runtime diagnostics only. The Product API is unavailable, so no mock artifact catalog is shown.
+            The bundle registry could not be derived from persisted metadata. This surface suppresses raw sidecars and only shows product-visible export bundles.
           </div>
         </GlassCard>
       )}
@@ -48,10 +57,10 @@ export default function AdvancedExperimentsPage() {
       <AiLabMetricGrid
         columns={4}
         metrics={[
-          { label: 'Total Artifacts', value: summary?.totalArtifacts ?? '—', icon: Archive, status: 'neutral' },
-          { label: 'Benchmarks', value: artifacts.filter((item) => item.type === 'benchmark').length, icon: FlaskConical, status: 'neutral' },
-          { label: 'Eval Reports', value: artifacts.filter((item) => item.type === 'eval').length, icon: Eye, status: 'neutral' },
-          { label: 'Diagnostics', value: diagnostics.length, icon: Cpu, status: 'neutral' },
+          { label: 'Export Bundles', value: summary?.totalArtifacts ?? '—', icon: Archive, status: 'neutral' },
+          { label: 'Benchmark Bundles', value: summary?.benchmarkArtifacts ?? artifacts.filter((item) => item.type === 'benchmark_bundle').length, icon: FlaskConical, status: 'neutral' },
+          { label: 'Preview Assets', value: summary?.previewAssets ?? artifacts.reduce((total, item) => total + (item.previewCount ?? 0), 0), icon: Eye, status: 'neutral' },
+          { label: 'Linked Workflow Runs', value: summary?.linkedWorkflowRuns ?? '—', icon: Link2, status: 'neutral' },
         ]}
       />
 
@@ -67,14 +76,18 @@ export default function AdvancedExperimentsPage() {
           <p className="mt-1 text-xs text-muted-foreground">Persisted inspector runs available for artifact drill-down.</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Latest workflow artifact</p>
-          <p className="mt-2 text-sm font-semibold text-foreground break-all">{runRegistry?.latestWorkflowArtifact ?? 'No linked artifact yet'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">The most recent persisted artifact path connected to Workflow Inspector.</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Latest linked artifact</p>
+          <p className="mt-2 text-sm font-semibold text-foreground break-all">{runRegistry?.latestWorkflowArtifact?.label ?? 'No linked artifact yet'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {runRegistry?.latestWorkflowArtifact?.updatedAt ? `Updated ${formatDateTime(runRegistry.latestWorkflowArtifact.updatedAt)}` : 'Most recent workflow-linked bundle visible from persisted runtime state.'}
+          </p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Capture posture</p>
           <p className="mt-2 text-sm font-semibold text-foreground">{statusLabel}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{data?.degraded_reason ?? `${recentCaptures.length} recent capture(s) surfaced from the live artifact inventory.`}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {data?.degraded_reason ?? `${summary?.linkedWorkflowRuns ?? 0} linked run(s), ${summary?.unlinkedWorkflowRuns ?? 0} unlinked run(s), across ${summary?.workflowCount ?? 0} workflow surface(s).`}
+          </p>
         </GlassCard>
       </div>
 
@@ -96,7 +109,8 @@ export default function AdvancedExperimentsPage() {
             </div>
             <div className="rounded-lg border border-border/30 bg-secondary/20 p-3 sm:col-span-2">
               <p className="text-muted-foreground uppercase tracking-wider">Latest linked workflow artifact</p>
-              <p className="mt-2 text-xs text-foreground font-medium break-all">{runRegistry?.latestWorkflowArtifact ?? 'No workflow artifact linked yet'}</p>
+              <p className="mt-2 text-xs text-foreground font-medium break-all">{runRegistry?.latestWorkflowArtifact?.label ?? 'No workflow artifact linked yet'}</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">{runRegistry?.latestWorkflowArtifact?.runId ? `Run ${runRegistry.latestWorkflowArtifact.runId}` : 'The latest run with a persisted artifact linkage will surface here.'}</p>
             </div>
           </div>
         </GlassCard>
@@ -104,23 +118,36 @@ export default function AdvancedExperimentsPage() {
         <GlassCard delay={0.1}>
           <div className="flex items-center gap-2 mb-4">
             <Eye className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Recent Captures</h3>
+            <h3 className="text-sm font-medium text-foreground">Recent Bundles</h3>
             {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
           </div>
           {recentCaptures.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No capture registry has been derived yet from the current artifact inventory.</p>
+            <p className="text-xs text-muted-foreground">No product-visible bundle registry has been derived yet from the current workspace.</p>
           ) : (
             <div className="space-y-2">
-              {recentCaptures.slice(0, 6).map((capture) => (
-                <div key={capture.id} className="rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-foreground truncate">{capture.label}</span>
-                    <span className="text-[10px] text-muted-foreground">{capture.status ?? 'unknown'}</span>
+              {recentCaptures.slice(0, 6).map((capture) => {
+                const details = [
+                  capture.slideCount ? `${capture.slideCount} slides` : null,
+                  capture.previewCount ? `${capture.previewCount} previews` : null,
+                  capture.issueCount ? `${capture.issueCount} issues` : null,
+                  !capture.issueCount && capture.warningCount ? `${capture.warningCount} warnings` : null,
+                  capture.assetCount ? `${capture.assetCount} assets` : null,
+                ].filter(Boolean);
+                return (
+                  <div key={capture.id} className="rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-medium text-foreground truncate">{capture.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{capture.status ?? 'unknown'}</span>
+                    </div>
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      {capture.workflowLabel ?? 'Unlabeled workflow'}
+                      {capture.exportKind ? ` · ${capture.exportKind.split('_').join(' ')}` : ''}
+                      {capture.createdAt ? ` · ${formatDateTime(capture.createdAt)}` : ''}
+                    </p>
+                    {details.length > 0 ? <p className="mt-1 text-[10px] text-muted-foreground/80">{details.join(' · ')}</p> : null}
                   </div>
-                  <p className="mt-1 text-[10px] text-muted-foreground">{capture.category ?? 'uncategorized'}{capture.createdAt ? ` · ${new Date(capture.createdAt).toLocaleString()}` : ''}</p>
-                  {capture.artifactPath ? <p className="mt-1 text-[10px] text-muted-foreground/80 break-all">{capture.artifactPath}</p> : null}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </GlassCard>
@@ -133,7 +160,7 @@ export default function AdvancedExperimentsPage() {
           {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
         </div>
         {isLoading && !diagnostics.length ? (
-          <p className="text-xs text-muted-foreground">Loading diagnostics from runtime state and artifact inventory…</p>
+          <p className="text-xs text-muted-foreground">Loading diagnostics from runtime state and artifact metadata…</p>
         ) : diagnostics.length === 0 ? (
           <p className="text-xs text-muted-foreground">No diagnostics were derived from the current workspace yet.</p>
         ) : (

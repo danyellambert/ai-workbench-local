@@ -55,6 +55,8 @@ export default function LabOverviewPage() {
           { label: `${workflowMix.length} workflow slices`, variant: 'default' },
         ]}
         dataSource={data?.meta?.source}
+        surfaceStatus={data?.status}
+        degradedReason={data?.degraded_reason}
       />
 
       {isError ? (

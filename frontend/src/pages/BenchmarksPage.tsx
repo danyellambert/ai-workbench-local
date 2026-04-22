@@ -1,27 +1,27 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, BarChart3, Trophy, Timer, Target, CheckCircle2, ArrowUpDown } from 'lucide-react';
-import { AiLabSectionIntro, DataSourceBadge } from '@/components/ai-lab/AiLabSectionIntro';
+import { AlertTriangle, BarChart3, CalendarClock, CheckCircle2, Gauge, Target, Timer, Trophy } from 'lucide-react';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Cell, BarChart, Bar, Legend } from 'recharts';
+
 import { AiLabMetricGrid } from '@/components/ai-lab/AiLabMetricGrid';
+import { AiLabSectionIntro, DataSourceBadge } from '@/components/ai-lab/AiLabSectionIntro';
 import { GlassCard } from '@/components/shared/ui-components';
-import { aiLabQueryKeys, getLabBenchmarksPage } from '@/lib/ai-lab-data';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Cell, BarChart, Bar, Legend } from 'recharts';
+import { aiLabQueryKeys, getLabBenchmarksPage } from '@/lib/ai-lab-data';
 import { useAppStore } from '@/lib/store';
 
 const profileColors: Record<string, string> = {
   'Recommended production': 'hsl(142, 71%, 45%)',
   'External reference': 'hsl(217, 91%, 60%)',
   'Fastest observed': 'hsl(38, 92%, 50%)',
-  'Hosted candidate': 'hsl(280, 67%, 55%)',
   'Benchmark candidate': 'hsl(199, 89%, 48%)',
 };
 
 const scatterChartConfig = {
-  fit: { label: 'Use-Case Fit %' },
+  fit: { label: 'Use-case fit %' },
   latency: { label: 'Latency (s)' },
 };
 
@@ -30,6 +30,78 @@ const retrievalChartConfig = {
   ContextRetention: { label: 'Context retention', color: 'hsl(142, 71%, 45%)' },
   Composite: { label: 'Composite', color: 'hsl(280, 67%, 55%)' },
 };
+
+function isNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function formatPercent(value?: number | null) {
+  return isNumber(value) ? `${Math.round(value * 100)}%` : '—';
+}
+
+function formatPercentWithLabel(value?: number | null, fallback = 'Not scored') {
+  return isNumber(value) ? `${Math.round(value * 100)}%` : fallback;
+}
+
+function formatSeconds(value?: number | null) {
+  if (!isNumber(value)) {
+    return '—';
+  }
+  if (value >= 10) {
+    return `${value.toFixed(3)}s`;
+  }
+  return `${value.toFixed(3)}s`;
+}
+
+function formatCount(value?: number | null) {
+  return isNumber(value) ? `${Math.round(value)}` : '—';
+}
+
+function formatBenchmarkTimestamp(value?: string | null) {
+  const text = String(value || '').trim();
+  if (!text) {
+    return 'Unknown';
+  }
+  const normalized = text.includes('T') ? text : text.replace(' ', 'T');
+  const parsed = new Date(normalized.endsWith('Z') || /[+-]\d\d:?\d\d$/.test(normalized) ? normalized : `${normalized}Z`);
+  if (Number.isNaN(parsed.getTime())) {
+    return text;
+  }
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(parsed);
+}
+
+function MetricRow({
+  label,
+  value,
+  coverage,
+}: {
+  label: string;
+  value?: number | null;
+  coverage?: number;
+}) {
+  return (
+    <div>
+      <div className="flex justify-between text-[10px] text-muted-foreground mb-1 gap-3">
+        <span>{label}</span>
+        <span className="text-right text-foreground font-medium">
+          {isNumber(value) ? `${Math.round(value * 100)}%` : 'Not scored'}
+          {coverage ? <span className="ml-1 text-muted-foreground font-normal">· {coverage} run(s)</span> : null}
+        </span>
+      </div>
+      {isNumber(value) ? (
+        <Progress value={value * 100} className="h-1.5 bg-secondary" />
+      ) : (
+        <div className="h-1.5 rounded bg-secondary/60" />
+      )}
+    </div>
+  );
+}
 
 export default function BenchmarksPage() {
   const benchmarkBaselineLabel = useAppStore((state) => state.benchmarkBaselineLabel);
@@ -42,56 +114,86 @@ export default function BenchmarksPage() {
 
   const models = data?.models ?? [];
   const retrievalObservations = data?.retrievalObservations ?? [];
-  const presets = data?.presets ?? [];
+  const promptProfiles = data?.presets ?? [];
   const providerSummary = data?.providerSummary ?? [];
   const leaderboardHighlights = data?.leaderboardHighlights ?? [];
-  const recommended = models[0];
-  const statusLabel = data?.status === 'empty' ? 'Waiting for runs' : data?.status === 'derived' ? 'Derived live' : 'Live';
+  const recommended = models.find((model) => model.profileTag === 'Recommended production') ?? models.find((model) => isNumber(model.useCaseFit));
+  const benchmarkStatus = data?.status === 'historical' ? 'Historical' : data?.status === 'derived-live' ? 'Derived live' : data?.status === 'empty' ? 'Waiting for runs' : 'Derived';
+  const partialModelCount = data?.summary.partialModelCount ?? 0;
 
-  const sorted = useMemo(() => [...models].sort((a, b) => b.useCaseFit - a.useCaseFit), [models]);
+  const orderedModels = useMemo(() => models, [models]);
+
   const scatterData = useMemo(
-    () => models.map((model) => ({
-      name: model.family,
-      latency: model.latency,
-      fit: Math.round(model.useCaseFit * 100),
-      groundedness: Math.round(model.groundedness * 100),
-      profile: model.profileTag || 'Benchmark candidate',
-      model: model.model,
-      runs: model.runs,
-    })),
+    () => models
+      .filter((model) => isNumber(model.useCaseFit) && isNumber(model.latency))
+      .map((model) => ({
+        name: model.family,
+        latency: model.latency as number,
+        fit: Math.round((model.useCaseFit as number) * 100),
+        groundedness: isNumber(model.groundedness) ? Math.round((model.groundedness as number) * 100) : null,
+        profile: model.profileTag || 'Benchmark candidate',
+        model: model.model,
+        runs: model.runs,
+      })),
     [models],
   );
 
   const retrievalChartData = useMemo(
     () => retrievalObservations.map((item) => ({
       name: item.strategy.replace(/_/g, ' '),
-      OutputDiscipline: Math.round(item.outputDiscipline * 100),
-      ContextRetention: Math.round(item.contextRetention * 100),
-      Composite: Math.round(item.composite * 100),
+      OutputDiscipline: isNumber(item.outputDiscipline) ? Math.round(item.outputDiscipline * 100) : null,
+      ContextRetention: isNumber(item.contextRetention) ? Math.round(item.contextRetention * 100) : null,
+      Composite: isNumber(item.composite) ? Math.round(item.composite * 100) : null,
     })),
     [retrievalObservations],
   );
+
+  const freshnessLabel = formatBenchmarkTimestamp(data?.summary.lastRecordedAt);
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <AiLabSectionIntro
         title="Benchmarks"
-        description="Model and strategy comparison hub — latency, quality, groundedness and adherence across configurations."
-        operatorQuestion="Which model/provider setup is strongest for which use case?"
+        description="Recorded product benchmark comparison hub — measured fit, groundedness, adherence and latency from persisted comparison runs in this workspace."
+        operatorQuestion="Which model setup is actually strongest for the benchmark scenarios this product has already executed here?"
         badges={[
+          { label: `${data?.summary.totalRuns ?? 0} runs`, variant: 'default' },
           { label: `${data?.summary.modelCount ?? 0} models`, variant: 'default' },
-          { label: `${retrievalObservations.length} retrieval observations`, variant: 'default' },
-          { label: recommended ? `Production: ${recommended.family}` : 'Waiting for phase7 logs', variant: recommended ? 'success' : 'default' },
+          ...(isNumber(data?.summary.scoredModelCount) ? [{ label: `${data?.summary.scoredModelCount} scored models`, variant: 'success' as const }] : []),
+          ...(isNumber(data?.summary.useCaseCount) && (data?.summary.useCaseCount ?? 0) > 0 ? [{ label: `${data?.summary.useCaseCount} benchmark scenarios`, variant: 'default' as const }] : []),
           ...(benchmarkBaselineLabel ? [{ label: `Baseline: ${benchmarkBaselineLabel}`, variant: 'default' as const }] : []),
+          ...(data?.summary.lastRecordedAt ? [{ label: `Last run: ${freshnessLabel}`, variant: data?.status === 'historical' ? 'warning' as const : 'default' as const }] : []),
         ]}
         dataSource={data?.meta.source}
+        surfaceStatus={data?.status}
+        degradedReason={data?.degraded_reason}
       />
 
       {isError && (
         <GlassCard className="mb-6 border border-glow-warning/20 bg-glow-warning/5">
           <div className="flex items-center gap-2 text-xs text-glow-warning">
             <AlertTriangle className="w-4 h-4" />
-            Benchmarks now read recorded phase7 comparison logs only. The Product API is unavailable, so no synthetic leaderboard is shown.
+            Benchmarks read only the persisted phase7 comparison log for this workspace. The Product API response could not be refreshed just now.
+          </div>
+        </GlassCard>
+      )}
+
+      {(data?.status === 'historical' || partialModelCount > 0) && (
+        <GlassCard className="mb-6 border border-primary/20 bg-primary/5">
+          <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+            <CalendarClock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+            <div>
+              {data?.status === 'historical' ? (
+                <p>
+                  The latest recorded benchmark is <span className="text-foreground font-medium">historical</span> ({freshnessLabel}). This surface is useful for comparison evidence, but it is not showing live product traffic.
+                </p>
+              ) : null}
+              {partialModelCount > 0 ? (
+                <p className={data?.status === 'historical' ? 'mt-2' : ''}>
+                  {partialModelCount} model row(s) come from older comparison runs that do not include measured groundedness or use-case-fit telemetry. Those metrics are shown as <span className="text-foreground font-medium">Not scored</span> instead of being inferred.
+                </p>
+              ) : null}
+            </div>
           </div>
         </GlassCard>
       )}
@@ -99,9 +201,9 @@ export default function BenchmarksPage() {
       <AiLabMetricGrid
         columns={4}
         metrics={[
-          { label: 'Production Fit', value: recommended ? `${Math.round(recommended.useCaseFit * 100)}%` : '—', icon: Trophy, status: recommended ? 'healthy' : 'neutral' },
-          { label: 'Best Groundedness', value: data ? `${Math.round(data.summary.bestGroundedness * 100)}%` : '—', icon: Target, status: data ? 'healthy' : 'neutral' },
-          { label: 'Fastest Latency', value: data ? `${data.summary.fastestLatency}s` : '—', icon: Timer, status: data ? 'healthy' : 'neutral' },
+          { label: 'Best Scored Fit', value: formatPercentWithLabel(recommended?.useCaseFit), icon: Trophy, status: recommended ? 'healthy' : 'neutral' },
+          { label: 'Best Groundedness', value: formatPercentWithLabel(data?.summary.bestGroundedness), icon: Target, status: isNumber(data?.summary.bestGroundedness) ? 'healthy' : 'neutral' },
+          { label: 'Fastest Latency', value: formatSeconds(data?.summary.fastestLatency), icon: Timer, status: isNumber(data?.summary.fastestLatency) ? 'healthy' : 'neutral' },
           { label: 'Models Tested', value: data?.summary.modelCount ?? '—', icon: BarChart3, status: 'neutral' },
         ]}
       />
@@ -110,22 +212,30 @@ export default function BenchmarksPage() {
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Provider coverage</p>
           <p className="mt-2 text-2xl font-semibold text-foreground">{providerSummary.length || '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Active providers with recorded model comparisons.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Providers that actually appear in recorded comparison runs.</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Top provider</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Top scored provider</p>
           <p className="mt-2 text-sm font-semibold text-foreground">{providerSummary[0]?.provider ?? 'No provider yet'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{providerSummary[0]?.bestModel ? `${providerSummary[0].bestModel} · ${providerSummary[0].bestFit}% best fit` : 'Benchmark registry is still empty.'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {providerSummary[0]?.bestModel
+              ? `${providerSummary[0].bestModel} · ${providerSummary[0].bestFit}% best fit`
+              : 'No provider has measured use-case-fit telemetry yet.'}
+          </p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Leaderboard posture</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">{statusLabel}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{data?.degraded_reason ?? `${leaderboardHighlights.length} highlight(s) derived from recorded runs.`}</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Benchmark posture</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{benchmarkStatus}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {data?.status === 'historical'
+              ? `Latest recorded comparison: ${freshnessLabel}.`
+              : data?.degraded_reason ?? `${leaderboardHighlights.length} highlight(s) derived from recorded runs.`}
+          </p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Preset coverage</p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">{presets.length || '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Reusable benchmark presets aggregated from the comparison log.</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt profile coverage</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{data?.summary.promptProfileCount ?? '—'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Distinct prompt profiles represented in the recorded benchmark runs.</p>
         </GlassCard>
       </div>
 
@@ -146,7 +256,7 @@ export default function BenchmarksPage() {
           <TabsTrigger value="leaderboard" className="text-xs data-[state=active]:bg-secondary">Leaderboard</TabsTrigger>
           <TabsTrigger value="tradeoffs" className="text-xs data-[state=active]:bg-secondary">Tradeoff Map</TabsTrigger>
           <TabsTrigger value="cards" className="text-xs data-[state=active]:bg-secondary">Model Cards</TabsTrigger>
-          <TabsTrigger value="presets" className="text-xs data-[state=active]:bg-secondary">Presets</TabsTrigger>
+          <TabsTrigger value="profiles" className="text-xs data-[state=active]:bg-secondary">Prompt Profiles</TabsTrigger>
           <TabsTrigger value="retrieval" className="text-xs data-[state=active]:bg-secondary">Retrieval Strategies</TabsTrigger>
         </TabsList>
 
@@ -157,16 +267,17 @@ export default function BenchmarksPage() {
               <h3 className="text-sm font-medium text-foreground">Model Leaderboard</h3>
               {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
             </div>
-            {isLoading && !sorted.length ? (
+            {isLoading && !orderedModels.length ? (
               <p className="text-xs text-muted-foreground">Loading recorded benchmark runs…</p>
-            ) : sorted.length === 0 ? (
+            ) : orderedModels.length === 0 ? (
               <p className="text-xs text-muted-foreground">No phase7 benchmark comparison log has been recorded in this workspace yet.</p>
             ) : (
               <div className="space-y-2">
-                {sorted.map((model, index) => {
-                  const profile = model.profileTag || 'Benchmark candidate';
-                  const isRecommended = profile === 'Recommended production';
-                  const isExternal = profile === 'External reference';
+                {orderedModels.map((model, index) => {
+                  const profile = model.profileTag || (model.scoreStatus === 'partial' ? 'Historical comparison' : 'Benchmark candidate');
+                  const isRecommended = model.profileTag === 'Recommended production';
+                  const isExternal = model.profileTag === 'External reference';
+                  const isPartial = model.scoreStatus === 'partial';
                   return (
                     <motion.div
                       key={model.id}
@@ -189,14 +300,18 @@ export default function BenchmarksPage() {
                           {isExternal ? (
                             <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border/50 font-medium">External ref.</span>
                           ) : null}
+                          {isPartial ? (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">Partial scoring</span>
+                          ) : null}
                         </div>
                         <p className="text-[10px] text-muted-foreground">{model.provider} · {model.family} · {model.quantization}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{profile}</p>
                       </div>
                       <div className="flex items-center gap-6 text-[10px] text-muted-foreground shrink-0">
-                        <div className="text-center"><p className="text-foreground font-medium">{model.latency}s</p><p>Latency</p></div>
-                        <div className="text-center"><p className="text-foreground font-medium">{Math.round(model.adherence * 100)}%</p><p>Adherence</p></div>
-                        <div className="text-center"><p className="text-foreground font-medium">{Math.round(model.groundedness * 100)}%</p><p>Ground.</p></div>
-                        <div className="text-center"><p className="text-primary font-semibold text-xs">{Math.round(model.useCaseFit * 100)}%</p><p>Fit</p></div>
+                        <div className="text-center"><p className="text-foreground font-medium">{formatSeconds(model.latency)}</p><p>Latency</p></div>
+                        <div className="text-center"><p className="text-foreground font-medium">{formatPercent(model.adherence)}</p><p>Adherence</p></div>
+                        <div className="text-center"><p className="text-foreground font-medium">{formatPercent(model.groundedness)}</p><p>Ground.</p></div>
+                        <div className="text-center"><p className="text-primary font-semibold text-xs">{formatPercent(model.useCaseFit)}</p><p>Fit</p></div>
                       </div>
                     </motion.div>
                   );
@@ -210,11 +325,11 @@ export default function BenchmarksPage() {
           <GlassCard>
             <div className="flex items-center gap-2 mb-4">
               <BarChart3 className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-medium text-foreground">Latency vs Use-Case Fit</h3>
+              <h3 className="text-sm font-medium text-foreground">Latency vs Scored Use-Case Fit</h3>
               {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
             </div>
             {scatterData.length === 0 ? (
-              <p className="text-xs text-muted-foreground">A tradeoff map appears once model comparison runs are recorded.</p>
+              <p className="text-xs text-muted-foreground">A tradeoff map appears after comparison runs record measured use-case-fit telemetry.</p>
             ) : (
               <>
                 <div className="h-[340px]">
@@ -222,9 +337,9 @@ export default function BenchmarksPage() {
                     <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
                       <XAxis type="number" dataKey="latency" name="Latency" unit="s" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} label={{ value: 'Latency (seconds)', position: 'bottom', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                      <YAxis type="number" dataKey="fit" name="Fit" unit="%" domain={[60, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} label={{ value: 'Use-Case Fit %', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                      <YAxis type="number" dataKey="fit" name="Fit" unit="%" domain={[0, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} label={{ value: 'Scored use-case fit %', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                       <ChartTooltip
-                        content={({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; profile: string; latency: number; fit: number; groundedness: number; runs: number } }> }) => {
+                        content={({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; profile: string; latency: number; fit: number; groundedness: number | null; runs: number } }> }) => {
                           if (!active || !payload?.length) return null;
                           const entry = payload[0].payload;
                           return (
@@ -234,7 +349,7 @@ export default function BenchmarksPage() {
                               <div className="space-y-0.5 text-[10px]">
                                 <p>Latency: <span className="text-foreground">{entry.latency}s</span></p>
                                 <p>Fit: <span className="text-foreground">{entry.fit}%</span></p>
-                                <p>Groundedness: <span className="text-foreground">{entry.groundedness}%</span></p>
+                                <p>Groundedness: <span className="text-foreground">{entry.groundedness == null ? 'Not scored' : `${entry.groundedness}%`}</span></p>
                                 <p>Recorded runs: <span className="text-foreground">{entry.runs}</span></p>
                               </div>
                             </div>
@@ -264,10 +379,10 @@ export default function BenchmarksPage() {
 
         <TabsContent value="cards" className="mt-0">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {models.map((model, index) => {
-              const profile = model.profileTag || 'Benchmark candidate';
-              const isRecommended = profile === 'Recommended production';
-              const isExternal = profile === 'External reference';
+            {orderedModels.map((model, index) => {
+              const profile = model.profileTag || (model.scoreStatus === 'partial' ? 'Historical comparison without full scoring' : 'Benchmark candidate');
+              const isRecommended = model.profileTag === 'Recommended production';
+              const isExternal = model.profileTag === 'External reference';
               return (
                 <motion.div
                   key={model.id}
@@ -281,33 +396,28 @@ export default function BenchmarksPage() {
                       <h4 className="text-sm font-medium text-foreground">{model.family}</h4>
                       <p className="text-[10px] text-muted-foreground font-mono break-all">{model.model}</p>
                     </div>
-                    {isRecommended ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-glow-success/10 text-glow-success border border-glow-success/20 font-medium">Production</span>
-                    ) : null}
-                    {isExternal ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border/50 font-medium">External ref.</span>
-                    ) : null}
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                      {isRecommended ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-glow-success/10 text-glow-success border border-glow-success/20 font-medium">Production</span>
+                      ) : null}
+                      {isExternal ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border/50 font-medium">External ref.</span>
+                      ) : null}
+                      {model.scoreStatus === 'partial' ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">Partial scoring</span>
+                      ) : null}
+                    </div>
                   </div>
                   <p className="text-[10px] text-muted-foreground mb-3">{profile}</p>
                   <div className="space-y-3 mt-2">
-                    {[
-                      { label: 'Use Case Fit', value: model.useCaseFit },
-                      { label: 'Groundedness', value: model.groundedness },
-                      { label: 'Adherence', value: model.adherence },
-                    ].map((metric) => (
-                      <div key={metric.label}>
-                        <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                          <span>{metric.label}</span>
-                          <span className="text-foreground font-medium">{Math.round(metric.value * 100)}%</span>
-                        </div>
-                        <Progress value={metric.value * 100} className="h-1.5 bg-secondary" />
-                      </div>
-                    ))}
+                    <MetricRow label="Use Case Fit" value={model.useCaseFit} coverage={model.metricCoverage?.useCaseFit} />
+                    <MetricRow label="Groundedness" value={model.groundedness} coverage={model.metricCoverage?.groundedness} />
+                    <MetricRow label="Adherence" value={model.adherence} coverage={model.metricCoverage?.adherence} />
                   </div>
                   <div className="mt-4 pt-3 border-t border-border/30 grid grid-cols-2 gap-2 text-[10px] text-muted-foreground">
-                    <div><span className="block text-muted-foreground/60">Latency</span>{model.latency}s</div>
-                    <div><span className="block text-muted-foreground/60">Output</span>{model.outputChars} chars</div>
-                    <div><span className="block text-muted-foreground/60">Runtime</span>{model.runtimeBucket.replace(/_/g, ' ')}</div>
+                    <div><span className="block text-muted-foreground/60">Latency</span>{formatSeconds(model.latency)}</div>
+                    <div><span className="block text-muted-foreground/60">Output</span>{isNumber(model.outputChars) ? `${Math.round(model.outputChars)} chars` : '—'}</div>
+                    <div><span className="block text-muted-foreground/60">Runtime</span>{model.runtimeBucket?.replace(/_/g, ' ') || '—'}</div>
                     <div><span className="block text-muted-foreground/60">Runs</span>{model.runs}</div>
                   </div>
                 </motion.div>
@@ -316,34 +426,34 @@ export default function BenchmarksPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="presets" className="mt-0 space-y-3">
-          {presets.length === 0 ? (
+        <TabsContent value="profiles" className="mt-0 space-y-3">
+          {promptProfiles.length === 0 ? (
             <GlassCard>
-              <p className="text-xs text-muted-foreground">No observed benchmark presets were found in the phase7 comparison log.</p>
+              <p className="text-xs text-muted-foreground">No recorded prompt profiles were found in the phase7 comparison log.</p>
             </GlassCard>
           ) : (
-            presets.map((preset, index) => (
-              <GlassCard key={preset.id} delay={0.1 + index * 0.05}>
+            promptProfiles.map((profile, index) => (
+              <GlassCard key={profile.id} delay={0.1 + index * 0.05}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h4 className="text-sm font-medium text-foreground">{preset.name}</h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">{preset.description}</p>
+                    <h4 className="text-sm font-medium text-foreground">{profile.name}</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">{profile.description}</p>
                   </div>
                   {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
                 </div>
                 <div className="flex items-center gap-2 mt-3 flex-wrap">
-                  {preset.metrics.map((metric) => (
+                  {profile.metrics.map((metric) => (
                     <span key={metric} className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">{metric}</span>
                   ))}
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-2">Models: {preset.models.join(', ')}</p>
+                <p className="text-[10px] text-muted-foreground mt-2">Models: {profile.models.join(', ')}</p>
               </GlassCard>
             ))
           )}
           {providerSummary.length ? (
             <GlassCard delay={0.2}>
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="w-4 h-4 text-primary" />
+                <Gauge className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-medium text-foreground">Provider Summary</h3>
               </div>
               <div className="space-y-2">
@@ -351,11 +461,15 @@ export default function BenchmarksPage() {
                   <div key={provider.provider} className="flex items-center justify-between gap-4 rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
                     <div>
                       <p className="text-xs font-medium text-foreground">{provider.provider}</p>
-                      <p className="text-[10px] text-muted-foreground">{provider.models} model(s) · best {provider.bestFit}% fit</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {provider.models} model(s)
+                        {isNumber(provider.scoredModels) ? ` · ${provider.scoredModels} scored` : ''}
+                        {provider.bestFit != null ? ` · best ${provider.bestFit}% fit` : ' · no scored fit yet'}
+                      </p>
                     </div>
                     <div className="text-right text-[10px] text-muted-foreground">
-                      <p className="text-foreground font-medium">{provider.avgLatency}s</p>
-                      <p>{provider.bestModel ?? 'No leader yet'}</p>
+                      <p className="text-foreground font-medium">{formatSeconds(provider.avgLatency ?? null)}</p>
+                      <p>{provider.bestModel ?? 'No scored leader yet'}</p>
                     </div>
                   </div>
                 ))}
@@ -379,7 +493,7 @@ export default function BenchmarksPage() {
                   <BarChart data={retrievalChartData} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
                     <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                    <YAxis domain={[60, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend wrapperStyle={{ fontSize: '10px' }} />
                     <Bar dataKey="OutputDiscipline" fill="hsl(217, 91%, 60%)" radius={[2, 2, 0, 0]} />
@@ -393,7 +507,7 @@ export default function BenchmarksPage() {
 
           <GlassCard>
             <div className="flex items-center gap-2 mb-4">
-              <ArrowUpDown className="w-4 h-4 text-primary" />
+              <Target className="w-4 h-4 text-primary" />
               <h3 className="text-sm font-medium text-foreground">Retrieval Observation Detail</h3>
               {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
             </div>
@@ -401,7 +515,7 @@ export default function BenchmarksPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border/50">
-                    {['Strategy', 'Output', 'Retention', 'Composite', 'Latency', 'Coverage', 'Description'].map((heading) => (
+                    {['Strategy', 'Output', 'Retention', 'Composite', 'Latency', 'Candidates', 'Avg ctx chars', 'Description'].map((heading) => (
                       <th key={heading} className="text-left px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{heading}</th>
                     ))}
                   </tr>
@@ -410,17 +524,18 @@ export default function BenchmarksPage() {
                   {retrievalObservations.map((item) => (
                     <tr key={item.strategy} className="border-b border-border/20 hover:bg-secondary/10 transition-colors">
                       <td className="px-3 py-2.5 text-xs text-foreground font-mono">{item.strategy}</td>
-                      <td className="px-3 py-2.5 text-xs text-foreground">{Math.round(item.outputDiscipline * 100)}%</td>
-                      <td className="px-3 py-2.5 text-xs text-foreground">{Math.round(item.contextRetention * 100)}%</td>
-                      <td className="px-3 py-2.5 text-xs text-primary font-medium">{Math.round(item.composite * 100)}%</td>
-                      <td className="px-3 py-2.5 text-xs text-muted-foreground">{item.latency}s</td>
-                      <td className="px-3 py-2.5 text-xs text-muted-foreground">{item.coverage}</td>
+                      <td className="px-3 py-2.5 text-xs text-foreground">{formatPercent(item.outputDiscipline)}</td>
+                      <td className="px-3 py-2.5 text-xs text-foreground">{formatPercent(item.contextRetention)}</td>
+                      <td className="px-3 py-2.5 text-xs text-primary font-medium">{formatPercent(item.composite)}</td>
+                      <td className="px-3 py-2.5 text-xs text-muted-foreground">{formatSeconds(item.latency)}</td>
+                      <td className="px-3 py-2.5 text-xs text-muted-foreground">{item.candidateCount ?? '—'}{isNumber(item.scoredCandidateCount) ? ` · ${item.scoredCandidateCount} scored` : ''}</td>
+                      <td className="px-3 py-2.5 text-xs text-muted-foreground">{formatCount(item.avgContextChars)}</td>
                       <td className="px-3 py-2.5 text-[10px] text-muted-foreground">{item.description}</td>
                     </tr>
                   ))}
                   {isLoading && !retrievalObservations.length ? (
                     <tr>
-                      <td colSpan={7} className="px-3 py-6 text-xs text-muted-foreground">Loading retrieval observations…</td>
+                      <td colSpan={8} className="px-3 py-6 text-xs text-muted-foreground">Loading retrieval observations…</td>
                     </tr>
                   ) : null}
                 </tbody>
@@ -437,9 +552,10 @@ export default function BenchmarksPage() {
               {retrievalObservations[0]
                 ? (
                   <>
-                    <span className="text-foreground font-medium">{retrievalObservations[0].strategy}</span> is the best observed retrieval posture in recorded benchmark runs, with{' '}
-                    <span className="text-foreground font-medium">{Math.round(retrievalObservations[0].composite * 100)}%</span> composite quality across{' '}
-                    <span className="text-foreground font-medium">{retrievalObservations[0].coverage}</span> captured candidate result(s).
+                    <span className="text-foreground font-medium">{retrievalObservations[0].strategy}</span> is the best scored retrieval posture observed in this workspace, with{' '}
+                    <span className="text-foreground font-medium">{formatPercent(retrievalObservations[0].composite)}</span> composite quality across{' '}
+                    <span className="text-foreground font-medium">{retrievalObservations[0].scoredCandidateCount ?? 0}</span> scored candidate(s) and{' '}
+                    <span className="text-foreground font-medium">{retrievalObservations[0].candidateCount ?? 0}</span> total captured candidate result(s).
                   </>
                 )
                 : 'No retrieval summary is available until the benchmark log captures retrieval-aware comparison runs.'}
