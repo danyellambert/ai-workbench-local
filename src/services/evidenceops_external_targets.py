@@ -1833,13 +1833,13 @@ def _derive_preview_owner(preview_payload: dict[str, Any] | None, result: Produc
     payload = result.structured_result.validated_output if result.structured_result is not None else None
     if isinstance(payload, CVAnalysisPayload):
         return 'Hiring team'
-    workflow_defaults = {
+    workflow_owner_defaults = {
         'document_review': 'Compliance Operations',
         'policy_contract_comparison': 'Legal / Compliance',
         'action_plan_evidence_review': 'Program owner',
         'candidate_review': 'Hiring team',
     }
-    return workflow_defaults.get(str(result.workflow_id or '').strip(), None)
+    return workflow_owner_defaults.get(str(result.workflow_id or '').strip(), None)
 
 
 def _derive_notion_status_value(preview_payload: dict[str, Any] | None, result: ProductWorkflowResult) -> str | None:

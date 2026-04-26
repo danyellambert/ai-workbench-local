@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, Search, Wrench, RefreshCw, Radio, Shield, Clock, AlertTriangle, FolderSearch } from 'lucide-react';
+import { Activity, Search, FolderSearch, Wrench, RefreshCw, Radio, Shield, Clock, AlertTriangle } from 'lucide-react';
 import { AiLabSectionIntro, DataSourceBadge } from '@/components/ai-lab/AiLabSectionIntro';
 import { AiLabMetricGrid } from '@/components/ai-lab/AiLabMetricGrid';
 import { DeliveryLoopPanel } from '@/components/product/DeliveryLoopPanel';
@@ -71,15 +71,11 @@ export default function EvidenceOpsPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <AiLabSectionIntro
+      <div data-tour="lab-evidenceops-header">
+        <AiLabSectionIntro
         title="EvidenceOps / MCP"
-        description="Operational governance console — tool health, automated operations, action tracking and repository readiness."
-        operatorQuestion="Is operations/governance healthy and controllable?"
-        badges={[
-          { label: `${summary?.activeTools ?? 0}/${summary?.toolsTotal ?? 0} tools active`, variant: summary && summary.activeTools === summary.toolsTotal ? 'success' : 'warning' },
-          { label: `${summary?.openActions ?? 0} open actions`, variant: (summary?.openActions ?? 0) > 0 ? 'warning' : 'success' },
-          { label: `${summary?.repositoryDocumentCount ?? 0} corpus docs`, variant: 'default' },
-        ]}
+        description="Operational governance console — local MCP tool health, automated operations, action tracking and repository readiness."
+        operatorQuestion="Is the local operations/governance loop healthy, and are the external delivery targets connected?"
         dataSource={data?.meta.source}
         surfaceStatus={data?.status}
         degradedReason={data?.degraded_reason}
@@ -90,7 +86,8 @@ export default function EvidenceOpsPage() {
           <RefreshCw className="w-3.5 h-3.5 mr-2" />
           {syncMutation.isPending ? 'Syncing…' : 'Sync'}
         </Button>
-      </AiLabSectionIntro>
+        </AiLabSectionIntro>
+      </div>
 
       {evidenceQuery.isError && (
         <GlassCard className="mb-6 border border-glow-warning/20 bg-glow-warning/5">
@@ -102,95 +99,71 @@ export default function EvidenceOpsPage() {
       )}
 
 
-      <AiLabMetricGrid
+      <div data-tour="lab-evidenceops-metrics">
+        <AiLabMetricGrid
         columns={5}
         metrics={[
-          { label: 'MCP Tools', value: summary?.toolsTotal ?? '—', icon: Wrench, status: 'neutral' },
-          { label: 'Active', value: summary?.activeTools ?? '—', icon: Activity, status: summary ? 'healthy' : 'neutral' },
-          { label: 'Open Actions', value: summary?.openActions ?? '—', icon: AlertTriangle, status: (summary?.openActions ?? 0) > 0 ? 'warning' : 'healthy' },
-          { label: 'Auto Ops', value: summary?.operationsCount ?? '—', icon: RefreshCw, status: 'neutral' },
-          { label: 'Last Sync', value: summary?.lastSyncAt ? formatDateTime(summary.lastSyncAt) : '—', icon: Clock, status: 'neutral' },
+          { label: 'Local MCP Tools', value: summary?.toolsTotal ?? '—', subtitle: 'server-exposed repository, action and worklog operations', icon: Wrench, status: 'neutral' },
+          { label: 'Open Backlog (Total)', value: summary?.openActions ?? '—', subtitle: 'all persisted open actions saved so far', icon: AlertTriangle, status: (summary?.openActions ?? 0) > 0 ? 'warning' : 'healthy' },
+          { label: `Open in Latest ${summary?.latestActionWindow ?? 10}`, value: summary?.latestOpenActions ?? '—', subtitle: 'recent persisted actions still open', icon: Activity, status: (summary?.latestOpenActions ?? 0) > 0 ? 'warning' : 'healthy' },
+          { label: 'Unassigned Queue', value: summary?.unassignedActions ?? '—', subtitle: 'claim reduces this counter', icon: Activity, status: (summary?.unassignedActions ?? 0) > 0 ? 'warning' : 'healthy' },
+          { label: 'Last Sync', value: summary?.lastSyncAt ? formatDateTime(summary.lastSyncAt) : '—', subtitle: 'repository/worklog checkpoint', icon: Clock, status: 'neutral' },
         ]}
-      />
+        />
+      </div>
 
-      <div className="grid md:grid-cols-4 gap-3 mb-6">
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3 mb-6" data-tour="lab-evidenceops-repository">
         <GlassCard>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Repository drift</p>
           <p className="text-lg font-semibold text-foreground">{data?.repositoryStats?.changedDocuments ?? 0}</p>
-          <p className="text-[10px] text-muted-foreground">changed doc(s), {data?.repositoryStats?.newDocuments ?? 0} new</p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Top owner</p>
-          <p className="text-sm font-semibold text-foreground">{ownershipSummary[0]?.owner ?? 'Unassigned'}</p>
-          <p className="text-[10px] text-muted-foreground">{ownershipSummary[0]?.count ?? 0} open action(s)</p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Operation mix</p>
-          <p className="text-sm font-semibold text-foreground">{operationBreakdown[0]?.label ?? '—'}</p>
-          <p className="text-[10px] text-muted-foreground">{operationBreakdown[0]?.value ?? 0} recent operation(s)</p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Search hints</p>
-          <p className="text-sm font-semibold text-foreground truncate">{data?.searchHints?.slice(0, 2).join(' · ') || 'vendor · policy'}</p>
-          <p className="text-[10px] text-muted-foreground">{data?.degraded_reason ?? 'Live repository and persisted state connected.'}</p>
-        </GlassCard>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-3 mb-6">
-        <GlassCard>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Overdue actions</p>
-          <p className="text-lg font-semibold text-foreground">{summary?.overdueActions ?? 0}</p>
-          <p className="text-[10px] text-muted-foreground">unresolved actions past due date</p>
-        </GlassCard>
-        <GlassCard>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Unassigned queue</p>
-          <p className="text-lg font-semibold text-foreground">{summary?.unassignedActions ?? 0}</p>
-          <p className="text-[10px] text-muted-foreground">open actions without a named owner</p>
+          <p className="text-[10px] text-muted-foreground">changed doc(s), {data?.repositoryStats?.newDocuments ?? 0} new since the last snapshot</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Repository footprint</p>
           <p className="text-sm font-semibold text-foreground">{data?.repositoryStats?.categories ?? 0} categories</p>
           <p className="text-[10px] text-muted-foreground">{data?.repositoryStats?.totalSizeLabel ?? '—'} visible corpus size</p>
         </GlassCard>
+        <GlassCard>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Operation mix</p>
+          <p className="text-sm font-semibold text-foreground">{operationBreakdown[0]?.label ?? '—'}</p>
+          <p className="text-[10px] text-muted-foreground">{operationBreakdown[0]?.value ?? 0} recent operation(s)</p>
+        </GlassCard>
       </div>
 
-      <details data-testid="evidenceops-delivery-targets" className="mb-6 rounded-xl border border-border/40 bg-secondary/10 p-0">
-        <summary className="cursor-pointer list-none px-4 py-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-medium text-foreground">Connected delivery targets</p>
-              <p className="mt-1 text-[11px] text-muted-foreground">Compact MCP summary for Nextcloud import, Trello publishing and Notion handoffs.</p>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-              <StatusPill status={summary?.activeTools === summary?.toolsTotal ? 'ready' : 'warning'} />
-              <span>{summary?.activeTools ?? 0}/{summary?.toolsTotal ?? 0} live targets</span>
-            </div>
-          </div>
-        </summary>
-        <div className="border-t border-border/40 px-4 pb-4 pt-2">
-          <DeliveryLoopPanel
-            title="Delivery surfaces"
-            description="The product surfaces stay clean; use this area when you need a compact MCP health and delivery snapshot."
-            compact
-          />
-        </div>
-      </details>
+      <div data-tour="lab-evidenceops-delivery">
+        <DeliveryLoopPanel
+        className="mb-6"
+        title="Connected delivery targets"
+        description="These are external delivery surfaces, not local MCP-console tools: use this strip to verify Nextcloud, Trello and Notion readiness without hiding them behind another disclosure."
+        compact
+        />
+      </div>
 
       <Tabs defaultValue="tools">
-        <TabsList className="bg-secondary/30 border border-border/50 mb-4">
+        <div className="inline-flex">
+        <TabsList data-tour="lab-evidenceops-tabs" className="bg-secondary/30 border border-border/50 mb-4">
           <TabsTrigger value="tools" className="text-xs data-[state=active]:bg-secondary">Tools</TabsTrigger>
-          <TabsTrigger value="actions" className="text-xs data-[state=active]:bg-secondary">Open Actions</TabsTrigger>
+          <TabsTrigger value="actions" className="text-xs data-[state=active]:bg-secondary">Open Backlog</TabsTrigger>
           <TabsTrigger value="operations" className="text-xs data-[state=active]:bg-secondary">Auto Operations</TabsTrigger>
           <TabsTrigger value="timeline" className="text-xs data-[state=active]:bg-secondary">Timeline</TabsTrigger>
           <TabsTrigger value="telemetry" className="text-xs data-[state=active]:bg-secondary">Telemetry</TabsTrigger>
           <TabsTrigger value="readiness" className="text-xs data-[state=active]:bg-secondary">Readiness</TabsTrigger>
           <TabsTrigger value="search" className="text-xs data-[state=active]:bg-secondary">Search</TabsTrigger>
         </TabsList>
+        </div>
 
-        <TabsContent value="tools" className="mt-0 space-y-3">
-          {(data?.tools ?? []).map((tool, index) => (
+        <TabsContent value="tools" className="mt-0 space-y-3" data-tour="lab-evidenceops-tools">
+          <GlassCard>
+            <p className="text-xs text-muted-foreground">The inventory below shows the actual local MCP server tools exposed by EvidenceOps.</p>
+          </GlassCard>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2" data-tour="lab-evidenceops-tools-start">Local MCP-console tools</p>
+              {(data?.tools ?? []).map((tool, index) => (
             <motion.div
               key={tool.name}
+              data-tour={index < 4 ? 'lab-evidenceops-tools-start' : undefined}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + index * 0.04 }}
@@ -212,16 +185,21 @@ export default function EvidenceOpsPage() {
                 </div>
               </div>
             </motion.div>
-          ))}
-          {evidenceQuery.isLoading && !(data?.tools?.length ?? 0) ? <GlassCard><p className="text-xs text-muted-foreground">Loading tool inventory…</p></GlassCard> : null}
+              ))}
+              {evidenceQuery.isLoading && !(data?.tools?.length ?? 0) ? <GlassCard><p className="text-xs text-muted-foreground">Loading tool inventory…</p></GlassCard> : null}
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="actions" className="mt-0">
           <GlassCard>
             <div className="flex items-center gap-2 mb-4">
               <Shield className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-medium text-foreground">Open Actions</h3>
+              <h3 className="text-sm font-medium text-foreground">Open Backlog</h3>
               {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
+            </div>
+            <div className="mb-3 rounded-lg border border-border/30 bg-secondary/20 p-3 text-[10px] text-muted-foreground">
+              Total backlog counts every persisted action that is still open in the saved action store. The recent metric above shows how many of the latest {summary?.latestActionWindow ?? 10} persisted action records are still open.
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -242,7 +220,7 @@ export default function EvidenceOpsPage() {
                       <td className="px-3 py-2.5"><span className={`text-[10px] px-2 py-0.5 rounded border font-medium capitalize ${priorityStyle[action.priority]}`}>{action.priority}</span></td>
                       <td className="px-3 py-2.5 text-xs text-muted-foreground">{action.dueDate}</td>
                       <td className="px-3 py-2.5">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <button
                             className="text-[10px] px-2 py-1 rounded border border-border/40 bg-secondary/20 text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors"
                             onClick={() => {
@@ -263,6 +241,17 @@ export default function EvidenceOpsPage() {
                               Claim
                             </button>
                           ) : null}
+                          {action.status !== 'closed' ? (
+                            <button
+                              className="text-[10px] px-2 py-1 rounded border border-glow-success/30 bg-glow-success/10 text-glow-success hover:bg-glow-success/15 transition-colors"
+                              onClick={() => {
+                                void actionMutation.mutateAsync({ actionId: action.id, status: 'closed', owner: action.owner === 'Unassigned' ? 'AI Lab operator' : undefined });
+                              }}
+                              disabled={actionMutation.isPending}
+                            >
+                              Close
+                            </button>
+                          ) : null}
                         </div>
                       </td>
                     </tr>
@@ -270,6 +259,11 @@ export default function EvidenceOpsPage() {
                   {evidenceQuery.isLoading && !(data?.actions?.length ?? 0) ? (
                     <tr>
                       <td colSpan={7} className="px-3 py-6 text-xs text-muted-foreground">Loading action inventory…</td>
+                    </tr>
+                  ) : null}
+                  {!evidenceQuery.isLoading && !(data?.actions?.length ?? 0) ? (
+                    <tr>
+                      <td colSpan={7} className="px-3 py-6 text-xs text-muted-foreground">No open backlog items are currently persisted.</td>
                     </tr>
                   ) : null}
                 </tbody>
@@ -368,7 +362,7 @@ export default function EvidenceOpsPage() {
           </GlassCard>
         </TabsContent>
 
-        <TabsContent value="readiness" className="mt-0">
+        <TabsContent value="readiness" className="mt-0" data-tour="lab-evidenceops-finish">
           <GlassCard>
             <div className="flex items-center gap-2 mb-4">
               <Shield className="w-4 h-4 text-primary" />
@@ -396,7 +390,8 @@ export default function EvidenceOpsPage() {
               <p>repository_documents: {summary?.repositoryDocumentCount ?? 0}</p>
               <p>tools_registered: {summary?.toolsTotal ?? 0}</p>
               <p>tools_active: {summary?.activeTools ?? 0}</p>
-              <p>open_actions: {summary?.openActions ?? 0}</p>
+              <p>open_backlog_total: {summary?.openActions ?? 0}</p>
+              <p>open_in_latest_{summary?.latestActionWindow ?? 10}: {summary?.latestOpenActions ?? 0}</p>
               <p>last_sync_at: {summary?.lastSyncAt ?? '—'}</p>
               <p>status_mix: {statusBreakdown.map((item) => `${item.label}:${item.value}`).join(' · ') || '—'}</p>
               <p>category_mix: {categoryBreakdown.slice(0, 3).map((item) => `${item.label}:${item.value}`).join(' · ') || '—'}</p>
