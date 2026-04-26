@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import math
 import statistics
+import time
 from collections import Counter, defaultdict
 import re
 from datetime import datetime, timedelta, timezone
@@ -20,6 +21,7 @@ from src.services.evidenceops_repository import (
     list_evidenceops_repository_documents,
     summarize_evidenceops_repository_documents,
 )
+from src.services.document_context import build_structured_document_context
 from src.services.runtime_controls import build_effective_rag_settings, load_runtime_controls_state
 from src.storage.lab_state import (
     append_lab_chat_message,
@@ -39,6 +41,9 @@ from src.storage.phase95_evidenceops_repository_snapshot import load_evidenceops
 from src.storage.phase95_evidenceops_worklog import load_evidenceops_worklog, summarize_evidenceops_worklog
 from src.storage.rag_store import load_rag_document_catalog, load_rag_store
 from src.storage.runtime_execution_log import load_runtime_execution_log, summarize_runtime_execution_log
+from src.structured.base import DocumentAgentPayload
+from src.structured.envelope import StructuredResult, TaskExecutionRequest
+from src.structured.langgraph_workflow import run_structured_execution_workflow
 from src.storage.runtime_paths import (
     get_artifact_root,
     get_lab_chat_sessions_path,
@@ -65,6 +70,21 @@ LAB_CROSS_SURFACE_NOTES = [
     'Use EvidenceOps / MCP for repository readiness, open actions and delivery operations.',
 ]
 
+LAB_CHAT_AUTOMATED_PROMPTS = {
+    'Summarize the main control gaps in the selected evidence.',
+    'Turn the findings into next actions with owners and due dates.',
+    'What appears risky, unsupported or contradictory in these documents?',
+}
+
+LAB_CHAT_STOPWORDS = {
+    'the', 'and', 'for', 'with', 'this', 'that', 'what', 'about', 'from', 'into', 'your', 'these',
+    'those', 'document', 'documents', 'selected', 'evidence', 'main', 'does', 'mean', 'says',
+    'uma', 'uns', 'das', 'dos', 'com', 'que', 'esse', 'essa', 'isso', 'isto', 'este', 'esta',
+    'documento', 'documentos', 'quer', 'querendo', 'dizer', 'sobre', 'qual', 'quais', 'para',
+    'por', 'como', 'mais', 'não', 'sim', 'ele', 'ela', 'está', 'esta', 'nas', 'nos', 'das',
+}
+
+
 WORKFLOW_TASK_LABELS = {
     'document_review': 'Document Review',
     'policy_contract_comparison': 'Policy / Contract Comparison',
@@ -85,6 +105,59 @@ WORKFLOW_INPUT_HINTS = {
     'action_plan_evidence_review': 'Extract operational action items, owners, due dates and blockers from the evidence.',
     'candidate_review': 'Review the selected candidate material and summarize strengths, risks and fit.',
 }
+
+EVIDENCEOPS_MCP_TOOL_CATALOG = [
+    {
+        'name': 'list_documents',
+        'description': 'List repository documents with optional category, suffix and identifier filters.',
+        'surface': 'repository',
+    },
+    {
+        'name': 'search_documents',
+        'description': 'Search repository documents using local term matching and ranking.',
+        'surface': 'repository',
+    },
+    {
+        'name': 'get_document',
+        'description': 'Resolve a single repository document by document_id or relative_path.',
+        'surface': 'repository',
+    },
+    {
+        'name': 'summarize_repository',
+        'description': 'Return the aggregated repository summary for the current evidence corpus.',
+        'surface': 'repository',
+    },
+    {
+        'name': 'compare_repository_state',
+        'description': 'Compare the current repository against the persisted snapshot to detect drift.',
+        'surface': 'repository',
+    },
+    {
+        'name': 'register_evidenceops_entry',
+        'description': 'Register worklog entries and materialize derived actions through MCP.',
+        'surface': 'worklog',
+    },
+    {
+        'name': 'list_actions',
+        'description': 'List action-store records with status, owner and review-type filters.',
+        'surface': 'actions',
+    },
+    {
+        'name': 'summarize_actions',
+        'description': 'Return the aggregated summary of the local action store.',
+        'surface': 'actions',
+    },
+    {
+        'name': 'update_action',
+        'description': 'Update a stored action while preserving the EvidenceOps approval trail.',
+        'surface': 'actions',
+    },
+    {
+        'name': 'summarize_worklog',
+        'description': 'Return the aggregated summary of the local EvidenceOps worklog.',
+        'surface': 'worklog',
+    },
+]
 
 RUNTIME_SURFACE_MAX_RUNS = 10
 WORKFLOW_INSPECTOR_TASK_IDS = tuple(WORKFLOW_TASK_LABELS.keys())
@@ -175,13 +248,17 @@ def _workflow_surface_label(run: dict[str, Any]) -> str:
 def _pick_preferred_workflow_run(task_runs: list[dict[str, Any]]) -> dict[str, Any] | None:
     if not task_runs:
         return None
-    preferred_surfaces = ('workflow_inspector', 'product_api', 'workflow_run')
-    for surface in preferred_surfaces:
-        for run in task_runs:
-            raw_surface = str(run.get('surface') or run.get('execution_mode') or '').strip()
-            if raw_surface == surface:
+
+    preferred_surface_runs = [
+        run for run in task_runs if str(run.get('surface') or '').strip() == 'workflow_inspector'
+    ]
+
+    for candidate_runs in (preferred_surface_runs, task_runs):
+        for run in candidate_runs:
+            if isinstance(run.get('result'), dict) or isinstance(run.get('response_payload'), dict) or str(run.get('summary') or '').strip():
                 return run
-    return task_runs[0]
+
+    return preferred_surface_runs[0] if preferred_surface_runs else task_runs[0]
 
 
 def _now_iso() -> str:
@@ -549,7 +626,7 @@ def _build_runtime_core_payload(runtime_state: dict[str, Any]) -> dict[str, Any]
     return {
         'generationProvider': str(profile.get('primaryConnectionId') or 'ollama'),
         'generationModel': str(profile.get('primaryModel') or 'unknown'),
-        'promptProfile': str(generation.get('promptProfile') or 'neutro'),
+        'promptProfile': str(generation.get('promptProfile') or 'neutral'),
         'contextWindowMode': str(generation.get('contextWindow') or runtime_state['latest_entry'].get('context_window_mode') or 'auto'),
         'resolvedContext': runtime_state['context_budget_total'],
         'embeddingProvider': str(profile.get('embeddingConnectionId') or 'ollama'),
@@ -1130,6 +1207,416 @@ def _workflow_request_defaults(workspace_root: Path) -> tuple[str, str | None]:
     return str(profile.get('primaryConnectionId') or 'ollama'), str(profile.get('primaryModel') or '') or None
 
 
+
+def _normalize_chat_prompt(value: str) -> str:
+    return ' '.join(str(value or '').split()).strip().casefold()
+
+
+def _is_automated_lab_chat_prompt(value: str) -> bool:
+    normalized = _normalize_chat_prompt(value)
+    return normalized in {_normalize_chat_prompt(prompt) for prompt in LAB_CHAT_AUTOMATED_PROMPTS}
+
+
+def _looks_portuguese(value: str) -> bool:
+    lowered = f' {str(value or "").casefold()} '
+    markers = (
+        ' o ', ' a ', ' os ', ' as ', ' que ', ' esse ', ' essa ', ' documento ', ' documentos ',
+        ' quer ', ' dizer ', ' sobre ', ' quais ', ' como ', ' por que ', ' risco ', ' riscos ',
+        ' ação ', ' ações ', ' recomenda', ' evidência', ' evidencias', ' contrato ',
+    )
+    return any(marker in lowered for marker in markers)
+
+
+def _is_summary_like_question(value: str) -> bool:
+    lowered = str(value or '').casefold()
+    return any(
+        marker in lowered
+        for marker in (
+            'o que', 'quer dizer', 'querendo dizer', 'significa', 'explique', 'explica',
+            'resuma', 'resumo', 'summary', 'summarize', 'what is this document', 'what does',
+            'main point', 'main points', 'about this document',
+        )
+    )
+
+
+def _chat_question_tokens(value: str) -> set[str]:
+    tokens = {
+        token
+        for token in re.findall(r"[A-Za-zÀ-ÿ0-9]{3,}", str(value or '').casefold())
+        if token not in LAB_CHAT_STOPWORDS
+    }
+    return tokens
+
+
+def _extract_context_blocks(context: str) -> list[dict[str, str]]:
+    cleaned_context = str(context or '').strip()
+    if not cleaned_context:
+        return []
+    blocks: list[dict[str, str]] = []
+    source_pattern = re.compile(r"^\[Source:\s*([^\]]+)\]\s*([\s\S]*?)(?=^\[Source:|\Z)", re.MULTILINE)
+    for match in source_pattern.finditer(cleaned_context):
+        source = ' '.join(str(match.group(1) or 'Grounded source').split()).strip()
+        text = ' '.join(str(match.group(2) or '').split()).strip()
+        if not text:
+            continue
+        blocks.append({'source': source or 'Grounded source', 'text': text})
+    if blocks:
+        return blocks
+
+    section_pattern = re.compile(r"^\[([A-Z][A-Z\s]+)\]\s*([\s\S]*?)(?=^\[[A-Z][A-Z\s]+\]|\Z)", re.MULTILINE)
+    for match in section_pattern.finditer(cleaned_context):
+        source = ' '.join(str(match.group(1) or 'Grounded context').split()).title()
+        text = ' '.join(str(match.group(2) or '').split()).strip()
+        if text:
+            blocks.append({'source': source, 'text': text})
+    if blocks:
+        return blocks
+
+    return [{'source': 'Grounded context', 'text': ' '.join(cleaned_context.split())}]
+
+
+def _score_context_block(question: str, block: dict[str, str], position: int) -> float:
+    tokens = _chat_question_tokens(question)
+    source = str(block.get('source') or '')
+    text = str(block.get('text') or '')
+    haystack = f'{source} {text}'.casefold()
+    if not tokens:
+        return max(0.05, 1.0 - position * 0.05)
+    overlap = sum(1 for token in tokens if token in haystack)
+    name_bonus = sum(0.08 for token in tokens if token in source.casefold())
+    return (overlap / max(len(tokens), 1)) + name_bonus + max(0.0, 0.2 - position * 0.025)
+
+
+def _split_evidence_sentences(text: str) -> list[str]:
+    normalized = ' '.join(str(text or '').split()).strip()
+    if not normalized:
+        return []
+    raw_sentences = re.split(r'(?<=[.!?])\s+(?=[A-ZÀ-Ý0-9])', normalized)
+    sentences: list[str] = []
+    for sentence in raw_sentences:
+        candidate = sentence.strip(' -•\t')
+        if len(candidate) < 35:
+            continue
+        if len(candidate) > 360:
+            candidate = candidate[:357].rsplit(' ', 1)[0].rstrip(' ,;:') + '...'
+        sentences.append(candidate)
+    if sentences:
+        return sentences
+    fallback = normalized[:357].rsplit(' ', 1)[0].rstrip(' ,;:') or normalized[:357]
+    return [fallback + ('...' if len(normalized) > len(fallback) else '')]
+
+
+def _pick_relevant_evidence(question: str, blocks: list[dict[str, str]], *, limit: int = 4) -> list[dict[str, str]]:
+    if not blocks:
+        return []
+    summary_like = _is_summary_like_question(question)
+    scored_blocks = [
+        (_score_context_block(question, block, index), index, block)
+        for index, block in enumerate(blocks)
+    ]
+    if summary_like:
+        # Preserve the opening evidence when the user asks what the selected document is saying.
+        scored_blocks.sort(key=lambda item: (item[1] >= 4, -item[0], item[1]))
+    else:
+        scored_blocks.sort(key=lambda item: (-item[0], item[1]))
+
+    evidence: list[dict[str, str]] = []
+    seen: set[str] = set()
+    question_tokens = _chat_question_tokens(question)
+    for score, _, block in scored_blocks:
+        sentences = _split_evidence_sentences(block.get('text', ''))
+        if not sentences:
+            continue
+        if question_tokens and not summary_like:
+            sentences.sort(
+                key=lambda sentence: (
+                    -sum(1 for token in question_tokens if token in sentence.casefold()),
+                    len(sentence),
+                )
+            )
+        sentence = sentences[0]
+        key = f"{block.get('source')}::{sentence}".casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        evidence.append({'source': str(block.get('source') or 'Grounded source'), 'excerpt': sentence, 'score': f'{score:.3f}'})
+        if len(evidence) >= limit:
+            break
+    return evidence
+
+
+def _build_document_qa_answer(*, question: str, documents: list[dict[str, Any]], evidence: list[dict[str, str]], context_chars: int) -> str:
+    pt = _looks_portuguese(question)
+    selected_names = [str(document.get('name') or document.get('document_id') or '').strip() for document in documents if str(document.get('name') or document.get('document_id') or '').strip()]
+    if not evidence:
+        if pt:
+            return (
+                'Não encontrei contexto suficiente nos documentos selecionados para responder essa pergunta com segurança. '
+                'Tente selecionar outro documento ou reformular a pergunta com uma palavra-chave mais específica.'
+            )
+        return (
+            'I could not find enough grounded context in the selected documents to answer that question confidently. '
+            'Try selecting another document or asking with a more specific keyword.'
+        )
+
+    if pt:
+        intro = 'Com base nos trechos recuperados'
+        if selected_names:
+            intro += f" de {', '.join(selected_names[:2])}" + (f" + {len(selected_names) - 2} outro(s)" if len(selected_names) > 2 else '')
+        intro += ', a resposta é:'
+        bullets = '\n'.join(f"- {item['excerpt']}" for item in evidence[:3])
+        sources = '\n'.join(f"- {item['source']}: “{_trim_text(item['excerpt'], max_chars=180)}”" for item in evidence[:4])
+        return (
+            f"{intro}\n\n"
+            f"{bullets}\n\n"
+            f"Evidência usada:\n{sources}\n\n"
+            f"Grounding: {len(evidence)} trecho(s) selecionado(s), {context_chars:,} caracteres de contexto."
+        )
+
+    intro = 'Based on the retrieved evidence'
+    if selected_names:
+        intro += f" from {', '.join(selected_names[:2])}" + (f" + {len(selected_names) - 2} other(s)" if len(selected_names) > 2 else '')
+    intro += ', the answer is:'
+    bullets = '\n'.join(f"- {item['excerpt']}" for item in evidence[:3])
+    sources = '\n'.join(f"- {item['source']}: “{_trim_text(item['excerpt'], max_chars=180)}”" for item in evidence[:4])
+    return (
+        f"{intro}\n\n"
+        f"{bullets}\n\n"
+        f"Evidence used:\n{sources}\n\n"
+        f"Grounding: {len(evidence)} selected excerpt(s), {context_chars:,} context characters."
+    )
+
+
+def _sources_from_evidence(evidence: list[dict[str, str]]) -> list[dict[str, Any]]:
+    sources: list[dict[str, Any]] = []
+    for index, item in enumerate(evidence[:6]):
+        try:
+            score = float(item.get('score') or 0.0)
+        except (TypeError, ValueError):
+            score = 0.0
+        sources.append(
+            {
+                'label': str(item.get('source') or f'Source {index + 1}'),
+                'detail': _trim_text(str(item.get('excerpt') or ''), max_chars=240),
+                'score': min(0.98, max(0.45, 0.78 + min(score, 1.0) * 0.18 - index * 0.03)),
+            }
+        )
+    return sources
+
+
+
+def _build_lab_chat_task_request(
+    *,
+    content: str,
+    document_ids: list[str],
+    provider: str,
+    model: str | None,
+) -> TaskExecutionRequest:
+    return TaskExecutionRequest(
+        task_type='document_agent',
+        input_text=str(content or '').strip(),
+        use_rag_context=False,
+        use_document_context=True,
+        source_document_ids=[str(document_id) for document_id in document_ids if str(document_id or '').strip()],
+        context_strategy='retrieval',
+        provider=provider,
+        model=model,
+        telemetry={
+            'surface': 'lab_chat',
+            'chat_mode': 'grounded_question_answering',
+            'agent_intent': 'document_question',
+            'agent_intent_reason': 'lab_chat_question_mode',
+            'agent_tool': 'consult_documents',
+            'agent_tool_reason': 'lab_chat_direct_question',
+            'agent_answer_mode': 'friendly',
+        },
+    )
+
+
+def _render_chat_assistant_content(result: Any) -> str:
+    structured_result = getattr(result, 'structured_result', None)
+    if structured_result is None and isinstance(result, StructuredResult):
+        structured_result = result
+    payload = getattr(structured_result, 'validated_output', None)
+    if isinstance(payload, DocumentAgentPayload):
+        summary = str(payload.summary or '').strip()
+        if payload.tool_used == 'consult_documents':
+            return summary or 'Could not generate a grounded document answer.'
+        parts: list[str] = []
+        if summary:
+            parts.append(summary)
+        if payload.key_points:
+            parts.append('Evidence:\n' + '\n'.join(f'- {point}' for point in payload.key_points[:6] if str(point or '').strip()))
+        if payload.limitations:
+            parts.append('Caveats:\n' + '\n'.join(f'- {item}' for item in payload.limitations[:4] if str(item or '').strip()))
+        if payload.recommended_actions:
+            parts.append('Next actions:\n' + '\n'.join(f'- {item}' for item in payload.recommended_actions[:4] if str(item or '').strip()))
+        return '\n\n'.join(part for part in parts if part).strip() or 'The document agent completed, but no response text was returned.'
+
+    summary = str(getattr(result, 'summary', '') or '').strip()
+    recommendation = str(getattr(result, 'recommendation', '') or '').strip()
+    highlights = [str(item).strip() for item in (getattr(result, 'highlights', None) or []) if str(item or '').strip()]
+    parts = [summary]
+    if highlights:
+        parts.append('Highlights:\n' + '\n'.join(f'- {item}' for item in highlights[:4]))
+    if recommendation:
+        parts.append(f'Recommendation: {recommendation}')
+    return '\n\n'.join(part for part in parts if part).strip()
+
+
+def _sources_from_document_agent_payload(payload: DocumentAgentPayload) -> list[dict[str, Any]]:
+    sources: list[dict[str, Any]] = []
+    for index, source in enumerate(payload.sources[:6]):
+        score = getattr(source, 'score', None)
+        if score is None:
+            score = 0.9 - index * 0.04
+        try:
+            normalized_score = float(score)
+        except (TypeError, ValueError):
+            normalized_score = 0.9 - index * 0.04
+        sources.append(
+            {
+                'label': str(getattr(source, 'source', None) or getattr(source, 'document_id', None) or f'Source {index + 1}'),
+                'detail': _trim_text(str(getattr(source, 'snippet', None) or getattr(source, 'document_id', None) or 'grounded document'), max_chars=240),
+                'score': min(0.98, max(0.45, normalized_score)),
+            }
+        )
+    return sources
+
+
+def _execute_lab_document_qa_turn(
+    *,
+    bootstrap: ProductBootstrap,
+    sessions_path: Path,
+    session_id: str,
+    content: str,
+    document_ids: list[str],
+    provider: str,
+    model: str | None,
+) -> dict[str, Any]:
+    started = time.perf_counter()
+    try:
+        structured_request = _build_lab_chat_task_request(
+            content=content,
+            document_ids=document_ids,
+            provider=provider,
+            model=model,
+        )
+        structured_result = run_structured_execution_workflow(structured_request, strategy='direct')
+        payload = structured_result.validated_output
+        if structured_result.success and isinstance(payload, DocumentAgentPayload):
+            assistant_content = _render_chat_assistant_content(structured_result)
+            if assistant_content.strip():
+                sources = _sources_from_document_agent_payload(payload)
+                latency_s = round(time.perf_counter() - started, 3)
+                assistant_message = append_lab_chat_message(
+                    sessions_path,
+                    session_id=session_id,
+                    role='assistant',
+                    content=assistant_content,
+                    sources=sources,
+                    diagnostics={
+                        'workflow_id': 'lab_document_qa',
+                        'workflow_label': 'Grounded Document Q&A',
+                        'provider': provider,
+                        'model': model,
+                        'context_strategy': 'retrieval',
+                        'structured_execution_id': structured_result.execution_id,
+                        'tool_used': payload.tool_used,
+                        'answer_mode': payload.answer_mode,
+                        'confidence': payload.confidence,
+                        'source_count': len(sources),
+                        'latency_s': latency_s,
+                    },
+                )
+                update_lab_chat_session_runtime(
+                    sessions_path,
+                    session_id=session_id,
+                    runtime={
+                        'provider': provider,
+                        'model': model,
+                        'workflow_id': 'lab_document_qa',
+                        'avg_latency_s': latency_s,
+                        'total_tokens': _safe_float(structured_result.execution_metadata.get('total_tokens') if isinstance(structured_result.execution_metadata, dict) else 0.0),
+                        'warning_count': len(payload.limitations or []),
+                        'context_chars': _safe_int(structured_result.execution_metadata.get('context_chars') if isinstance(structured_result.execution_metadata, dict) else 0),
+                        'source_count': len(sources),
+                        'grounded_documents': document_ids,
+                    },
+                    status='completed',
+                    last_error=None,
+                    document_ids=document_ids,
+                )
+                return {'assistant_message': assistant_message, 'artifact_path': None}
+    except Exception:
+        # Fall back to deterministic extractive answering below so custom user questions never collapse into canned review output.
+        pass
+
+    context = build_structured_document_context(
+        query=content,
+        document_ids=document_ids,
+        strategy='retrieval',
+        max_chunks=8,
+        max_chars=10000,
+    )
+    blocks = _extract_context_blocks(context)
+    ranked_blocks = [
+        block
+        for _, block in sorted(
+            enumerate(blocks),
+            key=lambda item: -_score_context_block(content, item[1], item[0]),
+        )
+    ]
+    evidence = _pick_relevant_evidence(content, ranked_blocks, limit=4)
+    documents = _workspace_documents(bootstrap.workspace_root)
+    document_lookup = _document_lookup(documents)
+    selected_documents = [document_lookup[document_id] for document_id in document_ids if document_id in document_lookup]
+    assistant_content = _build_document_qa_answer(
+        question=content,
+        documents=selected_documents,
+        evidence=evidence,
+        context_chars=len(context),
+    )
+    sources = _sources_from_evidence(evidence)
+    assistant_message = append_lab_chat_message(
+        sessions_path,
+        session_id=session_id,
+        role='assistant',
+        content=assistant_content,
+        sources=sources,
+        diagnostics={
+            'workflow_id': 'lab_document_qa',
+            'workflow_label': 'Grounded Document Q&A',
+            'provider': provider,
+            'model': model,
+            'context_strategy': 'retrieval',
+            'context_chars': len(context),
+            'source_count': len(sources),
+            'question_tokens': sorted(_chat_question_tokens(content))[:20],
+            'latency_s': round(time.perf_counter() - started, 3),
+        },
+    )
+    update_lab_chat_session_runtime(
+        sessions_path,
+        session_id=session_id,
+        runtime={
+            'provider': provider,
+            'model': model,
+            'workflow_id': 'lab_document_qa',
+            'avg_latency_s': round(time.perf_counter() - started, 3),
+            'total_tokens': 0.0,
+            'warning_count': 0,
+            'context_chars': len(context),
+            'source_count': len(sources),
+            'grounded_documents': document_ids,
+        },
+        status='completed',
+        last_error=None,
+        document_ids=document_ids,
+    )
+    return {'assistant_message': assistant_message, 'artifact_path': None}
+
+
 def execute_lab_chat_turn(
     *,
     bootstrap: ProductBootstrap,
@@ -1160,6 +1647,28 @@ def execute_lab_chat_turn(
         upsert_lab_chat_session(sessions_path, session)
 
     provider, model = _workflow_request_defaults(bootstrap.workspace_root)
+    if not _is_automated_lab_chat_prompt(normalized_content):
+        try:
+            return _execute_lab_document_qa_turn(
+                bootstrap=bootstrap,
+                sessions_path=sessions_path,
+                session_id=session_id,
+                content=normalized_content,
+                document_ids=current_document_ids,
+                provider=provider,
+                model=model,
+            )
+        except Exception as error:
+            update_lab_chat_session_runtime(
+                sessions_path,
+                session_id=session_id,
+                runtime={'provider': provider, 'model': model, 'document_ids': current_document_ids, 'workflow_id': 'lab_document_qa'},
+                status='error',
+                last_error=str(error),
+                document_ids=current_document_ids,
+            )
+            raise
+
     request = ProductWorkflowRequest(
         workflow_id='document_review',
         document_ids=current_document_ids,
@@ -1365,27 +1874,41 @@ def _build_task_details(workspace_root: Path, task_options: list[dict[str, Any]]
     return task_details, recent_cases, dict(mode_counter), review_reason_counter
 
 
-def _resolve_inspector_document_ids(workspace_root: Path, workflow_id: str, requested_document_id: str | None) -> list[str]:
+def _resolve_inspector_document_ids(
+    workspace_root: Path,
+    workflow_id: str,
+    requested_document_ids: list[str] | None = None,
+    requested_document_id: str | None = None,
+) -> list[str]:
     available_document_ids = [
         str(document.get('document_id') or '').strip()
         for document in _workspace_documents(workspace_root)
         if str(document.get('document_id') or '').strip()
     ]
-    if workflow_id == 'candidate_review':
-        if requested_document_id and requested_document_id in available_document_ids:
-            return [requested_document_id]
+    available_document_id_set = set(available_document_ids)
+
+    requested_ids: list[str] = []
+    for raw_document_id in list(requested_document_ids or []) + ([requested_document_id] if requested_document_id else []):
+        normalized_document_id = str(raw_document_id or '').strip()
+        if not normalized_document_id or normalized_document_id not in available_document_id_set or normalized_document_id in requested_ids:
+            continue
+        requested_ids.append(normalized_document_id)
+
+    if workflow_id in {'candidate_review', 'document_review', 'action_plan_evidence_review'}:
+        if requested_ids:
+            return requested_ids[:1]
         return available_document_ids[:1]
 
-    minimum_documents = 2 if workflow_id in {'policy_contract_comparison', 'action_plan_evidence_review'} else 1
-    selected: list[str] = []
-    if requested_document_id and requested_document_id in available_document_ids:
-        selected.append(requested_document_id)
-    for document_id in available_document_ids:
-        if document_id not in selected:
-            selected.append(document_id)
-        if len(selected) >= minimum_documents:
-            break
-    return selected
+    minimum_documents = 2 if workflow_id == 'policy_contract_comparison' else 1
+    selected = list(requested_ids)
+    auto_fill_allowed = workflow_id != 'policy_contract_comparison' or not requested_ids
+    if auto_fill_allowed:
+        for document_id in available_document_ids:
+            if document_id not in selected:
+                selected.append(document_id)
+            if len(selected) >= minimum_documents:
+                break
+    return selected[:max(minimum_documents, len(selected))]
 
 
 def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]:
@@ -1410,7 +1933,8 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
         workflow_id = str(run.get('workflow_id') or run.get('task_id') or 'document_review')
         runs_by_workflow[workflow_id].append(run)
 
-    recent_runs = workflow_runs[:30]
+    recent_window_limit = 30
+    recent_runs = workflow_runs[:recent_window_limit]
     for run in recent_runs:
         workflow_id = str(run.get('workflow_id') or run.get('task_id') or 'document_review')
         document_labels = [
@@ -1432,6 +1956,7 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
                 'status': str(run.get('status') or 'completed'),
                 'confidence': _safe_float(run.get('confidence') or 0.0),
                 'sourceCount': _safe_int(run.get('source_count') or 0),
+                'documentCount': len(document_labels) or len([str(item) for item in (run.get('document_ids') or []) if str(item or '').strip()]),
                 'needsReview': bool(run.get('needs_review')),
             }
         )
@@ -1511,12 +2036,12 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
         result_items = []
         if latest_run:
             result_items.append({'label': 'Summary', 'value': str(latest_run.get('summary') or 'Persisted workflow summary unavailable.'), 'confidence': _safe_float(latest_run.get('confidence') or 0.0)})
-            if workflow_id in {'policy_contract_comparison', 'action_plan_evidence_review'} and document_names:
+            if workflow_id == 'policy_contract_comparison' and document_names:
                 visible_documents = document_names[:2]
                 extra_document_count = max(len(document_names) - len(visible_documents), 0)
                 suffix = f' +{extra_document_count} more' if extra_document_count else ''
                 result_items.append({'label': 'Documents', 'value': ', '.join(visible_documents) + suffix, 'confidence': None})
-            result_items.append({'label': 'Input', 'value': str(latest_run.get('input_text') or '—'), 'confidence': None})
+            result_items.append({'label': 'Instructions', 'value': str(latest_run.get('input_text') or '—'), 'confidence': None})
             if latest_run.get('artifact_label') or latest_run.get('artifact_path'):
                 result_items.append({'label': 'Artifact', 'value': str(latest_run.get('artifact_label') or latest_run.get('artifact_path') or 'Artifact captured'), 'confidence': None})
 
@@ -1544,15 +2069,17 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
                         'duration_ms': _safe_int(span.get('duration_ms') or 0) or None,
                     }
                 )
-        guardrails = [
-            {
-                'label': _humanize_workflow_review_reason(item),
-                'severity': 'warning',
-                'detail': _humanize_workflow_review_reason(item),
-            }
-            for item in _split_workflow_review_reasons(str(latest_run.get('review_reason') or ''))
-            if latest_run and _humanize_workflow_review_reason(item)
-        ]
+        guardrails = []
+        if latest_run:
+            guardrails = [
+                {
+                    'label': _humanize_workflow_review_reason(item),
+                    'severity': 'warning',
+                    'detail': _humanize_workflow_review_reason(item),
+                }
+                for item in _split_workflow_review_reasons(str(latest_run.get('review_reason') or ''))
+                if _humanize_workflow_review_reason(item)
+            ]
         artifacts = []
         if latest_run and (latest_run.get('artifact_label') or latest_run.get('artifact_path')):
             artifacts.append(
@@ -1598,7 +2125,9 @@ def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]
     selected_task_id = task_options[0]['id'] if task_options else 'document_review'
     confidence_values = [float(item['confidence']) for item in recent_cases if float(item['confidence']) > 0]
     summary = {
-        'total_cases': len(recent_cases),
+        'total_cases': len(workflow_runs),
+        'recent_window_count': len(recent_cases),
+        'recent_window_limit': recent_window_limit,
         'needs_review': sum(1 for item in recent_cases if item['needsReview']),
         'avg_confidence': round(_mean(confidence_values), 3) if confidence_values else 0.0,
         'review_blockers': sum(1 for item in recent_cases if item['needsReview']),
@@ -1632,6 +2161,7 @@ def execute_lab_workflow_inspector_run(
     bootstrap: ProductBootstrap,
     task_id: str,
     document_id: str | None = None,
+    document_ids: list[str] | None = None,
     input_text: str | None = None,
     provider: str | None = None,
     model: str | None = None,
@@ -1639,16 +2169,28 @@ def execute_lab_workflow_inspector_run(
     workflow_id = str(task_id or 'document_review').strip() or 'document_review'
     if workflow_id not in WORKFLOW_TASK_LABELS:
         workflow_id = 'document_review'
-    document_ids = _resolve_inspector_document_ids(bootstrap.workspace_root, workflow_id, str(document_id or '').strip() or None)
+    document_ids = _resolve_inspector_document_ids(
+        bootstrap.workspace_root,
+        workflow_id,
+        requested_document_ids=[str(item or '').strip() for item in (document_ids or []) if str(item or '').strip()],
+        requested_document_id=str(document_id or '').strip() or None,
+    )
     minimum_documents = 2 if workflow_id == 'policy_contract_comparison' else 1
     if len(document_ids) < minimum_documents:
-        requirement = 'at least 2 indexed documents' if workflow_id == 'policy_contract_comparison' else 'at least 1 indexed document'
+        if workflow_id == 'policy_contract_comparison':
+            raise ValueError('Policy / Contract Comparison requires two distinct indexed documents.')
+        requirement = 'at least 1 indexed document'
         raise ValueError(f"{WORKFLOW_TASK_LABELS.get(workflow_id, workflow_id)} requires {requirement} in the workspace.")
+
+    normalized_input_text = str(input_text or '').strip()
+    if len(normalized_input_text) > 1000:
+        raise ValueError('Instructions must stay within 1000 characters for Workflow Inspector runs.')
+
     resolved_provider, resolved_model = _workflow_request_defaults(bootstrap.workspace_root)
     request = ProductWorkflowRequest(
         workflow_id=workflow_id,
         document_ids=document_ids,
-        input_text=str(input_text or WORKFLOW_INPUT_HINTS.get(workflow_id) or '').strip(),
+        input_text=normalized_input_text,
         provider=str(provider or resolved_provider),
         model=str(model or resolved_model or '') or None,
         context_strategy='retrieval',
@@ -1682,7 +2224,12 @@ def execute_lab_workflow_inspector_run(
         'input_text': request.input_text,
         'document_ids': document_ids,
         'document_names': [str(document_lookup.get(document_id, {}).get('name') or document_id) for document_id in document_ids],
-        'confidence': _safe_float(debug_metadata.get('confidence') or 0.0),
+        'confidence': _safe_float(
+            debug_metadata.get('confidence')
+            or (getattr(result.structured_result, 'overall_confidence', None) if getattr(result, 'structured_result', None) is not None else None)
+            or (getattr(result.structured_result, 'quality_score', None) if getattr(result, 'structured_result', None) is not None else None)
+            or 0.0
+        ),
         'needs_review': bool(result.warnings),
         'review_reason': '; '.join(str(item) for item in (result.warnings or [])[:2]) or None,
         'provider': request.provider,
@@ -1690,7 +2237,8 @@ def execute_lab_workflow_inspector_run(
         'summary': result.summary,
         'artifact_path': artifact_path,
         'artifact_label': artifact_label,
-        'execution_mode': 'workflow_run',
+        'surface': 'workflow_inspector',
+        'execution_mode': str(debug_metadata.get('context_strategy') or request.context_strategy or 'workflow_run'),
         'result_title': f"{WORKFLOW_TASK_LABELS.get(workflow_id, workflow_id)} result",
         'source_count': _safe_int(getattr(result.grounding_preview, 'source_block_count', 0) if getattr(result, 'grounding_preview', None) is not None else 0),
         'latency_s': _safe_float(debug_metadata.get('latency_s') or 0.0),
@@ -1704,32 +2252,181 @@ def execute_lab_workflow_inspector_run(
     saved = append_lab_workflow_run(get_lab_workflow_runs_path(bootstrap.workspace_root), run_record)
     return {'result': result, 'request': request, 'run_record': saved}
 
+
 def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
+    def _load_json_payload(path: Path) -> dict[str, Any] | list[Any] | None:
+        if not path.exists():
+            return None
+        try:
+            payload = json.loads(path.read_text(encoding='utf-8'))
+        except (OSError, json.JSONDecodeError):
+            return None
+        return payload if isinstance(payload, (dict, list)) else None
+
+    def _stable_payload_key(payload: Any) -> str:
+        try:
+            return json.dumps(payload, ensure_ascii=False, sort_keys=True)
+        except TypeError:
+            return str(payload)
+
+    def _ensure_model_row(provider_name: str, model_name: str) -> dict[str, Any]:
+        key = f'{provider_name}:{model_name}'
+        return model_rows.setdefault(
+            key,
+            {
+                'id': key,
+                'family': model_name,
+                'provider': provider_name,
+                'model': model_name,
+                'profileTag': None,
+                'useCaseFitValues': [],
+                'groundednessValues': [],
+                'adherenceValues': [],
+                'latencyValues': [],
+                'outputCharsValues': [],
+                'runtimeBucket': 'cloud',
+                'quantization': 'cloud_managed',
+                'runs': 0,
+                'caseCount': 0,
+                'sourceFamilies': set(),
+            },
+        )
+
+    def _ensure_prompt_profile(
+        profile_name: str,
+        *,
+        description: str,
+        metrics: list[str],
+    ) -> dict[str, Any]:
+        return prompt_profile_map.setdefault(
+            profile_name,
+            {
+                'id': profile_name.replace(' ', '-').replace('/', '-').lower(),
+                'name': profile_name,
+                'description': description,
+                'metrics': metrics,
+                'models': [],
+                'runCount': 0,
+                'metricSummary': {},
+                'useCaseFitValues': [],
+                'groundednessValues': [],
+                'adherenceValues': [],
+                'decisionValues': [],
+                'groundingValues': [],
+                'structuredValues': [],
+                'latencyValues': [],
+            },
+        )
+
+    def _append_numeric(bucket: dict[str, Any], field: str, value: Any) -> None:
+        if isinstance(value, (int, float)):
+            bucket[field].append(_safe_float(value))
+
+    def _normalize_prompt_profile_name(value: Any) -> str:
+        normalized = str(value or '').strip()
+        if not normalized:
+            return 'default'
+        lowered = normalized.lower().replace('-', '_').replace(' ', '_')
+        if lowered == 'neutro':
+            return 'neutral'
+        return normalized
+
+    def _register_retrieval_observation(
+        *,
+        strategy: str,
+        category: str,
+        output_value: Any = None,
+        retention_value: Any = None,
+        composite_value: Any = None,
+        latency_value: Any = None,
+        candidate_count: Any = None,
+        scored_candidate_count: Any = None,
+        avg_context_chars: Any = None,
+        description: str,
+    ) -> None:
+        normalized_strategy = str(strategy or '').strip()
+        normalized_category = str(category or '').strip()
+        if not normalized_strategy or not normalized_category:
+            return
+        key = f'{normalized_category}::{normalized_strategy}'
+        bucket = retrieval_buckets.setdefault(
+            key,
+            {
+                'strategy': normalized_strategy,
+                'category': normalized_category,
+                'outputValues': [],
+                'retentionValues': [],
+                'compositeValues': [],
+                'latencyValues': [],
+                'candidateCount': 0,
+                'scoredCandidateCount': 0,
+                'avgContextCharsValues': [],
+                'description': description,
+            },
+        )
+        if isinstance(output_value, (int, float)):
+            bucket['outputValues'].append(_safe_float(output_value))
+        if isinstance(retention_value, (int, float)):
+            bucket['retentionValues'].append(_safe_float(retention_value))
+        if isinstance(composite_value, (int, float)):
+            bucket['compositeValues'].append(_safe_float(composite_value))
+        if isinstance(latency_value, (int, float)):
+            bucket['latencyValues'].append(_safe_float(latency_value))
+        if isinstance(candidate_count, (int, float)):
+            bucket['candidateCount'] += max(int(candidate_count), 0)
+        if isinstance(scored_candidate_count, (int, float)):
+            bucket['scoredCandidateCount'] += max(int(scored_candidate_count), 0)
+        if isinstance(avg_context_chars, (int, float)):
+            bucket['avgContextCharsValues'].append(_safe_float(avg_context_chars))
+        if description and not bucket.get('description'):
+            bucket['description'] = description
+
+    def _collect_paths(*patterns: str) -> list[Path]:
+        benchmark_root = workspace_root / 'benchmark_runs'
+        if not benchmark_root.exists():
+            return []
+        collected: list[Path] = []
+        seen: set[Path] = set()
+        for pattern in patterns:
+            for path in benchmark_root.glob(pattern):
+                if path not in seen and path.exists():
+                    seen.add(path)
+                    collected.append(path)
+        return sorted(collected)
+
+    def _phase45_category(benchmark_name: str) -> str:
+        normalized = str(benchmark_name or '').strip().replace('_', ' ')
+        if not normalized:
+            return 'Phase 4.5 retrieval'
+        return f'Phase 4.5 {normalized}'
+
     entries = load_model_comparison_log(get_phase7_model_comparison_log_path(workspace_root))
     summary = summarize_model_comparison_log(entries)
 
     model_rows: dict[str, dict[str, Any]] = {}
     prompt_profile_map: dict[str, dict[str, Any]] = {}
     strategy_buckets: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    retrieval_buckets: dict[str, dict[str, Any]] = {}
     use_case_labels: set[str] = set()
+    phase85_top_candidate_keys: set[str] = set()
 
     latest_timestamp = _format_timestamp(summary.get('latest_timestamp'))
+    latest_datetimes: list[datetime] = []
+    latest_phase7 = _safe_iso_datetime(latest_timestamp)
+    if latest_phase7 is not None:
+        latest_datetimes.append(latest_phase7)
 
     for entry in entries:
         retrieval_strategy = str(entry.get('retrieval_strategy') or 'manual_hybrid')
         strategy_buckets[retrieval_strategy].append(entry)
 
-        prompt_profile_name = str(entry.get('prompt_profile') or 'default') or 'default'
-        prompt_profile = prompt_profile_map.setdefault(
+        prompt_profile_name = _normalize_prompt_profile_name(entry.get('prompt_profile') or 'default')
+        prompt_profile = _ensure_prompt_profile(
             prompt_profile_name,
-            {
-                'id': prompt_profile_name.replace(' ', '-').lower(),
-                'name': prompt_profile_name,
-                'description': f'{prompt_profile_name} prompt profile observed in recorded product comparison runs.',
-                'metrics': ['use case fit', 'groundedness', 'format adherence', 'latency'],
-                'models': [],
-            },
+            description=f'{prompt_profile_name} prompt profile observed in recorded product comparison runs.',
+            metrics=['use case fit', 'groundedness', 'format adherence', 'latency'],
         )
+        prompt_profile['runCount'] += 1
 
         benchmark_use_case = str(entry.get('benchmark_use_case') or '').strip()
         if benchmark_use_case:
@@ -1738,54 +2435,330 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
         for candidate in entry.get('candidate_results') or []:
             if not isinstance(candidate, dict):
                 continue
-
             model_name = str(candidate.get('model_effective') or candidate.get('model_requested') or 'unknown')
             provider_name = str(candidate.get('provider_effective') or candidate.get('provider_requested') or 'unknown')
-            key = f'{provider_name}:{model_name}'
-
-            bucket = model_rows.setdefault(
-                key,
-                {
-                    'id': key,
-                    'family': model_name,
-                    'provider': provider_name,
-                    'model': model_name,
-                    'profileTag': None,
-                    'useCaseFitValues': [],
-                    'groundednessValues': [],
-                    'adherenceValues': [],
-                    'latencyValues': [],
-                    'outputCharsValues': [],
-                    'runtimeBucket': 'cloud',
-                    'quantization': 'cloud_managed',
-                    'runs': 0,
-                },
-            )
-
+            bucket = _ensure_model_row(provider_name, model_name)
             bucket['runs'] += 1
+            bucket['caseCount'] += 1
+            bucket['sourceFamilies'].add('phase7')
 
             adherence_value = candidate.get('format_adherence')
-            if isinstance(adherence_value, (int, float)):
-                bucket['adherenceValues'].append(_safe_float(adherence_value))
-
             groundedness_value = candidate.get('groundedness_score') if isinstance(candidate.get('groundedness_score'), (int, float)) else candidate.get('groundedness')
-            if isinstance(groundedness_value, (int, float)):
-                bucket['groundednessValues'].append(_safe_float(groundedness_value))
-
             use_case_fit_value = candidate.get('use_case_fit_score') if isinstance(candidate.get('use_case_fit_score'), (int, float)) else candidate.get('use_case_fit')
-            if isinstance(use_case_fit_value, (int, float)):
-                bucket['useCaseFitValues'].append(_safe_float(use_case_fit_value))
-
             latency_value = candidate.get('latency_s')
-            if isinstance(latency_value, (int, float)):
-                bucket['latencyValues'].append(_safe_float(latency_value))
+            _append_numeric(bucket, 'adherenceValues', adherence_value)
+            _append_numeric(bucket, 'groundednessValues', groundedness_value)
+            _append_numeric(bucket, 'useCaseFitValues', use_case_fit_value)
+            _append_numeric(bucket, 'latencyValues', latency_value)
+            _append_numeric(bucket, 'outputCharsValues', candidate.get('output_chars'))
 
-            output_chars_value = candidate.get('output_chars')
-            if isinstance(output_chars_value, (int, float)):
-                bucket['outputCharsValues'].append(_safe_float(output_chars_value))
+            _append_numeric(prompt_profile, 'adherenceValues', adherence_value)
+            _append_numeric(prompt_profile, 'groundednessValues', groundedness_value)
+            _append_numeric(prompt_profile, 'useCaseFitValues', use_case_fit_value)
+            _append_numeric(prompt_profile, 'latencyValues', latency_value)
 
             if model_name not in prompt_profile['models']:
                 prompt_profile['models'].append(model_name)
+
+    phase8_bundle_paths = _collect_paths(
+        'phase8_5_matrix/*/aggregated/summary.json',
+        'phase8_5_round1/*/aggregated/summary.json',
+        'phase8_5_matrix_campaigns/*/aggregated/summary.json',
+        'phase8_5_matrix_campaigns/*/group_runs/*/aggregated/summary.json',
+    )
+    phase8_generation_paths = _collect_paths(
+        'phase8_5_matrix/*/aggregated/generation_summary.json',
+        'phase8_5_round1/*/aggregated/generation_summary.json',
+        'phase8_5_matrix_campaigns/*/aggregated/generation_summary.json',
+        'phase8_5_matrix_campaigns/*/group_runs/*/aggregated/generation_summary.json',
+    )
+    phase8_embedding_paths = _collect_paths(
+        'phase8_5_matrix/*/aggregated/embedding_summary.json',
+        'phase8_5_round1/*/aggregated/embedding_summary.json',
+        'phase8_5_matrix_campaigns/*/aggregated/embedding_summary.json',
+        'phase8_5_matrix_campaigns/*/group_runs/*/aggregated/embedding_summary.json',
+    )
+    phase8_reranker_paths = _collect_paths(
+        'phase8_5_matrix/*/aggregated/reranker_summary.json',
+        'phase8_5_round1/*/aggregated/reranker_summary.json',
+        'phase8_5_matrix_campaigns/*/aggregated/reranker_summary.json',
+        'phase8_5_matrix_campaigns/*/group_runs/*/aggregated/reranker_summary.json',
+    )
+    phase8_ocr_paths = _collect_paths(
+        'phase8_5_matrix/*/aggregated/ocr_vlm_summary.json',
+        'phase8_5_round1/*/aggregated/ocr_vlm_summary.json',
+        'phase8_5_matrix_campaigns/*/aggregated/ocr_vlm_summary.json',
+        'phase8_5_matrix_campaigns/*/group_runs/*/aggregated/ocr_vlm_summary.json',
+    )
+    phase45_result_paths = _collect_paths('20260315_011241_phase_4_5_all/*/*/*/result.json')
+    doc_review_paths = _collect_paths('document_review_findings_experiment*/results.json')
+
+    unique_generation_payloads: set[str] = set()
+    for path in phase8_generation_paths:
+        if 'phase8_5_matrix_campaigns' in str(path) and '/group_runs/' not in str(path):
+            continue
+        payload = _load_json_payload(path)
+        if not isinstance(payload, dict):
+            continue
+        payload_key = _stable_payload_key(payload)
+        if payload_key in unique_generation_payloads:
+            continue
+        unique_generation_payloads.add(payload_key)
+        use_case_labels.add('phase8_5_generation')
+
+        top_candidate = payload.get('top_candidate') if isinstance(payload.get('top_candidate'), dict) else {}
+        top_provider = str(top_candidate.get('provider') or '').strip()
+        top_model = str(top_candidate.get('model_effective') or top_candidate.get('model') or '').strip()
+        if top_provider and top_model:
+            phase85_top_candidate_keys.add(f'{top_provider}:{top_model}')
+
+        for candidate in payload.get('candidate_ranking') or []:
+            if not isinstance(candidate, dict):
+                continue
+            model_name = str(candidate.get('model_effective') or candidate.get('model') or 'unknown')
+            provider_name = str(candidate.get('provider') or 'unknown')
+            bucket = _ensure_model_row(provider_name, model_name)
+            bucket['runs'] += 1
+            bucket['caseCount'] += max(_safe_int(candidate.get('case_count') or 0), 1)
+            bucket['sourceFamilies'].add('phase8_generation')
+            _append_numeric(bucket, 'useCaseFitValues', candidate.get('avg_use_case_fit_score'))
+            _append_numeric(bucket, 'groundednessValues', candidate.get('avg_groundedness_score'))
+            _append_numeric(bucket, 'adherenceValues', candidate.get('avg_format_adherence'))
+            _append_numeric(bucket, 'latencyValues', candidate.get('avg_latency_s'))
+            _append_numeric(bucket, 'outputCharsValues', candidate.get('avg_total_tokens'))
+
+    for path in doc_review_paths:
+        payload = _load_json_payload(path)
+        if not isinstance(payload, dict):
+            continue
+        generated_at = _safe_iso_datetime(payload.get('generated_at'))
+        if generated_at is not None:
+            latest_datetimes.append(generated_at)
+
+        for config in payload.get('configs') or []:
+            if not isinstance(config, dict):
+                continue
+            profile_name = _normalize_prompt_profile_name(config.get('prompt_style') or config.get('key') or config.get('label') or 'document_review_findings')
+            prompt_profile = _ensure_prompt_profile(
+                profile_name,
+                description=f'{profile_name} findings experiment profile observed in benchmark_runs document review bundles.',
+                metrics=['decision score', 'grounding ratio', 'structured success', 'latency'],
+            )
+            model_name = str(config.get('findings_model') or config.get('base_model') or '').strip()
+            if model_name and model_name not in prompt_profile['models']:
+                prompt_profile['models'].append(model_name)
+            use_case_labels.add('document_review_findings')
+
+        for run in payload.get('runs') or []:
+            if not isinstance(run, dict):
+                continue
+            config = run.get('config') if isinstance(run.get('config'), dict) else {}
+            profile_name = _normalize_prompt_profile_name(config.get('prompt_style') or config.get('key') or config.get('label') or 'document_review_findings')
+            prompt_profile = _ensure_prompt_profile(
+                profile_name,
+                description=f'{profile_name} findings experiment profile observed in benchmark_runs document review bundles.',
+                metrics=['decision score', 'grounding ratio', 'structured success', 'latency'],
+            )
+            prompt_profile['runCount'] += 1
+            model_name = str(config.get('findings_model') or config.get('base_model') or '').strip()
+            if model_name and model_name not in prompt_profile['models']:
+                prompt_profile['models'].append(model_name)
+            scores = run.get('scores') if isinstance(run.get('scores'), dict) else {}
+            _append_numeric(prompt_profile, 'decisionValues', scores.get('decision_score'))
+            _append_numeric(prompt_profile, 'groundingValues', scores.get('grounding_ratio'))
+            structured_success = run.get('structured_success')
+            if isinstance(structured_success, bool):
+                prompt_profile['structuredValues'].append(1.0 if structured_success else 0.0)
+            _append_numeric(prompt_profile, 'latencyValues', run.get('duration_s'))
+            use_case_labels.add('document_review_findings')
+
+    unique_embedding_payloads: set[str] = set()
+    for path in phase8_embedding_paths:
+        if 'phase8_5_matrix_campaigns' in str(path) and '/group_runs/' not in str(path):
+            continue
+        payload = _load_json_payload(path)
+        if not isinstance(payload, dict):
+            continue
+        payload_key = _stable_payload_key(payload)
+        if payload_key in unique_embedding_payloads:
+            continue
+        unique_embedding_payloads.add(payload_key)
+        use_case_labels.add('phase8_5_embeddings')
+
+        for candidate in payload.get('candidate_ranking') or []:
+            if not isinstance(candidate, dict):
+                continue
+            strategy_parts = [
+                str(candidate.get('model_effective') or candidate.get('model') or candidate.get('candidate') or 'embedding').strip(),
+            ]
+            subset_label = str(candidate.get('subset_label') or candidate.get('subset_id') or '').strip()
+            if subset_label:
+                strategy_parts.append(subset_label)
+            strategy_label = ' · '.join(part for part in strategy_parts if part)
+            _register_retrieval_observation(
+                strategy=strategy_label,
+                category='Phase 8.5 embeddings',
+                output_value=candidate.get('avg_hit_at_1') if isinstance(candidate.get('avg_hit_at_1'), (int, float)) else candidate.get('avg_mrr'),
+                retention_value=candidate.get('avg_hit_at_k'),
+                composite_value=candidate.get('avg_mrr'),
+                latency_value=candidate.get('avg_total_wall_time_s') if isinstance(candidate.get('avg_total_wall_time_s'), (int, float)) else candidate.get('avg_retrieval_seconds'),
+                candidate_count=candidate.get('case_count'),
+                scored_candidate_count=candidate.get('case_count') if isinstance(candidate.get('avg_mrr'), (int, float)) else 0,
+                description=f"Phase 8.5 embeddings · {subset_label or 'retrieval'}",
+            )
+
+    unique_reranker_payloads: set[str] = set()
+    for path in phase8_reranker_paths:
+        if 'phase8_5_matrix_campaigns' in str(path) and '/group_runs/' not in str(path):
+            continue
+        payload = _load_json_payload(path)
+        if not isinstance(payload, dict):
+            continue
+        payload_key = _stable_payload_key(payload)
+        if payload_key in unique_reranker_payloads:
+            continue
+        unique_reranker_payloads.add(payload_key)
+        use_case_labels.add('phase8_5_rerankers')
+
+        for candidate in payload.get('candidate_ranking') or []:
+            if not isinstance(candidate, dict):
+                continue
+            strategy_label = str(candidate.get('model_effective') or candidate.get('model') or candidate.get('candidate') or 'reranker').strip()
+            _register_retrieval_observation(
+                strategy=strategy_label,
+                category='Phase 8.5 rerankers',
+                output_value=candidate.get('avg_hit_at_1') if isinstance(candidate.get('avg_hit_at_1'), (int, float)) else candidate.get('avg_mrr'),
+                retention_value=candidate.get('avg_hit_at_k'),
+                composite_value=candidate.get('avg_mrr'),
+                latency_value=candidate.get('avg_total_wall_time_s') if isinstance(candidate.get('avg_total_wall_time_s'), (int, float)) else candidate.get('avg_reranking_seconds'),
+                candidate_count=candidate.get('case_count'),
+                scored_candidate_count=candidate.get('case_count') if isinstance(candidate.get('avg_mrr'), (int, float)) else 0,
+                description='Phase 8.5 reranker quality benchmark.',
+            )
+
+    unique_ocr_payloads: set[str] = set()
+    for path in phase8_ocr_paths:
+        if 'phase8_5_matrix_campaigns' in str(path) and '/group_runs/' not in str(path):
+            continue
+        payload = _load_json_payload(path)
+        if not isinstance(payload, dict):
+            continue
+        payload_key = _stable_payload_key(payload)
+        if payload_key in unique_ocr_payloads:
+            continue
+        unique_ocr_payloads.add(payload_key)
+        use_case_labels.add('phase8_5_ocr_vlm')
+
+        for variant in payload.get('variant_ranking') or []:
+            if not isinstance(variant, dict):
+                continue
+            case_count = _safe_int(variant.get('case_count') or 0)
+            helped_cases = _safe_int(variant.get('helped_cases') or 0)
+            retention_ratio = helped_cases / max(case_count, 1) if case_count > 0 else None
+            _register_retrieval_observation(
+                strategy=str(variant.get('variant') or 'ocr_variant'),
+                category='Phase 8.5 OCR / VLM',
+                output_value=variant.get('avg_f1'),
+                retention_value=retention_ratio,
+                composite_value=variant.get('avg_f1'),
+                latency_value=variant.get('avg_latency_s'),
+                candidate_count=variant.get('case_count'),
+                scored_candidate_count=variant.get('case_count') if isinstance(variant.get('avg_f1'), (int, float)) else 0,
+                description=f"Phase 8.5 OCR/VLM variant · {variant.get('resolved_runtime_family') or variant.get('requested_runtime_family') or 'runtime'}",
+            )
+
+    phase45_root_name = '20260315_011241_phase_4_5_all'
+    phase45_timestamp = _safe_iso_datetime(phase45_root_name.split('_phase_')[0].replace('_', 'T', 1).replace('_', ':', 2))
+    if phase45_timestamp is not None:
+        latest_datetimes.append(phase45_timestamp)
+
+    for path in phase45_result_paths:
+        payload = _load_json_payload(path)
+        if not isinstance(payload, dict):
+            continue
+        metrics = payload.get('metrics') if isinstance(payload.get('metrics'), dict) else {}
+        settings = payload.get('settings') if isinstance(payload.get('settings'), dict) else {}
+        benchmark_name = str(payload.get('benchmark') or '').strip()
+        strategy_label = str(payload.get('label') or path.parent.name).strip() or path.parent.name
+        description_parts = []
+        embedding_model = str(settings.get('embedding_model') or '').strip()
+        if embedding_model:
+            description_parts.append(embedding_model)
+        top_k = settings.get('top_k')
+        if isinstance(top_k, (int, float)):
+            description_parts.append(f'top-k {int(top_k)}')
+        _register_retrieval_observation(
+            strategy=strategy_label,
+            category=_phase45_category(benchmark_name),
+            output_value=metrics.get('hit_at_1') if isinstance(metrics.get('hit_at_1'), (int, float)) else metrics.get('mrr'),
+            retention_value=metrics.get('hit_at_k'),
+            composite_value=metrics.get('mrr'),
+            latency_value=metrics.get('avg_retrieval_seconds'),
+            candidate_count=metrics.get('question_count'),
+            scored_candidate_count=metrics.get('question_count') if isinstance(metrics.get('mrr'), (int, float)) else 0,
+            description=' · '.join(description_parts) or 'Phase 4.5 retrieval benchmark bundle.',
+        )
+        use_case_labels.add(f'phase4_5_{benchmark_name}' if benchmark_name else 'phase4_5_retrieval')
+
+    for strategy, strategy_entries in strategy_buckets.items():
+        candidate_rows = [
+            candidate
+            for entry in strategy_entries
+            for candidate in (entry.get('candidate_results') or [])
+            if isinstance(candidate, dict)
+        ]
+        adherence_values = [_safe_float(candidate.get('format_adherence')) for candidate in candidate_rows if isinstance(candidate.get('format_adherence'), (int, float))]
+        groundedness_values = [
+            _safe_float(candidate.get('groundedness_score') if isinstance(candidate.get('groundedness_score'), (int, float)) else candidate.get('groundedness'))
+            for candidate in candidate_rows
+            if isinstance(candidate.get('groundedness_score'), (int, float)) or isinstance(candidate.get('groundedness'), (int, float))
+        ]
+        retention_values = [
+            _safe_float(candidate.get('used_chunks') or 0.0) / max((_safe_float(candidate.get('used_chunks') or 0.0) + _safe_float(candidate.get('dropped_chunks') or 0.0)), 1.0)
+            for candidate in candidate_rows
+        ]
+        latency_values = [_safe_float(candidate.get('latency_s')) for candidate in candidate_rows if isinstance(candidate.get('latency_s'), (int, float))]
+        context_char_values = [_safe_float(candidate.get('context_preview_chars')) for candidate in candidate_rows if isinstance(candidate.get('context_preview_chars'), (int, float))]
+        composite_values = [
+            (float(candidate.get('format_adherence')) * 0.5) + (
+                float(candidate.get('groundedness_score') if isinstance(candidate.get('groundedness_score'), (int, float)) else candidate.get('groundedness'))
+                * 0.5
+            )
+            for candidate in candidate_rows
+            if isinstance(candidate.get('format_adherence'), (int, float))
+            and (isinstance(candidate.get('groundedness_score'), (int, float)) or isinstance(candidate.get('groundedness'), (int, float)))
+        ]
+
+        _register_retrieval_observation(
+            strategy=strategy,
+            category='Phase 7 product comparisons',
+            output_value=round(_mean(adherence_values), 3) if adherence_values else None,
+            retention_value=round(min(_mean(retention_values), 1.0), 3) if retention_values else None,
+            composite_value=round(_mean(composite_values), 3) if composite_values else None,
+            latency_value=round(_mean(latency_values), 3) if latency_values else None,
+            candidate_count=len(candidate_rows),
+            scored_candidate_count=len(composite_values),
+            avg_context_chars=round(_mean(context_char_values), 0) if context_char_values else None,
+            description=f'{strategy.replace("_", " ")} derived from persisted product comparison runs.',
+        )
+
+    for prompt_profile in prompt_profile_map.values():
+        metric_summary: dict[str, Any] = {}
+        if prompt_profile.get('useCaseFitValues'):
+            metric_summary['useCaseFit'] = round(_mean(prompt_profile['useCaseFitValues']), 3)
+        if prompt_profile.get('groundednessValues'):
+            metric_summary['groundedness'] = round(_mean(prompt_profile['groundednessValues']), 3)
+        if prompt_profile.get('adherenceValues'):
+            metric_summary['adherence'] = round(_mean(prompt_profile['adherenceValues']), 3)
+        if prompt_profile.get('decisionValues'):
+            metric_summary['decisionScore'] = round(_mean(prompt_profile['decisionValues']), 3)
+        if prompt_profile.get('groundingValues'):
+            metric_summary['groundingRatio'] = round(_mean(prompt_profile['groundingValues']), 3)
+        if prompt_profile.get('structuredValues'):
+            metric_summary['structuredSuccess'] = round(_mean(prompt_profile['structuredValues']), 3)
+        if prompt_profile.get('latencyValues'):
+            metric_summary['latency'] = round(_mean(prompt_profile['latencyValues']), 3)
+        prompt_profile['metricSummary'] = metric_summary
 
     models: list[dict[str, Any]] = []
     for row in model_rows.values():
@@ -1818,7 +2791,9 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
                 'runtimeBucket': row['runtimeBucket'],
                 'quantization': row['quantization'],
                 'runs': row['runs'],
+                'caseCount': row['caseCount'],
                 'scoreStatus': score_status,
+                'sourceFamilies': sorted(str(item) for item in row['sourceFamilies']),
                 'metricCoverage': {
                     'useCaseFit': len(use_case_fit_values),
                     'groundedness': len(groundedness_values),
@@ -1854,15 +2829,19 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
     if scored_models:
         scored_models[0]['profileTag'] = 'Recommended production'
 
-    if models:
-        fastest_candidates = [item for item in models if isinstance(item.get('latency'), (int, float))]
-        if fastest_candidates:
-            fastest = min(fastest_candidates, key=lambda item: float(item.get('latency') or 10**9))
-            if fastest['id'] != scored_models[0]['id'] if scored_models else True:
-                fastest['profileTag'] = 'Fastest observed'
-        for item in models:
-            if item['provider'] not in {'ollama', 'ollama_hosted'} and not item.get('profileTag'):
-                item['profileTag'] = 'External reference'
+    fastest_candidates = [item for item in models if isinstance(item.get('latency'), (int, float))]
+    if fastest_candidates:
+        fastest = min(fastest_candidates, key=lambda item: float(item.get('latency') or 10**9))
+        if fastest['id'] != scored_models[0]['id'] if scored_models else True:
+            fastest['profileTag'] = 'Fastest observed'
+
+    for item in models:
+        if item['id'] in phase85_top_candidate_keys and not item.get('profileTag'):
+            item['profileTag'] = 'Phase 8.5 winner'
+        if item['provider'] not in {'ollama', 'ollama_hosted', 'huggingface_server', 'huggingface_local'} and not item.get('profileTag'):
+            item['profileTag'] = 'External reference'
+        if not item.get('profileTag') and item.get('scoreStatus') == 'partial':
+            item['profileTag'] = 'Benchmark candidate'
 
     provider_summary: list[dict[str, Any]] = []
     grouped_providers: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -1891,37 +2870,24 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
     )
 
     retrieval_observations: list[dict[str, Any]] = []
-    for strategy, strategy_entries in strategy_buckets.items():
-        candidate_rows = [candidate for entry in strategy_entries for candidate in (entry.get('candidate_results') or []) if isinstance(candidate, dict)]
-        adherence_values = [_safe_float(candidate.get('format_adherence')) for candidate in candidate_rows if isinstance(candidate.get('format_adherence'), (int, float))]
-        groundedness_values = [
-            _safe_float(candidate.get('groundedness_score') if isinstance(candidate.get('groundedness_score'), (int, float)) else candidate.get('groundedness'))
-            for candidate in candidate_rows
-            if isinstance(candidate.get('groundedness_score'), (int, float)) or isinstance(candidate.get('groundedness'), (int, float))
-        ]
-        retention_values = [
-            _safe_float(candidate.get('used_chunks') or 0.0) / max((_safe_float(candidate.get('used_chunks') or 0.0) + _safe_float(candidate.get('dropped_chunks') or 0.0)), 1.0)
-            for candidate in candidate_rows
-        ]
-        latency_values = [_safe_float(candidate.get('latency_s')) for candidate in candidate_rows if isinstance(candidate.get('latency_s'), (int, float))]
-        context_char_values = [_safe_float(candidate.get('context_preview_chars')) for candidate in candidate_rows if isinstance(candidate.get('context_preview_chars'), (int, float))]
-        composite_values = [
-            (float(candidate.get('format_adherence')) * 0.5) + (float(candidate.get('groundedness_score') if isinstance(candidate.get('groundedness_score'), (int, float)) else candidate.get('groundedness')) * 0.5)
-            for candidate in candidate_rows
-            if isinstance(candidate.get('format_adherence'), (int, float)) and (isinstance(candidate.get('groundedness_score'), (int, float)) or isinstance(candidate.get('groundedness'), (int, float)))
-        ]
-
+    for bucket in retrieval_buckets.values():
+        output_values = list(bucket['outputValues'])
+        retention_values = list(bucket['retentionValues'])
+        composite_values = list(bucket['compositeValues'])
+        latency_values = list(bucket['latencyValues'])
+        avg_context_values = list(bucket['avgContextCharsValues'])
         retrieval_observations.append(
             {
-                'strategy': strategy,
-                'outputDiscipline': round(_mean(adherence_values), 3) if adherence_values else None,
+                'strategy': bucket['strategy'],
+                'category': bucket['category'],
+                'outputDiscipline': round(_mean(output_values), 3) if output_values else None,
                 'contextRetention': round(min(_mean(retention_values), 1.0), 3) if retention_values else None,
                 'composite': round(_mean(composite_values), 3) if composite_values else None,
                 'latency': round(_mean(latency_values), 3) if latency_values else None,
-                'candidateCount': len(candidate_rows),
-                'scoredCandidateCount': len(composite_values),
-                'avgContextChars': round(_mean(context_char_values), 0) if context_char_values else None,
-                'description': f'{strategy.replace("_", " ")} derived from recorded benchmark runs for this workspace.',
+                'candidateCount': bucket['candidateCount'],
+                'scoredCandidateCount': bucket['scoredCandidateCount'],
+                'avgContextChars': round(_mean(avg_context_values), 0) if avg_context_values else None,
+                'description': str(bucket.get('description') or ''),
             }
         )
     retrieval_observations.sort(
@@ -1929,6 +2895,7 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
             0 if item.get('composite') is not None else 1,
             -(item.get('composite') or 0),
             item.get('latency') if isinstance(item.get('latency'), (int, float)) else 10**9,
+            item.get('strategy') or '',
         )
     )
 
@@ -1941,7 +2908,6 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
                 'detail': f"{round(float(scored_models[0]['useCaseFit']) * 100)}% use-case fit across {scored_models[0]['metricCoverage']['useCaseFit']} scored run(s)",
             }
         )
-    fastest_candidates = [item for item in models if isinstance(item.get('latency'), (int, float))]
     if fastest_candidates:
         fastest_model = min(fastest_candidates, key=lambda item: float(item.get('latency') or 10**9))
         leaderboard_highlights.append(
@@ -1961,14 +2927,80 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
                 'detail': f"{round(float(best_grounded['groundedness']) * 100)}% groundedness across {best_grounded['metricCoverage']['groundedness']} scored run(s)",
             }
         )
+    retrieval_candidates = [item for item in retrieval_observations if isinstance(item.get('composite'), (int, float))]
+    if retrieval_candidates:
+        top_retrieval = retrieval_candidates[0]
+        leaderboard_highlights.append(
+            {
+                'label': 'Top retrieval quality',
+                'model': top_retrieval['strategy'],
+                'detail': f"{round(float(top_retrieval['composite']) * 100)}% composite in {top_retrieval['category']}",
+            }
+        )
 
-    notes = ['Benchmarks owns model-vs-model tradeoff evaluation from persisted comparison runs, not live product traffic.']
+    phase85_case_count = 0
+    for path in phase8_bundle_paths:
+        bundle_payload = _load_json_payload(path)
+        if isinstance(bundle_payload, dict):
+            phase85_case_count += _safe_int(bundle_payload.get('total_cases') or 0)
+
+    total_runs = _safe_int(summary.get('total_runs')) + len(phase8_bundle_paths) + len(phase45_result_paths) + len(doc_review_paths)
+    source_breakdown = []
+    if entries:
+        source_breakdown.append(
+            {
+                'id': 'phase7',
+                'label': 'Phase 7 comparison log',
+                'bundles': 1,
+                'runs': _safe_int(summary.get('total_runs')),
+                'detail': 'Persisted product comparison runs already recorded in this workspace.',
+            }
+        )
+    if phase8_bundle_paths:
+        source_breakdown.append(
+            {
+                'id': 'phase8_5',
+                'label': 'Phase 8.5 benchmark bundles',
+                'bundles': len(phase8_bundle_paths),
+                'runs': len(phase8_bundle_paths),
+                'detail': 'Generation, embeddings, rerankers, and OCR / VLM benchmark outputs under benchmark_runs.',
+            }
+        )
+    if phase45_result_paths:
+        source_breakdown.append(
+            {
+                'id': 'phase4_5',
+                'label': 'Phase 4.5 retrieval sweeps',
+                'bundles': len(phase45_result_paths),
+                'runs': len(phase45_result_paths),
+                'detail': 'Embedding model, context-window, and retrieval-tuning result bundles.',
+            }
+        )
+    if doc_review_paths:
+        source_breakdown.append(
+            {
+                'id': 'document_review_findings',
+                'label': 'Document review findings experiments',
+                'bundles': len(doc_review_paths),
+                'runs': len(doc_review_paths),
+                'detail': 'Structured findings experiments captured in benchmark_runs.',
+            }
+        )
+
+    latest_recorded_at = None
+    if latest_datetimes:
+        latest_candidate = max(latest_datetimes)
+        latest_recorded_at = latest_candidate.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+
+    notes = ['Benchmarks now merges persisted phase7 comparisons with benchmark_runs bundles that exist inside this workspace.']
+    if phase45_result_paths:
+        notes.append('Phase 4.5 retrieval sweeps contribute retrieval observations but do not get mixed into the response-model leaderboard.')
     if partially_scored_models:
         notes.append('Some historical rows predate groundedness/use-case-fit scoring; unmeasured metrics remain visible as not scored instead of being inferred.')
 
     meta = _runtime_meta(workspace_root, notes=notes)
-    if latest_timestamp:
-        meta['updated_at'] = latest_timestamp
+    if latest_recorded_at:
+        meta['updated_at'] = latest_recorded_at
 
     scored_candidate_count = sum(item['metricCoverage']['useCaseFit'] for item in models)
     best_groundedness = max((float(item['groundedness']) for item in grounded_candidates), default=None) if grounded_candidates else None
@@ -1977,11 +3009,11 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
     return {
         'ok': True,
         'meta': meta,
-        'status': _derive_benchmark_surface_status(latest_timestamp, has_models=bool(models)),
+        'status': _derive_benchmark_surface_status(latest_recorded_at or latest_timestamp, has_models=bool(models)),
         'degraded_reason': (
-            'No phase7 model comparison log has been recorded yet.'
-            if not models
-            else 'Recorded benchmark runs exist, but this workspace has no scored use-case-fit telemetry yet.'
+            'No recorded benchmark bundle was found yet.'
+            if total_runs == 0
+            else 'Recorded benchmark bundles exist, but this workspace has no scored use-case-fit telemetry yet.'
             if not scored_models
             else None
         ),
@@ -1995,14 +3027,29 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
             'bestGroundedness': round(best_groundedness, 3) if isinstance(best_groundedness, (int, float)) else None,
             'fastestLatency': round(fastest_latency, 3) if isinstance(fastest_latency, (int, float)) else None,
             'bestModel': scored_models[0]['model'] if scored_models else None,
-            'totalRuns': _safe_int(summary.get('total_runs')),
-            'lastRecordedAt': latest_timestamp,
+            'totalRuns': total_runs,
+            'lastRecordedAt': latest_recorded_at or latest_timestamp,
+            'sourceBundleCount': sum(item['bundles'] for item in source_breakdown),
+            'phase85CaseCount': phase85_case_count,
+            'phase85WinnerCount': len(phase85_top_candidate_keys),
         },
         'models': models,
-        'presets': list(prompt_profile_map.values()),
+        'presets': [
+            {
+                'id': preset['id'],
+                'name': preset['name'],
+                'description': preset['description'],
+                'metrics': preset['metrics'],
+                'models': preset['models'],
+                'runCount': preset.get('runCount') or 0,
+                'metricSummary': preset.get('metricSummary') or {},
+            }
+            for preset in prompt_profile_map.values()
+        ],
         'providerSummary': provider_summary,
         'leaderboardHighlights': leaderboard_highlights,
         'retrievalObservations': retrieval_observations,
+        'sourceBreakdown': source_breakdown,
     }
 
 
@@ -2543,27 +3590,37 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
     worklog = load_evidenceops_worklog(get_phase95_evidenceops_worklog_path(workspace_root))
     worklog_summary = summarize_evidenceops_worklog(worklog)
     sorted_worklog = _sorted_worklog_entries(worklog)
+    latest_action_window = 10
+    open_statuses = {'recommended', 'open', 'pending', 'suggested', 'in_progress'}
+    open_actions = [entry for entry in actions if str(entry.get('status') or '').strip().lower() in open_statuses]
+    latest_actions = actions[:latest_action_window]
+    latest_open_actions = sum(1 for entry in latest_actions if str(entry.get('status') or '').strip().lower() in open_statuses)
+    repository_tool_last_call = _latest_worklog_timestamp(sorted_worklog, tool_names={'local_repository_scan'}, operations={'repository_sync', 'repository_search'})
+    action_tool_last_call = _latest_worklog_timestamp(sorted_worklog, tool_names={'action_store'}, operations={'action_update'}) or _format_timestamp(action_summary.get('latest_created_at'))
+    worklog_tool_last_call = _latest_worklog_timestamp(sorted_worklog)
+    action_store_available = bool(actions) or get_phase95_evidenceops_action_store_path(workspace_root).exists()
+    worklog_available = bool(worklog) or get_phase95_evidenceops_worklog_path(workspace_root).exists()
 
-    tools = [
-        {
-            'name': 'local_repository_scan',
-            'description': 'Scans the grounded evidence repository for searchable documents.',
-            'status': 'active' if repository_documents else 'degraded',
-            'lastCall': _latest_worklog_timestamp(sorted_worklog, tool_names={'local_repository_scan'}, operations={'repository_sync', 'repository_search'}),
-        },
-        {
-            'name': 'action_store',
-            'description': 'Persists EvidenceOps action recommendations and operator follow-up.',
-            'status': 'active' if actions else 'inactive',
-            'lastCall': _latest_worklog_timestamp(sorted_worklog, tool_names={'action_store'}, operations={'action_update'}) or _format_timestamp(action_summary.get('latest_created_at')),
-        },
-        {
-            'name': 'worklog_registry',
-            'description': 'Tracks EvidenceOps operation telemetry and readiness.',
-            'status': 'active' if worklog else 'degraded',
-            'lastCall': _latest_worklog_timestamp(sorted_worklog),
-        },
-    ]
+    tools = []
+    for tool in EVIDENCEOPS_MCP_TOOL_CATALOG:
+        surface = str(tool.get('surface') or '').strip()
+        if surface == 'repository':
+            status = 'active' if repository_documents else 'degraded'
+            last_call = repository_tool_last_call
+        elif surface == 'actions':
+            status = 'active' if action_store_available else 'inactive'
+            last_call = action_tool_last_call
+        else:
+            status = 'active' if worklog_available else 'inactive'
+            last_call = worklog_tool_last_call
+        tools.append(
+            {
+                'name': str(tool.get('name') or 'tool'),
+                'description': str(tool.get('description') or 'EvidenceOps MCP capability.'),
+                'status': status,
+                'lastCall': last_call,
+            }
+        )
 
     operation_rows = []
     for index, entry in enumerate(sorted_worklog[:12]):
@@ -2593,8 +3650,9 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
 
     status_counter: Counter[str] = Counter()
     action_rows = []
-    for entry in actions:
-        status = 'open' if str(entry.get('status') or '').strip() in {'recommended', 'open', 'pending'} else str(entry.get('status') or 'open')
+    for entry in open_actions:
+        normalized_status = str(entry.get('status') or '').strip().lower() or 'open'
+        status = 'open' if normalized_status in {'recommended', 'open', 'pending', 'suggested'} else normalized_status
         owner = str(entry.get('owner') or 'Unassigned')
         due_date = str(entry.get('due_date') or '—')
         status_counter[status] += 1
@@ -2676,13 +3734,16 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
             'toolsTotal': len(tools),
             'activeTools': sum(1 for tool in tools if tool['status'] == 'active'),
             'openActions': _safe_int(action_summary.get('open_actions')),
+            'latestOpenActions': latest_open_actions,
+            'latestActionWindow': latest_action_window,
             'operationsCount': len(operation_rows),
             'repositoryDocumentCount': _safe_int(repository_summary.get('total_documents')),
             'repositoryRoot': str(repository_root),
             'lastSyncAt': _latest_repository_sync_timestamp(sorted_worklog, previous_repository_snapshot) or _format_timestamp(worklog_summary.get('latest_timestamp')) or _format_timestamp(action_summary.get('latest_created_at')),
             'overdueActions': _safe_int(action_summary.get('overdue_actions')),
             'unassignedActions': _safe_int(action_summary.get('unassigned_open_actions')),
-            'needsReviewActions': sum(1 for entry in actions if bool(entry.get('needs_review'))),
+            'inProgressActions': sum(1 for entry in open_actions if str(entry.get('status') or '').strip().lower() == 'in_progress'),
+            'needsReviewActions': sum(1 for entry in open_actions if bool(entry.get('needs_review'))),
         },
         'repositoryStats': {
             'changedDocuments': changed_documents,
@@ -2785,11 +3846,15 @@ def sync_lab_evidenceops_state(workspace_root: Path) -> dict[str, Any]:
 
 
 def update_lab_evidenceops_action(workspace_root: Path, *, action_id: int, status: str | None = None, owner: str | None = None) -> dict[str, Any]:
+    resolved_operator = str(owner or 'AI Lab operator').strip() or 'AI Lab operator'
     updated = update_evidenceops_action_item(
         get_phase95_evidenceops_action_store_path(workspace_root),
         action_id=action_id,
         status=status,
         owner=owner,
+        approval_status='approved',
+        approval_reason='Operator update from the AI Lab EvidenceOps backlog surface.',
+        approved_by=resolved_operator,
     )
     if updated is None:
         raise KeyError(f'EvidenceOps action not found: {action_id}')

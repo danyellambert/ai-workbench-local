@@ -1,14 +1,17 @@
 import { motion } from 'framer-motion';
 import { KeyboardEvent, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageSquare, Send, FileText, Sparkles, Activity, Database, Clock, Gauge, AlertTriangle, Loader2, FolderClock } from 'lucide-react';
+import { Send, FileText, Sparkles, AlertTriangle, Loader2, FolderClock, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { AiLabSectionIntro, DataSourceBadge } from '@/components/ai-lab/AiLabSectionIntro';
 import { GlassCard } from '@/components/shared/ui-components';
-import { aiLabQueryKeys, createLabChatSession, getLabChatPage, sendLabChatMessage } from '@/lib/ai-lab-data';
-import type { LabChatMessage, LabChatMessageSource, LabChatSessionSummary, LabDocumentOption, LabTimelineEntry } from '@/lib/ai-lab-data';
+import { aiLabQueryKeys, createLabChatSession, deleteLabChatSession, getLabChatPage, sendLabChatMessage } from '@/lib/ai-lab-data';
+import { getProductDocumentLibrary, type ProductDocumentLibraryEntry } from '@/lib/product-api';
+import type { LabChatMessage, LabChatMessageSource, LabChatPageData, LabChatSessionSummary, LabDocumentOption, LabTimelineEntry } from '@/lib/ai-lab-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/lib/store';
+
+const CHAT_INPUT_MAX_CHARS = 2000;
 
 function prettifyMetricLabel(label: string) {
   return label
@@ -245,9 +248,60 @@ function normalizeDocuments(documents: unknown): LabDocumentOption[] {
   });
 }
 
+function productDocumentToLabOption(document: ProductDocumentLibraryEntry): LabDocumentOption {
+  return {
+    document_id: document.document_id,
+    name: document.name,
+    status: document.status,
+    chunk_count: document.chunk_count,
+    char_count: document.char_count,
+    indexed_at: document.indexed_at ?? null,
+    loader_strategy_label: document.loader_strategy_label ?? null,
+    size_bytes: document.size_bytes ?? null,
+    size_label: document.size_label ?? null,
+    source_type: document.source_type ?? null,
+    page_count: document.page_count ?? null,
+    warnings: document.warnings ?? [],
+  };
+}
+
+function mergeDocumentOptions(primary: LabDocumentOption[], secondary: LabDocumentOption[]): LabDocumentOption[] {
+  const byId = new Map<string, LabDocumentOption>();
+  for (const document of [...primary, ...secondary]) {
+    if (!document.document_id || byId.has(document.document_id)) continue;
+    byId.set(document.document_id, document);
+  }
+  return Array.from(byId.values());
+}
+
+function removeSessionFromPage(page: unknown, deletedSessionId: string): LabChatPageData | unknown {
+  if (!page || typeof page !== 'object') {
+    return page;
+  }
+
+  const chatPage = page as LabChatPageData;
+  const nextSessions = Array.isArray(chatPage.sessions)
+    ? chatPage.sessions.filter((session) => session.session_id !== deletedSessionId)
+    : [];
+  const activeWasDeleted = chatPage.active_session_id === deletedSessionId;
+  const nextActiveSessionId = activeWasDeleted ? (nextSessions[0]?.session_id ?? null) : chatPage.active_session_id;
+  const nextActiveSession = nextSessions.find((session) => session.session_id === nextActiveSessionId) ?? nextSessions[0] ?? null;
+
+  return {
+    ...chatPage,
+    sessions: nextSessions,
+    active_session_id: nextActiveSessionId,
+    active_session: nextActiveSession,
+    messages: activeWasDeleted ? [] : chatPage.messages,
+  };
+}
+
 export default function ChatPage() {
   const [input, setInput] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [documentPickerOpen, setDocumentPickerOpen] = useState(false);
+  const [documentFilter, setDocumentFilter] = useState('');
+  const [draftDocumentIds, setDraftDocumentIds] = useState<string[]>([]);
   const operatorPreferences = useAppStore((state) => state.operatorPreferences);
   const queryClient = useQueryClient();
 
@@ -258,28 +312,67 @@ export default function ChatPage() {
     refetchOnWindowFocus: false,
   });
 
+  const productDocumentLibraryQuery = useQuery({
+    queryKey: ['product-document-library'],
+    queryFn: getProductDocumentLibrary,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
   useEffect(() => {
     if (data?.active_session_id && data.active_session_id !== sessionId) {
       setSessionId(data.active_session_id);
     }
   }, [data?.active_session_id, sessionId]);
 
-  const selectedDocuments = useMemo(() => normalizeDocuments(data?.selected_documents), [data?.selected_documents]);
-  const selectedDocumentIds = useMemo(
-    () => selectedDocuments.map((document) => document.document_id).filter(Boolean),
-    [selectedDocuments],
+  const serverSelectedDocuments = useMemo(() => normalizeDocuments(data?.selected_documents), [data?.selected_documents]);
+  const productAvailableDocuments = useMemo(
+    () => (productDocumentLibraryQuery.data?.documents ?? [])
+      .filter((document) => document.status === 'indexed' || document.status === 'warning')
+      .map(productDocumentToLabOption),
+    [productDocumentLibraryQuery.data?.documents],
+  );
+  const availableDocuments = useMemo(() => {
+    const pageAvailableDocuments = normalizeDocuments((data as { available_documents?: unknown } | undefined)?.available_documents ?? data?.selected_documents);
+    return mergeDocumentOptions(productAvailableDocuments, pageAvailableDocuments);
+  }, [data, productAvailableDocuments]);
+  const serverSelectedDocumentIds = useMemo(
+    () => serverSelectedDocuments.map((document) => document.document_id).filter(Boolean),
+    [serverSelectedDocuments],
   );
   const messages = useMemo(() => normalizeMessages(data?.messages), [data?.messages]);
   const sessions = useMemo(() => normalizeSessions(data?.sessions), [data?.sessions]);
-  const sessionDiagnostics = useMemo(() => normalizeRows(data?.session_diagnostics), [data?.session_diagnostics]);
-  const retrievalQuality = useMemo(() => normalizeRows(data?.retrieval_quality), [data?.retrieval_quality]);
-  const groundingOverview = useMemo(() => normalizeRows(data?.grounding_overview), [data?.grounding_overview]);
   const sessionTimeline = useMemo<LabTimelineEntry[]>(() => (Array.isArray(data?.session_timeline) ? data.session_timeline as LabTimelineEntry[] : []), [data?.session_timeline]);
-  const chatSummary = data?.summary;
-  const metaNotes = useMemo(
-    () => (Array.isArray(data?.meta?.notes) ? data.meta.notes.filter((note): note is string => typeof note === 'string') : []),
-    [data?.meta?.notes],
+
+  useEffect(() => {
+    const availableSet = new Set(availableDocuments.map((document) => document.document_id));
+    const nextSelection = serverSelectedDocumentIds.filter((documentId) => availableSet.has(documentId));
+    setDraftDocumentIds((current) => {
+      const currentKey = current.join('|');
+      const nextKey = nextSelection.join('|');
+      return currentKey === nextKey ? current : nextSelection;
+    });
+  }, [sessionId, availableDocuments, serverSelectedDocumentIds]);
+
+  const selectedDocumentIds = draftDocumentIds;
+  const selectedDocuments = useMemo(
+    () => availableDocuments.filter((document) => selectedDocumentIds.includes(document.document_id)),
+    [availableDocuments, selectedDocumentIds],
   );
+  const filteredAvailableDocuments = useMemo(() => {
+    const normalizedFilter = documentFilter.trim().toLowerCase();
+    if (!normalizedFilter) {
+      return availableDocuments;
+    }
+    return availableDocuments.filter((document) => {
+      const haystack = [document.name, document.status, document.loader_strategy_label, document.source_type]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(normalizedFilter);
+    });
+  }, [availableDocuments, documentFilter]);
 
   const sendMutation = useMutation({
     mutationFn: async () => {
@@ -322,25 +415,39 @@ export default function ChatPage() {
     },
   });
 
-  const canSend = Boolean(data?.capabilities?.can_send);
-  const hasVisibleRuntimeError = isError || sendMutation.isError;
-  const shouldSuppressStaleProviderError = canSend && !hasVisibleRuntimeError;
-  const visibleMetaNotes = useMemo(
-    () => metaNotes.filter((note) => !(shouldSuppressStaleProviderError && /^HTTP Error\s+\d+:/i.test(note.trim()))),
-    [metaNotes, shouldSuppressStaleProviderError],
-  );
+  const deleteSessionMutation = useMutation({
+    mutationFn: async (targetSessionId: string) => deleteLabChatSession(targetSessionId),
+    onMutate: async (targetSessionId) => {
+      await queryClient.cancelQueries({ queryKey: ['ai-lab', 'chat'] });
+      setSessionId((current) => (current === targetSessionId ? null : current));
+      queryClient.setQueriesData({ queryKey: ['ai-lab', 'chat'] }, (cachedPage) => removeSessionFromPage(cachedPage, targetSessionId));
+    },
+    onSuccess: (response, deletedSessionId) => {
+      const nextSessionId = response.page.active_session_id ?? null;
+      setSessionId((current) => (current === deletedSessionId || current === null ? nextSessionId : current));
+      queryClient.setQueryData(aiLabQueryKeys.chat(nextSessionId), response.page);
+      queryClient.invalidateQueries({ queryKey: ['ai-lab', 'chat'] });
+    },
+    onError: (_error, deletedSessionId) => {
+      queryClient.setQueriesData({ queryKey: ['ai-lab', 'chat'] }, (cachedPage) => removeSessionFromPage(cachedPage, deletedSessionId));
+      setSessionId((current) => (current === deletedSessionId ? null : current));
+      queryClient.invalidateQueries({ queryKey: ['ai-lab', 'chat'] });
+    },
+  });
 
-  const retrievalStrategy = retrievalQuality.find((row) => row.label === 'Strategy')?.value ?? 'trace_only';
-  const topK = sessionDiagnostics.find((row) => row.label === 'Top-K')?.value ?? '—';
+  const hasVisibleRuntimeError = isError || sendMutation.isError;
   const activeSessionId = data?.active_session_id ?? sessionId ?? sessions[0]?.session_id ?? null;
   const activeSession = sessions.find((item) => item.session_id === activeSessionId) ?? sessions[0];
   const activeSessionError = activeSession?.last_error?.trim() ?? null;
-  const showActiveSessionError = Boolean(activeSessionError && !(shouldSuppressStaleProviderError && /^HTTP Error\s+\d+:/i.test(activeSessionError)));
-  const effectiveStatus = shouldSuppressStaleProviderError && data?.status === 'degraded' ? 'live' : data?.status;
+  const showActiveSessionError = Boolean(activeSessionError && !/^HTTP Error\s+\d+:/i.test(activeSessionError));
+  const effectiveStatus = data?.status === 'degraded' && !hasVisibleRuntimeError ? 'live' : data?.status;
   const activeStatusLabel = effectiveStatus === 'degraded' ? 'Degraded' : effectiveStatus === 'trace_only' ? 'Trace only' : 'Live';
-  const groundedRate = typeof chatSummary?.groundedMessageRate === 'number' ? Math.round(chatSummary.groundedMessageRate * 100) : 0;
-  const artifactCount = typeof chatSummary?.artifactCount === 'number' ? chatSummary.artifactCount : 0;
-  const avgSourcesPerAssistant = typeof chatSummary?.avgSourcesPerAssistant === 'number' ? chatSummary.avgSourcesPerAssistant : 0;
+  const canSend = availableDocuments.length > 0 && selectedDocumentIds.length > 0;
+  const sendDisabledReason = availableDocuments.length === 0
+    ? data?.capabilities?.reason ?? 'At least one indexed document is required to send grounded AI LAB chat messages.'
+    : selectedDocumentIds.length === 0
+      ? 'Select at least one document to ground the next turn.'
+      : null;
 
   const handleSend = async () => {
     if (!canSend || sendMutation.isPending || !input.trim()) {
@@ -363,19 +470,44 @@ export default function ChatPage() {
     await createSessionMutation.mutateAsync();
   };
 
+  const handleDeleteSession = async (targetSessionId: string) => {
+    if (deleteSessionMutation.isPending) {
+      return;
+    }
+    const targetSession = sessions.find((session) => session.session_id === targetSessionId);
+    const confirmed = window.confirm(`Delete session \"${targetSession?.title ?? 'AI Lab chat session'}\"?`);
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await deleteSessionMutation.mutateAsync(targetSessionId);
+    } catch {
+      // The session list is updated optimistically; stale or already-deleted sessions should not block cleanup.
+    }
+  };
+
+  const toggleDocumentSelection = (documentId: string) => {
+    setDraftDocumentIds((current) => {
+      if (current.includes(documentId)) {
+        return current.filter((item) => item !== documentId);
+      }
+      return [...current, documentId];
+    });
+  };
+
   return (
-    <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto h-[calc(100vh-3.5rem)] flex flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <AiLabSectionIntro
-        title="Document / Chat Experiments"
-        description="Diagnostic RAG surface for document interaction, retrieval quality assessment and grounding validation."
+    <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto h-[calc(100vh-3.5rem)] min-h-[calc(100vh-3.5rem)] flex flex-col overflow-y-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div data-tour="lab-document-experiments-header">
+        <AiLabSectionIntro
+          title="Document / Chat Experiments"
+        description="Grounded document Q&A surface for probing the selected evidence, validating answers and persisting useful chat traces."
         operatorQuestion="Is RAG helping or just adding noise and cost?"
         badges={[
           { label: activeStatusLabel, variant: effectiveStatus === 'degraded' ? 'warning' : effectiveStatus === 'trace_only' ? 'default' : 'success' },
-          { label: String(retrievalStrategy), variant: 'default' },
-          { label: `top-k: ${topK}`, variant: 'default' },
         ]}
         dataSource={data?.meta?.source}
-      />
+        />
+      </div>
 
       {(isError || sendMutation.isError) && (
         <GlassCard className="mb-4 border border-glow-warning/20 bg-glow-warning/5">
@@ -390,33 +522,9 @@ export default function ChatPage() {
         </GlassCard>
       )}
 
-      <div className="flex-1 flex gap-4 min-h-0">
-        <div className="flex-1 flex flex-col min-w-0">
-          {visibleMetaNotes.length ? (
-            <div className="mb-4 rounded-xl border border-border/50 bg-secondary/20 px-4 py-3 text-[11px] text-muted-foreground">
-              {visibleMetaNotes.join(' ')}
-            </div>
-          ) : null}
-
-          <div className="grid gap-3 md:grid-cols-3 mb-4">
-            <GlassCard>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Grounded reply rate</p>
-              <p className="text-lg font-semibold text-foreground">{groundedRate}%</p>
-              <p className="text-[10px] text-muted-foreground">assistant replies with cited grounding</p>
-            </GlassCard>
-            <GlassCard>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Captured artifacts</p>
-              <p className="text-lg font-semibold text-foreground">{artifactCount}</p>
-              <p className="text-[10px] text-muted-foreground">exports or workflow captures linked to this chat surface</p>
-            </GlassCard>
-            <GlassCard>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Avg sources / reply</p>
-              <p className="text-lg font-semibold text-foreground">{avgSourcesPerAssistant.toFixed(1)}</p>
-              <p className="text-[10px] text-muted-foreground">grounding density per assistant message</p>
-            </GlassCard>
-          </div>
-
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
+      <div className="flex-1 flex gap-4 min-h-0 pb-4" data-tour="lab-document-experiments-workspace">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0" data-tour="lab-document-experiments-main-panel">
+          <div className="flex-1 min-h-[30rem] lg:min-h-[36rem] overflow-y-auto space-y-4 mb-4 pr-2" data-tour="lab-document-experiments-chat">
             {isLoading && !messages.length ? (
               <div className="glass rounded-xl p-4 text-xs text-muted-foreground">Loading AI LAB chat session…</div>
             ) : messages.length === 0 ? (
@@ -481,15 +589,17 @@ export default function ChatPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 glass rounded-xl p-2">
+          <div className="flex items-center gap-2 glass rounded-xl p-2" data-tour="lab-document-experiments-prompt">
             <Input
               value={input}
-              onChange={(event) => setInput(event.target.value)}
+              onChange={(event) => setInput(event.target.value.slice(0, CHAT_INPUT_MAX_CHARS))}
               onKeyDown={handleInputKeyDown}
-              placeholder={canSend ? 'Ask about your documents…' : 'AI LAB chat is unavailable in the current runtime'}
+              placeholder={canSend ? 'Ask about your documents…' : 'Select documents to ground this chat'}
+              maxLength={CHAT_INPUT_MAX_CHARS}
               className="border-0 bg-transparent text-xs focus-visible:ring-0 h-8"
               disabled={!canSend || sendMutation.isPending}
             />
+            <span className="px-2 text-[10px] text-muted-foreground tabular-nums">{input.length}/{CHAT_INPUT_MAX_CHARS}</span>
             <Button
               size="sm"
               className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 w-8 p-0 shrink-0"
@@ -503,13 +613,13 @@ export default function ChatPage() {
               {sendMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
             </Button>
           </div>
-          {!canSend && data?.capabilities?.reason ? (
-            <p className="mt-2 text-[10px] text-muted-foreground">{data.capabilities.reason}</p>
+          {sendDisabledReason ? (
+            <p className="mt-2 text-[10px] text-muted-foreground">{sendDisabledReason}</p>
           ) : null}
         </div>
 
         <div className="hidden lg:block w-72 space-y-4">
-          <GlassCard>
+          <GlassCard data-tour="lab-document-experiments-sessions">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Sessions</h4>
               <div className="flex items-center gap-2">
@@ -524,43 +634,115 @@ export default function ChatPage() {
                 {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[18rem] overflow-y-auto pr-1">
               {sessions.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No persisted sessions yet.</p>
               ) : (
                 sessions.map((session) => (
-                  <button
+                  <div
                     key={session.session_id}
-                    onClick={() => setSessionId(session.session_id)}
-                    className={`w-full rounded-lg border px-3 py-2 text-left transition-colors ${session.session_id === activeSessionId ? 'border-primary/30 bg-primary/10' : 'border-border/40 bg-secondary/20 hover:bg-secondary/30'}`}
+                    className={`rounded-lg border px-3 py-2 transition-colors ${session.session_id === activeSessionId ? 'border-primary/30 bg-primary/10' : 'border-border/40 bg-secondary/20 hover:bg-secondary/30'}`}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-foreground truncate">{session.title}</span>
-                      <FolderClock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <div className="flex items-start gap-2">
+                      <button
+                        onClick={() => setSessionId(session.session_id)}
+                        className="flex-1 min-w-0 text-left"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs text-foreground truncate">{session.title}</span>
+                          <FolderClock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        </div>
+                        <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between gap-2">
+                          <span>{session.message_count} msg · {session.document_count ?? 0} docs</span>
+                          <span>{session.updated_at ? new Date(session.updated_at).toLocaleString() : '—'}</span>
+                        </div>
+                        <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between gap-2">
+                          <span>{session.last_model ?? 'model n/a'}</span>
+                          <span>{session.status ?? 'active'}</span>
+                        </div>
+                        {showActiveSessionError && session.session_id === activeSession?.session_id ? <p className="mt-1 text-[10px] text-glow-warning truncate">{activeSessionError}</p> : null}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleDeleteSession(session.session_id);
+                        }}
+                        className="mt-0.5 rounded-md border border-border/40 bg-background/20 p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors disabled:opacity-50"
+                        title="Delete session"
+                        aria-label={`Delete ${session.title}`}
+                        disabled={deleteSessionMutation.isPending}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between gap-2">
-                      <span>{session.message_count} msg · {session.document_count ?? 0} docs</span>
-                      <span>{session.updated_at ? new Date(session.updated_at).toLocaleString() : '—'}</span>
-                    </div>
-                    <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between gap-2">
-                      <span>{session.last_model ?? 'model n/a'}</span>
-                      <span>{session.status ?? 'active'}</span>
-                    </div>
-                    {showActiveSessionError && session.session_id === activeSession?.session_id ? <p className="mt-1 text-[10px] text-glow-warning truncate">{activeSessionError}</p> : null}
-                  </button>
+                  </div>
                 ))
               )}
             </div>
           </GlassCard>
 
-          <GlassCard>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Selected Documents</h4>
-              {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
+          <GlassCard data-tour="lab-document-experiments-documents">
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <div>
+                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Selected Documents</h4>
+                <p className="mt-1 text-[10px] text-muted-foreground">{selectedDocuments.length} selected · applies to the next grounded turn</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDocumentPickerOpen((current) => !current)}
+                className="text-[10px] px-2 py-1 rounded-md border border-border/50 bg-secondary/20 text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors inline-flex items-center gap-1"
+              >
+                Choose
+                {documentPickerOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
             </div>
-            <div className="space-y-2">
+            {documentPickerOpen ? (
+              <div className="mb-3 rounded-lg border border-border/40 bg-secondary/10 p-2 space-y-2">
+                <Input
+                  value={documentFilter}
+                  onChange={(event) => setDocumentFilter(event.target.value)}
+                  placeholder="Filter documents..."
+                  className="h-8 text-xs bg-background/40"
+                />
+                <div className="flex items-center justify-between px-1 text-[10px] text-muted-foreground">
+                  <span>Indexed documents</span>
+                  <span>{filteredAvailableDocuments.length} option{filteredAvailableDocuments.length === 1 ? '' : 's'}</span>
+                </div>
+                <div className="max-h-60 overflow-y-auto space-y-1 pr-1">
+                  {filteredAvailableDocuments.length === 0 ? (
+                    <p className="text-[10px] text-muted-foreground px-1 py-2">No documents match the current filter.</p>
+                  ) : (
+                    filteredAvailableDocuments.map((document) => {
+                      const checked = selectedDocumentIds.includes(document.document_id);
+                      return (
+                        <label
+                          key={document.document_id}
+                          className="flex items-start gap-2 rounded-md border border-border/30 bg-background/20 px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary/20 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            className="mt-0.5 h-4 w-4 rounded border-border/60 bg-transparent"
+                            checked={checked}
+                            onChange={() => toggleDocumentSelection(document.document_id)}
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-foreground">{document.name}</span>
+                            <span className="mt-0.5 block text-[10px] text-muted-foreground">
+                              {document.status}
+                              {typeof document.chunk_count === 'number' ? ` · ${document.chunk_count} chunk(s)` : ''}
+                              {document.size_label ? ` · ${document.size_label}` : ''}
+                            </span>
+                          </span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            ) : null}
+            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
               {selectedDocuments.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No indexed documents are currently visible to the chat runtime.</p>
+                <p className="text-xs text-muted-foreground">No documents selected for the next grounded turn.</p>
               ) : (
                 selectedDocuments.map((document) => (
                   <div key={document.document_id} className="py-1.5 border-b last:border-0 border-border/20">
@@ -581,69 +763,12 @@ export default function ChatPage() {
             </div>
           </GlassCard>
 
-          <GlassCard>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Session Diagnostics</h4>
-              {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
-            </div>
-            <div className="space-y-2 text-[10px] text-muted-foreground">
-              {sessionDiagnostics.map((row) => {
-                const Icon = row.label === 'Messages'
-                  ? MessageSquare
-                  : row.label.includes('Token')
-                    ? Database
-                    : row.label.toLowerCase().includes('latency')
-                      ? Clock
-                      : row.label.includes('Top-K') || row.label.includes('Context')
-                        ? Gauge
-                        : Activity;
-                return (
-                  <div key={row.label} className="flex justify-between items-center gap-4">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <Icon className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{row.label}</span>
-                    </div>
-                    <span className="text-foreground font-mono text-right">{row.value}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </GlassCard>
-
-          <GlassCard>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Retrieval Quality</h4>
-              {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
-            </div>
-            <div className="space-y-2 text-[10px] text-muted-foreground">
-              {retrievalQuality.map((row) => (
-                <div key={row.label} className="flex justify-between gap-4">
-                  <span>{row.label}</span>
-                  <span className="text-foreground font-mono text-right">{row.value}</span>
-                </div>
-              ))}
-            </div>
-            {groundingOverview.length ? (
-              <div className="mt-3 pt-3 border-t border-border/30 space-y-2 text-[10px] text-muted-foreground">
-                {groundingOverview.map((row) => (
-                  <div key={row.label} className="flex justify-between gap-4">
-                    <span>{row.label}</span>
-                    <span className="text-foreground font-mono text-right">{row.value}</span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-            {activeSession?.updated_at ? (
-              <p className="mt-3 text-[10px] text-muted-foreground">Last updated {new Date(activeSession.updated_at).toLocaleString()}</p>
-            ) : null}
-          </GlassCard>
-
-          <GlassCard>
+          <GlassCard data-tour="lab-document-experiments-activity">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Recent activity</h4>
               {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[18rem] overflow-y-auto pr-1">
               {sessionTimeline.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No persisted timeline yet.</p>
               ) : (

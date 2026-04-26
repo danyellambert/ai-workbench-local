@@ -229,6 +229,32 @@ def get_lab_chat_session(path: Path, session_id: str) -> dict[str, object] | Non
     return None
 
 
+def delete_lab_chat_session(path: Path, session_id: str) -> dict[str, object]:
+    normalized_session_id = str(session_id or "").strip()
+    if not normalized_session_id:
+        raise ValueError("Chat session id is required.")
+
+    sessions = load_lab_chat_sessions(path)
+    deleted_session: dict[str, object] | None = None
+    remaining_sessions: list[dict[str, object]] = []
+    for session in sessions:
+        if deleted_session is None and str(session.get("session_id") or "") == normalized_session_id:
+            deleted_session = session
+            continue
+        remaining_sessions.append(session)
+
+    if deleted_session is None:
+        raise KeyError(f"Chat session not found: {session_id}")
+
+    save_lab_chat_sessions(path, remaining_sessions)
+    next_session_id = str(remaining_sessions[0].get("session_id") or "").strip() if remaining_sessions else None
+    return {
+        "deleted_session": deleted_session,
+        "active_session_id": next_session_id,
+        "sessions": remaining_sessions,
+    }
+
+
 def load_lab_workflow_runs(path: Path) -> list[dict[str, object]]:
     payload = _read_json(path, [])
     if not isinstance(payload, list):
