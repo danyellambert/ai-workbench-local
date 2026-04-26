@@ -13,17 +13,16 @@ from src.product.command_center import build_product_workflow_history_entry
 from src.product.models import ProductWorkflowRequest, ProductWorkflowResult
 from src.product.service import run_product_workflow
 from src.storage.lab_state import append_lab_workflow_run
-from src.storage.phase8_eval_store import append_eval_run
 from src.storage.product_telemetry import append_product_telemetry_run, get_product_telemetry_run, update_product_telemetry_run
 from src.storage.product_workflow_history import append_product_workflow_history_entry
 from src.storage.runtime_execution_log import append_runtime_execution_log_entry
 from src.storage.runtime_paths import (
     get_lab_workflow_runs_path,
-    get_phase8_eval_db_path,
     get_product_telemetry_path,
     get_product_workflow_history_path,
     get_runtime_execution_log_path,
 )
+from src.product.runtime_eval import persist_product_runtime_evals
 
 
 def _now_iso() -> str:
@@ -286,6 +285,12 @@ def _build_runtime_entry(
         "cost_source": provider_usage.get("cost_source"),
         "context_window_mode": request.context_window_mode,
         "context_window": request.context_window,
+        "resolved_context_window": metadata.get("resolved_context_window") or request.context_window,
+        "context_window_cap": metadata.get("context_window_cap") or request.context_window,
+        "temperature": request.temperature,
+        "top_p": request.top_p,
+        "max_tokens": request.max_tokens,
+        "prompt_profile": request.prompt_profile,
         "execution_strategy_requested": metadata.get("execution_strategy_requested"),
         "execution_strategy_used": metadata.get("execution_strategy_used"),
         "workflow_route_decision": metadata.get("workflow_route_decision"),
@@ -416,52 +421,6 @@ def _build_telemetry_run(
     return telemetry_run
 
 
-def _sample_eval_from_run(
-    *,
-    bootstrap: ProductBootstrap,
-    telemetry_run: dict[str, Any],
-    result: ProductWorkflowResult | None,
-) -> None:
-    runtime = telemetry_run.get("runtime") if isinstance(telemetry_run.get("runtime"), dict) else {}
-    status = str(telemetry_run.get("status") or "warning").lower()
-    eval_status = "PASS" if status == "completed" else "WARN" if status == "warning" else "FAIL"
-    score_ratio = 1.0 if status == "completed" else 0.7 if status == "warning" else 0.35
-    reasons = [str(item) for item in ((result.warnings if result is not None else []) or []) if str(item or "").strip()]
-    if telemetry_run.get("error_message"):
-        reasons.insert(0, str(telemetry_run.get("error_message")))
-    append_eval_run(
-        get_phase8_eval_db_path(bootstrap.workspace_root),
-        {
-            "created_at": telemetry_run.get("completed_at") or _now_iso(),
-            "suite_name": "runtime_sampled_workflows",
-            "task_type": telemetry_run.get("workflow_id"),
-            "case_name": telemetry_run.get("run_id"),
-            "provider": runtime.get("provider"),
-            "model": runtime.get("model"),
-            "status": eval_status,
-            "score": round(score_ratio * 100, 2),
-            "max_score": 100.0,
-            "quality_score": round(score_ratio, 4),
-            "overall_confidence": getattr(result.structured_result, "overall_confidence", None) if result is not None and result.structured_result is not None else None,
-            "latency_s": runtime.get("latency_s"),
-            "needs_review": bool(telemetry_run.get("needs_review")),
-            "context_strategy": ((telemetry_run.get("routing") or {}) if isinstance(telemetry_run.get("routing"), dict) else {}).get("context_strategy"),
-            "metrics": {
-                "prompt_tokens": runtime.get("prompt_tokens"),
-                "completion_tokens": runtime.get("completion_tokens"),
-                "total_tokens": runtime.get("total_tokens"),
-                "source_count": runtime.get("retrieved_chunks_count"),
-            },
-            "reasons": reasons,
-            "metadata": {
-                "source": "product_runtime_sample",
-                "run_id": telemetry_run.get("run_id"),
-                "trace_id": telemetry_run.get("trace_id"),
-                "surface": telemetry_run.get("surface"),
-            },
-            "run_key": f"runtime-sample::{telemetry_run.get('run_id')}",
-        },
-    )
 
 
 def attach_artifact_lineage(
@@ -543,7 +502,7 @@ def execute_product_workflow_with_telemetry(
         append_lab_workflow_run(get_lab_workflow_runs_path(bootstrap.workspace_root), run_record)
         telemetry_run = _build_telemetry_run(run_id=run_id, trace_id=trace_id, request=request, result=result, runtime_entry=runtime_entry, history_entry=history_entry, surface=surface, started_at=started_at, completed_at=_now_iso(), reran_from_run_id=reran_from_run_id)
         append_product_telemetry_run(get_product_telemetry_path(bootstrap.workspace_root), telemetry_run)
-        _sample_eval_from_run(bootstrap=bootstrap, telemetry_run=telemetry_run, result=result)
+        persist_product_runtime_evals(bootstrap=bootstrap, telemetry_run=telemetry_run, result=result)
         return {"result": result, "run_id": run_id, "trace_id": trace_id, "history_entry": history_entry, "runtime_entry": runtime_entry, "telemetry_run": telemetry_run, "run_record": run_record}
     except Exception as error:
         finished_perf = datetime.now(timezone.utc)
@@ -560,4 +519,5 @@ def execute_product_workflow_with_telemetry(
         append_runtime_execution_log_entry(get_runtime_execution_log_path(bootstrap.workspace_root), runtime_entry)
         telemetry_run = _build_telemetry_run(run_id=run_id, trace_id=trace_id, request=request, result=None, runtime_entry=runtime_entry, history_entry=history_entry, surface=surface, started_at=started_at, completed_at=_now_iso(), error_message=str(error), reran_from_run_id=reran_from_run_id)
         append_product_telemetry_run(get_product_telemetry_path(bootstrap.workspace_root), telemetry_run)
+        persist_product_runtime_evals(bootstrap=bootstrap, telemetry_run=telemetry_run, result=None)
         raise
