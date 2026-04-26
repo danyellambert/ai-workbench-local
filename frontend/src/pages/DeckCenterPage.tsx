@@ -157,11 +157,13 @@ export default function DeckCenterPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Deck Center" description="Executive artifact catalog backed by the real export registry, persisted metadata, review sidecars and downloadable assets.">
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={() => window.location.assign('/app/run')}>
-          <Sparkles className="mr-2 h-3.5 w-3.5" /> Open Run Surface
-        </Button>
-      </PageHeader>
+      <div data-tour="deck-center-header">
+        <PageHeader title="Deck Center" description="Executive artifact catalog backed by the real export registry, persisted metadata, review sidecars and downloadable assets.">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={() => window.location.assign('/app/run')}>
+            <Sparkles className="mr-2 h-3.5 w-3.5" /> Open Run Surface
+          </Button>
+        </PageHeader>
+      </div>
 
       {(artifactsQuery.isError || artifactDetailQuery.isError) && (
         <GlassCard className="mb-6 border border-glow-warning/20">
@@ -172,14 +174,14 @@ export default function DeckCenterPage() {
         </GlassCard>
       )}
 
-      <div className="grid gap-3 md:grid-cols-4 mb-6">
+      <div className="grid gap-3 md:grid-cols-4 mb-6" data-tour="deck-center-metrics">
         <MetricCard label="Artifacts" value={artifactsQuery.data?.summary.total_artifacts ?? artifacts.length} icon={FileOutput} delay={0.05} />
         <MetricCard label="Ready" value={artifactsQuery.data?.summary.completed_artifacts ?? artifacts.filter((artifact) => artifact.status === 'ready').length} icon={CheckCircle2} glowColor="success" delay={0.08} />
         <MetricCard label="Needs review" value={artifacts.filter((artifact) => artifact.status === 'warning').length} icon={AlertTriangle} glowColor="warning" delay={0.11} />
         <MetricCard label="Preview assets" value={artifacts.reduce((accumulator, artifact) => accumulator + safeNumber(artifact.preview_count), 0)} icon={Layers} glowColor="accent" delay={0.14} />
       </div>
 
-      <GlassCard className="mb-4">
+      <GlassCard className="mb-4" data-tour="deck-center-filters">
         <div className="grid gap-3 md:grid-cols-[minmax(0,1.5fr)_180px_220px]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -214,22 +216,9 @@ export default function DeckCenterPage() {
       </div>
 
 
-      <div className="mb-6">
-        <GlassCard>
-          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Share-ready outputs</h3>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Keep Deck Center product-facing: open the generated deck, review assets, and use EvidenceOps only when you need the delivery plumbing behind the scenes.
-              </p>
-            </div>
-            <Badge variant="outline" className="w-fit text-[10px] border-border/60 text-muted-foreground">MCP details live in EvidenceOps</Badge>
-          </div>
-        </GlassCard>
-      </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)]">
-        <div className="space-y-3">
+        <div className="space-y-3" data-tour="deck-center-list">
           {!visibleArtifacts.length && (
             <GlassCard>
               <div data-testid="deck-center-detail-empty" className="text-xs text-muted-foreground">
@@ -303,7 +292,7 @@ export default function DeckCenterPage() {
           ) : null}
         </div>
 
-        <GlassCard className="min-h-[540px]" data-testid="deck-center-detail-panel">
+        <GlassCard className="min-h-[540px]" data-testid="deck-center-detail-panel" data-tour="deck-center-detail">
           {!detailArtifact ? (
             <div className="text-xs text-muted-foreground">Select an artifact to inspect its readiness, review snapshot, preview assets and export files.</div>
           ) : (

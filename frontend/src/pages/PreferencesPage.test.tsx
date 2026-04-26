@@ -63,6 +63,7 @@ function buildPreferencesResponse(activeProfileId = 'workspace-default'): Prefer
         name: 'Workspace Default',
         primaryConnectionId: 'ollama',
         primaryModel: 'qwen2.5:7b',
+        fallbackEnabled: false,
         fallbackChain: [],
         executionPolicy: 'local_only',
         retrievalStrategy: 'hybrid',
@@ -109,6 +110,7 @@ function buildPreferencesResponse(activeProfileId = 'workspace-default'): Prefer
         name: 'Deep Review',
         primaryConnectionId: 'ollama',
         primaryModel: 'qwen2.5:7b',
+        fallbackEnabled: false,
         fallbackChain: [],
         executionPolicy: 'prefer_local_burst_hosted',
         retrievalStrategy: 'hybrid',
@@ -150,10 +152,6 @@ function buildPreferencesResponse(activeProfileId = 'workspace-default'): Prefer
           { workflowId: 'document-review', label: 'Document Review', compatibility: 'recommended' },
         ],
       },
-    ],
-    workflow_defaults: [
-      { workflowId: 'document-review', label: 'Document Review', profileId: 'workspace-default' },
-      { workflowId: 'comparison', label: 'Comparison', profileId: 'deep-review' },
     ],
     connection_policy_rules: [
       {

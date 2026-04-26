@@ -18,6 +18,7 @@ const profileColors: Record<string, string> = {
   'External reference': 'hsl(217, 91%, 60%)',
   'Fastest observed': 'hsl(38, 92%, 50%)',
   'Benchmark candidate': 'hsl(199, 89%, 48%)',
+  'Phase 8.5 winner': 'hsl(280, 67%, 55%)',
 };
 
 const scatterChartConfig = {
@@ -134,40 +135,92 @@ export default function BenchmarksPage() {
         profile: model.profileTag || 'Benchmark candidate',
         model: model.model,
         runs: model.runs,
+        caseCount: model.caseCount,
       })),
     [models],
   );
 
-  const retrievalChartData = useMemo(
-    () => retrievalObservations.map((item) => ({
-      name: item.strategy.replace(/_/g, ' '),
-      OutputDiscipline: isNumber(item.outputDiscipline) ? Math.round(item.outputDiscipline * 100) : null,
-      ContextRetention: isNumber(item.contextRetention) ? Math.round(item.contextRetention * 100) : null,
-      Composite: isNumber(item.composite) ? Math.round(item.composite * 100) : null,
-    })),
-    [retrievalObservations],
+  const sourceBreakdown = data?.sourceBreakdown ?? [];
+
+  const presentScatterProfiles = useMemo(
+    () => Array.from(new Set(scatterData.map((item) => item.profile))).filter((label) => Boolean(profileColors[label])),
+    [scatterData],
   );
+
+  const retrievalChartData = useMemo(() => {
+    const scoredObservations = retrievalObservations
+      .filter((item) => isNumber(item.composite) || isNumber(item.outputDiscipline) || isNumber(item.contextRetention))
+      .sort((left, right) => {
+        const compositeDelta = (right.composite ?? -1) - (left.composite ?? -1);
+        if (compositeDelta !== 0) {
+          return compositeDelta;
+        }
+        const outputDelta = (right.outputDiscipline ?? -1) - (left.outputDiscipline ?? -1);
+        if (outputDelta !== 0) {
+          return outputDelta;
+        }
+        const retentionDelta = (right.contextRetention ?? -1) - (left.contextRetention ?? -1);
+        if (retentionDelta !== 0) {
+          return retentionDelta;
+        }
+        return (left.latency ?? Number.POSITIVE_INFINITY) - (right.latency ?? Number.POSITIVE_INFINITY);
+      });
+
+    const representativeByScore = new Map<string, typeof scoredObservations[number]>();
+    scoredObservations.forEach((item) => {
+      const scoreKey = [
+        isNumber(item.outputDiscipline) ? Math.round(item.outputDiscipline * 100) : 'na',
+        isNumber(item.contextRetention) ? Math.round(item.contextRetention * 100) : 'na',
+        isNumber(item.composite) ? Math.round(item.composite * 100) : 'na',
+      ].join(':');
+      const existing = representativeByScore.get(scoreKey);
+      if (!existing || (item.latency ?? Number.POSITIVE_INFINITY) < (existing.latency ?? Number.POSITIVE_INFINITY)) {
+        representativeByScore.set(scoreKey, item);
+      }
+    });
+
+    const representativeRows = Array.from(representativeByScore.values());
+    const desiredCount = Math.min(12, representativeRows.length);
+    if (desiredCount === 0) {
+      return [];
+    }
+
+    const chosenIndices = new Set<number>();
+    for (let position = 0; position < desiredCount; position += 1) {
+      const index = Math.round((position * (representativeRows.length - 1)) / Math.max(desiredCount - 1, 1));
+      chosenIndices.add(index);
+    }
+
+    return Array.from(chosenIndices)
+      .sort((left, right) => left - right)
+      .map((index) => representativeRows[index])
+      .map((item) => ({
+        name: item.strategy.replace(/_/g, ' '),
+        category: item.category ?? 'Retrieval benchmark',
+        OutputDiscipline: isNumber(item.outputDiscipline) ? Math.round(item.outputDiscipline * 100) : null,
+        ContextRetention: isNumber(item.contextRetention) ? Math.round(item.contextRetention * 100) : null,
+        Composite: isNumber(item.composite) ? Math.round(item.composite * 100) : null,
+      }));
+  }, [retrievalObservations]);
 
   const freshnessLabel = formatBenchmarkTimestamp(data?.summary.lastRecordedAt);
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <AiLabSectionIntro
+      <div data-tour="lab-benchmarks-header">
+        <AiLabSectionIntro
         title="Benchmarks"
         description="Recorded product benchmark comparison hub — measured fit, groundedness, adherence and latency from persisted comparison runs in this workspace."
         operatorQuestion="Which model setup is actually strongest for the benchmark scenarios this product has already executed here?"
         badges={[
-          { label: `${data?.summary.totalRuns ?? 0} runs`, variant: 'default' },
-          { label: `${data?.summary.modelCount ?? 0} models`, variant: 'default' },
-          ...(isNumber(data?.summary.scoredModelCount) ? [{ label: `${data?.summary.scoredModelCount} scored models`, variant: 'success' as const }] : []),
-          ...(isNumber(data?.summary.useCaseCount) && (data?.summary.useCaseCount ?? 0) > 0 ? [{ label: `${data?.summary.useCaseCount} benchmark scenarios`, variant: 'default' as const }] : []),
+          { label: benchmarkStatus, variant: data?.status === 'historical' ? 'warning' : 'default' },
           ...(benchmarkBaselineLabel ? [{ label: `Baseline: ${benchmarkBaselineLabel}`, variant: 'default' as const }] : []),
           ...(data?.summary.lastRecordedAt ? [{ label: `Last run: ${freshnessLabel}`, variant: data?.status === 'historical' ? 'warning' as const : 'default' as const }] : []),
         ]}
         dataSource={data?.meta.source}
-        surfaceStatus={data?.status}
         degradedReason={data?.degraded_reason}
-      />
+        />
+      </div>
 
       {isError && (
         <GlassCard className="mb-6 border border-glow-warning/20 bg-glow-warning/5">
@@ -185,12 +238,12 @@ export default function BenchmarksPage() {
             <div>
               {data?.status === 'historical' ? (
                 <p>
-                  The latest recorded benchmark is <span className="text-foreground font-medium">historical</span> ({freshnessLabel}). This surface is useful for comparison evidence, but it is not showing live product traffic.
+                  The latest recorded benchmark is <span className="text-foreground font-medium">historical</span> ({freshnessLabel}). This surface is useful for comparison evidence, but it is not showing live product traffic. Local Phase 8.5 runtime winners are merged in when that decision bundle exists.
                 </p>
               ) : null}
               {partialModelCount > 0 ? (
                 <p className={data?.status === 'historical' ? 'mt-2' : ''}>
-                  {partialModelCount} model row(s) come from older comparison runs that do not include measured groundedness or use-case-fit telemetry. Those metrics are shown as <span className="text-foreground font-medium">Not scored</span> instead of being inferred.
+                  {partialModelCount} model row(s) come from older comparison runs that do not include measured groundedness or use-case-fit telemetry. Those metrics are shown as <span className="text-foreground font-medium">Not scored</span> instead of being inferred. Groundedness measures how well the answer stays supported by the captured evidence; use-case fit measures how well the output matches the benchmark task goal.
                 </p>
               ) : null}
             </div>
@@ -198,17 +251,21 @@ export default function BenchmarksPage() {
         </GlassCard>
       )}
 
-      <AiLabMetricGrid
-        columns={4}
+      <div data-tour="lab-benchmarks-metrics">
+        <AiLabMetricGrid
+        columns={6}
         metrics={[
+          { label: 'Recorded Runs', value: data?.summary.totalRuns ?? '—', icon: BarChart3, status: 'neutral' },
+          { label: 'Models Tested', value: data?.summary.modelCount ?? '—', icon: Gauge, status: 'neutral' },
+          { label: 'Scored Models', value: data?.summary.scoredModelCount ?? '—', icon: CheckCircle2, status: isNumber(data?.summary.scoredModelCount) && (data?.summary.scoredModelCount ?? 0) > 0 ? 'healthy' : 'neutral' },
+          { label: 'Benchmark Scenarios', value: data?.summary.useCaseCount ?? '—', icon: Target, status: 'neutral' },
           { label: 'Best Scored Fit', value: formatPercentWithLabel(recommended?.useCaseFit), icon: Trophy, status: recommended ? 'healthy' : 'neutral' },
-          { label: 'Best Groundedness', value: formatPercentWithLabel(data?.summary.bestGroundedness), icon: Target, status: isNumber(data?.summary.bestGroundedness) ? 'healthy' : 'neutral' },
           { label: 'Fastest Latency', value: formatSeconds(data?.summary.fastestLatency), icon: Timer, status: isNumber(data?.summary.fastestLatency) ? 'healthy' : 'neutral' },
-          { label: 'Models Tested', value: data?.summary.modelCount ?? '—', icon: BarChart3, status: 'neutral' },
         ]}
-      />
+        />
+      </div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-benchmarks-coverage">
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Provider coverage</p>
           <p className="mt-2 text-2xl font-semibold text-foreground">{providerSummary.length || '—'}</p>
@@ -233,14 +290,14 @@ export default function BenchmarksPage() {
           </p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt profile coverage</p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">{data?.summary.promptProfileCount ?? '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Distinct prompt profiles represented in the recorded benchmark runs.</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Benchmark bundles</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{data?.summary.sourceBundleCount ?? '—'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Merged phase7 comparisons plus benchmark_runs bundles such as Phase 4.5 retrieval sweeps, Phase 8.5 matrices, and findings experiments.</p>
         </GlassCard>
       </div>
 
       {leaderboardHighlights.length ? (
-        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-benchmarks-highlights">
           {leaderboardHighlights.map((highlight, index) => (
             <GlassCard key={`${highlight.label}-${index}`} className="p-4" delay={0.05 + index * 0.03}>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{highlight.label}</p>
@@ -252,16 +309,18 @@ export default function BenchmarksPage() {
       ) : null}
 
       <Tabs defaultValue="leaderboard">
-        <TabsList className="bg-secondary/30 border border-border/50 mb-4">
+        <div className="inline-flex">
+        <TabsList data-tour="lab-benchmarks-tabs" className="bg-secondary/30 border border-border/50 mb-4">
           <TabsTrigger value="leaderboard" className="text-xs data-[state=active]:bg-secondary">Leaderboard</TabsTrigger>
           <TabsTrigger value="tradeoffs" className="text-xs data-[state=active]:bg-secondary">Tradeoff Map</TabsTrigger>
           <TabsTrigger value="cards" className="text-xs data-[state=active]:bg-secondary">Model Cards</TabsTrigger>
           <TabsTrigger value="profiles" className="text-xs data-[state=active]:bg-secondary">Prompt Profiles</TabsTrigger>
           <TabsTrigger value="retrieval" className="text-xs data-[state=active]:bg-secondary">Retrieval Strategies</TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="leaderboard" className="mt-0">
-          <GlassCard>
+          <GlassCard data-tour="lab-benchmarks-leaderboard">
             <div className="flex items-center gap-2 mb-4">
               <Trophy className="w-4 h-4 text-glow-warning" />
               <h3 className="text-sm font-medium text-foreground">Model Leaderboard</h3>
@@ -281,6 +340,7 @@ export default function BenchmarksPage() {
                   return (
                     <motion.div
                       key={model.id}
+                      data-tour={index < 3 ? 'lab-benchmarks-leaderboard-row' : undefined}
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + index * 0.04 }}
@@ -304,7 +364,10 @@ export default function BenchmarksPage() {
                             <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">Partial scoring</span>
                           ) : null}
                         </div>
-                        <p className="text-[10px] text-muted-foreground">{model.provider} · {model.family} · {model.quantization}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {model.provider} · {model.family} · {model.quantization}
+                          {isNumber(model.caseCount) && (model.caseCount ?? 0) > model.runs ? ` · ${model.caseCount} eval cases` : ''}
+                        </p>
                         <p className="text-[10px] text-muted-foreground mt-1">{profile}</p>
                       </div>
                       <div className="flex items-center gap-6 text-[10px] text-muted-foreground shrink-0">
@@ -339,7 +402,7 @@ export default function BenchmarksPage() {
                       <XAxis type="number" dataKey="latency" name="Latency" unit="s" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} label={{ value: 'Latency (seconds)', position: 'bottom', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                       <YAxis type="number" dataKey="fit" name="Fit" unit="%" domain={[0, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} label={{ value: 'Scored use-case fit %', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                       <ChartTooltip
-                        content={({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; profile: string; latency: number; fit: number; groundedness: number | null; runs: number } }> }) => {
+                        content={({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; profile: string; latency: number; fit: number; groundedness: number | null; runs: number; caseCount?: number } }> }) => {
                           if (!active || !payload?.length) return null;
                           const entry = payload[0].payload;
                           return (
@@ -350,7 +413,10 @@ export default function BenchmarksPage() {
                                 <p>Latency: <span className="text-foreground">{entry.latency}s</span></p>
                                 <p>Fit: <span className="text-foreground">{entry.fit}%</span></p>
                                 <p>Groundedness: <span className="text-foreground">{entry.groundedness == null ? 'Not scored' : `${entry.groundedness}%`}</span></p>
-                                <p>Recorded runs: <span className="text-foreground">{entry.runs}</span></p>
+                                <p>Recorded bundles: <span className="text-foreground">{entry.runs}</span></p>
+                                {isNumber(entry.caseCount) && (entry.caseCount ?? 0) > entry.runs ? (
+                                  <p>Evaluated cases: <span className="text-foreground">{entry.caseCount}</span></p>
+                                ) : null}
                               </div>
                             </div>
                           );
@@ -365,9 +431,9 @@ export default function BenchmarksPage() {
                   </ChartContainer>
                 </div>
                 <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-border/30">
-                  {Object.entries(profileColors).map(([label, color]) => (
+                  {presentScatterProfiles.map((label) => (
                     <div key={label} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: profileColors[label] }} />
                       {label}
                     </div>
                   ))}
@@ -414,12 +480,20 @@ export default function BenchmarksPage() {
                     <MetricRow label="Groundedness" value={model.groundedness} coverage={model.metricCoverage?.groundedness} />
                     <MetricRow label="Adherence" value={model.adherence} coverage={model.metricCoverage?.adherence} />
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border/30 grid grid-cols-2 gap-2 text-[10px] text-muted-foreground">
+                  <div className="mt-4 pt-3 border-t border-border/30 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[10px] text-muted-foreground">
                     <div><span className="block text-muted-foreground/60">Latency</span>{formatSeconds(model.latency)}</div>
                     <div><span className="block text-muted-foreground/60">Output</span>{isNumber(model.outputChars) ? `${Math.round(model.outputChars)} chars` : '—'}</div>
                     <div><span className="block text-muted-foreground/60">Runtime</span>{model.runtimeBucket?.replace(/_/g, ' ') || '—'}</div>
-                    <div><span className="block text-muted-foreground/60">Runs</span>{model.runs}</div>
+                    <div><span className="block text-muted-foreground/60">Bundles</span>{model.runs}</div>
+                    {isNumber(model.caseCount) && (model.caseCount ?? 0) > model.runs ? (
+                      <div><span className="block text-muted-foreground/60">Eval cases</span>{model.caseCount}</div>
+                    ) : null}
                   </div>
+                  {model.scoreStatus === 'partial' ? (
+                    <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
+                      Groundedness and use-case fit are blank here because this source bundle only recorded partial benchmark telemetry. The page keeps those fields unfilled instead of backfilling guessed values.
+                    </p>
+                  ) : null}
                 </motion.div>
               );
             })}
@@ -445,6 +519,16 @@ export default function BenchmarksPage() {
                   {profile.metrics.map((metric) => (
                     <span key={metric} className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">{metric}</span>
                   ))}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2 text-[10px]">
+                  {isNumber(profile.metricSummary?.useCaseFit) ? <span className="px-2 py-0.5 rounded border border-border/50 bg-secondary/30 text-foreground">Fit {formatPercent(profile.metricSummary?.useCaseFit)}</span> : null}
+                  {isNumber(profile.metricSummary?.groundedness) ? <span className="px-2 py-0.5 rounded border border-border/50 bg-secondary/30 text-foreground">Grounding {formatPercent(profile.metricSummary?.groundedness)}</span> : null}
+                  {isNumber(profile.metricSummary?.adherence) ? <span className="px-2 py-0.5 rounded border border-border/50 bg-secondary/30 text-foreground">Adherence {formatPercent(profile.metricSummary?.adherence)}</span> : null}
+                  {isNumber(profile.metricSummary?.decisionScore) ? <span className="px-2 py-0.5 rounded border border-border/50 bg-secondary/30 text-foreground">Decision {formatPercent(profile.metricSummary?.decisionScore)}</span> : null}
+                  {isNumber(profile.metricSummary?.groundingRatio) ? <span className="px-2 py-0.5 rounded border border-border/50 bg-secondary/30 text-foreground">Grounding ratio {formatPercent(profile.metricSummary?.groundingRatio)}</span> : null}
+                  {isNumber(profile.metricSummary?.structuredSuccess) ? <span className="px-2 py-0.5 rounded border border-border/50 bg-secondary/30 text-foreground">Structured {formatPercent(profile.metricSummary?.structuredSuccess)}</span> : null}
+                  {isNumber(profile.metricSummary?.latency) ? <span className="px-2 py-0.5 rounded border border-border/50 bg-secondary/30 text-foreground">Latency {formatSeconds(profile.metricSummary?.latency)}</span> : null}
+                  {isNumber(profile.runCount) && profile.runCount > 0 ? <span className="px-2 py-0.5 rounded border border-border/50 bg-secondary/30 text-foreground">Bundles {profile.runCount}</span> : null}
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-2">Models: {profile.models.join(', ')}</p>
               </GlassCard>
@@ -488,20 +572,25 @@ export default function BenchmarksPage() {
             {retrievalChartData.length === 0 ? (
               <p className="text-xs text-muted-foreground">Retrieval observations will populate when benchmark comparison runs include recorded retrieval context.</p>
             ) : (
-              <div className="h-[260px]">
-                <ChartContainer config={retrievalChartConfig} className="w-full h-full">
-                  <BarChart data={retrievalChartData} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
-                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend wrapperStyle={{ fontSize: '10px' }} />
-                    <Bar dataKey="OutputDiscipline" fill="hsl(217, 91%, 60%)" radius={[2, 2, 0, 0]} />
-                    <Bar dataKey="ContextRetention" fill="hsl(142, 71%, 45%)" radius={[2, 2, 0, 0]} />
-                    <Bar dataKey="Composite" fill="hsl(280, 67%, 55%)" radius={[2, 2, 0, 0]} />
-                  </BarChart>
-                </ChartContainer>
-              </div>
+              <>
+                <div className="h-[260px]">
+                  <ChartContainer config={retrievalChartConfig} className="w-full h-full">
+                    <BarChart data={retrievalChartData} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                      <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Legend wrapperStyle={{ fontSize: '10px' }} />
+                      <Bar dataKey="OutputDiscipline" fill="hsl(217, 91%, 60%)" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="ContextRetention" fill="hsl(142, 71%, 45%)" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="Composite" fill="hsl(280, 67%, 55%)" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ChartContainer>
+                </div>
+                <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
+                  This chart shows representative score bands across the retrieval observations, instead of only the top few ties. The full observation table stays expanded below.
+                </p>
+              </>
             )}
           </GlassCard>
 
@@ -515,15 +604,16 @@ export default function BenchmarksPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border/50">
-                    {['Strategy', 'Output', 'Retention', 'Composite', 'Latency', 'Candidates', 'Avg ctx chars', 'Description'].map((heading) => (
+                    {['Strategy', 'Category', 'Output', 'Retention', 'Composite', 'Latency', 'Candidates', 'Avg ctx chars', 'Description'].map((heading) => (
                       <th key={heading} className="text-left px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{heading}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {retrievalObservations.map((item) => (
-                    <tr key={item.strategy} className="border-b border-border/20 hover:bg-secondary/10 transition-colors">
+                    <tr key={`${item.category ?? 'retrieval'}:${item.strategy}`} className="border-b border-border/20 hover:bg-secondary/10 transition-colors">
                       <td className="px-3 py-2.5 text-xs text-foreground font-mono">{item.strategy}</td>
+                      <td className="px-3 py-2.5 text-xs text-muted-foreground">{item.category ?? '—'}</td>
                       <td className="px-3 py-2.5 text-xs text-foreground">{formatPercent(item.outputDiscipline)}</td>
                       <td className="px-3 py-2.5 text-xs text-foreground">{formatPercent(item.contextRetention)}</td>
                       <td className="px-3 py-2.5 text-xs text-primary font-medium">{formatPercent(item.composite)}</td>
@@ -535,7 +625,7 @@ export default function BenchmarksPage() {
                   ))}
                   {isLoading && !retrievalObservations.length ? (
                     <tr>
-                      <td colSpan={8} className="px-3 py-6 text-xs text-muted-foreground">Loading retrieval observations…</td>
+                      <td colSpan={9} className="px-3 py-6 text-xs text-muted-foreground">Loading retrieval observations…</td>
                     </tr>
                   ) : null}
                 </tbody>

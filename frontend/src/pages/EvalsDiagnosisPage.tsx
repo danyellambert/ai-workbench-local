@@ -32,6 +32,16 @@ function statusLabel(status?: string) {
   return 'Product scoped';
 }
 
+function formatDateTime(value?: string | null) {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
+
+function formatTaskLabel(value?: string | null) {
+  return String(value || 'Task');
+}
+
 export default function EvalsDiagnosisPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: aiLabQueryKeys.evals,
@@ -57,6 +67,13 @@ export default function EvalsDiagnosisPage() {
   const investigateFirst = data?.investigateFirst ?? cases.filter((item) => item.verdict === 'FAIL');
   const activeWorkflowLabels = data?.scope?.observedWorkflowLabels ?? [];
   const activeTaskTypes = data?.scope?.observedTaskTypes ?? [];
+  const uncoveredTaskTypes = data?.scope?.uncoveredTaskTypes ?? [];
+  const historicalWindow = data?.scope?.historicalWindow;
+  const liveWindow = data?.scope?.liveWindow;
+  const workflowCoverage = data?.scope?.workflowCoverage;
+  const observedWorkflowCount = workflowCoverage?.observed ?? activeWorkflowLabels.length ?? 0;
+  const historicalWorkflowCoverage = workflowCoverage?.historical ?? 0;
+  const liveWorkflowCoverage = workflowCoverage?.live ?? 0;
 
   const suiteChartData = suites.map((suite) => ({
     name: suite.name,
@@ -66,7 +83,8 @@ export default function EvalsDiagnosisPage() {
   }));
 
   const liveWorkflowChartData = liveWorkflowBreakdown.map((workflow) => ({
-    name: workflow.label,
+    name: workflow.shortLabel || workflow.label,
+    fullName: workflow.label,
     Pass: workflow.pass,
     Warn: workflow.warn,
     Fail: workflow.fail,
@@ -78,19 +96,16 @@ export default function EvalsDiagnosisPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <AiLabSectionIntro
+      <div data-tour="lab-evals-header">
+        <AiLabSectionIntro
         title="Evals & Diagnosis"
         description="Product-scoped quality measurement, regression detection and diagnostic investigation for workflows actually used by the current product."
         operatorQuestion="Which active product workflows are healthy live, and where is the historical baseline regressing?"
-        badges={[
-          { label: `${formatPercent(passRate)} historical pass`, variant: passRate >= 85 ? 'success' : passRate >= 70 ? 'warning' : 'error' },
-          { label: `${liveTotals.total} live evals`, variant: liveTotals.total > 0 ? 'success' : 'warning' },
-          { label: `${activeTaskTypes.length} active tasks`, variant: activeTaskTypes.length > 0 ? 'success' : 'warning' },
-        ]}
         dataSource={data?.meta.source}
         surfaceStatus={data?.status}
         degradedReason={data?.degraded_reason}
-      />
+        />
+      </div>
 
       {isError && (
         <GlassCard className="mb-6 border border-glow-warning/20 bg-glow-warning/5">
@@ -101,47 +116,50 @@ export default function EvalsDiagnosisPage() {
         </GlassCard>
       )}
 
-      <AiLabMetricGrid
+      <div data-tour="lab-evals-metrics">
+        <AiLabMetricGrid
         columns={5}
         metrics={[
-          { label: 'Historical Pass', value: `${passRate}%`, icon: ShieldCheck, status: passRate >= 85 ? 'healthy' : passRate >= 70 ? 'warning' : 'error' },
-          { label: 'Historical Cases', value: totals.total, icon: CheckCircle2, status: totals.total > 0 ? 'neutral' : 'warning' },
-          { label: 'Live Pass', value: `${livePassRate}%`, icon: Activity, status: liveTotals.total > 0 ? (livePassRate >= 85 ? 'healthy' : livePassRate >= 70 ? 'warning' : 'error') : 'neutral' },
-          { label: 'Live Runs', value: liveTotals.total, icon: Clock, status: liveTotals.total > 0 ? 'healthy' : 'warning' },
-          { label: 'Active Tasks', value: activeTaskTypes.length, icon: Eye, status: activeTaskTypes.length > 0 ? 'healthy' : 'warning' },
+          { label: 'Historical Pass', value: `${passRate}%`, subtitle: 'retained eval baseline · product-scoped', icon: ShieldCheck, status: passRate >= 85 ? 'healthy' : passRate >= 70 ? 'warning' : 'error' },
+          { label: 'Historical Cases', value: totals.total, subtitle: historicalWindow?.label ?? 'retained eval DB', icon: CheckCircle2, status: totals.total > 0 ? 'neutral' : 'warning' },
+          { label: 'Live Pass', value: `${livePassRate}%`, subtitle: 'retained product telemetry', icon: Activity, status: liveTotals.total > 0 ? (livePassRate >= 85 ? 'healthy' : livePassRate >= 70 ? 'warning' : 'error') : 'neutral' },
+          { label: 'Live Runs', value: liveTotals.total, subtitle: liveWindow?.label ?? 'not a fixed 24h window', icon: Clock, status: liveTotals.total > 0 ? 'healthy' : 'warning' },
+          { label: 'Active Tasks', value: activeTaskTypes.length, subtitle: 'task types seen in product workflows', icon: Eye, status: activeTaskTypes.length > 0 ? 'healthy' : 'warning' },
         ]}
-      />
+        />
+      </div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-evals-coverage">
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Observed workflows</p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">{activeWorkflowLabels.length || '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Only workflows actually observed in product runs contribute to this page.</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{observedWorkflowCount || '—'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Historical coverage: {historicalWorkflowCoverage}/{Math.max(observedWorkflowCount, 1)} · live coverage: {liveWorkflowCoverage}/{Math.max(observedWorkflowCount, 1)} observed workflows.</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Historical baseline</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">{statusLabel(data?.status)}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{historicalCases.length ? `${historicalCases.length} product-scoped historical eval cases retained.` : 'No retained historical baseline yet.'}</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Historical baseline window</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{historicalWindow?.label ?? statusLabel(data?.status)}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{historicalWindow?.start ? `${formatDateTime(historicalWindow.start)} → ${formatDateTime(historicalWindow.end)}` : 'No retained historical timestamps yet.'}</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Live product posture</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">{liveTotals.total ? `${liveTotals.pass} pass · ${liveTotals.warn} warn · ${liveTotals.fail} fail` : 'No live evals yet'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Derived from current product workflow telemetry, not external benchmarks.</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Live telemetry window</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{liveTotals.total ? (liveWindow?.label ?? 'Retained product telemetry') : 'No live evals yet'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{liveWindow?.start ? `${formatDateTime(liveWindow.start)} → ${formatDateTime(liveWindow.end)}` : 'These live numbers come from retained workflow telemetry, not a fixed last-24h slice.'}</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Scope filter</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">{activeTaskTypes.length ? activeTaskTypes.join(', ') : 'Waiting for product usage'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Anything outside the currently used product task types is excluded from this page.</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Coverage gap</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{uncoveredTaskTypes.length ? uncoveredTaskTypes.join(', ') : 'No obvious task gap in current catalog'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Observed workflows: {observedWorkflowCount}. Historical eval coverage: {historicalWorkflowCoverage}. Live eval coverage: {liveWorkflowCoverage}. Current product workflow catalog and observed task types are aligned; the bigger issue here was provenance clarity.</p>
         </GlassCard>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4 mb-6">
+      <div className="grid lg:grid-cols-2 gap-4 mb-6" data-tour="lab-evals-distribution">
         <GlassCard delay={0.08}>
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Historical Product Distribution</h3>
+            <h3 className="text-sm font-medium text-foreground">Historical Suite Distribution</h3>
             {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
           </div>
+          <p className="mb-3 text-[10px] text-muted-foreground">These counts come from retained eval suites filtered down to task types that the current product actually uses.</p>
           {suiteChartData.length === 0 ? (
             <p className="text-xs text-muted-foreground">No product-scoped historical eval suites are recorded yet.</p>
           ) : (
@@ -168,6 +186,7 @@ export default function EvalsDiagnosisPage() {
             <h3 className="text-sm font-medium text-foreground">Live Workflow Verdicts</h3>
             {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
           </div>
+          <p className="mb-3 text-[10px] text-muted-foreground">Live verdicts are derived from retained product workflow telemetry. They are not currently pinned to a fixed 24-hour window.</p>
           {liveWorkflowChartData.length === 0 ? (
             <p className="text-xs text-muted-foreground">Run product workflows to populate live eval verdicts here.</p>
           ) : (
@@ -189,8 +208,8 @@ export default function EvalsDiagnosisPage() {
         </GlassCard>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4 mb-6">
-        <GlassCard delay={0.12}>
+      <div className="grid lg:grid-cols-2 gap-4 mb-6" data-tour="lab-evals-investigate">
+        <GlassCard delay={0.12} data-tour="lab-evals-suite-leaderboard">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Historical Suite Leaderboard</h3>
@@ -224,7 +243,7 @@ export default function EvalsDiagnosisPage() {
           </div>
         </GlassCard>
 
-        <GlassCard delay={0.15}>
+        <GlassCard delay={0.15} data-tour="lab-evals-investigate-first">
           <div className="flex items-center gap-2 mb-4">
             <TrendingDown className="w-4 h-4 text-glow-error" />
             <h3 className="text-sm font-medium text-foreground">Investigate First</h3>
@@ -245,7 +264,7 @@ export default function EvalsDiagnosisPage() {
                   className="p-3 rounded-lg border border-glow-error/20 bg-glow-error/5"
                 >
                   <div className="flex items-center justify-between mb-1 gap-3">
-                    <span className="text-xs font-medium text-foreground">{item.task}</span>
+                    <span className="text-xs font-medium text-foreground">{formatTaskLabel(item.task)}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border/50">{item.sourceKind === 'live' ? 'live' : 'historical'}</span>
                       <span className={`text-[10px] px-2 py-0.5 rounded border font-medium ${verdictStyle.FAIL}`}>FAIL</span>
@@ -264,8 +283,8 @@ export default function EvalsDiagnosisPage() {
         </GlassCard>
       </div>
 
-      <div className="grid xl:grid-cols-3 gap-4 mb-6">
-        <GlassCard delay={0.18}>
+      <div className="grid xl:grid-cols-3 gap-4 mb-6" data-tour="lab-evals-breakdowns">
+        <GlassCard delay={0.18} data-tour="lab-evals-provider-breakdown">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Historical Provider Breakdown</h3>
@@ -288,10 +307,10 @@ export default function EvalsDiagnosisPage() {
           )}
         </GlassCard>
 
-        <GlassCard delay={0.2}>
+        <GlassCard delay={0.2} data-tour="lab-evals-task-coverage">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Historical Task Breakdown</h3>
+            <h3 className="text-sm font-medium text-foreground">Historical Task Coverage</h3>
             {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
           </div>
           {taskBreakdown.length === 0 ? (
@@ -299,9 +318,9 @@ export default function EvalsDiagnosisPage() {
           ) : (
             <div className="space-y-2">
               {taskBreakdown.slice(0, 6).map((task) => (
-                <div key={task.task} className="rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
+                <div key={formatTaskLabel(task.task)} className="rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-foreground">{task.task}</span>
+                    <span className="text-xs font-medium text-foreground">{formatTaskLabel(task.task)}</span>
                     <span className={`text-[10px] font-medium ${task.passRate >= 85 ? 'text-glow-success' : task.passRate >= 70 ? 'text-glow-warning' : 'text-glow-error'}`}>{task.passRate}%</span>
                   </div>
                   <p className="mt-1 text-[10px] text-muted-foreground">{task.total} cases · avg score {Math.round(task.avgScore * 100)}%</p>
@@ -311,10 +330,10 @@ export default function EvalsDiagnosisPage() {
           )}
         </GlassCard>
 
-        <GlassCard delay={0.22}>
+        <GlassCard delay={0.22} data-tour="lab-evals-attention-queue">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-4 h-4 text-glow-warning" />
-            <h3 className="text-sm font-medium text-foreground">Product Watchlist</h3>
+            <h3 className="text-sm font-medium text-foreground">Product Attention Queue</h3>
             {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
           </div>
           {watchlist.length === 0 ? (
@@ -324,7 +343,7 @@ export default function EvalsDiagnosisPage() {
               {watchlist.slice(0, 6).map((item) => (
                 <div key={item.id} className="rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-foreground truncate">{item.task}</span>
+                    <span className="text-xs font-medium text-foreground truncate">{formatTaskLabel(item.task)}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border/50">{item.sourceKind === 'live' ? 'live' : 'historical'}</span>
                       <span className={`text-[10px] px-2 py-0.5 rounded border font-medium ${verdictStyle[item.verdict]}`}>{item.verdict}</span>
@@ -340,15 +359,15 @@ export default function EvalsDiagnosisPage() {
       </div>
 
       {(data?.diagnosis?.adaptationCandidates ?? []).length ? (
-        <GlassCard className="mb-6" delay={0.2}>
+        <GlassCard className="mb-6" delay={0.2} data-tour="lab-evals-adaptation">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-4 h-4 text-glow-warning" />
             <h3 className="text-sm font-medium text-foreground">Historical Adaptation Candidates</h3>
             {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
           </div>
           <div className="space-y-2">
-            {(data?.diagnosis?.adaptationCandidates ?? []).slice(0, 5).map((candidate) => (
-              <div key={candidate.task_type} className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-secondary/20 transition-colors gap-4">
+            {(data?.diagnosis?.adaptationCandidates ?? []).slice(0, 5).map((candidate, index) => (
+              <div key={candidate.task_type} data-tour={index < 4 ? 'lab-evals-adaptation-row' : undefined} className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-secondary/20 transition-colors gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs text-foreground font-medium">{candidate.task_type}</span>
@@ -367,8 +386,8 @@ export default function EvalsDiagnosisPage() {
         </GlassCard>
       ) : null}
 
-      <GlassCard delay={0.25}>
-        <div className="flex items-center gap-2 mb-4">
+      <GlassCard delay={0.25} data-tour="lab-evals-recent-cases">
+        <div className="flex items-center gap-2 mb-4" data-tour="lab-evals-recent-cases-start">
           <Clock className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-medium text-foreground">Recent Product Eval Cases</h3>
           {data?.meta.source && <DataSourceBadge source={data.meta.source} />}
@@ -383,10 +402,10 @@ export default function EvalsDiagnosisPage() {
               </tr>
             </thead>
             <tbody>
-              {recentCases.map((item) => (
-                <tr key={item.id} className="border-b border-border/20 hover:bg-secondary/10 transition-colors">
+              {recentCases.map((item, index) => (
+                <tr key={item.id} data-tour={index < 4 ? 'lab-evals-recent-cases-start' : undefined} className="border-b border-border/20 hover:bg-secondary/10 transition-colors">
                   <td className="px-3 py-2.5"><span className="text-[10px] px-2 py-0.5 rounded bg-secondary text-muted-foreground border border-border/50">{item.sourceKind === 'live' ? 'live' : 'historical'}</span></td>
-                  <td className="px-3 py-2.5 text-xs text-foreground">{item.task}</td>
+                  <td className="px-3 py-2.5 text-xs text-foreground">{formatTaskLabel(item.task)}</td>
                   <td className="px-3 py-2.5 text-xs text-muted-foreground">{item.suite}</td>
                   <td className="px-3 py-2.5"><span className={`text-[10px] px-2 py-0.5 rounded border font-medium ${verdictStyle[item.verdict]}`}>{item.verdict}</span></td>
                   <td className="px-3 py-2.5 text-xs text-foreground">{Math.round(item.score * 100)}%</td>

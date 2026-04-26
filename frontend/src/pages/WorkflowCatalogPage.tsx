@@ -102,12 +102,13 @@ export default function WorkflowCatalogPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Decision Workflows" description="Run the live workflow catalog backed by the Product API contract, document index and persisted run history." />
+      <div data-tour="workflow-catalog-header"><PageHeader title="Decision Workflows" description="Run the live workflow catalog backed by the Product API contract, document index and persisted run history." /></div>
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
+        data-tour="workflow-catalog-surface"
         className="glass rounded-xl p-4 mb-8 flex items-center gap-4"
       >
         <div className="w-10 h-10 rounded-xl bg-glow-warning/10 flex items-center justify-center shrink-0">
@@ -146,7 +147,7 @@ export default function WorkflowCatalogPage() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Loading workflow catalog...</div>
         </GlassCard>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4" data-tour="workflow-catalog-cards">
           {workflows.map((workflow, index) => {
             const Icon = WORKFLOW_ICON_MAP[workflow.workflow_id] || Shield;
             const colors = WORKFLOW_COLOR_MAP[workflow.workflow_id] || WORKFLOW_COLOR_MAP.document_review;
@@ -172,7 +173,7 @@ export default function WorkflowCatalogPage() {
                 transition={{ delay: 0.15 + index * 0.08, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
                 <Link to={route} className="block">
-                  <div className={`glass rounded-xl p-6 group hover:border-primary/30 transition-all duration-300 cursor-pointer bg-gradient-to-r ${colors.gradient}`}>
+                  <div data-tour={`workflow-card-${workflow.workflow_id}`} className={`glass rounded-xl p-6 group hover:border-primary/30 transition-all duration-300 cursor-pointer bg-gradient-to-r ${colors.gradient}`}>
                     <div className="flex items-start gap-5">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${colors.icon}`}>
                         <Icon className="w-6 h-6" />

@@ -31,19 +31,16 @@ export default function AdvancedExperimentsPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <AiLabSectionIntro
+      <div data-tour="lab-artifacts-header">
+        <AiLabSectionIntro
         title="Experiments & Artifacts"
         description="Product-visible export bundles, workflow-linked evidence and capture posture for the AI Lab surfaces."
         operatorQuestion="Which persisted artifact bundles explain the latest workflow behavior?"
-        badges={[
-          { label: `${summary?.totalArtifacts ?? 0} export bundles`, variant: 'default' },
-          { label: `${summary?.readyArtifacts ?? 0} ready`, variant: 'success' },
-          { label: `${attentionCount} need attention`, variant: attentionCount > 0 ? 'warning' : 'default' },
-        ]}
         dataSource={data?.meta.source}
         surfaceStatus={data?.status}
         degradedReason={data?.degraded_reason}
-      />
+        />
+      </div>
 
       {isError && (
         <GlassCard className="mb-6 border border-glow-warning/20 bg-glow-warning/5">
@@ -54,45 +51,47 @@ export default function AdvancedExperimentsPage() {
         </GlassCard>
       )}
 
-      <AiLabMetricGrid
+      <div data-tour="lab-artifacts-metrics">
+        <AiLabMetricGrid
         columns={4}
         metrics={[
-          { label: 'Export Bundles', value: summary?.totalArtifacts ?? '—', icon: Archive, status: 'neutral' },
-          { label: 'Benchmark Bundles', value: summary?.benchmarkArtifacts ?? artifacts.filter((item) => item.type === 'benchmark_bundle').length, icon: FlaskConical, status: 'neutral' },
-          { label: 'Preview Assets', value: summary?.previewAssets ?? artifacts.reduce((total, item) => total + (item.previewCount ?? 0), 0), icon: Eye, status: 'neutral' },
-          { label: 'Linked Workflow Runs', value: summary?.linkedWorkflowRuns ?? '—', icon: Link2, status: 'neutral' },
+          { label: 'Export Bundles', value: summary?.totalArtifacts ?? '—', subtitle: 'top-level presentation_exports registry', icon: Archive, status: 'neutral' },
+          { label: 'Ready Bundles', value: summary?.readyArtifacts ?? '—', subtitle: `${summary?.warningArtifacts ?? 0} warning · ${summary?.errorArtifacts ?? 0} error`, icon: FlaskConical, status: attentionCount > 0 ? 'warning' : 'healthy' },
+          { label: 'Needs Attention', value: attentionCount, subtitle: 'failed or degraded bundles', icon: Eye, status: attentionCount > 0 ? 'warning' : 'healthy' },
+          { label: 'Artifact-linked Runs', value: summary?.linkedWorkflowRuns ?? '—', subtitle: 'product workflow history', icon: Link2, status: (summary?.linkedWorkflowRuns ?? 0) > 0 ? 'healthy' : 'warning' },
         ]}
-      />
+        />
+      </div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-artifacts-registry-summary">
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Chat registry</p>
           <p className="mt-2 text-2xl font-semibold text-foreground">{runRegistry?.chatSessions ?? summary?.chatSessions ?? '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Persisted AI LAB chat sessions linked into the artifact surface.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Persisted AI Lab chat sessions visible from the artifact surface.</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Workflow runs</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Product workflow runs</p>
           <p className="mt-2 text-2xl font-semibold text-foreground">{runRegistry?.workflowRuns ?? summary?.workflowRuns ?? '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Persisted inspector runs available for artifact drill-down.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Persisted product workflow history entries, not just inspector samples.</p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Latest linked artifact</p>
           <p className="mt-2 text-sm font-semibold text-foreground break-all">{runRegistry?.latestWorkflowArtifact?.label ?? 'No linked artifact yet'}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {runRegistry?.latestWorkflowArtifact?.updatedAt ? `Updated ${formatDateTime(runRegistry.latestWorkflowArtifact.updatedAt)}` : 'Most recent workflow-linked bundle visible from persisted runtime state.'}
+            {runRegistry?.latestWorkflowArtifact?.updatedAt ? `Updated ${formatDateTime(runRegistry.latestWorkflowArtifact.updatedAt)}` : 'The latest workflow run with a captured artifact bundle will surface here.'}
           </p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Capture posture</p>
           <p className="mt-2 text-sm font-semibold text-foreground">{statusLabel}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {data?.degraded_reason ?? `${summary?.linkedWorkflowRuns ?? 0} linked run(s), ${summary?.unlinkedWorkflowRuns ?? 0} unlinked run(s), across ${summary?.workflowCount ?? 0} workflow surface(s).`}
+            {data?.degraded_reason ?? `${summary?.linkedWorkflowRuns ?? 0} artifact-linked product run(s), ${summary?.unlinkedWorkflowRuns ?? 0} still without artifact capture, across ${summary?.workflowCount ?? 0} workflow surface(s).`}
           </p>
         </GlassCard>
       </div>
 
       <div className="grid xl:grid-cols-[1.15fr,0.85fr] gap-4 mb-6">
-        <GlassCard delay={0.08}>
+        <GlassCard delay={0.08} data-tour="lab-artifacts-run-registry">
           <div className="flex items-center gap-2 mb-4">
             <Archive className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Run Registry</h3>
@@ -104,18 +103,18 @@ export default function AdvancedExperimentsPage() {
               <p className="mt-2 text-xs text-foreground font-medium break-all">{runRegistry?.latestChatSession ?? 'No session yet'}</p>
             </div>
             <div className="rounded-lg border border-border/30 bg-secondary/20 p-3">
-              <p className="text-muted-foreground uppercase tracking-wider">Latest workflow run</p>
+              <p className="text-muted-foreground uppercase tracking-wider">Latest product workflow run</p>
               <p className="mt-2 text-xs text-foreground font-medium break-all">{runRegistry?.latestWorkflowRun ?? 'No run yet'}</p>
             </div>
             <div className="rounded-lg border border-border/30 bg-secondary/20 p-3 sm:col-span-2">
               <p className="text-muted-foreground uppercase tracking-wider">Latest linked workflow artifact</p>
               <p className="mt-2 text-xs text-foreground font-medium break-all">{runRegistry?.latestWorkflowArtifact?.label ?? 'No workflow artifact linked yet'}</p>
-              <p className="mt-1 text-[10px] text-muted-foreground">{runRegistry?.latestWorkflowArtifact?.runId ? `Run ${runRegistry.latestWorkflowArtifact.runId}` : 'The latest run with a persisted artifact linkage will surface here.'}</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">{runRegistry?.latestWorkflowArtifact?.runId ? `Run ${runRegistry.latestWorkflowArtifact.runId}` : 'The latest product workflow run with a persisted artifact capture will surface here.'}</p>
             </div>
           </div>
         </GlassCard>
 
-        <GlassCard delay={0.1}>
+        <GlassCard delay={0.1} data-tour="lab-artifacts-recent-bundles">
           <div className="flex items-center gap-2 mb-4">
             <Eye className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Recent Bundles</h3>
@@ -153,7 +152,7 @@ export default function AdvancedExperimentsPage() {
         </GlassCard>
       </div>
 
-      <GlassCard className="mb-6" delay={0.1}>
+      <GlassCard className="mb-6" delay={0.1} data-tour="lab-artifacts-diagnostics">
         <div className="flex items-center gap-2 mb-4">
           <Cpu className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-medium text-foreground">Processing Diagnostics</h3>
@@ -191,7 +190,7 @@ export default function AdvancedExperimentsPage() {
         ) : null}
       </GlassCard>
 
-      <GlassCard delay={0.2}>
+      <GlassCard delay={0.2} data-tour="lab-artifacts-explorer">
         <ArtifactExplorerPanel artifacts={artifacts} dataSource={data?.meta.source ?? 'derived'} />
       </GlassCard>
     </motion.div>

@@ -8,6 +8,14 @@ interface DataSourceBadgeProps {
   className?: string;
 }
 
+function formatSurfaceStatusLabel(value: string): string {
+  const normalized = String(value || '').trim();
+  if (!normalized) return '';
+  return normalized
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
 export function DataSourceBadge({ source, className }: DataSourceBadgeProps) {
   const colors: Record<DataSource, string> = {
     live: 'bg-glow-success/10 text-glow-success border-glow-success/20',
@@ -60,7 +68,7 @@ export function AiLabSectionIntro({ title, description, operatorQuestion, badges
                   surfaceStatus === 'degraded' && 'bg-glow-warning/10 text-glow-warning border-glow-warning/20',
                   surfaceStatus === 'empty' && 'bg-secondary text-secondary-foreground border-border',
                 )}>
-                  {surfaceStatus}
+                  {formatSurfaceStatusLabel(surfaceStatus)}
                 </span>
               ) : null}
               {degradedReason ? (

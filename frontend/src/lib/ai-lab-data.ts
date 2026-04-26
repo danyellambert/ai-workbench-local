@@ -80,6 +80,23 @@ export interface LabRuntimePayload {
     contextBudgetTotal?: number;
     contextPressurePct?: number;
     contextUtilizationPct?: number;
+    latestContextPressurePct?: number;
+    avgContextPressurePct?: number;
+    maxContextPressurePct?: number;
+    latestContextUtilizationPct?: number;
+    avgContextUtilizationPct?: number;
+    contextHeadroomPct?: number;
+    avgSourceCoveragePct?: number;
+    medianSourceCoveragePct?: number;
+    p90SourceCoveragePct?: number;
+    latestSourceCoveragePct?: number;
+    minSourceCoveragePct?: number;
+    maxSourceCoveragePct?: number;
+    sourceCoverageRunCount?: number;
+    sourceCoverageHighRunCount?: number;
+    sourceCoverageFocusedRunCount?: number;
+    sourceCoverageBalancedRunCount?: number;
+    sourceCoverageBroadRunCount?: number;
     pdfExtractionMode?: string;
     ocrBackend?: string;
     vlmEnhancement?: boolean;
@@ -163,7 +180,11 @@ export interface LabRuntimePayload {
     success: boolean;
     needsReview: boolean;
     totalTokens: number;
+    tokensEstimated?: boolean;
     sourceCount: number;
+    retrievedChunkCount?: number;
+    documentCount?: number;
+    sourceDocuments?: string[];
     contextPressurePct: number;
     errorMessage?: string | null;
   }>;
@@ -239,6 +260,7 @@ export interface LabChatPageData {
   messages: LabChatMessage[];
   suggested_prompts: string[];
   selected_documents: LabDocumentOption[];
+  available_documents?: LabDocumentOption[];
   session_diagnostics?: Array<{ label: string; value: string | number }> | Record<string, unknown>;
   retrieval_quality?: Array<{ label: string; value: string | number }> | Record<string, unknown>;
   grounding_overview?: Array<{ label: string; value: string | number }> | Record<string, unknown>;
@@ -270,6 +292,14 @@ export interface SendLabChatMessageResponse {
   page: LabChatPageData;
 }
 
+export interface DeleteLabChatSessionResponse {
+  ok: boolean;
+  session_id: string;
+  deleted?: boolean;
+  warning?: string;
+  page: LabChatPageData;
+}
+
 export interface LabWorkflowInspectorPageData {
   meta: LabMeta;
   status?: string;
@@ -277,6 +307,8 @@ export interface LabWorkflowInspectorPageData {
   capabilities: { can_execute: boolean; reason?: string | null };
   summary: {
     total_cases: number;
+    recent_window_count?: number;
+    recent_window_limit?: number;
     needs_review: number;
     avg_confidence: number;
     review_blockers: number;
@@ -309,6 +341,9 @@ export interface LabWorkflowInspectorPageData {
       model?: string | null;
       source_count?: number;
       surface?: string | null;
+      answer_mode?: string | null;
+      tool_used?: string | null;
+      intent?: string | null;
     }>;
     trace_fields?: Array<{ label: string; value: string | number }>;
     stage_timeline?: Array<{ label: string; status: string; detail?: string | null; duration_ms?: number | null }>;
@@ -324,6 +359,7 @@ export interface LabWorkflowInspectorPageData {
     status: string;
     confidence: number;
     sourceCount: number;
+    documentCount?: number;
     needsReview: boolean;
   }>;
   mode_breakdown?: Array<{ label: string; value: number }>;
@@ -370,6 +406,9 @@ export interface LabBenchmarksPageData {
     bestModel?: string | null;
     totalRuns?: number;
     lastRecordedAt?: string | null;
+    sourceBundleCount?: number;
+    phase85CaseCount?: number;
+    phase85WinnerCount?: number;
   };
   models: Array<{
     id: string;
@@ -385,7 +424,9 @@ export interface LabBenchmarksPageData {
     runtimeBucket?: string;
     quantization?: string;
     runs: number;
+    caseCount?: number;
     scoreStatus?: 'scored' | 'partial';
+    sourceFamilies?: string[];
     metricCoverage?: {
       useCaseFit?: number;
       groundedness?: number;
@@ -394,11 +435,28 @@ export interface LabBenchmarksPageData {
       outputChars?: number;
     };
   }>;
-  presets: Array<{ id: string; name: string; description: string; metrics: string[]; models: string[] }>;
+  presets: Array<{
+    id: string;
+    name: string;
+    description: string;
+    metrics: string[];
+    models: string[];
+    runCount?: number;
+    metricSummary?: {
+      useCaseFit?: number | null;
+      groundedness?: number | null;
+      adherence?: number | null;
+      decisionScore?: number | null;
+      groundingRatio?: number | null;
+      structuredSuccess?: number | null;
+      latency?: number | null;
+    };
+  }>;
   providerSummary?: Array<{ provider: string; models: number; scoredModels?: number; bestFit?: number | null; avgLatency?: number | null; bestModel?: string | null }>;
   leaderboardHighlights?: Array<{ label: string; model?: string | null; detail?: string | null }>;
   retrievalObservations: Array<{
     strategy: string;
+    category?: string | null;
     outputDiscipline?: number | null;
     contextRetention?: number | null;
     composite?: number | null;
@@ -407,6 +465,13 @@ export interface LabBenchmarksPageData {
     scoredCandidateCount?: number;
     avgContextChars?: number | null;
     description: string;
+  }>;
+  sourceBreakdown?: Array<{
+    id: string;
+    label: string;
+    bundles: number;
+    runs?: number;
+    detail?: string | null;
   }>;
 }
 
@@ -439,6 +504,16 @@ export interface LabEvalsPageData {
     observedWorkflowLabels?: string[];
     observedTaskTypes?: string[];
     capableTaskTypes?: string[];
+    uncoveredTaskTypes?: string[];
+    historicalWindow?: { start?: string | null; end?: string | null; label?: string | null };
+    liveWindow?: { start?: string | null; end?: string | null; label?: string | null };
+    workflowCoverage?: {
+      observed: number;
+      historical: number;
+      live: number;
+      historicalCoveredWorkflowIds?: string[];
+      liveCoveredWorkflowIds?: string[];
+    };
   };
   passRate: number;
   livePassRate?: number;
@@ -452,7 +527,7 @@ export interface LabEvalsPageData {
   taskBreakdown?: Array<{ task: string; total: number; passRate: number; avgScore: number; warnings?: number; failures?: number }>;
   liveProviderBreakdown?: Array<{ provider: string; total: number; failures: number; warnings?: number; passRate: number }>;
   liveTaskBreakdown?: Array<{ task: string; total: number; passRate: number; avgScore: number; warnings?: number; failures?: number }>;
-  liveWorkflowBreakdown?: Array<{ workflowId: string; label: string; pass: number; warn: number; fail: number; total: number }>;
+  liveWorkflowBreakdown?: Array<{ workflowId: string; label: string; shortLabel?: string; pass: number; warn: number; fail: number; total: number }>;
   watchlist?: Array<{ id: string; task: string; suite: string; verdict: 'WARN' | 'FAIL'; score: number; model: string; latency: number; reason?: string | null; timestamp?: string | null; errorDetail?: string | null; sourceKind?: 'live' | 'historical' }>;
   liveWatchlist?: Array<{ id: string; task: string; suite: string; verdict: 'WARN' | 'FAIL'; score: number; model: string; latency: number; reason?: string | null; timestamp?: string | null; errorDetail?: string | null; sourceKind?: 'live' | 'historical' }>;
   historicalWatchlist?: Array<{ id: string; task: string; suite: string; verdict: 'WARN' | 'FAIL'; score: number; model: string; latency: number; reason?: string | null; timestamp?: string | null; errorDetail?: string | null; sourceKind?: 'live' | 'historical' }>;
@@ -495,11 +570,13 @@ export interface LabArtifactsPageData {
     issueCount?: number;
     workflowCount?: number;
     benchmarkArtifacts?: number;
+    inspectorRuns?: number;
   };
   diagnostics: Array<{ label: string; detail: string; status: string; health: 'healthy' | 'warning' | 'neutral' }>;
   runRegistry?: {
     chatSessions?: number;
     workflowRuns?: number;
+    inspectorRuns?: number;
     latestChatSession?: string | null;
     latestWorkflowRun?: string | null;
     latestWorkflowArtifact?: {
@@ -530,18 +607,24 @@ export interface LabEvidenceOpsPageData {
   summary: {
     toolsTotal: number;
     activeTools: number;
+    externalToolsTotal?: number;
+    activeExternalTools?: number;
     openActions: number;
+    latestOpenActions?: number;
+    latestActionWindow?: number;
     operationsCount: number;
     repositoryDocumentCount: number;
     repositoryRoot?: string | null;
     lastSyncAt?: string | null;
     overdueActions?: number;
     unassignedActions?: number;
+    inProgressActions?: number;
     needsReviewActions?: number;
   };
   repositoryStats?: { changedDocuments: number; newDocuments: number; categories?: number; totalSizeLabel?: string };
   searchHints?: string[];
   tools: Array<{ name: string; description: string; status: string; lastCall?: string | null }>;
+  externalTools?: Array<{ name: string; description: string; status: string; lastCall?: string | null; missing?: string[]; connected?: boolean; surface?: string | null }>;
   actions: Array<{ id: string; title: string; status: string; owner: string; target: string; priority: string; dueDate: string; [key: string]: unknown }>;
   operations: Array<{ id: string; operation: string; tool: string; status: string; timestamp: string; durationMs: number; detail: string }>;
   timeline?: LabTimelineEntry[];
@@ -633,11 +716,15 @@ export function sendLabChatMessage(sessionId: string, payload: { content: string
   return postJson<SendLabChatMessageResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/messages`, payload);
 }
 
+export function deleteLabChatSession(sessionId: string) {
+  return postJson<DeleteLabChatSessionResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/delete`, {});
+}
+
 export function getLabWorkflowInspectorPage() {
   return fetchJson<LabWorkflowInspectorPageData>('/api/lab/workflow-inspector');
 }
 
-export function runLabWorkflowInspector(payload: { task_id: string; document_id?: string | null; input_text?: string | null; provider?: string | null; model?: string | null }) {
+export function runLabWorkflowInspector(payload: { task_id: string; document_id?: string | null; document_ids?: string[]; input_text?: string | null; provider?: string | null; model?: string | null }) {
   return postJson<RunLabWorkflowInspectorResponse>('/api/lab/workflow-inspector/run', payload);
 }
 
