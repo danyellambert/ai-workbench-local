@@ -1,30 +1,57 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import KeystoneLogo from '@/components/KeystoneLogo';
+import MeetDanyelModal from '@/components/landing/MeetDanyelModal';
 
 export default function LandingNav() {
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.1 }}
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-landing-bg/60 backdrop-blur-xl border-b border-border/30"
-    >
-      <Link to="/" className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-primary" />
-        </div>
-        <div className="flex flex-col leading-tight">
-          <span className="text-sm font-semibold text-foreground tracking-tight">AI Decision Studio</span>
-          <span className="text-[10px] text-muted-foreground">by Danyel Lambert</span>
-        </div>
-      </Link>
-      <Link
-        to="/app"
-        className="text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 px-4 py-2 rounded-lg transition-colors"
+    <>
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-landing-bg/60 backdrop-blur-xl border-b border-border/30"
       >
-        Enter Workbench
-      </Link>
-    </motion.header>
+        <div className="flex items-center gap-2.5">
+          <Link
+            to="/"
+            aria-label="Open landing page"
+            className="flex items-center gap-2.5 rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/60 focus:ring-offset-2 focus:ring-offset-background"
+          >
+            <KeystoneLogo size={32} />
+            <span className="text-sm font-semibold text-foreground tracking-tight">AI Decision Studio</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setIsBuilderOpen(true)}
+            className="text-[10px] text-muted-foreground transition-colors hover:text-primary focus:outline-none focus:text-primary"
+            aria-label="Open Meet Danyel card"
+          >
+            by Danyel Lambert
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setIsBuilderOpen(true)}
+            className="hidden sm:inline-flex text-xs font-medium text-muted-foreground hover:text-foreground border border-border/50 bg-card/20 hover:bg-card/40 px-4 py-2 rounded-lg transition-colors"
+          >
+            Meet Danyel
+          </button>
+          <Link
+            to="/app"
+            className="text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 px-4 py-2 rounded-lg transition-colors"
+          >
+            Enter Workbench
+          </Link>
+        </div>
+      </motion.header>
+
+      <MeetDanyelModal isOpen={isBuilderOpen} onClose={() => setIsBuilderOpen(false)} />
+    </>
   );
 }

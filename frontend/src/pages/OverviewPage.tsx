@@ -48,13 +48,13 @@ export default function OverviewPage() {
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-8" variants={stagger} initial="initial" animate="animate">
       {/* Hero */}
-      <motion.div variants={item} className="relative overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-br from-card via-card to-surface-2 p-8 lg:p-10">
+      <motion.div variants={item} className="relative overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-br from-card via-card to-surface-2 p-8 lg:p-10" data-tour="command-center-hero">
         <div className="absolute top-0 right-0 w-[400px] h-[400px] opacity-[0.06] pointer-events-none"
           style={{ background: 'radial-gradient(circle, hsl(187 90% 70%), transparent 70%)' }} />
-        <div className="relative z-10">
+        <div className="relative z-10" data-tour="command-center-hero-content">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-xs font-medium text-primary tracking-wide uppercase">AI Workbench Local</span>
+            <span className="text-xs font-medium text-primary tracking-wide uppercase">Evidence-First Decision OS</span>
           </div>
           <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground max-w-2xl leading-tight">
             Turn documents into<br />
@@ -76,7 +76,7 @@ export default function OverviewPage() {
       </motion.div>
 
       {/* Metrics */}
-      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3" data-tour="command-center-metrics">
         <MetricCard label="Indexed Documents" value={isLoading ? '—' : (summary?.indexed_documents ?? 0)} icon={FileText} glowColor="primary" delay={0.1} />
         <MetricCard label="Total Chunks" value={isLoading ? '—' : ((summary?.total_chunks ?? 0).toLocaleString())} icon={Database} glowColor="accent" delay={0.15} />
         <MetricCard label="Completed Runs" value={isLoading ? '—' : (summary?.completed_runs ?? 0)} icon={Activity} glowColor="success" delay={0.2} />
@@ -93,7 +93,7 @@ export default function OverviewPage() {
       )}
 
       {/* Workflow Cards */}
-      <motion.div variants={item}>
+      <motion.div variants={item} data-tour="command-center-workflows">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-foreground">Decision Workflows</h2>
           <Link to="/app/workflows" className="text-xs text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
@@ -127,7 +127,7 @@ export default function OverviewPage() {
         </div>
       </motion.div>
 
-      <div className="grid lg:grid-cols-3 gap-3">
+      <div className="grid lg:grid-cols-3 gap-3" data-tour="command-center-activity">
         {/* Recent Runs */}
         <GlassCard className="lg:col-span-2" delay={0.4}>
           <h3 className="text-sm font-medium text-foreground mb-4">Recent Runs</h3>
@@ -176,7 +176,7 @@ export default function OverviewPage() {
       </div>
 
       {/* AI Lab Teaser + Artifacts */}
-      <div className="grid lg:grid-cols-2 gap-3">
+      <div className="grid lg:grid-cols-2 gap-3" data-tour="command-center-lab-artifacts">
         <GlassCard delay={0.5}>
           <div className="flex items-center gap-2 mb-4">
             <Layers className="w-4 h-4 text-accent" />

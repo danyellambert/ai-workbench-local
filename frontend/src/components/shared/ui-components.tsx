@@ -168,6 +168,7 @@ type GlassCardProps = {
   style?: CSSProperties;
   onClick?: MouseEventHandler<HTMLDivElement>;
   ['data-testid']?: string;
+  ['data-tour']?: string;
 };
 
 export function GlassCard({ children, className, delay = 0, ...props }: GlassCardProps) {

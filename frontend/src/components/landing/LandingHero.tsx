@@ -50,21 +50,36 @@ export default function LandingHero({ onExploreWorkflows }: Props) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.85 }}
-        className="flex flex-col sm:flex-row items-center gap-4 mt-10"
+        className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
       >
         <Link
           to="/app"
-          className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all duration-300 shadow-[0_0_30px_-5px_hsl(var(--primary)/0.4)]"
+          className="group inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all duration-300 shadow-[0_0_30px_-5px_hsl(var(--primary)/0.4)]"
         >
           Enter Workbench
           <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
         </Link>
         <button
           onClick={onExploreWorkflows}
-          className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-border/60 bg-card/30 backdrop-blur-md text-sm text-muted-foreground hover:text-foreground hover:border-border transition-all duration-300"
+          className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl border border-border/60 bg-card/30 backdrop-blur-md text-sm text-muted-foreground hover:text-foreground hover:border-border transition-all duration-300"
         >
           Explore Workflows
         </button>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 1.05 }}
+        className="mt-4 text-xs text-muted-foreground/70"
+      >
+        New here?{' '}
+        <Link
+          to="/app?tour=1"
+          className="font-medium text-primary/90 hover:text-primary transition-colors"
+        >
+          Start a guided tour of the workbench →
+        </Link>
       </motion.div>
 
       {/* Scroll indicator */}
