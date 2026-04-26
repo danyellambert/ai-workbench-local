@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ..config import get_rag_settings
-from ..rag.service import retrieve_relevant_chunks_detailed
+from ..rag.service import inspect_embedding_configuration_compatibility, retrieve_relevant_chunks_detailed
 
 
 DEFAULT_DOCUMENT_SCAN_CHUNKS = 14
@@ -638,6 +638,31 @@ def _get_rag_index() -> dict[str, Any] | None:
     return disk_index
 
 
+
+
+class _BoundEmbeddingProvider:
+    def __init__(self, provider: Any, forced_model: str | None = None):
+        self._provider = provider
+        self._forced_model = str(forced_model or "").strip() or None
+
+    def create_embeddings(
+        self,
+        texts: list[str],
+        model: str,
+        context_window: int | None = None,
+        truncate: bool = True,
+    ) -> list[list[float]]:
+        effective_model = self._forced_model or str(model or "").strip()
+        return self._provider.create_embeddings(
+            texts,
+            model=effective_model,
+            context_window=context_window,
+            truncate=truncate,
+        )
+
+    def __getattr__(self, name: str):
+        return getattr(self._provider, name)
+
 def _get_effective_rag_settings():
     try:
         from .rag_state import get_rag_runtime_settings
@@ -658,17 +683,31 @@ def _get_effective_rag_settings():
 def _get_embedding_provider():
     try:
         from ..providers.registry import build_provider_registry, resolve_provider_runtime_profile
+        from .runtime_controls import resolve_runtime_fallback_provider, resolve_runtime_fallback_step
     except Exception:
         return None
     registry = build_provider_registry()
     rag_settings = _get_effective_rag_settings()
+    fallback_provider = resolve_runtime_fallback_provider("embeddings")
     runtime_profile = resolve_provider_runtime_profile(
         registry,
         rag_settings.embedding_provider,
         capability="embeddings",
-        fallback_provider="ollama",
+        fallback_provider=fallback_provider,
     )
-    return runtime_profile.get("provider_instance")
+    provider_instance = runtime_profile.get("provider_instance")
+    if provider_instance is None:
+        return None
+
+    forced_model = str(rag_settings.embedding_model or "").strip()
+    effective_provider = str(runtime_profile.get("effective_provider") or "").strip()
+    requested_provider = str(rag_settings.embedding_provider or "").strip()
+    if effective_provider and requested_provider and effective_provider != requested_provider:
+        fallback_step = resolve_runtime_fallback_step("embeddings")
+        fallback_model = str((fallback_step or {}).get("model") or runtime_profile.get("default_model") or "").strip()
+        if fallback_model:
+            forced_model = fallback_model
+    return _BoundEmbeddingProvider(provider_instance, forced_model)
 
 
 def _filtered_chunks(rag_index: dict[str, Any], document_ids: list[str] | None = None) -> list[dict[str, Any]]:
@@ -908,32 +947,40 @@ def build_document_scan_context(
 def build_retrieval_context(
     query: str,
     document_ids: list[str] | None = None,
-    max_chunks: int = DEFAULT_RETRIEVAL_CHUNKS,
+    max_chunks: int | None = None,
     max_chars: int = DEFAULT_RETRIEVAL_CHARS,
 ) -> str:
     rag_settings = _get_effective_rag_settings()
+    effective_max_chunks = int(max_chunks) if max_chunks is not None else int(getattr(rag_settings, "top_k", DEFAULT_RETRIEVAL_CHUNKS) or DEFAULT_RETRIEVAL_CHUNKS)
     rag_index = _get_rag_index()
     if not isinstance(rag_index, dict):
         return ""
     cleaned_query = (query or "").strip()
     if not cleaned_query:
-        return build_document_scan_context(document_ids=document_ids, max_chunks=max_chunks, max_chars=max_chars)
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
 
     embedding_provider = _get_embedding_provider()
     if embedding_provider is None:
-        return build_document_scan_context(document_ids=document_ids, max_chunks=max_chunks, max_chars=max_chars)
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
 
-    retrieval = retrieve_relevant_chunks_detailed(
-        query=cleaned_query,
-        rag_index=rag_index,
-        settings=rag_settings,
-        embedding_provider=embedding_provider,
-        document_ids=document_ids,
-    )
+    compatibility = inspect_embedding_configuration_compatibility(rag_index, rag_settings)
+    if isinstance(compatibility, dict) and not bool(compatibility.get("compatible", True)):
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
+
+    try:
+        retrieval = retrieve_relevant_chunks_detailed(
+            query=cleaned_query,
+            rag_index=rag_index,
+            settings=rag_settings,
+            embedding_provider=embedding_provider,
+            document_ids=document_ids,
+        )
+    except Exception:
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
     chunks = retrieval.get("chunks", []) if isinstance(retrieval, dict) else []
     if not chunks:
-        return build_document_scan_context(document_ids=document_ids, max_chunks=max_chunks, max_chars=max_chars)
-    return _join_chunk_context(chunks[:max_chunks], max_chars=max_chars)
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
+    return _join_chunk_context(chunks[:effective_max_chunks], max_chars=max_chars)
 
 
 def build_structured_document_context(
@@ -967,7 +1014,7 @@ def build_structured_document_context(
         return build_retrieval_context(
             query=query,
             document_ids=document_ids,
-            max_chunks=max_chunks or DEFAULT_RETRIEVAL_CHUNKS,
+            max_chunks=max_chunks,
             max_chars=max_chars or DEFAULT_RETRIEVAL_CHARS,
         )
     return build_document_scan_context(
