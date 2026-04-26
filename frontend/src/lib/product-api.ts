@@ -3,7 +3,6 @@ import type {
   OperatorPreferences,
   ProviderConnection,
   RuntimeProfile,
-  WorkflowDefault,
 } from '@/types/settings';
 
 const rawBaseUrl = (import.meta.env.VITE_PRODUCT_API_BASE_URL as string | undefined)?.trim();
@@ -133,6 +132,7 @@ export interface ProductRunHistoryDetailResponse {
   source?: string;
   history_path?: string;
   run: ProductRunEntry;
+  workflow_response?: ProductRunWorkflowResponse;
 }
 
 export interface ProductRunHistoryResponse {
@@ -211,6 +211,11 @@ export interface ProductDocumentLibraryResponse {
     indexing_documents: number;
     total_chunks: number;
     total_chars: number;
+  };
+  capabilities?: {
+    direct_upload_enabled?: boolean;
+    nextcloud_import_enabled?: boolean;
+    public_demo_mode?: boolean;
   };
   documents: ProductDocumentLibraryEntry[];
 }
@@ -883,7 +888,6 @@ export interface PreferencesResponse {
   active_profile_id: string;
   provider_connections: ProviderConnection[];
   runtime_profiles: RuntimeProfile[];
-  workflow_defaults: WorkflowDefault[];
   connection_policy_rules: ConnectionPolicyRule[];
   operator_preferences: OperatorPreferences;
   catalogs: RuntimeControlsCatalogs;
@@ -894,7 +898,6 @@ export interface PreferencesResponse {
 export interface PreferencesPatchPayload {
   active_profile_id?: string;
   runtime_profiles?: RuntimeProfile[];
-  workflow_defaults?: WorkflowDefault[];
   connection_policy_rules?: ConnectionPolicyRule[];
   operator_preferences?: Partial<OperatorPreferences>;
   provider_connections?: Array<Partial<ProviderConnection> & { id: string }>;
@@ -967,6 +970,30 @@ export function getProductWorkflows(): Promise<ProductWorkflowCatalogResponse> {
 
 export function getProductRunHistory(): Promise<ProductRunHistoryResponse> {
   return fetchProductApi<ProductRunHistoryResponse>("/api/product/run-history");
+}
+
+export function buildWorkflowResponseFromRunHistory(detail?: ProductRunHistoryDetailResponse | null): ProductRunWorkflowResponse | null {
+  const run = detail?.run;
+  if (!run) return null;
+
+  if (detail?.workflow_response?.result) {
+    return {
+      ...detail.workflow_response,
+      source_run: detail.workflow_response.source_run ?? run,
+    };
+  }
+
+  if (run.response_payload && typeof run.response_payload === 'object') {
+    return {
+      ok: true,
+      run_id: run.id,
+      result: run.response_payload as ProductWorkflowResultPayload,
+      result_sections: run.result_sections as ProductResultSections,
+      source_run: run,
+    };
+  }
+
+  return null;
 }
 
 export function getProductRunHistoryEntry(runId: string): Promise<ProductRunHistoryDetailResponse> {
@@ -1164,25 +1191,31 @@ export function getProductNextcloudDocuments(limit = 8): Promise<ProductNextclou
   return fetchProductApi<ProductNextcloudDocumentsResponse>(`/api/product/integrations/nextcloud?limit=${encodeURIComponent(String(normalizedLimit))}`);
 }
 
-export async function importProductDocumentFromNextcloud(options: {
+export type ProductNextcloudImportDocumentOptions = {
   relativePath?: string | null;
   documentId?: string | null;
   filename?: string | null;
   title?: string | null;
   category?: string | null;
   webdavUrl?: string | null;
-}): Promise<ProductUploadDocumentsResponse> {
+};
+
+function serializeNextcloudImportDocument(options: ProductNextcloudImportDocumentOptions) {
+  return {
+    relative_path: options.relativePath || undefined,
+    document_id: options.documentId || undefined,
+    filename: options.filename || undefined,
+    title: options.title || undefined,
+    category: options.category || undefined,
+    webdav_url: options.webdavUrl || undefined,
+  };
+}
+
+async function postNextcloudImportPayload(payload: object): Promise<ProductUploadDocumentsResponse> {
   const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/integrations/nextcloud/import`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      relative_path: options.relativePath || undefined,
-      document_id: options.documentId || undefined,
-      filename: options.filename || undefined,
-      title: options.title || undefined,
-      category: options.category || undefined,
-      webdav_url: options.webdavUrl || undefined,
-    }),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) {
     let message = `Product API Nextcloud import failed: ${response.status}`;
@@ -1196,6 +1229,20 @@ export async function importProductDocumentFromNextcloud(options: {
     throw new Error(message);
   }
   return response.json() as Promise<ProductUploadDocumentsResponse>;
+}
+
+export async function importProductDocumentFromNextcloud(options: ProductNextcloudImportDocumentOptions): Promise<ProductUploadDocumentsResponse> {
+  return postNextcloudImportPayload(serializeNextcloudImportDocument(options));
+}
+
+export async function importProductDocumentsFromNextcloud(options: ProductNextcloudImportDocumentOptions[]): Promise<ProductUploadDocumentsResponse> {
+  const documents = options.map(serializeNextcloudImportDocument).filter((item) => (
+    item.relative_path || item.document_id || item.filename || item.title || item.webdav_url
+  ));
+  if (documents.length <= 1) {
+    return postNextcloudImportPayload(documents[0] || {});
+  }
+  return postNextcloudImportPayload({ documents });
 }
 
 export async function syncProductEvidenceToNextcloud(options?: { dryRun?: boolean }): Promise<ProductNextcloudSyncResponse> {

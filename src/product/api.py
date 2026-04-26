@@ -71,7 +71,6 @@ from src.product.service import (
 )
 from src.product.telemetry import attach_artifact_lineage, attach_delivery_lineage, execute_product_workflow_with_telemetry
 from src.services.preferences import (
-    apply_preferences_to_product_request,
     build_preferences_payload,
     test_preferences_connection,
     update_preferences_connection_credential,
@@ -87,6 +86,7 @@ from src.storage.lab_state import (
     append_lab_chat_message,
     append_lab_workflow_run,
     create_lab_chat_session,
+    delete_lab_chat_session,
     get_lab_chat_session,
     update_lab_chat_session_runtime,
 )
@@ -123,6 +123,17 @@ def _coerce_bool_flag(value: Any) -> bool:
         return False
     return bool(value)
 
+
+def _resolve_product_workflow_runtime_request(
+    bootstrap: ProductBootstrap,
+    request: ProductWorkflowRequest,
+    explicit_fields: set[str],
+) -> ProductWorkflowRequest:
+    return apply_runtime_controls_to_product_request(
+        request,
+        bootstrap,
+        explicit_fields=explicit_fields,
+    )
 
 def _resolve_product_artifact_path(*, bootstrap: ProductBootstrap, raw_path: str) -> Path:
     candidate = Path(str(raw_path or "").strip()).expanduser()
@@ -188,6 +199,24 @@ def _build_product_workflow_response_payload(
     if extra:
         response_payload.update(extra)
     return response_payload
+
+
+def _hydrate_run_detail_with_workflow_response(detail_payload: dict[str, Any] | None) -> dict[str, Any] | None:
+    if detail_payload is None:
+        return None
+    run_entry = detail_payload.get("run") if isinstance(detail_payload, dict) else None
+    if not isinstance(run_entry, dict):
+        return detail_payload
+    response_payload = run_entry.get("response_payload")
+    if not isinstance(response_payload, dict):
+        return detail_payload
+    try:
+        result = ProductWorkflowResult.model_validate(response_payload)
+    except Exception:
+        return detail_payload
+    run_id = str(run_entry.get("id") or "").strip() or None
+    detail_payload["workflow_response"] = _build_product_workflow_response_payload(result=result, run_id=run_id)
+    return detail_payload
 
 
 @dataclass(frozen=True)
@@ -267,23 +296,22 @@ def _run_product_upload_job(
         total_documents = len(uploaded_files)
         loaded_documents = []
         effective_rag_settings = build_effective_rag_settings(default_settings=bootstrap.rag_settings, workspace_root=bootstrap.workspace_root)
+        vlm_enhancement_enabled = bool(
+            getattr(effective_rag_settings, "pdf_evidence_pipeline_enabled", False)
+            or getattr(effective_rag_settings, "pdf_docling_picture_description", False)
+        )
+        ocr_failover_enabled = bool(getattr(effective_rag_settings, "pdf_ocr_fallback_enabled", False))
         upload_rag_settings = replace(
             effective_rag_settings,
-            pdf_extraction_mode="hybrid",
             pdf_docling_enabled=True,
             pdf_docling_ocr_enabled=True,
             pdf_docling_force_full_page_ocr=False,
-            pdf_docling_picture_description=False,
             pdf_baseline_chars_per_page_threshold=40,
             pdf_min_text_coverage_ratio=0.1,
-            pdf_suspicious_pages_trigger_full_docling_ratio=2.0,
-            pdf_suspicious_pages_trigger_full_docling_min_count=999,
             pdf_max_selective_docling_pages=4,
-            pdf_evidence_pipeline_enabled=False,
-            pdf_evidence_pipeline_use_for_cv_like=False,
-            pdf_evidence_pipeline_use_for_strong_scan_like=False,
-            pdf_ocr_fallback_enabled=False,
-            pdf_scan_image_ocr_enabled=False,
+            pdf_scan_image_ocr_enabled=ocr_failover_enabled,
+            pdf_evidence_pipeline_use_for_cv_like=vlm_enhancement_enabled,
+            pdf_evidence_pipeline_use_for_strong_scan_like=vlm_enhancement_enabled,
         )
         for index, uploaded in enumerate(uploaded_files, start=1):
             update_product_upload_job_stage(
@@ -374,6 +402,72 @@ def start_product_upload_job(
     return job_payload
 
 
+def _resolve_nextcloud_remote_document(import_item: dict[str, Any]) -> dict[str, Any]:
+    return download_nextcloud_repository_document(
+        relative_path=str(import_item.get("relative_path") or "").strip() or None,
+        document_id=str(import_item.get("document_id") or "").strip() or None,
+        filename=str(import_item.get("filename") or "").strip() or None,
+        title=str(import_item.get("title") or "").strip() or None,
+        category=str(import_item.get("category") or "").strip() or None,
+        webdav_url=str(import_item.get("webdav_url") or "").strip() or None,
+    )
+
+
+def _nextcloud_import_item_has_locator(import_item: dict[str, Any]) -> bool:
+    return any(
+        str(import_item.get(key) or "").strip()
+        for key in ["relative_path", "document_id", "filename", "title", "webdav_url"]
+    )
+
+
+def start_product_nextcloud_batch_import_job(
+    *,
+    bootstrap: ProductBootstrap,
+    documents: list[dict[str, Any]],
+) -> dict[str, Any]:
+    normalized_documents = [item for item in documents if isinstance(item, dict) and _nextcloud_import_item_has_locator(item)]
+    if not normalized_documents:
+        raise ValueError("At least one Nextcloud document locator is required.")
+
+    uploaded_files: list[_ApiUploadedFile] = []
+    source_documents: list[dict[str, Any]] = []
+    seen_names: dict[str, int] = {}
+    for import_item in normalized_documents:
+        remote_document = _resolve_nextcloud_remote_document(import_item)
+        raw_filename = str(remote_document.get("filename") or Path(str(remote_document.get("relative_path") or "remote-document")).name or "remote-document")
+        next_index = seen_names.get(raw_filename, 0) + 1
+        seen_names[raw_filename] = next_index
+        if next_index == 1:
+            filename = raw_filename
+        else:
+            stem = Path(raw_filename).stem or "remote-document"
+            suffix = Path(raw_filename).suffix
+            filename = f"{stem}-{next_index}{suffix}"
+        uploaded_files.append(_ApiUploadedFile(name=filename, content=bytes(remote_document.get("content") or b"")))
+        source_documents.append(
+            {
+                "relative_path": remote_document.get("relative_path"),
+                "title": remote_document.get("title"),
+                "document_id": remote_document.get("document_id"),
+                "filename": filename,
+            }
+        )
+
+    job_payload = start_product_upload_job(bootstrap=bootstrap, uploaded_files=uploaded_files, ignored_count=0)
+    if len(uploaded_files) == 1:
+        job_payload["message"] = f"Import accepted for {uploaded_files[0].name}. Preparing ingestion pipeline."
+    else:
+        job_payload["message"] = f"Import accepted for {len(uploaded_files)} Nextcloud documents. Preparing one indexing pipeline."
+    job_payload["source"] = {
+        "kind": "nextcloud",
+        "documents": source_documents,
+        "relative_path": source_documents[0].get("relative_path") if source_documents else None,
+        "title": source_documents[0].get("title") if source_documents else None,
+        "document_id": source_documents[0].get("document_id") if source_documents else None,
+    }
+    return job_payload
+
+
 def start_product_nextcloud_import_job(
     *,
     bootstrap: ProductBootstrap,
@@ -384,25 +478,19 @@ def start_product_nextcloud_import_job(
     category: str | None = None,
     webdav_url: str | None = None,
 ) -> dict[str, Any]:
-    remote_document = download_nextcloud_repository_document(
-        relative_path=relative_path,
-        document_id=document_id,
-        filename=filename,
-        title=title,
-        category=category,
-        webdav_url=webdav_url,
+    return start_product_nextcloud_batch_import_job(
+        bootstrap=bootstrap,
+        documents=[
+            {
+                "relative_path": relative_path,
+                "document_id": document_id,
+                "filename": filename,
+                "title": title,
+                "category": category,
+                "webdav_url": webdav_url,
+            }
+        ],
     )
-    filename = str(remote_document.get("filename") or Path(str(remote_document.get("relative_path") or "remote-document")).name or "remote-document")
-    uploaded = _ApiUploadedFile(name=filename, content=bytes(remote_document.get("content") or b""))
-    job_payload = start_product_upload_job(bootstrap=bootstrap, uploaded_files=[uploaded], ignored_count=0)
-    job_payload["message"] = f"Import accepted for {filename}. Preparing ingestion pipeline."
-    job_payload["source"] = {
-        "kind": "nextcloud",
-        "relative_path": remote_document.get("relative_path"),
-        "title": remote_document.get("title"),
-        "document_id": remote_document.get("document_id"),
-    }
-    return job_payload
 
 
 class ProductApiHandler(BaseHTTPRequestHandler):
@@ -421,15 +509,18 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
     def _send_json(self, status: int, payload: object) -> None:
         body = _json_bytes(payload)
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        if getattr(self, "settings", None) and self.settings.allow_cors:
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type")
-            self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            if getattr(self, "settings", None) and self.settings.allow_cors:
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Access-Control-Allow-Headers", "Content-Type")
+                self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+            self.end_headers()
+            self.wfile.write(body)
+        except BrokenPipeError:
+            return
 
     def _send_file(self, path: Path) -> None:
         body = path.read_bytes()
@@ -652,7 +743,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             if detail_payload is None:
                 self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Run history entry not found."})
                 return
-            self._send_json(HTTPStatus.OK, detail_payload)
+            self._send_json(HTTPStatus.OK, _hydrate_run_detail_with_workflow_response(detail_payload))
             return
 
         if path == "/api/product/artifacts":
@@ -732,23 +823,26 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
         if path == "/api/product/integrations/nextcloud/import":
             try:
-                relative_path = str(payload.get("relative_path") or "").strip() or None
-                document_id = str(payload.get("document_id") or "").strip() or None
-                filename = str(payload.get("filename") or "").strip() or None
-                title = str(payload.get("title") or "").strip() or None
-                category = str(payload.get("category") or "").strip() or None
-                webdav_url = str(payload.get("webdav_url") or "").strip() or None
-                if not any([relative_path, document_id, filename, title, webdav_url]):
+                raw_documents = payload.get("documents") if isinstance(payload.get("documents"), list) else None
+                if raw_documents is not None:
+                    import_documents = [item for item in raw_documents if isinstance(item, dict)]
+                else:
+                    import_documents = [
+                        {
+                            "relative_path": str(payload.get("relative_path") or "").strip() or None,
+                            "document_id": str(payload.get("document_id") or "").strip() or None,
+                            "filename": str(payload.get("filename") or "").strip() or None,
+                            "title": str(payload.get("title") or "").strip() or None,
+                            "category": str(payload.get("category") or "").strip() or None,
+                            "webdav_url": str(payload.get("webdav_url") or "").strip() or None,
+                        }
+                    ]
+                if not any(_nextcloud_import_item_has_locator(item) for item in import_documents):
                     self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "relative_path, document_id, filename, title or webdav_url is required."})
                     return
-                job_payload = start_product_nextcloud_import_job(
+                job_payload = start_product_nextcloud_batch_import_job(
                     bootstrap=self.bootstrap,
-                    relative_path=relative_path,
-                    document_id=document_id,
-                    filename=filename,
-                    title=title,
-                    category=category,
-                    webdav_url=webdav_url,
+                    documents=import_documents,
                 )
                 self._send_json(HTTPStatus.OK, job_payload)
             except FileNotFoundError as error:
@@ -785,12 +879,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         if path == "/api/product/run-workflow":
             try:
                 request = ProductWorkflowRequest.model_validate(payload)
-                request = apply_runtime_controls_to_product_request(
-                    request,
-                    self.bootstrap,
-                    explicit_fields=set(payload.keys()),
-                )
-                request = apply_preferences_to_product_request(
+                request = _resolve_product_workflow_runtime_request(
                     self.bootstrap,
                     request,
                     explicit_fields=set(payload.keys()),
@@ -841,12 +930,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "This run cannot be replayed because its request payload is incomplete."})
                     return
                 request = ProductWorkflowRequest.model_validate(rerun_payload)
-                request = apply_runtime_controls_to_product_request(
-                    request,
-                    self.bootstrap,
-                    explicit_fields=set(rerun_payload.keys()),
-                )
-                request = apply_preferences_to_product_request(
+                request = _resolve_product_workflow_runtime_request(
                     self.bootstrap,
                     request,
                     explicit_fields=set(rerun_payload.keys()),
@@ -979,6 +1063,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     bootstrap=self.bootstrap,
                     task_id=str(payload.get("task_id") or payload.get("workflow_id") or self.bootstrap.product_settings.default_workflow),
                     document_id=(str(payload.get("document_id")) if payload.get("document_id") is not None else None),
+                    document_ids=[str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()],
                     input_text=(str(payload.get("input_text")) if payload.get("input_text") is not None else None),
                     provider=(str(payload.get("provider")) if payload.get("provider") is not None else None),
                     model=(str(payload.get("model")) if payload.get("model") is not None else None),
@@ -1014,6 +1099,29 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     document_ids=document_ids,
                 )
                 self._send_json(HTTPStatus.OK, {"ok": True, "session": session, "page": build_lab_chat_payload(self.bootstrap.workspace_root)})
+            except Exception as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        if path.startswith("/api/lab/chat/sessions/") and path.endswith("/delete"):
+            session_id = path.removeprefix("/api/lab/chat/sessions/").removesuffix("/delete").strip("/")
+            try:
+                deletion = delete_lab_chat_session(get_lab_chat_sessions_path(self.bootstrap.workspace_root), session_id)
+                next_session_id = deletion.get("active_session_id") if isinstance(deletion, dict) else None
+                self._send_json(HTTPStatus.OK, {
+                    "ok": True,
+                    "session_id": session_id,
+                    "deleted": True,
+                    "page": build_lab_chat_payload(self.bootstrap.workspace_root, session_id=(str(next_session_id) if next_session_id else None)),
+                })
+            except KeyError:
+                self._send_json(HTTPStatus.OK, {
+                    "ok": True,
+                    "session_id": session_id,
+                    "deleted": False,
+                    "warning": "Chat session was already absent.",
+                    "page": build_lab_chat_payload(self.bootstrap.workspace_root),
+                })
             except Exception as error:
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return

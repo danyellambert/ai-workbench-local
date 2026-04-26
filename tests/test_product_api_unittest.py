@@ -16,7 +16,7 @@ class ProductApiTests(unittest.TestCase):
 
         bootstrap = SimpleNamespace(
             workflow_catalog=build_product_workflow_catalog(),
-            product_settings=SimpleNamespace(default_workflow="document_review", max_upload_files=5),
+            product_settings=SimpleNamespace(default_workflow="document_review", max_upload_files=5, allow_direct_uploads=True),
             rag_settings=SimpleNamespace(store_path=Path(".rag_store.json")),
             provider_registry={},
             presentation_export_settings=SimpleNamespace(enabled=False),
@@ -104,7 +104,7 @@ class ProductApiTests(unittest.TestCase):
         server, thread = self._start_server()
         try:
             with patch(
-                "src.product.api.list_product_documents",
+                "src.product.command_center.list_product_documents",
                 return_value=[ProductDocumentRef(document_id="doc-1", name="Policy A", file_type="pdf", char_count=1200, chunk_count=4)],
             ), patch(
                 "src.product.api.build_grounding_preview",
@@ -299,7 +299,6 @@ class ProductApiTests(unittest.TestCase):
                     }
                 ],
                 "runtime_profiles": [],
-                "workflow_defaults": [],
                 "connection_policy_rules": [],
                 "operator_preferences": {
                     "reducedMotion": False,
@@ -746,6 +745,47 @@ class ProductApiTests(unittest.TestCase):
             server.server_close()
             thread.join(timeout=2)
 
+    def test_product_api_upload_documents_endpoint_rejects_when_direct_uploads_are_disabled(self) -> None:
+        from urllib.error import HTTPError
+
+        server, thread = self._start_server()
+        server.RequestHandlerClass.bootstrap.product_settings.allow_direct_uploads = False
+        try:
+            with self.assertRaises(HTTPError) as error_context:
+                self._post_multipart(
+                    server,
+                    "/api/product/upload-documents",
+                    [("files", "notes.md", b"# Notes\n\nHello world")],
+                )
+            self.assertEqual(error_context.exception.code, 403)
+            payload = json.loads(error_context.exception.read().decode("utf-8"))
+            self.assertFalse(payload["ok"])
+            self.assertIn("Direct document upload is disabled", payload["error"])
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_product_api_document_library_payload_exposes_direct_upload_capability(self) -> None:
+        from unittest.mock import patch
+
+        server, thread = self._start_server()
+        server.RequestHandlerClass.bootstrap.product_settings.allow_direct_uploads = False
+        try:
+            with patch(
+                "src.product.command_center.list_product_documents",
+                return_value=[ProductDocumentRef(document_id="doc-1", name="Policy A", file_type="pdf", char_count=1200, chunk_count=4)],
+            ):
+                document_library = self._get_json(server, "/api/product/document-library")
+                self.assertTrue(document_library["ok"])
+                self.assertFalse(document_library["capabilities"]["direct_upload_enabled"])
+                self.assertTrue(document_library["capabilities"]["public_demo_mode"])
+                self.assertTrue(document_library["capabilities"]["nextcloud_import_enabled"])
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
     def test_product_api_delete_documents_endpoint(self) -> None:
         from unittest.mock import patch
 
@@ -935,7 +975,7 @@ class ProductApiTests(unittest.TestCase):
                 "src.product.api.run_product_workflow",
                 return_value=fake_result,
             ), patch(
-                "src.product.api.list_product_documents",
+                "src.product.command_center.list_product_documents",
                 return_value=[],
             ), patch(
                 "src.product.api.append_product_workflow_history_entry",

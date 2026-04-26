@@ -658,6 +658,7 @@ def build_product_command_center_payload(bootstrap: ProductBootstrap, *, recent_
 
 def build_product_document_library_payload(bootstrap: ProductBootstrap) -> dict[str, object]:
     documents = list_product_documents(bootstrap.rag_settings)
+    direct_upload_enabled = bool(getattr(bootstrap.product_settings, "allow_direct_uploads", True))
     status_counts: dict[str, int] = {
         "indexed": 0,
         "indexing": 0,
@@ -680,6 +681,11 @@ def build_product_document_library_payload(bootstrap: ProductBootstrap) -> dict[
             "indexing_documents": int(status_counts.get("indexing") or 0),
             "total_chunks": sum(int(item.chunk_count or 0) for item in documents),
             "total_chars": sum(int(item.char_count or 0) for item in documents),
+        },
+        "capabilities": {
+            "direct_upload_enabled": direct_upload_enabled,
+            "nextcloud_import_enabled": True,
+            "public_demo_mode": not direct_upload_enabled,
         },
         "documents": [item.model_dump(mode="json") for item in documents],
     }

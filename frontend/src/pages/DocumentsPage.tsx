@@ -10,9 +10,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import KeystoneLogo from '@/components/KeystoneLogo';
 
 const stagger = { animate: { transition: { staggerChildren: 0.04 } } };
 const item = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
+
+const LINKEDIN_DEMO_URL = 'https://www.linkedin.com/in/danyel-/';
 
 const pipelineSteps = [
   { key: 'extraction', label: 'Extraction', icon: FileText },
@@ -47,6 +50,7 @@ export default function DocumentsPage() {
   const [uploadJobSeed, setUploadJobSeed] = useState<ProductUploadDocumentsResponse | null>(null);
   const [documentPendingDelete, setDocumentPendingDelete] = useState<ProductDocumentLibraryEntry | null>(null);
   const [nextcloudSheetOpen, setNextcloudSheetOpen] = useState(false);
+  const [uploadLockedDialogOpen, setUploadLockedDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const handledUploadTerminalStateRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
@@ -156,6 +160,7 @@ export default function DocumentsPage() {
 
   const documents = data?.documents ?? [];
   const summary = data?.summary;
+  const directUploadEnabled = data?.capabilities?.direct_upload_enabled ?? true;
   const filtered = documents.filter(d => {
     const haystack = `${d.name} ${d.file_type || ''} ${d.loader_strategy_label || ''}`.toLowerCase();
     return haystack.includes(search.toLowerCase());
@@ -164,12 +169,25 @@ export default function DocumentsPage() {
   const pipelineStageLookup = new Map((pipelineJob?.steps || []).map(step => [step.key, step]));
   const pipelineStatusMessage = pipelineJob?.message || (uploadInProgress ? 'Preparing ingestion pipeline...' : 'Pipeline status will appear here during document indexing.');
 
+  const openUploadLockedDialog = () => {
+    setDropActive(false);
+    setUploadLockedDialogOpen(true);
+  };
+
   const handleOpenFilePicker = () => {
     if (uploadInProgress) return;
+    if (!directUploadEnabled) {
+      openUploadLockedDialog();
+      return;
+    }
     fileInputRef.current?.click();
   };
 
   const handleFilesSelected = (fileList: FileList | File[] | null) => {
+    if (!directUploadEnabled) {
+      openUploadLockedDialog();
+      return;
+    }
     const files = Array.from(fileList ?? []);
     if (!files.length) return;
     uploadMutation.mutate(files);
@@ -185,11 +203,17 @@ export default function DocumentsPage() {
     deleteMutation.mutate([documentPendingDelete.document_id]);
   };
 
+  useEffect(() => {
+    const openNextcloudImportForTour = () => setNextcloudSheetOpen(true);
+    window.addEventListener('workbench-tour:open-nextcloud-import', openNextcloudImportForTour);
+    return () => window.removeEventListener('workbench-tour:open-nextcloud-import', openNextcloudImportForTour);
+  }, []);
+
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" variants={stagger} initial="initial" animate="animate">
       <PageHeader title="Document Library" description="Ingest, index and manage your document corpus for AI-powered analysis.">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => setNextcloudSheetOpen(true)} disabled={uploadInProgress} data-testid="open-nextcloud-import">
+        <div className="-m-1 flex items-center gap-2 rounded-xl p-1" data-tour="documents-page-actions">
+          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => setNextcloudSheetOpen(true)} disabled={uploadInProgress} data-testid="open-nextcloud-import" data-tour="documents-nextcloud-button">
             <FolderTree className="w-3.5 h-3.5 mr-2" /> Import from Nextcloud
           </Button>
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={handleOpenFilePicker} disabled={uploadInProgress}>
@@ -198,14 +222,16 @@ export default function DocumentsPage() {
         </div>
       </PageHeader>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept=".pdf,.csv,.txt,.md,.py"
-        className="hidden"
-        onChange={(event) => handleFilesSelected(event.target.files)}
-      />
+      {directUploadEnabled ? (
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.csv,.txt,.md,.py"
+          className="hidden"
+          onChange={(event) => handleFilesSelected(event.target.files)}
+        />
+      ) : null}
 
       <NextcloudImportSheet
         open={nextcloudSheetOpen}
@@ -222,7 +248,7 @@ export default function DocumentsPage() {
       />
 
       {/* Stats */}
-      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" data-tour="documents-stats">
         <MetricCard label="Total Documents" value={isLoading ? '—' : (summary?.total_documents ?? 0)} icon={FileText} glowColor="primary" />
         <MetricCard label="Indexed" value={isLoading ? '—' : (summary?.indexed_documents ?? 0)} icon={Check} glowColor="success" />
         <MetricCard label="Total Chunks" value={isLoading ? '—' : ((summary?.total_chunks ?? 0).toLocaleString())} icon={Layers} glowColor="accent" />
@@ -249,7 +275,7 @@ export default function DocumentsPage() {
 
       {/* Pipeline Visualization */}
       <motion.div variants={item}>
-        <GlassCard className="mb-6">
+        <GlassCard className="mb-6" data-tour="documents-pipeline">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
               <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Ingestion Pipeline</h3>
@@ -292,10 +318,11 @@ export default function DocumentsPage() {
         </GlassCard>
       </motion.div>
 
-      {/* Upload Zone */}
+      {/* Intake Zone */}
       <motion.div variants={item}>
         <div
           className={`border-2 border-dashed rounded-xl p-8 mb-6 text-center transition-colors group cursor-pointer ${dropActive ? 'border-primary/60 bg-primary/5' : 'border-border/60 hover:border-primary/40'} ${uploadMutation.isPending ? 'opacity-80' : ''}`}
+          data-tour="documents-intake"
           onClick={handleOpenFilePicker}
           onDragOver={(event) => {
             event.preventDefault();
@@ -309,6 +336,10 @@ export default function DocumentsPage() {
             event.preventDefault();
             setDropActive(false);
             if (uploadInProgress) return;
+            if (!directUploadEnabled) {
+              openUploadLockedDialog();
+              return;
+            }
             handleFilesSelected(event.dataTransfer.files);
           }}
         >
@@ -319,12 +350,12 @@ export default function DocumentsPage() {
           )}
           <p className="text-sm text-foreground mb-1">Drop files here or click to browse</p>
           <p className="text-xs text-muted-foreground">Supported now: PDF, CSV, TXT, MD and PY — files are indexed immediately after upload.</p>
-          <p className="mt-2 text-[11px] text-muted-foreground">Need something from the external corpus? Use <span className="font-medium text-foreground">Import from Nextcloud</span> to browse remote folders and ingest one file into this workspace.</p>
+          <p className="mt-2 text-[11px] text-muted-foreground">Need something from the external corpus? Use <span className="font-medium text-foreground">Import from Nextcloud</span> to browse remote folders and ingest several selected PDFs into this workspace.</p>
         </div>
       </motion.div>
 
       {/* Controls */}
-      <motion.div variants={item} className="flex items-center justify-between mb-4 gap-4">
+      <motion.div variants={item} className="flex items-center justify-between mb-4 gap-4" data-tour="documents-library-controls">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input placeholder="Search documents..." value={search} onChange={e => setSearch(e.target.value)}
@@ -342,7 +373,7 @@ export default function DocumentsPage() {
 
       {/* Document Table */}
       {view === 'table' ? (
-        <motion.div variants={item} className="glass rounded-xl overflow-hidden">
+        <motion.div variants={item} className="glass rounded-xl overflow-hidden" data-tour="documents-indexed-table">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border/50">
@@ -356,6 +387,7 @@ export default function DocumentsPage() {
                 <motion.tr key={doc.document_id}
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
                   className="border-b border-border/30 hover:bg-secondary/20 transition-colors cursor-pointer group"
+                  data-tour={i < 3 ? 'documents-indexed-sample' : undefined}
                   onClick={() => setSelectedDocument(doc)}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -530,6 +562,81 @@ export default function DocumentsPage() {
           )}
         </SheetContent>
       </Sheet>
+
+
+      <AlertDialog open={uploadLockedDialogOpen} onOpenChange={setUploadLockedDialogOpen}>
+        <AlertDialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto border border-primary/15 bg-background/95 p-0 shadow-2xl shadow-primary/10 sm:max-w-[500px]">
+          <div className="border-b border-border/60 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent px-6 pb-4 pt-5">
+            <div className="flex items-center justify-center">
+              <KeystoneLogo size={82} />
+            </div>
+            <div className="mt-3 flex items-center justify-center">
+              <span className="rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] font-medium tracking-wide text-muted-foreground backdrop-blur">
+                Public demo • Curated workspace
+              </span>
+            </div>
+          </div>
+
+          <div className="px-6 pb-6 pt-5">
+            <AlertDialogHeader className="items-center space-y-2 text-center">
+              <AlertDialogTitle className="mx-auto max-w-[360px] text-center text-xl font-semibold leading-tight tracking-tight sm:text-2xl">
+                Explore the curated demo workspace
+              </AlertDialogTitle>
+              <AlertDialogDescription className="mx-auto max-w-[380px] text-center text-sm leading-6 text-muted-foreground">
+                This public version is designed for exploring the curated demo set already prepared in the workspace.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="mt-4 grid gap-2.5">
+              <div className="rounded-xl border border-border/60 bg-secondary/20 p-3 text-left">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/70 text-foreground">
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">Browse the curated library</p>
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      Explore the documents that are already available in this demo workspace.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border/60 bg-secondary/20 p-3 text-left">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/70 text-foreground">
+                    <FolderTree className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">Use Import from Nextcloud</p>
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      Click <span className="font-medium text-foreground">Import from Nextcloud</span> to select an approved demo document connected to this environment.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-primary/10 bg-primary/5 px-3 py-2.5 text-center text-xs leading-5 text-muted-foreground">
+              Want to see it with your own documents or use case? I’d be happy to walk you through a guided demo.
+            </div>
+
+            <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+              <AlertDialogCancel className="sm:mt-0">Close</AlertDialogCancel>
+              <Button
+                type="button"
+                className="h-9 px-4 text-xs"
+                onClick={() => {
+                  window.open(LINKEDIN_DEMO_URL, '_blank', 'noopener,noreferrer');
+                  setUploadLockedDialogOpen(false);
+                }}
+              >
+                Connect with Danyel on LinkedIn
+              </Button>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={Boolean(documentPendingDelete)} onOpenChange={(open) => { if (!open && !deleteMutation.isPending) setDocumentPendingDelete(null); }}>
         <AlertDialogContent>
