@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, Clock, ExternalLink, FileText, Info, Loader2, Play, Sparkles, User } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, Clock, ExternalLink, FileText, Info, Loader2, Play, Sparkles, User } from 'lucide-react';
 
 import { PageHeader, StatusPill, SeverityBadge, GlassCard, WorkflowProgressHeader } from '@/components/shared/ui-components';
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
@@ -11,6 +12,7 @@ import {
   generateProductWorkflowDeck,
   getProductDocumentLibrary,
   getProductGroundingPreview,
+  getProductRunHistoryEntry,
   runProductWorkflow,
   type ProductDocumentLibraryEntry,
   type ProductDocumentReviewFinding,
@@ -23,7 +25,9 @@ import {
 import { toast } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAppStore } from '@/lib/store';
+import { findRecommendedDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
 
 const workflowSteps = [
   { key: 'select', label: 'Select' },
@@ -92,12 +96,15 @@ function getDefaultDecisionSummary(view?: ProductDocumentReviewView | null) {
 
 export default function DocumentReviewPage() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const historyRunId = searchParams.get('historyRunId') || searchParams.get('runId') || '';
   const operatorPreferences = useAppStore((state) => state.operatorPreferences);
   const defaultTab = operatorPreferences.defaultEvidencePanelOpen ? 'evidence' : 'findings';
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [activeTab, setActiveTab] = useState<'findings' | 'evidence' | 'artifacts'>(defaultTab);
   const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
+  const [showGroundingPanel, setShowGroundingPanel] = useState(false);
   const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
   const [notionPublishResult, setNotionPublishResult] = useState<ProductPublishNotionResponse | null>(null);
 
@@ -108,20 +115,33 @@ export default function DocumentReviewPage() {
     refetchOnReconnect: false,
   });
 
+  const historyDetailQuery = useQuery({
+    queryKey: ['product-run-history-entry', historyRunId, 'workflow-hydration'],
+    queryFn: () => getProductRunHistoryEntry(historyRunId),
+    enabled: Boolean(historyRunId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
   const availableDocuments = useMemo(
     () => (documentLibrary?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
     [documentLibrary],
   );
 
+  const recommendedDocument = useMemo(
+    () => findRecommendedDocuments(availableDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.documentReview)[0],
+    [availableDocuments],
+  );
+
   useEffect(() => {
     if (!availableDocuments.length) {
-      setSelectedDocumentId('');
+      if (!historyRunId) setSelectedDocumentId('');
       return;
     }
     if (!selectedDocumentId || !availableDocuments.some((document) => document.document_id === selectedDocumentId)) {
-      setSelectedDocumentId(availableDocuments[0].document_id);
+      setSelectedDocumentId(recommendedDocument?.document_id ?? '');
     }
-  }, [availableDocuments, selectedDocumentId]);
+  }, [availableDocuments, historyRunId, recommendedDocument, selectedDocumentId]);
 
   const selectedDocument = useMemo<ProductDocumentLibraryEntry | undefined>(
     () => availableDocuments.find((document) => document.document_id === selectedDocumentId),
@@ -141,13 +161,43 @@ export default function DocumentReviewPage() {
       }),
   });
 
+  useEffect(() => {
+    const run = historyDetailQuery.data?.run;
+    if (!historyRunId || !run) return;
+
+    const fallbackWorkflowResponse: ProductRunWorkflowResponse | null = run.response_payload && typeof run.response_payload === 'object'
+      ? {
+          ok: true,
+          run_id: run.id,
+          result: run.response_payload as ProductRunWorkflowResponse['result'],
+          result_sections: run.result_sections as ProductRunWorkflowResponse['result_sections'],
+          source_run: run,
+        }
+      : null;
+    const hydratedWorkflowResponse = historyDetailQuery.data?.workflow_response ?? fallbackWorkflowResponse;
+
+    if (!hydratedWorkflowResponse?.result || hydratedWorkflowResponse.result.workflow_id !== 'document_review') return;
+
+    const requestPayload = run.request_payload && typeof run.request_payload === 'object' ? run.request_payload : null;
+    const requestDocumentIds = Array.isArray(requestPayload?.document_ids)
+      ? requestPayload.document_ids.map((item) => String(item || '').trim()).filter(Boolean)
+      : [];
+    const historyDocumentId = (run.document_ids ?? [])[0] || requestDocumentIds[0] || hydratedWorkflowResponse.result.grounding_preview?.document_ids?.[0] || '';
+
+    if (historyDocumentId) setSelectedDocumentId(historyDocumentId);
+    setWorkflowResponse({ ...hydratedWorkflowResponse, source_run: hydratedWorkflowResponse.source_run ?? run });
+    setGeneratedArtifacts(run.artifact_items ?? hydratedWorkflowResponse.result.artifacts ?? []);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
+    setActiveTab('findings');
+  }, [historyDetailQuery.data, historyRunId]);
+
   const runReviewMutation = useMutation({
     mutationFn: () =>
       runProductWorkflow({
         workflow_id: 'document_review',
         document_ids: selectedDocumentId ? [selectedDocumentId] : [],
         context_strategy: 'retrieval',
-        context_window_mode: 'auto',
         use_document_context: true,
       }),
     onSuccess: async (payload) => {
@@ -242,32 +292,36 @@ export default function DocumentReviewPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Document Review" description="Review a document for risks, gaps and grounded findings.">
-        <Button
-          className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"
-          disabled={!selectedDocumentId || runReviewMutation.isPending}
-          onClick={() => runReviewMutation.mutate()}
-        >
-          {runReviewMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />}
-          {runReviewMutation.isPending ? 'Running Review' : 'Run Review'}
-        </Button>
-        <Button
-          variant="outline"
-          className="h-9 px-4 text-xs border-border/50"
-          disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending}
-          onClick={() => generateDeckMutation.mutate()}
-        >
-          {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />}
-          {generateDeckMutation.isPending ? 'Generating Deck' : 'Generate Deck'}
-        </Button>
-      </PageHeader>
-      <WorkflowProgressHeader
-        steps={stepStatuses}
-        title="Workflow progress"
-        description="Track how the live run moves from document selection to export-ready review outputs."
-      />
+      <div data-tour="document-review-header">
+        <PageHeader title="Document Review" description="Review a document for risks, gaps and grounded findings.">
+          <Button
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"
+            disabled={!selectedDocumentId || runReviewMutation.isPending}
+            onClick={() => runReviewMutation.mutate()}
+          >
+            {runReviewMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />}
+            {runReviewMutation.isPending ? 'Running Review' : 'Run Review'}
+          </Button>
+          <Button
+            variant="outline"
+            className="h-9 px-4 text-xs border-border/50"
+            disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending}
+            onClick={() => generateDeckMutation.mutate()}
+          >
+            {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />}
+            {generateDeckMutation.isPending ? 'Generating Deck' : 'Generate Deck'}
+          </Button>
+        </PageHeader>
+      </div>
+      <div data-tour="document-review-progress">
+        <WorkflowProgressHeader
+          steps={stepStatuses}
+          title="Workflow progress"
+          description="Track how the live run moves from document selection to export-ready review outputs."
+        />
+      </div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass rounded-xl p-4 mb-6 border-glow-warning/30">
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} data-tour="document-review-decision" className="glass rounded-xl p-4 mb-6 border-glow-warning/30">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-glow-warning/10 flex items-center justify-center">
@@ -302,7 +356,7 @@ export default function DocumentReviewPage() {
 
       <div className="grid lg:grid-cols-12 gap-4">
         <div className="lg:col-span-4 space-y-4">
-          <GlassCard delay={0.15}>
+          <GlassCard delay={0.15} data-tour="document-review-selection">
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Document Selection</h3>
             <Select value={selectedDocumentId} onValueChange={handleDocumentChange}>
               <SelectTrigger className="h-8 text-xs bg-secondary/30"><SelectValue placeholder={documentsLoading ? 'Loading documents...' : 'Select a document'} /></SelectTrigger>
@@ -314,31 +368,60 @@ export default function DocumentReviewPage() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="mt-3 space-y-1.5">
-              <div className="flex justify-between text-[10px] text-muted-foreground"><span>Chunks</span><span>{selectedDocument?.chunk_count?.toLocaleString() ?? '—'}</span></div>
-              <div className="flex justify-between text-[10px] text-muted-foreground"><span>Characters</span><span>{selectedDocument?.char_count ? selectedDocument.char_count.toLocaleString() : '—'}</span></div>
-              <div className="flex justify-between text-[10px] text-muted-foreground"><span>Strategy</span><span className="font-mono">{currentStrategy}</span></div>
-            </div>
-
-            <div className="mt-4 border-t border-border/40 pt-4">
-              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Grounding Preview</h3>
-              <div className="bg-secondary/30 rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  {previewQuery.isLoading ? <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" /> : <div className={`w-1.5 h-1.5 rounded-full ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'bg-glow-warning' : 'bg-glow-success'}`} />}
-                  <span className={`text-[10px] font-medium ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'text-glow-warning' : 'text-glow-success'}`}>
-                    {previewQuery.isLoading ? 'Loading context...' : (groundingPreview?.warnings?.length ?? 0) > 0 ? 'Context loaded with caveats' : 'Context loaded'}
-                  </span>
+            <Collapsible open={showGroundingPanel} onOpenChange={setShowGroundingPanel} className="mt-3">
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-xl border border-border/40 bg-secondary/20 px-3 py-3 text-left transition-colors hover:border-primary/30 hover:bg-secondary/30"
+                  aria-label={showGroundingPanel ? 'Hide grounding panel' : 'Show grounding panel'}
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Grounding</span>
+                      <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'border-glow-warning/30 text-glow-warning' : 'border-glow-success/30 text-glow-success'}`}>
+                        {previewQuery.isLoading ? 'Loading' : (groundingPreview?.warnings?.length ?? 0) > 0 ? 'Caveats' : 'Ready'}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-[11px] text-foreground">Context metadata and preview for the selected document</div>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${showGroundingPanel ? 'rotate-180' : ''}`} />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <div className="mt-2 space-y-3 rounded-xl border border-border/30 bg-secondary/15 p-3">
+                  <div>
+                    <h3 className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">Grounding Details</h3>
+                    <div className="rounded-lg border border-border/30 bg-secondary/20 p-3">
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-[10px] text-muted-foreground"><span>Chunks</span><span>{selectedDocument?.chunk_count?.toLocaleString() ?? '—'}</span></div>
+                        <div className="flex justify-between text-[10px] text-muted-foreground"><span>Characters</span><span>{selectedDocument?.char_count ? selectedDocument.char_count.toLocaleString() : '—'}</span></div>
+                        <div className="flex justify-between text-[10px] text-muted-foreground"><span>Strategy</span><span className="font-mono">{currentStrategy}</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">Grounding Preview</h3>
+                    <div className="rounded-lg border border-border/30 bg-secondary/20 p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        {previewQuery.isLoading ? <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" /> : <div className={`w-1.5 h-1.5 rounded-full ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'bg-glow-warning' : 'bg-glow-success'}`} />}
+                        <span className={`text-[10px] font-medium ${(groundingPreview?.warnings?.length ?? 0) > 0 ? 'text-glow-warning' : 'text-glow-success'}`}>
+                          {previewQuery.isLoading ? 'Loading context...' : (groundingPreview?.warnings?.length ?? 0) > 0 ? 'Context loaded with caveats' : 'Context loaded'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
+                        {groundingPreview?.preview_text || 'Select an indexed document to preview the grounded context before running the workflow.'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
-                  {groundingPreview?.preview_text || 'Select an indexed document to preview the grounded context before running the workflow.'}
-                </p>
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
           </GlassCard>
 
 
-          <GlassCard delay={0.25}>
-            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Top Blockers Before Signature</h3>
+          <div data-tour="document-review-supporting-cards" className="space-y-4">
+            <GlassCard delay={0.25}>
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Top Blockers Before Signature</h3>
             <div className="space-y-2">
               {topBlockers.length > 0 ? topBlockers.map((blocker, index) => (
                 <div key={`${blocker.title}-${index}`} className="flex items-start gap-2 text-xs">
@@ -350,20 +433,21 @@ export default function DocumentReviewPage() {
                 </div>
               )) : <p className="text-xs text-muted-foreground leading-relaxed">Run the review to identify grounded blockers before signature.</p>}
             </div>
-          </GlassCard>
+            </GlassCard>
 
-          <GlassCard delay={0.3}>
-            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Business Impact Summary</h3>
+            <GlassCard delay={0.3}>
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Business Impact Summary</h3>
             <div className="space-y-2 text-xs text-muted-foreground leading-relaxed">
               {businessImpact.length > 0 ? businessImpact.map((item) => (
                 <p key={item.label}><span className="text-foreground font-medium">{item.label}:</span> {item.detail}</p>
               )) : <p>Run the review to derive grounded business impact statements from the selected document.</p>}
             </div>
-          </GlassCard>
+            </GlassCard>
+          </div>
         </div>
 
-        <div className="lg:col-span-8">
-          <div role="tablist" aria-label="Document review panels" className="inline-flex h-10 items-center justify-center rounded-md bg-secondary/30 border border-border/50 p-1 text-muted-foreground mb-4">
+        <div className="lg:col-span-8" data-tour="document-review-output-panel">
+          <div data-tour="document-review-output-tabs" role="tablist" aria-label="Document review panels" className="inline-flex h-10 items-center justify-center rounded-md bg-secondary/30 border border-border/50 p-1 text-muted-foreground mb-4">
             <button
               type="button"
               role="tab"
@@ -514,7 +598,7 @@ export default function DocumentReviewPage() {
         </div>
       </div>
 
-      <div className="mt-6" data-testid="workflow-publish-actions-surface" data-workflow="document-review">
+      <div className="mt-6" data-tour="document-review-publish" data-testid="workflow-publish-actions-surface" data-workflow="document-review">
         <WorkflowPublishActions
           workflowId="document_review"
           result={workflowResponse?.result ?? null}

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   UserCheck,
   Sparkles,
+  Play,
   AlertTriangle,
   Briefcase,
   GraduationCap,
@@ -15,6 +17,8 @@ import {
   FileText,
   ArrowRight,
   ExternalLink,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
@@ -25,10 +29,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/components/ui/sonner';
 import {
   buildProductArtifactUrl,
+  buildWorkflowResponseFromRunHistory,
   PRODUCT_API_BASE_URL,
   generateProductWorkflowDeck,
   getProductDocumentLibrary,
   getProductGroundingPreview,
+  getProductRunHistoryEntry,
   runProductWorkflow,
   type ProductDocumentLibraryEntry,
   type ProductResultSections,
@@ -37,6 +43,7 @@ import {
   type ProductRunWorkflowResponse,
   type ProductWorkflowArtifact,
 } from '@/lib/product-api';
+import { findRecommendedDocument, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
 
 const workflowSteps = [
   { key: 'select', label: 'Select' },
@@ -49,6 +56,232 @@ const workflowSteps = [
 function isCandidateLikeDocument(document: ProductDocumentLibraryEntry): boolean {
   const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`.toLowerCase();
   return /(cv|resume|candidate|curriculum|hiring)/.test(haystack);
+}
+
+const ROLE_BRIEF_NONE = '__none__';
+
+interface CandidateReviewRoleContext {
+  title?: string | null;
+  seniority?: string | null;
+  must_haves: string[];
+  nice_to_haves: string[];
+  leadership_expectations: string[];
+  interview_focus: string[];
+  red_flags: string[];
+}
+
+function isRoleBriefDocument(document: ProductDocumentLibraryEntry): boolean {
+  const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`.toLowerCase();
+  return /(role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition)/.test(haystack) && !isCandidateLikeDocument(document);
+}
+
+function stripSourceDecorators(value: string): string {
+  return value
+    .replace(/\[source:[^\]]+\]/gi, '')
+    .replace(/\bsource\s*:\s*[^\n]+/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function looksLikeDocumentLabel(value: string): boolean {
+  const lowered = value.toLowerCase();
+  return /\.(pdf|doc|docx|txt|md)$/i.test(value) || ((/role brief|job description|job brief|hiring brief/.test(lowered)) && /(pdf|doc|docx|txt|md)/.test(lowered));
+}
+
+function cleanText(value: unknown): string | null {
+  const cleaned = stripSourceDecorators(String(value ?? ''));
+  return cleaned || null;
+}
+
+function normalizeBullets(values: Array<unknown>, limit = 8): string[] {
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+  for (const value of values) {
+    const cleaned = cleanText(value)?.replace(/^[\-\*\u2022\d\.)\s]+/, '').trim();
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(cleaned);
+    if (normalized.length >= limit) break;
+  }
+  return normalized;
+}
+
+function canonicalRoleSectionName(rawName: string): keyof CandidateReviewRoleContext | null {
+  const lowered = cleanText(rawName)?.toLowerCase().replace(/:$/, '');
+  if (!lowered) return null;
+  const lookup: Record<string, keyof CandidateReviewRoleContext> = {
+    title: 'title',
+    'role title': 'title',
+    'job title': 'title',
+    position: 'title',
+    seniority: 'seniority',
+    level: 'seniority',
+    'seniority level': 'seniority',
+    'must have': 'must_haves',
+    'must-haves': 'must_haves',
+    'must haves': 'must_haves',
+    required: 'must_haves',
+    requirements: 'must_haves',
+    'required skills': 'must_haves',
+    preferred: 'nice_to_haves',
+    'preferred qualifications': 'nice_to_haves',
+    bonus: 'nice_to_haves',
+    'nice to have': 'nice_to_haves',
+    'nice-to-have': 'nice_to_haves',
+    'nice to haves': 'nice_to_haves',
+    leadership: 'leadership_expectations',
+    ownership: 'leadership_expectations',
+    scope: 'leadership_expectations',
+    'leadership expectations': 'leadership_expectations',
+    'interview focus': 'interview_focus',
+    'interview priorities': 'interview_focus',
+    assessment: 'interview_focus',
+    'evaluation focus': 'interview_focus',
+    'red flags': 'red_flags',
+    watchouts: 'red_flags',
+    risks: 'red_flags',
+    'screen outs': 'red_flags',
+    'screen-outs': 'red_flags',
+  };
+  return lookup[lowered] || null;
+}
+
+function deriveRoleTitleFromDocumentName(rawLabel?: string | null): string | null {
+  const value = cleanText(rawLabel);
+  if (!value) return null;
+  const withoutExtension = value.replace(/\.(pdf|doc|docx|txt|md)$/i, '').trim();
+  const normalized = withoutExtension
+    .replace(/\b(role brief|job description|job brief|hiring brief|position brief|scorecard|requisition)\b/gi, '')
+    .replace(/[\-_]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  if (!normalized || normalized.length < 3 || looksLikeDocumentLabel(normalized)) return null;
+  if (/(engineer|manager|designer|analyst|scientist|counsel|lead|specialist|architect|director)/i.test(normalized)) return normalized;
+  return null;
+}
+
+function normalizeRoleBriefText(rawText?: string | null, fallbackDocumentName?: string | null): CandidateReviewRoleContext {
+  const text = String(rawText || '').trim();
+  if (!text) {
+    return { title: null, seniority: null, must_haves: [], nice_to_haves: [], leadership_expectations: [], interview_focus: [], red_flags: [] };
+  }
+
+  const sections: Partial<Record<keyof CandidateReviewRoleContext, string[]>> = {};
+  let current: keyof CandidateReviewRoleContext | null = null;
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const headingMatch = line.match(/^([A-Za-z][A-Za-z\s\-/]+):\s*(.*)$/);
+    if (headingMatch) {
+      const maybeSection = canonicalRoleSectionName(headingMatch[1]);
+      if (maybeSection) {
+        current = maybeSection;
+        const trailing = cleanText(headingMatch[2]);
+        if (trailing) sections[maybeSection] = [...(sections[maybeSection] || []), trailing];
+        continue;
+      }
+    }
+    if (current) sections[current] = [...(sections[current] || []), line];
+  }
+
+  const inferredTitle = (() => {
+    const explicit = cleanText(sections.title?.[0]);
+    if (explicit && !looksLikeDocumentLabel(explicit)) return explicit;
+    const roleMatch = text.match(/(?:role|job title|position)\s*:\s*(.+)/i);
+    const matchedTitle = roleMatch ? cleanText(roleMatch[1]) : null;
+    if (matchedTitle && !looksLikeDocumentLabel(matchedTitle)) return matchedTitle;
+    for (const line of text.split(/\r?\n/).slice(0, 6)) {
+      const cleaned = cleanText(line);
+      if (!cleaned || cleaned.length > 100 || looksLikeDocumentLabel(cleaned)) continue;
+      if (/(engineer|manager|designer|analyst|scientist|counsel|lead|specialist)/i.test(cleaned)) return cleaned.replace(/:$/, '');
+    }
+    const fromDocumentName = deriveRoleTitleFromDocumentName(fallbackDocumentName);
+    if (fromDocumentName) return fromDocumentName;
+    return null;
+  })();
+
+  const inferredSeniority = (() => {
+    const explicit = cleanText(sections.seniority?.[0]);
+    if (explicit) return explicit;
+    const match = text.match(/\b(staff|principal|director|lead|senior|mid|junior|entry[ -]?level)\b/i);
+    return match ? match[1].replace(/-/g, ' ') : null;
+  })();
+
+  const mustHaves = normalizeBullets(sections.must_haves || []);
+  const niceToHaves = normalizeBullets(sections.nice_to_haves || []);
+  const leadershipExpectations = normalizeBullets(sections.leadership_expectations || []);
+  const redFlags = normalizeBullets(sections.red_flags || []);
+  const interviewFocus = normalizeBullets(
+    (sections.interview_focus || []).length
+      ? sections.interview_focus || []
+      : [...leadershipExpectations.slice(0, 2), ...redFlags.slice(0, 1), ...mustHaves.slice(0, 2)],
+    4,
+  );
+
+  return {
+    title: inferredTitle,
+    seniority: inferredSeniority,
+    must_haves: mustHaves,
+    nice_to_haves: niceToHaves,
+    leadership_expectations: leadershipExpectations,
+    interview_focus: interviewFocus,
+    red_flags: redFlags,
+  };
+}
+
+function renderCandidateReviewInputText(roleContext: CandidateReviewRoleContext): string | undefined {
+  const hasRoleContext = Boolean(roleContext.title || roleContext.seniority || roleContext.must_haves.length || roleContext.nice_to_haves.length || roleContext.leadership_expectations.length || roleContext.interview_focus.length || roleContext.red_flags.length);
+  if (!hasRoleContext) return undefined;
+
+  const lines = [
+    'Evaluate the CV against the normalized hiring thesis below.',
+    'Keep the same candidate_review output shape: candidate fit summary, strengths, gaps, seniority signals, watchouts and interview next steps.',
+    'Do not attribute role requirements to the candidate unless the CV explicitly supports them.',
+    'Prefer grounded evidence from the CV over assumptions.',
+  ];
+
+  if (roleContext.title) lines.push(`Role title: ${roleContext.title}`);
+  if (roleContext.seniority) lines.push(`Target seniority: ${roleContext.seniority}`);
+  if (roleContext.must_haves.length) {
+    lines.push('Must-have requirements:');
+    lines.push(...roleContext.must_haves.map((item) => `- ${item}`));
+  }
+  if (roleContext.nice_to_haves.length) {
+    lines.push('Nice-to-have signals:');
+    lines.push(...roleContext.nice_to_haves.map((item) => `- ${item}`));
+  }
+  if (roleContext.leadership_expectations.length) {
+    lines.push('Leadership / scope expectations:');
+    lines.push(...roleContext.leadership_expectations.map((item) => `- ${item}`));
+  }
+  if (roleContext.interview_focus.length) {
+    lines.push('Interview focus:');
+    lines.push(...roleContext.interview_focus.map((item) => `- ${item}`));
+  }
+  if (roleContext.red_flags.length) {
+    lines.push('Role-specific watchouts:');
+    lines.push(...roleContext.red_flags.map((item) => `- ${item}`));
+  }
+
+  lines.push('Final instruction: preserve the existing candidate_review output style and evaluate fit specifically for this role context.');
+  return lines.join('\n').trim();
+}
+
+function roleContextHasContent(roleContext: CandidateReviewRoleContext | null | undefined): boolean {
+  return Boolean(roleContext && (roleContext.title || roleContext.seniority || roleContext.must_haves.length || roleContext.nice_to_haves.length || roleContext.leadership_expectations.length || roleContext.interview_focus.length || roleContext.red_flags.length));
+}
+
+function roleContextSummary(roleContext: CandidateReviewRoleContext | null | undefined): string {
+  if (!roleContextHasContent(roleContext)) return 'No role brief selected. Candidate Review will use the default workflow prompt.';
+  const parts = [
+    roleContext?.title ? `Role: ${roleContext.title}` : null,
+    roleContext?.seniority ? `Seniority: ${roleContext.seniority}` : null,
+    roleContext?.must_haves?.length ? `${roleContext.must_haves.length} must-have requirement(s)` : null,
+    roleContext?.interview_focus?.length ? `${roleContext.interview_focus.length} interview focus area(s)` : null,
+  ].filter(Boolean);
+  return parts.join(' · ');
 }
 
 function formatDate(value?: string | null): string {
@@ -114,7 +347,12 @@ function dedupeRows(rows: Array<Array<unknown>>): Array<Array<unknown>> {
 }
 
 function normalizeExperienceRows(rows: Array<Array<unknown>>): Array<Array<unknown>> {
-  return dedupeRows(rows).filter((row) => isMeaningfulCell(row[0]) || isMeaningfulCell(row[1]) || isMeaningfulCell(row[3]));
+  return dedupeRows(rows).filter((row) => {
+    const meaningfulCount = [row[0], row[1], row[2], row[3]].filter((cell) => isMeaningfulCell(cell)).length;
+    const hasRoleAndCompany = isMeaningfulCell(row[0]) && isMeaningfulCell(row[1]);
+    const hasRoleAndSummary = isMeaningfulCell(row[0]) && isMeaningfulCell(row[3]);
+    return meaningfulCount >= 2 && (hasRoleAndCompany || hasRoleAndSummary || meaningfulCount >= 3);
+  });
 }
 
 function normalizeEvidenceRows(rows: Array<Array<unknown>>): Array<Array<unknown>> {
@@ -149,16 +387,33 @@ function getStatusCopy(response: ProductRunWorkflowResponse | null): { label: st
 
 export default function CandidateReviewPage() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const historyRunId = searchParams.get('historyRunId') || searchParams.get('runId') || '';
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
-  const candidateReviewBrief = 'Evaluate this CV for a senior AI engineer role and highlight strengths, watchouts, seniority signals and interview focus areas.';
+  const [selectedRoleBriefDocumentId, setSelectedRoleBriefDocumentId] = useState(ROLE_BRIEF_NONE);
   const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
+  const [analysisInternalsOpen, setAnalysisInternalsOpen] = useState(false);
   const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
   const [notionPublishResult, setNotionPublishResult] = useState<ProductPublishNotionResponse | null>(null);
+
+  useEffect(() => {
+    const handleOpenInternals = () => setAnalysisInternalsOpen(true);
+    window.addEventListener('workbench-tour:open-candidate-internals', handleOpenInternals);
+    return () => window.removeEventListener('workbench-tour:open-candidate-internals', handleOpenInternals);
+  }, []);
 
   const documentLibraryQuery = useQuery({
     queryKey: ['product-document-library'],
     queryFn: getProductDocumentLibrary,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const historyDetailQuery = useQuery({
+    queryKey: ['product-run-history-entry', historyRunId, 'workflow-hydration'],
+    queryFn: () => getProductRunHistoryEntry(historyRunId),
+    enabled: Boolean(historyRunId),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
@@ -168,7 +423,6 @@ export default function CandidateReviewPage() {
     [documentLibraryQuery.data?.documents],
   );
 
-
   const preferredCandidateDocuments = useMemo(
     () => availableDocuments.filter(isCandidateLikeDocument),
     [availableDocuments],
@@ -177,20 +431,74 @@ export default function CandidateReviewPage() {
   const selectableDocuments = preferredCandidateDocuments.length ? preferredCandidateDocuments : availableDocuments;
   const hasDedicatedCandidateCorpus = preferredCandidateDocuments.length > 0;
 
+  const recommendedCandidateDocument = useMemo(
+    () => findRecommendedDocument(selectableDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.candidateReview[0]),
+    [selectableDocuments],
+  );
+
+  const roleBriefDocuments = useMemo(
+    () => availableDocuments.filter((document) => isRoleBriefDocument(document) && document.document_id !== selectedDocumentId),
+    [availableDocuments, selectedDocumentId],
+  );
+
+  const recommendedRoleBriefDocument = useMemo(
+    () => findRecommendedDocument(roleBriefDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.candidateReview[1]),
+    [roleBriefDocuments],
+  );
+
   useEffect(() => {
     if (!selectableDocuments.length) {
       setSelectedDocumentId('');
       return;
     }
     if (!selectedDocumentId || !selectableDocuments.some((document) => document.document_id === selectedDocumentId)) {
-      setSelectedDocumentId(selectableDocuments[0].document_id);
+      setSelectedDocumentId(recommendedCandidateDocument?.document_id ?? '');
     }
-  }, [selectedDocumentId, selectableDocuments]);
+  }, [recommendedCandidateDocument, selectedDocumentId, selectableDocuments]);
+
+  useEffect(() => {
+    if (!roleBriefDocuments.length) {
+      if (selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE) setSelectedRoleBriefDocumentId(ROLE_BRIEF_NONE);
+      return;
+    }
+    if (selectedRoleBriefDocumentId === ROLE_BRIEF_NONE && recommendedRoleBriefDocument) {
+      setSelectedRoleBriefDocumentId(recommendedRoleBriefDocument.document_id);
+      return;
+    }
+    if (selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE && !roleBriefDocuments.some((document) => document.document_id === selectedRoleBriefDocumentId)) {
+      setSelectedRoleBriefDocumentId(recommendedRoleBriefDocument?.document_id ?? ROLE_BRIEF_NONE);
+    }
+  }, [recommendedRoleBriefDocument, roleBriefDocuments, selectedRoleBriefDocumentId]);
 
   const selectedDocument = selectableDocuments.find((document) => document.document_id === selectedDocumentId);
+  const selectedRoleBriefDocument = roleBriefDocuments.find((document) => document.document_id === selectedRoleBriefDocumentId);
+
+  const roleBriefPreviewQuery = useQuery({
+    queryKey: ['candidate-review-role-brief-preview', selectedRoleBriefDocumentId],
+    enabled: selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    queryFn: () =>
+      getProductGroundingPreview({
+        workflowId: 'document_review',
+        strategy: 'document_scan',
+        documentIds: selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE ? [selectedRoleBriefDocumentId] : [],
+        inputText: 'Extract the hiring thesis, must-haves, preferred signals, leadership scope, interview focus and red flags from this role brief.',
+      }),
+  });
+
+  const rawRoleBriefText = useMemo(
+    () => cleanText(roleBriefPreviewQuery.data?.preview.preview_text) || '',
+    [roleBriefPreviewQuery.data?.preview.preview_text],
+  );
+  const normalizedRoleBrief = useMemo(() => normalizeRoleBriefText(rawRoleBriefText, selectedRoleBriefDocument?.name), [rawRoleBriefText, selectedRoleBriefDocument?.name]);
+  const generatedCandidateReviewInputText = useMemo(
+    () => renderCandidateReviewInputText(normalizedRoleBrief),
+    [normalizedRoleBrief],
+  );
 
   const previewQuery = useQuery({
-    queryKey: ['candidate-review-preview', selectedDocumentId],
+    queryKey: ['candidate-review-preview', selectedDocumentId, generatedCandidateReviewInputText],
     enabled: Boolean(selectedDocumentId),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -199,17 +507,35 @@ export default function CandidateReviewPage() {
         workflowId: 'candidate_review',
         strategy: 'document_scan',
         documentIds: selectedDocumentId ? [selectedDocumentId] : [],
+        inputText: generatedCandidateReviewInputText,
       }),
   });
+
+  useEffect(() => {
+    const run = historyDetailQuery.data?.run;
+    const hydratedWorkflowResponse = buildWorkflowResponseFromRunHistory(historyDetailQuery.data);
+    if (!historyRunId || !run || !hydratedWorkflowResponse?.result || hydratedWorkflowResponse.result.workflow_id !== 'candidate_review') return;
+
+    const requestPayload = run.request_payload && typeof run.request_payload === 'object' ? run.request_payload : null;
+    const requestDocumentIds = Array.isArray(requestPayload?.document_ids)
+      ? requestPayload.document_ids.map((item) => String(item || '').trim()).filter(Boolean)
+      : [];
+    const historyDocumentId = (run.document_ids ?? [])[0] || requestDocumentIds[0] || hydratedWorkflowResponse.result.grounding_preview?.document_ids?.[0] || '';
+
+    if (historyDocumentId) setSelectedDocumentId(historyDocumentId);
+    setWorkflowResponse(hydratedWorkflowResponse);
+    setGeneratedArtifacts(run.artifact_items?.length ? run.artifact_items : hydratedWorkflowResponse.result.artifacts ?? []);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
+  }, [historyDetailQuery.data, historyRunId]);
 
   const runReviewMutation = useMutation({
     mutationFn: () =>
       runProductWorkflow({
         workflow_id: 'candidate_review',
         document_ids: selectedDocumentId ? [selectedDocumentId] : [],
-        input_text: candidateReviewBrief,
+        input_text: generatedCandidateReviewInputText,
         context_strategy: 'document_scan',
-        context_window_mode: 'auto',
         use_document_context: true,
       }),
     onSuccess: async (payload) => {
@@ -221,7 +547,7 @@ export default function CandidateReviewPage() {
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
       ]);
-      toast.success('Candidate review completed with grounded backend output.');
+      toast.success(generatedCandidateReviewInputText ? 'Candidate review completed against the selected role brief.' : 'Candidate review completed with grounded backend output.');
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : 'Candidate review failed.');
@@ -250,17 +576,29 @@ export default function CandidateReviewPage() {
   });
 
   const sections = workflowResponse?.result_sections ?? null;
+  const candidateReviewView = (workflowResponse as (ProductRunWorkflowResponse & { candidate_review_view?: any }) | null)?.candidate_review_view ?? null;
   const statusCopy = getStatusCopy(workflowResponse);
-  const candidateProfile = sections?.candidate_profile ?? null;
+  const activeRoleContext = roleContextHasContent(candidateReviewView?.role_context) ? candidateReviewView?.role_context : roleContextHasContent(normalizedRoleBrief) ? normalizedRoleBrief : null;
+  const roleBriefSignalsSparse = Boolean(selectedRoleBriefDocument && activeRoleContext && !activeRoleContext.must_haves.length && !activeRoleContext.interview_focus.length);
+  const candidateProfile = candidateReviewView?.candidate_profile ?? sections?.candidate_profile ?? null;
   const score = deriveScore(workflowResponse, sections);
   const evidenceRows = useMemo(() => normalizeEvidenceRows(sections?.evidence_highlights ?? []), [sections?.evidence_highlights]);
   const experienceTable = getTable(sections, 'Experience highlights');
   const experienceRows = useMemo(() => normalizeExperienceRows(experienceTable?.rows ?? []), [experienceTable?.rows]);
   const evidenceTable = getTable(sections, 'Evidence highlights');
   const evidenceTableRows = useMemo(() => normalizeEvidenceRows(evidenceTable?.rows ?? []), [evidenceTable?.rows]);
+  const strengths = candidateReviewView?.strengths?.length ? candidateReviewView.strengths : (sections?.strengths ?? []);
+  const gaps = candidateReviewView?.gaps ?? [];
+  const senioritySignals = candidateReviewView?.seniority_signals ?? [];
+  const watchouts = candidateReviewView?.watchouts?.length ? candidateReviewView.watchouts : (sections?.watchouts ?? []);
+  const nextSteps = candidateReviewView?.next_steps?.length ? candidateReviewView.next_steps : (sections?.next_steps ?? []);
+  const documentMetrics = candidateReviewView?.document_metrics ?? null;
+  const showSourceBlockCount = documentMetrics?.show_source_block_count ?? ((workflowResponse?.result?.grounding_preview?.source_block_count ?? previewQuery.data?.preview?.source_block_count ?? 0) > 0);
+  const sourceBlockCount = documentMetrics?.source_block_count ?? workflowResponse?.result?.grounding_preview?.source_block_count ?? previewQuery.data?.preview?.source_block_count ?? 0;
+  const previewContextChars = documentMetrics?.context_chars ?? workflowResponse?.result?.grounding_preview?.context_chars ?? previewQuery.data?.preview?.context_chars ?? 0;
   const allArtifacts = useMemo(
-    () => dedupeArtifacts([...(sections?.artifacts ?? []), ...generatedArtifacts]),
-    [generatedArtifacts, sections?.artifacts],
+    () => dedupeArtifacts([...(candidateReviewView?.artifacts ?? []), ...(sections?.artifacts ?? []), ...generatedArtifacts]),
+    [candidateReviewView?.artifacts, generatedArtifacts, sections?.artifacts],
   );
   const selectedDocumentDate = formatDate(selectedDocument?.indexed_at || null);
   const preview = workflowResponse?.result?.grounding_preview ?? previewQuery.data?.preview ?? null;
@@ -268,14 +606,14 @@ export default function CandidateReviewPage() {
   const stepStatuses = useMemo(() => workflowSteps.map((step) => {
     let status = 'pending';
     if (step.key === 'select' && selectedDocumentId) status = 'completed';
-    if (step.key === 'ground' && preview) status = 'completed';
+    if (step.key === 'ground' && (preview || selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE)) status = 'completed';
     if (step.key === 'analyze' && runReviewMutation.isPending) status = 'running';
     if (step.key === 'analyze' && workflowResponse?.result) status = workflowResponse.result.status === 'error' ? 'error' : 'completed';
-    if (step.key === 'review' && sections) status = 'completed';
+    if (step.key === 'review' && (sections || candidateReviewView)) status = 'completed';
     if (step.key === 'export' && generateDeckMutation.isPending) status = 'running';
     if (step.key === 'export' && allArtifacts.length > 0) status = 'completed';
     return { ...step, status };
-  }), [allArtifacts.length, generateDeckMutation.isPending, preview, runReviewMutation.isPending, sections, selectedDocumentId, workflowResponse?.result]);
+  }), [allArtifacts.length, candidateReviewView, generateDeckMutation.isPending, preview, runReviewMutation.isPending, sections, selectedDocumentId, selectedRoleBriefDocumentId, workflowResponse?.result]);
 
 
   const handleOpenArtifact = (artifact: ProductWorkflowArtifact) => {
@@ -288,20 +626,24 @@ export default function CandidateReviewPage() {
 
   return (
     <motion.div data-testid="candidate-review-page" className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Candidate Review" description="Review a candidate profile with grounded strengths, watchouts and interview focus.">
-        <Button data-testid="candidate-review-run-button" className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" disabled={!selectedDocumentId || runReviewMutation.isPending} onClick={() => runReviewMutation.mutate()}>
-          {runReviewMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Run Candidate Review
-        </Button>
-        <Button data-testid="candidate-review-generate-deck-button" variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending} onClick={() => generateDeckMutation.mutate()}>
-          {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Generate Deck
-        </Button>
-      </PageHeader>
+      <div data-tour="candidate-review-header">
+        <PageHeader title="Candidate Review" description="Review a candidate profile with grounded strengths, watchouts and interview focus.">
+          <Button data-testid="candidate-review-run-button" className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" disabled={!selectedDocumentId || runReviewMutation.isPending} onClick={() => runReviewMutation.mutate()}>
+            {runReviewMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />} Run Candidate Review
+          </Button>
+          <Button data-testid="candidate-review-generate-deck-button" variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending} onClick={() => generateDeckMutation.mutate()}>
+            {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Generate Deck
+          </Button>
+        </PageHeader>
+      </div>
 
-      <WorkflowProgressHeader
-        steps={stepStatuses}
-        title="Workflow progress"
-        description="Track how the candidate review moves from document selection to publish-ready outputs."
-      />
+      <div data-tour="candidate-review-progress">
+        <WorkflowProgressHeader
+          steps={stepStatuses}
+          title="Workflow progress"
+          description="Track how the candidate review moves from document selection to publish-ready outputs."
+        />
+      </div>
 
       {(documentLibraryQuery.isError || previewQuery.isError) && (
         <GlassCard className="mb-6 border border-glow-warning/20">
@@ -330,54 +672,125 @@ export default function CandidateReviewPage() {
         </GlassCard>
       )}
 
-      <GlassCard className="mb-6">
-        <div className="grid lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)] gap-4">
-          <div>
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Candidate document</label>
+      <GlassCard className="mb-6" data-tour="candidate-review-selection">
+        <div className="grid lg:grid-cols-2 gap-4">
+          <div className="rounded-xl border border-border/50 bg-secondary/10 p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Candidate document</p>
+                <p className="mt-2 text-sm text-muted-foreground">This is the primary grounded document used by the candidate_review workflow.</p>
+              </div>
+              <StatusPill status={selectedDocumentId ? 'ready' : 'pending'} />
+            </div>
             <Select value={selectedDocumentId} onValueChange={setSelectedDocumentId}>
-              <SelectTrigger data-testid="candidate-review-document-trigger" className="h-9 text-xs bg-secondary/30"><SelectValue placeholder="Select a candidate document" /></SelectTrigger>
+              <SelectTrigger data-testid="candidate-review-document-trigger" className="h-11 text-sm bg-secondary/30"><SelectValue placeholder="Select a candidate document" /></SelectTrigger>
               <SelectContent>
                 {selectableDocuments.map((document) => (
                   <SelectItem data-testid="candidate-review-document-option" data-document-name={document.name} key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
-              <div data-testid="candidate-review-selected-document-date">Indexed: {selectedDocumentDate}</div>
-              <div data-testid="candidate-review-selected-document-stats">Chunks: {selectedDocument?.chunk_count ?? 0} | Characters: {(selectedDocument?.char_count ?? 0).toLocaleString()}</div>
-              <div data-testid="candidate-review-source-coverage">Source coverage: {preview?.source_block_count ?? 0} source block(s), {preview?.context_chars ?? 0} context chars</div>
-            </div>
           </div>
-          <div>
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Grounding preview</label>
-            <div className="rounded-lg border border-border/50 bg-secondary/20 px-3 py-3 min-h-[92px]">
-              <div className="grid gap-2 sm:grid-cols-3">
-                <div className="rounded-md bg-background/60 px-2 py-2">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
-                  <div className="mt-1 text-sm font-medium text-foreground">{selectedDocumentId ? 1 : 0}</div>
-                </div>
-                <div className="rounded-md bg-background/60 px-2 py-2">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
-                  <div className="mt-1 text-sm font-medium text-foreground">{preview?.source_block_count ?? 0}</div>
-                </div>
-                <div className="rounded-md bg-background/60 px-2 py-2">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
-                  <div className="mt-1 text-sm font-medium text-foreground">{(preview?.context_chars ?? 0).toLocaleString()} chars</div>
-                </div>
+
+          <div className="rounded-xl border border-border/50 bg-secondary/10 p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Role brief document</p>
+                <p className="mt-2 text-sm text-muted-foreground">Use an indexed role brief to make the review role-aware without changing the workflow contract.</p>
               </div>
-              <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed line-clamp-5">
-                {preview?.preview_text
-                  ? preview.preview_text
-                  : 'Select a candidate document to preview the grounded CV context before running the workflow.'}
-              </p>
+              <StatusPill status={selectedRoleBriefDocument ? 'ready' : 'pending'} />
             </div>
+            <Select value={selectedRoleBriefDocumentId} onValueChange={setSelectedRoleBriefDocumentId}>
+              <SelectTrigger data-testid="candidate-review-role-brief-trigger" className="h-11 text-sm bg-secondary/30"><SelectValue placeholder="Select an indexed role brief" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ROLE_BRIEF_NONE} className="text-xs">No indexed role brief</SelectItem>
+                {roleBriefDocuments.map((document) => (
+                  <SelectItem key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </GlassCard>
 
+      <GlassCard className="mb-6" data-tour="candidate-review-analysis-internals">
+        <button
+          type="button"
+          onClick={() => setAnalysisInternalsOpen((value) => !value)}
+          className="w-full flex items-start justify-between gap-4 text-left"
+          data-testid="candidate-review-analysis-internals-toggle"
+        >
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Analysis internals</h3>
+            <p className="mt-1 text-xs text-muted-foreground">Grounding preview and generated role-aware input. Keep collapsed unless you need retrieval/debug context.</p>
+          </div>
+          <span className="mt-0.5 text-muted-foreground">{analysisInternalsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</span>
+        </button>
+
+        {analysisInternalsOpen ? (
+          <div className="mt-4 grid lg:grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Candidate grounding preview</label>
+              <div className="rounded-lg border border-border/50 bg-secondary/20 px-3 py-3 min-h-[132px]">
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="rounded-md bg-background/60 px-2 py-2">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
+                    <div className="mt-1 text-sm font-medium text-foreground">{selectedDocumentId ? 1 : 0}</div>
+                  </div>
+                  {showSourceBlockCount ? (
+                    <div className="rounded-md bg-background/60 px-2 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
+                      <div className="mt-1 text-sm font-medium text-foreground">{sourceBlockCount}</div>
+                    </div>
+                  ) : null}
+                  <div className="rounded-md bg-background/60 px-2 py-2">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
+                    <div className="mt-1 text-sm font-medium text-foreground">{previewContextChars.toLocaleString()} chars</div>
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed line-clamp-6">
+                  {preview?.preview_text
+                    ? preview.preview_text
+                    : 'Select a candidate document to preview the grounded CV context before running the workflow.'}
+                </p>
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Generated review input</label>
+              <div className="rounded-lg border border-border/50 bg-secondary/20 px-3 py-3 min-h-[132px]">
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="rounded-md bg-background/60 px-2 py-2">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Role title</div>
+                    <div className="mt-1 text-sm font-medium text-foreground">{activeRoleContext?.title || 'Role-aware review'}</div>
+                  </div>
+                  {activeRoleContext?.must_haves.length ? (
+                    <div className="rounded-md bg-background/60 px-2 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Must-haves</div>
+                      <div className="mt-1 text-sm font-medium text-foreground">{activeRoleContext.must_haves.length}</div>
+                    </div>
+                  ) : null}
+                  {activeRoleContext?.interview_focus.length ? (
+                    <div className="rounded-md bg-background/60 px-2 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Interview focus</div>
+                      <div className="mt-1 text-sm font-medium text-foreground">{activeRoleContext.interview_focus.length}</div>
+                    </div>
+                  ) : null}
+                </div>
+                {roleBriefSignalsSparse ? (
+                  <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">Indexed role brief selected, but structured signals are still sparse. Candidate Review will still use role title and seniority context without surfacing empty counters.</p>
+                ) : null}
+                <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed line-clamp-6">
+                  {generatedCandidateReviewInputText || 'No role brief was supplied. The workflow will use its default backend candidate-review prompt.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </GlassCard>
+
       <div className="grid lg:grid-cols-12 gap-4">
         <div className="lg:col-span-4 space-y-4">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="glass rounded-xl p-6 text-center">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} data-tour="candidate-review-profile" className="glass rounded-xl p-6 text-center">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-gradient-primary">{buildInitials(candidateProfile?.name)}</span>
             </div>
@@ -413,13 +826,47 @@ export default function CandidateReviewPage() {
             </div>
           </motion.div>
 
-          <GlassCard delay={0.16}>
+          <GlassCard delay={0.16} data-tour="candidate-review-left-insights">
+            <div className="flex items-center gap-2 mb-3">
+              <Briefcase className="w-4 h-4 text-primary" />
+              <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Role Context</h4>
+            </div>
+            {roleContextHasContent(activeRoleContext) ? (
+              <div className="space-y-3 text-xs text-muted-foreground">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Role</p>
+                  <p className="mt-1 text-foreground font-medium">{activeRoleContext?.title || 'Selected role brief'}</p>
+                  {activeRoleContext?.seniority ? <p className="mt-1 text-[11px] text-muted-foreground">Target seniority: {activeRoleContext.seniority}</p> : null}
+                </div>
+                {activeRoleContext?.must_haves.length ? (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Must-haves</p>
+                    <div className="space-y-1">
+                      {activeRoleContext.must_haves.slice(0, 4).map((item) => <p key={item}>• {item}</p>)}
+                    </div>
+                  </div>
+                ) : null}
+                {activeRoleContext?.interview_focus.length ? (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Interview focus</p>
+                    <div className="space-y-1">
+                      {activeRoleContext.interview_focus.slice(0, 3).map((item) => <p key={item}>• {item}</p>)}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Select an indexed role brief to make Candidate Review fit-aware instead of using the generic prompt.</p>
+            )}
+          </GlassCard>
+
+          <GlassCard delay={0.18}>
             <div className="flex items-center gap-2 mb-3">
               <ShieldAlert className="w-4 h-4 text-glow-warning" />
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Decision Risks</h4>
             </div>
             <div className="space-y-2">
-              {(sections?.watchouts.length ? sections.watchouts : ['Run the candidate workflow to surface live watchouts and interview risks.']).map((watchout) => (
+              {(watchouts.length ? watchouts : ['Run the candidate workflow to surface live watchouts and interview risks.']).map((watchout) => (
                 <div key={watchout} className="text-xs">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-glow-warning shrink-0" />
@@ -449,13 +896,13 @@ export default function CandidateReviewPage() {
         </div>
 
         <div className="lg:col-span-8 space-y-4">
-          <GlassCard delay={0.1}>
+          <GlassCard delay={0.1} data-tour="candidate-review-interview-focus">
             <div className="flex items-center gap-2 mb-4">
               <Target className="w-4 h-4 text-primary" />
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Interview Focus Areas</h4>
             </div>
             <div className="space-y-2">
-              {(sections?.next_steps.length ? sections.next_steps : ['Run the candidate review to generate live interview focus areas.']).map((step, index) => (
+              {(nextSteps.length ? nextSteps : ['Run the candidate review to generate live interview focus areas.']).map((step, index) => (
                 <div key={step} className="flex items-start gap-3 py-2 px-3 rounded-lg bg-secondary/20">
                   <span className="text-[10px] font-bold text-muted-foreground w-4 mt-0.5">{index + 1}</span>
                   <div className="min-w-0 flex-1">
@@ -466,7 +913,7 @@ export default function CandidateReviewPage() {
             </div>
           </GlassCard>
 
-          <GlassCard delay={0.14}>
+          <GlassCard delay={0.14} data-tour="candidate-review-experience">
             <div className="flex items-center gap-2 mb-4">
               <Search className="w-4 h-4 text-primary" />
               <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Experience Highlights</h4>
@@ -497,14 +944,14 @@ export default function CandidateReviewPage() {
             </div>
           </GlassCard>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4" data-tour="candidate-review-evaluation-grid">
             <GlassCard delay={0.18}>
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle2 className="w-4 h-4 text-glow-success" />
                 <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Strengths</h4>
               </div>
               <div className="space-y-2">
-                {(sections?.strengths.length ? sections.strengths : ['Strengths will populate from the structured candidate payload after the live run.']).map((strength) => (
+                {(strengths.length ? strengths : ['Strengths will populate from the structured candidate payload after the live run.']).map((strength) => (
                   <p key={strength} className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-glow-success mt-1.5 shrink-0" />{strength}
                   </p>
@@ -512,13 +959,41 @@ export default function CandidateReviewPage() {
               </div>
             </GlassCard>
 
+            <GlassCard delay={0.2}>
+              <div className="flex items-center gap-2 mb-3">
+                <Search className="w-4 h-4 text-primary" />
+                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Gaps</h4>
+              </div>
+              <div className="space-y-2">
+                {(gaps.length ? gaps : ['Gaps will appear once the role-aware candidate review compares the CV against the selected hiring brief.']).map((gap) => (
+                  <p key={gap} className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />{gap}
+                  </p>
+                ))}
+              </div>
+            </GlassCard>
+
             <GlassCard delay={0.22}>
+              <div className="flex items-center gap-2 mb-3">
+                <UserCheck className="w-4 h-4 text-primary" />
+                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Seniority Signals</h4>
+              </div>
+              <div className="space-y-2">
+                {(senioritySignals.length ? senioritySignals : ['Seniority signals will populate after the live run.']).map((signal) => (
+                  <p key={signal} className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />{signal}
+                  </p>
+                ))}
+              </div>
+            </GlassCard>
+
+            <GlassCard delay={0.24}>
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="w-4 h-4 text-glow-warning" />
                 <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Watchouts</h4>
               </div>
               <div className="space-y-2">
-                {(sections?.watchouts.length ? sections.watchouts : ['Watchouts will populate from the backend review status after the live run.']).map((watchout) => (
+                {(watchouts.length ? watchouts : ['Watchouts will populate from the backend review status after the live run.']).map((watchout) => (
                   <p key={watchout} className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-glow-warning mt-1.5 shrink-0" />{watchout}
                   </p>
@@ -556,7 +1031,7 @@ export default function CandidateReviewPage() {
             </GlassCard>
           )}
 
-          <div data-testid="workflow-publish-actions-surface" data-workflow="candidate-review">
+          <div data-testid="workflow-publish-actions-surface" data-workflow="candidate-review" data-tour="candidate-review-handoff">
           <WorkflowPublishActions
             workflowId="candidate_review"
             result={workflowResponse?.result ?? null}
@@ -572,12 +1047,16 @@ export default function CandidateReviewPage() {
               candidate_location: candidateProfile?.location || null,
               summary: workflowResponse?.result.summary,
               recommendation: workflowResponse?.result.recommendation,
-              strengths: sections?.strengths || [],
-              watchouts: sections?.watchouts || [],
-              highlights: sections?.strengths || [],
-              next_steps: sections?.next_steps || [],
-              interview_focus: sections?.watchouts || [],
-              interview_questions: sections?.watchouts || [],
+              strengths: strengths || [],
+              watchouts: watchouts || [],
+              highlights: strengths || [],
+              next_steps: nextSteps || [],
+              interview_focus: activeRoleContext?.interview_focus || watchouts || [],
+              interview_questions: watchouts || [],
+              role_title: activeRoleContext?.title || null,
+              target_seniority: activeRoleContext?.seniority || null,
+              must_haves: activeRoleContext?.must_haves || [],
+              role_watchouts: activeRoleContext?.red_flags || [],
               experience_snapshot: experienceRows.map((row) => ({ role: String(row[0] || ''), company: String(row[1] || ''), tenure: String(row[2] || ''), impact: String(row[3] || '') })),
               evidence_rows: evidenceTableRows.map((row) => row.map((cell) => String(cell ?? ''))),
               documents: selectedDocument ? [selectedDocument.name] : [],

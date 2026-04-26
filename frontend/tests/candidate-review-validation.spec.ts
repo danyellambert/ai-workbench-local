@@ -35,7 +35,6 @@ for (const pageDefinition of pages) {
         await page.getByTestId('candidate-review-document-trigger').click();
         await page.getByRole('option', { name: candidateDocumentName, exact: true }).click();
         interactions.push({ type: 'select-document', name: candidateDocumentName });
-        await page.getByTestId('candidate-review-brief-input').fill('Evaluate this CV for a senior AI engineer role and highlight strengths, watchouts, seniority signals and interview focus areas.');
         const runResponsePromise = page.waitForResponse((response) => response.url().includes('/api/product/run-workflow') && response.request().method() === 'POST', { timeout: 180000 });
         await page.getByTestId('candidate-review-run-button').click();
         const runResponse = await runResponsePromise; addCheck('run-workflow-response', runResponse.ok() ? 'passed' : 'failed', String(runResponse.status()));

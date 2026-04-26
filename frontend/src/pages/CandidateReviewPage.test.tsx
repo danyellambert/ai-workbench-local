@@ -235,6 +235,18 @@ describe('CandidateReviewPage', () => {
     expect(screen.queryByText('-', { selector: 'h5' })).not.toBeInTheDocument();
   });
 
+  it('keeps analysis internals collapsed by default and reveals them on demand', async () => {
+    renderPage();
+
+    expect(await screen.findByText('Sarah Chen - Senior ML Engineer CV.pdf')).toBeInTheDocument();
+    expect(screen.queryByText('Candidate grounding preview')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('candidate-review-analysis-internals-toggle'));
+
+    expect(screen.getByText('Candidate grounding preview')).toBeInTheDocument();
+    expect(screen.getByText('Generated review input')).toBeInTheDocument();
+  });
+
 
   it('runs the live candidate workflow and renders grounded sections plus deck artifacts', async () => {
     renderPage();

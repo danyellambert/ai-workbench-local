@@ -152,7 +152,7 @@ describe('RunHistoryPage', () => {
     expect(await screen.findByText('Candidate Review')).toBeInTheDocument();
     expect(await screen.findByText('Grounded summary from persisted run.')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /^rerun$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Rerun from history/i }));
 
     await waitFor(() => {
       expect(rerunProductRunHistoryEntry).toHaveBeenCalledWith('run-1');

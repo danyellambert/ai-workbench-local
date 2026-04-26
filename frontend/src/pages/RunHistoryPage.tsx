@@ -227,6 +227,7 @@ export default function RunHistoryPage() {
   const deliveryOutputs = deliveryOutputEntries(detailRun);
   const recentDeliveryEvents = useMemo(() => buildRecentDeliveryEvents(filteredRuns.length ? filteredRuns : runs, detailRun?.id ?? selectedRun?.id ?? null), [filteredRuns, runs, detailRun?.id, selectedRun?.id]);
   const workflowRoute = detailRun?.workflow_id ? WORKFLOW_ROUTE_MAP[detailRun.workflow_id] : undefined;
+  const workflowRouteWithRun = workflowRoute && detailRun?.id ? `${workflowRoute}?historyRunId=${encodeURIComponent(detailRun.id)}` : workflowRoute;
   const latestSummary = detailRun?.result_sections && typeof detailRun.result_sections === 'object' && 'summary' in detailRun.result_sections
     ? String((detailRun.result_sections as { summary?: string | null }).summary || '')
     : '';
@@ -236,15 +237,17 @@ export default function RunHistoryPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Run History" description="Persisted workflow executions, rerun controls, request/response payloads and artifact links backed by the live Product API registry.">
-        {workflowRoute ? (
-          <Link to={workflowRoute}>
+      <div data-tour="run-history-header">
+        <PageHeader title="Run History" description="Persisted workflow executions, rerun controls, request/response payloads and artifact links backed by the live Product API registry.">
+        {workflowRouteWithRun ? (
+          <Link to={workflowRouteWithRun}>
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs">
               <Sparkles className="mr-2 h-3.5 w-3.5" /> Open workflow
             </Button>
           </Link>
         ) : null}
-      </PageHeader>
+        </PageHeader>
+      </div>
 
       {runHistoryQuery.isError && (
         <GlassCard className="mb-6 border border-glow-warning/20">
@@ -255,14 +258,14 @@ export default function RunHistoryPage() {
         </GlassCard>
       )}
 
-      <div className="grid gap-3 md:grid-cols-4 mb-6">
+      <div className="grid gap-3 md:grid-cols-4 mb-6" data-tour="run-history-metrics">
         <MetricCard label="Total runs" value={runHistoryQuery.data?.summary.total_runs ?? runs.length} icon={History} delay={0.05} />
         <MetricCard label="Completed" value={runHistoryQuery.data?.summary.completed_runs ?? runs.filter((run) => run.status === 'completed').length} icon={Sparkles} glowColor="success" delay={0.08} />
         <MetricCard label="Warnings" value={runHistoryQuery.data?.summary.warning_runs ?? runs.filter((run) => run.status === 'warning').length} icon={AlertTriangle} glowColor="warning" delay={0.11} />
         <MetricCard label="Errors" value={runHistoryQuery.data?.summary.error_runs ?? runs.filter((run) => run.status === 'error').length} icon={FileText} glowColor="accent" delay={0.14} />
       </div>
 
-      <GlassCard className="mb-4">
+      <GlassCard className="mb-4" data-tour="run-history-filters">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_180px_220px_180px]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -303,7 +306,7 @@ export default function RunHistoryPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(460px,0.95fr)]">
-        <div className="space-y-3">
+        <div className="space-y-3" data-tour="run-history-list">
           {!visibleRuns.length && (
             <GlassCard>
               <div className="text-xs text-muted-foreground">
@@ -346,7 +349,7 @@ export default function RunHistoryPage() {
           ) : null}
         </div>
 
-        <GlassCard className="min-h-[620px]">
+        <GlassCard className="min-h-[620px]" data-tour="run-history-detail">
           {!detailRun ? (
             <div className="text-xs text-muted-foreground">Select a run to inspect request payloads, backend result sections and rerun options.</div>
           ) : (
@@ -367,8 +370,8 @@ export default function RunHistoryPage() {
                   {lastRerunId && detailRun.id === lastRerunId ? <p className="mt-1 text-[11px] text-glow-success">This is the latest rerun generated from the history surface.</p> : null}
                 </div>
                 <div className="flex items-center gap-2">
-                  {workflowRoute ? (
-                    <Link to={workflowRoute}>
+                  {workflowRouteWithRun ? (
+                    <Link to={workflowRouteWithRun}>
                       <Button variant="outline" size="sm" className="h-8 text-[10px] border-border/50">Open flow</Button>
                     </Link>
                   ) : null}
@@ -408,7 +411,7 @@ export default function RunHistoryPage() {
 
 
               {recentDeliveryEvents.length ? (
-                <div data-testid="delivery-history-section">
+                <div data-testid="delivery-history-section" data-tour="run-history-deliveries">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <div>
                       <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">External deliveries</h4>

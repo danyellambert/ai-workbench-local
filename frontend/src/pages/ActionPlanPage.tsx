@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertCircle,
@@ -7,6 +8,7 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
+  ChevronRight,
   FileText,
   Info,
   Loader2,
@@ -19,10 +21,12 @@ import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActi
 import { PageHeader, StatusPill, SeverityBadge, GlassCard, WorkflowProgressHeader } from '@/components/shared/ui-components';
 import {
   buildProductArtifactUrl,
+  buildWorkflowResponseFromRunHistory,
   PRODUCT_API_BASE_URL,
   generateProductWorkflowDeck,
   getProductDocumentLibrary,
   getProductGroundingPreview,
+  getProductRunHistoryEntry,
   runProductWorkflow,
   type ProductActionPlanEvidenceGap,
   type ProductActionPlanItem,
@@ -35,10 +39,12 @@ import {
 } from '@/lib/product-api';
 import { toast } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { ACTION_PLAN_DOCUMENT_LIMIT, findRecommendedDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
 
 const statusCols: Array<ProductActionPlanItem['status']> = ['open', 'in_progress', 'blocked', 'done'];
 const workflowSteps = [
@@ -147,19 +153,37 @@ function truncatePreviewText(value: string, maxChars = 220): string {
 
 export default function ActionPlanPage() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const historyRunId = searchParams.get('historyRunId') || searchParams.get('runId') || '';
   const operatorPreferences = useAppStore((state) => state.operatorPreferences);
   const defaultTab = normalizeTab(operatorPreferences.defaultEvidencePanelOpen);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const previousAvailableDocumentIdsRef = useRef<string[]>([]);
+  const hasInitializedDocumentSelectionRef = useRef(false);
   const [activeTab, setActiveTab] = useState<ActionPlanTab>(defaultTab);
   const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
   const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
   const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
   const [notionPublishResult, setNotionPublishResult] = useState<ProductPublishNotionResponse | null>(null);
+  const [isGroundingPreviewOpen, setIsGroundingPreviewOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenBoard = () => setActiveTab('board');
+    window.addEventListener('workbench-tour:open-action-plan-board', handleOpenBoard);
+    return () => window.removeEventListener('workbench-tour:open-action-plan-board', handleOpenBoard);
+  }, []);
 
   const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
     queryKey: ['product-document-library'],
     queryFn: getProductDocumentLibrary,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const historyDetailQuery = useQuery({
+    queryKey: ['product-run-history-entry', historyRunId, 'workflow-hydration'],
+    queryFn: () => getProductRunHistoryEntry(historyRunId),
+    enabled: Boolean(historyRunId),
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
@@ -169,36 +193,42 @@ export default function ActionPlanPage() {
     [documentLibrary],
   );
 
+  const recommendedActionPlanDocuments = useMemo(
+    () => findRecommendedDocuments(availableDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.actionPlan).slice(0, ACTION_PLAN_DOCUMENT_LIMIT),
+    [availableDocuments],
+  );
+
+  const recommendedActionPlanDocumentIds = useMemo(
+    () => recommendedActionPlanDocuments.map((document) => document.document_id),
+    [recommendedActionPlanDocuments],
+  );
+
   useEffect(() => {
     const availableIds = availableDocuments.map((document) => document.document_id);
-    const previousAvailableIds = previousAvailableDocumentIdsRef.current;
     previousAvailableDocumentIdsRef.current = availableIds;
 
     if (!availableIds.length) {
       if (selectedDocumentIds.length) setSelectedDocumentIds([]);
+      hasInitializedDocumentSelectionRef.current = false;
       return;
     }
 
-    const validSelected = selectedDocumentIds.filter((documentId) => availableIds.includes(documentId));
-    const hadNoPreviousDocuments = previousAvailableIds.length === 0;
-    const previouslySelectedAllDocuments =
-      previousAvailableIds.length > 0 && previousAvailableIds.every((documentId) => selectedDocumentIds.includes(documentId));
-    const newDocumentWasAdded = availableIds.some((documentId) => !previousAvailableIds.includes(documentId));
+    const validSelected = selectedDocumentIds
+      .filter((documentId) => availableIds.includes(documentId))
+      .slice(0, ACTION_PLAN_DOCUMENT_LIMIT);
 
-    if (!validSelected.length && (hadNoPreviousDocuments || !selectedDocumentIds.length)) {
-      setSelectedDocumentIds(availableIds);
+    if (!hasInitializedDocumentSelectionRef.current && !selectedDocumentIds.length) {
+      hasInitializedDocumentSelectionRef.current = true;
+      setSelectedDocumentIds(recommendedActionPlanDocumentIds);
       return;
     }
 
-    if (validSelected.length !== selectedDocumentIds.length) {
+    hasInitializedDocumentSelectionRef.current = true;
+
+    if (validSelected.length !== selectedDocumentIds.length || validSelected.some((documentId, index) => documentId !== selectedDocumentIds[index])) {
       setSelectedDocumentIds(validSelected);
-      return;
     }
-
-    if (previouslySelectedAllDocuments && newDocumentWasAdded) {
-      setSelectedDocumentIds(availableIds);
-    }
-  }, [availableDocuments, selectedDocumentIds]);
+  }, [availableDocuments, recommendedActionPlanDocumentIds, selectedDocumentIds]);
 
   const selectedDocuments = useMemo(
     () => availableDocuments.filter((document) => selectedDocumentIds.includes(document.document_id)),
@@ -218,13 +248,39 @@ export default function ActionPlanPage() {
       }),
   });
 
+  useEffect(() => {
+    const run = historyDetailQuery.data?.run;
+    const hydratedWorkflowResponse = buildWorkflowResponseFromRunHistory(historyDetailQuery.data);
+    if (!historyRunId || !run || !hydratedWorkflowResponse?.result || hydratedWorkflowResponse.result.workflow_id !== 'action_plan_evidence_review') return;
+
+    const requestPayload = run.request_payload && typeof run.request_payload === 'object' ? run.request_payload : null;
+    const requestDocumentIds = Array.isArray(requestPayload?.document_ids)
+      ? requestPayload.document_ids.map((item) => String(item || '').trim()).filter(Boolean)
+      : [];
+    const groundingDocumentIds = hydratedWorkflowResponse.result.grounding_preview?.document_ids ?? [];
+    const historyDocumentIds = [
+      ...(run.document_ids?.length ? run.document_ids : requestDocumentIds),
+      ...groundingDocumentIds,
+    ]
+      .map((item) => String(item || '').trim())
+      .filter(Boolean);
+    const uniqueDocumentIds = Array.from(new Set(historyDocumentIds)).slice(0, ACTION_PLAN_DOCUMENT_LIMIT);
+
+    hasInitializedDocumentSelectionRef.current = true;
+    setSelectedDocumentIds(uniqueDocumentIds);
+    setWorkflowResponse(hydratedWorkflowResponse);
+    setGeneratedArtifacts(run.artifact_items?.length ? run.artifact_items : hydratedWorkflowResponse.result.artifacts ?? []);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
+    setActiveTab('board');
+  }, [historyDetailQuery.data, historyRunId]);
+
   const runActionPlanMutation = useMutation({
     mutationFn: () =>
       runProductWorkflow({
         workflow_id: 'action_plan_evidence_review',
         document_ids: selectedDocumentIds,
         context_strategy: 'document_scan',
-        context_window_mode: 'auto',
         use_document_context: true,
       }),
     onSuccess: async (payload) => {
@@ -280,6 +336,24 @@ export default function ActionPlanPage() {
     () => parseGroundingPreviewBlocks(groundingPreview?.preview_text),
     [groundingPreview?.preview_text],
   );
+  const groundingPreviewStatus = previewQuery.isLoading
+    ? 'running'
+    : groundingPreview?.warnings?.length
+      ? 'warning'
+      : groundingPreview
+        ? 'ready'
+        : 'pending';
+  const groundingPreviewSummary = groundingPreview
+    ? `${groundingPreview.document_ids.length} docs · ${groundingPreview.source_block_count} blocks · ${groundingPreview.context_chars.toLocaleString()} chars`
+    : selectedDocumentIds.length
+      ? 'Preview available for the selected documents'
+      : 'Select documents to prepare a preview';
+  const maximumSelectionReached = selectedDocumentIds.length >= ACTION_PLAN_DOCUMENT_LIMIT;
+  const preferredSelectionIds = recommendedActionPlanDocumentIds.length
+    ? recommendedActionPlanDocumentIds
+    : availableDocuments.slice(0, ACTION_PLAN_DOCUMENT_LIMIT).map((document) => document.document_id);
+  const preferredDocumentsSelected = preferredSelectionIds.length > 0 && preferredSelectionIds.every((documentId) => selectedDocumentIds.includes(documentId));
+  const hasSelectedDocuments = selectedDocumentIds.length > 0;
   const runMetadata = actionPlanView?.run_metadata ?? null;
   const warnings = runMetadata?.warnings ?? workflowResponse?.result.warnings ?? [];
   const highlights = runMetadata?.highlights ?? workflowResponse?.result.highlights ?? [];
@@ -312,18 +386,39 @@ export default function ActionPlanPage() {
     });
   }, [actionPlanView, allArtifacts.length, generateDeckMutation.isPending, groundingPreview, runActionPlanMutation.isPending, runMetadata, selectedDocumentIds.length, workflowResponse]);
 
-  const handleToggleDocument = (documentId: string) => {
-    setSelectedDocumentIds((current) => {
-      if (current.includes(documentId)) {
-        if (current.length === 1) return current;
-        return current.filter((value) => value !== documentId);
-      }
-      return [...current, documentId];
-    });
+  const resetRunOutputs = () => {
     setWorkflowResponse(null);
     setGeneratedArtifacts([]);
     setTrelloPublishResult(null);
+    setNotionPublishResult(null);
     setActiveTab(defaultTab);
+  };
+
+  const handleToggleDocument = (documentId: string) => {
+    hasInitializedDocumentSelectionRef.current = true;
+    setSelectedDocumentIds((current) => {
+      if (current.includes(documentId)) {
+        return current.filter((value) => value !== documentId);
+      }
+      if (current.length >= ACTION_PLAN_DOCUMENT_LIMIT) {
+        toast.warning(`Action Plan uses up to ${ACTION_PLAN_DOCUMENT_LIMIT} documents at once. Deselect one before adding another.`);
+        return current;
+      }
+      return [...current, documentId];
+    });
+    resetRunOutputs();
+  };
+
+  const handleSelectAllDocuments = () => {
+    hasInitializedDocumentSelectionRef.current = true;
+    setSelectedDocumentIds(preferredSelectionIds);
+    resetRunOutputs();
+  };
+
+  const handleClearSelectedDocuments = () => {
+    hasInitializedDocumentSelectionRef.current = true;
+    setSelectedDocumentIds([]);
+    resetRunOutputs();
   };
 
   const handleOpenArtifact = (artifact: ProductWorkflowArtifact) => {
@@ -336,7 +431,16 @@ export default function ActionPlanPage() {
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1440px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Action Plan & Evidence Review" description="Turn grounded findings into action items with owners, timelines and evidence tracking.">
+      <div data-tour="action-plan-header">
+        <PageHeader title="Action Plan & Evidence Review" description="Turn grounded findings into action items with owners, timelines and evidence tracking.">
+        <Button
+          className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"
+          disabled={!selectedDocumentIds.length || runActionPlanMutation.isPending || documentsLoading}
+          onClick={() => runActionPlanMutation.mutate()}
+        >
+          {runActionPlanMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />}
+          Run Action Plan
+        </Button>
         <Button
           variant="outline"
           className="h-9 px-4 text-xs"
@@ -346,21 +450,16 @@ export default function ActionPlanPage() {
           {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />}
           Generate Deck
         </Button>
-        <Button
-          className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"
-          disabled={!selectedDocumentIds.length || runActionPlanMutation.isPending || documentsLoading}
-          onClick={() => runActionPlanMutation.mutate()}
-        >
-          {runActionPlanMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />}
-          Run Action Plan
-        </Button>
-      </PageHeader>
+        </PageHeader>
+      </div>
 
-      <WorkflowProgressHeader
-        steps={stepStatuses}
-        title="Workflow progress"
-        description="Track how the live run moves from document selection to export-ready action items."
-      />
+      <div data-tour="action-plan-progress">
+        <WorkflowProgressHeader
+          steps={stepStatuses}
+          title="Workflow progress"
+          description="Track how the live run moves from document selection to export-ready action items."
+        />
+      </div>
 
       {documentsError && (
         <GlassCard className="mb-6 border border-glow-error/20">
@@ -400,145 +499,252 @@ export default function ActionPlanPage() {
       )}
 
       {!!availableDocuments.length && (
-        <GlassCard className="mb-6" delay={0.04}>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-            <div className="min-w-0">
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div>
-                  <h2 className="text-sm font-medium text-foreground">Grounded document selection</h2>
-                  <p className="text-xs text-muted-foreground mt-1">{selectedDocumentSummary(selectedDocuments)}</p>
+        <>
+          <GlassCard className="mb-5" delay={0.04} data-tour="action-plan-selection">
+            <div className="space-y-3">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-sm font-medium text-foreground">Grounded document selection</h2>
+                    <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] text-primary">
+                      Grounding preview below
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{selectedDocumentSummary(selectedDocuments)}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-border/50 bg-background/60 px-2.5 py-1 text-[10px] text-muted-foreground">
+                      {selectedDocumentIds.length} selected
+                    </span>
+                    <span className="rounded-full border border-border/50 bg-background/60 px-2.5 py-1 text-[10px] text-muted-foreground">
+                      max {ACTION_PLAN_DOCUMENT_LIMIT} docs
+                    </span>
+                    <span className="rounded-full border border-border/50 bg-background/60 px-2.5 py-1 text-[10px] text-muted-foreground">
+                      {availableDocuments.length} available
+                    </span>
+                    <span className="rounded-full border border-border/50 bg-background/60 px-2.5 py-1 text-[10px] text-muted-foreground">
+                      {(documentLibrary?.summary.total_chunks || 0).toLocaleString()} total chunks
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right text-[10px] text-muted-foreground">
-                  <div>{availableDocuments.length} available</div>
-                  <div>{documentLibrary?.summary.total_chunks || 0} total chunks</div>
+
+                <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-8 border-border/60 bg-background/45 px-3 text-[11px] text-muted-foreground hover:bg-background/70 hover:text-foreground"
+                    onClick={preferredDocumentsSelected ? handleClearSelectedDocuments : handleSelectAllDocuments}
+                    disabled={!availableDocuments.length}
+                  >
+                    {preferredDocumentsSelected ? 'Deselect all' : recommendedActionPlanDocumentIds.length ? 'Use recommended 4' : 'Select first 4'}
+                  </Button>
+                  <span className="rounded-full border border-border/50 bg-background/60 px-2.5 py-1 text-[10px] text-muted-foreground">
+                    {hasSelectedDocuments ? 'Review selection first' : 'No documents selected'}
+                  </span>
                 </div>
               </div>
 
-              <ScrollArea className="h-[340px] pr-3">
-                <div className="space-y-2">
-                  {availableDocuments.map((document) => {
-                    const selected = selectedDocumentIds.includes(document.document_id);
-                    return (
-                      <button
-                        key={document.document_id}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => handleToggleDocument(document.document_id)}
-                        className={cn(
-                          'w-full rounded-xl border px-3 py-3 text-left transition-all duration-200',
-                          selected
-                            ? 'border-primary/50 bg-primary/10 shadow-[0_0_0_1px_rgba(80,120,255,0.15)]'
-                            : 'border-border/60 bg-secondary/20 hover:border-primary/20 hover:bg-secondary/30',
-                        )}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={cn(
-                                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full border px-1.5 text-[10px] font-semibold',
-                                  selected ? 'border-primary/40 bg-primary/15 text-primary' : 'border-border bg-background/70 text-muted-foreground',
-                                )}
-                              >
-                                {selected ? '✓' : '○'}
-                              </span>
-                              <p className="text-xs font-medium text-foreground line-clamp-2">{document.name}</p>
+              <div className="rounded-2xl border border-border/40 bg-background/20 p-2">
+                <ScrollArea className="h-[170px] pr-2">
+                  <div className="space-y-1">
+                    {availableDocuments.map((document) => {
+                      const selected = selectedDocumentIds.includes(document.document_id);
+                      return (
+                        <button
+                          key={document.document_id}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => handleToggleDocument(document.document_id)}
+                          disabled={!selected && maximumSelectionReached}
+                          title={!selected && maximumSelectionReached ? `Limit of ${ACTION_PLAN_DOCUMENT_LIMIT} selected documents reached` : undefined}
+                          className={cn(
+                            'w-full rounded-xl border px-3 py-1.5 text-left transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50',
+                            selected
+                              ? 'border-primary/50 bg-primary/10 shadow-[0_0_0_1px_rgba(80,120,255,0.15)]'
+                              : 'border-border/60 bg-secondary/20 hover:border-primary/20 hover:bg-secondary/30',
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={cn(
+                                    'inline-flex h-5 min-w-5 items-center justify-center rounded-full border px-1.5 text-[10px] font-semibold',
+                                    selected ? 'border-primary/40 bg-primary/15 text-primary' : 'border-border bg-background/70 text-muted-foreground',
+                                  )}
+                                >
+                                  {selected ? '✓' : '○'}
+                                </span>
+                                <p className="line-clamp-1 text-xs font-medium text-foreground">{document.name}</p>
+                              </div>
+                              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+                                <span>{document.chunk_count} chunks</span>
+                                <span>{document.char_count.toLocaleString()} chars</span>
+                                <span>{document.loader_strategy_label || 'Grounded ingest'}</span>
+                                {document.size_label ? <span>{document.size_label}</span> : null}
+                              </div>
+                              {document.warnings?.length ? (
+                                <p className="mt-2 text-[10px] leading-relaxed text-glow-warning">{document.warnings[0]}</p>
+                              ) : null}
                             </div>
-                            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
-                              <span>{document.chunk_count} chunks</span>
-                              <span>{document.char_count.toLocaleString()} chars</span>
-                              <span>{document.loader_strategy_label || 'Grounded ingest'}</span>
-                              {document.size_label ? <span>{document.size_label}</span> : null}
-                            </div>
-                            {document.warnings?.length ? (
-                              <p className="mt-2 text-[10px] text-glow-warning leading-relaxed">{document.warnings[0]}</p>
-                            ) : null}
+                            <StatusPill status={document.status} />
                           </div>
-                          <StatusPill status={document.status} />
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            </div>
-
-            <div className="min-w-0 rounded-xl border border-border/50 bg-secondary/20 px-4 py-4">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-primary" />
-                  <h3 className="text-xs font-medium text-foreground">Grounding preview</h3>
-                </div>
-                <StatusPill
-                  status={
-                    previewQuery.isLoading
-                      ? 'running'
-                      : groundingPreview?.warnings?.length
-                        ? 'warning'
-                        : groundingPreview
-                          ? 'ready'
-                          : 'pending'
-                  }
-                />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
               </div>
-              {previewQuery.isLoading ? (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Building preview from selected evidence...
-                </div>
-              ) : groundingPreview ? (
-                <div className="space-y-3">
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    Quick signal check before execution: confirm the workflow is using the intended documents, enough source blocks and the expected evidence themes.
-                  </p>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    <div className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
-                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
-                      <div className="text-sm font-medium text-foreground">{groundingPreview.document_ids.length}</div>
-                    </div>
-                    <div className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
-                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
-                      <div className="text-sm font-medium text-foreground">{groundingPreview.source_block_count}</div>
-                    </div>
-                    <div className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
-                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
-                      <div className="text-sm font-medium text-foreground">{groundingPreview.context_chars.toLocaleString()} chars</div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-                      <FileText className="w-3.5 h-3.5" />
-                      Context highlights
-                    </div>
-                    <div className="space-y-2">
-                      {groundingPreviewBlocks.slice(0, 2).map((block) => (
-                        <div key={`${block.source}-${block.excerpt.slice(0, 24)}`} className="rounded-lg border border-border/40 bg-background/60 px-3 py-2">
-                          <div className="text-[10px] font-medium uppercase tracking-wide text-primary">{block.source}</div>
-                          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{truncatePreviewText(block.excerpt)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  {groundingPreview.warnings?.length ? (
-                    <div className="rounded-lg border border-glow-warning/30 bg-glow-warning/10 px-3 py-2">
-                      <div className="text-[10px] uppercase tracking-wide text-glow-warning font-medium">Context caveats</div>
-                      <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
-                        {groundingPreview.warnings.map((warning) => (
-                          <li key={warning}>• {warning}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">Select at least one indexed document to preview the grounded context.</p>
-              )}
             </div>
-          </div>
-        </GlassCard>
+          </GlassCard>
+
+          <GlassCard className="mb-6" delay={0.06} data-tour="action-plan-grounding">
+            <Collapsible open={isGroundingPreviewOpen} onOpenChange={setIsGroundingPreviewOpen}>
+              <div className="space-y-3">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="group w-full rounded-2xl border border-border/50 bg-background/35 px-4 py-3.5 text-left transition-all duration-200 hover:border-primary/20 hover:bg-background/50 hover:shadow-[0_8px_24px_rgba(6,14,40,0.12)]"
+                    aria-label={isGroundingPreviewOpen ? 'Hide grounding preview' : 'Show grounding preview'}
+                  >
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary">
+                          <Info className="h-4 w-4" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm font-medium text-foreground">Grounding preview</span>
+                            <span
+                              className={cn(
+                                'inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium',
+                                groundingPreviewStatus === 'warning'
+                                  ? 'border-glow-warning/30 bg-glow-warning/10 text-glow-warning'
+                                  : groundingPreviewStatus === 'ready'
+                                    ? 'border-primary/25 bg-primary/10 text-primary'
+                                    : 'border-border/50 bg-background/60 text-muted-foreground',
+                              )}
+                            >
+                              {groundingPreviewStatus === 'running'
+                                ? 'Updating'
+                                : groundingPreviewStatus === 'warning'
+                                  ? 'Needs attention'
+                                  : groundingPreviewStatus === 'ready'
+                                    ? 'Ready'
+                                    : 'Idle'}
+                            </span>
+                          </span>
+                          <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                            {isGroundingPreviewOpen
+                              ? 'Hide the detailed grounded signals once you are done reviewing the current selection.'
+                              : groundingPreviewSummary}
+                          </span>
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 lg:justify-end">
+                        <span className="flex flex-wrap gap-2">
+                          <span className="rounded-full border border-border/40 bg-background/55 px-2.5 py-1 text-[10px] text-muted-foreground">
+                            {previewQuery.isLoading ? 'Refreshing preview' : groundingPreview ? 'Preview ready' : 'Preview on demand'}
+                          </span>
+                          {groundingPreview?.warnings?.length ? (
+                            <span className="rounded-full border border-glow-warning/30 bg-glow-warning/10 px-2.5 py-1 text-[10px] text-glow-warning">
+                              {groundingPreview.warnings.length} caveat{groundingPreview.warnings.length > 1 ? 's' : ''}
+                            </span>
+                          ) : null}
+                        </span>
+                        <ChevronRight
+                          className={cn(
+                            'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+                            isGroundingPreviewOpen && 'rotate-90 text-primary',
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </button>
+                </CollapsibleTrigger>
+
+                <CollapsibleContent className="space-y-3">
+                  <div className="rounded-2xl border border-border/50 bg-background/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+                    {previewQuery.isLoading ? (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        Building preview from selected evidence...
+                      </div>
+                    ) : groundingPreview ? (
+                      <div className="space-y-3">
+                        <div className="grid gap-3 xl:grid-cols-12">
+                          <div className="rounded-xl border border-border/40 bg-background/60 p-4 xl:col-span-3">
+                            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Quick signal check</div>
+                            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                              Confirm the workflow is using the intended documents, enough source blocks and the expected evidence themes before execution.
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-border/40 bg-background/60 p-4 xl:col-span-2">
+                            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
+                            <div className="mt-2 text-lg font-semibold text-foreground">{groundingPreview.document_ids.length}</div>
+                          </div>
+                          <div className="rounded-xl border border-border/40 bg-background/60 p-4 xl:col-span-2">
+                            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
+                            <div className="mt-2 text-lg font-semibold text-foreground">{groundingPreview.source_block_count}</div>
+                          </div>
+                          <div className="rounded-xl border border-border/40 bg-background/60 p-4 xl:col-span-2">
+                            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
+                            <div className="mt-2 text-lg font-semibold text-foreground">{groundingPreview.context_chars.toLocaleString()}</div>
+                            <div className="mt-1 text-[10px] text-muted-foreground">characters</div>
+                          </div>
+                          <div
+                            className={cn(
+                              'rounded-xl border p-4 xl:col-span-3',
+                              groundingPreview.warnings?.length
+                                ? 'border-glow-warning/30 bg-glow-warning/10'
+                                : 'border-border/40 bg-background/60',
+                            )}
+                          >
+                            <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground">
+                              <AlertTriangle className={cn('h-3.5 w-3.5', groundingPreview.warnings?.length ? 'text-glow-warning' : 'text-primary')} />
+                              {groundingPreview.warnings?.length ? 'Context caveats' : 'Preview status'}
+                            </div>
+                            {groundingPreview.warnings?.length ? (
+                              <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-muted-foreground">
+                                {groundingPreview.warnings.slice(0, 2).map((warning) => (
+                                  <li key={warning}>• {warning}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                                No immediate caveats detected for the current grounded selection.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {groundingPreviewBlocks.slice(0, 2).length ? (
+                          <div className="grid gap-3 xl:grid-cols-2">
+                            {groundingPreviewBlocks.slice(0, 2).map((block) => (
+                              <div key={`${block.source}-${block.excerpt.slice(0, 24)}`} className="rounded-xl border border-border/40 bg-background/60 p-4">
+                                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground">
+                                  <FileText className="h-3.5 w-3.5 text-primary" />
+                                  Context highlight
+                                </div>
+                                <div className="mt-2 text-[10px] font-medium uppercase tracking-wide text-primary">{block.source}</div>
+                                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{truncatePreviewText(block.excerpt, 280)}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Select at least one indexed document to preview the grounded context.</p>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          </GlassCard>
+        </>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <motion.div data-tour="action-plan-status-strip" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
           { label: 'Open', value: summary.open, color: 'text-primary' },
           { label: 'In Progress', value: summary.in_progress, color: 'text-glow-warning' },
@@ -553,7 +759,7 @@ export default function ActionPlanPage() {
       </motion.div>
 
       {!!criticalPath.length && (
-        <GlassCard className="mb-6" delay={0.12}>
+        <GlassCard className="mb-6" delay={0.12} data-tour="action-plan-critical-path">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-glow-warning" />
             <h3 className="text-sm font-medium text-foreground">Critical Path - Top Unblockers</h3>
@@ -578,14 +784,16 @@ export default function ActionPlanPage() {
       )}
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ActionPlanTab)}>
-        <TabsList className="bg-secondary/30 border border-border/50 mb-4">
-          <TabsTrigger value="board" className="text-xs data-[state=active]:bg-secondary">Board</TabsTrigger>
-          <TabsTrigger value="table" className="text-xs data-[state=active]:bg-secondary">Table</TabsTrigger>
-          <TabsTrigger value="timeline" className="text-xs data-[state=active]:bg-secondary">Timeline</TabsTrigger>
-          <TabsTrigger value="evidence" className="text-xs data-[state=active]:bg-secondary">Evidence Gaps</TabsTrigger>
-        </TabsList>
+        <div className="inline-flex w-fit">
+          <TabsList className="mb-4 border border-border/50 bg-secondary/30" data-tour="action-plan-work-views">
+            <TabsTrigger value="board" className="text-xs data-[state=active]:bg-secondary">Board</TabsTrigger>
+            <TabsTrigger value="table" className="text-xs data-[state=active]:bg-secondary">Table</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-xs data-[state=active]:bg-secondary">Timeline</TabsTrigger>
+            <TabsTrigger value="evidence" className="text-xs data-[state=active]:bg-secondary">Evidence Gaps</TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="board" className="mt-0">
+        <TabsContent value="board" className="mt-0" data-tour="action-plan-board">
           {!actionPlanView ? (
             <GlassCard>
               <div className="flex items-start gap-3">
@@ -760,7 +968,7 @@ export default function ActionPlanPage() {
       </Tabs>
 
 
-      <div className="grid xl:grid-cols-[1.2fr_0.8fr] gap-4 mt-6">
+      <div className="grid xl:grid-cols-[1.2fr_0.8fr] gap-4 mt-6" data-tour="action-plan-run-summary">
         <GlassCard>
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="w-4 h-4 text-primary" />
@@ -897,7 +1105,7 @@ export default function ActionPlanPage() {
         </GlassCard>
       </div>
 
-      <div className="mt-6" data-testid="workflow-publish-actions-surface" data-workflow="action-plan">
+      <div className="mt-6" data-tour="action-plan-publish" data-testid="workflow-publish-actions-surface" data-workflow="action-plan">
         <WorkflowPublishActions
           workflowId="action_plan_evidence_review"
           result={workflowResponse?.result ?? null}
