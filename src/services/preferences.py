@@ -9,12 +9,11 @@ from typing import TYPE_CHECKING, Any
 
 from src.config import BASE_DIR
 from src.services.preferences_benchmark import (
-    PRODUCT_WORKFLOW_PREFERENCE_IDS,
     WORKFLOW_TO_USE_CASE,
     build_benchmark_recommendations,
 )
 from src.providers.registry import build_provider_registry
-from src.storage.secret_store import delete_secret, set_secret
+from src.storage.secret_store import delete_secret, get_secret, set_secret
 from src.services.runtime_controls import (
     DOC_PRESETS,
     EXECUTION_POLICIES,
@@ -37,10 +36,11 @@ from src.services.runtime_controls import (
     _derive_execution_policy,
     _derive_fallback_chain,
     _derive_quality_posture,
-    _context_window_from_label,
+    _canonical_ollama_hosted_model,
+    _default_ollama_embedding_model,
+    _looks_like_non_ollama_embedding_model,
     _normalize_context_window_label,
     _normalize_prompt_profile,
-    _workflow_fit,
     build_effective_rag_settings,
     get_prompt_profiles,
 )
@@ -60,12 +60,6 @@ DEFAULT_CONNECTION_POLICY_RULES = [
         "id": "allow-hosted-overflow",
         "label": "Allow hosted burst overflow",
         "description": "Allow the active workflow profile to burst from local to hosted capacity when needed.",
-        "enabled": True,
-    },
-    {
-        "id": "cloud-benchmarks-only",
-        "label": "Restrict cloud to benchmarks/evals",
-        "description": "Keep remote cloud providers as reference/benchmark paths unless a workflow explicitly needs them.",
         "enabled": True,
     },
     {
@@ -284,12 +278,24 @@ def _normalize_runtime_profile(
 
     requested_id = str(patch.get("id") or base.get("id") or patch.get("name") or "profile").strip()
     profile_id = _ensure_unique_profile_id(_slugify(requested_id), seen_ids)
+    canonical_profile_id = profile_id.lower()
+    is_current_profile = canonical_profile_id == "current-product-runtime"
+    is_deep_review_profile = canonical_profile_id == "deep-review"
+    is_local_profile = canonical_profile_id == "local-only"
 
     primary_connection_id = str(patch.get("primaryConnectionId") or base.get("primaryConnectionId") or "").strip()
+    if is_current_profile or is_deep_review_profile:
+        primary_connection_id = "ollama_hosted" if "ollama_hosted" in connections_by_id else primary_connection_id
+    elif is_local_profile:
+        primary_connection_id = "ollama" if "ollama" in connections_by_id else primary_connection_id
     if primary_connection_id not in connections_by_id:
         primary_connection_id = str(base.get("primaryConnectionId") or next(iter(connections_by_id.keys()), ""))
 
     embedding_connection_id = str(patch.get("embeddingConnectionId") or base.get("embeddingConnectionId") or primary_connection_id).strip()
+    if is_current_profile or is_local_profile:
+        embedding_connection_id = "ollama" if "ollama" in connections_by_id else primary_connection_id
+    elif is_deep_review_profile:
+        embedding_connection_id = "huggingface_inference" if "huggingface_inference" in connections_by_id else primary_connection_id
     if embedding_connection_id not in connections_by_id:
         embedding_connection_id = str(base.get("embeddingConnectionId") or primary_connection_id)
 
@@ -341,20 +347,82 @@ def _normalize_runtime_profile(
     requested_primary_model = str(patch.get("primaryModel") or base.get("primaryModel") or "").strip()
     requested_embedding_model = str(patch.get("embeddingModel") or base.get("embeddingModel") or "").strip()
     primary_model = requested_primary_model if requested_primary_model else (primary_model_options[0] if primary_model_options else "")
-    if primary_model_options and primary_model not in primary_model_options:
+    # Preserve explicitly saved model ids even when the live model catalog is stale or
+    # the hosted endpoint is temporarily unreachable. This keeps saved runtime profiles
+    # stable and lets Ollama-compatible cloud tags resolve at execution time.
+    if not primary_model and primary_model_options:
         primary_model = primary_model_options[0]
+    if is_current_profile:
+        primary_model = _canonical_ollama_hosted_model(primary_model or "nemotron-3-super:cloud")
+    elif is_deep_review_profile:
+        primary_model = _canonical_ollama_hosted_model(primary_model or "nemotron-3-nano:30b-cloud")
     embedding_model = requested_embedding_model if requested_embedding_model else (embedding_model_options[0] if embedding_model_options else "")
-    if embedding_model_options and embedding_model not in embedding_model_options:
+    if not embedding_model and embedding_model_options:
         embedding_model = embedding_model_options[0]
+    if is_current_profile or is_local_profile:
+        if not embedding_model or _looks_like_non_ollama_embedding_model(embedding_model):
+            embedding_model = (embedding_model_options[0] if embedding_model_options else _default_ollama_embedding_model())
+    elif is_deep_review_profile:
+        embedding_model = "BAAI/bge-small-en-v1.5"
 
-    fallback_chain = _derive_fallback_chain(connections, primary_connection_id, models_by_connection)
+    derived_fallback_chain = _derive_fallback_chain(connections, primary_connection_id, models_by_connection, embedding_models_by_connection)
+    requested_fallback_chain = patch.get("fallbackChain") if isinstance(patch.get("fallbackChain"), list) else (base.get("fallbackChain") if isinstance(base.get("fallbackChain"), list) else [])
+    fallback_chain: list[dict[str, Any]] = []
+    seen_fallback_steps: set[str] = set()
+    for raw_step in requested_fallback_chain:
+        if not isinstance(raw_step, dict):
+            continue
+        connection_id = str(raw_step.get("connectionId") or "").strip()
+        if not connection_id:
+            continue
+        connection = connections_by_id.get(connection_id, {})
+        capabilities = connection.get("capabilities") if isinstance(connection.get("capabilities"), dict) else {}
+        if not bool(capabilities.get("generation")) and not bool(capabilities.get("embeddings")):
+            continue
+        model_choices = models_by_connection.get(connection_id) or []
+        embedding_choices = embedding_models_by_connection.get(connection_id) or []
+        model_name = str(raw_step.get("model") or "").strip()
+        if not model_name:
+            if model_choices:
+                model_name = model_choices[0]
+            elif embedding_choices:
+                model_name = embedding_choices[0]
+            else:
+                model_name = str(connection.get("preferredModel") or "").strip()
+        if not model_name:
+            continue
+        step_key = f"{connection_id}::{model_name}"
+        if step_key in seen_fallback_steps:
+            continue
+        fallback_chain.append(
+            {
+                "connectionId": connection_id,
+                "model": model_name,
+                "label": str(raw_step.get("label") or f"Fallback to {connection.get('name')}").strip() or f"Fallback to {connection.get('name')}",
+            }
+        )
+        seen_fallback_steps.add(step_key)
+        if len(fallback_chain) >= 3:
+            break
+
     quality_posture = str(patch.get("qualityPosture") or base.get("qualityPosture") or "").strip()
     if quality_posture not in QUALITY_POSTURE_VALUES:
         quality_posture = _derive_quality_posture(int(retrieval["topK"]), int(generation["maxOutputTokens"]))
 
     execution_policy = str(patch.get("executionPolicy") or base.get("executionPolicy") or "").strip()
     if execution_policy not in EXECUTION_POLICY_VALUES:
-        execution_policy = _derive_execution_policy(connections_by_id.get(primary_connection_id, {}), fallback_chain)
+        execution_policy = _derive_execution_policy(connections_by_id.get(primary_connection_id, {}), fallback_chain or derived_fallback_chain)
+
+    fallback_enabled = bool(patch.get("fallbackEnabled", base.get("fallbackEnabled", bool(fallback_chain or derived_fallback_chain))))
+    if execution_policy == "local_only":
+        fallback_enabled = False
+    if is_current_profile or is_deep_review_profile or is_local_profile:
+        fallback_enabled = False
+        fallback_chain = []
+    elif not fallback_enabled:
+        fallback_chain = []
+    elif not fallback_chain:
+        fallback_chain = derived_fallback_chain
 
     doc_processing_preset = str(patch.get("docProcessingPreset") or base.get("docProcessingPreset") or "").strip()
     if doc_processing_preset not in DOC_PRESET_VALUES:
@@ -363,6 +431,42 @@ def _normalize_runtime_profile(
     retrieval_strategy = str(patch.get("retrievalStrategy") or base.get("retrievalStrategy") or "hybrid").strip().lower()
     if retrieval_strategy not in RETRIEVAL_STRATEGY_VALUES:
         retrieval_strategy = "hybrid"
+
+    # The three built-in profiles deliberately share the same request wiring as
+    # Current Product Runtime. Old saved copies of Deep Review/Local Only may
+    # contain stale provider, fallback, or embedding fields from previous builds;
+    # reset those canonical fields here so selecting a profile always means the
+    # backend calls exactly the provider/model displayed in Preferences.
+    if is_current_profile:
+        primary_connection_id = "ollama_hosted" if "ollama_hosted" in connections_by_id else primary_connection_id
+        primary_model = _canonical_ollama_hosted_model("nemotron-3-super:cloud")
+        embedding_connection_id = "ollama" if "ollama" in connections_by_id else primary_connection_id
+        embedding_model = _default_ollama_embedding_model() if embedding_connection_id == "ollama" else embedding_model
+        execution_policy = "hosted_generation_local_embeddings"
+        quality_posture = "low_latency"
+        doc_processing_preset = "standard"
+        fallback_enabled = False
+        fallback_chain = []
+    elif is_deep_review_profile:
+        primary_connection_id = "ollama_hosted" if "ollama_hosted" in connections_by_id else primary_connection_id
+        primary_model = _canonical_ollama_hosted_model("nemotron-3-nano:30b-cloud")
+        embedding_connection_id = "huggingface_inference" if "huggingface_inference" in connections_by_id else primary_connection_id
+        embedding_model = "BAAI/bge-small-en-v1.5"
+        execution_policy = "hosted_only"
+        quality_posture = "low_latency"
+        doc_processing_preset = "standard"
+        fallback_enabled = False
+        fallback_chain = []
+    elif is_local_profile:
+        primary_connection_id = "ollama" if "ollama" in connections_by_id else primary_connection_id
+        primary_model = "qwen2.5:7b"
+        embedding_connection_id = "ollama" if "ollama" in connections_by_id else primary_connection_id
+        embedding_model = _default_ollama_embedding_model() if embedding_connection_id == "ollama" else embedding_model
+        execution_policy = "local_only"
+        quality_posture = "privacy_first"
+        doc_processing_preset = "standard"
+        fallback_enabled = False
+        fallback_chain = []
 
     intended_workflows = patch.get("intendedWorkflows") if isinstance(patch.get("intendedWorkflows"), list) else base.get("intendedWorkflows")
     normalized_workflows = [str(item).strip() for item in (intended_workflows or WORKFLOW_IDS) if str(item).strip() in WORKFLOW_IDS]
@@ -374,6 +478,7 @@ def _normalize_runtime_profile(
         "name": str(patch.get("name") or base.get("name") or f"Profile {profile_id}").strip() or f"Profile {profile_id}",
         "primaryConnectionId": primary_connection_id,
         "primaryModel": primary_model,
+        "fallbackEnabled": fallback_enabled,
         "fallbackChain": fallback_chain,
         "executionPolicy": execution_policy,
         "retrievalStrategy": retrieval_strategy,
@@ -403,120 +508,100 @@ def _seed_runtime_profiles(
     models_by_connection: dict[str, list[str]],
     embedding_models_by_connection: dict[str, list[str]],
 ) -> tuple[list[dict[str, Any]], str]:
-    recommendations = build_benchmark_recommendations()
-    workflow_winners = recommendations.get("workflow_winners") if isinstance(recommendations.get("workflow_winners"), dict) else {}
-    embedding_winner = recommendations.get("embedding_winner") if isinstance(recommendations.get("embedding_winner"), dict) else {}
     connections_by_id = {str(connection.get("id") or ""): connection for connection in connections}
 
-    def _winner_provider(use_case_id: str, fallback: str) -> str:
-        winner = workflow_winners.get(use_case_id) if isinstance(workflow_winners.get(use_case_id), dict) else {}
-        provider = str(winner.get("provider") or fallback).strip()
-        return provider if provider in connections_by_id else fallback
-
-    def _winner_model(use_case_id: str, connection_id: str, fallback: str) -> str:
-        winner = workflow_winners.get(use_case_id) if isinstance(workflow_winners.get(use_case_id), dict) else {}
-        requested = str(winner.get("model") or "").strip()
-        model_choices = models_by_connection.get(connection_id) or []
-        if requested and (not model_choices or requested in model_choices):
-            return requested
-        if model_choices:
-            return model_choices[0]
-        return fallback
-
-    primary_connection_id = str(base_profile.get("primaryConnectionId") or "")
-    primary_model = str(base_profile.get("primaryModel") or "")
-    embedding_connection_id = str(embedding_winner.get("provider") or base_profile.get("embeddingConnectionId") or primary_connection_id)
-    if embedding_connection_id not in connections_by_id:
-        embedding_connection_id = str(base_profile.get("embeddingConnectionId") or primary_connection_id)
+    hosted_connection_id = "ollama_hosted" if "ollama_hosted" in connections_by_id else str(base_profile.get("primaryConnectionId") or "ollama")
+    local_connection_id = "ollama" if "ollama" in connections_by_id else str(base_profile.get("primaryConnectionId") or hosted_connection_id)
+    # Canonical hosted profiles should not inherit a Hugging Face embedding provider
+    # from prior runtime state. Keep embeddings on Ollama unless Ollama is absent.
+    embedding_connection_id = local_connection_id if local_connection_id in connections_by_id else hosted_connection_id
     embedding_model_choices = embedding_models_by_connection.get(embedding_connection_id) or []
-    embedding_model = str(embedding_winner.get("model") or base_profile.get("embeddingModel") or "")
-    if embedding_model_choices and embedding_model not in embedding_model_choices:
-        embedding_model = embedding_model_choices[0]
-    if not embedding_model and embedding_model_choices:
-        embedding_model = embedding_model_choices[0]
+    embedding_model = str(base_profile.get("embeddingModel") or "").strip() or (embedding_model_choices[0] if embedding_model_choices else "")
+    if not embedding_model or _looks_like_non_ollama_embedding_model(embedding_model):
+        embedding_model = embedding_model_choices[0] if embedding_model_choices else _default_ollama_embedding_model()
 
-    def _seed_for_use_case(
-        *,
-        profile_id: str,
-        name: str,
-        use_case_id: str,
-        intended_workflows: list[str],
-        quality_posture: str,
-        doc_processing_preset: str,
-        generation_patch: dict[str, Any] | None = None,
-        retrieval_patch: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        provider_id = _winner_provider(use_case_id, primary_connection_id)
-        model_id = _winner_model(use_case_id, provider_id, primary_model)
-        return {
-            **_clone(base_profile),
-            "id": profile_id,
-            "name": name,
-            "primaryConnectionId": provider_id,
-            "primaryModel": model_id,
-            "embeddingConnectionId": embedding_connection_id,
-            "embeddingModel": embedding_model,
-            "qualityPosture": quality_posture,
-            "docProcessingPreset": doc_processing_preset,
-            "generation": {
-                **_clone(base_profile.get("generation") if isinstance(base_profile.get("generation"), dict) else {}),
-                **dict(generation_patch or {}),
-            },
-            "retrieval": {
-                **_clone(base_profile.get("retrieval") if isinstance(base_profile.get("retrieval"), dict) else {}),
-                **dict(retrieval_patch or {}),
-            },
-            "intendedWorkflows": intended_workflows,
-        }
+    base_generation = _clone(base_profile.get("generation") if isinstance(base_profile.get("generation"), dict) else {})
+    base_retrieval = _clone(base_profile.get("retrieval") if isinstance(base_profile.get("retrieval"), dict) else {})
+    base_doc_processing = _clone(base_profile.get("docProcessing") if isinstance(base_profile.get("docProcessing"), dict) else {})
+    base_doc_preset = str(base_profile.get("docProcessingPreset") or _derive_doc_preset(base_doc_processing) or "standard")
 
-    seeds = [
-        {
-            **_seed_for_use_case(
-                profile_id="workspace-default",
-                name="Grounded Review",
-                use_case_id="release_candidate_risk_review",
-                intended_workflows=["document-review", "comparison"],
-                quality_posture="max_quality",
-                doc_processing_preset="ocr_heavy",
-                generation_patch={"maxOutputTokens": 8192, "temperature": 0.2},
-                retrieval_patch={"topK": max(int(((base_profile.get("retrieval") or {}).get("topK") or 0)), 12)},
-            ),
-            "isDefault": True,
-        },
-        _seed_for_use_case(
-            profile_id="action-plan-benchmark",
-            name="Action Plan Summary",
-            use_case_id="ops_update_summary",
-            intended_workflows=["action-plan"],
-            quality_posture="balanced",
-            doc_processing_preset="standard",
-            generation_patch={"maxOutputTokens": 4096, "temperature": 0.2},
-            retrieval_patch={"topK": max(int(((base_profile.get("retrieval") or {}).get("topK") or 0)), 8)},
-        ),
-        _seed_for_use_case(
-            profile_id="candidate-structured",
-            name="Candidate Structured Extraction",
-            use_case_id="cv_structured_extraction",
-            intended_workflows=["candidate-review", "workflow-inspector"],
-            quality_posture="balanced",
-            doc_processing_preset="standard",
-            generation_patch={"promptProfile": "extrator", "structuredOutput": True, "maxOutputTokens": 4096},
-            retrieval_patch={"topK": max(int(((base_profile.get("retrieval") or {}).get("topK") or 0)), 10), "groundingStrictness": "strict"},
-        ),
-        _seed_for_use_case(
-            profile_id="code-experiments",
-            name="Code Review Experiments",
-            use_case_id="code_quality_review",
-            intended_workflows=["chat-experiments"],
-            quality_posture="balanced",
-            doc_processing_preset="fast_text",
-            generation_patch={"maxOutputTokens": 4096, "temperature": 0.15},
-            retrieval_patch={"topK": max(int(((base_profile.get("retrieval") or {}).get("topK") or 0)), 8)},
-        ),
-    ]
+    common_generation = {
+        **base_generation,
+        "temperature": 0.2,
+        "topP": 0.95,
+        "maxOutputTokens": 4352,
+        "contextWindow": "auto",
+        "promptProfile": _normalize_prompt_profile(None),
+        "streaming": True,
+        "structuredOutput": False,
+    }
+    common_retrieval = {
+        **base_retrieval,
+        "groundingStrictness": str(base_retrieval.get("groundingStrictness") or "balanced"),
+    }
+
+    def _fallback_chain_for(profile_connection_id: str, *, enabled: bool) -> list[dict[str, str]]:
+        if not enabled:
+            return []
+        return _derive_fallback_chain(connections, profile_connection_id, models_by_connection, embedding_models_by_connection)
+
+    current_product_seed = {
+        **_clone(base_profile),
+        "id": "current-product-runtime",
+        "name": "Current Product Runtime",
+        "primaryConnectionId": hosted_connection_id,
+        "primaryModel": "nemotron-3-super:cloud",
+        "embeddingConnectionId": embedding_connection_id,
+        "embeddingModel": embedding_model,
+        "fallbackEnabled": False,
+        "fallbackChain": [],
+        "executionPolicy": "hosted_generation_local_embeddings",
+        "retrievalStrategy": "hybrid",
+        "rerankingEnabled": bool((base_retrieval.get("rerankPoolSize") or 0) > 0),
+        "docProcessingPreset": "standard",
+        "qualityPosture": "low_latency",
+        "generation": common_generation,
+        "retrieval": common_retrieval,
+        "docProcessing": base_doc_processing,
+        "intendedWorkflows": WORKFLOW_IDS[:],
+        "summary": "Hosted Ollama generation profile using Nemotron 3 Super Cloud with local Ollama embeddings and the standard document processing stack.",
+        "isDefault": True,
+    }
+    # Build Demo Profile and Local Only as direct copies of Current Product Runtime
+    # with only the visible runtime choices changed. This keeps every saved
+    # profile on the same request/credential resolution path.
+    demo_embedding_connection_id = "huggingface_inference" if "huggingface_inference" in connections_by_id else hosted_connection_id
+    deep_review_seed = {
+        **_clone(current_product_seed),
+        "id": "deep-review",
+        "name": "Demo Profile",
+        "primaryConnectionId": hosted_connection_id,
+        "primaryModel": "nemotron-3-nano:30b-cloud",
+        "embeddingConnectionId": demo_embedding_connection_id,
+        "embeddingModel": "BAAI/bge-small-en-v1.5",
+        "executionPolicy": "hosted_only",
+        "qualityPosture": "low_latency",
+        "retrieval": {**common_retrieval, "groundingStrictness": "balanced"},
+        "summary": "Live demo profile using hosted Ollama Nemotron 3 Nano 30B Cloud with Hugging Face BGE-small embeddings for predictable low-latency runs.",
+    }
+    local_seed = {
+        **_clone(current_product_seed),
+        "id": "local-only",
+        "name": "Local Only",
+        "primaryConnectionId": local_connection_id,
+        "primaryModel": "qwen2.5:7b",
+        "embeddingConnectionId": local_connection_id,
+        "embeddingModel": (embedding_models_by_connection.get(local_connection_id) or [embedding_model])[0] if (embedding_models_by_connection.get(local_connection_id) or [embedding_model]) else embedding_model,
+        "executionPolicy": "local_only",
+        "qualityPosture": "privacy_first",
+        "docProcessingPreset": "standard",
+        "retrieval": {**common_retrieval, "groundingStrictness": "balanced"},
+        "summary": "Fully local profile for privacy-first runs. Keeps prompts, retrieval, and document context on the local Ollama runtime.",
+    }
+    seeds = [current_product_seed, deep_review_seed, local_seed]
 
     seen_ids: set[str] = set()
-    active_profile_id = "workspace-default"
+    active_profile_id = "current-product-runtime"
     profiles = [
         _normalize_runtime_profile(
             raw_profile=seed,
@@ -532,55 +617,20 @@ def _seed_runtime_profiles(
     return profiles, active_profile_id
 
 
-def _normalize_workflow_defaults(
-    raw_defaults: list[dict[str, Any]] | None,
-    profiles: list[dict[str, Any]],
-    active_profile_id: str,
-) -> list[dict[str, Any]]:
-    profile_ids = {str(profile.get("id") or "") for profile in profiles}
-    workflow_recommended_profile: dict[str, str] = {}
-    for profile in profiles:
-        if not isinstance(profile, dict):
-            continue
-        profile_id = str(profile.get("id") or "").strip()
-        for workflow_id in profile.get("intendedWorkflows") or []:
-            normalized_workflow_id = str(workflow_id or "").strip()
-            if normalized_workflow_id and normalized_workflow_id not in workflow_recommended_profile:
-                workflow_recommended_profile[normalized_workflow_id] = profile_id
-    structured_profile_id = next(
-        (
-            str(profile.get("id") or "")
-            for profile in profiles
-            if isinstance(profile, dict) and bool(((profile.get("generation") or {}).get("structuredOutput")))
-        ),
-        active_profile_id,
-    )
-    if structured_profile_id in profile_ids:
-        workflow_recommended_profile.setdefault("workflow-inspector", structured_profile_id)
-    defaults_lookup = {
-        str(item.get("workflowId") or ""): item
-        for item in (raw_defaults or [])
-        if isinstance(item, dict) and str(item.get("workflowId") or "")
+def _canonical_profile_id(profile_id: str) -> str:
+    normalized = _slugify(profile_id)
+    aliases = {
+        "workspace-default": "current-product-runtime",
+        "grounded-review": "current-product-runtime",
+        "current-product-runtime": "current-product-runtime",
+        "fast-triage": "local-only",
+        "local": "local-only",
+        "local-only": "local-only",
+        "action-plan-benchmark": "deep-review",
+        "action-plan-summary": "deep-review",
+        "deep-review": "deep-review",
     }
-    normalized: list[dict[str, Any]] = []
-    for workflow in WORKFLOW_CATALOG:
-        workflow_id = str(workflow.get("workflowId") or "")
-        if not workflow_id:
-            continue
-        raw = defaults_lookup.get(workflow_id, {})
-        requested_profile_id = str(raw.get("profileId") or "").strip()
-        if requested_profile_id not in profile_ids:
-            requested_profile_id = workflow_recommended_profile.get(workflow_id, active_profile_id)
-            if requested_profile_id not in profile_ids:
-                requested_profile_id = active_profile_id
-        normalized.append(
-            {
-                "workflowId": workflow_id,
-                "label": str(raw.get("label") or workflow.get("label") or workflow_id),
-                "profileId": requested_profile_id,
-            }
-        )
-    return normalized
+    return aliases.get(normalized, normalized)
 
 
 def _normalize_connection_policy_rules(raw_rules: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
@@ -638,7 +688,7 @@ def _normalize_preferences_state(
         "name": "Current Product Runtime",
         "primaryConnectionId": _default_provider_key(registry),
         "primaryModel": (models_by_connection.get(_default_provider_key(registry)) or [""])[0],
-        "fallbackChain": _derive_fallback_chain(runtime_connections, _default_provider_key(registry), models_by_connection),
+        "fallbackChain": _derive_fallback_chain(runtime_connections, _default_provider_key(registry), models_by_connection, embedding_models_by_connection),
         "executionPolicy": "prefer_local_burst_hosted",
         "retrievalStrategy": "hybrid",
         "embeddingConnectionId": _default_embedding_provider_key(registry, runtime_rag_settings),
@@ -693,8 +743,8 @@ def _normalize_preferences_state(
         models_by_connection=models_by_connection,
         embedding_models_by_connection=embedding_models_by_connection,
     )
-    raw_profiles = state.get("runtime_profiles") if isinstance(state.get("runtime_profiles"), list) else seed_profiles
-    active_profile_id = str(state.get("active_profile_id") or seed_active_profile_id).strip() or seed_active_profile_id
+    raw_profiles = list(seed_profiles)
+    active_profile_id = _canonical_profile_id(str(state.get("active_profile_id") or seed_active_profile_id).strip() or seed_active_profile_id)
     seen_ids: set[str] = set()
     normalized_profiles = [
         _normalize_runtime_profile(
@@ -717,11 +767,6 @@ def _normalize_preferences_state(
         profile["isActive"] = str(profile.get("id") or "") == active_profile_id
         profile["isDefault"] = str(profile.get("id") or "") == active_profile_id or bool(profile.get("isDefault", False))
 
-    normalized_workflow_defaults = _normalize_workflow_defaults(
-        state.get("workflow_defaults") if isinstance(state.get("workflow_defaults"), list) else None,
-        normalized_profiles,
-        active_profile_id,
-    )
     normalized_policy_rules = _normalize_connection_policy_rules(
         state.get("connection_policy_rules") if isinstance(state.get("connection_policy_rules"), list) else None,
     )
@@ -751,7 +796,6 @@ def _normalize_preferences_state(
         "updated_at": str(state.get("updated_at") or "").strip() or None,
         "active_profile_id": active_profile_id,
         "runtime_profiles": normalized_profiles,
-        "workflow_defaults": normalized_workflow_defaults,
         "connection_policy_rules": normalized_policy_rules,
         "operator_preferences": normalized_operator_preferences,
         "connection_overlays": connection_overlays,
@@ -794,7 +838,6 @@ def build_preferences_payload(bootstrap: ProductBootstrap) -> dict[str, Any]:
         "active_profile_id": normalized.get("active_profile_id"),
         "provider_connections": provider_connections,
         "runtime_profiles": normalized.get("runtime_profiles") or [],
-        "workflow_defaults": normalized.get("workflow_defaults") or [],
         "connection_policy_rules": normalized.get("connection_policy_rules") or [],
         "operator_preferences": normalized.get("operator_preferences") or _clone(DEFAULT_OPERATOR_PREFERENCES),
         "catalogs": {
@@ -828,6 +871,18 @@ def build_preferences_payload(bootstrap: ProductBootstrap) -> dict[str, Any]:
     }
 
 
+def _refresh_bootstrap_provider_registry(bootstrap: ProductBootstrap) -> None:
+    """Refresh long-lived provider instances after a UI-managed secret changes."""
+    try:
+        refreshed_registry = build_provider_registry()
+        bootstrap.provider_registry.clear()
+        bootstrap.provider_registry.update(refreshed_registry)
+    except Exception:
+        # Preferences payloads are built from a fresh registry below; do not fail the
+        # credential save just because an optional provider cannot be refreshed here.
+        pass
+
+
 def update_preferences_connection_credential(bootstrap: ProductBootstrap, connection_id: str, api_key: str | None) -> dict[str, Any]:
     normalized_connection_id = str(connection_id or "").strip()
     secret_key = UI_CREDENTIAL_CONNECTION_IDS.get(normalized_connection_id)
@@ -838,68 +893,15 @@ def update_preferences_connection_credential(bootstrap: ProductBootstrap, connec
     ok = delete_secret(secret_key) if not secret_value else set_secret(secret_key, secret_value)
     if not ok:
         raise ValueError("Could not update the credential in the local macOS Keychain.")
+    if secret_value and str(get_secret(secret_key) or "").strip() != secret_value:
+        raise ValueError("Credential was saved, but the runtime could not read back the new Keychain value.")
+
+    _refresh_bootstrap_provider_registry(bootstrap)
 
     raw_state = load_preferences_state(_state_path(bootstrap.workspace_root)) or {}
     raw_state["updated_at"] = _utc_now_iso()
     save_preferences_state(_state_path(bootstrap.workspace_root), raw_state)
     return build_preferences_payload(bootstrap)
-
-
-def apply_preferences_to_product_request(bootstrap: ProductBootstrap, request: Any, explicit_fields: set[str] | None = None) -> Any:
-    normalized = _normalize_preferences_state(
-        bootstrap=bootstrap,
-        raw_state=load_preferences_state(_state_path(bootstrap.workspace_root)) or {},
-    )
-    workflow_id = PRODUCT_WORKFLOW_PREFERENCE_IDS.get(str(request.workflow_id or ""))
-    if not workflow_id:
-        return request
-
-    explicit = {str(item) for item in (explicit_fields or set())}
-    workflow_defaults = normalized.get("workflow_defaults") if isinstance(normalized.get("workflow_defaults"), list) else []
-    runtime_profiles = normalized.get("runtime_profiles") if isinstance(normalized.get("runtime_profiles"), list) else []
-    connection_policy_rules = normalized.get("connection_policy_rules") if isinstance(normalized.get("connection_policy_rules"), list) else []
-    provider_connections = normalized.get("provider_connections") if isinstance(normalized.get("provider_connections"), list) else []
-
-    default_entry = next((item for item in workflow_defaults if isinstance(item, dict) and str(item.get("workflowId") or "") == workflow_id), None)
-    target_profile_id = str((default_entry or {}).get("profileId") or normalized.get("active_profile_id") or "").strip()
-    target_profile = next((profile for profile in runtime_profiles if isinstance(profile, dict) and str(profile.get("id") or "") == target_profile_id), None)
-    if target_profile is None:
-        target_profile = next((profile for profile in runtime_profiles if isinstance(profile, dict) and bool(profile.get("isActive"))), None)
-    if target_profile is None:
-        return request
-
-    connections_by_id = {str(item.get("id") or ""): item for item in provider_connections if isinstance(item, dict)}
-    target_connection = connections_by_id.get(str(target_profile.get("primaryConnectionId") or ""), {})
-    policy_lookup = {str(item.get("id") or ""): bool(item.get("enabled")) for item in connection_policy_rules if isinstance(item, dict)}
-
-    if str(target_connection.get("mode") or "") == "cloud" and bool(policy_lookup.get("cloud-benchmarks-only", False)):
-        target_profile = next((profile for profile in runtime_profiles if isinstance(profile, dict) and str(profile.get("id") or "") == "workspace-default"), target_profile)
-        target_connection = connections_by_id.get(str(target_profile.get("primaryConnectionId") or ""), target_connection)
-
-    generation = target_profile.get("generation") if isinstance(target_profile.get("generation"), dict) else {}
-    retrieval = target_profile.get("retrieval") if isinstance(target_profile.get("retrieval"), dict) else {}
-    if str(request.workflow_id or "") in {"document_review", "policy_contract_comparison"} and bool(policy_lookup.get("require-evidence-strict", True)):
-        if str(retrieval.get("groundingStrictness") or "balanced") == "permissive":
-            retrieval = {**retrieval, "groundingStrictness": "balanced"}
-
-    context_window = _context_window_from_label(str(generation.get("contextWindow") or "auto"))
-    updates: dict[str, Any] = {}
-    if "provider" not in explicit:
-        updates["provider"] = str(target_profile.get("primaryConnectionId") or request.provider)
-    if "model" not in explicit and str(target_profile.get("primaryModel") or "").strip():
-        updates["model"] = str(target_profile.get("primaryModel") or request.model)
-    if "prompt_profile" not in explicit and str(generation.get("promptProfile") or "").strip():
-        updates["prompt_profile"] = str(generation.get("promptProfile") or request.prompt_profile)
-    if "temperature" not in explicit:
-        updates["temperature"] = float(generation.get("temperature") or request.temperature)
-    if "top_p" not in explicit and generation.get("topP") is not None:
-        updates["top_p"] = float(generation.get("topP"))
-    if "max_tokens" not in explicit and generation.get("maxOutputTokens") is not None:
-        updates["max_tokens"] = int(generation.get("maxOutputTokens"))
-    if "context_window_mode" not in explicit and "context_window" not in explicit:
-        updates["context_window_mode"] = "manual" if context_window is not None else "auto"
-        updates["context_window"] = context_window
-    return request.model_copy(update=updates) if updates else request
 
 
 def update_preferences_payload(bootstrap: ProductBootstrap, patch_payload: dict[str, Any]) -> dict[str, Any]:
@@ -910,8 +912,6 @@ def update_preferences_payload(bootstrap: ProductBootstrap, patch_payload: dict[
         working_state["runtime_profiles"] = [item for item in patch_payload.get("runtime_profiles") or [] if isinstance(item, dict)]
     if str(patch_payload.get("active_profile_id") or "").strip():
         working_state["active_profile_id"] = str(patch_payload.get("active_profile_id") or "").strip()
-    if isinstance(patch_payload.get("workflow_defaults"), list):
-        working_state["workflow_defaults"] = [item for item in patch_payload.get("workflow_defaults") or [] if isinstance(item, dict)]
     if isinstance(patch_payload.get("connection_policy_rules"), list):
         working_state["connection_policy_rules"] = [item for item in patch_payload.get("connection_policy_rules") or [] if isinstance(item, dict)]
     if isinstance(patch_payload.get("operator_preferences"), dict):
@@ -941,7 +941,6 @@ def update_preferences_payload(bootstrap: ProductBootstrap, patch_payload: dict[
             "updated_at": normalized.get("updated_at"),
             "active_profile_id": normalized.get("active_profile_id"),
             "runtime_profiles": normalized.get("runtime_profiles") or [],
-            "workflow_defaults": normalized.get("workflow_defaults") or [],
             "connection_policy_rules": normalized.get("connection_policy_rules") or [],
             "operator_preferences": normalized.get("operator_preferences") or _clone(DEFAULT_OPERATOR_PREFERENCES),
             "connection_overlays": normalized.get("connection_overlays") or {},
@@ -980,12 +979,18 @@ def test_preferences_connection(bootstrap: ProductBootstrap, connection_id: str)
                 error_message = "Provider entry is unavailable in the current registry."
             else:
                 instance = provider_entry.get("instance")
-                models: list[str] = []
-                if instance is not None and hasattr(instance, "list_available_models"):
-                    models = list(instance.list_available_models())
-                elif instance is not None and hasattr(instance, "list_available_embedding_models"):
-                    models = list(instance.list_available_embedding_models())
-                status = "connected" if models or str(connection.get("status") or "") == "connected" else "degraded"
+                if instance is not None and hasattr(instance, "probe_connection"):
+                    probe = instance.probe_connection() or {}
+                    status = str(probe.get("status") or "degraded")
+                    error_message = str(probe.get("last_error_message") or "").strip() or None
+                else:
+                    chat_models: list[str] = []
+                    embedding_models: list[str] = []
+                    if instance is not None and hasattr(instance, "list_available_models"):
+                        chat_models = [str(model or "").strip() for model in instance.list_available_models() if str(model or "").strip()]
+                    if instance is not None and hasattr(instance, "list_available_embedding_models"):
+                        embedding_models = [str(model or "").strip() for model in instance.list_available_embedding_models() if str(model or "").strip()]
+                    status = "connected" if chat_models or embedding_models or str(connection.get("status") or "") == "connected" else "degraded"
     except Exception as error:  # pragma: no cover - defensive endpoint behavior
         status = "degraded" if str(connection.get("status") or "") == "connected" else "disconnected"
         error_message = str(error)
@@ -1009,7 +1014,6 @@ def test_preferences_connection(bootstrap: ProductBootstrap, connection_id: str)
             "updated_at": normalized_state.get("updated_at"),
             "active_profile_id": normalized_state.get("active_profile_id"),
             "runtime_profiles": normalized_state.get("runtime_profiles") or [],
-            "workflow_defaults": normalized_state.get("workflow_defaults") or [],
             "connection_policy_rules": normalized_state.get("connection_policy_rules") or [],
             "operator_preferences": normalized_state.get("operator_preferences") or _clone(DEFAULT_OPERATOR_PREFERENCES),
             "connection_overlays": normalized_state.get("connection_overlays") or {},

@@ -17,6 +17,7 @@ from src.config import (
     get_rag_settings,
 )
 from src.providers.registry import build_provider_registry
+from src.storage.secret_store import get_secret
 from src.storage.preferences_state import load_preferences_state, save_preferences_state
 from src.prompt_profiles import get_prompt_profiles
 from src.storage.runtime_controls_state import (
@@ -37,7 +38,8 @@ RUNTIME_CONTROLS_STATE_VERSION = "runtime_controls.state.v1"
 EXECUTION_POLICIES = [
     {"value": "local_only", "label": "Local Only", "description": "Strictly local execution. Fail hard if unavailable."},
     {"value": "prefer_local_burst_hosted", "label": "Prefer Local · Burst to Hosted", "description": "Prefer local inference and keep hosted capacity as overflow/reference."},
-    {"value": "hosted_only", "label": "Hosted Only", "description": "Prefer hosted inference as the primary route."},
+    {"value": "hosted_only", "label": "Hosted Only", "description": "Prefer hosted inference as the primary generation route."},
+    {"value": "hosted_generation_local_embeddings", "label": "Hosted Generation · Local Embeddings", "description": "Use hosted generation while keeping retrieval embeddings on the local Ollama stack."},
     {"value": "hosted_deep_review", "label": "Hosted · Deep Review", "description": "Hosted-first posture for heavier review and longer reasoning."},
     {"value": "cloud_selected_workflows", "label": "Cloud · Selected Workflows", "description": "Cloud endpoints are reserved for selected workflows or demo scenarios."},
     {"value": "benchmark_reference_only", "label": "Benchmark Reference Only", "description": "External endpoints remain reference targets for comparison and demos."},
@@ -48,6 +50,7 @@ QUALITY_POSTURES = [
     {"value": "balanced", "label": "Balanced", "description": "Balance quality, responsiveness and operational simplicity."},
     {"value": "low_latency", "label": "Low Latency", "description": "Favor shorter responses and lower-latency runtime choices."},
     {"value": "cost_optimized", "label": "Cost Optimized", "description": "Favor cheaper execution paths where quality remains acceptable."},
+    {"value": "privacy_first", "label": "Privacy First", "description": "Keep analysis local and prioritize data locality over hosted capacity."},
 ]
 
 DOC_PRESETS = [
@@ -103,6 +106,72 @@ WORKFLOW_CATALOG = [
 
 PRODUCT_CONNECTION_BLACKLIST = {"huggingface_local"}
 BLOCKED_PRODUCT_MODELS = {"pptagent-q8"}
+
+
+def _canonical_ollama_hosted_model(model: str | None) -> str:
+    """Return the exact hosted Ollama tag the product should send.
+
+    Ollama Hosted's cloud tags are dash-suffixed. Keep the Runtime Controls
+    profiles on those tags so every saved profile follows the same request path
+    as Current Product Runtime and no hidden provider/model rewrite is needed.
+    """
+    normalized = str(model or "").strip()
+    if not normalized:
+        return ""
+    aliases = {
+        "nemotron-3-nano:30b": "nemotron-3-nano:30b-cloud",
+        "nemotron-3-nano-30b": "nemotron-3-nano:30b-cloud",
+        "nemotron-3-nano-30b-cloud": "nemotron-3-nano:30b-cloud",
+        "nemotron-3-nano:30b-cloud": "nemotron-3-nano:30b-cloud",
+        "nemotron-3-super": "nemotron-3-super:cloud",
+        "nemotron-3-super:cloud": "nemotron-3-super:cloud",
+        "nemotron-3-super-cloud": "nemotron-3-super:cloud",
+    }
+    return aliases.get(normalized.lower(), normalized)
+
+
+
+
+def _looks_like_non_ollama_embedding_model(model_name: Any) -> bool:
+    normalized = str(model_name or "").strip().lower()
+    if not normalized:
+        return False
+    return (
+        "/" in normalized
+        or normalized.startswith("text-embedding")
+        or normalized.startswith("sentence-transformers")
+        or normalized.startswith("openai:")
+        or normalized.startswith("huggingface:")
+    )
+
+
+def _default_ollama_embedding_model() -> str:
+    try:
+        settings = get_ollama_settings()
+        for candidate in settings.available_embedding_models_env:
+            normalized = str(candidate or "").strip()
+            if normalized and not _looks_like_non_ollama_embedding_model(normalized):
+                return normalized
+    except Exception:
+        pass
+    return "embeddinggemma:300m"
+
+def _hosted_ollama_model_catalog(configured: list[str] | tuple[str, ...] | None = None) -> list[str]:
+    ordered: list[str] = []
+    for item in [*(configured or []), "nemotron-3-nano:30b-cloud", "nemotron-3-super:cloud"]:
+        normalized = _canonical_ollama_hosted_model(str(item or "").strip())
+        if normalized and normalized not in ordered:
+            ordered.append(normalized)
+    return ordered
+
+
+def _remote_model_discovery_disabled(provider_key: str, static_config: dict[str, Any]) -> bool:
+    # Opening Preferences/Runtime Controls must never call paid/remote inference
+    # providers. Remote model dropdowns come from static configuration plus
+    # canonical presets. Only explicit Test Connection may probe a remote provider.
+    if provider_key in {"ollama_hosted", "huggingface_inference", "openai"}:
+        return True
+    return str(static_config.get("mode") or "").strip().lower() == "cloud"
 
 
 def _utc_now_iso() -> str:
@@ -264,19 +333,27 @@ def _provider_static_settings() -> dict[str, dict[str, Any]]:
             "availableEmbeddingModelsEnv": list(hf_inference.available_embedding_models_env),
         },
     }
+    ollama_hosted_key_configured = bool(
+        (ollama_hosted.api_key if ollama_hosted is not None else None)
+        or get_secret("ollama_hosted_api_key")
+    )
+    hosted_models = _hosted_ollama_model_catalog(ollama_hosted.available_models_env if ollama_hosted is not None else [])
+    hosted_default_model = _canonical_ollama_hosted_model(
+        ollama_hosted.default_model if ollama_hosted is not None else ""
+    ) or (hosted_models[0] if hosted_models else ollama.default_model)
     settings["ollama_hosted"] = {
         "providerFamily": "ollama",
         "mode": "hosted",
         "baseUrl": ollama_hosted.base_url if ollama_hosted is not None else "",
         "authMethod": "api_key",
-        "apiKeyConfigured": bool(ollama_hosted.api_key) if ollama_hosted is not None else False,
-        "defaultModel": (ollama_hosted.default_model if ollama_hosted is not None else ollama.default_model),
+        "apiKeyConfigured": ollama_hosted_key_configured,
+        "defaultModel": hosted_default_model,
         "defaultContextWindow": (ollama_hosted.default_context_window if ollama_hosted is not None else ollama.default_context_window),
         "defaultPromptProfile": (ollama_hosted.default_prompt_profile if ollama_hosted is not None else ollama.default_prompt_profile),
         "defaultTopP": (ollama_hosted.default_top_p if ollama_hosted is not None else ollama.default_top_p),
         "defaultMaxTokens": (ollama_hosted.default_max_tokens if ollama_hosted is not None else ollama.default_max_tokens),
         "defaultTemperature": (ollama_hosted.default_temperature if ollama_hosted is not None else ollama.default_temperature),
-        "availableModelsEnv": list(ollama_hosted.available_models_env) if ollama_hosted is not None else [],
+        "availableModelsEnv": hosted_models,
         "availableEmbeddingModelsEnv": list(ollama_hosted.available_embedding_models_env) if ollama_hosted is not None else [],
     }
     return settings
@@ -307,14 +384,19 @@ def _connection_capabilities(provider_key: str, provider_entry: dict[str, Any]) 
     }
 
 
-def _infer_connection_status(provider_entry: dict[str, Any], static_settings: dict[str, Any]) -> str:
+def _resolve_connection_health(provider_entry: dict[str, Any], static_settings: dict[str, Any]) -> dict[str, Any]:
     if not provider_entry:
-        return "not_configured"
+        return {"status": "not_configured", "last_error_message": None}
     if not bool(provider_entry.get("supports_chat")) and not bool(provider_entry.get("supports_embeddings")):
-        return "not_configured"
+        return {"status": "not_configured", "last_error_message": None}
     if static_settings.get("authMethod") != "none" and not static_settings.get("apiKeyConfigured"):
-        return "not_configured"
-    return "connected"
+        return {"status": "not_configured", "last_error_message": "An API key is required for this connection."}
+
+    # Do not call provider.probe_connection() while building Preferences or
+    # Runtime Controls payloads. Those pages are rendered frequently and probing
+    # remote providers can consume hosted usage under the wrong account. The
+    # explicit Test Connection endpoint is the only place that may call probes.
+    return {"status": "connected", "last_error_message": None}
 
 
 def _list_models(provider_entry: dict[str, Any], *, embedding: bool = False) -> list[str]:
@@ -357,8 +439,15 @@ def _build_connections(registry: dict[str, dict[str, Any]]) -> tuple[list[dict[s
         provider_entry = registry.get(provider_key) if isinstance(registry.get(provider_key), dict) else {}
         static_config = static_settings.get(provider_key, {})
         provider_settings[provider_key] = static_config
-        models_by_connection[provider_key] = _list_models(provider_entry, embedding=False) or _filter_product_models(list(static_config.get("availableModelsEnv") or []))
-        embedding_models_by_connection[provider_key] = _list_models(provider_entry, embedding=True) or _filter_product_models(list(static_config.get("availableEmbeddingModelsEnv") or []))
+        connection_health = _resolve_connection_health(provider_entry, static_config)
+        static_generation_models = _filter_product_models(list(static_config.get("availableModelsEnv") or []))
+        static_embedding_models = _filter_product_models(list(static_config.get("availableEmbeddingModelsEnv") or []))
+        if _remote_model_discovery_disabled(provider_key, static_config):
+            models_by_connection[provider_key] = static_generation_models
+            embedding_models_by_connection[provider_key] = static_embedding_models
+        else:
+            models_by_connection[provider_key] = _list_models(provider_entry, embedding=False) or static_generation_models
+            embedding_models_by_connection[provider_key] = _list_models(provider_entry, embedding=True) or static_embedding_models
         preferred_model = str(provider_entry.get("default_model") or static_config.get("defaultModel") or "")
         if _is_blocked_product_model(preferred_model):
             preferred_model = models_by_connection.get(provider_key, [""])[0] if models_by_connection.get(provider_key) else ""
@@ -371,12 +460,13 @@ def _build_connections(registry: dict[str, dict[str, Any]]) -> tuple[list[dict[s
                 "baseUrl": static_config.get("baseUrl") or str(provider_entry.get("detail") or ""),
                 "authMethod": static_config.get("authMethod") or "none",
                 "apiKeyConfigured": bool(static_config.get("apiKeyConfigured")),
-                "status": _infer_connection_status(provider_entry, static_config),
+                "status": str(connection_health.get("status") or "connected"),
                 "preferredModel": preferred_model,
                 "lastChecked": _utc_now_iso(),
                 "description": str(provider_entry.get("detail") or static_config.get("description") or "Runtime connection surfaced by workspace preferences."),
                 "capabilities": _connection_capabilities(provider_key, provider_entry),
                 "role": "production" if provider_key == "ollama" else "burst_overflow" if provider_key == "ollama_hosted" else "benchmark_reference",
+                "lastErrorMessage": connection_health.get("last_error_message"),
             }
         )
     return connections, models_by_connection, embedding_models_by_connection, provider_settings
@@ -433,6 +523,7 @@ def _sync_runtime_controls_to_preferences_state(workspace_root: Path | None, nor
     mirrored_fields = {
         "primaryConnectionId",
         "primaryModel",
+        "fallbackEnabled",
         "fallbackChain",
         "executionPolicy",
         "retrievalStrategy",
@@ -530,19 +621,64 @@ def _workflow_fit(profile: dict[str, Any], primary_connection: dict[str, Any]) -
     return fits
 
 
-def _derive_fallback_chain(connections: list[dict[str, Any]], primary_connection_id: str, models_by_connection: dict[str, list[str]]) -> list[dict[str, str]]:
-    fallbacks: list[dict[str, str]] = []
-    for connection in connections:
+def _preferred_fallback_model(
+    connection_id: str,
+    *,
+    models_by_connection: dict[str, list[str]],
+    embedding_models_by_connection: dict[str, list[str]],
+    connection: dict[str, Any],
+) -> str:
+    capabilities = connection.get("capabilities") if isinstance(connection.get("capabilities"), dict) else {}
+    if bool(capabilities.get("generation")):
+        model_choices = models_by_connection.get(connection_id) or []
+        if model_choices:
+            return model_choices[0]
+    if bool(capabilities.get("embeddings")):
+        embedding_choices = embedding_models_by_connection.get(connection_id) or []
+        if embedding_choices:
+            return embedding_choices[0]
+    fallback = str(connection.get("preferredModel") or "").strip()
+    return fallback
+
+
+def _derive_fallback_chain(
+    connections: list[dict[str, Any]],
+    primary_connection_id: str,
+    models_by_connection: dict[str, list[str]],
+    embedding_models_by_connection: dict[str, list[str]],
+) -> list[dict[str, str]]:
+    primary_connection = next((item for item in connections if str(item.get("id") or "") == primary_connection_id), {})
+    primary_mode = str(primary_connection.get("mode") or "local").strip().lower()
+
+    def _priority(connection: dict[str, Any]) -> tuple[int, str]:
         connection_id = str(connection.get("id") or "")
-        if connection_id == primary_connection_id:
+        mode = str(connection.get("mode") or "local").strip().lower()
+        name = str(connection.get("name") or connection_id).lower()
+        if primary_mode == "local":
+            mode_rank = 0 if mode in {"hosted", "cloud"} else 1
+        else:
+            mode_rank = 0 if mode == "local" else 1
+        ollama_bonus = 0 if connection_id == "ollama" else 1
+        return (mode_rank, ollama_bonus, name)
+
+    candidate_connections = sorted(connections, key=_priority)
+    fallbacks: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for connection in candidate_connections:
+        connection_id = str(connection.get("id") or "")
+        if not connection_id or connection_id == primary_connection_id or connection_id in seen:
             continue
         capabilities = connection.get("capabilities") if isinstance(connection.get("capabilities"), dict) else {}
-        if not bool(capabilities.get("generation")):
+        if not bool(capabilities.get("generation")) and not bool(capabilities.get("embeddings")):
             continue
-        if str(connection.get("status") or "") != "connected":
+        if str(connection.get("status") or "") not in {"connected", "degraded"}:
             continue
-        model_choices = models_by_connection.get(connection_id) or []
-        model_name = model_choices[0] if model_choices else str(connection.get("preferredModel") or "")
+        model_name = _preferred_fallback_model(
+            connection_id,
+            models_by_connection=models_by_connection,
+            embedding_models_by_connection=embedding_models_by_connection,
+            connection=connection,
+        )
         if not model_name:
             continue
         fallbacks.append(
@@ -552,9 +688,27 @@ def _derive_fallback_chain(connections: list[dict[str, Any]], primary_connection
                 "label": f"Fallback to {connection.get('name')}",
             }
         )
-        if len(fallbacks) >= 2:
+        seen.add(connection_id)
+        if len(fallbacks) >= 3:
             break
     return fallbacks
+
+
+def _resolve_selected_model(requested_model: Any, available_models: list[str], default_model: Any, *, preserve_requested_if_unlisted: bool = False) -> str:
+    requested = str(requested_model or "").strip()
+    normalized_available = [str(item).strip() for item in available_models if str(item).strip()]
+    default = str(default_model or "").strip()
+    if normalized_available:
+        if requested and requested in normalized_available:
+            return requested
+        if default and default in normalized_available:
+            return default
+        if requested and preserve_requested_if_unlisted:
+            return requested
+        return normalized_available[0]
+    if requested and preserve_requested_if_unlisted:
+        return requested
+    return default
 
 
 def _normalize_profile(
@@ -618,9 +772,61 @@ def _normalize_profile(
     if not reranking_enabled:
         retrieval["rerankPoolSize"] = 0
 
-    primary_model = str(patch.get("primaryModel") or (primary_models[0] if primary_models else primary_static.get("defaultModel") or "")).strip()
-    embedding_model = str(patch.get("embeddingModel") or (embedding_models[0] if embedding_models else rag_settings.embedding_model)).strip()
-    fallback_chain = _derive_fallback_chain(connections, primary_connection_id, models_by_connection)
+    primary_model = _resolve_selected_model(
+        patch.get("primaryModel"),
+        primary_models,
+        primary_static.get("defaultModel"),
+        preserve_requested_if_unlisted=True,
+    )
+    if primary_connection_id == "ollama_hosted":
+        primary_model = _canonical_ollama_hosted_model(primary_model)
+    embedding_model = _resolve_selected_model(
+        patch.get("embeddingModel"),
+        embedding_models,
+        rag_settings.embedding_model,
+        preserve_requested_if_unlisted=True,
+    )
+    available_fallback_chain = _derive_fallback_chain(connections, primary_connection_id, models_by_connection, embedding_models_by_connection)
+    fallback_enabled = bool(patch.get("fallbackEnabled", bool(available_fallback_chain)))
+    requested_fallback_chain = patch.get("fallbackChain") if isinstance(patch.get("fallbackChain"), list) else []
+    validated_fallback_chain: list[dict[str, str]] = []
+    seen_fallback_steps: set[str] = set()
+    for raw_step in requested_fallback_chain:
+        if not isinstance(raw_step, dict):
+            continue
+        connection_id = str(raw_step.get("connectionId") or "").strip()
+        if not connection_id:
+            continue
+        connection = connections_by_id.get(connection_id, {})
+        capabilities = connection.get("capabilities") if isinstance(connection.get("capabilities"), dict) else {}
+        if not bool(capabilities.get("generation")) and not bool(capabilities.get("embeddings")):
+            continue
+        model_name = str(raw_step.get("model") or "").strip() or _preferred_fallback_model(
+            connection_id,
+            models_by_connection=models_by_connection,
+            embedding_models_by_connection=embedding_models_by_connection,
+            connection=connection,
+        )
+        if not model_name:
+            continue
+        step_key = f"{connection_id}::{model_name}"
+        if step_key in seen_fallback_steps:
+            continue
+        validated_fallback_chain.append(
+            {
+                "connectionId": connection_id,
+                "model": model_name,
+                "label": str(raw_step.get("label") or f"Fallback to {connection.get('name')}").strip() or f"Fallback to {connection.get('name')}",
+            }
+        )
+        seen_fallback_steps.add(step_key)
+        if len(validated_fallback_chain) >= 3:
+            break
+
+    requested_execution_policy = str(patch.get("executionPolicy") or "").strip()
+    if requested_execution_policy == "local_only":
+        fallback_enabled = False
+    fallback_chain = validated_fallback_chain if fallback_enabled and validated_fallback_chain else (available_fallback_chain if fallback_enabled else [])
     quality_posture = str(patch.get("qualityPosture") or _derive_quality_posture(int(retrieval["topK"]), int(generation["maxOutputTokens"])))
 
     profile = {
@@ -628,6 +834,7 @@ def _normalize_profile(
         "name": str(patch.get("name") or "Current Product Runtime"),
         "primaryConnectionId": primary_connection_id,
         "primaryModel": primary_model,
+        "fallbackEnabled": fallback_enabled,
         "fallbackChain": fallback_chain,
         "executionPolicy": str(patch.get("executionPolicy") or _derive_execution_policy(primary_connection, fallback_chain)),
         "retrievalStrategy": "hybrid",
@@ -731,6 +938,14 @@ def build_effective_rag_settings(*, default_settings: RagSettings | None = None,
     profile = state.get("profile") if isinstance(state.get("profile"), dict) else {}
     retrieval = profile.get("retrieval") if isinstance(profile.get("retrieval"), dict) else {}
     doc_processing = profile.get("docProcessing") if isinstance(profile.get("docProcessing"), dict) else {}
+    scanned_threshold = _clamp_float(
+        doc_processing.get("scannedDocumentThreshold"),
+        base.pdf_scan_image_ocr_min_suspicious_ratio,
+        minimum=0.1,
+        maximum=1.0,
+    )
+    vlm_enabled = bool(doc_processing.get("vlmEnhancement", base.pdf_evidence_pipeline_enabled))
+    ocr_failover_enabled = bool(doc_processing.get("ocrFailoverEnabled", base.pdf_ocr_fallback_enabled))
     return replace(
         base,
         embedding_provider=str(profile.get("embeddingConnectionId") or base.embedding_provider),
@@ -742,11 +957,50 @@ def build_effective_rag_settings(*, default_settings: RagSettings | None = None,
         rerank_lexical_weight=_clamp_float(retrieval.get("rerankLexicalWeight"), base.rerank_lexical_weight, minimum=0.0, maximum=1.0),
         pdf_extraction_mode=str(doc_processing.get("pdfExtractionMode") or base.pdf_extraction_mode),
         evidence_ocr_backend=str(doc_processing.get("ocrBackend") or base.evidence_ocr_backend),
-        pdf_ocr_fallback_enabled=bool(doc_processing.get("ocrFailoverEnabled", base.pdf_ocr_fallback_enabled)),
-        pdf_scan_image_ocr_min_suspicious_ratio=_clamp_float(doc_processing.get("scannedDocumentThreshold"), base.pdf_scan_image_ocr_min_suspicious_ratio, minimum=0.1, maximum=1.0),
-        pdf_evidence_pipeline_enabled=bool(doc_processing.get("vlmEnhancement", base.pdf_evidence_pipeline_enabled)),
-        pdf_docling_picture_description=bool(doc_processing.get("vlmEnhancement", base.pdf_docling_picture_description)),
+        pdf_ocr_fallback_enabled=ocr_failover_enabled,
+        pdf_scan_image_ocr_enabled=ocr_failover_enabled,
+        pdf_scan_image_ocr_min_suspicious_ratio=scanned_threshold,
+        pdf_evidence_pipeline_enabled=vlm_enabled,
+        pdf_evidence_pipeline_min_scan_suspicious_ratio=scanned_threshold,
+        pdf_docling_picture_description=vlm_enabled,
     )
+
+
+def load_active_runtime_profile(workspace_root: Path | None = None) -> dict[str, Any]:
+    state = load_runtime_controls_state(_state_path(workspace_root)) or {}
+    profile = state.get("profile") if isinstance(state.get("profile"), dict) else None
+    if isinstance(profile, dict):
+        return profile
+    seed = _load_runtime_seed_from_preferences(workspace_root)
+    return seed if isinstance(seed, dict) else {}
+
+
+def resolve_runtime_fallback_step(capability: str, workspace_root: Path | None = None) -> dict[str, Any] | None:
+    profile = load_active_runtime_profile(workspace_root)
+    if not bool(profile.get("fallbackEnabled")):
+        return None
+    fallback_chain = profile.get("fallbackChain") if isinstance(profile.get("fallbackChain"), list) else []
+    if not fallback_chain:
+        return None
+    registry = build_provider_registry()
+    capability_key = {"chat": "supports_chat", "embeddings": "supports_embeddings"}.get(capability, capability)
+    for step in fallback_chain:
+        if not isinstance(step, dict):
+            continue
+        connection_id = str(step.get("connectionId") or "").strip().lower()
+        entry = registry.get(connection_id)
+        if isinstance(entry, dict) and bool(entry.get(capability_key)):
+            return {
+                "connectionId": connection_id,
+                "model": str(step.get("model") or "").strip(),
+                "label": str(step.get("label") or "").strip(),
+            }
+    return None
+
+
+def resolve_runtime_fallback_provider(capability: str, workspace_root: Path | None = None) -> str | None:
+    step = resolve_runtime_fallback_step(capability, workspace_root)
+    return str(step.get("connectionId") or "").strip() or None if isinstance(step, dict) else None
 
 
 def apply_runtime_controls_to_product_request(
@@ -754,10 +1008,14 @@ def apply_runtime_controls_to_product_request(
     bootstrap: ProductBootstrap,
     explicit_fields: set[str] | None = None,
 ) -> ProductWorkflowRequest:
-    payload = build_runtime_controls_payload(bootstrap)
-    profile = payload.get("active_profile") if isinstance(payload.get("active_profile"), dict) else {}
+    profile = load_active_runtime_profile(bootstrap.workspace_root)
     generation = profile.get("generation") if isinstance(profile.get("generation"), dict) else {}
     explicit = {str(item) for item in (explicit_fields or set())}
+    if request.context_window_mode == "auto" and request.context_window is None:
+        # Product workflow pages historically sent context_window_mode="auto" as a hard-coded
+        # transport default. Treat that as non-explicit so the live Runtime Controls context
+        # window can still drive the actual model request.
+        explicit.discard("context_window_mode")
 
     resolved_context_mode = request.context_window_mode
     resolved_context_window = request.context_window
@@ -776,10 +1034,15 @@ def apply_runtime_controls_to_product_request(
     resolved_max_tokens = request.max_tokens if "max_tokens" in explicit else int(generation.get("maxOutputTokens", request.max_tokens if request.max_tokens is not None else 4096))
     resolved_prompt_profile = request.prompt_profile if "prompt_profile" in explicit else str(generation.get("promptProfile") or request.prompt_profile or "neutro")
 
+    resolved_provider = request.provider if "provider" in explicit else str(profile.get("primaryConnectionId") or request.provider)
+    resolved_model = request.model if "model" in explicit and request.model else str(profile.get("primaryModel") or request.model or "")
+    if str(resolved_provider or "").strip().lower() == "ollama_hosted":
+        resolved_model = _canonical_ollama_hosted_model(resolved_model)
+
     return request.model_copy(
         update={
-            "provider": request.provider if "provider" in explicit else str(profile.get("primaryConnectionId") or request.provider),
-            "model": request.model if "model" in explicit and request.model else (request.model or str(profile.get("primaryModel") or "")),
+            "provider": resolved_provider,
+            "model": resolved_model,
             "temperature": resolved_temperature,
             "prompt_profile": resolved_prompt_profile,
             "top_p": resolved_top_p,

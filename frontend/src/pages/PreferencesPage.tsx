@@ -12,10 +12,7 @@ import {
   Link2,
   Loader2,
   RefreshCw,
-  Settings2,
-  Shield,
   User,
-  WifiOff,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,9 +31,9 @@ import {
   type PreferencesPatchPayload,
   type PreferencesResponse,
 } from '@/lib/product-api';
-import { CONNECTION_ROLE_LABELS, credentialStatusCopy, formatConnectionCheckedAt, formatPreferencesUpdatedAt } from '@/lib/preferences-ui';
+import { CONNECTION_ROLE_LABELS, credentialStatusCopy, formatConnectionCheckedAt } from '@/lib/preferences-ui';
 import { buildCatalogLookup } from '@/lib/runtime-controls-ui';
-import type { ConnectionPolicyRule, OperatorPreferences, ProviderConnection, RuntimeProfile, WorkflowDefault, WorkflowFit } from '@/types/settings';
+import type { OperatorPreferences, ProviderConnection, RuntimeProfile } from '@/types/settings';
 
 const CapabilityBadge = ({ label }: { label: string }) => (
   <span
@@ -52,21 +49,6 @@ const ModeIcon = ({ mode }: { mode: string }) => {
   if (mode === 'hosted') return <Cloud className="h-4 w-4 text-accent" />;
   if (mode === 'openai-compatible') return <Globe className="h-4 w-4 text-glow-warning" />;
   return <Cloud className="h-4 w-4 text-glow-warning" />;
-};
-
-const CompatibilityBadge = ({ fit }: { fit: WorkflowFit }) => {
-  const colors = {
-    recommended: { bg: 'bg-glow-success/10', text: 'text-glow-success', border: 'border-glow-success/20' },
-    compatible: { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' },
-    restricted: { bg: 'bg-glow-warning/10', text: 'text-glow-warning', border: 'border-glow-warning/20' },
-    unsupported: { bg: 'bg-glow-error/10', text: 'text-glow-error', border: 'border-glow-error/20' },
-  }[fit.compatibility] ?? { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' };
-
-  return (
-    <span className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[8px] font-medium capitalize ${colors.bg} ${colors.border} ${colors.text}`}>
-      {fit.compatibility}
-    </span>
-  );
 };
 
 const ConnectionCard = ({
@@ -286,7 +268,7 @@ const ProfileCard = ({
         </div>
         <div>
           <p className="text-[10px] text-muted-foreground">Model</p>
-          <p className="truncate text-[10px] font-mono text-foreground">{profile.primaryModel}</p>
+          <p className="truncate text-[10px] font-mono text-foreground" title={profile.primaryModel}>{profile.primaryModel}</p>
         </div>
         <div>
           <p className="text-[10px] text-muted-foreground">Execution Policy</p>
@@ -304,26 +286,27 @@ const ProfileCard = ({
           <p className="text-[10px] text-muted-foreground">Doc Preset</p>
           <p className="text-[10px] text-foreground">{docPresetLabel}</p>
         </div>
+        <div>
+          <p className="text-[10px] text-muted-foreground">Max Output Tokens</p>
+          <p className="text-[10px] font-mono text-foreground">{profile.generation.maxOutputTokens.toLocaleString()}</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-muted-foreground">Temperature / Top-P</p>
+          <p className="text-[10px] font-mono text-foreground">{profile.generation.temperature} / {profile.generation.topP}</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-muted-foreground">Embedding</p>
+          <p className="truncate text-[10px] font-mono text-foreground" title={profile.embeddingModel}>{profile.embeddingModel}</p>
+        </div>
+        <div>
+          <p className="text-[10px] text-muted-foreground">Top-K / Grounding</p>
+          <p className="text-[10px] text-foreground">{profile.retrieval.topK} · {profile.retrieval.groundingStrictness}</p>
+        </div>
       </div>
 
       {profile.fallbackChain.length > 0 && (
         <p className="text-[10px] text-muted-foreground">Fallback: {profile.fallbackChain.map((step) => step.label).join(' → ')}</p>
       )}
-
-      {profile.workflowFit.length > 0 ? (
-        <div className="border-t border-border/50 pt-1.5">
-          <p className="mb-1 text-[10px] text-muted-foreground">Workflow compatibility</p>
-          <div className="space-y-1">
-            {profile.workflowFit.map((fit) => (
-              <div key={fit.workflowId} className="flex items-center gap-2">
-                <span className="w-28 truncate text-[10px] text-foreground">{fit.label}</span>
-                <CompatibilityBadge fit={fit} />
-                {fit.reason && <span className="flex-1 truncate text-[9px] text-muted-foreground" title={fit.reason}>{fit.reason}</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
 
       <p className="text-[10px] italic text-muted-foreground">{profile.summary}</p>
     </GlassCard>
@@ -441,8 +424,6 @@ export default function PreferencesPage() {
       ...data,
       provider_connections: data.provider_connections ?? [],
       runtime_profiles: data.runtime_profiles ?? [],
-      workflow_defaults: data.workflow_defaults ?? [],
-      connection_policy_rules: data.connection_policy_rules ?? [],
       catalogs: data.catalogs ?? { executionPolicies: [], qualityPostures: [], docPresets: [] },
       credential_policy: data.credential_policy ?? { notes: [] },
     };
@@ -452,7 +433,6 @@ export default function PreferencesPage() {
   const qualityPostureLookup = useMemo(() => buildCatalogLookup(normalizedData?.catalogs.qualityPostures), [normalizedData?.catalogs.qualityPostures]);
   const docPresetLookup = useMemo(() => buildCatalogLookup(normalizedData?.catalogs.docPresets), [normalizedData?.catalogs.docPresets]);
   const profiles = normalizedData?.runtime_profiles ?? [];
-  const workflowDefaults = normalizedData?.workflow_defaults ?? [];
   const operatorPreferences = normalizedData?.operator_preferences;
   const connectionsById = useMemo(
     () => Object.fromEntries((normalizedData?.provider_connections ?? []).map((connection) => [connection.id, connection] as const)),
@@ -468,20 +448,6 @@ export default function PreferencesPage() {
     savePreferences({ active_profile_id: profileId }, 'Active runtime profile updated.');
   };
 
-  const handleWorkflowDefaultChange = (workflowId: string, profileId: string) => {
-    const nextDefaults: WorkflowDefault[] = workflowDefaults.map((item) =>
-      item.workflowId === workflowId ? { ...item, profileId } : item,
-    );
-    savePreferences({ workflow_defaults: nextDefaults }, 'Workflow defaults updated.');
-  };
-
-  const handlePolicyRuleChange = (ruleId: string, enabled: boolean) => {
-    const nextRules: ConnectionPolicyRule[] = (normalizedData?.connection_policy_rules ?? []).map((rule) =>
-      rule.id === ruleId ? { ...rule, enabled } : rule,
-    );
-    savePreferences({ connection_policy_rules: nextRules }, 'Workspace policy updated.');
-  };
-
   const handleOperatorPreferenceChange = (patch: Partial<OperatorPreferences>, successMessage: string) => {
     savePreferences({ operator_preferences: patch }, successMessage);
   };
@@ -491,7 +457,7 @@ export default function PreferencesPage() {
       <motion.div className="mx-auto max-w-[920px] p-6 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <PageHeader
           title="Preferences"
-          description="Saved provider connections, runtime profiles, workflow defaults, and workspace policy."
+          description="Saved provider connections, runtime profiles, and operator preferences."
         >
           <Badge variant="outline" className="border-primary/30 text-[10px] text-primary">
             Loading live preferences
@@ -501,7 +467,7 @@ export default function PreferencesPage() {
           <div className="flex items-center justify-between gap-3">
             <div className="space-y-1">
               <div className="text-xs text-muted-foreground">Loading preferences from the backend…</div>
-              <div className="text-[10px] text-muted-foreground">This screen waits for the persisted workspace contract so it can render real connections, profiles and defaults.</div>
+              <div className="text-[10px] text-muted-foreground">This screen waits for the persisted workspace contract so it can render real connections and profiles.</div>
             </div>
             <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
           </div>
@@ -515,7 +481,7 @@ export default function PreferencesPage() {
       <motion.div className="mx-auto max-w-[920px] p-6 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <PageHeader
           title="Preferences"
-          description="Saved provider connections, runtime profiles, workflow defaults, and workspace policy."
+          description="Saved provider connections, runtime profiles, and operator preferences."
         />
         <GlassCard>
           <div className="space-y-3">
@@ -539,10 +505,11 @@ export default function PreferencesPage() {
 
   return (
     <motion.div className="mx-auto max-w-[920px] p-6 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader
-        title="Preferences"
-        description="Saved provider connections, runtime profiles, workflow defaults, and workspace policy — now backed by live workspace configuration."
-      >
+      <div data-tour="preferences-header">
+        <PageHeader
+          title="Preferences"
+          description="Saved provider connections, runtime profiles, and operator preferences."
+        >
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="border-primary/30 text-[10px] text-primary">
             Live preferences
@@ -556,17 +523,17 @@ export default function PreferencesPage() {
             </Badge>
           )}
         </div>
-      </PageHeader>
+        </PageHeader>
+      </div>
 
       <div className="space-y-6">
-        <div className="grid gap-3 md:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-3" data-tour="preferences-metrics">
           <MetricCard label="Connections" value={normalizedData.provider_connections.length} icon={Link2} delay={0.03} />
           <MetricCard label="Healthy" value={normalizedData.provider_connections.filter((connection) => connection.status === 'connected').length} icon={Check} glowColor="success" delay={0.06} />
           <MetricCard label="Saved profiles" value={profiles.length} icon={Layers} glowColor="accent" delay={0.09} />
-          <MetricCard label="Workflow defaults" value={workflowDefaults.length} icon={Settings2} glowColor="warning" delay={0.12} />
         </div>
 
-        <GlassCard>
+        <GlassCard data-tour="preferences-summary">
           <div className="grid gap-3 md:grid-cols-3">
             <div>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Active profile</p>
@@ -594,7 +561,7 @@ export default function PreferencesPage() {
           </GlassCard>
         )}
 
-        <div>
+        <div data-tour="preferences-connections">
           <div className="mb-3 flex items-center gap-2">
             <Link2 className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-medium text-foreground">Provider Connections</h2>
@@ -618,13 +585,13 @@ export default function PreferencesPage() {
 
         <Separator />
 
-        <div>
+        <div data-tour="preferences-profiles">
           <div className="mb-3 flex items-center gap-2">
             <Layers className="h-4 w-4 text-accent" />
             <h2 className="text-sm font-medium text-foreground">Saved Runtime Profiles</h2>
           </div>
           <p className="mb-4 text-[10px] text-muted-foreground">
-            Each saved profile resolves to a provider connection and the full execution stack: generation, retrieval, processing, fallback, and policy.
+            Each saved profile resolves to a provider connection and the full execution stack: generation, retrieval, processing, fallback, and output budget.
           </p>
           <div className="grid gap-4 md:grid-cols-2">
             {profiles.map((profile) => (
@@ -644,65 +611,7 @@ export default function PreferencesPage() {
 
         <Separator />
 
-        <GlassCard>
-          <div className="mb-3 flex items-center gap-2">
-            <Settings2 className="h-4 w-4 text-glow-warning" />
-            <h3 className="text-sm font-medium text-foreground">Workflow Defaults</h3>
-          </div>
-          <p className="mb-3 text-[10px] text-muted-foreground">
-            Workflows bind to runtime profiles rather than raw models so that routing, retrieval, and document processing stay coherent.
-          </p>
-          <div className="space-y-1">
-            {workflowDefaults.map((workflowDefault) => {
-              const profile = profiles.find((item) => item.id === workflowDefault.profileId);
-              const connection = profile ? connectionsById[profile.primaryConnectionId] : undefined;
-
-              return (
-                <div key={workflowDefault.workflowId} className="flex items-center justify-between gap-3 py-1.5">
-                  <div className="min-w-0 flex-1">
-                    <span className="text-xs text-foreground">{workflowDefault.label}</span>
-                    {connection && <p className="text-[9px] text-muted-foreground">via {connection.name}</p>}
-                  </div>
-                  <Select value={workflowDefault.profileId} onValueChange={(value) => handleWorkflowDefaultChange(workflowDefault.workflowId, value)}>
-                    <SelectTrigger className="h-7 w-[210px] bg-secondary/20 text-[10px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {profiles.map((profileOption) => (
-                        <SelectItem key={profileOption.id} value={profileOption.id} className="text-xs">
-                          {profileOption.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              );
-            })}
-          </div>
-        </GlassCard>
-
-        <GlassCard>
-          <div className="mb-3 flex items-center gap-2">
-            <Shield className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Workspace Policy</h3>
-          </div>
-          <p className="mb-3 text-[10px] text-muted-foreground">
-            Workspace-level policy expresses what this workspace allows by default. Live runtime routing and diagnostics stay in Runtime Controls.
-          </p>
-          <div className="space-y-2">
-            {normalizedData.connection_policy_rules.map((rule) => (
-              <div key={rule.id} className="flex items-center justify-between gap-4 rounded-lg border border-border/40 bg-secondary/10 px-3 py-2.5">
-                <div className="flex-1">
-                  <Label className="text-xs text-foreground">{rule.label}</Label>
-                  <p className="text-[10px] text-muted-foreground">{rule.description}</p>
-                </div>
-                <Switch checked={rule.enabled} disabled={isBusy} onCheckedChange={(checked) => handlePolicyRuleChange(rule.id, checked)} />
-              </div>
-            ))}
-          </div>
-        </GlassCard>
-
-        <GlassCard>
+        <GlassCard data-tour="preferences-operator">
           <div className="mb-3 flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
             <h3 className="text-sm font-medium text-foreground">Operator Preferences</h3>
@@ -756,21 +665,6 @@ export default function PreferencesPage() {
           </div>
           ) : null}
         </GlassCard>
-
-        <div className="rounded-xl border border-border/40 bg-secondary/10 px-4 py-3">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="mt-0.5 h-3.5 w-3.5 text-muted-foreground" />
-            <div className="space-y-1">
-              <p className="text-[10px] text-muted-foreground">
-                Preferences are now backed by a live workspace contract. Active runtime profile changes are synchronized with Runtime Controls.
-              </p>
-              <p className="text-[10px] text-muted-foreground">Last updated: {formatPreferencesUpdatedAt(normalizedData.updated_at)}</p>
-              {(normalizedData.credential_policy.notes || []).map((note) => (
-                <p key={note} className="text-[10px] text-muted-foreground">• {note}</p>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
     </motion.div>
   );

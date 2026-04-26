@@ -38,17 +38,15 @@ export function formatRuntimeUpdatedAt(value?: string | null): string {
 
 export function deriveRuntimeFallbackChain(profile: RuntimeProfile, payload: RuntimeControlsResponse | undefined) {
   const connections = payload?.available_connections ?? [];
-  const modelsByConnection = payload?.options.modelsByConnection ?? {};
-  return connections
-    .filter((connection) => connection.id !== profile.primaryConnectionId)
-    .filter((connection) => connection.capabilities.generation)
-    .filter((connection) => connection.status === 'connected')
-    .slice(0, 2)
-    .map((connection) => ({
-      connectionId: connection.id,
-      model: (modelsByConnection[connection.id] || [connection.preferredModel]).filter(Boolean)[0] || connection.preferredModel,
-      label: `Fallback to ${connection.name}`,
-    }));
+  const connectionsById = Object.fromEntries(connections.map((connection) => [connection.id, connection]));
+  return (profile.fallbackChain || []).map((step) => {
+    const connection = connectionsById[step.connectionId];
+    return {
+      connectionId: step.connectionId,
+      model: step.model || connection?.preferredModel || '',
+      label: step.label || `Fallback to ${connection?.name ?? step.connectionId}`,
+    };
+  });
 }
 
 export function deriveRuntimeWorkflowFit(profile: RuntimeProfile, primaryConnection: ProviderConnection | undefined): WorkflowFit[] {

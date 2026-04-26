@@ -20,7 +20,6 @@ import { AiLabMetricGrid } from '../components/ai-lab/AiLabMetricGrid';
 import { GlassCard, StatusPill } from '../components/shared/ui-components';
 import { aiLabQueryKeys, getLabRuntimePage } from '../lib/ai-lab-data';
 import type { LabRuntimePayload } from '../lib/ai-lab-data';
-import { Progress } from '../components/ui/progress';
 import { Input } from '../components/ui/input';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
@@ -31,7 +30,7 @@ const latencyChartConfig = {
 
 const timelineChartConfig = {
   latencyS: { label: 'Latency (s)' },
-  contextPressurePct: { label: 'Context pressure %' },
+  contextPressurePct: { label: 'Grounding coverage %' },
 };
 
 function asPercent(value?: number | null) {
@@ -42,6 +41,99 @@ function asPercent(value?: number | null) {
 function asNumber(value?: number | null, digits = 1) {
   if (typeof value !== 'number' || Number.isNaN(value)) return '—';
   return value.toFixed(digits);
+}
+
+function coverageTone(value?: number | null) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return 'text-foreground';
+  if (value >= 90) return 'text-glow-warning';
+  if (value <= 35) return 'text-primary';
+  return 'text-foreground';
+}
+
+function percentile(values: number[], fraction: number) {
+  if (!values.length) return 0;
+  const ordered = [...values].sort((a, b) => a - b);
+  const rank = (ordered.length - 1) * fraction;
+  const lower = Math.floor(rank);
+  const upper = Math.ceil(rank);
+  if (lower === upper) return ordered[lower];
+  const weight = rank - lower;
+  return ordered[lower] * (1 - weight) + ordered[upper] * weight;
+}
+
+function formatCoveragePct(value?: number | null) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '—';
+  return `${Math.round(value)}%`;
+}
+
+function coveragePosture(value?: number | null) {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return {
+      label: 'Coverage pending',
+      detail: 'Recent runs have not emitted grounded evidence usage yet.',
+      tone: 'text-muted-foreground',
+    };
+  }
+  if (value >= 90) {
+    return {
+      label: 'Near-full packet',
+      detail: 'The run consumed nearly all of the selected evidence packet.',
+      tone: 'text-glow-warning',
+    };
+  }
+  if (value >= 60) {
+    return {
+      label: 'Broad grounding',
+      detail: 'The run used a large portion of the selected evidence.',
+      tone: 'text-foreground',
+    };
+  }
+  if (value >= 30) {
+    return {
+      label: 'Selective grounding',
+      detail: 'The run grounded against a focused slice of the available evidence.',
+      tone: 'text-primary',
+    };
+  }
+  return {
+    label: 'Minimal grounding',
+    detail: 'Only a small slice of the selected evidence packet was consumed.',
+    tone: 'text-primary',
+  };
+}
+
+function coverageVarianceLabel(minValue?: number | null, maxValue?: number | null) {
+  if (typeof minValue !== 'number' || typeof maxValue !== 'number' || Number.isNaN(minValue) || Number.isNaN(maxValue)) {
+    return 'Coverage pending';
+  }
+  const spread = maxValue - minValue;
+  if (spread >= 45) return 'High variance';
+  if (spread >= 20) return 'Mixed packet sizes';
+  return 'Stable packet size';
+}
+
+function formatTraceTokenLabel(totalTokens: number, estimated?: boolean) {
+  const formatted = Math.round(totalTokens || 0).toLocaleString();
+  return estimated ? `${formatted} est.` : formatted;
+}
+
+function formatTraceEvidenceLabel(trace: { documentCount?: number; retrievedChunkCount?: number; sourceCount: number }) {
+  const documentCount = typeof trace.documentCount === 'number' ? trace.documentCount : undefined;
+  const retrievedChunkCount = typeof trace.retrievedChunkCount === 'number' ? trace.retrievedChunkCount : undefined;
+
+  if (typeof documentCount === 'number' || typeof retrievedChunkCount === 'number') {
+    const parts = [];
+    if (typeof documentCount === 'number') {
+      parts.push(`${documentCount} doc${documentCount === 1 ? '' : 's'}`);
+    }
+    if (typeof retrievedChunkCount === 'number') {
+      parts.push(`${retrievedChunkCount} retrieved chunk${retrievedChunkCount === 1 ? '' : 's'}`);
+    }
+    return parts.join(' · ');
+  }
+
+  const sourceCount = Math.max(0, trace.sourceCount ?? 0);
+  return `${sourceCount} source${sourceCount === 1 ? '' : 's'}`;
 }
 
 function parseDecimalInput(raw: string) {
@@ -74,8 +166,50 @@ export default function RuntimeObservabilityPage() {
   const timeline = data?.timeline ?? [];
   const watchouts = data?.watchouts ?? [];
 
-  const contextPressure = Math.round(runtime?.contextPressurePct ?? Math.min((runtime?.contextPressure ?? 0) * 100, 100));
-  const contextUtilization = Math.round(runtime?.contextUtilizationPct ?? 0);
+  const sourceCoverageValues = (timeline.length ? timeline : recentTraces)
+    .map((item) => item.contextPressurePct)
+    .filter((value): value is number => typeof value === 'number' && !Number.isNaN(value));
+  const coverageSignalRuns = Math.max(0, Math.round(runtime?.sourceCoverageRunCount ?? sourceCoverageValues.length));
+  const totalWindowRuns = Math.max(coverageSignalRuns, data?.surface_window?.size ?? recentTraces.length ?? 0);
+  const avgSourceCoverageRaw = runtime?.avgSourceCoveragePct ?? runtime?.avgContextUtilizationPct ?? retrievalHealth?.avgContextUtilizationPct;
+  const avgSourceCoverage = Math.round(
+    typeof avgSourceCoverageRaw === 'number' && avgSourceCoverageRaw > 0
+      ? avgSourceCoverageRaw
+      : (sourceCoverageValues.length ? sourceCoverageValues.reduce((sum, value) => sum + value, 0) / sourceCoverageValues.length : 0),
+  );
+  const medianSourceCoverage = Math.round(
+    typeof runtime?.medianSourceCoveragePct === 'number' && runtime.medianSourceCoveragePct > 0
+      ? runtime.medianSourceCoveragePct
+      : percentile(sourceCoverageValues, 0.5),
+  );
+  const p90SourceCoverage = Math.round(
+    typeof runtime?.p90SourceCoveragePct === 'number' && runtime.p90SourceCoveragePct > 0
+      ? runtime.p90SourceCoveragePct
+      : percentile(sourceCoverageValues, 0.9),
+  );
+  const latestSourceCoverage = Math.round(
+    typeof runtime?.latestSourceCoveragePct === 'number' && runtime.latestSourceCoveragePct > 0
+      ? runtime.latestSourceCoveragePct
+      : (recentTraces[0]?.contextPressurePct ?? sourceCoverageValues[sourceCoverageValues.length - 1] ?? avgSourceCoverage),
+  );
+  const minSourceCoverage = Math.round(
+    typeof runtime?.minSourceCoveragePct === 'number' && runtime.minSourceCoveragePct > 0
+      ? runtime.minSourceCoveragePct
+      : (sourceCoverageValues.length ? Math.min(...sourceCoverageValues) : latestSourceCoverage),
+  );
+  const maxSourceCoverage = Math.round(
+    typeof runtime?.maxSourceCoveragePct === 'number' && runtime.maxSourceCoveragePct > 0
+      ? runtime.maxSourceCoveragePct
+      : (sourceCoverageValues.length ? Math.max(...sourceCoverageValues) : latestSourceCoverage),
+  );
+  const sourceCoverageHighRunCount = Math.max(0, Math.round(runtime?.sourceCoverageHighRunCount ?? sourceCoverageValues.filter((value) => value >= 90).length));
+  const sourceCoverageFocusedRunCount = Math.max(0, Math.round(runtime?.sourceCoverageFocusedRunCount ?? sourceCoverageValues.filter((value) => value < 35).length));
+  const sourceCoverageBalancedRunCount = Math.max(0, Math.round(runtime?.sourceCoverageBalancedRunCount ?? sourceCoverageValues.filter((value) => value >= 35 && value < 85).length));
+  const sourceCoverageBroadRunCount = Math.max(0, Math.round(runtime?.sourceCoverageBroadRunCount ?? sourceCoverageValues.filter((value) => value >= 85).length));
+  const sourceCoverageSpreadLabel = coverageSignalRuns > 0 ? `${minSourceCoverage}%–${maxSourceCoverage}%` : '—';
+  const typicalCoveragePosture = coveragePosture(coverageSignalRuns > 0 ? (medianSourceCoverage || avgSourceCoverage) : null);
+  const latestCoveragePosture = coveragePosture(coverageSignalRuns > 0 ? latestSourceCoverage : null);
+  const coverageVariance = coverageVarianceLabel(minSourceCoverage, maxSourceCoverage);
   const [promptCostPer1k, setPromptCostPer1k] = useState('0');
   const [completionCostPer1k, setCompletionCostPer1k] = useState('0');
 
@@ -93,14 +227,15 @@ export default function RuntimeObservabilityPage() {
   const promptTokenBasis = costSummary?.totalPromptTokens ?? 0;
   const completionTokenBasis = costSummary?.totalCompletionTokens ?? 0;
   const simulationHasBasis = promptTokenBasis > 0 || completionTokenBasis > 0;
-  const simulatedTotalUsd = useMemo(() => ((promptTokenBasis ?? 0) / 1000) * promptRate + ((completionTokenBasis ?? 0) / 1000) * completionRate, [completionTokenBasis, promptRate, promptTokenBasis, completionRate]);
-  const simulatedAvgUsd = useMemo(() => ((costSummary?.avgPromptTokens ?? 0) / 1000) * promptRate + ((costSummary?.avgCompletionTokens ?? 0) / 1000) * completionRate, [costSummary?.avgCompletionTokens, costSummary?.avgPromptTokens, completionRate, promptRate]);
+  const simulatedTotalUsd = useMemo(() => ((promptTokenBasis ?? 0) / 1_000_000) * promptRate + ((completionTokenBasis ?? 0) / 1_000_000) * completionRate, [completionTokenBasis, promptRate, promptTokenBasis, completionRate]);
+  const simulatedAvgUsd = useMemo(() => ((costSummary?.avgPromptTokens ?? 0) / 1_000_000) * promptRate + ((costSummary?.avgCompletionTokens ?? 0) / 1_000_000) * completionRate, [costSummary?.avgCompletionTokens, costSummary?.avgPromptTokens, completionRate, promptRate]);
   const simulatedDeltaUsd = simulatedTotalUsd - (costSummary?.totalCostUsd ?? 0);
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <AiLabSectionIntro
-        title="Runtime & Observability"
+      <div data-tour="lab-runtime-header">
+        <AiLabSectionIntro
+          title="Runtime & Observability"
         description="Operational posture for the AI runtime — configuration applied, throughput, latency, retrieval health, cost signals and recent trace issues."
         operatorQuestion="Is the runtime healthy enough to operate, and where should I escalate next if it is not?"
         badges={[
@@ -116,7 +251,8 @@ export default function RuntimeObservabilityPage() {
         dataSource={data?.meta?.source}
         surfaceStatus={data?.status}
         degradedReason={data?.degraded_reason}
-      />
+        />
+      </div>
 
       {isError && (
         <GlassCard className="mb-6 border border-glow-warning/20 bg-glow-warning/5">
@@ -127,8 +263,9 @@ export default function RuntimeObservabilityPage() {
         </GlassCard>
       )}
 
-      <AiLabMetricGrid
-        columns={6}
+      <div data-tour="lab-runtime-metrics">
+        <AiLabMetricGrid
+          columns={6}
         metrics={[
           {
             label: 'Success Rate',
@@ -167,25 +304,26 @@ export default function RuntimeObservabilityPage() {
             icon: Radar,
           },
         ]}
-      />
+        />
+      </div>
 
       <p className="mb-4 text-[11px] text-muted-foreground">Operational KPIs, watchouts and trace details below are scoped to <span className="text-foreground">{surfaceWindowLabel}</span>, so old lab experiments do not dominate the page.</p>
 
-      <div className="grid lg:grid-cols-5 gap-3 mb-6">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 mb-6" data-tour="lab-runtime-summary-cards">
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Dominant provider</p>
           <p className="mt-2 text-sm font-semibold text-foreground">{strongestProvider ? `${strongestProvider.provider} · ${strongestProvider.model}` : 'No persisted provider slice yet'}</p>
           <p className="mt-1 text-xs text-muted-foreground">{strongestProvider ? `${strongestProvider.runs} of ${data?.surface_window?.size ?? strongestProvider.runs} runs · ${Math.round(strongestProvider.errorRate * 100)}% error rate` : 'Provider/model mix appears once runtime traces exist.'}</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Context utilization</p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">{runtime ? `${contextUtilization}%` : '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Real observed context usage from the latest product trace that reported a budget.</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Typical grounding usage</p>
+          <p className={`mt-2 text-lg font-semibold ${typicalCoveragePosture.tone}`}>{coverageSignalRuns > 0 ? typicalCoveragePosture.label : 'Coverage pending'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{coverageSignalRuns > 0 ? `Median ${formatCoveragePct(medianSourceCoverage)} · avg ${formatCoveragePct(avgSourceCoverage)} across ${coverageSignalRuns} observed run${coverageSignalRuns === 1 ? '' : 's'}.` : 'Recent runs have not emitted a usable grounded evidence coverage signal yet.'}</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Context pressure</p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">{runtime ? `${contextPressure}%` : '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Derived pressure signal from the latest product trace. Useful for triage, not a substitute for evals.</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Grounding variance</p>
+          <p className="mt-2 text-lg font-semibold text-foreground">{coverageSignalRuns > 1 ? coverageVariance : 'Not enough signal yet'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{coverageSignalRuns > 1 ? `Range ${sourceCoverageSpreadLabel} in ${surfaceWindowLabel}. ${sourceCoverageHighRunCount} run${sourceCoverageHighRunCount === 1 ? '' : 's'} reached 90%+ packet usage.` : 'Variance becomes meaningful once multiple grounded runs are retained.'}</p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Cost visibility</p>
@@ -193,28 +331,9 @@ export default function RuntimeObservabilityPage() {
           <p className="mt-1 text-xs text-muted-foreground">How much of runtime traffic has usable cost accounting attached.</p>
           <p className="mt-2 text-[10px] text-muted-foreground">Real observed: {typeof costSummary?.totalCostUsd === 'number' ? `$${costSummary.totalCostUsd.toFixed(4)}` : '—'} total</p>
         </GlassCard>
-        <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Cost simulation</p>
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            <div>
-              <p className="text-[10px] text-muted-foreground mb-1">Prompt / 1k</p>
-              <Input value={promptCostPer1k} onChange={(event) => setPromptCostPer1k(event.target.value)} inputMode="decimal" placeholder="ex. 0.002 or 0,002" className="h-8 text-xs" />
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground mb-1">Completion / 1k</p>
-              <Input value={completionCostPer1k} onChange={(event) => setCompletionCostPer1k(event.target.value)} inputMode="decimal" placeholder="ex. 0.006 or 0,006" className="h-8 text-xs" />
-            </div>
-          </div>
-          <p className="mt-2 text-sm font-semibold text-foreground">${simulatedTotalUsd.toFixed(4)} simulated total</p>
-          <p className="mt-1 text-xs text-muted-foreground">Avg simulated run: ${simulatedAvgUsd.toFixed(4)}</p>
-          <p className="mt-1 text-[10px] text-muted-foreground">Delta vs real observed: <span className={simulatedDeltaUsd >= 0 ? 'text-glow-warning' : 'text-glow-success'}>{simulatedDeltaUsd >= 0 ? '+' : ''}${simulatedDeltaUsd.toFixed(4)}</span></p>
-          <p className="mt-2 text-[10px] text-muted-foreground">Basis: {promptTokenBasis.toLocaleString()} prompt tokens + {completionTokenBasis.toLocaleString()} completion tokens captured in persisted traces.</p>
-          {!simulationHasBasis ? <p className="mt-1 text-[10px] text-glow-warning">This workspace still has no prompt/completion token split recorded, so the simulation cannot move yet.</p> : null}
-          <p className="mt-1 text-[10px] text-muted-foreground">Accepts dot or comma decimal notation. This changes only the simulation, not the real observed cost.</p>
-        </GlassCard>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4 mb-6">
+      <div className="grid lg:grid-cols-2 gap-4 mb-6" data-tour="lab-runtime-config">
         <GlassCard delay={0.1}>
           <div className="flex items-center gap-2 mb-4">
             <Cpu className="w-4 h-4 text-primary" />
@@ -250,78 +369,169 @@ export default function RuntimeObservabilityPage() {
         </GlassCard>
       </div>
 
-      <div className="grid xl:grid-cols-[0.95fr,1.05fr] gap-4 mb-6">
-        <GlassCard delay={0.2}>
+      <div className="grid xl:grid-cols-[1.08fr,0.92fr] gap-4 mb-6">
+        <GlassCard delay={0.2} data-tour="lab-runtime-grounding">
           <div className="flex items-center gap-2 mb-4">
             <Gauge className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Context Envelope</h3>
+            <h3 className="text-sm font-medium text-foreground">Grounded Evidence Usage</h3>
             {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
           </div>
-          <div className="space-y-4 text-xs">
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <span className="text-muted-foreground">Latest measured utilization</span>
-                <span className={`font-medium ${contextUtilization > 85 ? 'text-glow-warning' : 'text-glow-success'}`}>{runtime ? `${contextUtilization}%` : '—'}</span>
-              </div>
-              <Progress value={runtime ? contextUtilization : 0} className="h-2 bg-secondary" />
-              <p className="mt-2 text-[10px] text-muted-foreground">
-                Used {runtime?.contextBudgetUsed?.toLocaleString() ?? '—'} of {runtime?.contextBudgetTotal?.toLocaleString() ?? '—'} context units in the latest trace that reported a budget.
-              </p>
-            </div>
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <span className="text-muted-foreground">Derived pressure signal</span>
-                <span className={`font-medium ${contextPressure > 80 ? 'text-glow-warning' : 'text-glow-success'}`}>{runtime ? `${contextPressure}%` : '—'}</span>
-              </div>
-              <Progress value={runtime ? contextPressure : 0} className="h-2 bg-secondary" />
-              <p className="mt-2 text-[10px] text-muted-foreground">
-                Pressure is inferred from the runtime log. It is useful for operator triage, but not a replacement for regression evidence.
-              </p>
-            </div>
-            <div className="rounded-lg border border-border/30 bg-secondary/20 p-3 text-[10px] text-muted-foreground">
-              A senior AI engineer would expect both numbers: utilization tells you what the latest trace actually consumed, while pressure tells you whether the runtime is trending toward context risk.
-            </div>
+          <div className="mb-4 rounded-lg border border-border/30 bg-secondary/20 px-3 py-2.5">
+            <p className="text-[11px] text-muted-foreground">
+              This panel tracks how much <span className="text-foreground">selected evidence</span> each run actually consumed. It is intentionally separate from the model's max prompt window, so a 100% value here usually means <span className="text-foreground">"used almost the whole evidence packet"</span>, not <span className="text-foreground">"blew the LLM context window"</span>.
+            </p>
           </div>
-        </GlassCard>
-
-        <GlassCard delay={0.25}>
-          <div className="flex items-center gap-2 mb-4">
-            <Timer className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Latency Breakdown</h3>
-            {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
-          </div>
-          {latencyBreakdown.length === 0 ? (
-            <p className="text-xs text-muted-foreground">Stage timing breakdown appears once recent product runs include stage timings.</p>
+          {coverageSignalRuns <= 0 ? (
+            <div className="rounded-lg border border-border/30 bg-secondary/20 p-4 text-xs text-muted-foreground">
+              Grounded evidence usage will appear once recent runtime traces emit a usable coverage signal.
+            </div>
           ) : (
-            <>
-              <div className="h-[220px]">
-                <ChartContainer config={latencyChartConfig} className="w-full h-full">
-                  <BarChart data={latencyBreakdown} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
-                    <XAxis dataKey="stage" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                    <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="seconds" fill="hsl(217, 91%, 60%)" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ChartContainer>
+            <div className="space-y-4 text-xs">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-lg border border-border/30 bg-secondary/10 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Typical posture</p>
+                  <p className={`mt-2 text-sm font-semibold ${typicalCoveragePosture.tone}`}>{typicalCoveragePosture.label}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Median {formatCoveragePct(medianSourceCoverage)} · p90 {formatCoveragePct(p90SourceCoverage)}</p>
+                </div>
+                <div className="rounded-lg border border-border/30 bg-secondary/10 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Latest run</p>
+                  <p className={`mt-2 text-sm font-semibold ${latestCoveragePosture.tone}`}>{latestCoveragePosture.label}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Latest run used {formatCoveragePct(latestSourceCoverage)} of the selected evidence packet.</p>
+                </div>
+                <div className="rounded-lg border border-border/30 bg-secondary/10 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Coverage signal</p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{coverageSignalRuns}/{totalWindowRuns || coverageSignalRuns} runs</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Coverage telemetry was retained for this many runs in the current window.</p>
+                </div>
+                <div className="rounded-lg border border-border/30 bg-secondary/10 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Near-full packet runs</p>
+                  <p className={`mt-2 text-sm font-semibold ${coverageTone(maxSourceCoverage)}`}>{sourceCoverageHighRunCount} run{sourceCoverageHighRunCount === 1 ? '' : 's'}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">These runs landed at 90%+ evidence usage, which is worth checking for over-broad grounding.</p>
+                </div>
               </div>
-              <div className="mt-2 space-y-1">
-                <p className="text-[11px] text-muted-foreground">
-                  Average observed stage latency across {surfaceWindowLabel} totals {latencyTotal ? `${latencyTotal.toFixed(1)}s` : '—'}.
+
+              <div className="rounded-lg border border-border/30 bg-secondary/10 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Coverage mix in recent runs</p>
+                    <p className="mt-1 text-sm font-medium text-foreground">{coverageVariance}</p>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">Range {sourceCoverageSpreadLabel}</p>
+                </div>
+                <div className="mt-3 grid gap-3 md:grid-cols-3">
+                  <div className="rounded-lg border border-border/20 bg-background/30 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Focused</p>
+                    <p className="mt-2 text-lg font-semibold text-primary">{sourceCoverageFocusedRunCount}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">Below 35% packet usage. Usually targeted evidence selection.</p>
+                  </div>
+                  <div className="rounded-lg border border-border/20 bg-background/30 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Balanced</p>
+                    <p className="mt-2 text-lg font-semibold text-foreground">{sourceCoverageBalancedRunCount}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">35–84% packet usage. Usually the healthiest operating band.</p>
+                  </div>
+                  <div className="rounded-lg border border-border/20 bg-background/30 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Near-full</p>
+                    <p className={`mt-2 text-lg font-semibold ${coverageTone(maxSourceCoverage)}`}>{sourceCoverageBroadRunCount}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">85%+ packet usage. Check whether the workflow is carrying too much evidence.</p>
+                  </div>
+                </div>
+                <p className="mt-3 text-[10px] text-muted-foreground">
+                  {latestCoveragePosture.detail} Median is {formatCoveragePct(medianSourceCoverage)} across {coverageSignalRuns} observed run{coverageSignalRuns === 1 ? '' : 's'}, while the window average is {formatCoveragePct(avgSourceCoverage)}.
                 </p>
-                {latencyBreakdownMeta?.instrumentedRuns ? (
-                  <p className="text-[10px] text-muted-foreground">
-                    Stage timings were recorded on {latencyBreakdownMeta.instrumentedRuns} of {latencyBreakdownMeta.totalRuns ?? latencyBreakdownMeta.instrumentedRuns} selected runs.
+                {typeof runtime?.contextBudgetUsed === 'number' && typeof runtime?.contextBudgetTotal === 'number' && runtime.contextBudgetTotal > 0 ? (
+                  <p className="mt-2 text-[10px] text-muted-foreground">
+                    Latest grounded evidence packet: {runtime.contextBudgetUsed.toLocaleString()} of {runtime.contextBudgetTotal.toLocaleString()} characters used.
                   </p>
                 ) : null}
               </div>
-            </>
+            </div>
           )}
         </GlassCard>
+
+        <div className="grid gap-4 xl:grid-rows-[minmax(0,1fr)_auto]">
+          <GlassCard delay={0.25} data-tour="lab-runtime-latency">
+            <div className="flex items-center gap-2 mb-4">
+              <Timer className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-medium text-foreground">Latency Breakdown</h3>
+              {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
+            </div>
+            {latencyBreakdown.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Stage timing breakdown appears once recent product runs include stage timings.</p>
+            ) : (
+              <>
+                <div className="h-[220px]">
+                  <ChartContainer config={latencyChartConfig} className="w-full h-full">
+                    <BarChart data={latencyBreakdown} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                      <XAxis dataKey="stage" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                      <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="seconds" fill="hsl(217, 91%, 60%)" radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                  </ChartContainer>
+                </div>
+                <div className="mt-2 space-y-1">
+                  <p className="text-[11px] text-muted-foreground">
+                    Average observed stage latency across {surfaceWindowLabel} totals {latencyTotal ? `${latencyTotal.toFixed(1)}s` : '—'}.
+                  </p>
+                  {latencyBreakdownMeta?.instrumentedRuns ? (
+                    <p className="text-[10px] text-muted-foreground">
+                      Stage timings were recorded on {latencyBreakdownMeta.instrumentedRuns} of {latencyBreakdownMeta.totalRuns ?? latencyBreakdownMeta.instrumentedRuns} selected runs.
+                    </p>
+                  ) : null}
+                </div>
+              </>
+            )}
+          </GlassCard>
+
+          <GlassCard delay={0.27} data-tour="lab-runtime-cost-simulation">
+            <div className="flex items-center gap-2 mb-4">
+              <Coins className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-medium text-foreground">Cost Simulation</h3>
+              {data?.meta?.source && <DataSourceBadge source={data.meta.source} />}
+            </div>
+            <p className="mb-3 text-[11px] text-muted-foreground">
+              Model your expected runtime spend using provider-style pricing per 1M tokens. This only changes the simulation, never the real observed cost.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-[10px] text-muted-foreground mb-1">Input / 1M tokens</p>
+                <Input value={promptCostPer1k} onChange={(event) => setPromptCostPer1k(event.target.value)} inputMode="decimal" placeholder="ex. 0.15 or 0,15" className="h-8 text-xs" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground mb-1">Output / 1M tokens</p>
+                <Input value={completionCostPer1k} onChange={(event) => setCompletionCostPer1k(event.target.value)} inputMode="decimal" placeholder="ex. 0.60 or 0,60" className="h-8 text-xs" />
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-border/30 bg-secondary/10 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Simulated total</p>
+                <p className="mt-2 text-sm font-semibold text-foreground">${simulatedTotalUsd.toFixed(4)}</p>
+              </div>
+              <div className="rounded-lg border border-border/30 bg-secondary/10 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Avg simulated run</p>
+                <p className="mt-2 text-sm font-semibold text-foreground">${simulatedAvgUsd.toFixed(4)}</p>
+              </div>
+              <div className="rounded-lg border border-border/30 bg-secondary/10 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Delta vs real</p>
+                <p className={`mt-2 text-sm font-semibold ${simulatedDeltaUsd >= 0 ? 'text-glow-warning' : 'text-glow-success'}`}>
+                  {simulatedDeltaUsd >= 0 ? '+' : ''}${simulatedDeltaUsd.toFixed(4)}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 rounded-lg border border-border/30 bg-secondary/10 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Simulation basis</p>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                {promptTokenBasis.toLocaleString()} input tokens + {completionTokenBasis.toLocaleString()} output tokens captured across {surfaceWindowLabel}.
+              </p>
+              {!simulationHasBasis ? <p className="mt-2 text-[10px] text-glow-warning">This workspace still has no input/output token split recorded, so the simulation cannot move yet.</p> : null}
+            </div>
+          </GlassCard>
+        </div>
       </div>
 
       <div className="grid xl:grid-cols-[1.05fr,0.95fr] gap-4 mb-6">
-        <GlassCard delay={0.3}>
+        <GlassCard delay={0.3} data-tour="lab-runtime-trend">
           <div className="flex items-center gap-2 mb-4">
             <ArrowRightLeft className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Recent Product Run Trend</h3>
@@ -335,20 +545,21 @@ export default function RuntimeObservabilityPage() {
                 <AreaChart data={timeline} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
                   <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis yAxisId="latency" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis yAxisId="pressure" orientation="right" domain={[0, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area type="monotone" dataKey="latencyS" stroke="hsl(217, 91%, 60%)" fill="hsl(217, 91%, 60%)" fillOpacity={0.18} />
-                  <Area type="monotone" dataKey="contextPressurePct" stroke="hsl(38, 92%, 50%)" fill="hsl(38, 92%, 50%)" fillOpacity={0.12} />
+                  <Area yAxisId="latency" type="monotone" dataKey="latencyS" stroke="hsl(217, 91%, 60%)" fill="hsl(217, 91%, 60%)" fillOpacity={0.18} />
+                  <Area yAxisId="pressure" type="monotone" dataKey="contextPressurePct" stroke="hsl(38, 92%, 50%)" fill="hsl(38, 92%, 50%)" fillOpacity={0.12} />
                 </AreaChart>
               </ChartContainer>
             </div>
           )}
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Chronological view across {surfaceWindowLabel}. Use Benchmarks for model comparisons and Evals & Diagnosis for real quality regressions.
+            Chronological view across {surfaceWindowLabel}. The amber curve is grounding coverage, so spikes mean a run consumed more of the selected evidence packet — not necessarily that the model window was exhausted. Use Benchmarks for model comparisons and Evals & Diagnosis for real quality regressions.
           </p>
         </GlassCard>
 
-        <GlassCard delay={0.32}>
+        <GlassCard delay={0.32} data-tour="lab-runtime-retrieval-cost">
           <div className="flex items-center gap-2 mb-4">
             <Radar className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Retrieval & Cost Signals</h3>
@@ -388,7 +599,7 @@ export default function RuntimeObservabilityPage() {
       </div>
 
       <div className="grid xl:grid-cols-[0.9fr,1.1fr] gap-4 mb-6">
-        <GlassCard delay={0.34}>
+        <GlassCard delay={0.34} data-tour="lab-runtime-vector-diagnostics">
           <div className="flex items-center gap-2 mb-4">
             <HardDrive className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Vector Backend & Diagnostics</h3>
@@ -412,7 +623,7 @@ export default function RuntimeObservabilityPage() {
           </div>
         </GlassCard>
 
-        <GlassCard delay={0.36}>
+        <GlassCard delay={0.36} data-tour="lab-runtime-trace-watchlist">
           <div className="flex items-center gap-2 mb-4">
             <GitBranch className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Recent Trace Watchlist</h3>
@@ -430,9 +641,9 @@ export default function RuntimeObservabilityPage() {
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-muted-foreground">
                 <span>Latency: {highlightedTrace.latencyS.toFixed(2)}s</span>
-                <span>Tokens: {highlightedTrace.totalTokens.toLocaleString()}</span>
-                <span>Context pressure: {highlightedTrace.contextPressurePct.toFixed(0)}%</span>
-                <span>Sources: {highlightedTrace.sourceCount}</span>
+                <span>Tokens: {formatTraceTokenLabel(highlightedTrace.totalTokens, highlightedTrace.tokensEstimated)}</span>
+                <span>Grounding coverage: {highlightedTrace.contextPressurePct.toFixed(0)}%</span>
+                <span>Evidence: {formatTraceEvidenceLabel(highlightedTrace)}</span>
               </div>
               {highlightedTrace.errorMessage ? <p className="mt-2 text-[10px] text-glow-warning">{highlightedTrace.errorMessage}</p> : null}
             </div>
@@ -443,15 +654,15 @@ export default function RuntimeObservabilityPage() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-medium text-foreground">{trace.task}</p>
-                    <p className="text-[10px] text-muted-foreground">{new Date(trace.timestamp).toLocaleString()} · {trace.taskDetail ? `${trace.taskDetail} · ` : ''}{trace.provider}</p>
+                    <p className="text-[10px] text-muted-foreground">{new Date(trace.timestamp).toLocaleString()} · {trace.taskDetail ? `${trace.taskDetail} · ` : ''}{trace.provider} · {trace.model}</p>
                   </div>
                   <StatusPill status={!trace.success ? 'error' : trace.needsReview ? 'warning' : 'completed'} />
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-muted-foreground">
                   <span>{trace.latencyS.toFixed(2)}s latency</span>
-                  <span>{trace.totalTokens.toLocaleString()} tokens</span>
-                  <span>{trace.contextPressurePct.toFixed(0)}% pressure</span>
-                  <span>{trace.sourceCount} source(s)</span>
+                  <span>{formatTraceTokenLabel(trace.totalTokens, trace.tokensEstimated)} tokens</span>
+                  <span>{trace.contextPressurePct.toFixed(0)}% grounding coverage</span>
+                  <span>{formatTraceEvidenceLabel(trace)}</span>
                 </div>
               </div>
             ))}
@@ -461,7 +672,7 @@ export default function RuntimeObservabilityPage() {
       </div>
 
       <div className="grid gap-4">
-        <GlassCard delay={0.38}>
+        <GlassCard delay={0.38} data-tour="lab-runtime-failure-modes">
           <div className="flex items-center gap-2 mb-4">
             <ShieldAlert className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Failure Modes & Watchouts</h3>

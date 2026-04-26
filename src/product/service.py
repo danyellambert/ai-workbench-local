@@ -8,6 +8,7 @@ from src.providers.registry import resolve_provider_runtime_profile
 from src.rag.loaders import LoadedDocument
 from src.rag.service import get_indexed_documents, normalize_rag_index, remove_documents_from_rag_index, upsert_documents_in_rag_index
 from src.services.document_context import build_structured_document_context
+from src.services.runtime_controls import resolve_runtime_fallback_provider
 from src.services.presentation_export import (
     ACTION_PLAN_EXPORT_KIND,
     CANDIDATE_REVIEW_EXPORT_KIND,
@@ -268,6 +269,25 @@ def list_product_documents(rag_settings: RagSettings) -> list[ProductDocumentRef
     return normalized
 
 
+
+
+class _BoundEmbeddingProvider:
+    def __init__(self, provider, forced_model: str | None = None):
+        self._provider = provider
+        self._forced_model = str(forced_model or "").strip() or None
+
+    def create_embeddings(self, texts, model, context_window=None, truncate=True):
+        effective_model = self._forced_model or str(model or "").strip()
+        return self._provider.create_embeddings(
+            texts,
+            model=effective_model,
+            context_window=context_window,
+            truncate=truncate,
+        )
+
+    def __getattr__(self, name):
+        return getattr(self._provider, name)
+
 def index_loaded_documents(
     documents: list[LoadedDocument],
     *,
@@ -277,15 +297,27 @@ def index_loaded_documents(
 ) -> tuple[list[ProductDocumentRef], dict[str, object]]:
     if not documents:
         return list_product_documents(rag_settings), {"ok": False, "message": "No documents were provided for indexing."}
+    workspace_root = rag_settings.store_path.parent
+    fallback_provider = resolve_runtime_fallback_provider("embeddings", workspace_root)
     runtime_profile = resolve_provider_runtime_profile(
         provider_registry,
         rag_settings.embedding_provider,
         capability="embeddings",
-        fallback_provider="ollama",
+        fallback_provider=fallback_provider,
     )
     embedding_provider = runtime_profile.get("provider_instance")
     if embedding_provider is None:
         raise RuntimeError("No embedding provider is available to index the uploaded documents.")
+    forced_model = str(rag_settings.embedding_model or "").strip()
+    effective_provider = str(runtime_profile.get("effective_provider") or "").strip()
+    requested_provider = str(rag_settings.embedding_provider or "").strip()
+    if effective_provider and requested_provider and effective_provider != requested_provider:
+        from src.services.runtime_controls import resolve_runtime_fallback_step
+        fallback_step = resolve_runtime_fallback_step("embeddings", workspace_root)
+        fallback_model = str((fallback_step or {}).get("model") or runtime_profile.get("default_model") or "").strip()
+        if fallback_model:
+            forced_model = fallback_model
+    embedding_provider = _BoundEmbeddingProvider(embedding_provider, forced_model)
     rag_index = _load_current_rag_index(rag_settings)
     updated_index, sync_status = upsert_documents_in_rag_index(
         documents=documents,

@@ -13,7 +13,6 @@ export type ExecutionPolicy =
   | 'local_only'
   | 'prefer_local_burst_hosted'
   | 'hosted_only'
-  | 'hosted_generation_local_embeddings'
   | 'hosted_deep_review'
   | 'cloud_reference_only'
   | 'cloud_selected_workflows'

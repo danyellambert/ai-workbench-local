@@ -6,6 +6,7 @@ from math import ceil
 from typing import Any
 
 from ..config import get_ollama_settings
+from ..services.runtime_controls import resolve_runtime_fallback_provider
 from .base import (
     ActionItem,
     ChecklistPayload,
@@ -66,7 +67,7 @@ class StructuredOutputService:
             registry,
             provider_name,
             capability="chat",
-            fallback_provider="ollama",
+            fallback_provider=resolve_runtime_fallback_provider("chat"),
         )
 
     def _resolve_context_window_cap(self, fallback_cap: int, *, effective_provider: str | None = None) -> int:
@@ -100,16 +101,22 @@ class StructuredOutputService:
 
         model = request.model or task_definition.default_model or provider_default_model or self.ollama_settings.default_model
         temperature = request.temperature if request.temperature is not None else task_definition.default_temperature
-        configured_context_window_cap = request.context_window or provider_default_context_window
-        context_window_cap = self._resolve_context_window_cap(
-            int(configured_context_window_cap),
-            effective_provider=effective_provider,
-        )
-        context_window = self.resolve_context_window(
-            request,
-            max_context_window=configured_context_window_cap,
-            effective_provider=effective_provider,
-        )
+        manual_context_window = int(request.context_window) if request.context_window is not None else None
+        if manual_context_window is not None:
+            # A concrete Runtime Controls value (4k/8k/16k/...) must be honored exactly.
+            # The automatic document-size heuristic is only allowed when the UI is set to Auto.
+            context_window_cap = manual_context_window
+            context_window = manual_context_window
+        else:
+            context_window_cap = self._resolve_context_window_cap(
+                int(provider_default_context_window),
+                effective_provider=effective_provider,
+            )
+            context_window = self.resolve_context_window(
+                request,
+                max_context_window=context_window_cap,
+                effective_provider=effective_provider,
+            )
         execution_request = request.model_copy(
             update={
                 "provider": requested_provider,

@@ -781,9 +781,10 @@ def retrieve_relevant_chunks_detailed(
         }
 
     vector_backend_status = inspect_vector_backend_status(rag_index, settings)
+    reranking_enabled = int(getattr(settings, "rerank_pool_size", 0) or 0) > 0
     candidate_pool_size = build_candidate_pool_size(
         top_k=settings.top_k,
-        rerank_pool_size=settings.rerank_pool_size,
+        rerank_pool_size=settings.rerank_pool_size if reranking_enabled else settings.top_k,
         filtered_chunks_count=len(filtered_chunks),
     )
     vector_candidates: list[dict[str, object]] = []
@@ -808,14 +809,28 @@ def retrieve_relevant_chunks_detailed(
             retrieval_strategy_fallback_reason = langchain_error or "langchain_returned_no_results"
 
     query_embedding = None
+    embedding_error: str | None = None
     if not vector_candidates:
-        query_embedding = embedding_provider.create_embeddings(
-            [query],
-            model=settings.embedding_model,
-            context_window=settings.embedding_context_window,
-            truncate=settings.embedding_truncate,
-        )[0]
+        try:
+            query_embedding = embedding_provider.create_embeddings(
+                [query],
+                model=settings.embedding_model,
+                context_window=settings.embedding_context_window,
+                truncate=settings.embedding_truncate,
+            )[0]
+        except Exception as error:
+            embedding_error = str(error)
+            logger.warning("Embedding generation failed; using lexical/document fallback: %s", error)
+            vector_backend_status = {
+                **vector_backend_status,
+                "status": "degraded",
+                "backend_ready": False,
+                "message": f"Embedding request failed: {error}",
+            }
+            backend_used = "lexical_fallback"
+            backend_message = f"Embedding request failed for `{settings.embedding_provider}` / `{settings.embedding_model}`; retrieval fell back to lexical ranking."
 
+    if not vector_candidates and query_embedding is not None:
         try:
             chroma_store = ChromaVectorStore(settings.chroma_path)
             chroma_results = chroma_store.similarity_search(
@@ -840,7 +855,7 @@ def retrieve_relevant_chunks_detailed(
                 "message": f"Chroma retrieval failure: {error}",
             }
 
-    if not vector_candidates:
+    if not vector_candidates and query_embedding is not None:
         store = LocalVectorStore(filtered_chunks)
         local_results = store.similarity_search(query_embedding, candidate_pool_size)
         vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in local_results]
@@ -848,30 +863,35 @@ def retrieve_relevant_chunks_detailed(
         backend_message = "Retrieval served by local fallback from the canonical JSON."
         effective_retrieval_strategy = "manual_hybrid"
 
-    lexical_candidates = rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)
-    reranked_chunks = hybrid_rerank_chunks(
-        query,
-        vector_candidates,
-        lexical_candidates,
-        top_k=settings.top_k,
-        lexical_weight=settings.rerank_lexical_weight,
-    )
+    if reranking_enabled:
+        lexical_candidates = rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)
+        selected_chunks = hybrid_rerank_chunks(
+            query,
+            vector_candidates,
+            lexical_candidates,
+            top_k=settings.top_k,
+            lexical_weight=settings.rerank_lexical_weight,
+        )
+    else:
+        selected_chunks = list(vector_candidates[: settings.top_k])
+        if not selected_chunks:
+            selected_chunks = rank_chunks_lexically(query, filtered_chunks, settings.top_k)
 
     return {
-        "chunks": reranked_chunks,
+        "chunks": selected_chunks,
         "backend_used": backend_used,
         "backend_message": backend_message,
         "filtered_chunks_available": len(filtered_chunks),
         "candidate_pool_size": candidate_pool_size,
-        "reranking_applied": True,
+        "reranking_applied": reranking_enabled,
         "vector_backend_status": vector_backend_status,
         "retrieval_strategy_requested": requested_retrieval_strategy,
         "retrieval_strategy_used": effective_retrieval_strategy,
         "retrieval_strategy_label": describe_retrieval_strategy(effective_retrieval_strategy),
         "retrieval_strategy_fallback_reason": retrieval_strategy_fallback_reason,
         "rerank_strategy": {
-            "type": "hybrid_vector_lexical",
-            "lexical_weight": settings.rerank_lexical_weight,
+            "type": "hybrid_vector_lexical" if reranking_enabled else "disabled",
+            "lexical_weight": settings.rerank_lexical_weight if reranking_enabled else 0.0,
             "candidate_pool_size": candidate_pool_size,
         },
     }

@@ -212,13 +212,14 @@ class TaskHandler:
 
     def _resolve_provider(self, request: TaskExecutionRequest):
         from ..providers.registry import resolve_provider_runtime_profile
+        from ..services.runtime_controls import resolve_runtime_fallback_provider
 
         registry = self._get_provider_registry()
         runtime_profile = resolve_provider_runtime_profile(
             registry,
             request.provider,
             capability="chat",
-            fallback_provider="ollama",
+            fallback_provider=resolve_runtime_fallback_provider("chat"),
         )
         requested_provider = str(runtime_profile.get("requested_provider") or request.provider or "ollama")
         provider_key = runtime_profile.get("effective_provider")
@@ -234,6 +235,18 @@ class TaskHandler:
             telemetry["provider_fallback_reason"] = fallback_reason
         return provider_entry["instance"]
 
+    def _build_provider_messages(self, request: TaskExecutionRequest, prompt: str) -> list[dict[str, str]]:
+        profile_key = str(request.prompt_profile or "").strip()
+        user_message = {"role": "user", "content": prompt}
+        if not profile_key:
+            return [user_message]
+        try:
+            from ..prompt_profiles import build_prompt_messages
+
+            return build_prompt_messages(profile_key, [user_message])
+        except Exception:
+            return [user_message]
+
     def _collect_response_text(self, provider, request: TaskExecutionRequest, prompt: str) -> str:
         from ..services.runtime_economics import get_provider_native_usage_metrics
 
@@ -242,7 +255,7 @@ class TaskHandler:
         started_at = time.perf_counter()
         error_message = None
         native_usage: dict[str, object] = {}
-        messages = [{"role": "user", "content": prompt}]
+        messages = self._build_provider_messages(request, prompt)
         try:
             stream = provider.stream_chat_completion(
                 messages=messages,
@@ -272,6 +285,11 @@ class TaskHandler:
                         "model": request.model,
                         "duration_s": duration_s,
                         "prompt_chars": len(prompt or ""),
+                        "context_window": request.context_window,
+                        "temperature": request.temperature,
+                        "top_p": request.top_p,
+                        "max_tokens": request.max_tokens,
+                        "prompt_profile": request.prompt_profile,
                         "success": error_message is None,
                         **({"native_usage": native_usage} if native_usage else {}),
                         **({"error": error_message} if error_message else {}),
@@ -5171,12 +5189,13 @@ Grounded input:
     def _build_document_agent_consult_prompt(self, *, user_query: str, context_text: str) -> str:
         return f"""
 You are the Document Operations Copilot.
-Respond in English.
+Respond in the same language used by the user request unless the user explicitly asks for another language.
 Use only the information present in the document context.
 If the context is insufficient, explicitly say the information is unclear and request human review.
-Do not invent facts, dates, numbers, or names.
-First provide a short, direct response.
-Then provide short bullets with the main points found.
+Do not invent facts, dates, numbers, names, obligations, tasks, or conclusions.
+Answer the specific question directly instead of converting the reply into a checklist, workflow report, or broader review unless the user explicitly asks for that format.
+Keep the answer concise and evidence-led.
+When useful, add up to 4 short bullet points with the main grounded details.
 
 User request:
 {user_query}

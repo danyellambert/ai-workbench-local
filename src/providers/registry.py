@@ -193,16 +193,17 @@ def build_provider_registry() -> dict[str, dict[str, object]]:
     if (
         huggingface_inference_settings.api_key
         and huggingface_inference_settings.base_url
-        and huggingface_inference_settings.model
         and HuggingFaceInferenceProvider is not None
     ):
+        default_chat_model = huggingface_inference_settings.model or next(iter(huggingface_inference_settings.available_models_env), "")
+        default_embedding_model = huggingface_inference_settings.embedding_model or next(iter(huggingface_inference_settings.available_embedding_models_env), "")
         registry["huggingface_inference"] = {
             "label": "Hugging Face Inference",
             "detail": f"Remote endpoint configured at `{huggingface_inference_settings.base_url}`",
             "instance": HuggingFaceInferenceProvider(huggingface_inference_settings),
-            "supports_chat": True,
-            "supports_embeddings": bool(huggingface_inference_settings.embedding_model),
-            "default_model": huggingface_inference_settings.model,
+            "supports_chat": bool(default_chat_model),
+            "supports_embeddings": bool(default_embedding_model),
+            "default_model": default_chat_model or default_embedding_model,
             "default_context_window": huggingface_inference_settings.default_context_window,
         }
 
@@ -216,6 +217,14 @@ def resolve_provider_entry(
     capability: str,
     fallback_provider: str | None = None,
 ) -> tuple[str | None, dict[str, object] | None, str | None]:
+    """Resolve a provider without silently changing providers.
+
+    The selected runtime profile is the source of truth. If a request names
+    `ollama_hosted`, the backend must not quietly execute against Hugging Face,
+    OpenAI, or a local provider just because those providers are also configured.
+    A different provider is allowed only when the caller did not request one or
+    when an explicit fallback provider was supplied by an enabled fallback chain.
+    """
     requested = (provider_name or "").strip().lower()
     capability_key = capability_to_registry_flag(capability)
 
@@ -223,14 +232,23 @@ def resolve_provider_entry(
         candidate = registry.get(requested)
         if isinstance(candidate, dict) and bool(candidate.get(capability_key)):
             return requested, candidate, None
+        if isinstance(candidate, dict):
+            return None, None, f"{capability}_not_supported_by_requested_provider:{requested}"
+        return None, None, f"requested_provider_not_available:{requested}"
 
-    fallback_key = fallback_provider if fallback_provider in registry else None
-    if fallback_key and bool(registry[fallback_key].get(capability_key)):
-        return fallback_key, registry[fallback_key], (f"{capability}_provider_unavailable:{requested}" if requested and requested != fallback_key else None)
+    fallback_key = (fallback_provider or "").strip().lower()
+    if fallback_key:
+        fallback_entry = registry.get(fallback_key)
+        if isinstance(fallback_entry, dict) and bool(fallback_entry.get(capability_key)):
+            return fallback_key, fallback_entry, "explicit_runtime_fallback"
+        return None, None, f"explicit_fallback_provider_unavailable:{fallback_key}"
 
+    # No provider was requested. This is the only case where choosing the first
+    # capable provider is acceptable, because there is no explicit user/runtime
+    # selection to violate.
     for key, candidate in registry.items():
         if isinstance(candidate, dict) and bool(candidate.get(capability_key)):
-            return key, candidate, (f"{capability}_provider_unavailable:{requested}" if requested and requested != key else None)
+            return key, candidate, None
 
     return None, None, f"no_provider_with_capability:{capability}"
 

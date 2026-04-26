@@ -2,22 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowRight,
   AlertTriangle,
-  Check,
-  ChevronRight,
   Cpu,
   FileText,
   Layers,
-  RefreshCw,
   Search,
-  Server,
-  Shield,
-  X,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -32,14 +26,10 @@ import {
 import {
   buildCatalogLookup,
   cloneRuntimeProfile,
-  deriveRuntimeFallbackChain,
-  deriveRuntimeWorkflowFit,
-  EMPTY_PROVIDER_CAPABILITIES,
   formatRuntimeUpdatedAt,
   getRuntimeConnection,
-  RUNTIME_COMPATIBILITY_COLORS,
 } from '@/lib/runtime-controls-ui';
-import type { RuntimeProfile, WorkflowFit } from '@/types/settings';
+import type { RuntimeProfile } from '@/types/settings';
 
 const Control = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="space-y-1.5">
@@ -69,47 +59,11 @@ const ToggleRow = ({
     <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
   </div>
 );
-
-const CapabilityBadge = ({ label }: { label: string }) => (
-  <span
-    className="inline-flex items-center gap-1 rounded-full border border-glow-success/20 bg-glow-success/10 px-2 py-0.5 text-[10px] font-medium text-glow-success"
-  >
-    <Check className="h-2.5 w-2.5" />
-    {label}
-  </span>
-);
-
-const WorkflowFitBadge = ({ fit }: { fit: WorkflowFit }) => {
-  const colors = RUNTIME_COMPATIBILITY_COLORS[fit.compatibility] ?? RUNTIME_COMPATIBILITY_COLORS.compatible;
-  return (
-    <div className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 ${colors.bg} ${colors.border}`}>
-      <span className={`text-[10px] font-medium ${colors.text}`}>{fit.label}</span>
-      <Badge variant="outline" className={`px-1.5 py-0 text-[8px] capitalize ${colors.border} ${colors.text}`}>
-        {fit.compatibility}
-      </Badge>
-    </div>
-  );
-};
-
-const ObservedItem = ({
-  label,
-  value,
-  description,
-}: {
-  label: string;
-  value: string;
-  description?: string;
-}) => (
-  <div className="rounded-lg border border-border/40 bg-secondary/10 p-3">
-    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-    <p className="mt-1 text-xs font-medium text-foreground">{value}</p>
-    {description ? <p className="mt-1 text-[10px] text-muted-foreground">{description}</p> : null}
-  </div>
-);
-
 function buildSelectLookup(items: RuntimeControlsCatalogItem[] | undefined): Record<string, RuntimeControlsCatalogItem> {
   return buildCatalogLookup(items);
 }
+
+
 
 export default function RuntimeControlsPage() {
   const queryClient = useQueryClient();
@@ -151,18 +105,8 @@ export default function RuntimeControlsPage() {
 
   const primaryConnection = profile ? getRuntimeConnection(data, profile.primaryConnectionId) : undefined;
   const embeddingConnection = profile ? getRuntimeConnection(data, profile.embeddingConnectionId) : undefined;
-  const capabilities = primaryConnection?.capabilities ?? EMPTY_PROVIDER_CAPABILITIES;
-  const fallbackChain = profile ? deriveRuntimeFallbackChain(profile, data) : [];
-  const workflowFit = profile ? deriveRuntimeWorkflowFit(profile, primaryConnection) : [];
-  const supportedCapabilities = [
-    capabilities.generation ? 'Generation' : null,
-    capabilities.embeddings ? 'Embeddings' : null,
-    capabilities.structuredOutputs ? 'Structured Outputs' : null,
-    capabilities.streaming ? 'Streaming' : null,
-    capabilities.vision ? 'Vision / VLM' : null,
-    capabilities.toolCalling ? 'Tool Calling' : null,
-    capabilities.reranking ? 'Reranking' : null,
-  ].filter(Boolean) as string[];
+  const embeddingModelOptions = ((profile && data?.options.embeddingModelsByConnection[profile.embeddingConnectionId]) || []).filter(Boolean);
+
 
   const updateProfile = (updater: (current: RuntimeProfile) => RuntimeProfile) => {
     setDraft((current) => {
@@ -175,7 +119,7 @@ export default function RuntimeControlsPage() {
   const handlePrimaryConnectionChange = (connectionId: string) => {
     updateProfile((current) => {
       const modelOptions = (data?.options.modelsByConnection[connectionId] || []).filter(Boolean);
-      const nextModel = modelOptions.includes(current.primaryModel) ? current.primaryModel : (modelOptions[0] || current.primaryModel);
+      const nextModel = modelOptions.includes(current.primaryModel) ? current.primaryModel : (modelOptions[0] || '');
       return {
         ...current,
         primaryConnectionId: connectionId,
@@ -187,7 +131,9 @@ export default function RuntimeControlsPage() {
   const handleEmbeddingConnectionChange = (connectionId: string) => {
     updateProfile((current) => {
       const modelOptions = (data?.options.embeddingModelsByConnection[connectionId] || []).filter(Boolean);
-      const nextModel = modelOptions.includes(current.embeddingModel) ? current.embeddingModel : (modelOptions[0] || current.embeddingModel);
+      const nextModel = modelOptions.includes(current.embeddingModel)
+        ? current.embeddingModel
+        : (modelOptions[0] || current.embeddingModel || '');
       return {
         ...current,
         embeddingConnectionId: connectionId,
@@ -195,6 +141,7 @@ export default function RuntimeControlsPage() {
       };
     });
   };
+
 
   const handleReset = () => {
     if (!data?.active_profile) return;
@@ -207,7 +154,7 @@ export default function RuntimeControlsPage() {
       <motion.div className="mx-auto max-w-[920px] p-6 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <PageHeader
           title="Runtime Controls"
-          description="Active execution configuration for the current system profile — generation, retrieval, routing, and document processing."
+          description="Active execution configuration for the current system profile — generation, retrieval, and document processing."
         >
           <Badge variant="outline" className="border-primary/30 text-[10px] text-primary">
             Loading live runtime
@@ -225,7 +172,7 @@ export default function RuntimeControlsPage() {
       <motion.div className="mx-auto max-w-[920px] p-6 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <PageHeader
           title="Runtime Controls"
-          description="Active execution configuration for the current system profile — generation, retrieval, routing, and document processing."
+          description="Active execution configuration for the current system profile — generation, retrieval, and document processing."
         />
         <GlassCard>
           <div className="flex items-center gap-2 text-xs text-glow-warning">
@@ -239,10 +186,11 @@ export default function RuntimeControlsPage() {
 
   return (
     <motion.div className="mx-auto max-w-[920px] p-6 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader
-        title="Runtime Controls"
-        description="Edit the currently active runtime profile. Workspace defaults and the saved profile library live in Preferences, while this screen focuses on the active execution path."
-      >
+      <div data-tour="runtime-controls-header">
+        <PageHeader
+          title="Runtime Controls"
+          description="Edit the currently active runtime profile. Workspace defaults and the saved profile library live in Preferences, while this screen focuses on the active execution path."
+        >
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="border-primary/30 text-[10px] text-primary">
             Live runtime
@@ -251,7 +199,8 @@ export default function RuntimeControlsPage() {
             {data?.contract_version || 'runtime_controls.v1'}
           </Badge>
         </div>
-      </PageHeader>
+        </PageHeader>
+      </div>
 
       <div className="space-y-6">
         {isError && (
@@ -263,7 +212,7 @@ export default function RuntimeControlsPage() {
           </GlassCard>
         )}
 
-        <GlassCard>
+        <GlassCard data-tour="runtime-controls-summary">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary" />
@@ -286,6 +235,17 @@ export default function RuntimeControlsPage() {
           </div>
 
           <div className="rounded-xl border border-border/50 bg-secondary/15 p-4">
+            {(primaryConnection?.lastErrorMessage || embeddingConnection?.lastErrorMessage) ? (
+              <div className="mb-4 rounded-lg border border-glow-warning/30 bg-glow-warning/10 px-3 py-2 text-[10px] text-glow-warning">
+                <p className="font-medium text-foreground">Connection diagnostics</p>
+                {primaryConnection?.lastErrorMessage ? (
+                  <p className="mt-1">Generation connection: {primaryConnection.lastErrorMessage}</p>
+                ) : null}
+                {embeddingConnection?.lastErrorMessage ? (
+                  <p className="mt-1">Embedding connection: {embeddingConnection.lastErrorMessage}</p>
+                ) : null}
+              </div>
+            ) : null}
             <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Profile</p>
@@ -324,12 +284,6 @@ export default function RuntimeControlsPage() {
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Quality Posture</p>
                 <p className="mt-0.5 text-sm text-foreground">{qualityPostureLookup[profile.qualityPosture]?.label ?? profile.qualityPosture}</p>
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Fallback Chain</p>
-                <p className="mt-0.5 text-sm text-foreground">
-                  {fallbackChain.length > 0 ? `${fallbackChain.length} step${fallbackChain.length > 1 ? 's' : ''}` : 'None — fail hard'}
-                </p>
-              </div>
             </div>
             <div className="mt-4 border-t border-border/50 pt-3">
               <p className="text-[10px] italic text-muted-foreground">{profile.summary}</p>
@@ -351,7 +305,7 @@ export default function RuntimeControlsPage() {
           </p>
         </div>
 
-        <GlassCard>
+        <GlassCard data-tour="runtime-controls-generation">
           <div className="mb-1 flex items-center gap-2">
             <Cpu className="h-4 w-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Generation</h3>
@@ -422,7 +376,7 @@ export default function RuntimeControlsPage() {
           </div>
         </GlassCard>
 
-        <GlassCard>
+        <GlassCard data-tour="runtime-controls-retrieval">
           <div className="mb-1 flex items-center gap-2">
             <Search className="h-4 w-4 text-accent" />
             <h3 className="text-sm font-medium text-foreground">Retrieval & Ranking</h3>
@@ -447,14 +401,28 @@ export default function RuntimeControlsPage() {
             </Control>
 
             <Control label="Embedding Model">
-              <Select value={profile.embeddingModel} onValueChange={(value) => updateProfile((current) => ({ ...current, embeddingModel: value }))}>
-                <SelectTrigger className="h-9 bg-secondary/30 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {((data?.options.embeddingModelsByConnection[profile.embeddingConnectionId] || []).filter(Boolean)).map((model) => (
-                    <SelectItem key={model} value={model}>{model}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {embeddingModelOptions.length > 0 ? (
+                <Select value={profile.embeddingModel} onValueChange={(value) => updateProfile((current) => ({ ...current, embeddingModel: value }))}>
+                  <SelectTrigger className="h-9 bg-secondary/30 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {embeddingModelOptions.map((model) => (
+                      <SelectItem key={model} value={model}>{model}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="space-y-2">
+                  <Input
+                    value={profile.embeddingModel}
+                    onChange={(event) => updateProfile((current) => ({ ...current, embeddingModel: event.target.value }))}
+                    placeholder="Type the embedding model id manually"
+                    className="h-9 bg-secondary/30 text-xs"
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    No embedding models were discovered for this connection. Type the model id manually or configure the provider catalog/env so the backend can surface it here.
+                  </p>
+                </div>
+              )}
             </Control>
 
             <Control label={`Top-K — ${profile.retrieval.topK}`}>
@@ -481,7 +449,7 @@ export default function RuntimeControlsPage() {
           </div>
         </GlassCard>
 
-        <GlassCard>
+        <GlassCard data-tour="runtime-controls-doc-processing">
           <div className="mb-1 flex items-center gap-2">
             <FileText className="h-4 w-4 text-glow-warning" />
             <h3 className="text-sm font-medium text-foreground">Document Processing</h3>
@@ -520,209 +488,9 @@ export default function RuntimeControlsPage() {
             </Control>
 
             <ToggleRow label="VLM Enhancement" description="Use a vision-language model for complex layouts when the profile enables it." checked={profile.docProcessing.vlmEnhancement} onCheckedChange={(checked) => updateProfile((current) => ({ ...current, docProcessing: { ...current.docProcessing, vlmEnhancement: checked } }))} />
-            <ToggleRow label="OCR Failover" description="Fallback to OCR when extraction confidence drops below the configured threshold." checked={profile.docProcessing.ocrFailoverEnabled} onCheckedChange={(checked) => updateProfile((current) => ({ ...current, docProcessing: { ...current.docProcessing, ocrFailoverEnabled: checked } }))} />
+            <ToggleRow label="OCR Recovery" description="Use OCR when extraction confidence drops below the configured threshold." checked={profile.docProcessing.ocrFailoverEnabled} onCheckedChange={(checked) => updateProfile((current) => ({ ...current, docProcessing: { ...current.docProcessing, ocrFailoverEnabled: checked } }))} />
           </div>
         </GlassCard>
-
-        <div className="px-1 pt-1">
-          <div className="mb-1 flex items-center gap-2">
-            <Shield className="h-4 w-4 text-accent" />
-            <h3 className="text-sm font-medium text-foreground">Observed Runtime State</h3>
-            <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Observed / not editable
-            </Badge>
-          </div>
-          <p className="text-[10px] text-muted-foreground">
-            These sections explain what the runtime is actually doing right now. They are intentionally not editable here, so operators can distinguish active controls from observed state.
-          </p>
-        </div>
-
-        <GlassCard>
-          <div className="mb-3 flex items-center gap-2">
-            <Shield className="h-4 w-4 text-accent" />
-            <h3 className="text-sm font-medium text-foreground">Policy Signals (computed)</h3>
-            <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Computed from active controls
-            </Badge>
-          </div>
-          <p className="mb-3 text-[10px] text-muted-foreground">
-            These values are computed from the active controls above. They remain visible because they explain governance posture and downstream behavior, but they are not edited independently here.
-          </p>
-          <div className="grid gap-3 md:grid-cols-2">
-            <ObservedItem
-              label="Execution Policy"
-              value={executionPolicyLookup[profile.executionPolicy]?.label ?? profile.executionPolicy}
-              description={executionPolicyLookup[profile.executionPolicy]?.description}
-            />
-            <ObservedItem
-              label="Quality Posture"
-              value={qualityPostureLookup[profile.qualityPosture]?.label ?? profile.qualityPosture}
-              description="Explains how the active profile should behave, without acting as a separate knob on this screen."
-            />
-            <ObservedItem
-              label="Retrieval Strategy"
-              value={profile.retrievalStrategy}
-              description="Shown here as the resolved runtime posture after profile + retrieval settings are applied." 
-            />
-            <ObservedItem
-              label="Doc Processing Preset"
-              value={docPresetLookup[profile.docProcessingPreset]?.label ?? profile.docProcessingPreset}
-              description="Resolved from the document-processing controls above so operators can verify the final effective preset."
-            />
-          </div>
-        </GlassCard>
-
-        <GlassCard>
-          <div className="mb-3 flex items-center gap-2">
-            <Server className="h-4 w-4 text-glow-warning" />
-            <h3 className="text-sm font-medium text-foreground">Provider Capability Fit</h3>
-            <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Observed
-            </Badge>
-          </div>
-          <p className="mb-3 text-[10px] text-muted-foreground">
-            Active generation provider: {primaryConnection?.name ?? 'Unknown'}. These capabilities shape what the runtime can safely do.
-          </p>
-          {supportedCapabilities.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {supportedCapabilities.map((label) => (
-                <CapabilityBadge key={label} label={label} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-2 rounded-lg border border-border/40 bg-secondary/10 p-2.5">
-              <p className="text-[10px] text-muted-foreground">No capability badge is shown here unless the backend can positively confirm it.</p>
-            </div>
-          )}
-        </GlassCard>
-
-        {workflowFit.length > 0 ? (
-          <GlassCard>
-            <div className="mb-3 flex items-center gap-2">
-              <ArrowRight className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-medium text-foreground">Workflow Compatibility</h3>
-              <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-                Validated for current route
-              </Badge>
-            </div>
-            <p className="mb-3 text-[10px] text-muted-foreground">
-              Only compatibility signals the backend can positively support for the current profile are shown here. This section should answer “what will safely run now?” rather than expose another control surface.
-            </p>
-            <div className="space-y-2">
-              {workflowFit.map((fit) => (
-                <div key={fit.workflowId} className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-secondary/10 px-3 py-2">
-                  <WorkflowFitBadge fit={fit} />
-                  {fit.reason && (
-                    <p className="max-w-[52%] truncate text-right text-[10px] text-muted-foreground" title={fit.reason}>
-                      {fit.reason}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-        ) : null}
-
-        <GlassCard>
-          <div className="mb-3 flex items-center gap-2">
-            <RefreshCw className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-medium text-foreground">Fallback / Routing Chain</h3>
-            <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Observed
-            </Badge>
-          </div>
-          <p className="mb-3 text-[10px] text-muted-foreground">Resolved routing order for the active profile. This explains where traffic goes first and what happens if the preferred endpoint cannot serve the request.</p>
-          <div className="space-y-0">
-            <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-[9px] font-bold text-primary">1</div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-foreground">Primary — {primaryConnection?.name ?? 'Unknown'}</p>
-                <p className="truncate text-[10px] font-mono text-muted-foreground">{profile.primaryModel}</p>
-              </div>
-              <StatusPill status={primaryConnection?.status ?? 'not_configured'} />
-            </div>
-
-            {fallbackChain.map((step, index) => {
-              const fallbackConnection = getRuntimeConnection(data, step.connectionId);
-              return (
-                <div key={`${step.connectionId}-${index}`}>
-                  <div className="flex justify-center py-1">
-                    <ChevronRight className="h-3 w-3 rotate-90 text-muted-foreground" />
-                  </div>
-                  <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-secondary/10 p-3">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary/60 text-[9px] font-bold text-muted-foreground">
-                      {index + 2}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-foreground">{step.label}</p>
-                      <p className="truncate text-[10px] font-mono text-muted-foreground">
-                        {fallbackConnection?.name ?? step.connectionId} · {step.model}
-                      </p>
-                    </div>
-                    <StatusPill status={fallbackConnection?.status ?? 'not_configured'} />
-                  </div>
-                </div>
-              );
-            })}
-
-            {fallbackChain.length === 0 ? (
-              <div className="mt-2 rounded-lg border border-border/50 bg-secondary/10 p-2.5">
-                <p className="text-center text-[10px] text-muted-foreground">No fallback is configured. The runtime will fail hard if the primary endpoint is unavailable.</p>
-              </div>
-            ) : (
-              <div className="mt-2">
-                <div className="flex justify-center py-1">
-                  <ChevronRight className="h-3 w-3 rotate-90 text-muted-foreground" />
-                </div>
-                <div className="rounded-lg border border-border/50 bg-secondary/10 p-2.5 text-center">
-                  <p className="text-[10px] text-muted-foreground">End of chain — fail hard if all fallback steps are exhausted.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </GlassCard>
-
-        <details className="glass rounded-xl border border-border/50 p-0 open:bg-secondary/5">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary" />
-              <div>
-                <h3 className="text-sm font-medium text-foreground">Advanced informational signals</h3>
-                <p className="text-[10px] text-muted-foreground">Secondary signals kept for advanced inspection only.</p>
-              </div>
-            </div>
-            <Badge variant="outline" className="border-border/60 text-[9px] text-muted-foreground">
-              Advanced / informational
-            </Badge>
-          </summary>
-          <div className="border-t border-border/40 px-4 pb-4 pt-3">
-            <p className="mb-3 text-[10px] text-muted-foreground">
-              These signals stay available for advanced inspection, but they are intentionally secondary because they do not currently change the main runtime path in a first-order way.
-            </p>
-            <div className="grid gap-3 md:grid-cols-2">
-              <ObservedItem
-                label="Grounding Strictness"
-                value={profile.retrieval.groundingStrictness}
-                description="Visible for advanced inspection while grounding is still mostly governed by the broader execution flow."
-              />
-              <ObservedItem
-                label="Table Extraction Mode"
-                value={profile.docProcessing.tableExtractionMode}
-                description="Visible for document-pipeline inspection, but intentionally de-emphasized until it materially changes runtime behavior."
-              />
-              <ObservedItem
-                label="Streaming"
-                value={profile.generation.streaming ? 'Enabled' : 'Disabled'}
-                description="Shown for explainability, but intentionally secondary to the saved generation controls."
-              />
-              <ObservedItem
-                label="Structured Output"
-                value={profile.generation.structuredOutput ? 'Enabled' : 'Disabled'}
-                description="Useful when auditing output shape, but intentionally secondary to the active generation settings."
-              />
-            </div>
-          </div>
-        </details>
       </div>
     </motion.div>
   );
