@@ -97,6 +97,39 @@ def mark_product_upload_job_running(job_id: str, *, message: str | None = None) 
         return deepcopy(payload)
 
 
+def reset_product_upload_job_steps(
+    job_id: str,
+    *,
+    message: str | None = None,
+    document_name: str | None = None,
+    current_document: int | None = None,
+    total_documents: int | None = None,
+) -> dict[str, Any] | None:
+    """Reset the visible pipeline cards before a new document starts."""
+    metadata: dict[str, Any] = {}
+    if document_name:
+        metadata["document_name"] = document_name
+    if current_document is not None:
+        metadata["current_document"] = int(current_document)
+    if total_documents is not None:
+        metadata["total_documents"] = int(total_documents)
+
+    with _JOB_LOCK:
+        payload = _JOB_STORE.get(job_id)
+        if payload is None:
+            return None
+        payload["status"] = "running"
+        payload["message"] = message or payload.get("message") or "Running ingestion pipeline."
+        payload["current_stage"] = None
+        payload["updated_at"] = _now_iso()
+        for step in payload.get("steps", []):
+            step["status"] = "pending"
+            step["detail"] = None
+            step["updated_at"] = payload["updated_at"]
+            step["metadata"] = dict(metadata)
+        return deepcopy(payload)
+
+
 def update_product_upload_job_stage(
     job_id: str,
     stage_key: str,

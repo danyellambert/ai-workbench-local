@@ -298,17 +298,17 @@ export default function DocumentsPage() {
                       : 'bg-secondary/40 text-muted-foreground';
 
               return (
-                <div key={step.key} className="rounded-xl border border-border/50 bg-secondary/10 p-4">
+                <div key={step.key} className="min-w-0 rounded-xl border border-border/50 bg-secondary/10 p-4">
                   <div className="flex items-start gap-3">
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
                       <step.icon className={`w-4 h-4 ${status === 'running' ? 'animate-pulse' : ''}`} />
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-medium text-foreground">{step.label}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 items-center gap-2 mb-1">
+                        <span className="min-w-0 truncate text-xs font-medium text-foreground">{step.label}</span>
                         <StatusPill status={status} className="shrink-0" />
                       </div>
-                      <p className="text-[10px] text-muted-foreground leading-relaxed">{detail || 'Completed.'}</p>
+                      <p className="max-w-full truncate text-[10px] text-muted-foreground leading-relaxed" title={detail || 'Completed.'}>{detail || 'Completed.'}</p>
                     </div>
                   </div>
                 </div>

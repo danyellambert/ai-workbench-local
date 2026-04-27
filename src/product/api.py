@@ -31,6 +31,7 @@ from src.product.ingestion_jobs import (
     fail_product_upload_job,
     get_product_upload_job,
     mark_product_upload_job_running,
+    reset_product_upload_job_steps,
     update_product_upload_job_stage,
 )
 from src.product.action_plan_presenter import build_action_plan_view
@@ -59,6 +60,12 @@ from src.product.lab import (
     update_lab_evidenceops_action,
 )
 from src.product.models import ProductWorkflowRequest, ProductWorkflowResult
+from src.product.preindexed_corpus import (
+    activate_preindexed_documents,
+    find_preindexed_document,
+    simulate_preindexed_document_stages,
+    source_payload_for_preindexed_entry,
+)
 from src.product.presenters import build_document_review_view, build_policy_comparison_view, build_product_result_sections
 from src.product.service import (
     build_grounding_preview,
@@ -313,7 +320,16 @@ def _run_product_upload_job(
             pdf_evidence_pipeline_use_for_cv_like=vlm_enhancement_enabled,
             pdf_evidence_pipeline_use_for_strong_scan_like=vlm_enhancement_enabled,
         )
+        indexed_documents = []
+        index_status: dict[str, Any] = {}
         for index, uploaded in enumerate(uploaded_files, start=1):
+            reset_product_upload_job_steps(
+                job_id,
+                message=f"Indexing {uploaded.name} ({index}/{total_documents}).",
+                document_name=uploaded.name,
+                current_document=index,
+                total_documents=total_documents,
+            )
             update_product_upload_job_stage(
                 job_id,
                 "extraction",
@@ -326,6 +342,7 @@ def _run_product_upload_job(
                     "progress_pct": 0.0,
                 },
             )
+
             def extraction_progress(payload: dict[str, object] | None, *, document_name: str = uploaded.name, current_document: int = index) -> None:
                 metadata = dict(payload or {})
                 detail = str(metadata.pop("detail", "")).strip() or f"Extracting {document_name} ({current_document}/{total_documents})."
@@ -343,12 +360,11 @@ def _run_product_upload_job(
                 )
 
             loaded_document = load_document(uploaded, upload_rag_settings, progress_callback=extraction_progress)
-            loaded_documents.append(loaded_document)
             update_product_upload_job_stage(
                 job_id,
                 "extraction",
                 status="completed",
-                detail=f"{index}/{total_documents} document(s) extracted.",
+                detail=f"Extraction completed for {uploaded.name}.",
                 metadata={
                     "document_name": uploaded.name,
                     "current_document": index,
@@ -357,29 +373,274 @@ def _run_product_upload_job(
                 },
             )
 
-        indexed_documents, index_status = index_loaded_documents(
-            loaded_documents,
-            rag_settings=effective_rag_settings,
-            provider_registry=bootstrap.provider_registry,
-            progress_callback=lambda stage_key, payload: update_product_upload_job_stage(
-                job_id,
-                stage_key,
-                status=str(payload.get("status") or "running"),
-                detail=str(payload.get("detail") or "").strip() or None,
-                metadata=payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {},
-            ),
-        )
+            def indexing_progress(stage_key: str, payload: dict[str, object], *, document_name: str = uploaded.name, current_document: int = index) -> None:
+                stage_metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+                update_product_upload_job_stage(
+                    job_id,
+                    stage_key,
+                    status=str(payload.get("status") or "running"),
+                    detail=str(payload.get("detail") or "").strip() or None,
+                    metadata={
+                        **stage_metadata,
+                        "document_name": document_name,
+                        "current_document": current_document,
+                        "total_documents": total_documents,
+                    },
+                )
+
+            indexed_documents, index_status = index_loaded_documents(
+                [loaded_document],
+                rag_settings=effective_rag_settings,
+                provider_registry=bootstrap.provider_registry,
+                progress_callback=indexing_progress,
+            )
         document_library = build_product_document_library_payload(bootstrap)
-        message = index_status.get("message") if isinstance(index_status, dict) else None
+        message = f"{len(uploaded_files)} document(s) indexed successfully."
         complete_product_upload_job(
             job_id,
-            message=message or f"{len(uploaded_files)} document(s) indexed successfully.",
+            message=message,
             indexed_documents=[item.model_dump(mode="json") for item in indexed_documents],
             document_library=document_library,
             index_status=index_status if isinstance(index_status, dict) else {},
         )
     except Exception as error:  # pragma: no cover - defensive background job handling
         fail_product_upload_job(job_id, error_message=str(error))
+
+
+def _run_product_cached_nextcloud_import_job(
+    *,
+    job_id: str,
+    cached_entries: list[dict[str, Any]],
+    uploaded_files: list[_ApiUploadedFile],
+    bootstrap: ProductBootstrap,
+) -> None:
+    """Activate prebuilt public-corpus vectors while preserving the normal UX contract."""
+    try:
+        mark_product_upload_job_running(job_id, message="Running ingestion pipeline.")
+        effective_rag_settings = build_effective_rag_settings(default_settings=bootstrap.rag_settings, workspace_root=bootstrap.workspace_root)
+        loaded_documents = []
+        index_status: dict[str, Any] = {}
+
+        if cached_entries:
+            total_documents_for_job = len(cached_entries) + len(uploaded_files)
+            sync_status: dict[str, Any] = {}
+            updated_index: dict[str, Any] = {}
+            for cached_position, cached_entry in enumerate(cached_entries, start=1):
+                cached_document = cached_entry.get("document") if isinstance(cached_entry.get("document"), dict) else {}
+                cached_chunks = cached_entry.get("chunks") if isinstance(cached_entry.get("chunks"), list) else []
+                cached_metadata = cached_document.get("loader_metadata") if isinstance(cached_document.get("loader_metadata"), dict) else {}
+                cached_preindex = cached_metadata.get("preindex") if isinstance(cached_metadata.get("preindex"), dict) else {}
+                cached_name = str(
+                    cached_document.get("name")
+                    or cached_preindex.get("filename")
+                    or cached_preindex.get("title")
+                    or f"Document {cached_position}"
+                ).strip()
+                cached_chunk_count = len(cached_chunks)
+
+                simulate_preindexed_document_stages(
+                    job_id=job_id,
+                    entries=[cached_entry],
+                    update_stage=update_product_upload_job_stage,
+                    reset_steps=reset_product_upload_job_steps,
+                    start_document=cached_position,
+                    total_documents=total_documents_for_job,
+                )
+
+                update_product_upload_job_stage(
+                    job_id,
+                    "index_sync",
+                    status="running",
+                    detail=f"Syncing vector index for {cached_name} ({cached_position}/{total_documents_for_job}).",
+                    metadata={
+                        "document_name": cached_name,
+                        "current_document": cached_position,
+                        "total_documents": total_documents_for_job,
+                        "processed_documents": cached_position - 1,
+                        "doc_chunk_count": cached_chunk_count,
+                        "progress_pct": 20.0,
+                    },
+                )
+
+                def sync_progress(payload: dict[str, object], *, document_name: str = cached_name, current_document: int = cached_position) -> None:
+                    metadata = dict(payload or {})
+                    detail = str(metadata.pop("detail", "")).strip() or f"Syncing vector index for {document_name}."
+                    update_product_upload_job_stage(
+                        job_id,
+                        "index_sync",
+                        status=str(metadata.pop("status", "running") or "running"),
+                        detail=detail,
+                        metadata={
+                            "document_name": document_name,
+                            "current_document": current_document,
+                            "total_documents": total_documents_for_job,
+                            "processed_documents": current_document - 1,
+                            "doc_chunk_count": cached_chunk_count,
+                            **metadata,
+                        },
+                    )
+
+                updated_index, sync_status = activate_preindexed_documents(
+                    entries=[cached_entry],
+                    rag_settings=effective_rag_settings,
+                    progress_callback=sync_progress,
+                )
+                update_product_upload_job_stage(
+                    job_id,
+                    "index_sync",
+                    status="completed",
+                    detail=f"Index sync completed for {cached_name}.",
+                    metadata={
+                        "document_name": cached_name,
+                        "current_document": cached_position,
+                        "total_documents": total_documents_for_job,
+                        "processed_documents": cached_position,
+                        "doc_chunk_count": cached_chunk_count,
+                        "chunk_count": len(updated_index.get("chunks") or []),
+                        "progress_pct": 100.0,
+                    },
+                )
+
+            index_status = {
+                "ok": True,
+                "message": f"{len(cached_entries)} document(s) indexed successfully.",
+                "imported_documents": len(cached_entries),
+                "sync_status": sync_status if isinstance(sync_status, dict) else {},
+            }
+
+        if uploaded_files:
+            total_documents = len(uploaded_files)
+            vlm_enhancement_enabled = bool(
+                getattr(effective_rag_settings, "pdf_evidence_pipeline_enabled", False)
+                or getattr(effective_rag_settings, "pdf_docling_picture_description", False)
+            )
+            ocr_failover_enabled = bool(getattr(effective_rag_settings, "pdf_ocr_fallback_enabled", False))
+            upload_rag_settings = replace(
+                effective_rag_settings,
+                pdf_docling_enabled=True,
+                pdf_docling_ocr_enabled=True,
+                pdf_docling_force_full_page_ocr=False,
+                pdf_baseline_chars_per_page_threshold=40,
+                pdf_min_text_coverage_ratio=0.1,
+                pdf_max_selective_docling_pages=4,
+                pdf_scan_image_ocr_enabled=ocr_failover_enabled,
+                pdf_evidence_pipeline_use_for_cv_like=vlm_enhancement_enabled,
+                pdf_evidence_pipeline_use_for_strong_scan_like=vlm_enhancement_enabled,
+            )
+            total_documents_for_job = len(cached_entries) + len(uploaded_files)
+            for index, uploaded in enumerate(uploaded_files, start=1):
+                display_index = len(cached_entries) + index
+                reset_product_upload_job_steps(
+                    job_id,
+                    message=f"Indexing {uploaded.name} ({display_index}/{total_documents_for_job}).",
+                    document_name=uploaded.name,
+                    current_document=display_index,
+                    total_documents=total_documents_for_job,
+                )
+                update_product_upload_job_stage(
+                    job_id,
+                    "extraction",
+                    status="running",
+                    detail=f"Extracting {uploaded.name} ({display_index}/{total_documents_for_job}).",
+                    metadata={
+                        "document_name": uploaded.name,
+                        "current_document": display_index,
+                        "total_documents": total_documents_for_job,
+                        "progress_pct": 0.0,
+                    },
+                )
+
+                def extraction_progress(payload: dict[str, object] | None, *, document_name: str = uploaded.name, current_document: int = display_index) -> None:
+                    metadata = dict(payload or {})
+                    detail = str(metadata.pop("detail", "")).strip() or f"Extracting {document_name} ({current_document}/{total_documents_for_job})."
+                    update_product_upload_job_stage(
+                        job_id,
+                        "extraction",
+                        status="running",
+                        detail=detail,
+                        metadata={
+                            "document_name": document_name,
+                            "current_document": current_document,
+                            "total_documents": total_documents_for_job,
+                            **metadata,
+                        },
+                    )
+
+                loaded_document = load_document(uploaded, upload_rag_settings, progress_callback=extraction_progress)
+                update_product_upload_job_stage(
+                    job_id,
+                    "extraction",
+                    status="completed",
+                    detail=f"Extraction completed for {uploaded.name}.",
+                    metadata={
+                        "document_name": uploaded.name,
+                        "current_document": display_index,
+                        "total_documents": total_documents_for_job,
+                        "progress_pct": 100.0,
+                    },
+                )
+
+                def indexing_progress(stage_key: str, payload: dict[str, object], *, document_name: str = uploaded.name, current_document: int = display_index) -> None:
+                    stage_metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+                    update_product_upload_job_stage(
+                        job_id,
+                        stage_key,
+                        status=str(payload.get("status") or "running"),
+                        detail=str(payload.get("detail") or "").strip() or None,
+                        metadata={
+                            **stage_metadata,
+                            "document_name": document_name,
+                            "current_document": current_document,
+                            "total_documents": total_documents_for_job,
+                        },
+                    )
+
+                _, real_index_status = index_loaded_documents(
+                    [loaded_document],
+                    rag_settings=effective_rag_settings,
+                    provider_registry=bootstrap.provider_registry,
+                    progress_callback=indexing_progress,
+                )
+                index_status = real_index_status if isinstance(real_index_status, dict) else index_status
+
+        indexed_documents = list_product_documents(effective_rag_settings)
+        document_library = build_product_document_library_payload(bootstrap)
+        total_completed_documents = len(cached_entries) + len(uploaded_files)
+        complete_product_upload_job(
+            job_id,
+            message=f"{total_completed_documents} document(s) indexed successfully.",
+            indexed_documents=[item.model_dump(mode="json") for item in indexed_documents],
+            document_library=document_library,
+            index_status=index_status,
+        )
+    except Exception as error:  # pragma: no cover - defensive background job handling
+        fail_product_upload_job(job_id, error_message=str(error))
+
+
+def start_product_cached_nextcloud_import_job(
+    *,
+    bootstrap: ProductBootstrap,
+    cached_entries: list[dict[str, Any]],
+    uploaded_files: list[_ApiUploadedFile] | None = None,
+    ignored_count: int = 0,
+) -> dict[str, Any]:
+    uploaded_files = list(uploaded_files or [])
+    job_payload = create_product_upload_job(
+        uploaded_count=len(cached_entries) + len(uploaded_files),
+        ignored_count=ignored_count,
+    )
+    thread = threading.Thread(
+        target=_run_product_cached_nextcloud_import_job,
+        kwargs={
+            "job_id": str(job_payload.get("job_id") or ""),
+            "cached_entries": list(cached_entries),
+            "uploaded_files": uploaded_files,
+            "bootstrap": bootstrap,
+        },
+        daemon=True,
+    )
+    thread.start()
+    return job_payload
 
 
 def start_product_upload_job(
@@ -429,10 +690,18 @@ def start_product_nextcloud_batch_import_job(
     if not normalized_documents:
         raise ValueError("At least one Nextcloud document locator is required.")
 
+    cached_entries: list[dict[str, Any]] = []
     uploaded_files: list[_ApiUploadedFile] = []
     source_documents: list[dict[str, Any]] = []
     seen_names: dict[str, int] = {}
+
     for import_item in normalized_documents:
+        cached_entry = find_preindexed_document(bootstrap.workspace_root, import_item)
+        if cached_entry is not None:
+            cached_entries.append(cached_entry)
+            source_documents.append(source_payload_for_preindexed_entry(cached_entry))
+            continue
+
         remote_document = _resolve_nextcloud_remote_document(import_item)
         raw_filename = str(remote_document.get("filename") or Path(str(remote_document.get("relative_path") or "remote-document")).name or "remote-document")
         next_index = seen_names.get(raw_filename, 0) + 1
@@ -453,11 +722,22 @@ def start_product_nextcloud_batch_import_job(
             }
         )
 
-    job_payload = start_product_upload_job(bootstrap=bootstrap, uploaded_files=uploaded_files, ignored_count=0)
-    if len(uploaded_files) == 1:
-        job_payload["message"] = f"Import accepted for {uploaded_files[0].name}. Preparing ingestion pipeline."
+    if cached_entries:
+        job_payload = start_product_cached_nextcloud_import_job(
+            bootstrap=bootstrap,
+            cached_entries=cached_entries,
+            uploaded_files=uploaded_files,
+            ignored_count=0,
+        )
     else:
-        job_payload["message"] = f"Import accepted for {len(uploaded_files)} Nextcloud documents. Preparing one indexing pipeline."
+        job_payload = start_product_upload_job(bootstrap=bootstrap, uploaded_files=uploaded_files, ignored_count=0)
+
+    total_selected = len(cached_entries) + len(uploaded_files)
+    if total_selected == 1:
+        first_name = str((source_documents[0] if source_documents else {}).get("filename") or (source_documents[0] if source_documents else {}).get("title") or "document")
+        job_payload["message"] = f"Import accepted for {first_name}. Preparing ingestion pipeline."
+    else:
+        job_payload["message"] = f"Import accepted for {total_selected} Nextcloud documents. Preparing one indexing pipeline."
     job_payload["source"] = {
         "kind": "nextcloud",
         "documents": source_documents,
