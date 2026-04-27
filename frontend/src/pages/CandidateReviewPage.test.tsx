@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 
 import CandidateReviewPage from '@/pages/CandidateReviewPage';
 import {
@@ -39,9 +40,11 @@ function renderPage() {
   });
 
   return render(
-    <QueryClientProvider client={queryClient}>
-      <CandidateReviewPage />
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <CandidateReviewPage />
+      </QueryClientProvider>
+    </MemoryRouter>,
   );
 }
 
@@ -224,7 +227,9 @@ describe('CandidateReviewPage', () => {
     });
 
     renderPage();
-    expect(await screen.findByText('Sarah Chen - Senior ML Engineer CV.pdf')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('candidate-review-candidate-name')).toHaveTextContent('Sarah Chen - Senior ML Engineer CV.pdf');
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /run candidate review/i }));
 
@@ -238,7 +243,9 @@ describe('CandidateReviewPage', () => {
   it('keeps analysis internals collapsed by default and reveals them on demand', async () => {
     renderPage();
 
-    expect(await screen.findByText('Sarah Chen - Senior ML Engineer CV.pdf')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('candidate-review-candidate-name')).toHaveTextContent('Sarah Chen - Senior ML Engineer CV.pdf');
+    });
     expect(screen.queryByText('Candidate grounding preview')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('candidate-review-analysis-internals-toggle'));
@@ -252,7 +259,9 @@ describe('CandidateReviewPage', () => {
     renderPage();
 
     expect(screen.getByTestId('candidate-review-page')).toBeInTheDocument();
-    expect(await screen.findByText('Sarah Chen - Senior ML Engineer CV.pdf')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('candidate-review-candidate-name')).toHaveTextContent('Sarah Chen - Senior ML Engineer CV.pdf');
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /run candidate review/i }));
 

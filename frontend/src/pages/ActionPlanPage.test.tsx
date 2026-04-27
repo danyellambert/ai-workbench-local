@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 
 import ActionPlanPage from '@/pages/ActionPlanPage';
 import {
@@ -41,9 +42,11 @@ function renderPage() {
   });
 
   return render(
-    <QueryClientProvider client={queryClient}>
-      <ActionPlanPage />
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <ActionPlanPage />
+      </QueryClientProvider>
+    </MemoryRouter>,
   );
 }
 
@@ -340,6 +343,7 @@ describe('ActionPlanPage', () => {
 
     expect(await screen.findByText('Privileged Account Approval Email.pdf')).toBeInTheDocument();
     expect(await screen.findByText('Access Review Evidence Log.pdf')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Show grounding preview/i }));
     await waitFor(() => {
       expect(
         screen.getAllByText(/Missing privileged-access approval evidence remains open/i).length,
@@ -362,7 +366,7 @@ describe('ActionPlanPage', () => {
     );
 
     expect(
-      await screen.findByText(/Drive grounded follow-up actions for Vendor access remediation/i),
+      await screen.findByText(/Vendor access remediation: 3 actionable task\(s\) and 2 evidence gaps identified/i),
     ).toBeInTheDocument();
     expect(
       screen.getAllByText(/Close temporary access exception before the next committee review/i)
@@ -381,18 +385,31 @@ describe('ActionPlanPage', () => {
     await waitFor(() => expect(generateProductWorkflowDeck).toHaveBeenCalledTimes(1));
     expect(await screen.findByText(/action-plan-deck\.pptx/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Publish to Trello/i }));
-    await waitFor(() => expect(publishProductWorkflowToTrello).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText(/Published by list/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/^Open$/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/^Approved$/)).toBeInTheDocument();
-    expect(screen.getAllByText(/^Done$/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Open → Open, In Progress → Approved, Blocked\/Needs review → Review, Done → Done/i)).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Open/i }));
     const expectedUrl = `${PRODUCT_API_BASE_URL}/api/product/artifact?${new URLSearchParams({
       path: '/tmp/action-plan-deck.pptx',
     }).toString()}`;
+    fireEvent.click(screen.getByRole('button', { name: /^Open$/i }));
     expect(window.open).toHaveBeenCalledWith(expectedUrl, '_blank', 'noopener,noreferrer');
+    vi.mocked(window.open).mockClear();
+
+    fireEvent.click(screen.getByRole('button', { name: /Preview Trello/i }));
+    await waitFor(() => expect(publishProductWorkflowToTrello).toHaveBeenCalledTimes(1));
+    expect(publishProductWorkflowToTrello).toHaveBeenLastCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ dryRun: true }),
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /Publish to Trello|Publish selected card/i }));
+    await waitFor(() => expect(publishProductWorkflowToTrello).toHaveBeenCalledTimes(2));
+    expect(publishProductWorkflowToTrello).toHaveBeenLastCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ dryRun: false }),
+    );
+    expect(await screen.findByText(/Published by list/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^Open$/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Approved$/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Done$/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Open → Open, In Progress → Approved, Blocked\/Needs review → Review, Done → Done/i)).toBeInTheDocument();
+
   });
 });

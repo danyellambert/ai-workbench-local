@@ -221,6 +221,7 @@ describe("DocumentReviewPage", () => {
     renderPage();
 
     expect(await screen.findByText("ASAP Annual Report 2025")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Show grounding panel/i }));
     expect(await screen.findByText(/Artemis III remains a major safety concern/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Run Review/i }));

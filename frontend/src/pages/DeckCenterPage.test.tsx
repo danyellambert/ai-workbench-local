@@ -127,10 +127,10 @@ describe('DeckCenterPage', () => {
   it('renders live artifact detail and opens registered assets', async () => {
     renderPage();
 
-    expect(await screen.findByText('Candidate Review Deck')).toBeInTheDocument();
+    expect((await screen.findAllByText('Candidate Review Deck')).length).toBeGreaterThan(0);
     expect(await screen.findByText('Review sidecar present')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /presentation deck/i }).firstChild ? screen.getByRole('button', { name: /presentation deck/i }) : screen.getByText('Presentation deck'));
+    fireEvent.click(screen.getAllByRole('button', { name: /presentation deck/i })[0]);
 
     expect(window.open).toHaveBeenCalled();
     expect(getProductArtifactEntry).toHaveBeenCalledWith('artifact-1');

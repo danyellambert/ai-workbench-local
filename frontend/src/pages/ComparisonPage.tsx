@@ -91,14 +91,16 @@ export default function ComparisonPage() {
     () =>
       findRecommendedDocument(availableDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.policyComparison[0]) ??
       policyComparisonCandidates.find((document) => normalizeDemoDocumentName(document.name).includes('v3 1')) ??
-      policyComparisonCandidates[0],
+      policyComparisonCandidates[0] ??
+      availableDocuments[0],
     [availableDocuments, policyComparisonCandidates],
   );
   const recommendedDocumentB = useMemo(
     () =>
       findRecommendedDocument(availableDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.policyComparison[1]) ??
       policyComparisonCandidates.find((document) => normalizeDemoDocumentName(document.name).includes('v3 2')) ??
-      policyComparisonCandidates.find((document) => document.document_id !== recommendedDocumentA?.document_id),
+      policyComparisonCandidates.find((document) => document.document_id !== recommendedDocumentA?.document_id) ??
+      availableDocuments.find((document) => document.document_id !== recommendedDocumentA?.document_id),
     [availableDocuments, policyComparisonCandidates, recommendedDocumentA],
   );
 
@@ -119,7 +121,9 @@ export default function ComparisonPage() {
         ? selectedDocumentBId
         : recommendedDocumentB && recommendedDocumentB.document_id !== nextPrimaryId
           ? recommendedDocumentB.document_id
-          : policyComparisonCandidates.find((document) => document.document_id !== nextPrimaryId)?.document_id ?? '';
+          : policyComparisonCandidates.find((document) => document.document_id !== nextPrimaryId)?.document_id ??
+            availableDocuments.find((document) => document.document_id !== nextPrimaryId)?.document_id ??
+            '';
 
     if (nextPrimaryId !== selectedDocumentAId) setSelectedDocumentAId(nextPrimaryId);
     if (nextSecondaryId !== selectedDocumentBId) setSelectedDocumentBId(nextSecondaryId);

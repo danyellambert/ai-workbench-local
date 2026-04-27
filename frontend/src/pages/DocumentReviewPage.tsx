@@ -139,7 +139,7 @@ export default function DocumentReviewPage() {
       return;
     }
     if (!selectedDocumentId || !availableDocuments.some((document) => document.document_id === selectedDocumentId)) {
-      setSelectedDocumentId(recommendedDocument?.document_id ?? '');
+      setSelectedDocumentId(recommendedDocument?.document_id ?? availableDocuments[0]?.document_id ?? '');
     }
   }, [availableDocuments, historyRunId, recommendedDocument, selectedDocumentId]);
 

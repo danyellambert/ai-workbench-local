@@ -452,7 +452,7 @@ export default function CandidateReviewPage() {
       return;
     }
     if (!selectedDocumentId || !selectableDocuments.some((document) => document.document_id === selectedDocumentId)) {
-      setSelectedDocumentId(recommendedCandidateDocument?.document_id ?? '');
+      setSelectedDocumentId(recommendedCandidateDocument?.document_id ?? selectableDocuments[0]?.document_id ?? '');
     }
   }, [recommendedCandidateDocument, selectedDocumentId, selectableDocuments]);
 

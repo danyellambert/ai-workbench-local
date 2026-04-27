@@ -40,6 +40,7 @@ function renderPage() {
 describe('RunHistoryPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    const recentTimestamp = new Date().toISOString();
 
     vi.mocked(getProductRunHistory).mockResolvedValue({
       ok: true,
@@ -49,7 +50,7 @@ describe('RunHistoryPage', () => {
         warning_runs: 1,
         error_runs: 0,
         workflow_counts: { candidate_review: 1 },
-        latest_timestamp: '2026-04-18T18:00:00',
+        latest_timestamp: recentTimestamp,
       },
       runs: [
         {
@@ -58,6 +59,7 @@ describe('RunHistoryPage', () => {
           workflow_label: 'Candidate Review',
           status: 'completed',
           provider: 'ollama',
+          timestamp: recentTimestamp,
           model: 'qwen2.5:14b',
           duration_label: '12s',
           documents: ['Sarah Chen - Senior ML Engineer CV.pdf'],
@@ -85,6 +87,7 @@ describe('RunHistoryPage', () => {
         workflow_label: 'Candidate Review',
         status: 'completed',
         provider: 'ollama',
+        timestamp: recentTimestamp,
         model: 'qwen2.5:14b',
         duration_label: '12s',
         documents: ['Sarah Chen - Senior ML Engineer CV.pdf'],
@@ -149,7 +152,7 @@ describe('RunHistoryPage', () => {
   it('loads run detail and triggers rerun from the live history surface', async () => {
     renderPage();
 
-    expect(await screen.findByText('Candidate Review')).toBeInTheDocument();
+    expect((await screen.findAllByText('Candidate Review')).length).toBeGreaterThan(0);
     expect(await screen.findByText('Grounded summary from persisted run.')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Rerun from history/i }));

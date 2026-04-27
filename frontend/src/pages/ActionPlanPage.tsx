@@ -219,7 +219,10 @@ export default function ActionPlanPage() {
 
     if (!hasInitializedDocumentSelectionRef.current && !selectedDocumentIds.length) {
       hasInitializedDocumentSelectionRef.current = true;
-      setSelectedDocumentIds(recommendedActionPlanDocumentIds);
+      const initialSelectionIds = recommendedActionPlanDocumentIds.length
+        ? recommendedActionPlanDocumentIds
+        : availableIds.slice(0, ACTION_PLAN_DOCUMENT_LIMIT);
+      setSelectedDocumentIds(initialSelectionIds);
       return;
     }
 
@@ -281,6 +284,7 @@ export default function ActionPlanPage() {
         workflow_id: 'action_plan_evidence_review',
         document_ids: selectedDocumentIds,
         context_strategy: 'document_scan',
+        context_window_mode: 'auto',
         use_document_context: true,
       }),
     onSuccess: async (payload) => {
