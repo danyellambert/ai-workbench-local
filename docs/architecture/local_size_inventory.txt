@@ -1,0 +1,12 @@
+# Local Size Inventory
+
+Generated at: 2026-04-28T19:40:53-03:00
+
+311M	.runtime
+274M	.chroma_rag
+ 60M	artifacts
+ 13M	outputs
+ 29M	data
+2.3M	docs
+7.2M	src
+315M	frontend
