@@ -495,3 +495,198 @@ For the Functional Baseline builder, validate:
 - preview manifests reference existing preview files;
 - artifact paths resolve only under allowed baseline or overlay roots;
 - run history artifact links point to existing artifact records where expected.
+
+---
+
+## Workflows
+
+### Frontend files
+
+- `frontend/src/pages/DocumentReviewPage.tsx`
+- `frontend/src/pages/ComparisonPage.tsx`
+- `frontend/src/pages/ActionPlanPage.tsx`
+- `frontend/src/pages/CandidateReviewPage.tsx`
+- `frontend/src/pages/WorkflowCatalogPage.tsx`
+- `frontend/src/lib/product-api.ts`
+
+### API endpoints
+
+- `POST /api/product/run-workflow`
+- `POST /api/product/run-history/<run_id>/rerun`
+- `POST /api/lab/workflow-inspector/run`
+
+### Backend sources
+
+- `src/product/api.py`
+- `src/product/service.py`
+- `src/product/models.py`
+- `src/product/telemetry.py`
+- `src/product/presenters.py`
+- `src/product/action_plan_presenter.py`
+- `src/product/candidate_review_presenter.py`
+- `src/services/runtime_controls.py`
+
+### State dependencies
+
+Workflows depend on:
+
+- Document Library / RAG state
+- runtime controls
+- preferences/provider registry
+- provider credentials injected at runtime
+- workflow history
+- telemetry runs
+- artifact generation state
+
+### Baseline requirement
+
+The baseline must preserve workflow inputs, document references, historical results, result views and artifact links. It must not replace workflow execution with frozen JSON. Running a workflow in Docker must use real selected documents and write a new overlay run.
+
+---
+
+## AI Lab
+
+### Frontend files
+
+- `frontend/src/lib/ai-lab-data.ts`
+- `frontend/src/pages/LabOverviewPage.tsx`
+- `frontend/src/pages/RuntimeObservabilityPage.tsx`
+- `frontend/src/pages/WorkflowInspectorPage.tsx`
+- `frontend/src/pages/BenchmarksPage.tsx`
+- `frontend/src/pages/EvalsDiagnosisPage.tsx`
+- `frontend/src/pages/EvidenceOpsPage.tsx`
+
+### API endpoints
+
+- `GET /api/lab/overview`
+- `GET /api/lab/runtime`
+- `GET /api/lab/workflow-inspector`
+- `POST /api/lab/workflow-inspector/run`
+- `GET /api/lab/benchmarks`
+- `GET /api/lab/evals`
+- `GET /api/lab/artifacts`
+- `GET /api/lab/evidenceops`
+
+### Backend sources
+
+- `src/product/api.py`
+- `src/product/lab.py`
+- `src/product/runtime_eval.py`
+- `src/storage/lab_state.py`
+- `src/services/runtime_snapshot.py`
+
+### State dependencies
+
+- `.runtime/state/lab/chat_sessions.json`
+- `.runtime/state/lab/workflow_runs.json`
+- `.runtime/state/lab/artifacts_index.json`
+- `.runtime/logs/product/workflow_history.json`
+- `.runtime/logs/product/telemetry_runs.json`
+- benchmark/eval state under `.runtime`, `data/eval`, and product telemetry
+
+### Baseline requirement
+
+AI Lab historical dashboards should use real retained lab/runtime/eval/benchmark state. These values may be historical and mostly fixed, but they should come from copied/sanitized state, not fabricated frontend numbers.
+
+---
+
+## EvidenceOps
+
+### Frontend files
+
+- `frontend/src/pages/EvidenceOpsPage.tsx`
+- `frontend/src/lib/ai-lab-data.ts`
+
+### API endpoints
+
+- `GET /api/lab/evidenceops`
+- `GET /api/lab/evidenceops/search`
+- `POST /api/lab/evidenceops/sync`
+- `POST /api/lab/evidenceops/actions/<action_id>`
+
+### Backend sources
+
+- `src/product/lab.py`
+- `src/services/evidenceops_local_ops.py`
+- `src/services/evidenceops_repository.py`
+- `src/storage/phase95_evidenceops_action_store.py`
+- `src/storage/phase95_evidenceops_worklog.py`
+- `src/storage/phase95_evidenceops_repository_snapshot.py`
+
+### State dependencies
+
+- `.runtime/logs/evidenceops/worklog.json`
+- `.runtime/state/evidenceops/actions.sqlite3`
+- `.runtime/state/evidenceops/repository_snapshot.json`
+- EvidenceOps repository/corpus files under `data/`
+
+### Baseline requirement
+
+Baseline must preserve real EvidenceOps worklog, action store, repository snapshot and referenced documents. Mutations such as action updates and sync results must write to overlay, not baseline.
+
+---
+
+## Runtime Controls and Preferences
+
+### Frontend files
+
+- `frontend/src/pages/RuntimeControlsPage.tsx`
+- `frontend/src/pages/PreferencesPage.tsx`
+- `frontend/src/lib/product-api.ts`
+- `frontend/src/lib/runtime-controls-ui.ts`
+- `frontend/src/lib/preferences-ui.ts`
+- `frontend/src/lib/store.ts`
+
+### API endpoints
+
+- `GET /api/runtime/controls`
+- `PATCH /api/runtime/controls`
+- `GET /api/preferences`
+- `PATCH /api/preferences`
+- `POST /api/preferences/connections/<connection_id>/test`
+- `POST /api/preferences/connections/<connection_id>/credential`
+
+### Backend sources
+
+- `src/services/runtime_controls.py`
+- `src/services/preferences.py`
+- `src/storage/preferences_state.py`
+- `src/storage/secret_store.py`
+- `src/storage/runtime_paths.py`
+
+### State dependencies
+
+- `.runtime/state/product/runtime_controls.json`
+- `.runtime/state/product/preferences.json`
+- provider registry/config
+- credential references from env, keychain, Docker secrets or admin credential store
+
+### Baseline requirement
+
+Runtime and Preferences must preserve the real contract shape, provider metadata, active profile, operator preferences and connection policy. Secrets must not be committed as raw values. Removing `.env` or keys must not break the app silently: missing credentials should produce clear connection/test errors while read-only surfaces continue to render.
+
+### Credential rule
+
+Baseline stores metadata and credential references only. Runtime injection supplies actual secrets:
+
+- `env:...`
+- Docker secret
+- admin credential store
+- local keychain for local-only development
+
+---
+
+## Phase 4 status
+
+Mapped surfaces:
+
+- Document Library
+- Run History / Run Detail
+- Artifacts / Deck Center
+- Workflows
+- AI Lab
+- EvidenceOps
+- Runtime Controls
+- Preferences
+
+This completes the initial Frontend Surface Provenance Map. Next runbook phase is Golden Surface Snapshot as a validation ruler only, not as the Docker data source.
