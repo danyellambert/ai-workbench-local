@@ -177,3 +177,164 @@ PY
 ### Status
 
 Initial provenance mapped from frontend/backend grep and local runtime inspection.
+
+---
+
+## Run History and Run Detail
+
+### Frontend files
+
+Primary surface:
+
+- `frontend/src/pages/RunHistoryPage.tsx`
+- `frontend/src/lib/product-api.ts`
+
+Shared consumers:
+
+- `frontend/src/pages/DocumentReviewPage.tsx`
+- `frontend/src/pages/ComparisonPage.tsx`
+- `frontend/src/pages/ActionPlanPage.tsx`
+- `frontend/src/pages/CandidateReviewPage.tsx`
+- `frontend/src/pages/WorkflowCatalogPage.tsx`
+- `frontend/src/pages/DeckCenterPage.tsx`
+
+Run History is not only a log table. It is the bridge between historical workflow executions, rerun controls, result hydration, linked artifacts, generated decks, delivery outputs and product telemetry.
+
+### API endpoints
+
+Read/list/detail:
+
+- `GET /api/product/run-history`
+- `GET /api/product/run-history/<run_id>`
+- `GET /api/product/artifacts`
+- `GET /api/product/artifacts/<artifact_id>`
+- `GET /api/product/artifact?path=...`
+
+Mutating actions:
+
+- `POST /api/product/run-history/<run_id>/rerun`
+- workflow deck generation endpoint using `run_id`
+- Trello/Notion delivery endpoints using `run_id`, when enabled
+
+### Backend handlers and helpers
+
+Primary route surface:
+
+- `src/product/api.py`
+
+Relevant backend helpers:
+
+- `build_product_workflow_history_entry(...)`
+- `build_product_run_detail_payload(...)`
+- `build_product_artifact_payload(...)`
+- `build_product_artifact_detail_payload(...)`
+- `_build_product_workflow_response_payload(...)`
+- `_resolve_product_artifact_path(...)`
+- `append_product_workflow_history_entry(...)`
+- `update_product_workflow_history_entry(...)`
+- `attach_artifact_lineage(...)`
+- `attach_delivery_lineage(...)`
+- `execute_product_workflow_with_telemetry(...)`
+
+Storage helpers:
+
+- `src/storage/product_workflow_history.py`
+- `src/storage/product_telemetry.py`
+- `src/storage/runtime_paths.py`
+- `src/storage/lab_state.py`
+
+### Current local state sources
+
+Primary product history state:
+
+- `.runtime/logs/product/workflow_history.json`
+- `.runtime/logs/product/telemetry_runs.json`
+- `.runtime/state/product/runtime_controls.json`
+- `.runtime/state/product/preferences.json`
+
+Related lab/workflow state:
+
+- `.runtime/state/lab/workflow_runs.json`
+- `.runtime/state/lab/artifacts_index.json`
+- `.runtime/state/lab/chat_sessions.json`
+
+Artifact state:
+
+- `artifacts/`
+- `outputs/`
+- `.runtime/state/product/artifacts_index.json`, if present
+- `.runtime/seed_build/current/product/artifacts_index.json`, diagnostic only
+- `.runtime/seed_build/current/product/workflow_history.json`, diagnostic only
+
+Previous seed-build/public-surface files under `.runtime/seed_build/current/public_surface/run_history.json` and `artifacts.json` are useful as comparison material, but they must not become the main Docker data source.
+
+### Functional Baseline requirement
+
+The baseline must preserve real historical runs and their relationships.
+
+Each baseline run should preserve:
+
+- stable run ID;
+- workflow ID and workflow label;
+- status;
+- timestamps and duration metadata;
+- selected `document_ids`;
+- selected document names where available;
+- request payload;
+- result payload;
+- `result_sections`;
+- workflow-specific views such as `result_view`, `comparison_view`, `action_plan_view`, and `candidate_review_view`;
+- linked artifact metadata;
+- delivery metadata, if present;
+- telemetry metadata, if present.
+
+If a run references artifacts, the artifact records and files must exist in the baseline or be explicitly marked unavailable with a clear reason.
+
+### Artifact/path requirement
+
+Artifact paths must be portable.
+
+Do not preserve raw host-only paths as operational paths. Convert artifact references to logical URIs such as:
+
+- `baseline://artifacts/...`
+- `baseline://outputs/...`
+- `runtime://artifacts/...`
+- `user://artifacts/...`
+
+The backend artifact resolver must allow only approved roots and reject path traversal or arbitrary absolute paths.
+
+### Overlay requirement
+
+The overlay must store new mutable history without changing baseline:
+
+- new workflow runs;
+- reruns created from baseline runs;
+- new generated decks/artifacts;
+- new delivery outputs;
+- new telemetry records;
+- tombstones or user-hidden baseline run records, if needed.
+
+Rerunning a baseline run should create a new overlay run, not mutate the baseline run.
+
+### Secrets and credentials
+
+Historical run display should require no secret.
+
+Rerun may require provider credentials depending on the workflow. Those credentials must be resolved through credential references, not stored in the run history baseline.
+
+Expected missing-secret behavior:
+
+- history still renders;
+- run detail still opens;
+- artifacts still open when present;
+- rerun returns a clear missing credential error instead of a blank page or fake response.
+
+### Validation requirement
+
+For the Functional Baseline builder, validate:
+
+- every run with `document_ids` references known baseline or overlay documents;
+- every artifact item with a path resolves under an allowed logical root;
+- every run detail can be converted back into a workflow response shape;
+- rerun creates a new overlay run;
+- baseline history remains read-only.
