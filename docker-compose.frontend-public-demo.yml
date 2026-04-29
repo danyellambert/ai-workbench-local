@@ -1,0 +1,64 @@
+name: ai-decision-studio-frontend-public-demo
+
+services:
+  product-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.public-demo
+    image: ai-decision-studio-product-api:frontend-public-demo
+    container_name: ai-decision-studio-product-api-frontend-public-demo
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PRODUCT_API_SERVER_NAME: "0.0.0.0"
+      PRODUCT_API_SERVER_PORT: "8011"
+      APP_PUBLIC_DEMO_MODE: "true"
+      APP_WORKSPACE_ROOT: "/app/baseline"
+      APP_RUNTIME_ROOT: "/app/baseline/.runtime"
+      APP_ARTIFACT_ROOT: "/app/baseline/artifacts"
+      PRESENTATION_EXPORT_LOCAL_ARTIFACT_DIR: "/app/baseline/artifacts/presentation_exports"
+    volumes:
+      - "${AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT:?Set AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT to a writable sanitized baseline overlay}:/app/baseline:rw"
+    ports:
+      - "${AI_DECISION_STUDIO_PRODUCT_API_PUBLIC_PORT:-8013}:8011"
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import json; from urllib.request import urlopen; r=urlopen('http://127.0.0.1:8011/health', timeout=5); assert r.status == 200 and json.loads(r.read().decode()).get('ok') is True\""]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend-public-demo
+      args:
+        VITE_PRODUCT_API_BASE_URL: "/"
+    image: ai-decision-studio-frontend:frontend-public-demo
+    container_name: ai-decision-studio-frontend-public-demo
+    depends_on:
+      product-api:
+        condition: service_healthy
+    ports:
+      - "${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8059}:8080"
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=64m,mode=1777
+      - /var/run:size=16m,mode=1777
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/ >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
