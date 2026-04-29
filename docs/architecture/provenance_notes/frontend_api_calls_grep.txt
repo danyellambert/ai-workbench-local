@@ -1,0 +1,83 @@
+frontend/src/lib/ai-lab-data.ts:1:import { PRODUCT_API_BASE_URL } from '@/lib/product-api';
+frontend/src/lib/ai-lab-data.ts:667:  const response = await fetch(`${PRODUCT_API_BASE_URL}${path}`);
+frontend/src/lib/ai-lab-data.ts:675:  const response = await fetch(`${PRODUCT_API_BASE_URL}${path}`, {
+frontend/src/lib/ai-lab-data.ts:699:  return fetchJson<LabOverviewPageData>('/api/lab/overview');
+frontend/src/lib/ai-lab-data.ts:703:  return fetchJson<LabRuntimePayload>('/api/lab/runtime');
+frontend/src/lib/ai-lab-data.ts:708:  return fetchJson<LabChatPageData>(`/api/lab/chat${query}`);
+frontend/src/lib/ai-lab-data.ts:712:  return postJson<CreateLabChatSessionResponse>('/api/lab/chat/sessions', payload);
+frontend/src/lib/ai-lab-data.ts:716:  return postJson<SendLabChatMessageResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/messages`, payload);
+frontend/src/lib/ai-lab-data.ts:720:  return postJson<DeleteLabChatSessionResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/delete`, {});
+frontend/src/lib/ai-lab-data.ts:724:  return fetchJson<LabWorkflowInspectorPageData>('/api/lab/workflow-inspector');
+frontend/src/lib/ai-lab-data.ts:728:  return postJson<RunLabWorkflowInspectorResponse>('/api/lab/workflow-inspector/run', payload);
+frontend/src/lib/ai-lab-data.ts:732:  return fetchJson<LabBenchmarksPageData>('/api/lab/benchmarks');
+frontend/src/lib/ai-lab-data.ts:736:  return fetchJson<LabEvalsPageData>('/api/lab/evals');
+frontend/src/lib/ai-lab-data.ts:740:  return fetchJson<LabArtifactsPageData>('/api/lab/artifacts');
+frontend/src/lib/ai-lab-data.ts:744:  return fetchJson<LabEvidenceOpsPageData>('/api/lab/evidenceops');
+frontend/src/lib/ai-lab-data.ts:748:  return fetchJson<LabEvidenceOpsSearchResponse>(`/api/lab/evidenceops/search?q=${encodeURIComponent(query)}`);
+frontend/src/lib/ai-lab-data.ts:752:  return postJson<{ ok: boolean; diff?: Record<string, unknown>; page: LabEvidenceOpsPageData }>('/api/lab/evidenceops/sync', {});
+frontend/src/lib/ai-lab-data.ts:756:  return postJson<{ ok: boolean; action?: Record<string, unknown>; page: LabEvidenceOpsPageData }>(`/api/lab/evidenceops/actions/${encodeURIComponent(String(actionId))}`, payload);
+frontend/src/lib/product-api.ts:8:const rawBaseUrl = (import.meta.env.VITE_PRODUCT_API_BASE_URL as string | undefined)?.trim();
+frontend/src/lib/product-api.ts:10:export const PRODUCT_API_BASE_URL = (rawBaseUrl || "http://127.0.0.1:8011").replace(/\/$/, "");
+frontend/src/lib/product-api.ts:918:  const response = await fetch(`${PRODUCT_API_BASE_URL}${path}`);
+frontend/src/lib/product-api.ts:926:  const response = await fetch(`${PRODUCT_API_BASE_URL}${path}`, {
+frontend/src/lib/product-api.ts:945:  const response = await fetch(`${PRODUCT_API_BASE_URL}${path}`, {
+frontend/src/lib/product-api.ts:964:  return fetchProductApi<ProductCommandCenterResponse>("/api/product/command-center");
+frontend/src/lib/product-api.ts:968:  return fetchProductApi<ProductWorkflowCatalogResponse>("/api/product/workflows");
+frontend/src/lib/product-api.ts:972:  return fetchProductApi<ProductRunHistoryResponse>("/api/product/run-history");
+frontend/src/lib/product-api.ts:1000:  return fetchProductApi<ProductRunHistoryDetailResponse>(`/api/product/run-history/${encodeURIComponent(runId)}`);
+frontend/src/lib/product-api.ts:1004:  return postProductApi<ProductRunWorkflowResponse>(`/api/product/run-history/${encodeURIComponent(runId)}/rerun`, {});
+frontend/src/lib/product-api.ts:1008:  return fetchProductApi<ProductArtifactsResponse>("/api/product/artifacts");
+frontend/src/lib/product-api.ts:1012:  return fetchProductApi<ProductArtifactDetailResponse>(`/api/product/artifacts/${encodeURIComponent(artifactId)}`);
+frontend/src/lib/product-api.ts:1016:  return fetchProductApi<LabOverviewResponse>("/api/lab/overview");
+frontend/src/lib/product-api.ts:1020:  return fetchProductApi<LabEvalsResponse>("/api/lab/evals");
+frontend/src/lib/product-api.ts:1024:  return fetchProductApi<ProductDocumentLibraryResponse>("/api/product/document-library");
+frontend/src/lib/product-api.ts:1032:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/upload-documents`, {
+frontend/src/lib/product-api.ts:1050:  return fetchProductApi<ProductUploadDocumentsResponse>(`/api/product/upload-jobs/${encodeURIComponent(jobId)}`);
+frontend/src/lib/product-api.ts:1068:  return fetchProductApi<ProductGroundingPreviewResponse>(`/api/product/grounding-preview?${query.toString()}`);
+frontend/src/lib/product-api.ts:1083:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/run-workflow`, {
+frontend/src/lib/product-api.ts:1105:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/generate-deck`, {
+frontend/src/lib/product-api.ts:1127:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-trello`, {
+frontend/src/lib/product-api.ts:1156:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-notion`, {
+frontend/src/lib/product-api.ts:1182:  return fetchProductApi<ProductIntegrationHubResponse>('/api/product/integrations');
+frontend/src/lib/product-api.ts:1186:  return fetchProductApi<ProductNotionEntriesResponse>(`/api/product/integrations/notion?limit=${encodeURIComponent(String(limit))}`);
+frontend/src/lib/product-api.ts:1191:  return fetchProductApi<ProductNextcloudDocumentsResponse>(`/api/product/integrations/nextcloud?limit=${encodeURIComponent(String(normalizedLimit))}`);
+frontend/src/lib/product-api.ts:1215:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/integrations/nextcloud/import`, {
+frontend/src/lib/product-api.ts:1249:  return postProductApi<ProductNextcloudSyncResponse>('/api/product/integrations/nextcloud/sync', { dry_run: options?.dryRun ?? false });
+frontend/src/lib/product-api.ts:1254:  return `${PRODUCT_API_BASE_URL}/api/product/artifact?${params.toString()}`;
+frontend/src/lib/product-api.ts:1272:  return `${PRODUCT_API_BASE_URL}/api/product/integrations/nextcloud/open?${params.toString()}`;
+frontend/src/lib/product-api.ts:1285:  const response = await fetch(url, { credentials: 'omit' });
+frontend/src/lib/product-api.ts:1307:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/delete-documents`, {
+frontend/src/lib/product-api.ts:1326:  return fetchProductApi<RuntimeControlsResponse>('/api/runtime/controls');
+frontend/src/lib/product-api.ts:1330:  return patchProductApi<RuntimeControlsResponse>('/api/runtime/controls', payload);
+frontend/src/lib/product-api.ts:1334:  return fetchProductApi<PreferencesResponse>('/api/preferences');
+frontend/src/lib/product-api.ts:1338:  return patchProductApi<PreferencesResponse>('/api/preferences', payload);
+frontend/src/lib/product-api.ts:1342:  return postProductApi<PreferencesConnectionTestResponse>(`/api/preferences/connections/${encodeURIComponent(connectionId)}/test`);
+frontend/src/lib/product-api.ts:1346:  return postProductApi<PreferencesResponse>(`/api/preferences/connections/${encodeURIComponent(connectionId)}/credential`, { api_key: apiKey });
+frontend/src/pages/ComparisonPage.test.tsx:8:  PRODUCT_API_BASE_URL,
+frontend/src/pages/ComparisonPage.test.tsx:226:    expect(window.open).toHaveBeenCalledWith(`${PRODUCT_API_BASE_URL}/api/product/artifact?path=%2Ftmp%2Fpolicy-comparison-deck.pptx`, "_blank", "noopener,noreferrer");
+frontend/src/pages/DocumentReviewPage.tsx:11:  PRODUCT_API_BASE_URL,
+frontend/src/pages/DocumentReviewPage.tsx:609:            product_api_base_url: PRODUCT_API_BASE_URL,
+frontend/src/pages/DocumentReviewPage.test.tsx:8:  PRODUCT_API_BASE_URL,
+frontend/src/pages/DocumentReviewPage.test.tsx:248:    expect(window.open).toHaveBeenCalledWith(`${PRODUCT_API_BASE_URL}/api/product/artifact?path=%2Ftmp%2Fdocument-review-deck.pptx`, "_blank", "noopener,noreferrer");
+frontend/src/pages/AiLabPages.test.tsx:28:  if (url.includes('/api/lab/overview')) {
+frontend/src/pages/AiLabPages.test.tsx:49:  if (url.includes('/api/lab/runtime')) {
+frontend/src/pages/AiLabPages.test.tsx:60:  if (url.includes('/api/lab/chat')) {
+frontend/src/pages/AiLabPages.test.tsx:96:  if (url.includes('/api/lab/workflow-inspector')) {
+frontend/src/pages/AiLabPages.test.tsx:123:  if (url.includes('/api/lab/benchmarks')) {
+frontend/src/pages/AiLabPages.test.tsx:200:  if (url.includes('/api/lab/evals')) {
+frontend/src/pages/AiLabPages.test.tsx:211:  if (url.includes('/api/lab/artifacts')) {
+frontend/src/pages/AiLabPages.test.tsx:239:  if (url.includes('/api/lab/evidenceops/search')) {
+frontend/src/pages/AiLabPages.test.tsx:248:  if (url.includes('/api/lab/evidenceops')) {
+frontend/src/pages/AiLabPages.test.tsx:260:  if (url.includes('/api/product/document-library')) {
+frontend/src/pages/AiLabPages.test.tsx:270:  if (url.includes('/api/runtime/controls')) {
+frontend/src/pages/AiLabPages.test.tsx:282:  if (url.includes('/api/product/run-workflow')) {
+frontend/src/pages/PreferencesPage.tsx:493:              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={() => refetch()}>
+frontend/src/pages/ComparisonPage.tsx:11:  PRODUCT_API_BASE_URL,
+frontend/src/pages/ComparisonPage.tsx:647:            product_api_base_url: PRODUCT_API_BASE_URL,
+frontend/src/pages/ActionPlanPage.test.tsx:8:  PRODUCT_API_BASE_URL,
+frontend/src/pages/ActionPlanPage.test.tsx:388:    const expectedUrl = `${PRODUCT_API_BASE_URL}/api/product/artifact?${new URLSearchParams({
+frontend/src/pages/ActionPlanPage.tsx:25:  PRODUCT_API_BASE_URL,
+frontend/src/pages/ActionPlanPage.tsx:1121:            product_api_base_url: PRODUCT_API_BASE_URL,
+frontend/src/pages/CandidateReviewPage.tsx:33:  PRODUCT_API_BASE_URL,
+frontend/src/pages/CandidateReviewPage.tsx:1043:              product_api_base_url: PRODUCT_API_BASE_URL,
+frontend/src/components/product/DeliveryLoopPanel.tsx:202:            <Button variant="outline" size="sm" className="h-8 border-border/50 text-[10px]" onClick={() => { void hubQuery.refetch(); void notionQuery.refetch(); void nextcloudQuery.refetch(); }}>

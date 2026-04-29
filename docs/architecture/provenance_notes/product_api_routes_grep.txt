@@ -1,0 +1,50 @@
+src/product/api.py:241:        if normalized.lower().startswith("boundary="):
+src/product/api.py:268:        if candidate.startswith(b"\r\n"):
+src/product/api.py:839:    def do_GET(self) -> None:  # noqa: N802
+src/product/api.py:844:        if path == "/" and self.settings.enable_web_frontend:
+src/product/api.py:890:        if path == "/health":
+src/product/api.py:902:        if path == "/api/product/workflows":
+src/product/api.py:906:        if path == "/api/product/documents":
+src/product/api.py:911:        if path == "/api/product/document-library":
+src/product/api.py:915:        if path == "/api/product/integrations/nextcloud/open":
+src/product/api.py:945:        if path == "/api/lab/overview":
+src/product/api.py:949:        if path == "/api/lab/runtime":
+src/product/api.py:953:        if path == "/api/lab/chat":
+src/product/api.py:958:        if path == "/api/lab/workflow-inspector":
+src/product/api.py:962:        if path == "/api/lab/benchmarks":
+src/product/api.py:966:        if path == "/api/lab/evals":
+src/product/api.py:970:        if path == "/api/lab/artifacts":
+src/product/api.py:974:        if path == "/api/lab/evidenceops":
+src/product/api.py:978:        if path == "/api/lab/evidenceops/search":
+src/product/api.py:983:        if path.startswith("/api/product/upload-jobs/"):
+src/product/api.py:992:        if path == "/api/product/command-center":
+src/product/api.py:996:        if path == "/api/product/integrations":
+src/product/api.py:1000:        if path == "/api/product/integrations/notion":
+src/product/api.py:1008:        if path == "/api/product/integrations/nextcloud":
+src/product/api.py:1016:        if path == "/api/product/run-history":
+src/product/api.py:1020:        if path.startswith("/api/product/run-history/"):
+src/product/api.py:1029:        if path == "/api/product/artifacts":
+src/product/api.py:1033:        if path.startswith("/api/product/artifacts/"):
+src/product/api.py:1042:        if path == "/api/product/artifact":
+src/product/api.py:1053:        if path == "/api/product/grounding-preview":
+src/product/api.py:1064:        if path == "/api/runtime/controls":
+src/product/api.py:1068:        if path == "/api/preferences":
+src/product/api.py:1074:    def do_POST(self) -> None:  # noqa: N802
+src/product/api.py:1078:        if path == "/api/product/upload-documents":
+src/product/api.py:1104:        if path == "/api/product/integrations/nextcloud/import":
+src/product/api.py:1134:        if path == "/api/product/delete-documents":
+src/product/api.py:1159:        if path == "/api/product/run-workflow":
+src/product/api.py:1197:        if path.startswith("/api/product/run-history/") and path.endswith("/rerun"):
+src/product/api.py:1248:        if path == "/api/product/generate-deck":
+src/product/api.py:1331:        if path == "/api/product/integrations/nextcloud/sync":
+src/product/api.py:1340:        if path == "/api/lab/workflow-inspector/run":
+src/product/api.py:1371:        if path == "/api/lab/chat/sessions":
+src/product/api.py:1386:        if path.startswith("/api/lab/chat/sessions/") and path.endswith("/delete"):
+src/product/api.py:1409:        if path.startswith("/api/lab/chat/sessions/") and path.endswith("/messages"):
+src/product/api.py:1429:        if path == "/api/lab/evidenceops/sync":
+src/product/api.py:1436:        if path.startswith("/api/lab/evidenceops/actions/"):
+src/product/api.py:1453:        if path.startswith("/api/preferences/connections/") and path.endswith("/test"):
+src/product/api.py:1464:        if path.startswith("/api/preferences/connections/") and path.endswith("/credential"):
+src/product/api.py:1478:    def do_PATCH(self) -> None:  # noqa: N802
+src/product/api.py:1488:        if path == "/api/runtime/controls":
+src/product/api.py:1495:        if path == "/api/preferences":
