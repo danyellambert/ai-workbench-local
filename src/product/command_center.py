@@ -114,10 +114,57 @@ def _load_json_file(path: Path | None) -> dict[str, Any] | list[Any] | None:
     return payload if isinstance(payload, (dict, list)) else None
 
 
+def _infer_baseline_root_from_metadata_path(metadata_path: Path) -> Path:
+    resolved = metadata_path.resolve(strict=False)
+    parts = list(resolved.parts)
+
+    for index, part in enumerate(parts):
+        if part == "artifacts" and index + 1 < len(parts) and parts[index + 1] == "presentation_exports":
+            return Path(*parts[:index]).resolve(strict=False)
+
+    if len(resolved.parents) >= 4:
+        return resolved.parents[3].resolve(strict=False)
+
+    return resolved.parent.resolve(strict=False)
+
+
+def _resolve_baseline_uri_path(raw_uri: str, metadata_path: Path) -> Path | None:
+    if not raw_uri.startswith("baseline://"):
+        return None
+
+    logical = raw_uri.removeprefix("baseline://").strip("/")
+    if not logical:
+        return None
+
+    namespace, _, suffix = logical.partition("/")
+    baseline_root = _infer_baseline_root_from_metadata_path(metadata_path)
+
+    namespace_roots = {
+        "workspace": baseline_root,
+        "artifacts": baseline_root / "artifacts",
+        "runtime": baseline_root / ".runtime",
+        "outputs": baseline_root / "outputs",
+        "data": baseline_root / "data",
+        "external_files": baseline_root / "external_files",
+    }
+
+    root = namespace_roots.get(namespace)
+    if root is None:
+        return None
+
+    candidate = (root / suffix).resolve(strict=False) if suffix else root.resolve(strict=False)
+    return candidate if candidate.exists() else None
+
+
 def _resolve_artifact_sidecar_path(raw_path: object, metadata_path: Path) -> Path | None:
     text = str(raw_path or "").strip()
     if not text:
         return None
+
+    baseline_candidate = _resolve_baseline_uri_path(text, metadata_path)
+    if baseline_candidate is not None:
+        return baseline_candidate
+
     candidate = Path(text).expanduser()
     if candidate.exists():
         return candidate.resolve(strict=False)

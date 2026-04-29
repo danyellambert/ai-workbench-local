@@ -448,6 +448,17 @@ def _build_connections(registry: dict[str, dict[str, Any]]) -> tuple[list[dict[s
         else:
             models_by_connection[provider_key] = _list_models(provider_entry, embedding=False) or static_generation_models
             embedding_models_by_connection[provider_key] = _list_models(provider_entry, embedding=True) or static_embedding_models
+
+        if provider_key == "ollama":
+            for embedding_model in [
+                *static_embedding_models,
+                _default_ollama_embedding_model(),
+            ]:
+                normalized_embedding_model = str(embedding_model or "").strip()
+                if normalized_embedding_model and normalized_embedding_model not in models_by_connection[provider_key]:
+                    models_by_connection[provider_key].append(normalized_embedding_model)
+                if normalized_embedding_model and normalized_embedding_model not in embedding_models_by_connection[provider_key]:
+                    embedding_models_by_connection[provider_key].append(normalized_embedding_model)
         preferred_model = str(provider_entry.get("default_model") or static_config.get("defaultModel") or "")
         if _is_blocked_product_model(preferred_model):
             preferred_model = models_by_connection.get(provider_key, [""])[0] if models_by_connection.get(provider_key) else ""

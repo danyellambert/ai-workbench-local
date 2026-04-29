@@ -99,6 +99,7 @@ For every tab above:
 - Docker route-only audit passed for 20 routes.
 - Local vs Docker API parity passed for the Golden Surface endpoints.
 - Local vs Docker UI route parity passed for 23 routes with no failed routes.
+- Local vs Docker visible action inventory parity passed for 22 interactive routes with no missing Docker actions.
 
 ## Not yet proven
 

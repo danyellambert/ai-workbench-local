@@ -212,6 +212,17 @@ def _build_provider_connections(
             current["lastChecked"] = str(test_result.get("checked_at") or current.get("lastChecked") or "")
         if str(test_result.get("status") or "") in {"connected", "degraded", "disconnected", "not_configured"}:
             current["status"] = str(test_result.get("status"))
+
+        if (
+            connection_id in UI_CREDENTIAL_CONNECTION_IDS
+            and str(current.get("status") or "") in {"connected", "degraded"}
+        ):
+            current["apiKeyConfigured"] = True
+            if connection_id == "huggingface_inference" and str(current.get("authMethod") or "none") == "none":
+                current["authMethod"] = "bearer_token"
+            if connection_id == "ollama_hosted" and not str(current.get("baseUrl") or "").strip():
+                current["baseUrl"] = "https://ollama.com/api"
+
         error_message = str(test_result.get("error_message") or "").strip()
         if error_message:
             current["lastErrorMessage"] = error_message
