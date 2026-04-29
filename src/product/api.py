@@ -148,8 +148,12 @@ def _resolve_product_artifact_path(*, bootstrap: ProductBootstrap, raw_path: str
         raise ValueError("Artifact path is required.")
 
     resolved = candidate.resolve(strict=False)
+    workspace_root = bootstrap.workspace_root.resolve(strict=False)
     allowed_roots = [
         get_artifact_root(bootstrap.workspace_root).resolve(strict=False),
+        (workspace_root / "external_files").resolve(strict=False),
+        (workspace_root / "outputs").resolve(strict=False),
+        (workspace_root / ".runtime").resolve(strict=False),
         Path(bootstrap.presentation_export_settings.local_artifact_dir).resolve(strict=False),
     ]
     if not any(resolved.is_relative_to(root) for root in allowed_roots):

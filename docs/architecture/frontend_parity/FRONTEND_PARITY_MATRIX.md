@@ -135,3 +135,14 @@ Validated Docker provider checks:
 - `huggingface_inference`: connected.
 - `ollama_hosted`: connected.
 
+## Docker integration validation note
+
+Additional Docker functional checks completed:
+
+- NextCloud WebDAV is reachable from inside `product-api` through `host.docker.internal:8085`.
+- NextCloud authenticated listing works for `/EvidenceOpsDemo`.
+- `GET /api/product/integrations/nextcloud` lists remote documents.
+- `POST /api/product/integrations/nextcloud/import` works through both API and frontend.
+- Deck Center artifact sidecars in `external_files`, `outputs`, and `.runtime` are allowed through the artifact endpoint when they remain inside the workspace/baseline safe roots.
+- Deck Center `.pptx`, `.json`, `.png`, and metadata assets open through the Docker API/frontend proxy.
+
