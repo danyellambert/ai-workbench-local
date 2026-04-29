@@ -12,14 +12,39 @@ SOURCE_PATHS = [
     ".runtime/state/rag",
     ".runtime/state/product",
     ".runtime/logs/product",
+    ".runtime/logs/runtime",
+    ".runtime/logs/phase6",
+    ".runtime/logs/phase7",
+    ".runtime/logs/phase55",
+    ".runtime/evals/phase8",
     ".runtime/state/lab",
     ".runtime/state/evidenceops",
     ".runtime/logs/evidenceops",
+    ".phase8_eval_runs.sqlite3",
     ".phase95_evidenceops_actions.sqlite3",
+    ".runtime_execution_log.json",
+    ".phase6_document_agent_log.json",
+    ".phase7_model_comparison_log.json",
+    ".phase55_langchain_shadow_log.json",
+    ".phase55_langgraph_shadow_log.json",
+    "benchmark_runs",
+    "benchmark_pdfs",
+    "phase5_eval",
+    "phase8_eval",
     "artifacts/presentation_exports",
     "data/corpus_revisado/frontend_demo_grounded_v1",
     "data/corpus_revisado/option_b_synthetic_premium",
     "data/materials_demo",
+]
+
+
+CANONICAL_RUNTIME_COPIES = [
+    (".phase8_eval_runs.sqlite3", ".runtime/evals/phase8/phase8_eval_runs.sqlite3"),
+    (".runtime_execution_log.json", ".runtime/logs/runtime/runtime_execution_log.json"),
+    (".phase6_document_agent_log.json", ".runtime/logs/phase6/document_agent_log.json"),
+    (".phase7_model_comparison_log.json", ".runtime/logs/phase7/model_comparison_log.json"),
+    (".phase55_langchain_shadow_log.json", ".runtime/logs/phase55/langchain_shadow_log.json"),
+    (".phase55_langgraph_shadow_log.json", ".runtime/logs/phase55/langgraph_shadow_log.json"),
 ]
 
 
@@ -54,6 +79,45 @@ def copy_path(root: Path, out: Path, rel: str) -> dict:
         "copied": True,
         "type": "dir" if src.is_dir() else "file",
     }
+
+
+def materialize_canonical_runtime_paths(out: Path) -> list[dict]:
+    """Mirror legacy AI Lab files into the canonical runtime layout used by runtime_paths.py."""
+    raw = out / "raw_sources"
+    report = []
+
+    for legacy_rel, canonical_rel in CANONICAL_RUNTIME_COPIES:
+        legacy = raw / legacy_rel
+        canonical = raw / canonical_rel
+
+        if not legacy.exists() or not legacy.is_file():
+            report.append({
+                "legacy": legacy_rel,
+                "canonical": canonical_rel,
+                "legacy_exists": False,
+                "materialized": False,
+            })
+            continue
+
+        should_copy = not canonical.exists()
+        if canonical.exists() and canonical.is_file():
+            should_copy = legacy.stat().st_size > canonical.stat().st_size
+
+        if should_copy:
+            canonical.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(legacy, canonical)
+
+        report.append({
+            "legacy": legacy_rel,
+            "canonical": canonical_rel,
+            "legacy_exists": True,
+            "canonical_exists": canonical.exists(),
+            "legacy_size": legacy.stat().st_size,
+            "canonical_size": canonical.stat().st_size if canonical.exists() else 0,
+            "materialized": should_copy,
+        })
+
+    return report
 
 
 def iter_text_files(root: Path):
@@ -142,6 +206,7 @@ def main() -> None:
     out.mkdir(parents=True)
 
     copy_report = [copy_path(root, out, rel) for rel in SOURCE_PATHS]
+    canonical_runtime_report = materialize_canonical_runtime_paths(out)
 
     raw = out / "raw_sources"
     scan_results = [item for item in (scan_file(path, raw) for path in iter_text_files(raw)) if len(item) > 1]
@@ -156,6 +221,12 @@ def main() -> None:
         "lab_workflow_runs": safe_json_count(raw / ".runtime/state/lab/workflow_runs.json", "runs", "workflow_runs", "items"),
         "lab_artifacts_index": safe_json_count(raw / ".runtime/state/lab/artifacts_index.json", "artifacts", "items"),
         "lab_artifacts_derived_from_presentation_exports": count_artifact_metadata_dirs(raw / "artifacts/presentation_exports"),
+        "benchmark_run_files": len([item for item in (raw / "benchmark_runs").rglob("*") if item.is_file()]) if (raw / "benchmark_runs").exists() else 0,
+        "phase5_eval_files": len([item for item in (raw / "phase5_eval").rglob("*") if item.is_file()]) if (raw / "phase5_eval").exists() else 0,
+        "phase8_eval_files": len([item for item in (raw / "phase8_eval").rglob("*") if item.is_file()]) if (raw / "phase8_eval").exists() else 0,
+        "phase8_eval_rows_legacy": safe_sqlite_table_count(raw / ".phase8_eval_runs.sqlite3", "eval_runs"),
+        "phase8_eval_rows_runtime": safe_sqlite_table_count(raw / ".runtime/evals/phase8/phase8_eval_runs.sqlite3", "eval_runs"),
+        "runtime_execution_entries": safe_json_count(raw / ".runtime/logs/runtime/runtime_execution_log.json", "entries", "items"),
         "evidenceops_worklog_entries": safe_json_count(raw / ".runtime/logs/evidenceops/worklog.json", "entries", "items"),
         "evidenceops_action_rows": safe_sqlite_table_count(raw / ".phase95_evidenceops_actions.sqlite3", "evidenceops_actions"),
     }
@@ -168,6 +239,7 @@ def main() -> None:
         "purpose": "Copy real local state outside Git before path rewrite and Docker mounting.",
         "workspace_root": str(root),
         "copy_report": copy_report,
+        "canonical_runtime_report": canonical_runtime_report,
         "counts": counts,
         "audit": {
             "text_files_with_findings": len(scan_results),

@@ -11,6 +11,13 @@ from pathlib import Path
 TEXT_SUFFIXES = {".json", ".md", ".txt", ".yml", ".yaml", ".toml", ".env"}
 ABS_PATH_RE = re.compile(r"""(?:/Users/[^"'\n\r,}\]]*|/private/[^"'\n\r,}\]]*|/var/folders/[^"'\n\r,}\]]*)""")
 SECRET_RE = re.compile(r"(?i)(api[_-]?key|secret|password|passwd|authorization|bearer)\s*[:=]")
+FORBIDDEN_EXTERNAL_FILE_NAMES = {
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.production",
+    ".env.test",
+}
 
 
 def sha_short(value: str) -> str:
@@ -42,6 +49,28 @@ def collect_absolute_paths(root: Path) -> set[str]:
     return found
 
 
+def should_copy_external_file(src: Path) -> bool:
+    """Return False for local secret/config files that must never enter the baseline."""
+    name = src.name.lower()
+
+    if name in FORBIDDEN_EXTERNAL_FILE_NAMES or name.startswith(".env."):
+        return False
+
+    if src.suffix.lower() == ".env":
+        return False
+
+    if src.suffix.lower() in TEXT_SUFFIXES:
+        try:
+            text = src.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            return False
+
+        if SECRET_RE.search(text):
+            return False
+
+    return True
+
+
 def copy_external_files(paths: set[str], external_dir: Path) -> dict[str, str]:
     mapping: dict[str, str] = {}
     external_dir.mkdir(parents=True, exist_ok=True)
@@ -49,6 +78,9 @@ def copy_external_files(paths: set[str], external_dir: Path) -> dict[str, str]:
     for raw_path in sorted(paths):
         src = Path(raw_path)
         if not src.exists() or not src.is_file():
+            continue
+
+        if not should_copy_external_file(src):
             continue
 
         name = src.name
