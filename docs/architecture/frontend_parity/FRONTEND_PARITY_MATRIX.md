@@ -19,7 +19,7 @@ Compare:
 |---|---|---|
 | 1 | Inventory all routes, links, pages, API calls and actions | Passed |
 | 2 | Compare local vs Docker API surfaces | Passed |
-| 3 | Compare local vs Docker UI route rendering | Pending |
+| 3 | Compare local vs Docker UI route rendering | Passed |
 | 4 | Validate actions per tab | Pending |
 | 5 | Create one full parity script | Pending |
 
@@ -98,6 +98,7 @@ For every tab above:
 - Docker frontend UI smoke for Document Review and Policy Comparison passes.
 - Docker route-only audit passed for 20 routes.
 - Local vs Docker API parity passed for the Golden Surface endpoints.
+- Local vs Docker UI route parity passed for 23 routes with no failed routes.
 
 ## Not yet proven
 
@@ -113,4 +114,5 @@ The following are not yet fully proven:
 - Runtime Controls user actions.
 - Preferences user actions.
 - Chat tab behavior.
-- Full local vs Docker UI parity for all routes.
+- Full local vs Docker UI parity for all routes. Passed for 23 routes in Phase 3 route rendering parity.
+- Full local vs Docker action parity for every tab.
