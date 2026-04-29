@@ -338,3 +338,160 @@ For the Functional Baseline builder, validate:
 - every run detail can be converted back into a workflow response shape;
 - rerun creates a new overlay run;
 - baseline history remains read-only.
+
+---
+
+## Artifacts / Deck Center
+
+### Frontend files
+
+Primary surface:
+
+- `frontend/src/pages/DeckCenterPage.tsx`
+- `frontend/src/lib/product-api.ts`
+
+Shared consumers:
+
+- `frontend/src/pages/RunHistoryPage.tsx`
+- `frontend/src/pages/DocumentReviewPage.tsx`
+- `frontend/src/pages/ComparisonPage.tsx`
+- `frontend/src/pages/ActionPlanPage.tsx`
+- `frontend/src/pages/CandidateReviewPage.tsx`
+- `frontend/src/pages/AdvancedExperimentsPage.tsx`
+
+The Deck Center is the product artifact registry. It must point to real persisted files, not only artifact counts.
+
+### API endpoints
+
+Read/list/detail/open:
+
+- `GET /api/product/artifacts`
+- `GET /api/product/artifacts/<artifact_id>`
+- `GET /api/product/artifact?path=...`
+
+Mutating/generation:
+
+- workflow deck generation endpoint using `run_id`
+- workflow pages call `generateProductWorkflowDeck(...)`
+- artifact lineage is attached back to run history when generation succeeds
+
+### Backend handlers and helpers
+
+Primary route surface:
+
+- `src/product/api.py`
+
+Relevant helpers:
+
+- `build_product_artifact_payload(...)`
+- `build_product_artifact_detail_payload(...)`
+- `_resolve_product_artifact_path(...)`
+- `generate_product_workflow_deck(...)`
+- `attach_artifact_lineage(...)`
+- `get_artifact_root(...)`
+
+Artifact catalog logic:
+
+- `src/product/command_center.py`
+- `src/product/service.py`
+- `src/product/telemetry.py`
+- `src/storage/runtime_paths.py`
+
+### Current local state sources
+
+Primary artifact state:
+
+- `artifacts/presentation_exports/`
+
+Each deck export directory can include:
+
+- `metadata.json`
+- `payload.json`
+- `review.json`
+- `contract.json`
+- `render_request.json`
+- `render_response.json`
+- `preview-manifest.json`
+- `*.pptx`
+- `*-thumbnails.png`
+- preview PNG files
+
+Related state:
+
+- `.runtime/logs/product/workflow_history.json`
+- `.runtime/logs/product/telemetry_runs.json`
+- `.runtime/state/lab/artifacts_index.json`
+- `.runtime/state/lab/workflow_runs.json`
+- `.runtime/seed_build/current/product/artifacts_index.json`, diagnostic only
+
+### Functional Baseline requirement
+
+The baseline must include real artifact records and real files.
+
+For every artifact shown in Deck Center, the baseline should preserve:
+
+- artifact ID;
+- workflow label;
+- created timestamp;
+- status;
+- slide count;
+- preview count;
+- asset count;
+- `local_pptx_path` or equivalent logical path;
+- `local_payload_path` or equivalent logical path;
+- preview assets;
+- metadata sidecars;
+- links back to run history when available.
+
+A deck card should not appear as ready unless its referenced files exist.
+
+### Path rewrite requirement
+
+Artifact paths must become portable logical URIs.
+
+Examples:
+
+- `baseline://artifacts/presentation_exports/deckexp_x/metadata.json`
+- `baseline://artifacts/presentation_exports/deckexp_x/deck.pptx`
+- `baseline://artifacts/presentation_exports/deckexp_x/payload.json`
+- `baseline://artifacts/presentation_exports/deckexp_x/preview-manifest.json`
+- `user://artifacts/presentation_exports/deckexp_y/deck.pptx`
+
+The backend resolver must reject arbitrary absolute paths and path traversal.
+
+### Overlay requirement
+
+New generated artifacts must be written to overlay, not baseline.
+
+Overlay stores:
+
+- new deck export directories;
+- new metadata sidecars;
+- new previews;
+- new payload files;
+- artifact lineage back to overlay run history.
+
+Baseline artifacts remain read-only.
+
+### Secrets and credentials
+
+Viewing historical artifacts should require no provider secret.
+
+Generating a new deck may require:
+
+- model/provider credentials for workflow generation;
+- PPT Creator service configuration;
+- renderer/export service configuration.
+
+Those must be injected at runtime through env, Docker secrets or admin credential store. They must not be embedded in artifact metadata.
+
+### Validation requirement
+
+For the Functional Baseline builder, validate:
+
+- every ready artifact has existing files;
+- every `local_pptx_path` resolves to a real `.pptx`;
+- every `local_payload_path` resolves to a real JSON payload;
+- preview manifests reference existing preview files;
+- artifact paths resolve only under allowed baseline or overlay roots;
+- run history artifact links point to existing artifact records where expected.
