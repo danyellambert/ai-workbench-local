@@ -155,3 +155,13 @@ Additional Docker UX/integration fixes completed:
 - Notion EvidenceOps variables are passed through to `product-api` through Docker Compose without committing secret values.
 - `/api/product/integrations` reports NextCloud, Trello and Notion as ready in Docker when the environment provides the required credentials and IDs.
 
+## Docker deep-click validation note
+
+Phase 4.2 Docker deep-click validation completed:
+
+- Product deep clicks passed for Command Center, Document Library / NextCloud, Workflows, Deck Center, Run History and Run Surface.
+- AI Lab deep clicks passed for Overview, Runtime, Chat, Workflow Inspector, Benchmarks, Evals, Artifacts, EvidenceOps, Structured and Models.
+- Settings deep clicks passed for Runtime Controls and Preferences.
+- Runtime Controls correctly renders Docker provider/model content.
+- Preferences can run provider connection tests without frontend errors.
+
