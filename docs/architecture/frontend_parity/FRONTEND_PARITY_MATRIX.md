@@ -146,3 +146,12 @@ Additional Docker functional checks completed:
 - Deck Center artifact sidecars in `external_files`, `outputs`, and `.runtime` are allowed through the artifact endpoint when they remain inside the workspace/baseline safe roots.
 - Deck Center `.pptx`, `.json`, `.png`, and metadata assets open through the Docker API/frontend proxy.
 
+## Docker UX and external handoff validation note
+
+Additional Docker UX/integration fixes completed:
+
+- Frontend favicon is served as a readable static asset from the Nginx container.
+- Trello EvidenceOps variables are passed through to `product-api` through Docker Compose without committing secret values.
+- Notion EvidenceOps variables are passed through to `product-api` through Docker Compose without committing secret values.
+- `/api/product/integrations` reports NextCloud, Trello and Notion as ready in Docker when the environment provides the required credentials and IDs.
+
