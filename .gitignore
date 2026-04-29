@@ -58,3 +58,5 @@ frontend/.tmp_frontend_surface_e2e/
 frontend/playwright-report/
 .tmp_candidate_review_validation/
 runtime-state-diagnosis*.txt
+.tmp_playwright/
+test-results/

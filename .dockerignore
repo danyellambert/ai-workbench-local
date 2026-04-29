@@ -38,3 +38,6 @@ tests/golden
 *.sqlite3
 *.db
 *.tmp
+.tmp_playwright/
+test-results/
+playwright-report/
