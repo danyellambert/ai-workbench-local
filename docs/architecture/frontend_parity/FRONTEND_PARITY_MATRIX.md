@@ -182,3 +182,17 @@ Additional AI Lab Docker fixes completed:
 - Experiments & Artifacts now links workflow runs to presentation export bundles using direct artifact metadata and timestamp/workflow fallback matching.
 - `Artifact linked runs` and `latestWorkflowArtifact` are populated from real persisted run/artifact state instead of staying permanently zero/null.
 
+## Full Docker frontend parity gate note
+
+The single readiness gate passed end-to-end in Docker:
+
+- Docker public demo smoke passed.
+- Workflow write smoke passed for `document_review`.
+- Workflow write smoke passed for `policy_contract_comparison`.
+- Frontend workflow UI smoke passed.
+- Local-vs-Docker route parity passed for all stable routes.
+- `/app/lab/chat` is excluded only from strict route-size parity because it is session-history dependent and mutates during tests.
+- Chat behavior is still validated through AI Lab content checks, including contextual follow-up prompts.
+- Product, AI Lab and Settings deep-click checks passed.
+- AI Lab content checks passed for Overview, Benchmarks, Evals, Artifacts, EvidenceOps and Chat.
+

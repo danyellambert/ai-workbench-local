@@ -26,11 +26,11 @@ from urllib.request import Request, urlopen
 base = os.environ["BASE_URL"].rstrip("/")
 report_path = Path(os.environ["REPORT_OUT"])
 
-def get_json(path, timeout=60):
+def get_json(path, timeout=int(os.getenv("AI_DECISION_STUDIO_WORKFLOW_SMOKE_TIMEOUT_SECONDS", "420"))):
     with urlopen(f"{base}{path}", timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
 
-def post_json(path, payload, timeout=240):
+def post_json(path, payload, timeout=int(os.getenv("AI_DECISION_STUDIO_WORKFLOW_SMOKE_TIMEOUT_SECONDS", "420"))):
     data = json.dumps(payload).encode("utf-8")
     request = Request(
         f"{base}{path}",

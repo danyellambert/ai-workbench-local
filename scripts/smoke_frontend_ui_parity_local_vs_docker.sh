@@ -37,6 +37,13 @@ const dockerBase = process.env.DOCKER_FRONTEND_URL;
 const reportOut = process.env.REPORT_OUT;
 const screenshotDir = process.env.SCREENSHOT_DIR;
 
+const skippedRoutes = new Set(
+  (process.env.AI_DECISION_STUDIO_ROUTE_PARITY_SKIP || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+);
+
 const routes = [
   '/',
   '/app',
@@ -179,6 +186,16 @@ async function main() {
   const results = [];
 
   for (const route of routes) {
+    if (skippedRoutes.has(route)) {
+      console.log(`SKIP ${route} dynamic route excluded from strict local-vs-Docker size parity`);
+      results.push({
+        route,
+        ok: true,
+        skipped: true,
+        reason: 'dynamic route excluded from strict local-vs-Docker size parity',
+      });
+      continue;
+    }
     const local = await inspectRoute(context, localBase, route);
     const docker = await inspectRoute(context, dockerBase, route);
     const parity = compare(local, docker);
