@@ -117,3 +117,21 @@ The following are not yet fully proven:
 - Chat tab behavior.
 - Full local vs Docker UI parity for all routes. Passed for 23 routes in Phase 3 route rendering parity.
 - Full local vs Docker action parity for every tab.
+
+## Docker provider topology note
+
+Docker runtime provider parity means providers are functionally reachable from inside the `product-api` container, not that every model default must match the local frontend byte-for-byte.
+
+Current accepted Docker topology:
+
+- Ollama local is reached through `host.docker.internal:11435`, because `localhost` inside the container points to the `product-api` container itself.
+- Ollama Hosted can use a Docker-specific preferred hosted model, including `nemotron-3-super:cloud`, as long as the connection test passes and Runtime Controls exposes the available hosted catalog.
+- Hugging Face Inference uses the configured remote router URL and credential reference.
+- Docker must not commit real credential values; credentials are supplied through environment variables or safe credential references.
+
+Validated Docker provider checks:
+
+- `ollama`: connected.
+- `huggingface_inference`: connected.
+- `ollama_hosted`: connected.
+
