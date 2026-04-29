@@ -1529,6 +1529,80 @@ def _sources_from_document_agent_payload(payload: DocumentAgentPayload) -> list[
     return sources
 
 
+
+
+LAB_CHAT_CONTEXTUAL_FOLLOWUPS = {
+    'what else',
+    'what else?',
+    'anything else',
+    'anything else?',
+    'continue',
+    'continue.',
+    'go on',
+    'go on.',
+    'tell me more',
+    'tell me more.',
+    'and more',
+    'more',
+    'mais',
+    'e mais',
+    'o que mais',
+    'o que mais?',
+    'e o resto',
+    'e o resto?',
+    'continue',
+    'continua',
+    'continua.',
+    'mais alguma coisa',
+    'mais alguma coisa?',
+}
+
+
+def _is_contextual_chat_followup(content: str) -> bool:
+    normalized = re.sub(r'\s+', ' ', str(content or '').strip().lower())
+    normalized = normalized.strip()
+    if normalized in LAB_CHAT_CONTEXTUAL_FOLLOWUPS:
+        return True
+    if len(normalized.split()) <= 4 and normalized in {'what more', 'what other', 'what about the rest', 'and then'}:
+        return True
+    return False
+
+
+def _build_lab_chat_recent_context(session: dict[str, Any], *, max_messages: int = 6, max_chars: int = 1400) -> str:
+    messages = session.get('messages') if isinstance(session.get('messages'), list) else []
+    useful = []
+    for message in messages[-max_messages:]:
+        if not isinstance(message, dict):
+            continue
+        role = str(message.get('role') or '').strip().lower()
+        content = str(message.get('content') or '').strip()
+        if role not in {'user', 'assistant'} or not content:
+            continue
+        label = 'User' if role == 'user' else 'Assistant'
+        useful.append(f'{label}: {_trim_text(content, max_chars=360)}')
+    context = '\n'.join(useful)
+    if len(context) > max_chars:
+        context = context[-max_chars:]
+    return context.strip()
+
+
+def _contextualize_lab_chat_content(content: str, session: dict[str, Any]) -> str:
+    normalized = str(content or '').strip()
+    if not normalized or not _is_contextual_chat_followup(normalized):
+        return normalized
+
+    recent_context = _build_lab_chat_recent_context(session)
+    if not recent_context:
+        return normalized
+
+    return (
+        'The user is asking a follow-up question in the same AI Lab chat session.\n'
+        'Use the recent conversation context below to resolve the follow-up, then answer the latest user message.\n\n'
+        f'Recent conversation:\n{recent_context}\n\n'
+        f'Latest user message: {normalized}'
+    )
+
+
 def _execute_lab_document_qa_turn(
     *,
     bootstrap: ProductBootstrap,
@@ -1684,6 +1758,8 @@ def execute_lab_chat_turn(
     if not current_document_ids:
         raise ValueError('At least one indexed document is required to execute AI LAB chat.')
 
+    effective_content = _contextualize_lab_chat_content(normalized_content, session)
+
     append_lab_chat_message(sessions_path, session_id=session_id, role='user', content=normalized_content)
 
     if str(session.get('title') or '').strip().lower() == 'ai lab chat session':
@@ -1694,15 +1770,24 @@ def execute_lab_chat_turn(
     provider, model = _workflow_request_defaults(bootstrap.workspace_root)
     if not _is_automated_lab_chat_prompt(normalized_content):
         try:
-            return _execute_lab_document_qa_turn(
+            response = _execute_lab_document_qa_turn(
                 bootstrap=bootstrap,
                 sessions_path=sessions_path,
                 session_id=session_id,
-                content=normalized_content,
+                content=effective_content,
                 document_ids=current_document_ids,
                 provider=provider,
                 model=model,
             )
+            if _is_contextual_chat_followup(normalized_content):
+                assistant_message = response.get('assistant_message') if isinstance(response, dict) else None
+                if isinstance(assistant_message, dict):
+                    diagnostics = assistant_message.get('diagnostics') if isinstance(assistant_message.get('diagnostics'), dict) else {}
+                    diagnostics['conversation_context_used'] = True
+                    diagnostics['original_user_message'] = normalized_content
+                    assistant_message['diagnostics'] = diagnostics
+                response['contextualized'] = True
+            return response
         except Exception as error:
             update_lab_chat_session_runtime(
                 sessions_path,
@@ -1717,7 +1802,7 @@ def execute_lab_chat_turn(
     request = ProductWorkflowRequest(
         workflow_id='document_review',
         document_ids=current_document_ids,
-        input_text=normalized_content,
+        input_text=effective_content,
         provider=provider,
         model=model,
         context_strategy='retrieval',
@@ -3539,18 +3624,147 @@ def _build_lab_artifact_inventory(workspace_root: Path) -> list[dict[str, Any]]:
     return bundles
 
 
+
+
+def _workflow_run_id_for_artifact_link(run: dict[str, Any]) -> str:
+    return str(run.get('run_id') or run.get('id') or run.get('trace_id') or '').strip()
+
+
+def _parse_artifact_link_timestamp(value: Any) -> datetime | None:
+    raw = str(value or '').strip()
+    if not raw:
+        return None
+    try:
+        if raw.endswith('Z'):
+            raw = raw[:-1] + '+00:00'
+        parsed = datetime.fromisoformat(raw)
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def _collect_artifact_link_strings(value: Any, *, limit: int = 80) -> list[str]:
+    collected: list[str] = []
+
+    def walk(item: Any) -> None:
+        if len(collected) >= limit:
+            return
+        if isinstance(item, str):
+            normalized = item.strip()
+            if normalized:
+                collected.append(normalized.lower())
+            return
+        if isinstance(item, (int, float)):
+            return
+        if isinstance(item, dict):
+            for key, nested in item.items():
+                if str(key).lower() in {'artifact_path', 'artifact_label', 'path', 'label', 'name', 'id', 'export_id', 'version', 'local_pptx_path', 'local_artifact_dir', 'remote_output_path'}:
+                    walk(nested)
+                elif key in {'artifacts', 'artifact_items', 'delivery_outputs', 'result', 'response_payload'}:
+                    walk(nested)
+            return
+        if isinstance(item, list):
+            for nested in item:
+                walk(nested)
+
+    walk(value)
+    return collected
+
+
+def _artifact_matches_workflow_run(artifact: dict[str, Any], run: dict[str, Any]) -> bool:
+    artifact_id = str(artifact.get('id') or artifact.get('version') or '').strip().lower()
+    artifact_name = str(artifact.get('name') or '').strip().lower()
+    artifact_workflow = str(artifact.get('workflowLabel') or artifact.get('category') or '').strip().lower()
+
+    run_tokens = _collect_artifact_link_strings(run)
+    if artifact_id and any(artifact_id in token for token in run_tokens):
+        return True
+    if artifact_name and any(artifact_name in token for token in run_tokens):
+        return True
+
+    run_workflow = str(run.get('workflow_label') or run.get('workflowLabel') or '').strip().lower()
+    if artifact_workflow and run_workflow and artifact_workflow != run_workflow:
+        return False
+
+    artifact_ts = _parse_artifact_link_timestamp(artifact.get('createdAt'))
+    run_ts = _parse_artifact_link_timestamp(run.get('timestamp') or run.get('created_at') or run.get('updated_at'))
+    if artifact_ts and run_ts:
+        distance_s = abs((artifact_ts - run_ts).total_seconds())
+        if distance_s <= 6 * 60 * 60:
+            return True
+
+    return False
+
+
+def _load_product_history_runs_for_artifacts(workspace_root: Path) -> list[dict[str, Any]]:
+    raw = _read_json(get_product_workflow_history_path(workspace_root), [])
+    if isinstance(raw, dict):
+        entries = raw.get('runs') or raw.get('history') or raw.get('items') or []
+    elif isinstance(raw, list):
+        entries = raw
+    else:
+        entries = []
+
+    normalized = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        run = dict(entry)
+        run.setdefault('run_id', str(entry.get('run_id') or entry.get('id') or '').strip())
+        run.setdefault('created_at', entry.get('timestamp') or entry.get('created_at') or entry.get('updated_at'))
+        normalized.append(run)
+    return normalized
+
+
+def _merge_artifact_workflow_runs(*run_groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    merged: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for group in run_groups:
+        for entry in group:
+            if not isinstance(entry, dict):
+                continue
+            run_id = _workflow_run_id_for_artifact_link(entry)
+            key = run_id or json.dumps(entry, sort_keys=True, default=str)[:160]
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(entry)
+    merged.sort(key=lambda item: str(item.get('timestamp') or item.get('created_at') or item.get('updated_at') or ''), reverse=True)
+    return merged
+
+
+def _build_artifact_workflow_linkage(artifacts: list[dict[str, Any]], workflow_runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    linked: dict[str, dict[str, Any]] = {}
+    for run in workflow_runs:
+        run_id = _workflow_run_id_for_artifact_link(run)
+        if not run_id:
+            continue
+        for artifact in artifacts:
+            if _artifact_matches_workflow_run(artifact, run):
+                linked[run_id] = artifact
+                break
+    return linked
+
+
 def build_lab_artifacts_payload(workspace_root: Path) -> dict[str, Any]:
     artifacts = _build_lab_artifact_inventory(workspace_root)
     chat_sessions = load_lab_chat_sessions(get_lab_chat_sessions_path(workspace_root))
-    workflow_runs = load_lab_workflow_runs(get_lab_workflow_runs_path(workspace_root))
+    lab_workflow_runs = load_lab_workflow_runs(get_lab_workflow_runs_path(workspace_root))
+    product_workflow_runs = _load_product_history_runs_for_artifacts(workspace_root)
+    workflow_runs = _merge_artifact_workflow_runs(lab_workflow_runs, product_workflow_runs)
+    linked_artifacts_by_run_id = _build_artifact_workflow_linkage(artifacts, workflow_runs)
 
     def _is_bundle_link(run: dict[str, Any]) -> bool:
+        run_id = _workflow_run_id_for_artifact_link(run)
         artifact_path = str(run.get('artifact_path') or '').strip().lower()
         artifact_label = str(run.get('artifact_label') or '').strip().lower()
-        return 'deckexp_' in artifact_path or artifact_path.endswith('.pptx') or 'deck' in artifact_label
+        return bool(run_id and run_id in linked_artifacts_by_run_id) or 'deckexp_' in artifact_path or artifact_path.endswith('.pptx') or 'deck' in artifact_label
 
     linked_workflow_runs = [run for run in workflow_runs if _is_bundle_link(run)]
     latest_linked_run = linked_workflow_runs[0] if linked_workflow_runs else None
+    latest_linked_artifact = linked_artifacts_by_run_id.get(_workflow_run_id_for_artifact_link(latest_linked_run or {})) if latest_linked_run else None
 
     ready_count = sum(1 for item in artifacts if item['status'] == 'ready')
     warning_count = sum(1 for item in artifacts if item['status'] == 'warning')
@@ -3585,11 +3799,12 @@ def build_lab_artifacts_payload(workspace_root: Path) -> dict[str, Any]:
         'chatSessions': len(chat_sessions),
         'workflowRuns': len(workflow_runs),
         'latestChatSession': str(chat_sessions[0].get('session_id') or '') if chat_sessions else None,
-        'latestWorkflowRun': str(workflow_runs[0].get('run_id') or '') if workflow_runs else None,
+        'latestWorkflowRun': _workflow_run_id_for_artifact_link(workflow_runs[0]) if workflow_runs else None,
         'latestWorkflowArtifact': {
-            'label': str((latest_linked_run or {}).get('artifact_label') or Path(str((latest_linked_run or {}).get('artifact_path') or '')).name or 'Workflow artifact').strip() or 'Workflow artifact',
-            'runId': str((latest_linked_run or {}).get('run_id') or '').strip() or None,
-            'updatedAt': _format_timestamp((latest_linked_run or {}).get('updated_at') or (latest_linked_run or {}).get('created_at')),
+            'label': str((latest_linked_artifact or {}).get('name') or (latest_linked_run or {}).get('artifact_label') or Path(str((latest_linked_run or {}).get('artifact_path') or '')).name or 'Workflow artifact').strip() or 'Workflow artifact',
+            'artifactId': str((latest_linked_artifact or {}).get('id') or '').strip() or None,
+            'runId': _workflow_run_id_for_artifact_link(latest_linked_run or {}) or None,
+            'updatedAt': _format_timestamp((latest_linked_run or {}).get('updated_at') or (latest_linked_run or {}).get('created_at') or (latest_linked_run or {}).get('timestamp')),
         } if latest_linked_run else None,
     }
     recent_captures = [

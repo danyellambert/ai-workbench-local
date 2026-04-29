@@ -173,3 +173,12 @@ EvidenceOps Readiness/Search now uses the configured NextCloud WebDAV repository
 - EvidenceOps search uses `nextcloud_webdav` when NextCloud credentials are configured.
 - Local `data/corpus_revisado` remains available as fallback when NextCloud is not configured.
 
+## Docker AI Lab chat and artifact linkage note
+
+Additional AI Lab Docker fixes completed:
+
+- AI Lab chat now contextualizes short follow-up prompts such as “What else?” with recent messages from the same persisted session.
+- The original user message is still persisted, while retrieval/answering receives a contextualized prompt when needed.
+- Experiments & Artifacts now links workflow runs to presentation export bundles using direct artifact metadata and timestamp/workflow fallback matching.
+- `Artifact linked runs` and `latestWorkflowArtifact` are populated from real persisted run/artifact state instead of staying permanently zero/null.
+
