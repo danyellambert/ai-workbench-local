@@ -1,0 +1,1389 @@
+frontend/src/pages/ComparisonPage.test.tsx:129:          { key: "select", label: "Select", status: "completed" },
+frontend/src/pages/ComparisonPage.test.tsx:143:    vi.stubGlobal("open", vi.fn());
+frontend/src/pages/ComparisonPage.test.tsx:196:          download_name: "policy-comparison-deck.pptx",
+frontend/src/pages/ComparisonPage.test.tsx:209:    const runButton = screen.getByRole("button", { name: /Run Comparison/i });
+frontend/src/pages/ComparisonPage.test.tsx:219:    const generateButton = screen.getByRole("button", { name: /Generate Deck/i });
+frontend/src/pages/ComparisonPage.test.tsx:225:    fireEvent.click(screen.getByRole("button", { name: /Open/i }));
+frontend/src/pages/ComparisonPage.test.tsx:226:    expect(window.open).toHaveBeenCalledWith(`${PRODUCT_API_BASE_URL}/api/product/artifact?path=%2Ftmp%2Fpolicy-comparison-deck.pptx`, "_blank", "noopener,noreferrer");
+frontend/src/pages/ComparisonPage.test.tsx:229:  it("surfaces a warning status when deck generation returns no downloadable artifact", async () => {
+frontend/src/pages/ComparisonPage.test.tsx:243:    const runButton = await screen.findByRole("button", { name: /Run Comparison/i });
+frontend/src/pages/ComparisonPage.test.tsx:248:    const generateButton = screen.getByRole("button", { name: /Generate Deck/i });
+frontend/src/pages/EvidenceOpsPage.tsx:3:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/EvidenceOpsPage.tsx:11:import { Button } from '@/components/ui/button';
+frontend/src/pages/EvidenceOpsPage.tsx:36:    refetchOnWindowFocus: false,
+frontend/src/pages/EvidenceOpsPage.tsx:44:    refetchOnWindowFocus: false,
+frontend/src/pages/EvidenceOpsPage.tsx:56:  const syncMutation = useMutation({
+frontend/src/pages/EvidenceOpsPage.tsx:64:  const actionMutation = useMutation({
+frontend/src/pages/EvidenceOpsPage.tsx:83:        <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => {
+frontend/src/pages/EvidenceOpsPage.tsx:84:          void syncMutation.mutateAsync();
+frontend/src/pages/EvidenceOpsPage.tsx:107:          { label: 'Open Backlog (Total)', value: summary?.openActions ?? '—', subtitle: 'all persisted open actions saved so far', icon: AlertTriangle, status: (summary?.openActions ?? 0) > 0 ? 'warning' : 'healthy' },
+frontend/src/pages/EvidenceOpsPage.tsx:108:          { label: `Open in Latest ${summary?.latestActionWindow ?? 10}`, value: summary?.latestOpenActions ?? '—', subtitle: 'recent persisted actions still open', icon: Activity, status: (summary?.latestOpenActions ?? 0) > 0 ? 'warning' : 'healthy' },
+frontend/src/pages/EvidenceOpsPage.tsx:202:              Total backlog counts every persisted action that is still open in the saved action store. The recent metric above shows how many of the latest {summary?.latestActionWindow ?? 10} persisted action records are still open.
+frontend/src/pages/EvidenceOpsPage.tsx:224:                          <button
+frontend/src/pages/EvidenceOpsPage.tsx:226:                            onClick={() => {
+frontend/src/pages/EvidenceOpsPage.tsx:227:                              void actionMutation.mutateAsync({ actionId: action.id, status: 'in_progress', owner: action.owner === 'Unassigned' ? 'AI Lab operator' : undefined });
+frontend/src/pages/EvidenceOpsPage.tsx:232:                          </button>
+frontend/src/pages/EvidenceOpsPage.tsx:234:                            <button
+frontend/src/pages/EvidenceOpsPage.tsx:236:                              onClick={() => {
+frontend/src/pages/EvidenceOpsPage.tsx:237:                                void actionMutation.mutateAsync({ actionId: action.id, owner: 'AI Lab operator' });
+frontend/src/pages/EvidenceOpsPage.tsx:242:                            </button>
+frontend/src/pages/EvidenceOpsPage.tsx:245:                            <button
+frontend/src/pages/EvidenceOpsPage.tsx:247:                              onClick={() => {
+frontend/src/pages/EvidenceOpsPage.tsx:248:                                void actionMutation.mutateAsync({ actionId: action.id, status: 'closed', owner: action.owner === 'Unassigned' ? 'AI Lab operator' : undefined });
+frontend/src/pages/EvidenceOpsPage.tsx:253:                            </button>
+frontend/src/pages/EvidenceOpsPage.tsx:266:                      <td colSpan={7} className="px-3 py-6 text-xs text-muted-foreground">No open backlog items are currently persisted.</td>
+frontend/src/pages/EvidenceOpsPage.tsx:393:              <p>open_backlog_total: {summary?.openActions ?? 0}</p>
+frontend/src/pages/EvidenceOpsPage.tsx:394:              <p>open_in_latest_{summary?.latestActionWindow ?? 10}: {summary?.latestOpenActions ?? 0}</p>
+frontend/src/pages/EvidenceOpsPage.tsx:423:              <Button size="sm" className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 text-xs px-4" type="submit">
+frontend/src/pages/DocumentReviewPage.tsx:4:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/DocumentReviewPage.tsx:26:import { Button } from '@/components/ui/button';
+frontend/src/pages/DocumentReviewPage.tsx:27:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+frontend/src/pages/DocumentReviewPage.tsx:33:  { key: 'select', label: 'Select' },
+frontend/src/pages/DocumentReviewPage.tsx:71:    const key = `${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`;
+frontend/src/pages/DocumentReviewPage.tsx:103:  const [selectedDocumentId, setSelectedDocumentId] = useState('');
+frontend/src/pages/DocumentReviewPage.tsx:114:    refetchOnWindowFocus: false,
+frontend/src/pages/DocumentReviewPage.tsx:115:    refetchOnReconnect: false,
+frontend/src/pages/DocumentReviewPage.tsx:122:    refetchOnWindowFocus: false,
+frontend/src/pages/DocumentReviewPage.tsx:123:    refetchOnReconnect: false,
+frontend/src/pages/DocumentReviewPage.tsx:141:    if (!selectedDocumentId || !availableDocuments.some((document) => document.document_id === selectedDocumentId)) {
+frontend/src/pages/DocumentReviewPage.tsx:144:  }, [availableDocuments, historyRunId, recommendedDocument, selectedDocumentId]);
+frontend/src/pages/DocumentReviewPage.tsx:146:  const selectedDocument = useMemo<ProductDocumentLibraryEntry | undefined>(
+frontend/src/pages/DocumentReviewPage.tsx:147:    () => availableDocuments.find((document) => document.document_id === selectedDocumentId),
+frontend/src/pages/DocumentReviewPage.tsx:148:    [availableDocuments, selectedDocumentId],
+frontend/src/pages/DocumentReviewPage.tsx:152:    queryKey: ['product-document-review-preview', selectedDocumentId],
+frontend/src/pages/DocumentReviewPage.tsx:153:    enabled: Boolean(selectedDocumentId),
+frontend/src/pages/DocumentReviewPage.tsx:154:    refetchOnWindowFocus: false,
+frontend/src/pages/DocumentReviewPage.tsx:155:    refetchOnReconnect: false,
+frontend/src/pages/DocumentReviewPage.tsx:160:        documentIds: selectedDocumentId ? [selectedDocumentId] : [],
+frontend/src/pages/DocumentReviewPage.tsx:195:  const runReviewMutation = useMutation({
+frontend/src/pages/DocumentReviewPage.tsx:199:        document_ids: selectedDocumentId ? [selectedDocumentId] : [],
+frontend/src/pages/DocumentReviewPage.tsx:220:  const generateDeckMutation = useMutation({
+frontend/src/pages/DocumentReviewPage.tsx:260:        if (step.key === 'select' && selectedDocumentId) status = 'completed';
+frontend/src/pages/DocumentReviewPage.tsx:271:  }, [allArtifacts.length, findings.length, generateDeckMutation.isPending, groundingPreview, reviewView, runReviewMutation.isPending, selectedDocumentId, workflowResponse]);
+frontend/src/pages/DocumentReviewPage.tsx:290:    window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer');
+frontend/src/pages/DocumentReviewPage.tsx:297:          <Button
+frontend/src/pages/DocumentReviewPage.tsx:299:            disabled={!selectedDocumentId || runReviewMutation.isPending}
+frontend/src/pages/DocumentReviewPage.tsx:300:            onClick={() => runReviewMutation.mutate()}
+frontend/src/pages/DocumentReviewPage.tsx:305:          <Button
+frontend/src/pages/DocumentReviewPage.tsx:309:            onClick={() => generateDeckMutation.mutate()}
+frontend/src/pages/DocumentReviewPage.tsx:320:          description="Track how the live run moves from document selection to export-ready review outputs."
+frontend/src/pages/DocumentReviewPage.tsx:359:          <GlassCard delay={0.15} data-tour="document-review-selection">
+frontend/src/pages/DocumentReviewPage.tsx:361:            <Select value={selectedDocumentId} onValueChange={handleDocumentChange}>
+frontend/src/pages/DocumentReviewPage.tsx:371:            <Collapsible open={showGroundingPanel} onOpenChange={setShowGroundingPanel} className="mt-3">
+frontend/src/pages/DocumentReviewPage.tsx:373:                <button
+frontend/src/pages/DocumentReviewPage.tsx:374:                  type="button"
+frontend/src/pages/DocumentReviewPage.tsx:385:                    <div className="mt-1 text-[11px] text-foreground">Context metadata and preview for the selected document</div>
+frontend/src/pages/DocumentReviewPage.tsx:388:                </button>
+frontend/src/pages/DocumentReviewPage.tsx:390:              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+frontend/src/pages/DocumentReviewPage.tsx:396:                        <div className="flex justify-between text-[10px] text-muted-foreground"><span>Chunks</span><span>{selectedDocument?.chunk_count?.toLocaleString() ?? '—'}</span></div>
+frontend/src/pages/DocumentReviewPage.tsx:397:                        <div className="flex justify-between text-[10px] text-muted-foreground"><span>Characters</span><span>{selectedDocument?.char_count ? selectedDocument.char_count.toLocaleString() : '—'}</span></div>
+frontend/src/pages/DocumentReviewPage.tsx:443:              )) : <p>Run the review to derive grounded business impact statements from the selected document.</p>}
+frontend/src/pages/DocumentReviewPage.tsx:451:            <button
+frontend/src/pages/DocumentReviewPage.tsx:452:              type="button"
+frontend/src/pages/DocumentReviewPage.tsx:454:              aria-selected={activeTab === 'findings'}
+frontend/src/pages/DocumentReviewPage.tsx:457:              onClick={() => setActiveTab('findings')}
+frontend/src/pages/DocumentReviewPage.tsx:460:            </button>
+frontend/src/pages/DocumentReviewPage.tsx:461:            <button
+frontend/src/pages/DocumentReviewPage.tsx:462:              type="button"
+frontend/src/pages/DocumentReviewPage.tsx:464:              aria-selected={activeTab === 'evidence'}
+frontend/src/pages/DocumentReviewPage.tsx:467:              onClick={() => setActiveTab('evidence')}
+frontend/src/pages/DocumentReviewPage.tsx:470:            </button>
+frontend/src/pages/DocumentReviewPage.tsx:471:            <button
+frontend/src/pages/DocumentReviewPage.tsx:472:              type="button"
+frontend/src/pages/DocumentReviewPage.tsx:474:              aria-selected={activeTab === 'artifacts'}
+frontend/src/pages/DocumentReviewPage.tsx:477:              onClick={() => setActiveTab('artifacts')}
+frontend/src/pages/DocumentReviewPage.tsx:480:            </button>
+frontend/src/pages/DocumentReviewPage.tsx:525:                  <div className="text-xs text-muted-foreground">Run the grounded review to populate real findings from the selected document.</div>
+frontend/src/pages/DocumentReviewPage.tsx:587:                        <span className="text-xs text-foreground truncate">{artifact.download_name || artifact.label}</span>
+frontend/src/pages/DocumentReviewPage.tsx:589:                      <Button variant="ghost" size="sm" className="h-7 text-[10px] text-muted-foreground hover:text-foreground" onClick={() => handleOpenArtifact(artifact)}>
+frontend/src/pages/DocumentReviewPage.tsx:610:            title: selectedDocument?.name,
+frontend/src/pages/DocumentReviewPage.tsx:621:            documents: selectedDocument ? [selectedDocument.name] : [],
+frontend/src/pages/DocumentReviewPage.tsx:622:            primary_documents: selectedDocument ? [selectedDocument.name] : [],
+frontend/src/pages/DocumentReviewPage.tsx:623:            source_document_name: selectedDocument?.name || null,
+frontend/src/pages/DocumentReviewPage.tsx:624:            source_document_title: selectedDocument?.name || null,
+frontend/src/pages/DocumentReviewPage.tsx:625:            source_document_filename: selectedDocument?.name || null,
+frontend/src/pages/DocumentReviewPage.test.tsx:85:        summary: "Multiple high-signal findings remain open before approval.",
+frontend/src/pages/DocumentReviewPage.test.tsx:145:          { key: "select", label: "Select", status: "completed" },
+frontend/src/pages/DocumentReviewPage.test.tsx:159:    vi.stubGlobal("open", vi.fn());
+frontend/src/pages/DocumentReviewPage.test.tsx:213:          download_name: "document-review-deck.pptx",
+frontend/src/pages/DocumentReviewPage.test.tsx:224:    fireEvent.click(screen.getByRole('button', { name: /Show grounding panel/i }));
+frontend/src/pages/DocumentReviewPage.test.tsx:227:    fireEvent.click(screen.getByRole("button", { name: /Run Review/i }));
+frontend/src/pages/DocumentReviewPage.test.tsx:241:    fireEvent.click(screen.getByRole("button", { name: /Generate Deck/i }));
+frontend/src/pages/DocumentReviewPage.test.tsx:247:    fireEvent.click(screen.getByRole("button", { name: /Open/i }));
+frontend/src/pages/DocumentReviewPage.test.tsx:248:    expect(window.open).toHaveBeenCalledWith(`${PRODUCT_API_BASE_URL}/api/product/artifact?path=%2Ftmp%2Fdocument-review-deck.pptx`, "_blank", "noopener,noreferrer");
+frontend/src/pages/CandidateReviewPage.test.tsx:81:          download_name: 'candidate-review.json',
+frontend/src/pages/CandidateReviewPage.test.tsx:113:          download_name: 'candidate-review.json',
+frontend/src/pages/CandidateReviewPage.test.tsx:133:    vi.stubGlobal('open', vi.fn());
+frontend/src/pages/CandidateReviewPage.test.tsx:183:          download_name: 'candidate-review-deck.pptx',
+frontend/src/pages/CandidateReviewPage.test.tsx:234:    fireEvent.click(screen.getByRole('button', { name: /run candidate review/i }));
+frontend/src/pages/CandidateReviewPage.test.tsx:240:    expect(screen.queryByText('-', { selector: 'h5' })).not.toBeInTheDocument();
+frontend/src/pages/CandidateReviewPage.test.tsx:266:    fireEvent.click(screen.getByRole('button', { name: /run candidate review/i }));
+frontend/src/pages/CandidateReviewPage.test.tsx:272:    fireEvent.click(screen.getByRole('button', { name: /generate deck/i }));
+frontend/src/pages/RuntimeObservabilityPage.tsx:80:      detail: 'The run consumed nearly all of the selected evidence packet.',
+frontend/src/pages/RuntimeObservabilityPage.tsx:87:      detail: 'The run used a large portion of the selected evidence.',
+frontend/src/pages/RuntimeObservabilityPage.tsx:100:    detail: 'Only a small slice of the selected evidence packet was consumed.',
+frontend/src/pages/RuntimeObservabilityPage.tsx:150:    refetchOnWindowFocus: false,
+frontend/src/pages/RuntimeObservabilityPage.tsx:381:              This panel tracks how much <span className="text-foreground">selected evidence</span> each run actually consumed. It is intentionally separate from the model's max prompt window, so a 100% value here usually means <span className="text-foreground">"used almost the whole evidence packet"</span>, not <span className="text-foreground">"blew the LLM context window"</span>.
+frontend/src/pages/RuntimeObservabilityPage.tsx:399:                  <p className="mt-1 text-[10px] text-muted-foreground">Latest run used {formatCoveragePct(latestSourceCoverage)} of the selected evidence packet.</p>
+frontend/src/pages/RuntimeObservabilityPage.tsx:425:                    <p className="mt-1 text-[10px] text-muted-foreground">Below 35% packet usage. Usually targeted evidence selection.</p>
+frontend/src/pages/RuntimeObservabilityPage.tsx:479:                      Stage timings were recorded on {latencyBreakdownMeta.instrumentedRuns} of {latencyBreakdownMeta.totalRuns ?? latencyBreakdownMeta.instrumentedRuns} selected runs.
+frontend/src/pages/RuntimeObservabilityPage.tsx:558:            Chronological view across {surfaceWindowLabel}. The amber curve is grounding coverage, so spikes mean a run consumed more of the selected evidence packet — not necessarily that the model window was exhausted. Use Benchmarks for model comparisons and Evals & Diagnosis for real quality regressions.
+frontend/src/pages/WorkflowInspectorPage.tsx:3:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/WorkflowInspectorPage.tsx:9:import { Button } from '@/components/ui/button';
+frontend/src/pages/WorkflowInspectorPage.tsx:10:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+frontend/src/pages/WorkflowInspectorPage.tsx:35:      return 'Compare the selected documents and summarize the main deltas, business impact, risks and follow-up actions.';
+frontend/src/pages/WorkflowInspectorPage.tsx:37:      return 'Extract the most important operational next steps, owners, blockers and evidence-backed actions from the selected documents.';
+frontend/src/pages/WorkflowInspectorPage.tsx:39:      return 'Review the selected candidate material and summarize strengths, gaps, hiring signals and decision risks.';
+frontend/src/pages/WorkflowInspectorPage.tsx:42:      return 'Review the selected document and summarize the main findings, risks and next actions.';
+frontend/src/pages/WorkflowInspectorPage.tsx:50:  if (lower.includes('open-ended')) return 'Open-ended questions';
+frontend/src/pages/WorkflowInspectorPage.tsx:65:    refetchOnWindowFocus: false,
+frontend/src/pages/WorkflowInspectorPage.tsx:68:  const [selectedTask, setSelectedTask] = useState<string>('');
+frontend/src/pages/WorkflowInspectorPage.tsx:69:  const [selectedDocument, setSelectedDocument] = useState<string>('');
+frontend/src/pages/WorkflowInspectorPage.tsx:70:  const [selectedSecondaryDocument, setSelectedSecondaryDocument] = useState<string>('');
+frontend/src/pages/WorkflowInspectorPage.tsx:75:    if (!selectedTask && data?.selected_task_id) {
+frontend/src/pages/WorkflowInspectorPage.tsx:76:      setSelectedTask(data.selected_task_id);
+frontend/src/pages/WorkflowInspectorPage.tsx:78:  }, [data?.selected_task_id, selectedTask]);
+frontend/src/pages/WorkflowInspectorPage.tsx:82:      if (selectedDocument) setSelectedDocument('');
+frontend/src/pages/WorkflowInspectorPage.tsx:85:    if (!selectedDocument || !data.document_options.some((document) => document.id === selectedDocument)) {
+frontend/src/pages/WorkflowInspectorPage.tsx:88:  }, [data?.document_options, selectedDocument]);
+frontend/src/pages/WorkflowInspectorPage.tsx:91:    const fallbackTask = data?.selected_task_id ?? data?.task_options[0]?.id ?? '';
+frontend/src/pages/WorkflowInspectorPage.tsx:92:    return selectedTask || fallbackTask;
+frontend/src/pages/WorkflowInspectorPage.tsx:93:  }, [data?.selected_task_id, data?.task_options, selectedTask]);
+frontend/src/pages/WorkflowInspectorPage.tsx:98:  const selectedDetail = currentTask ? data?.task_details[currentTask] : undefined;
+frontend/src/pages/WorkflowInspectorPage.tsx:103:  const hasDistinctComparisonPair = !requiresExplicitPairSelection || Boolean(selectedDocument && selectedSecondaryDocument && selectedSecondaryDocument !== selectedDocument);
+frontend/src/pages/WorkflowInspectorPage.tsx:114:            ? 'Action Plan / Evidence Review now runs against the single document you selected.'
+frontend/src/pages/WorkflowInspectorPage.tsx:116:              ? 'Document Review runs against the single document you selected.'
+frontend/src/pages/WorkflowInspectorPage.tsx:118:  const selectedDocumentIds = useMemo(() => {
+frontend/src/pages/WorkflowInspectorPage.tsx:120:      return [selectedDocument, selectedSecondaryDocument].filter((documentId, index, allIds) => Boolean(documentId) && allIds.indexOf(documentId) === index);
+frontend/src/pages/WorkflowInspectorPage.tsx:122:    return selectedDocument ? [selectedDocument] : [];
+frontend/src/pages/WorkflowInspectorPage.tsx:123:  }, [requiresExplicitPairSelection, selectedDocument, selectedSecondaryDocument]);
+frontend/src/pages/WorkflowInspectorPage.tsx:127:      if (selectedSecondaryDocument) setSelectedSecondaryDocument('');
+frontend/src/pages/WorkflowInspectorPage.tsx:131:      if (selectedSecondaryDocument) setSelectedSecondaryDocument('');
+frontend/src/pages/WorkflowInspectorPage.tsx:135:    const firstAvailableSecondary = documentOptions.find((document) => document.id !== selectedDocument)?.id ?? '';
+frontend/src/pages/WorkflowInspectorPage.tsx:136:    if (!selectedSecondaryDocument || selectedSecondaryDocument === selectedDocument || !documentOptions.some((document) => document.id === selectedSecondaryDocument)) {
+frontend/src/pages/WorkflowInspectorPage.tsx:139:  }, [documentOptions, requiresExplicitPairSelection, selectedDocument, selectedSecondaryDocument]);
+frontend/src/pages/WorkflowInspectorPage.tsx:157:  const runMutation = useMutation({
+frontend/src/pages/WorkflowInspectorPage.tsx:160:      document_id: selectedDocument || null,
+frontend/src/pages/WorkflowInspectorPage.tsx:161:      document_ids: selectedDocumentIds,
+frontend/src/pages/WorkflowInspectorPage.tsx:183:    await runMutation.mutateAsync();
+frontend/src/pages/WorkflowInspectorPage.tsx:262:          <GlassCard delay={0.1} data-tour="lab-workflow-inspector-task-selection">
+frontend/src/pages/WorkflowInspectorPage.tsx:266:                <button
+frontend/src/pages/WorkflowInspectorPage.tsx:268:                  onClick={() => {
+frontend/src/pages/WorkflowInspectorPage.tsx:283:                </button>
+frontend/src/pages/WorkflowInspectorPage.tsx:294:                <Select value={selectedDocument} onValueChange={setSelectedDocument} disabled={documentOptions.length === 0 || runMutation.isPending}>
+frontend/src/pages/WorkflowInspectorPage.tsx:309:                  <Select value={selectedSecondaryDocument} onValueChange={setSelectedSecondaryDocument} disabled={documentOptions.length < 2 || runMutation.isPending}>
+frontend/src/pages/WorkflowInspectorPage.tsx:312:                      {documentOptions.filter((document) => document.id !== selectedDocument).map((document) => (
+frontend/src/pages/WorkflowInspectorPage.tsx:323:              {taskExecutionReason ?? 'This selector now feeds real AI LAB workflow execution and persists the resulting trace for later inspection.'}
+frontend/src/pages/WorkflowInspectorPage.tsx:333:              placeholder={taskCanExecute ? 'Describe the run you want to execute…' : 'Workflow execution is unavailable for the selected task…'}
+frontend/src/pages/WorkflowInspectorPage.tsx:370:          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-xs" disabled={!taskCanExecute || runMutation.isPending || !currentTask} onClick={() => void handleRun()}>
+frontend/src/pages/WorkflowInspectorPage.tsx:390:                  <h3 className="text-sm font-medium text-foreground">{selectedDetail?.result_title ?? 'Latest persisted trace'}</h3>
+frontend/src/pages/WorkflowInspectorPage.tsx:392:                    {selectedDetail?.result_items.length ?? 0} item(s)
+frontend/src/pages/WorkflowInspectorPage.tsx:397:                {selectedDetail?.document_names?.length ? (() => {
+frontend/src/pages/WorkflowInspectorPage.tsx:398:                  const visibleDocumentNames = selectedDetail.document_names.slice(0, currentTask === 'policy_contract_comparison' ? 2 : 1);
+frontend/src/pages/WorkflowInspectorPage.tsx:399:                  const hiddenDocumentCount = Math.max(selectedDetail.document_names.length - visibleDocumentNames.length, 0);
+frontend/src/pages/WorkflowInspectorPage.tsx:416:                {selectedDetail?.result_items?.length ? (
+frontend/src/pages/WorkflowInspectorPage.tsx:418:                    {selectedDetail.result_items.map((item, index) => (
+frontend/src/pages/WorkflowInspectorPage.tsx:447:                  {JSON.stringify(selectedDetail?.raw_json ?? {}, null, 2)}
+frontend/src/pages/WorkflowInspectorPage.tsx:453:              {(selectedDetail?.executions ?? []).length === 0 ? (
+frontend/src/pages/WorkflowInspectorPage.tsx:455:                  <p className="text-xs text-muted-foreground">No execution trail is available for the selected task yet.</p>
+frontend/src/pages/WorkflowInspectorPage.tsx:459:                  {(selectedDetail?.executions ?? []).map((execution, index) => (
+frontend/src/pages/WorkflowInspectorPage.tsx:518:                  {(selectedDetail?.stage_timeline ?? []).length ? (
+frontend/src/pages/WorkflowInspectorPage.tsx:525:                        {(selectedDetail?.stage_timeline ?? []).map((stage, index) => (
+frontend/src/pages/WorkflowInspectorPage.tsx:545:                  {(selectedDetail?.trace_fields ?? []).map((field) => (
+frontend/src/pages/AiLabPages.test.tsx:77:        'Summarize the main control gaps in the selected evidence.',
+frontend/src/pages/AiLabPages.test.tsx:80:      selected_documents: [
+frontend/src/pages/AiLabPages.test.tsx:109:      selected_task_id: 'extract_operational_tasks',
+frontend/src/pages/AiLabPages.test.tsx:177:      presets: [{ id: 'default', name: 'default', description: 'Default prompt profile.', metrics: ['use case fit', 'groundedness'], models: ['nemotron-3-nano:30b-cloud'] }],
+frontend/src/pages/AiLabPages.test.tsx:252:      summary: { toolsTotal: 4, activeTools: 3, openActions: 1, operationsCount: 2, repositoryDocumentCount: 4 },
+frontend/src/pages/AiLabPages.test.tsx:254:      actions: [{ id: 'action-1', title: 'Review evidence gap', status: 'open', owner: 'Unassigned', dueDate: '—', target: 'Document Risk Review', priority: 'high', rawStatus: 'recommended', evidence: null, sourceCount: 2 }],
+frontend/src/pages/AiLabPages.test.tsx:337:    expect(await screen.findByRole('button', { name: /send chat message/i })).toBeInTheDocument();
+frontend/src/pages/AiLabPages.test.tsx:342:    expect(await screen.findByRole('button', { name: /execute task|execution unavailable/i })).toBeInTheDocument();
+frontend/src/pages/RuntimeControlsPage.tsx:3:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/RuntimeControlsPage.tsx:12:import { Button } from '@/components/ui/button';
+frontend/src/pages/RuntimeControlsPage.tsx:15:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+frontend/src/pages/RuntimeControlsPage.tsx:73:    refetchOnWindowFocus: false,
+frontend/src/pages/RuntimeControlsPage.tsx:87:  const saveMutation = useMutation({
+frontend/src/pages/RuntimeControlsPage.tsx:93:      toast.success('Runtime controls saved.');
+frontend/src/pages/RuntimeControlsPage.tsx:96:      toast.error(mutationError instanceof Error ? mutationError.message : 'Failed to save runtime controls.');
+frontend/src/pages/RuntimeControlsPage.tsx:104:  const docPresetLookup = useMemo(() => buildSelectLookup(data?.catalogs.docPresets), [data?.catalogs.docPresets]);
+frontend/src/pages/RuntimeControlsPage.tsx:192:          description="Edit the currently active runtime profile. Workspace defaults and the saved profile library live in Preferences, while this screen focuses on the active execution path."
+frontend/src/pages/RuntimeControlsPage.tsx:228:              <Button variant="outline" className="h-8 text-xs" onClick={handleReset} disabled={!isDirty || saveMutation.isPending}>
+frontend/src/pages/RuntimeControlsPage.tsx:231:              <Button className="h-8 text-xs" onClick={() => saveMutation.mutate(profile)} disabled={!isDirty || saveMutation.isPending}>
+frontend/src/pages/RuntimeControlsPage.tsx:232:                {saveMutation.isPending ? 'Saving…' : 'Save changes'}
+frontend/src/pages/RuntimeControlsPage.tsx:277:                <p className="mt-0.5 text-sm text-foreground">{docPresetLookup[profile.docProcessingPreset]?.label ?? profile.docProcessingPreset}</p>
+frontend/src/pages/RuntimeControlsPage.tsx:304:            These controls are persisted and affect the real runtime path. They also synchronize back to the active saved profile shown in Preferences.
+frontend/src/pages/RuntimeControlsPage.tsx:461:            Preset: <span className="font-medium text-foreground">{docPresetLookup[profile.docProcessingPreset]?.label ?? profile.docProcessingPreset}</span>
+frontend/src/pages/PreferencesPage.tsx:3:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/PreferencesPage.tsx:18:import { Button } from '@/components/ui/button';
+frontend/src/pages/PreferencesPage.tsx:21:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+frontend/src/pages/PreferencesPage.tsx:50:  if (mode === 'openai-compatible') return <Globe className="h-4 w-4 text-glow-warning" />;
+frontend/src/pages/PreferencesPage.tsx:137:                  <Button
+frontend/src/pages/PreferencesPage.tsx:142:                    onClick={() => {
+frontend/src/pages/PreferencesPage.tsx:151:                    <Button
+frontend/src/pages/PreferencesPage.tsx:156:                      onClick={() => onSaveCredential(connection.id, '')}
+frontend/src/pages/PreferencesPage.tsx:210:        <Button variant="ghost" size="sm" className="h-7 text-[10px] text-muted-foreground hover:text-foreground" onClick={() => onTestConnection(connection.id)} disabled={isTesting}>
+frontend/src/pages/PreferencesPage.tsx:224:  docPresetLabel,
+frontend/src/pages/PreferencesPage.tsx:232:  docPresetLabel: string;
+frontend/src/pages/PreferencesPage.tsx:253:        <Button
+frontend/src/pages/PreferencesPage.tsx:258:          onClick={() => onSetActive(profile.id)}
+frontend/src/pages/PreferencesPage.tsx:286:          <p className="text-[10px] text-muted-foreground">Doc Preset</p>
+frontend/src/pages/PreferencesPage.tsx:287:          <p className="text-[10px] text-foreground">{docPresetLabel}</p>
+frontend/src/pages/PreferencesPage.tsx:346:    refetchOnWindowFocus: false,
+frontend/src/pages/PreferencesPage.tsx:361:  const saveMutation = useMutation({
+frontend/src/pages/PreferencesPage.tsx:373:  const testConnectionMutation = useMutation({
+frontend/src/pages/PreferencesPage.tsx:404:  const credentialMutation = useMutation({
+frontend/src/pages/PreferencesPage.tsx:427:      catalogs: data.catalogs ?? { executionPolicies: [], qualityPostures: [], docPresets: [] },
+frontend/src/pages/PreferencesPage.tsx:434:  const docPresetLookup = useMemo(() => buildCatalogLookup(normalizedData?.catalogs.docPresets), [normalizedData?.catalogs.docPresets]);
+frontend/src/pages/PreferencesPage.tsx:441:  const isBusy = saveMutation.isPending;
+frontend/src/pages/PreferencesPage.tsx:443:  const savePreferences = (payload: PreferencesPatchPayload, successMessage: string) => {
+frontend/src/pages/PreferencesPage.tsx:444:    saveMutation.mutate({ payload, successMessage });
+frontend/src/pages/PreferencesPage.tsx:448:    savePreferences({ active_profile_id: profileId }, 'Active runtime profile updated.');
+frontend/src/pages/PreferencesPage.tsx:452:    savePreferences({ operator_preferences: patch }, successMessage);
+frontend/src/pages/PreferencesPage.tsx:493:              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={() => refetch()}>
+frontend/src/pages/PreferencesPage.tsx:496:              <Button variant="ghost" size="sm" className="h-8 text-[10px] text-muted-foreground" onClick={() => window.location.assign('/app/settings/runtime')}>
+frontend/src/pages/PreferencesPage.tsx:546:              <p className="text-[10px] text-muted-foreground">Runtime controls stay focused on the live route; Preferences stays focused on saved defaults.</p>
+frontend/src/pages/PreferencesPage.tsx:577:                onTestConnection={(connectionId) => testConnectionMutation.mutate(connectionId)}
+frontend/src/pages/PreferencesPage.tsx:578:                isTesting={testingConnectionId === connection.id && testConnectionMutation.isPending}
+frontend/src/pages/PreferencesPage.tsx:579:                onSaveCredential={(connectionId, apiKey) => credentialMutation.mutate({ connectionId, apiKey })}
+frontend/src/pages/PreferencesPage.tsx:594:            Each saved profile resolves to a provider connection and the full execution stack: generation, retrieval, processing, fallback, and output budget.
+frontend/src/pages/PreferencesPage.tsx:604:                docPresetLabel={docPresetLookup[profile.docProcessingPreset]?.label ?? profile.docProcessingPreset}
+frontend/src/pages/RunHistoryPage.tsx:4:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/RunHistoryPage.tsx:21:import { Button } from '@/components/ui/button';
+frontend/src/pages/RunHistoryPage.tsx:23:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+frontend/src/pages/RunHistoryPage.tsx:79:    const key = `${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`;
+frontend/src/pages/RunHistoryPage.tsx:144:  const [selectedRunId, setSelectedRunId] = useState('');
+frontend/src/pages/RunHistoryPage.tsx:151:    refetchOnWindowFocus: false,
+frontend/src/pages/RunHistoryPage.tsx:193:    if (!selectedRunId || !visibleRuns.some((run) => run.id === selectedRunId)) {
+frontend/src/pages/RunHistoryPage.tsx:196:  }, [visibleRuns, selectedRunId]);
+frontend/src/pages/RunHistoryPage.tsx:198:  const selectedRun = visibleRuns.find((run) => run.id === selectedRunId) ?? visibleRuns[0] ?? null;
+frontend/src/pages/RunHistoryPage.tsx:201:    queryKey: ['product-run-history-entry', selectedRun?.id],
+frontend/src/pages/RunHistoryPage.tsx:202:    queryFn: () => getProductRunHistoryEntry(selectedRun?.id || ''),
+frontend/src/pages/RunHistoryPage.tsx:203:    enabled: Boolean(selectedRun?.id),
+frontend/src/pages/RunHistoryPage.tsx:204:    refetchOnWindowFocus: false,
+frontend/src/pages/RunHistoryPage.tsx:207:  const rerunMutation = useMutation({
+frontend/src/pages/RunHistoryPage.tsx:225:  const detailRun = detailQuery.data?.run ?? selectedRun;
+frontend/src/pages/RunHistoryPage.tsx:228:  const recentDeliveryEvents = useMemo(() => buildRecentDeliveryEvents(filteredRuns.length ? filteredRuns : runs, detailRun?.id ?? selectedRun?.id ?? null), [filteredRuns, runs, detailRun?.id, selectedRun?.id]);
+frontend/src/pages/RunHistoryPage.tsx:244:            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs">
+frontend/src/pages/RunHistoryPage.tsx:318:            <motion.button
+frontend/src/pages/RunHistoryPage.tsx:319:              type="button"
+frontend/src/pages/RunHistoryPage.tsx:324:              onClick={() => setSelectedRunId(run.id)}
+frontend/src/pages/RunHistoryPage.tsx:325:              className={`glass w-full rounded-xl p-4 text-left transition-all duration-200 ${run.id === selectedRun?.id ? 'border-primary/40 bg-primary/5' : 'hover:border-primary/20'}`}
+frontend/src/pages/RunHistoryPage.tsx:343:            </motion.button>
+frontend/src/pages/RunHistoryPage.tsx:346:            <Button variant="outline" className="w-full h-9 text-xs border-border/50" onClick={() => setVisibleCount((current) => current + DEFAULT_PAGE_SIZE)}>
+frontend/src/pages/RunHistoryPage.tsx:359:                  Some older runs only expose summary rows. Rerun and the list itself remain usable; full detail could not be reconstructed for this selection.
+frontend/src/pages/RunHistoryPage.tsx:375:                      <Button variant="outline" size="sm" className="h-8 text-[10px] border-border/50">Open flow</Button>
+frontend/src/pages/RunHistoryPage.tsx:378:                  <Button
+frontend/src/pages/RunHistoryPage.tsx:382:                    onClick={() => rerunMutation.mutate(detailRun.id)}
+frontend/src/pages/RunHistoryPage.tsx:443:                            <button
+frontend/src/pages/RunHistoryPage.tsx:444:                              type="button"
+frontend/src/pages/RunHistoryPage.tsx:446:                              onClick={() => setSelectedRunId(event.runId)}
+frontend/src/pages/RunHistoryPage.tsx:449:                            </button>
+frontend/src/pages/RunHistoryPage.tsx:452:                            <Button variant="outline" size="sm" className="mt-3 h-7 text-[10px] border-border/50" onClick={() => window.open(delivery.url || '', '_blank', 'noopener,noreferrer')}>
+frontend/src/pages/RunHistoryPage.tsx:468:                      <Button
+frontend/src/pages/RunHistoryPage.tsx:474:                        onClick={() => artifact.path && window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer')}
+frontend/src/pages/RunHistoryPage.tsx:485:                <details className="rounded-lg border border-border/40 bg-secondary/10 p-0" open>
+frontend/src/pages/OverviewPage.tsx:11:import { Button } from '@/components/ui/button';
+frontend/src/pages/OverviewPage.tsx:68:            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs font-medium">
+frontend/src/pages/OverviewPage.tsx:71:            <Button variant="outline" asChild className="h-9 px-4 text-xs border-border/50 text-muted-foreground hover:text-foreground">
+frontend/src/pages/DeckCenterPage.test.tsx:32:    vi.stubGlobal('open', vi.fn());
+frontend/src/pages/DeckCenterPage.test.tsx:127:  it('renders live artifact detail and opens registered assets', async () => {
+frontend/src/pages/DeckCenterPage.test.tsx:133:    fireEvent.click(screen.getAllByRole('button', { name: /presentation deck/i })[0]);
+frontend/src/pages/DeckCenterPage.test.tsx:135:    expect(window.open).toHaveBeenCalled();
+frontend/src/pages/EvalsDiagnosisPage.tsx:50:    refetchOnWindowFocus: false,
+frontend/src/pages/DocumentsPage.tsx:7:import { Button } from '@/components/ui/button';
+frontend/src/pages/DocumentsPage.tsx:10:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/DocumentsPage.tsx:46:  const [selectedDocument, setSelectedDocument] = useState<ProductDocumentLibraryEntry | null>(null);
+frontend/src/pages/DocumentsPage.tsx:61:    refetchOnWindowFocus: false,
+frontend/src/pages/DocumentsPage.tsx:62:    refetchOnReconnect: false,
+frontend/src/pages/DocumentsPage.tsx:69:    refetchOnWindowFocus: false,
+frontend/src/pages/DocumentsPage.tsx:70:    refetchOnReconnect: false,
+frontend/src/pages/DocumentsPage.tsx:71:    refetchInterval: (query) => {
+frontend/src/pages/DocumentsPage.tsx:78:  const uploadMutation = useMutation({
+frontend/src/pages/DocumentsPage.tsx:102:  const deleteMutation = useMutation({
+frontend/src/pages/DocumentsPage.tsx:109:      if (selectedDocument && payload.removed_document_ids.includes(selectedDocument.document_id)) {
+frontend/src/pages/DocumentsPage.tsx:172:  const openUploadLockedDialog = () => {
+frontend/src/pages/DocumentsPage.tsx:180:      openUploadLockedDialog();
+frontend/src/pages/DocumentsPage.tsx:188:      openUploadLockedDialog();
+frontend/src/pages/DocumentsPage.tsx:193:    uploadMutation.mutate(files);
+frontend/src/pages/DocumentsPage.tsx:203:    deleteMutation.mutate([documentPendingDelete.document_id]);
+frontend/src/pages/DocumentsPage.tsx:207:    const openNextcloudImportForTour = () => setNextcloudSheetOpen(true);
+frontend/src/pages/DocumentsPage.tsx:208:    window.addEventListener('workbench-tour:open-nextcloud-import', openNextcloudImportForTour);
+frontend/src/pages/DocumentsPage.tsx:209:    return () => window.removeEventListener('workbench-tour:open-nextcloud-import', openNextcloudImportForTour);
+frontend/src/pages/DocumentsPage.tsx:216:          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => setNextcloudSheetOpen(true)} disabled={uploadInProgress} data-testid="open-nextcloud-import" data-tour="documents-nextcloud-button">
+frontend/src/pages/DocumentsPage.tsx:219:          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={handleOpenFilePicker} disabled={uploadInProgress}>
+frontend/src/pages/DocumentsPage.tsx:237:        open={nextcloudSheetOpen}
+frontend/src/pages/DocumentsPage.tsx:326:          onClick={handleOpenFilePicker}
+frontend/src/pages/DocumentsPage.tsx:340:              openUploadLockedDialog();
+frontend/src/pages/DocumentsPage.tsx:353:          <p className="mt-2 text-[11px] text-muted-foreground">Need something from the external corpus? Use <span className="font-medium text-foreground">Import from Nextcloud</span> to browse remote folders and ingest several selected PDFs into this workspace.</p>
+frontend/src/pages/DocumentsPage.tsx:365:          <button onClick={() => setView('table')} className={`p-1.5 rounded-md transition-colors ${view === 'table' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+frontend/src/pages/DocumentsPage.tsx:367:          </button>
+frontend/src/pages/DocumentsPage.tsx:368:          <button onClick={() => setView('grid')} className={`p-1.5 rounded-md transition-colors ${view === 'grid' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+frontend/src/pages/DocumentsPage.tsx:370:          </button>
+frontend/src/pages/DocumentsPage.tsx:391:                  onClick={() => setSelectedDocument(doc)}>
+frontend/src/pages/DocumentsPage.tsx:406:                    <Button
+frontend/src/pages/DocumentsPage.tsx:407:                      type="button"
+frontend/src/pages/DocumentsPage.tsx:412:                      onClick={(event) => {
+frontend/src/pages/DocumentsPage.tsx:437:              onClick={() => setSelectedDocument(doc)}>
+frontend/src/pages/DocumentsPage.tsx:445:                  <Button
+frontend/src/pages/DocumentsPage.tsx:446:                    type="button"
+frontend/src/pages/DocumentsPage.tsx:451:                    onClick={(event) => {
+frontend/src/pages/DocumentsPage.tsx:478:      <Sheet open={Boolean(selectedDocument)} onOpenChange={(open) => { if (!open) setSelectedDocument(null); }}>
+frontend/src/pages/DocumentsPage.tsx:483:              <span className="break-words">{selectedDocument?.name || 'Document details'}</span>
+frontend/src/pages/DocumentsPage.tsx:490:          {selectedDocument && (
+frontend/src/pages/DocumentsPage.tsx:493:                <StatusPill status={selectedDocument.status} />
+frontend/src/pages/DocumentsPage.tsx:495:                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{(selectedDocument.file_type || 'unknown').toUpperCase()}</span>
+frontend/src/pages/DocumentsPage.tsx:496:                  <Button
+frontend/src/pages/DocumentsPage.tsx:497:                    type="button"
+frontend/src/pages/DocumentsPage.tsx:502:                    onClick={() => requestDeleteDocument(selectedDocument)}
+frontend/src/pages/DocumentsPage.tsx:513:                  <div className="text-lg font-semibold text-foreground">{selectedDocument.chunk_count.toLocaleString()}</div>
+frontend/src/pages/DocumentsPage.tsx:517:                  <div className="text-lg font-semibold text-foreground">{selectedDocument.size_label || '—'}</div>
+frontend/src/pages/DocumentsPage.tsx:521:                  <div className="text-lg font-semibold text-foreground">{selectedDocument.char_count.toLocaleString()}</div>
+frontend/src/pages/DocumentsPage.tsx:525:                  <div className="text-lg font-semibold text-foreground">{selectedDocument.page_count ?? '—'}</div>
+frontend/src/pages/DocumentsPage.tsx:534:                  <div className="flex items-start justify-between gap-3"><span className="text-muted-foreground">Document ID</span><span className="text-foreground font-mono text-right break-all max-w-[240px]">{selectedDocument.document_id}</span></div>
+frontend/src/pages/DocumentsPage.tsx:535:                  <div className="flex items-start justify-between gap-3"><span className="text-muted-foreground">Loader</span><span className="text-foreground text-right">{selectedDocument.loader_strategy_label || '—'}</span></div>
+frontend/src/pages/DocumentsPage.tsx:536:                  <div className="flex items-start justify-between gap-3"><span className="text-muted-foreground">Indexed at</span><span className="text-foreground text-right">{formatDate(selectedDocument.indexed_at)}</span></div>
+frontend/src/pages/DocumentsPage.tsx:537:                  <div className="flex items-start justify-between gap-3"><span className="text-muted-foreground">Source type</span><span className="text-foreground text-right">{selectedDocument.source_type || '—'}</span></div>
+frontend/src/pages/DocumentsPage.tsx:545:                {selectedDocument.warnings.length ? (
+frontend/src/pages/DocumentsPage.tsx:547:                    {selectedDocument.warnings.map((warning) => (
+frontend/src/pages/DocumentsPage.tsx:567:      <AlertDialog open={uploadLockedDialogOpen} onOpenChange={setUploadLockedDialogOpen}>
+frontend/src/pages/DocumentsPage.tsx:613:                      Click <span className="font-medium text-foreground">Import from Nextcloud</span> to select an approved demo document connected to this environment.
+frontend/src/pages/DocumentsPage.tsx:626:              <Button
+frontend/src/pages/DocumentsPage.tsx:627:                type="button"
+frontend/src/pages/DocumentsPage.tsx:629:                onClick={() => {
+frontend/src/pages/DocumentsPage.tsx:630:                  window.open(LINKEDIN_DEMO_URL, '_blank', 'noopener,noreferrer');
+frontend/src/pages/DocumentsPage.tsx:641:      <AlertDialog open={Boolean(documentPendingDelete)} onOpenChange={(open) => { if (!open && !deleteMutation.isPending) setDocumentPendingDelete(null); }}>
+frontend/src/pages/DocumentsPage.tsx:654:              onClick={(event) => {
+frontend/src/pages/WorkflowCatalogPage.tsx:83:    refetchOnWindowFocus: false,
+frontend/src/pages/WorkflowCatalogPage.tsx:89:    refetchOnWindowFocus: false,
+frontend/src/pages/WorkflowCatalogPage.tsx:95:    refetchOnWindowFocus: false,
+frontend/src/pages/LabOverviewPage.tsx:139:    /(open actions|active mcp tools|mcp)/i,
+frontend/src/pages/LabOverviewPage.tsx:190:    refetchOnWindowFocus: false,
+frontend/src/pages/PreferencesPage.test.tsx:73:        docProcessingPreset: 'standard',
+frontend/src/pages/PreferencesPage.test.tsx:120:        docProcessingPreset: 'ocr_heavy',
+frontend/src/pages/PreferencesPage.test.tsx:181:      docPresets: [
+frontend/src/pages/PreferencesPage.test.tsx:242:  it('loads live preferences, activates a saved profile and tests a provider connection', async () => {
+frontend/src/pages/PreferencesPage.test.tsx:249:    fireEvent.click(screen.getByRole('button', { name: 'Set active' }));
+frontend/src/pages/PreferencesPage.test.tsx:252:    fireEvent.click(screen.getByRole('button', { name: /Test connection/i }));
+frontend/src/pages/AdvancedExperimentsPage.tsx:21:    refetchOnWindowFocus: false,
+frontend/src/pages/DeckCenterPage.tsx:23:import { Button } from '@/components/ui/button';
+frontend/src/pages/DeckCenterPage.tsx:25:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+frontend/src/pages/DeckCenterPage.tsx:55:function openArtifactPath(path?: string | null): void {
+frontend/src/pages/DeckCenterPage.tsx:57:  window.open(buildProductArtifactUrl(path), '_blank', 'noopener,noreferrer');
+frontend/src/pages/DeckCenterPage.tsx:62:    <Button
+frontend/src/pages/DeckCenterPage.tsx:67:      onClick={() => openArtifactPath(asset.path)}
+frontend/src/pages/DeckCenterPage.tsx:87:  const [selectedArtifactId, setSelectedArtifactId] = useState('');
+frontend/src/pages/DeckCenterPage.tsx:93:    refetchOnWindowFocus: false,
+frontend/src/pages/DeckCenterPage.tsx:134:    if (!selectedArtifactId || !visibleArtifacts.some((artifact) => artifact.id === selectedArtifactId)) {
+frontend/src/pages/DeckCenterPage.tsx:137:  }, [visibleArtifacts, selectedArtifactId]);
+frontend/src/pages/DeckCenterPage.tsx:139:  const selectedArtifact = visibleArtifacts.find((artifact) => artifact.id === selectedArtifactId) ?? visibleArtifacts[0] ?? null;
+frontend/src/pages/DeckCenterPage.tsx:142:    queryKey: ['product-artifact-entry', selectedArtifact?.id],
+frontend/src/pages/DeckCenterPage.tsx:143:    queryFn: () => getProductArtifactEntry(selectedArtifact?.id || ''),
+frontend/src/pages/DeckCenterPage.tsx:144:    enabled: Boolean(selectedArtifact?.id),
+frontend/src/pages/DeckCenterPage.tsx:145:    refetchOnWindowFocus: false,
+frontend/src/pages/DeckCenterPage.tsx:148:  const detailArtifact = artifactDetailQuery.data?.artifact ?? selectedArtifact;
+frontend/src/pages/DeckCenterPage.tsx:161:        <PageHeader title="Deck Center" description="Executive artifact catalog backed by the real export registry, persisted metadata, review sidecars and downloadable assets.">
+frontend/src/pages/DeckCenterPage.tsx:162:          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={() => window.location.assign('/app/run')}>
+frontend/src/pages/DeckCenterPage.tsx:172:            The artifact registry is live, but one or more detail sidecars could not be loaded. Ready decks and downloadable assets remain available.
+frontend/src/pages/DeckCenterPage.tsx:232:            const isSelected = artifact.id === selectedArtifact?.id;
+frontend/src/pages/DeckCenterPage.tsx:240:                role="button"
+frontend/src/pages/DeckCenterPage.tsx:243:                onClick={() => setSelectedArtifactId(artifact.id)}
+frontend/src/pages/DeckCenterPage.tsx:272:                    <Button
+frontend/src/pages/DeckCenterPage.tsx:276:                      onClick={(event) => {
+frontend/src/pages/DeckCenterPage.tsx:278:                        openArtifactPath(artifact.local_pptx_path);
+frontend/src/pages/DeckCenterPage.tsx:289:            <Button variant="outline" className="w-full h-9 text-xs border-border/50" onClick={() => setVisibleCount((current) => current + DEFAULT_PAGE_SIZE)}>
+frontend/src/pages/DeckCenterPage.tsx:332:                      <Button key={action.label} variant="outline" className="justify-between" onClick={() => openArtifactPath(action.path)}>
+frontend/src/pages/DeckCenterPage.tsx:349:                      <button
+frontend/src/pages/DeckCenterPage.tsx:350:                        type="button"
+frontend/src/pages/DeckCenterPage.tsx:354:                        onClick={() => openArtifactPath(slide.path)}
+frontend/src/pages/DeckCenterPage.tsx:358:                      </button>
+frontend/src/pages/ComparisonPage.tsx:4:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/ComparisonPage.tsx:23:import { Button } from '@/components/ui/button';
+frontend/src/pages/ComparisonPage.tsx:24:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+frontend/src/pages/ComparisonPage.tsx:39:    const key = `${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`;
+frontend/src/pages/ComparisonPage.tsx:52:  const [selectedDocumentAId, setSelectedDocumentAId] = useState('');
+frontend/src/pages/ComparisonPage.tsx:53:  const [selectedDocumentBId, setSelectedDocumentBId] = useState('');
+frontend/src/pages/ComparisonPage.tsx:64:    refetchOnWindowFocus: false,
+frontend/src/pages/ComparisonPage.tsx:65:    refetchOnReconnect: false,
+frontend/src/pages/ComparisonPage.tsx:72:    refetchOnWindowFocus: false,
+frontend/src/pages/ComparisonPage.tsx:73:    refetchOnReconnect: false,
+frontend/src/pages/ComparisonPage.tsx:114:    const nextPrimaryId = availableDocuments.some((document) => document.document_id === selectedDocumentAId)
+frontend/src/pages/ComparisonPage.tsx:115:      ? selectedDocumentAId
+frontend/src/pages/ComparisonPage.tsx:118:      selectedDocumentBId &&
+frontend/src/pages/ComparisonPage.tsx:119:      selectedDocumentBId !== nextPrimaryId &&
+frontend/src/pages/ComparisonPage.tsx:120:      availableDocuments.some((document) => document.document_id === selectedDocumentBId)
+frontend/src/pages/ComparisonPage.tsx:121:        ? selectedDocumentBId
+frontend/src/pages/ComparisonPage.tsx:128:    if (nextPrimaryId !== selectedDocumentAId) setSelectedDocumentAId(nextPrimaryId);
+frontend/src/pages/ComparisonPage.tsx:129:    if (nextSecondaryId !== selectedDocumentBId) setSelectedDocumentBId(nextSecondaryId);
+frontend/src/pages/ComparisonPage.tsx:130:  }, [availableDocuments, policyComparisonCandidates, recommendedDocumentA, recommendedDocumentB, selectedDocumentAId, selectedDocumentBId]);
+frontend/src/pages/ComparisonPage.tsx:132:  const selectedDocumentA = useMemo(
+frontend/src/pages/ComparisonPage.tsx:133:    () => availableDocuments.find((document) => document.document_id === selectedDocumentAId),
+frontend/src/pages/ComparisonPage.tsx:134:    [availableDocuments, selectedDocumentAId],
+frontend/src/pages/ComparisonPage.tsx:136:  const selectedDocumentB = useMemo(
+frontend/src/pages/ComparisonPage.tsx:137:    () => availableDocuments.find((document) => document.document_id === selectedDocumentBId),
+frontend/src/pages/ComparisonPage.tsx:138:    [availableDocuments, selectedDocumentBId],
+frontend/src/pages/ComparisonPage.tsx:143:    queryKey: ['product-policy-comparison-preview', selectedDocumentAId, selectedDocumentBId],
+frontend/src/pages/ComparisonPage.tsx:144:    enabled: showGroundingPreview && Boolean(selectedDocumentAId && selectedDocumentBId && selectedDocumentAId !== selectedDocumentBId),
+frontend/src/pages/ComparisonPage.tsx:145:    refetchOnWindowFocus: false,
+frontend/src/pages/ComparisonPage.tsx:146:    refetchOnReconnect: false,
+frontend/src/pages/ComparisonPage.tsx:151:        documentIds: [selectedDocumentAId, selectedDocumentBId].filter(Boolean),
+frontend/src/pages/ComparisonPage.tsx:182:  const runComparisonMutation = useMutation({
+frontend/src/pages/ComparisonPage.tsx:186:        document_ids: [selectedDocumentAId, selectedDocumentBId].filter(Boolean),
+frontend/src/pages/ComparisonPage.tsx:207:  const generateDeckMutation = useMutation({
+frontend/src/pages/ComparisonPage.tsx:228:          ? 'Deck export is currently disabled in the Product API configuration. The workflow ran correctly, but no downloadable artifact was produced.'
+frontend/src/pages/ComparisonPage.tsx:231:            : 'The deck generation request completed, but no downloadable artifact was returned.';
+frontend/src/pages/ComparisonPage.tsx:262:    !selectedDocumentAId ||
+frontend/src/pages/ComparisonPage.tsx:263:    !selectedDocumentBId ||
+frontend/src/pages/ComparisonPage.tsx:264:    selectedDocumentAId === selectedDocumentBId ||
+frontend/src/pages/ComparisonPage.tsx:269:    { key: 'select', label: 'Select', status: selectedDocumentAId && selectedDocumentBId ? 'completed' : 'pending' },
+frontend/src/pages/ComparisonPage.tsx:278:    if (documentId === selectedDocumentBId) {
+frontend/src/pages/ComparisonPage.tsx:302:    window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer');
+frontend/src/pages/ComparisonPage.tsx:308:        <Button
+frontend/src/pages/ComparisonPage.tsx:311:          onClick={() => runComparisonMutation.mutate()}
+frontend/src/pages/ComparisonPage.tsx:316:        <Button
+frontend/src/pages/ComparisonPage.tsx:320:          onClick={() => generateDeckMutation.mutate()}
+frontend/src/pages/ComparisonPage.tsx:344:          description="Track how the grounded comparison moves from document selection to export-ready outputs."
+frontend/src/pages/ComparisonPage.tsx:351:        data-tour="policy-comparison-selection"
+frontend/src/pages/ComparisonPage.tsx:356:            <Select value={selectedDocumentAId} onValueChange={handleDocumentAChange}>
+frontend/src/pages/ComparisonPage.tsx:367:            <Select value={selectedDocumentBId} onValueChange={handleDocumentBChange}>
+frontend/src/pages/ComparisonPage.tsx:379:              <button
+frontend/src/pages/ComparisonPage.tsx:380:                type="button"
+frontend/src/pages/ComparisonPage.tsx:382:                onClick={() => setShowGroundingPreview((value) => !value)}
+frontend/src/pages/ComparisonPage.tsx:405:              </button>
+frontend/src/pages/ComparisonPage.tsx:412:                      <div className="mt-1 text-sm font-medium text-foreground">{[selectedDocumentAId, selectedDocumentBId].filter(Boolean).length}</div>
+frontend/src/pages/ComparisonPage.tsx:446:                Analysis between <span className="text-foreground">{comparisonView.executive_summary.documents[0] || selectedDocumentA?.name || 'Document A'}</span> and <span className="text-foreground">{comparisonView.executive_summary.documents[1] || selectedDocumentB?.name || 'Document B'}</span> reveals
+frontend/src/pages/ComparisonPage.tsx:625:                    <span className="block text-xs text-foreground truncate">{artifact.download_name || artifact.label}</span>
+frontend/src/pages/ComparisonPage.tsx:629:                <Button variant="ghost" size="sm" className="h-7 text-[10px] text-muted-foreground hover:text-foreground" disabled={!artifact.available || !artifact.path} onClick={() => handleOpenArtifact(artifact)}>
+frontend/src/pages/ComparisonPage.tsx:658:            documents: comparisonView?.compared_documents || [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+frontend/src/pages/ComparisonPage.tsx:659:            primary_documents: [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+frontend/src/pages/ComparisonPage.tsx:660:            source_document_name: selectedDocumentA?.name || null,
+frontend/src/pages/ComparisonPage.tsx:661:            source_document_title: selectedDocumentA?.name || null,
+frontend/src/pages/ComparisonPage.tsx:662:            source_document_filename: selectedDocumentA?.name || null,
+frontend/src/pages/ActionPlanPage.test.tsx:91:        open: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:123:          evidence: 'Temporary exception remains open pending governance committee approval.',
+frontend/src/pages/ActionPlanPage.test.tsx:124:          rationale: 'Temporary exception remains open pending governance committee approval.',
+frontend/src/pages/ActionPlanPage.test.tsx:151:          evidence: 'Temporary exception remains open pending governance committee approval.',
+frontend/src/pages/ActionPlanPage.test.tsx:152:          rationale: 'Temporary exception remains open pending governance committee approval.',
+frontend/src/pages/ActionPlanPage.test.tsx:214:            { key: 'select', label: 'Select', status: 'completed' },
+frontend/src/pages/ActionPlanPage.test.tsx:229:    vi.stubGlobal('open', vi.fn());
+frontend/src/pages/ActionPlanPage.test.tsx:276:        preview_text: '[Source: Approval Email] Missing privileged-access approval evidence remains open.',
+frontend/src/pages/ActionPlanPage.test.tsx:294:          download_name: 'action-plan-deck.pptx',
+frontend/src/pages/ActionPlanPage.test.tsx:310:        { list_id: 'open-list', list_label: 'Open', count: 2 },
+frontend/src/pages/ActionPlanPage.test.tsx:338:    expect(screen.getByRole('button', { name: /Run Action Plan/i })).toBeDisabled();
+frontend/src/pages/ActionPlanPage.test.tsx:341:  it('runs the workflow, renders live tabs, generates deck artifacts and opens an artifact', async () => {
+frontend/src/pages/ActionPlanPage.test.tsx:346:    fireEvent.click(screen.getByRole('button', { name: /Show grounding preview/i }));
+frontend/src/pages/ActionPlanPage.test.tsx:349:        screen.getAllByText(/Missing privileged-access approval evidence remains open/i).length,
+frontend/src/pages/ActionPlanPage.test.tsx:354:    expect(screen.getByText(/2 documents selected - Privileged Account Approval Email\.pdf \+ Access Review Evidence Log\.pdf/i)).toBeInTheDocument();
+frontend/src/pages/ActionPlanPage.test.tsx:355:    fireEvent.click(screen.getByRole('button', { name: /Run Action Plan/i }));
+frontend/src/pages/ActionPlanPage.test.tsx:384:    fireEvent.click(screen.getByRole('button', { name: /Generate Deck/i }));
+frontend/src/pages/ActionPlanPage.test.tsx:391:    fireEvent.click(screen.getByRole('button', { name: /^Open$/i }));
+frontend/src/pages/ActionPlanPage.test.tsx:392:    expect(window.open).toHaveBeenCalledWith(expectedUrl, '_blank', 'noopener,noreferrer');
+frontend/src/pages/ActionPlanPage.test.tsx:393:    vi.mocked(window.open).mockClear();
+frontend/src/pages/ActionPlanPage.test.tsx:395:    fireEvent.click(screen.getByRole('button', { name: /Preview Trello/i }));
+frontend/src/pages/ActionPlanPage.test.tsx:402:    fireEvent.click(await screen.findByRole('button', { name: /Publish to Trello|Publish selected card/i }));
+frontend/src/pages/ActionPlanPage.tsx:4:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/ActionPlanPage.tsx:41:import { Button } from '@/components/ui/button';
+frontend/src/pages/ActionPlanPage.tsx:49:const statusCols: Array<ProductActionPlanItem['status']> = ['open', 'in_progress', 'blocked', 'done'];
+frontend/src/pages/ActionPlanPage.tsx:51:  { key: 'select', label: 'Select' },
+frontend/src/pages/ActionPlanPage.tsx:81:    const key = `${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`;
+frontend/src/pages/ActionPlanPage.tsx:89:function selectedDocumentSummary(documents: ProductDocumentLibraryEntry[]): string {
+frontend/src/pages/ActionPlanPage.tsx:91:  if (documents.length === 1) return `1 document selected - ${documents[0].name}`;
+frontend/src/pages/ActionPlanPage.tsx:92:  if (documents.length === 2) return `2 documents selected - ${documents[0].name} + ${documents[1].name}`;
+frontend/src/pages/ActionPlanPage.tsx:93:  return `${documents.length} documents selected - ${documents[0].name} + ${documents.length - 1} more`;
+frontend/src/pages/ActionPlanPage.tsx:112:    open: 0,
+frontend/src/pages/ActionPlanPage.tsx:160:  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
+frontend/src/pages/ActionPlanPage.tsx:172:    window.addEventListener('workbench-tour:open-action-plan-board', handleOpenBoard);
+frontend/src/pages/ActionPlanPage.tsx:173:    return () => window.removeEventListener('workbench-tour:open-action-plan-board', handleOpenBoard);
+frontend/src/pages/ActionPlanPage.tsx:179:    refetchOnWindowFocus: false,
+frontend/src/pages/ActionPlanPage.tsx:180:    refetchOnReconnect: false,
+frontend/src/pages/ActionPlanPage.tsx:187:    refetchOnWindowFocus: false,
+frontend/src/pages/ActionPlanPage.tsx:188:    refetchOnReconnect: false,
+frontend/src/pages/ActionPlanPage.tsx:211:      if (selectedDocumentIds.length) setSelectedDocumentIds([]);
+frontend/src/pages/ActionPlanPage.tsx:216:    const validSelected = selectedDocumentIds
+frontend/src/pages/ActionPlanPage.tsx:220:    if (!hasInitializedDocumentSelectionRef.current && !selectedDocumentIds.length) {
+frontend/src/pages/ActionPlanPage.tsx:231:    if (validSelected.length !== selectedDocumentIds.length || validSelected.some((documentId, index) => documentId !== selectedDocumentIds[index])) {
+frontend/src/pages/ActionPlanPage.tsx:234:  }, [availableDocuments, recommendedActionPlanDocumentIds, selectedDocumentIds]);
+frontend/src/pages/ActionPlanPage.tsx:236:  const selectedDocuments = useMemo(
+frontend/src/pages/ActionPlanPage.tsx:237:    () => availableDocuments.filter((document) => selectedDocumentIds.includes(document.document_id)),
+frontend/src/pages/ActionPlanPage.tsx:238:    [availableDocuments, selectedDocumentIds],
+frontend/src/pages/ActionPlanPage.tsx:242:    queryKey: ['product-action-plan-preview', ...selectedDocumentIds],
+frontend/src/pages/ActionPlanPage.tsx:243:    enabled: selectedDocumentIds.length > 0,
+frontend/src/pages/ActionPlanPage.tsx:244:    refetchOnWindowFocus: false,
+frontend/src/pages/ActionPlanPage.tsx:245:    refetchOnReconnect: false,
+frontend/src/pages/ActionPlanPage.tsx:250:        documentIds: selectedDocumentIds,
+frontend/src/pages/ActionPlanPage.tsx:281:  const runActionPlanMutation = useMutation({
+frontend/src/pages/ActionPlanPage.tsx:285:        document_ids: selectedDocumentIds,
+frontend/src/pages/ActionPlanPage.tsx:307:  const generateDeckMutation = useMutation({
+frontend/src/pages/ActionPlanPage.tsx:330:  const summary = actionPlanView?.summary ?? emptyActionPlanSummary(selectedDocumentIds.length, generatedArtifacts.length);
+frontend/src/pages/ActionPlanPage.tsx:352:    : selectedDocumentIds.length
+frontend/src/pages/ActionPlanPage.tsx:353:      ? 'Preview available for the selected documents'
+frontend/src/pages/ActionPlanPage.tsx:355:  const maximumSelectionReached = selectedDocumentIds.length >= ACTION_PLAN_DOCUMENT_LIMIT;
+frontend/src/pages/ActionPlanPage.tsx:359:  const preferredDocumentsSelected = preferredSelectionIds.length > 0 && preferredSelectionIds.every((documentId) => selectedDocumentIds.includes(documentId));
+frontend/src/pages/ActionPlanPage.tsx:360:  const hasSelectedDocuments = selectedDocumentIds.length > 0;
+frontend/src/pages/ActionPlanPage.tsx:380:        if (step.key === 'select' && selectedDocumentIds.length > 0) status = 'completed';
+frontend/src/pages/ActionPlanPage.tsx:391:  }, [actionPlanView, allArtifacts.length, generateDeckMutation.isPending, groundingPreview, runActionPlanMutation.isPending, runMetadata, selectedDocumentIds.length, workflowResponse]);
+frontend/src/pages/ActionPlanPage.tsx:393:  const resetRunOutputs = () => {
+frontend/src/pages/ActionPlanPage.tsx:408:        toast.warning(`Action Plan uses up to ${ACTION_PLAN_DOCUMENT_LIMIT} documents at once. Deselect one before adding another.`);
+frontend/src/pages/ActionPlanPage.tsx:413:    resetRunOutputs();
+frontend/src/pages/ActionPlanPage.tsx:419:    resetRunOutputs();
+frontend/src/pages/ActionPlanPage.tsx:425:    resetRunOutputs();
+frontend/src/pages/ActionPlanPage.tsx:433:    window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer');
+frontend/src/pages/ActionPlanPage.tsx:440:        <Button
+frontend/src/pages/ActionPlanPage.tsx:442:          disabled={!selectedDocumentIds.length || runActionPlanMutation.isPending || documentsLoading}
+frontend/src/pages/ActionPlanPage.tsx:443:          onClick={() => runActionPlanMutation.mutate()}
+frontend/src/pages/ActionPlanPage.tsx:448:        <Button
+frontend/src/pages/ActionPlanPage.tsx:452:          onClick={() => generateDeckMutation.mutate()}
+frontend/src/pages/ActionPlanPage.tsx:464:          description="Track how the live run moves from document selection to export-ready action items."
+frontend/src/pages/ActionPlanPage.tsx:507:          <GlassCard className="mb-5" delay={0.04} data-tour="action-plan-selection">
+frontend/src/pages/ActionPlanPage.tsx:512:                    <h2 className="text-sm font-medium text-foreground">Grounded document selection</h2>
+frontend/src/pages/ActionPlanPage.tsx:517:                  <p className="mt-1 text-xs text-muted-foreground">{selectedDocumentSummary(selectedDocuments)}</p>
+frontend/src/pages/ActionPlanPage.tsx:520:                      {selectedDocumentIds.length} selected
+frontend/src/pages/ActionPlanPage.tsx:535:                  <Button
+frontend/src/pages/ActionPlanPage.tsx:536:                    type="button"
+frontend/src/pages/ActionPlanPage.tsx:539:                    onClick={preferredDocumentsSelected ? handleClearSelectedDocuments : handleSelectAllDocuments}
+frontend/src/pages/ActionPlanPage.tsx:542:                    {preferredDocumentsSelected ? 'Deselect all' : recommendedActionPlanDocumentIds.length ? 'Use recommended 4' : 'Select first 4'}
+frontend/src/pages/ActionPlanPage.tsx:545:                    {hasSelectedDocuments ? 'Review selection first' : 'No documents selected'}
+frontend/src/pages/ActionPlanPage.tsx:554:                      const selected = selectedDocumentIds.includes(document.document_id);
+frontend/src/pages/ActionPlanPage.tsx:556:                        <button
+frontend/src/pages/ActionPlanPage.tsx:558:                          type="button"
+frontend/src/pages/ActionPlanPage.tsx:559:                          aria-pressed={selected}
+frontend/src/pages/ActionPlanPage.tsx:560:                          onClick={() => handleToggleDocument(document.document_id)}
+frontend/src/pages/ActionPlanPage.tsx:561:                          disabled={!selected && maximumSelectionReached}
+frontend/src/pages/ActionPlanPage.tsx:562:                          title={!selected && maximumSelectionReached ? `Limit of ${ACTION_PLAN_DOCUMENT_LIMIT} selected documents reached` : undefined}
+frontend/src/pages/ActionPlanPage.tsx:565:                            selected
+frontend/src/pages/ActionPlanPage.tsx:576:                                    selected ? 'border-primary/40 bg-primary/15 text-primary' : 'border-border bg-background/70 text-muted-foreground',
+frontend/src/pages/ActionPlanPage.tsx:579:                                  {selected ? '✓' : '○'}
+frontend/src/pages/ActionPlanPage.tsx:595:                        </button>
+frontend/src/pages/ActionPlanPage.tsx:605:            <Collapsible open={isGroundingPreviewOpen} onOpenChange={setIsGroundingPreviewOpen}>
+frontend/src/pages/ActionPlanPage.tsx:608:                  <button
+frontend/src/pages/ActionPlanPage.tsx:609:                    type="button"
+frontend/src/pages/ActionPlanPage.tsx:642:                              ? 'Hide the detailed grounded signals once you are done reviewing the current selection.'
+frontend/src/pages/ActionPlanPage.tsx:667:                  </button>
+frontend/src/pages/ActionPlanPage.tsx:675:                        Building preview from selected evidence...
+frontend/src/pages/ActionPlanPage.tsx:719:                                No immediate caveats detected for the current grounded selection.
+frontend/src/pages/ActionPlanPage.tsx:753:          { label: 'Open', value: summary.open, color: 'text-primary' },
+frontend/src/pages/ActionPlanPage.tsx:910:                          item.status === 'open' && 'bg-primary',
+frontend/src/pages/ActionPlanPage.tsx:1059:                    <Button variant="outline" size="sm" className="mt-3 h-7 px-2 text-[10px]" onClick={() => window.open(trelloPublishResult.board_url || '', '_blank', 'noopener,noreferrer')}>
+frontend/src/pages/ActionPlanPage.tsx:1077:                    <Button variant="outline" size="sm" className="mt-3 h-7 px-2 text-[10px]" onClick={() => window.open(notionPublishResult.page_url || '', '_blank', 'noopener,noreferrer')}>
+frontend/src/pages/ActionPlanPage.tsx:1090:                <div key={`${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`} className="rounded-lg bg-secondary/20 px-3 py-3">
+frontend/src/pages/ActionPlanPage.tsx:1093:                      <p className="text-xs font-medium text-foreground truncate">{artifact.download_name || artifact.label}</p>
+frontend/src/pages/ActionPlanPage.tsx:1100:                    <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" disabled={!artifact.path} onClick={() => handleOpenArtifact(artifact)}>
+frontend/src/pages/ActionPlanPage.tsx:1118:          description="After reviewing the board, evidence gaps and generated artifacts, preview the selected Trello card or the Notion handoff before publishing."
+frontend/src/pages/ActionPlanPage.tsx:1129:            documents: selectedDocuments.map((document) => document.name),
+frontend/src/pages/ActionPlanPage.tsx:1130:            primary_documents: selectedDocuments.map((document) => document.name),
+frontend/src/pages/ActionPlanPage.tsx:1131:            source_document_name: selectedDocuments[0]?.name || null,
+frontend/src/pages/ActionPlanPage.tsx:1132:            source_document_title: selectedDocuments[0]?.name || null,
+frontend/src/pages/ActionPlanPage.tsx:1133:            source_document_filename: selectedDocuments[0]?.name || null,
+frontend/src/pages/BenchmarksPage.tsx:113:    refetchOnWindowFocus: false,
+frontend/src/pages/BenchmarksPage.tsx:118:  const promptProfiles = data?.presets ?? [];
+frontend/src/pages/RunHistoryPage.test.tsx:158:    fireEvent.click(screen.getByRole('button', { name: /Rerun from history/i }));
+frontend/src/pages/CandidateReviewPage.tsx:4:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/CandidateReviewPage.tsx:26:import { Button } from '@/components/ui/button';
+frontend/src/pages/CandidateReviewPage.tsx:28:import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+frontend/src/pages/CandidateReviewPage.tsx:49:  { key: 'select', label: 'Select' },
+frontend/src/pages/CandidateReviewPage.tsx:277:  if (!roleContextHasContent(roleContext)) return 'No role brief selected. Candidate Review will use the default workflow prompt.';
+frontend/src/pages/CandidateReviewPage.tsx:321:    const key = `${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`;
+frontend/src/pages/CandidateReviewPage.tsx:367:      detail: 'The candidate review ran live against the selected document and the structured sections below come from the backend response.',
+frontend/src/pages/CandidateReviewPage.tsx:392:  const [selectedDocumentId, setSelectedDocumentId] = useState('');
+frontend/src/pages/CandidateReviewPage.tsx:393:  const [selectedRoleBriefDocumentId, setSelectedRoleBriefDocumentId] = useState(ROLE_BRIEF_NONE);
+frontend/src/pages/CandidateReviewPage.tsx:402:    window.addEventListener('workbench-tour:open-candidate-internals', handleOpenInternals);
+frontend/src/pages/CandidateReviewPage.tsx:403:    return () => window.removeEventListener('workbench-tour:open-candidate-internals', handleOpenInternals);
+frontend/src/pages/CandidateReviewPage.tsx:409:    refetchOnWindowFocus: false,
+frontend/src/pages/CandidateReviewPage.tsx:410:    refetchOnReconnect: false,
+frontend/src/pages/CandidateReviewPage.tsx:417:    refetchOnWindowFocus: false,
+frontend/src/pages/CandidateReviewPage.tsx:418:    refetchOnReconnect: false,
+frontend/src/pages/CandidateReviewPage.tsx:431:  const selectableDocuments = preferredCandidateDocuments.length ? preferredCandidateDocuments : availableDocuments;
+frontend/src/pages/CandidateReviewPage.tsx:435:    () => findRecommendedDocument(selectableDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.candidateReview[0]),
+frontend/src/pages/CandidateReviewPage.tsx:436:    [selectableDocuments],
+frontend/src/pages/CandidateReviewPage.tsx:440:    () => availableDocuments.filter((document) => isRoleBriefDocument(document) && document.document_id !== selectedDocumentId),
+frontend/src/pages/CandidateReviewPage.tsx:441:    [availableDocuments, selectedDocumentId],
+frontend/src/pages/CandidateReviewPage.tsx:450:    if (!selectableDocuments.length) {
+frontend/src/pages/CandidateReviewPage.tsx:454:    if (!selectedDocumentId || !selectableDocuments.some((document) => document.document_id === selectedDocumentId)) {
+frontend/src/pages/CandidateReviewPage.tsx:455:      setSelectedDocumentId(recommendedCandidateDocument?.document_id ?? selectableDocuments[0]?.document_id ?? '');
+frontend/src/pages/CandidateReviewPage.tsx:457:  }, [recommendedCandidateDocument, selectedDocumentId, selectableDocuments]);
+frontend/src/pages/CandidateReviewPage.tsx:461:      if (selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE) setSelectedRoleBriefDocumentId(ROLE_BRIEF_NONE);
+frontend/src/pages/CandidateReviewPage.tsx:464:    if (selectedRoleBriefDocumentId === ROLE_BRIEF_NONE && recommendedRoleBriefDocument) {
+frontend/src/pages/CandidateReviewPage.tsx:468:    if (selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE && !roleBriefDocuments.some((document) => document.document_id === selectedRoleBriefDocumentId)) {
+frontend/src/pages/CandidateReviewPage.tsx:471:  }, [recommendedRoleBriefDocument, roleBriefDocuments, selectedRoleBriefDocumentId]);
+frontend/src/pages/CandidateReviewPage.tsx:473:  const selectedDocument = selectableDocuments.find((document) => document.document_id === selectedDocumentId);
+frontend/src/pages/CandidateReviewPage.tsx:474:  const selectedRoleBriefDocument = roleBriefDocuments.find((document) => document.document_id === selectedRoleBriefDocumentId);
+frontend/src/pages/CandidateReviewPage.tsx:477:    queryKey: ['candidate-review-role-brief-preview', selectedRoleBriefDocumentId],
+frontend/src/pages/CandidateReviewPage.tsx:478:    enabled: selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE,
+frontend/src/pages/CandidateReviewPage.tsx:479:    refetchOnWindowFocus: false,
+frontend/src/pages/CandidateReviewPage.tsx:480:    refetchOnReconnect: false,
+frontend/src/pages/CandidateReviewPage.tsx:485:        documentIds: selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE ? [selectedRoleBriefDocumentId] : [],
+frontend/src/pages/CandidateReviewPage.tsx:494:  const normalizedRoleBrief = useMemo(() => normalizeRoleBriefText(rawRoleBriefText, selectedRoleBriefDocument?.name), [rawRoleBriefText, selectedRoleBriefDocument?.name]);
+frontend/src/pages/CandidateReviewPage.tsx:501:    queryKey: ['candidate-review-preview', selectedDocumentId, generatedCandidateReviewInputText],
+frontend/src/pages/CandidateReviewPage.tsx:502:    enabled: Boolean(selectedDocumentId),
+frontend/src/pages/CandidateReviewPage.tsx:503:    refetchOnWindowFocus: false,
+frontend/src/pages/CandidateReviewPage.tsx:504:    refetchOnReconnect: false,
+frontend/src/pages/CandidateReviewPage.tsx:509:        documentIds: selectedDocumentId ? [selectedDocumentId] : [],
+frontend/src/pages/CandidateReviewPage.tsx:532:  const runReviewMutation = useMutation({
+frontend/src/pages/CandidateReviewPage.tsx:536:        document_ids: selectedDocumentId ? [selectedDocumentId] : [],
+frontend/src/pages/CandidateReviewPage.tsx:550:      toast.success(generatedCandidateReviewInputText ? 'Candidate review completed against the selected role brief.' : 'Candidate review completed with grounded backend output.');
+frontend/src/pages/CandidateReviewPage.tsx:557:  const generateDeckMutation = useMutation({
+frontend/src/pages/CandidateReviewPage.tsx:582:  const roleBriefSignalsSparse = Boolean(selectedRoleBriefDocument && activeRoleContext && !activeRoleContext.must_haves.length && !activeRoleContext.interview_focus.length);
+frontend/src/pages/CandidateReviewPage.tsx:603:  const selectedDocumentDate = formatDate(selectedDocument?.indexed_at || null);
+frontend/src/pages/CandidateReviewPage.tsx:608:    if (step.key === 'select' && selectedDocumentId) status = 'completed';
+frontend/src/pages/CandidateReviewPage.tsx:609:    if (step.key === 'ground' && (preview || selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE)) status = 'completed';
+frontend/src/pages/CandidateReviewPage.tsx:616:  }), [allArtifacts.length, candidateReviewView, generateDeckMutation.isPending, preview, runReviewMutation.isPending, sections, selectedDocumentId, selectedRoleBriefDocumentId, workflowResponse?.result]);
+frontend/src/pages/CandidateReviewPage.tsx:624:    window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer');
+frontend/src/pages/CandidateReviewPage.tsx:631:          <Button data-testid="candidate-review-run-button" className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" disabled={!selectedDocumentId || runReviewMutation.isPending} onClick={() => runReviewMutation.mutate()}>
+frontend/src/pages/CandidateReviewPage.tsx:634:          <Button data-testid="candidate-review-generate-deck-button" variant="outline" className="h-9 px-4 text-xs border-border/50" disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending} onClick={() => generateDeckMutation.mutate()}>
+frontend/src/pages/CandidateReviewPage.tsx:644:          description="Track how the candidate review moves from document selection to publish-ready outputs."
+frontend/src/pages/CandidateReviewPage.tsx:657:      {!documentLibraryQuery.isLoading && !selectableDocuments.length && (
+frontend/src/pages/CandidateReviewPage.tsx:666:      {!documentLibraryQuery.isLoading && selectableDocuments.length > 0 && !hasDedicatedCandidateCorpus && (
+frontend/src/pages/CandidateReviewPage.tsx:670:            The current corpus is live, but no CV-like filename was detected. Candidate Review can still run on the selected document, though a CV imported through the Document Library is preferred.
+frontend/src/pages/CandidateReviewPage.tsx:675:      <GlassCard className="mb-6" data-tour="candidate-review-selection">
+frontend/src/pages/CandidateReviewPage.tsx:683:              <StatusPill status={selectedDocumentId ? 'ready' : 'pending'} />
+frontend/src/pages/CandidateReviewPage.tsx:685:            <Select value={selectedDocumentId} onValueChange={setSelectedDocumentId}>
+frontend/src/pages/CandidateReviewPage.tsx:688:                {selectableDocuments.map((document) => (
+frontend/src/pages/CandidateReviewPage.tsx:701:              <StatusPill status={selectedRoleBriefDocument ? 'ready' : 'pending'} />
+frontend/src/pages/CandidateReviewPage.tsx:703:            <Select value={selectedRoleBriefDocumentId} onValueChange={setSelectedRoleBriefDocumentId}>
+frontend/src/pages/CandidateReviewPage.tsx:717:        <button
+frontend/src/pages/CandidateReviewPage.tsx:718:          type="button"
+frontend/src/pages/CandidateReviewPage.tsx:719:          onClick={() => setAnalysisInternalsOpen((value) => !value)}
+frontend/src/pages/CandidateReviewPage.tsx:728:        </button>
+frontend/src/pages/CandidateReviewPage.tsx:738:                    <div className="mt-1 text-sm font-medium text-foreground">{selectedDocumentId ? 1 : 0}</div>
+frontend/src/pages/CandidateReviewPage.tsx:780:                  <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">Indexed role brief selected, but structured signals are still sparse. Candidate Review will still use role title and seniority context without surfacing empty counters.</p>
+frontend/src/pages/CandidateReviewPage.tsx:797:            <h3 data-testid="candidate-review-candidate-name" className="text-lg font-semibold text-foreground">{candidateProfile?.name || selectedDocument?.name || 'Awaiting candidate run'}</h3>
+frontend/src/pages/CandidateReviewPage.tsx:942:                <p className="text-xs text-muted-foreground">Run the candidate review to populate grounded experience rows from the selected CV.</p>
+frontend/src/pages/CandidateReviewPage.tsx:968:                {(gaps.length ? gaps : ['Gaps will appear once the role-aware candidate review compares the CV against the selected hiring brief.']).map((gap) => (
+frontend/src/pages/CandidateReviewPage.tsx:1044:              title: candidateProfile?.headline || candidateProfile?.name || selectedDocument?.name,
+frontend/src/pages/CandidateReviewPage.tsx:1045:              candidate_name: candidateProfile?.name || selectedDocument?.name,
+frontend/src/pages/CandidateReviewPage.tsx:1062:              documents: selectedDocument ? [selectedDocument.name] : [],
+frontend/src/pages/CandidateReviewPage.tsx:1063:              primary_documents: selectedDocument ? [selectedDocument.name] : [],
+frontend/src/pages/CandidateReviewPage.tsx:1064:              source_document_name: selectedDocument?.name || null,
+frontend/src/pages/CandidateReviewPage.tsx:1065:              source_document_title: selectedDocument?.name || null,
+frontend/src/pages/CandidateReviewPage.tsx:1066:              source_document_filename: selectedDocument?.name || null,
+frontend/src/pages/CandidateReviewPage.tsx:1067:              source_document_id: selectedDocument?.document_id || null,
+frontend/src/pages/CandidateReviewPage.tsx:1068:              source_document_relative_path: (selectedDocument as unknown as { relative_path?: string | null })?.relative_path || null,
+frontend/src/pages/CandidateReviewPage.tsx:1069:              source_document_webdav_url: (selectedDocument as unknown as { webdav_url?: string | null })?.webdav_url || null,
+frontend/src/pages/CandidateReviewPage.tsx:1109:                      <Button variant="outline" size="sm" className="mt-3 h-7 text-[10px]" onClick={() => window.open(notionPublishResult.page_url || '', '_blank', 'noopener,noreferrer')}>
+frontend/src/pages/CandidateReviewPage.tsx:1124:                      <p className="text-[10px] text-muted-foreground truncate">{artifact.download_name || artifact.path || artifact.artifact_type}</p>
+frontend/src/pages/CandidateReviewPage.tsx:1126:                    <Button variant="outline" size="sm" className="h-7 text-[10px]" disabled={!artifact.available || !artifact.path} onClick={() => handleOpenArtifact(artifact)}>
+frontend/src/pages/CandidateReviewPage.tsx:1133:              <p className="text-xs text-muted-foreground">Run the workflow and generate the deck to register downloadable candidate-review artifacts here.</p>
+frontend/src/pages/ChatPage.tsx:3:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/pages/ChatPage.tsx:10:import { Button } from '@/components/ui/button';
+frontend/src/pages/ChatPage.tsx:312:    refetchOnWindowFocus: false,
+frontend/src/pages/ChatPage.tsx:319:    refetchOnWindowFocus: false,
+frontend/src/pages/ChatPage.tsx:320:    refetchOnReconnect: false,
+frontend/src/pages/ChatPage.tsx:329:  const serverSelectedDocuments = useMemo(() => normalizeDocuments(data?.selected_documents), [data?.selected_documents]);
+frontend/src/pages/ChatPage.tsx:337:    const pageAvailableDocuments = normalizeDocuments((data as { available_documents?: unknown } | undefined)?.available_documents ?? data?.selected_documents);
+frontend/src/pages/ChatPage.tsx:358:  const selectedDocumentIds = draftDocumentIds;
+frontend/src/pages/ChatPage.tsx:359:  const selectedDocuments = useMemo(
+frontend/src/pages/ChatPage.tsx:360:    () => availableDocuments.filter((document) => selectedDocumentIds.includes(document.document_id)),
+frontend/src/pages/ChatPage.tsx:361:    [availableDocuments, selectedDocumentIds],
+frontend/src/pages/ChatPage.tsx:377:  const sendMutation = useMutation({
+frontend/src/pages/ChatPage.tsx:385:        const created = await createLabChatSession({ document_ids: selectedDocumentIds });
+frontend/src/pages/ChatPage.tsx:390:        document_ids: selectedDocumentIds,
+frontend/src/pages/ChatPage.tsx:408:  const createSessionMutation = useMutation({
+frontend/src/pages/ChatPage.tsx:409:    mutationFn: async () => createLabChatSession({ document_ids: selectedDocumentIds }),
+frontend/src/pages/ChatPage.tsx:418:  const deleteSessionMutation = useMutation({
+frontend/src/pages/ChatPage.tsx:445:  const canSend = availableDocuments.length > 0 && selectedDocumentIds.length > 0;
+frontend/src/pages/ChatPage.tsx:448:    : selectedDocumentIds.length === 0
+frontend/src/pages/ChatPage.tsx:456:    await sendMutation.mutateAsync();
+frontend/src/pages/ChatPage.tsx:470:    await createSessionMutation.mutateAsync();
+frontend/src/pages/ChatPage.tsx:483:      await deleteSessionMutation.mutateAsync(targetSessionId);
+frontend/src/pages/ChatPage.tsx:503:        description="Grounded document Q&A surface for probing the selected evidence, validating answers and persisting useful chat traces."
+frontend/src/pages/ChatPage.tsx:581:              <button
+frontend/src/pages/ChatPage.tsx:583:                onClick={() => setInput(prompt)}
+frontend/src/pages/ChatPage.tsx:588:              </button>
+frontend/src/pages/ChatPage.tsx:603:            <Button
+frontend/src/pages/ChatPage.tsx:609:              onClick={() => {
+frontend/src/pages/ChatPage.tsx:626:                <button
+frontend/src/pages/ChatPage.tsx:627:                  onClick={() => {
+frontend/src/pages/ChatPage.tsx:633:                </button>
+frontend/src/pages/ChatPage.tsx:647:                      <button
+frontend/src/pages/ChatPage.tsx:648:                        onClick={() => setSessionId(session.session_id)}
+frontend/src/pages/ChatPage.tsx:664:                      </button>
+frontend/src/pages/ChatPage.tsx:665:                      <button
+frontend/src/pages/ChatPage.tsx:666:                        type="button"
+frontend/src/pages/ChatPage.tsx:667:                        onClick={() => {
+frontend/src/pages/ChatPage.tsx:676:                      </button>
+frontend/src/pages/ChatPage.tsx:688:                <p className="mt-1 text-[10px] text-muted-foreground">{selectedDocuments.length} selected · applies to the next grounded turn</p>
+frontend/src/pages/ChatPage.tsx:690:              <button
+frontend/src/pages/ChatPage.tsx:691:                type="button"
+frontend/src/pages/ChatPage.tsx:692:                onClick={() => setDocumentPickerOpen((current) => !current)}
+frontend/src/pages/ChatPage.tsx:697:              </button>
+frontend/src/pages/ChatPage.tsx:716:                      const checked = selectedDocumentIds.includes(document.document_id);
+frontend/src/pages/ChatPage.tsx:744:              {selectedDocuments.length === 0 ? (
+frontend/src/pages/ChatPage.tsx:745:                <p className="text-xs text-muted-foreground">No documents selected for the next grounded turn.</p>
+frontend/src/pages/ChatPage.tsx:747:                selectedDocuments.map((document) => (
+frontend/src/components/ui/alert-dialog.tsx:5:import { buttonVariants } from "@/components/ui/button";
+frontend/src/components/ui/alert-dialog.tsx:19:      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+frontend/src/components/ui/alert-dialog.tsx:37:        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+frontend/src/components/ui/alert-dialog.tsx:76:  <AlertDialogPrimitive.Action ref={ref} className={cn(buttonVariants(), className)} {...props} />
+frontend/src/components/ui/alert-dialog.tsx:86:    className={cn(buttonVariants({ variant: "outline" }), "mt-2 sm:mt-0", className)}
+frontend/src/components/ui/pagination.tsx:5:import { ButtonProps, buttonVariants } from "@/components/ui/button";
+frontend/src/components/ui/pagination.tsx:31:} & Pick<ButtonProps, "size"> &
+frontend/src/components/ui/pagination.tsx:38:      buttonVariants({
+frontend/src/components/ui/slider.tsx:12:    className={cn("relative flex w-full touch-none select-none items-center", className)}
+frontend/src/components/ui/popover.tsx:20:        "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/hover-card.tsx:19:      "z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/sheet.tsx:22:      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+frontend/src/components/ui/sheet.tsx:32:  "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+frontend/src/components/ui/sheet.tsx:36:        top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+frontend/src/components/ui/sheet.tsx:38:          "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+frontend/src/components/ui/sheet.tsx:39:        left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+frontend/src/components/ui/sheet.tsx:41:          "inset-y-0 right-0 h-full w-3/4  border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
+frontend/src/components/ui/sheet.tsx:60:        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+frontend/src/components/ui/scroll-area.tsx:26:      "flex touch-none select-none transition-colors",
+frontend/src/components/ui/navigation-menu.tsx:38:  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
+frontend/src/components/ui/navigation-menu.tsx:52:      className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180"
+frontend/src/components/ui/navigation-menu.tsx:83:        "origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
+frontend/src/components/ui/accordion.tsx:25:        "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
+frontend/src/components/ui/accordion.tsx:43:    className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+frontend/src/components/ui/calendar.tsx:6:import { buttonVariants } from "@/components/ui/button";
+frontend/src/components/ui/calendar.tsx:21:        nav_button: cn(
+frontend/src/components/ui/calendar.tsx:22:          buttonVariants({ variant: "outline" }),
+frontend/src/components/ui/calendar.tsx:25:        nav_button_previous: "absolute left-1",
+frontend/src/components/ui/calendar.tsx:26:        nav_button_next: "absolute right-1",
+frontend/src/components/ui/calendar.tsx:31:        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+frontend/src/components/ui/calendar.tsx:32:        day: cn(buttonVariants({ variant: "ghost" }), "h-9 w-9 p-0 font-normal aria-selected:opacity-100"),
+frontend/src/components/ui/calendar.tsx:34:        day_selected:
+frontend/src/components/ui/calendar.tsx:38:          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+frontend/src/components/ui/calendar.tsx:40:        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+frontend/src/components/ui/command.tsx:108:      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50",
+frontend/src/components/ui/menubar.tsx:36:      "flex cursor-default select-none items-center rounded-sm px-3 py-1.5 text-sm font-medium outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/menubar.tsx:53:      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/menubar.tsx:72:      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/menubar.tsx:91:        "z-50 min-w-[12rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/menubar.tsx:109:      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/menubar.tsx:125:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/menubar.tsx:148:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/dialog.tsx:22:      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+frontend/src/components/ui/dialog.tsx:39:        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+frontend/src/components/ui/dialog.tsx:45:      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-accent data-[state=open]:text-muted-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+frontend/src/components/ui/sidebar.tsx:8:import { Button } from "@/components/ui/button";
+frontend/src/components/ui/sidebar.tsx:24:  open: boolean;
+frontend/src/components/ui/sidebar.tsx:25:  setOpen: (open: boolean) => void;
+frontend/src/components/ui/sidebar.tsx:26:  openMobile: boolean;
+frontend/src/components/ui/sidebar.tsx:27:  setOpenMobile: (open: boolean) => void;
+frontend/src/components/ui/sidebar.tsx:47:    open?: boolean;
+frontend/src/components/ui/sidebar.tsx:48:    onOpenChange?: (open: boolean) => void;
+frontend/src/components/ui/sidebar.tsx:50:>(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
+frontend/src/components/ui/sidebar.tsx:52:  const [openMobile, setOpenMobile] = React.useState(false);
+frontend/src/components/ui/sidebar.tsx:55:  // We use openProp and setOpenProp for control from outside the component.
+frontend/src/components/ui/sidebar.tsx:56:  const [_open, _setOpen] = React.useState(defaultOpen);
+frontend/src/components/ui/sidebar.tsx:57:  const open = openProp ?? _open;
+frontend/src/components/ui/sidebar.tsx:60:      const openState = typeof value === "function" ? value(open) : value;
+frontend/src/components/ui/sidebar.tsx:62:        setOpenProp(openState);
+frontend/src/components/ui/sidebar.tsx:64:        _setOpen(openState);
+frontend/src/components/ui/sidebar.tsx:68:      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+frontend/src/components/ui/sidebar.tsx:70:    [setOpenProp, open],
+frontend/src/components/ui/sidebar.tsx:75:    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
+frontend/src/components/ui/sidebar.tsx:93:  const state = open ? "expanded" : "collapsed";
+frontend/src/components/ui/sidebar.tsx:98:      open,
+frontend/src/components/ui/sidebar.tsx:101:      openMobile,
+frontend/src/components/ui/sidebar.tsx:105:    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+frontend/src/components/ui/sidebar.tsx:139:  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+frontend/src/components/ui/sidebar.tsx:155:      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+frontend/src/components/ui/sidebar.tsx:159:          className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+frontend/src/components/ui/sidebar.tsx:220:  ({ className, onClick, ...props }, ref) => {
+frontend/src/components/ui/sidebar.tsx:224:      <Button
+frontend/src/components/ui/sidebar.tsx:230:        onClick={(event) => {
+frontend/src/components/ui/sidebar.tsx:231:          onClick?.(event);
+frontend/src/components/ui/sidebar.tsx:244:const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button">>(
+frontend/src/components/ui/sidebar.tsx:249:      <button
+frontend/src/components/ui/sidebar.tsx:254:        onClick={toggleSidebar}
+frontend/src/components/ui/sidebar.tsx:375:const SidebarGroupAction = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button"> & { asChild?: boolean }>(
+frontend/src/components/ui/sidebar.tsx:377:    const Comp = asChild ? Slot : "button";
+frontend/src/components/ui/sidebar.tsx:385:          // Increases the hit area of the button on mobile.
+frontend/src/components/ui/sidebar.tsx:415:  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+frontend/src/components/ui/sidebar.tsx:438:  React.ComponentProps<"button"> & {
+frontend/src/components/ui/sidebar.tsx:444:  const Comp = asChild ? Slot : "button";
+frontend/src/components/ui/sidebar.tsx:447:  const button = (
+frontend/src/components/ui/sidebar.tsx:450:      data-sidebar="menu-button"
+frontend/src/components/ui/sidebar.tsx:459:    return button;
+frontend/src/components/ui/sidebar.tsx:470:      <TooltipTrigger asChild>{button}</TooltipTrigger>
+frontend/src/components/ui/sidebar.tsx:479:  React.ComponentProps<"button"> & {
+frontend/src/components/ui/sidebar.tsx:484:  const Comp = asChild ? Slot : "button";
+frontend/src/components/ui/sidebar.tsx:491:        "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform peer-hover/menu-button:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+frontend/src/components/ui/sidebar.tsx:492:        // Increases the hit area of the button on mobile.
+frontend/src/components/ui/sidebar.tsx:494:        "peer-data-[size=sm]/menu-button:top-1",
+frontend/src/components/ui/sidebar.tsx:495:        "peer-data-[size=default]/menu-button:top-1.5",
+frontend/src/components/ui/sidebar.tsx:496:        "peer-data-[size=lg]/menu-button:top-2.5",
+frontend/src/components/ui/sidebar.tsx:499:          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
+frontend/src/components/ui/sidebar.tsx:514:        "pointer-events-none absolute right-1 flex h-5 min-w-5 select-none items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums text-sidebar-foreground",
+frontend/src/components/ui/sidebar.tsx:515:        "peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground",
+frontend/src/components/ui/sidebar.tsx:516:        "peer-data-[size=sm]/menu-button:top-1",
+frontend/src/components/ui/sidebar.tsx:517:        "peer-data-[size=default]/menu-button:top-1.5",
+frontend/src/components/ui/sidebar.tsx:518:        "peer-data-[size=lg]/menu-button:top-2.5",
+frontend/src/components/ui/sidebar.tsx:595:      data-sidebar="menu-sub-button"
+frontend/src/components/ui/table.tsx:37:      className={cn("border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50", className)}
+frontend/src/components/ui/button.tsx:7:const buttonVariants = cva(
+frontend/src/components/ui/button.tsx:35:    VariantProps<typeof buttonVariants> {
+frontend/src/components/ui/button.tsx:41:    const Comp = asChild ? Slot : "button";
+frontend/src/components/ui/button.tsx:42:    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+frontend/src/components/ui/button.tsx:47:export { Button, buttonVariants };
+frontend/src/components/ui/toast.tsx:26:  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+frontend/src/components/ui/dropdown-menu.tsx:28:      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[state=open]:bg-accent focus:bg-accent",
+frontend/src/components/ui/dropdown-menu.tsx:47:      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/dropdown-menu.tsx:64:        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/dropdown-menu.tsx:82:      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/dropdown-menu.tsx:98:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/dropdown-menu.tsx:121:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/select.tsx:2:import * as SelectPrimitive from "@radix-ui/react-select";
+frontend/src/components/ui/select.tsx:69:        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/select.tsx:82:            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+frontend/src/components/ui/select.tsx:108:      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/context-menu.tsx:28:      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[state=open]:bg-accent data-[state=open]:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/context-menu.tsx:47:      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/context-menu.tsx:63:        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+frontend/src/components/ui/context-menu.tsx:81:      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/context-menu.tsx:97:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/context-menu.tsx:120:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground",
+frontend/src/components/ui/carousel.tsx:6:import { Button } from "@/components/ui/button";
+frontend/src/components/ui/carousel.tsx:98:      api.on("select", onSelect);
+frontend/src/components/ui/carousel.tsx:101:        api?.off("select", onSelect);
+frontend/src/components/ui/carousel.tsx:173:      <Button
+frontend/src/components/ui/carousel.tsx:185:        onClick={scrollPrev}
+frontend/src/components/ui/carousel.tsx:201:      <Button
+frontend/src/components/ui/carousel.tsx:213:        onClick={scrollNext}
+frontend/src/components/landing/LandingNav.tsx:27:          <button
+frontend/src/components/landing/LandingNav.tsx:28:            type="button"
+frontend/src/components/landing/LandingNav.tsx:29:            onClick={() => setIsBuilderOpen(true)}
+frontend/src/components/landing/LandingNav.tsx:34:          </button>
+frontend/src/components/landing/LandingNav.tsx:38:          <button
+frontend/src/components/landing/LandingNav.tsx:39:            type="button"
+frontend/src/components/landing/LandingNav.tsx:40:            onClick={() => setIsBuilderOpen(true)}
+frontend/src/components/landing/LandingNav.tsx:44:          </button>
+frontend/src/components/landing/MeetDanyelModal.tsx:21:      onClick={onClose}
+frontend/src/components/landing/MeetDanyelModal.tsx:29:        onClick={(event) => event.stopPropagation()}
+frontend/src/components/landing/MeetDanyelModal.tsx:34:        <button
+frontend/src/components/landing/MeetDanyelModal.tsx:35:          type="button"
+frontend/src/components/landing/MeetDanyelModal.tsx:36:          onClick={onClose}
+frontend/src/components/landing/MeetDanyelModal.tsx:41:        </button>
+frontend/src/components/landing/LandingHero.tsx:62:        <button
+frontend/src/components/landing/LandingHero.tsx:63:          onClick={onExploreWorkflows}
+frontend/src/components/landing/LandingHero.tsx:67:        </button>
+frontend/src/components/ai-lab/ArtifactExplorerPanel.tsx:47:        <details key={category} className="rounded-xl border border-border/30 bg-secondary/10 open:bg-secondary/15" open>
+frontend/src/components/ai-lab/ArtifactExplorerPanel.tsx:53:            <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform details-open:rotate-180" />
+frontend/src/components/layout/CommandPalette.tsx:61:    <CommandDialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
+frontend/src/components/layout/TopBar.tsx:30:    refetchOnWindowFocus: false,
+frontend/src/components/layout/TopBar.tsx:63:        <button onClick={() => setCommandPaletteOpen(true)}
+frontend/src/components/layout/TopBar.tsx:70:        </button>
+frontend/src/components/layout/TopBar.tsx:71:        <button onClick={() => setRuntimeDrawerOpen(true)}
+frontend/src/components/layout/TopBar.tsx:74:        </button>
+frontend/src/components/layout/TopBar.tsx:75:        <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+frontend/src/components/layout/TopBar.tsx:77:        </button>
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:6:import { Button } from '@/components/ui/button';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:10:  | 'open-nextcloud-import'
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:13:  | 'select-nextcloud-starter-set'
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:14:  | 'open-action-plan-board'
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:15:  | 'open-candidate-internals';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:23:  selector: string;
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:76:    selector: '[data-tour="command-center-hero"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:81:    tip: 'Start here when you want a quick read on what the workspace is ready to do before opening any workflow.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:88:    selector: '[data-tour="command-center-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:98:    selector: '[data-tour="command-center-workflows"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:108:    selector: '[data-tour="command-center-activity"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:112:    tip: 'For this walkthrough, take the cleaner setup path first: open the Document Library and bring in curated evidence.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:122:    selector: '[data-tour="command-center-lab-artifacts"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:132:    selector: '[data-tour="nav-documents"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:134:    title: 'Next, open the Document Library.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:142:    selector: '[data-tour="documents-page-actions"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:145:    body: 'Choose Import from Nextcloud to browse the prepared corpus and add selected PDFs to this workspace. Upload Documents is reserved for guided or private demos when a visitor wants to test their own files.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:157:    selector: '[data-tour="documents-pipeline"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:167:    selector: '[data-tour="documents-indexed-sample"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:178:    selector: '[data-tour="nextcloud-folder-list"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:186:    tip: 'For the first run, start with Demo Synthetic Corpus. It is the smoothest way to see the import flow, selected files, and product workflows working end to end.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:187:    actions: ['open-nextcloud-import', 'focus-nextcloud-root'],
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:194:    selector: '[data-tour="nextcloud-file-selection"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:205:    actions: ['open-nextcloud-import', 'focus-nextcloud-synthetic'],
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:208:      action: 'select-nextcloud-starter-set',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:214:    id: 'nextcloud-selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:216:    selector: '[data-tour="nextcloud-selection-controls"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:217:    eyebrow: 'Step 12 - Multi-select',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:219:    body: 'You can open folders, check individual files, or use Select all shown PDFs when the current folder already contains exactly the documents you want.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:220:    tip: 'Keep the selection focused. Import only the documents you plan to use in the upcoming workflow demo.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:221:    actions: ['open-nextcloud-import', 'focus-nextcloud-synthetic'],
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:228:    selector: '[data-tour="nextcloud-import-action"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:230:    title: 'Preview individual files if needed, then import the selected batch.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:231:    body: 'Use the small View button on any file card when you want a quick preview. When the selected batch looks right, Import sends every selected PDF into the Document Library as one clean indexing job.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:233:    actions: ['open-nextcloud-import', 'focus-nextcloud-synthetic'],
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:244:    selector: '[data-tour="workflow-catalog-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:247:    body: 'This page is the live catalog of jobs the workbench can run. It connects the workflow contract, indexed document corpus, and persisted run history before you open a specific workflow.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:255:    selector: '[data-tour="workflow-catalog-surface"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:265:    selector: '[data-tour="workflow-card-document_review"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:269:    tip: 'Read the inputs, outputs, badges, and live signals before opening the workflow. They explain whether the current corpus is ready to run.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:277:    selector: '[data-tour="workflow-card-policy_contract_comparison"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:288:    selector: '[data-tour="workflow-card-action_plan_evidence_review"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:299:    selector: '[data-tour="workflow-card-candidate_review"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:314:    selector: '[data-tour="document-review-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:325:    selector: '[data-tour="document-review-progress"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:327:    title: 'Follow the run from selection to export.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:335:    selector: '[data-tour="document-review-decision"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:343:    id: 'document-review-selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:345:    selector: '[data-tour="document-review-selection"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:346:    eyebrow: 'Step 4 - Grounded selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:349:    tip: 'For the smoothest demo, use Master Service Agreement v4.2.pdf. If it has not been indexed yet, leave the selector empty and choose another indexed document from the dropdown.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:356:    selector: '[data-tour="document-review-output-tabs"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:367:    selector: '[data-tour="document-review-supporting-cards"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:377:    selector: '[data-tour="document-review-publish"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:391:    selector: '[data-tour="policy-comparison-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:402:    selector: '[data-tour="policy-comparison-progress"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:404:    title: 'Track the comparison from selection to export.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:405:    body: 'The progress rail shows when the two documents are selected, grounded, analyzed, reviewed, and ready for export.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:410:    id: 'policy-comparison-selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:412:    selector: '[data-tour="policy-comparison-selection"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:415:    body: 'Policy Comparison needs two different indexed documents. The selectors keep both sides explicit instead of letting the workflow guess the pair.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:423:    selector: '[data-tour="policy-comparison-grounding"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:426:    body: 'The grounding preview stays collapsed by default, then opens when someone wants to inspect the retrieved context behind the comparison.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:433:    selector: '[data-tour="policy-comparison-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:443:    selector: '[data-tour="policy-comparison-priorities"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:453:    selector: '[data-tour="policy-comparison-diffs"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:463:    selector: '[data-tour="policy-comparison-recommendation"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:473:    selector: '[data-tour="policy-comparison-watchouts-artifacts"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:484:    selector: '[data-tour="policy-comparison-publish"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:498:    selector: '[data-tour="action-plan-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:501:    body: 'This workflow turns grounded findings into execution work: selected evidence, owners, priorities, due dates, blockers, and publish-ready handoff outputs.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:509:    selector: '[data-tour="action-plan-progress"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:511:    title: 'Track the action plan from selection to export.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:512:    body: 'The progress rail keeps the live workflow state readable: selecting source evidence, grounding context, analyzing actions, reviewing outputs, and exporting the handoff.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:517:    id: 'action-plan-selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:519:    selector: '[data-tour="action-plan-selection"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:522:    body: 'Action Plan can use several indexed documents at once. The compact selection card keeps the evidence set explicit before extracting owners, tasks, risks, and next steps.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:534:    selector: '[data-tour="action-plan-grounding"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:537:    body: 'The grounding preview stays collapsed until someone wants to inspect context coverage, selected source blocks, and evidence caveats behind the action plan.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:544:    selector: '[data-tour="action-plan-status-strip"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:547:    body: 'These counters summarize open, in-progress, blocked, and completed items once the workflow produces a normalized action plan.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:554:    selector: '[data-tour="action-plan-work-views"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:566:    selector: '[data-tour="action-plan-board"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:568:    actions: ['open-action-plan-board'],
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:578:    selector: '[data-tour="action-plan-run-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:588:    selector: '[data-tour="action-plan-publish"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:602:    selector: '[data-tour="candidate-review-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:613:    selector: '[data-tour="candidate-review-progress"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:615:    title: 'Track the review from selection to export.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:616:    body: 'The progress rail keeps the run state visible while the workflow selects the candidate document, grounds context, analyzes the CV, reviews outputs, and exports handoff assets.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:621:    id: 'candidate-review-selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:623:    selector: '[data-tour="candidate-review-selection"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:634:    selector: '[data-tour="candidate-review-analysis-internals"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:638:    actions: ['open-candidate-internals'],
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:645:    selector: '[data-tour="candidate-review-profile"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:655:    selector: '[data-tour="candidate-review-left-insights"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:665:    selector: '[data-tour="candidate-review-interview-focus"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:675:    selector: '[data-tour="candidate-review-experience"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:685:    selector: '[data-tour="candidate-review-evaluation-grid"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:695:    selector: '[data-tour="candidate-review-handoff"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:708:    selector: '[data-tour="deck-center-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:711:    body: 'Deck Center is where generated presentations, review sidecars, preview assets, and registry metadata become easy to inspect and download.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:719:    selector: '[data-tour="deck-center-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:721:    title: 'Check artifact readiness before opening files.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:729:    selector: '[data-tour="deck-center-filters"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:739:    selector: '[data-tour="deck-center-list"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:749:    selector: '[data-tour="deck-center-detail"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:751:    title: 'Inspect the selected deck package.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:752:    body: 'The detail panel collects primary files, preview slides, readiness notes, and registry assets for the selected artifact.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:762:    selector: '[data-tour="run-history-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:773:    selector: '[data-tour="run-history-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:775:    title: 'Read the run totals before opening a log.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:783:    selector: '[data-tour="run-history-filters"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:793:    selector: '[data-tour="run-history-list"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:803:    selector: '[data-tour="run-history-detail"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:805:    title: 'Inspect the selected run before rerunning or exporting.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:806:    body: 'The detail panel collects the summary, source counts, artifacts, deliveries, request payload, response payload, and rerun button so run operations stay auditable.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:817:    selector: '[data-tour="runtime-controls-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:828:    selector: '[data-tour="runtime-controls-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:831:    body: 'This summary shows the active profile, provider connection, model, embedding stack, retrieval posture, and document preset before any edits are made.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:838:    selector: '[data-tour="runtime-controls-generation"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:848:    selector: '[data-tour="runtime-controls-retrieval"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:858:    selector: '[data-tour="runtime-controls-doc-processing"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:874:    selector: '[data-tour="preferences-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:876:    title: 'Start with saved workspace configuration.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:885:    selector: '[data-tour="preferences-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:888:    body: 'These cards count provider connections, healthy connections, and saved runtime profiles so setup coverage is visible immediately.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:895:    selector: '[data-tour="preferences-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:898:    body: 'This compact summary keeps the most important saved settings readable without opening every provider or profile card.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:905:    selector: '[data-tour="preferences-connections"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:917:    selector: '[data-tour="preferences-profiles"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:919:    title: 'Manage saved profile presets.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:920:    body: 'Profiles package model route, execution policy, quality posture, retrieval strategy, document preset, and output budget into reusable presets.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:927:    selector: '[data-tour="preferences-operator"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:930:    body: 'Operator preferences keep source badges, export format, and benchmark baseline visible as the final saved workspace defaults.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:941:    selector: '[data-tour="lab-overview-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:953:    selector: '[data-tour="lab-overview-status-strip"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:963:    selector: '[data-tour="lab-overview-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:973:    selector: '[data-tour="lab-overview-signals"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:983:    selector: '[data-tour="lab-overview-surface-map"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:996:    selector: '[data-tour="lab-runtime-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1007:    selector: '[data-tour="lab-runtime-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1017:    selector: '[data-tour="lab-runtime-summary-cards"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1020:    body: 'These cards summarize dominant provider, typical grounding usage, grounding variance, and cost visibility before you open the detailed diagnostic panels.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1027:    selector: '[data-tour="lab-runtime-config"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1037:    selector: '[data-tour="lab-runtime-grounding"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1040:    body: 'This card shows how much of the selected evidence packet recent runs actually used. A high value means broad evidence consumption, not necessarily that the LLM prompt window failed.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1047:    selector: '[data-tour="lab-runtime-latency"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1057:    selector: '[data-tour="lab-runtime-cost-simulation"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1067:    selector: '[data-tour="lab-runtime-trend"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1077:    selector: '[data-tour="lab-runtime-retrieval-cost"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1087:    selector: '[data-tour="lab-runtime-vector-diagnostics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1097:    selector: '[data-tour="lab-runtime-trace-watchlist"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1107:    selector: '[data-tour="lab-runtime-failure-modes"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1123:    selector: '[data-tour="lab-document-experiments-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1126:    body: 'Document Experiments is the technical RAG playground: ask questions, inspect source behavior, test selected documents, and preserve useful traces for debugging.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1134:    selector: '[data-tour="lab-document-experiments-main-panel"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1146:    selector: '[data-tour="lab-document-experiments-prompt"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1149:    body: 'The prompt bar lives under the chat. Operators use it to test a specific retrieval or answer-quality hypothesis against the selected documents.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1160:    selector: '[data-tour="lab-document-experiments-sessions"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1170:    selector: '[data-tour="lab-document-experiments-documents"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1180:    selector: '[data-tour="lab-document-experiments-activity"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1193:    selector: '[data-tour="lab-workflow-inspector-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1196:    body: 'Workflow Inspector shows selected documents, task instructions, routing decisions, confidence, guardrail triggers, sources, and persisted traces.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1204:    selector: '[data-tour="lab-workflow-inspector-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1214:    selector: '[data-tour="lab-workflow-inspector-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1222:    id: 'lab-workflow-inspector-task-selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1224:    selector: '[data-tour="lab-workflow-inspector-task-selection"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1225:    eyebrow: 'Step 4 - Task selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1234:    selector: '[data-tour="lab-workflow-inspector-documents"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1235:    eyebrow: 'Step 5 - Document selection',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1244:    selector: '[data-tour="lab-workflow-inspector-instructions"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1254:    selector: '[data-tour="lab-workflow-inspector-trace-posture"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1264:    selector: '[data-tour="lab-workflow-inspector-audit"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1274:    selector: '[data-tour="lab-workflow-inspector-case-history-start"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1288:    selector: '[data-tour="lab-workflow-inspector-task-health"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1298:    selector: '[data-tour="lab-workflow-inspector-latest-runs"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1311:    selector: '[data-tour="lab-benchmarks-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1322:    selector: '[data-tour="lab-benchmarks-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1332:    selector: '[data-tour="lab-benchmarks-coverage"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1342:    selector: '[data-tour="lab-benchmarks-highlights"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1346:    body: 'Highlights call out the most useful benchmark takeaways before the operator opens the detailed tabs.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1353:    selector: '[data-tour="lab-benchmarks-tabs"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1363:    selector: '[data-tour="lab-benchmarks-leaderboard-row"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1380:    selector: '[data-tour="lab-evals-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1391:    selector: '[data-tour="lab-evals-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1401:    selector: '[data-tour="lab-evals-coverage"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1411:    selector: '[data-tour="lab-evals-distribution"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1421:    selector: '[data-tour="lab-evals-suite-leaderboard"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1434:    selector: '[data-tour="lab-evals-investigate-first"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1447:    selector: '[data-tour="lab-evals-provider-breakdown"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1460:    selector: '[data-tour="lab-evals-task-coverage"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1473:    selector: '[data-tour="lab-evals-attention-queue"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1486:    selector: '[data-tour="lab-evals-recent-cases-start"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1503:    selector: '[data-tour="lab-artifacts-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1514:    selector: '[data-tour="lab-artifacts-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1524:    selector: '[data-tour="lab-artifacts-registry-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1527:    body: 'These cards summarize persisted chat sessions, product workflow runs, latest linked artifact, and capture posture before you open detailed registries.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1534:    selector: '[data-tour="lab-artifacts-run-registry"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1544:    selector: '[data-tour="lab-artifacts-recent-bundles"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1554:    selector: '[data-tour="lab-artifacts-diagnostics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1564:    selector: '[data-tour="lab-artifacts-explorer-start"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1568:    body: 'The explorer header, first category summary, and first artifact rows show how persisted evidence can be opened and filtered without spotlighting the entire explorer.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1581:    selector: '[data-tour="lab-evidenceops-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1592:    selector: '[data-tour="lab-evidenceops-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1595:    body: 'These top cards show local MCP tools, open backlog, recent open items, unassigned queue, and last sync time.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1602:    selector: '[data-tour="lab-evidenceops-repository"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1612:    selector: '[data-tour="lab-evidenceops-delivery"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1625:    selector: '[data-tour="lab-evidenceops-tabs"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1635:    selector: '[data-tour="lab-evidenceops-tools-start"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1869:function collectElementRects(selector: string): DOMRect[] {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1870:  return Array.from(document.querySelectorAll(selector))
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1884:function getTargetRect(selector: string, fallbackSelector?: string, step?: TourStep): TourRect | null {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1885:  let rects = collectElementRects(selector);
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1902:function getRawTargetRect(selector: string, fallbackSelector?: string): TourRect | null {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1903:  let rects = collectElementRects(selector);
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1913:function getScrollTarget(selector: string, fallbackSelector?: string): HTMLElement | null {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1914:  return (document.querySelector(selector) || (fallbackSelector ? document.querySelector(fallbackSelector) : null)) as HTMLElement | null;
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1952:    const rawRect = getRawTargetRect(step.selector, step.fallbackSelector);
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1991:  if (action === 'open-nextcloud-import') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1992:    window.dispatchEvent(new CustomEvent('workbench-tour:open-nextcloud-import'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2003:  if (action === 'select-nextcloud-starter-set') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2004:    window.dispatchEvent(new CustomEvent('workbench-tour:select-nextcloud-starter-set'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2007:  if (action === 'open-action-plan-board') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2008:    window.dispatchEvent(new CustomEvent('workbench-tour:open-action-plan-board'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2011:  if (action === 'open-candidate-internals') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2012:    window.dispatchEvent(new CustomEvent('workbench-tour:open-candidate-internals'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2334:    const element = getScrollTarget(step.selector, step.fallbackSelector);
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2340:        const rect = getTargetRect(step.selector, step.fallbackSelector, step);
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2369:      window.setTimeout(() => dispatchTourAction(action), action === 'open-nextcloud-import' ? 20 : 160 + index * 80)
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2371:    const hasSheetAction = step.actions?.includes('open-nextcloud-import');
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2408:      const element = getScrollTarget(step.selector, step.fallbackSelector);
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2413:          const rect = getTargetRect(step.selector, step.fallbackSelector, step);
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2467:              <button type="button" onClick={closeTour} className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground" aria-label="Close guided tour"><X className="h-4 w-4" /></button>
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2473:              <Button
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2477:                onClick={() => {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2499:                <Button variant="ghost" size="sm" className={cn('h-8 px-3 text-xs', stepIndex === 0 && 'invisible')} onClick={() => goToStep(stepIndex - 1)}><ArrowLeft className="mr-1 h-3.5 w-3.5" /> Back</Button>
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2500:                <Button size="sm" className="h-8 px-3 text-xs" onClick={() => goToStep(stepIndex + 1)}>{stepIndex === activeTourSteps.length - 1 ? 'Finish here' : 'Next'}{stepIndex === activeTourSteps.length - 1 ? null : <ArrowRight className="ml-1 h-3.5 w-3.5" />}</Button>
+frontend/src/components/layout/RuntimeDrawer.tsx:6:import { Button } from '@/components/ui/button';
+frontend/src/components/layout/RuntimeDrawer.tsx:43:    refetchOnWindowFocus: false,
+frontend/src/components/layout/RuntimeDrawer.tsx:50:  const docPresetLookup = buildCatalogLookup(data?.catalogs.docPresets);
+frontend/src/components/layout/RuntimeDrawer.tsx:55:    <Sheet open={runtimeDrawerOpen} onOpenChange={setRuntimeDrawerOpen}>
+frontend/src/components/layout/RuntimeDrawer.tsx:86:                <p className="text-[10px] text-muted-foreground">Doc preset: {docPresetLookup[activeProfile.docProcessingPreset]?.label ?? activeProfile.docProcessingPreset}</p>
+frontend/src/components/layout/RuntimeDrawer.tsx:90:                  <Button asChild variant="outline" className="h-8 w-full text-xs" onClick={() => setRuntimeDrawerOpen(false)}>
+frontend/src/components/layout/AppSidebar.tsx:237:          body: 'This AI Lab section is for probing grounded chat behavior, selected documents, and RAG quality outside the product workflow.',
+frontend/src/components/layout/AppSidebar.tsx:248:              title: 'Ready to open the technical AI Lab layer?',
+frontend/src/components/layout/AppSidebar.tsx:382:    const openPrompt = () => {
+frontend/src/components/layout/AppSidebar.tsx:404:    window.addEventListener('workbench-tour:ready-for-workflow-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:405:    window.addEventListener('workbench-tour:ready-for-document-review-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:406:    window.addEventListener('workbench-tour:ready-for-policy-comparison-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:407:    window.addEventListener('workbench-tour:ready-for-action-plan-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:408:    window.addEventListener('workbench-tour:ready-for-candidate-review-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:409:    window.addEventListener('workbench-tour:ready-for-deck-center-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:410:    window.addEventListener('workbench-tour:ready-for-run-history-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:411:    window.addEventListener('workbench-tour:ready-for-runtime-controls-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:412:    window.addEventListener('workbench-tour:ready-for-preferences-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:413:    window.addEventListener('workbench-tour:ready-for-lab-overview-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:414:    window.addEventListener('workbench-tour:ready-for-lab-runtime-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:415:    window.addEventListener('workbench-tour:ready-for-lab-document-experiments-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:416:    window.addEventListener('workbench-tour:ready-for-lab-workflow-inspector-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:417:    window.addEventListener('workbench-tour:ready-for-lab-benchmarks-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:418:    window.addEventListener('workbench-tour:ready-for-lab-evals-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:419:    window.addEventListener('workbench-tour:ready-for-lab-artifacts-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:420:    window.addEventListener('workbench-tour:ready-for-lab-evidenceops-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:441:      window.removeEventListener('workbench-tour:ready-for-workflow-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:442:      window.removeEventListener('workbench-tour:ready-for-document-review-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:443:      window.removeEventListener('workbench-tour:ready-for-policy-comparison-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:444:      window.removeEventListener('workbench-tour:ready-for-action-plan-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:445:      window.removeEventListener('workbench-tour:ready-for-candidate-review-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:446:      window.removeEventListener('workbench-tour:ready-for-deck-center-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:447:      window.removeEventListener('workbench-tour:ready-for-run-history-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:448:      window.removeEventListener('workbench-tour:ready-for-runtime-controls-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:449:      window.removeEventListener('workbench-tour:ready-for-preferences-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:450:      window.removeEventListener('workbench-tour:ready-for-lab-overview-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:451:      window.removeEventListener('workbench-tour:ready-for-lab-runtime-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:452:      window.removeEventListener('workbench-tour:ready-for-lab-document-experiments-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:453:      window.removeEventListener('workbench-tour:ready-for-lab-workflow-inspector-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:454:      window.removeEventListener('workbench-tour:ready-for-lab-benchmarks-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:455:      window.removeEventListener('workbench-tour:ready-for-lab-evals-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:456:      window.removeEventListener('workbench-tour:ready-for-lab-artifacts-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:457:      window.removeEventListener('workbench-tour:ready-for-lab-evidenceops-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:578:            <button
+frontend/src/components/layout/AppSidebar.tsx:579:              type="button"
+frontend/src/components/layout/AppSidebar.tsx:580:              onClick={() => setIsBuilderOpen(true)}
+frontend/src/components/layout/AppSidebar.tsx:585:            </button>
+frontend/src/components/layout/AppSidebar.tsx:656:            <button
+frontend/src/components/layout/AppSidebar.tsx:657:              type="button"
+frontend/src/components/layout/AppSidebar.tsx:659:              onClick={startNextTour}
+frontend/src/components/layout/AppSidebar.tsx:667:            </button>
+frontend/src/components/layout/AppSidebar.tsx:686:                <button type="button" onClick={dismissWorkflowTourPrompt} className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground">Skip for now</button>
+frontend/src/components/layout/AppSidebar.tsx:687:                <button type="button" onClick={startNextTour} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90">{nextTourCopy.cta}</button>
+frontend/src/components/layout/AppSidebar.tsx:695:      <button onClick={toggleSidebar}
+frontend/src/components/layout/AppSidebar.tsx:698:      </button>
+frontend/src/components/shared/ui-components.tsx:58:    open: 'bg-primary/10 text-primary border-primary/20',
+frontend/src/components/shared/ui-components.tsx:69:        status === 'running' || status === 'indexing' || status === 'generating' || status === 'open' || status === 'derived-live' ? 'bg-primary' : '',
+frontend/src/components/shared/ui-components.tsx:169:  onClick?: MouseEventHandler<HTMLDivElement>;
+frontend/src/components/product/NextcloudImportSheet.tsx:2:import { useMutation, useQuery } from '@tanstack/react-query';
+frontend/src/components/product/NextcloudImportSheet.tsx:6:import { Button } from '@/components/ui/button';
+frontend/src/components/product/NextcloudImportSheet.tsx:19:  open: boolean;
+frontend/src/components/product/NextcloudImportSheet.tsx:20:  onOpenChange: (open: boolean) => void;
+frontend/src/components/product/NextcloudImportSheet.tsx:187:export function NextcloudImportSheet({ open, onOpenChange, onImportStarted }: NextcloudImportSheetProps) {
+frontend/src/components/product/NextcloudImportSheet.tsx:191:  const [selectedRelativePaths, setSelectedRelativePaths] = useState<string[]>([]);
+frontend/src/components/product/NextcloudImportSheet.tsx:195:  const wasOpenRef = useRef(open);
+frontend/src/components/product/NextcloudImportSheet.tsx:198:    if (wasOpenRef.current && !open) promptForWorkflowTourSoon();
+frontend/src/components/product/NextcloudImportSheet.tsx:199:    wasOpenRef.current = open;
+frontend/src/components/product/NextcloudImportSheet.tsx:200:  }, [open]);
+frontend/src/components/product/NextcloudImportSheet.tsx:203:    if (!open) return;
+frontend/src/components/product/NextcloudImportSheet.tsx:211:  }, [open]);
+frontend/src/components/product/NextcloudImportSheet.tsx:216:    enabled: open,
+frontend/src/components/product/NextcloudImportSheet.tsx:217:    refetchOnWindowFocus: false,
+frontend/src/components/product/NextcloudImportSheet.tsx:225:  const selectedPathSet = useMemo(() => new Set(selectedRelativePaths), [selectedRelativePaths]);
+frontend/src/components/product/NextcloudImportSheet.tsx:226:  const selectedDocuments = useMemo(
+frontend/src/components/product/NextcloudImportSheet.tsx:227:    () => selectedRelativePaths.map((path) => documentByPath.get(path)).filter(Boolean) as ProductNextcloudDocument[],
+frontend/src/components/product/NextcloudImportSheet.tsx:228:    [documentByPath, selectedRelativePaths],
+frontend/src/components/product/NextcloudImportSheet.tsx:260:  const selectStarterSet = useCallback(() => {
+frontend/src/components/product/NextcloudImportSheet.tsx:289:      toast.warning(`${uniquePaths.length} recommended starter PDF(s) selected. ${missingCount} could not be matched in the current listing.`);
+frontend/src/components/product/NextcloudImportSheet.tsx:291:      toast.success(`${uniquePaths.length} recommended starter PDF(s) selected.`);
+frontend/src/components/product/NextcloudImportSheet.tsx:296:    if (!open) return;
+frontend/src/components/product/NextcloudImportSheet.tsx:303:  }, [focusedRelativePath, open, visibleDocuments]);
+frontend/src/components/product/NextcloudImportSheet.tsx:306:    if (!open) {
+frontend/src/components/product/NextcloudImportSheet.tsx:314:  }, [open]);
+frontend/src/components/product/NextcloudImportSheet.tsx:317:    if (!open) return;
+frontend/src/components/product/NextcloudImportSheet.tsx:324:      selectStarterSet();
+frontend/src/components/product/NextcloudImportSheet.tsx:328:    window.addEventListener('workbench-tour:select-nextcloud-starter-set', handleSelectStarter);
+frontend/src/components/product/NextcloudImportSheet.tsx:331:      window.removeEventListener('workbench-tour:select-nextcloud-starter-set', handleSelectStarter);
+frontend/src/components/product/NextcloudImportSheet.tsx:333:  }, [open, selectStarterSet]);
+frontend/src/components/product/NextcloudImportSheet.tsx:336:    if (!open || !tourFolderRequest) return;
+frontend/src/components/product/NextcloudImportSheet.tsx:352:  }, [open, root, tourFolderRequest]);
+frontend/src/components/product/NextcloudImportSheet.tsx:355:    if (!open || !pendingStarterSelection || !documents.length) return;
+frontend/src/components/product/NextcloudImportSheet.tsx:356:    selectStarterSet();
+frontend/src/components/product/NextcloudImportSheet.tsx:357:  }, [documents.length, open, pendingStarterSelection, selectStarterSet]);
+frontend/src/components/product/NextcloudImportSheet.tsx:360:    () => documentByPath.get(String(focusedRelativePath || '')) ?? selectedDocuments[0] ?? null,
+frontend/src/components/product/NextcloudImportSheet.tsx:361:    [documentByPath, focusedRelativePath, selectedDocuments],
+frontend/src/components/product/NextcloudImportSheet.tsx:364:  const importMutation = useMutation({
+frontend/src/components/product/NextcloudImportSheet.tsx:373:      const count = selectedDocuments.length;
+frontend/src/components/product/NextcloudImportSheet.tsx:375:        ? `Could not import ${count} selected files from Nextcloud.`
+frontend/src/components/product/NextcloudImportSheet.tsx:377:          ? `Could not import ${focusedDocument.title || focusedDocument.relative_path || 'the selected file'} from Nextcloud.`
+frontend/src/components/product/NextcloudImportSheet.tsx:403:    const previewWindow = window.open(buildProductNextcloudOpenUrl(toImportPayload(document)), '_blank');
+frontend/src/components/product/NextcloudImportSheet.tsx:409:  const selectedPdfCount = selectedDocuments.filter(isPdfDocument).length;
+frontend/src/components/product/NextcloudImportSheet.tsx:412:    <Sheet open={open} onOpenChange={onOpenChange}>
+frontend/src/components/product/NextcloudImportSheet.tsx:419:            Browse folders, select one or more PDFs, preview individual files when useful, then import the selected batch into the Document Library.
+frontend/src/components/product/NextcloudImportSheet.tsx:437:              <span>{selectedDocuments.length} selected</span>
+frontend/src/components/product/NextcloudImportSheet.tsx:443:              <button
+frontend/src/components/product/NextcloudImportSheet.tsx:444:                type="button"
+frontend/src/components/product/NextcloudImportSheet.tsx:446:                onClick={() => setCurrentPath('')}
+frontend/src/components/product/NextcloudImportSheet.tsx:449:              </button>
+frontend/src/components/product/NextcloudImportSheet.tsx:455:                    <button
+frontend/src/components/product/NextcloudImportSheet.tsx:456:                      type="button"
+frontend/src/components/product/NextcloudImportSheet.tsx:458:                      onClick={() => setCurrentPath(path)}
+frontend/src/components/product/NextcloudImportSheet.tsx:461:                    </button>
+frontend/src/components/product/NextcloudImportSheet.tsx:476:                  <Button variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => setCurrentPath(currentPath.split('/').slice(0, -1).join('/'))}>
+frontend/src/components/product/NextcloudImportSheet.tsx:482:                <button
+frontend/src/components/product/NextcloudImportSheet.tsx:483:                  type="button"
+frontend/src/components/product/NextcloudImportSheet.tsx:485:                  onClick={() => {
+frontend/src/components/product/NextcloudImportSheet.tsx:495:                </button>
+frontend/src/components/product/NextcloudImportSheet.tsx:497:                  <button
+frontend/src/components/product/NextcloudImportSheet.tsx:499:                    type="button"
+frontend/src/components/product/NextcloudImportSheet.tsx:501:                    onClick={() => {
+frontend/src/components/product/NextcloudImportSheet.tsx:511:                  </button>
+frontend/src/components/product/NextcloudImportSheet.tsx:516:            <GlassCard className="p-3" data-tour="nextcloud-file-selection">
+frontend/src/components/product/NextcloudImportSheet.tsx:523:                  <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-background/20 p-1" data-tour="nextcloud-selection-controls">
+frontend/src/components/product/NextcloudImportSheet.tsx:526:                    <Button variant="outline" size="sm" className="h-7 text-[10px]" disabled={!visiblePdfDocuments.length || importMutation.isPending} onClick={() => addDocumentsToSelection(visiblePdfDocuments)}>
+frontend/src/components/product/NextcloudImportSheet.tsx:530:                  <Button variant="ghost" size="sm" className="h-7 text-[10px] text-muted-foreground" disabled={!selectedDocuments.length || importMutation.isPending} onClick={() => setSelectedRelativePaths([])}>
+frontend/src/components/product/NextcloudImportSheet.tsx:538:                  const selected = selectedPathSet.has(relativePath);
+frontend/src/components/product/NextcloudImportSheet.tsx:544:                      role="button"
+frontend/src/components/product/NextcloudImportSheet.tsx:546:                      className={`w-full rounded-lg border px-3 py-3 text-left transition-colors ${selected ? 'border-primary/60 bg-primary/5 shadow-[0_0_24px_-18px_hsl(var(--primary))]' : focused ? 'border-primary/30 bg-secondary/20' : 'border-border/40 bg-secondary/10 hover:border-primary/30 hover:bg-secondary/20'}`}
+frontend/src/components/product/NextcloudImportSheet.tsx:547:                      onClick={() => toggleDocumentSelection(document)}
+frontend/src/components/product/NextcloudImportSheet.tsx:554:                      data-testid={selected ? 'nextcloud-document-selected' : undefined}
+frontend/src/components/product/NextcloudImportSheet.tsx:558:                          <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border/70 bg-background/50 text-muted-foreground'}`}>
+frontend/src/components/product/NextcloudImportSheet.tsx:559:                            {selected ? <Check className="h-3 w-3" /> : pdf ? <Square className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+frontend/src/components/product/NextcloudImportSheet.tsx:568:                          {selected ? <CheckSquare className="h-3.5 w-3.5 text-primary" /> : <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+frontend/src/components/product/NextcloudImportSheet.tsx:577:                        <button
+frontend/src/components/product/NextcloudImportSheet.tsx:578:                          type="button"
+frontend/src/components/product/NextcloudImportSheet.tsx:580:                          onClick={(event) => {
+frontend/src/components/product/NextcloudImportSheet.tsx:587:                        </button>
+frontend/src/components/product/NextcloudImportSheet.tsx:601:                  {selectedDocuments.length
+frontend/src/components/product/NextcloudImportSheet.tsx:602:                    ? `${selectedDocuments.length} file(s) selected - ${selectedPdfCount} PDF(s). ${selectedDocuments.slice(0, 2).map((document) => document.relative_path).join(' - ')}${selectedDocuments.length > 2 ? ' - ...' : ''}`
+frontend/src/components/product/NextcloudImportSheet.tsx:606:              <Button
+frontend/src/components/product/NextcloudImportSheet.tsx:609:                disabled={!selectedDocuments.length || importMutation.isPending}
+frontend/src/components/product/NextcloudImportSheet.tsx:610:                onClick={() => selectedDocuments.length && importMutation.mutate(selectedDocuments)}
+frontend/src/components/product/NextcloudImportSheet.tsx:613:                Import {selectedDocuments.length || ''} into Document Library
+frontend/src/components/product/DeliveryLoopPanel.tsx:2:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/components/product/DeliveryLoopPanel.tsx:6:import { Button } from '@/components/ui/button';
+frontend/src/components/product/DeliveryLoopPanel.tsx:101:    refetchOnWindowFocus: false,
+frontend/src/components/product/DeliveryLoopPanel.tsx:107:    refetchOnWindowFocus: false,
+frontend/src/components/product/DeliveryLoopPanel.tsx:113:    refetchOnWindowFocus: false,
+frontend/src/components/product/DeliveryLoopPanel.tsx:126:  const publishTrelloMutation = useMutation({
+frontend/src/components/product/DeliveryLoopPanel.tsx:140:  const publishNotionMutation = useMutation({
+frontend/src/components/product/DeliveryLoopPanel.tsx:153:  const syncNextcloudMutation = useMutation({
+frontend/src/components/product/DeliveryLoopPanel.tsx:202:            <Button variant="outline" size="sm" className="h-8 border-border/50 text-[10px]" onClick={() => { void hubQuery.refetch(); void notionQuery.refetch(); void nextcloudQuery.refetch(); }}>
+frontend/src/components/product/DeliveryLoopPanel.tsx:207:                <Button variant="outline" size="sm" className="h-8 border-border/50 text-[10px]" disabled={!result || publishTrelloMutation.isPending} onClick={() => publishTrelloMutation.mutate()}>
+frontend/src/components/product/DeliveryLoopPanel.tsx:210:                <Button variant="outline" size="sm" className="h-8 border-border/50 text-[10px]" disabled={!result || publishNotionMutation.isPending} onClick={() => publishNotionMutation.mutate()}>
+frontend/src/components/product/DeliveryLoopPanel.tsx:213:                <Button variant="outline" size="sm" className="h-8 border-border/50 text-[10px]" disabled={syncNextcloudMutation.isPending} onClick={() => syncNextcloudMutation.mutate()}>
+frontend/src/components/product/DeliveryLoopPanel.tsx:289:                    <button type="button" className="mt-2 inline-flex items-center gap-1 text-[10px] text-primary hover:underline" onClick={() => window.open(delivery.url || '', '_blank', 'noopener,noreferrer')}>
+frontend/src/components/product/DeliveryLoopPanel.tsx:291:                    </button>
+frontend/src/components/product/DeliveryLoopPanel.tsx:333:                        <button type="button" className="mt-2 inline-flex items-center gap-1 text-[10px] text-primary hover:underline" onClick={() => window.open(entry.page_url || '', '_blank', 'noopener,noreferrer')}>
+frontend/src/components/product/DeliveryLoopPanel.tsx:335:                        </button>
+frontend/src/components/product/WorkflowPublishActions.tsx:2:import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+frontend/src/components/product/WorkflowPublishActions.tsx:7:import { Button } from '@/components/ui/button';
+frontend/src/components/product/WorkflowPublishActions.tsx:248:function openExternalUrl(url: string | null, fallbackMessage: string): void {
+frontend/src/components/product/WorkflowPublishActions.tsx:253:  const opened = window.open(url, '_blank');
+frontend/src/components/product/WorkflowPublishActions.tsx:254:  if (!opened) {
+frontend/src/components/product/WorkflowPublishActions.tsx:259:function openLocalPreviewPage(options: {
+frontend/src/components/product/WorkflowPublishActions.tsx:268:  const previewWindow = window.open('', '_blank');
+frontend/src/components/product/WorkflowPublishActions.tsx:289:  previewWindow.document.open();
+frontend/src/components/product/WorkflowPublishActions.tsx:416:  const [selectedTemplateId, setSelectedTemplateId] = useState(templateOptions[0]?.id ?? 'executive_summary');
+frontend/src/components/product/WorkflowPublishActions.tsx:417:  const [selectedTrelloCardIndex, setSelectedTrelloCardIndex] = useState(0);
+frontend/src/components/product/WorkflowPublishActions.tsx:426:    refetchOnWindowFocus: false,
+frontend/src/components/product/WorkflowPublishActions.tsx:441:  const previewTrelloMutation = useMutation({
+frontend/src/components/product/WorkflowPublishActions.tsx:453:  const publishTrelloMutation = useMutation({
+frontend/src/components/product/WorkflowPublishActions.tsx:460:        selectedCardIndex: selectedTrelloCardIndex,
+frontend/src/components/product/WorkflowPublishActions.tsx:469:      toast.success(payload.message || 'Published to Trello. You can open the created page now.');
+frontend/src/components/product/WorkflowPublishActions.tsx:474:  const previewNotionMutation = useMutation({
+frontend/src/components/product/WorkflowPublishActions.tsx:492:  const publishNotionMutation = useMutation({
+frontend/src/components/product/WorkflowPublishActions.tsx:509:      toast.success(payload.message || 'Published to Notion. You can open the created page now.');
+frontend/src/components/product/WorkflowPublishActions.tsx:514:  const selectedTemplate = templateOptions.find((item) => item.id === selectedTemplateId) ?? templateOptions[0];
+frontend/src/components/product/WorkflowPublishActions.tsx:520:    const safeIndex = Math.min(selectedTrelloCardIndex, trelloCards.length - 1);
+frontend/src/components/product/WorkflowPublishActions.tsx:522:  }, [selectedTrelloCardIndex, trelloCards]);
+frontend/src/components/product/WorkflowPublishActions.tsx:558:  const openTrelloPage = () => {
+frontend/src/components/product/WorkflowPublishActions.tsx:559:    openExternalUrl(trelloOpenUrl, 'Publish to Trello first to open the created card or board.');
+frontend/src/components/product/WorkflowPublishActions.tsx:562:  const openNotionPage = () => {
+frontend/src/components/product/WorkflowPublishActions.tsx:563:    openExternalUrl(notionOpenUrl, 'Publish to Notion first to open the created page.');
+frontend/src/components/product/WorkflowPublishActions.tsx:588:            <Button
+frontend/src/components/product/WorkflowPublishActions.tsx:594:              onClick={() => previewTrelloMutation.mutate()}
+frontend/src/components/product/WorkflowPublishActions.tsx:600:            <Button
+frontend/src/components/product/WorkflowPublishActions.tsx:606:              onClick={() => previewNotionMutation.mutate(selectedTemplateId)}
+frontend/src/components/product/WorkflowPublishActions.tsx:615:      <Dialog open={dialogTarget !== null} onOpenChange={(open) => !open && setDialogTarget(null)}>
+frontend/src/components/product/WorkflowPublishActions.tsx:657:                          const isActive = index === selectedTrelloCardIndex;
+frontend/src/components/product/WorkflowPublishActions.tsx:659:                            <button
+frontend/src/components/product/WorkflowPublishActions.tsx:661:                              type="button"
+frontend/src/components/product/WorkflowPublishActions.tsx:662:                              onClick={() => setSelectedTrelloCardIndex(index)}
+frontend/src/components/product/WorkflowPublishActions.tsx:676:                            </button>
+frontend/src/components/product/WorkflowPublishActions.tsx:735:                    ? 'Published. You can reopen the created Trello page from here.'
+frontend/src/components/product/WorkflowPublishActions.tsx:736:                    : 'Preview only. Nothing is created in Trello until you click “Publish selected card”.'}
+frontend/src/components/product/WorkflowPublishActions.tsx:739:                  <Button variant="outline" onClick={openTrelloPage} disabled={!canOpenPublishedTrelloPage}>
+frontend/src/components/product/WorkflowPublishActions.tsx:742:                  <Button disabled={publishTrelloMutation.isPending} onClick={() => publishTrelloMutation.mutate()}>
+frontend/src/components/product/WorkflowPublishActions.tsx:744:                    {trelloCards.length ? `Publish selected card${trelloCards.length > 1 ? ` (#${selectedTrelloCardIndex + 1})` : ""}` : "Publish to Trello"}
+frontend/src/components/product/WorkflowPublishActions.tsx:764:                  <p className="mt-1 text-sm font-medium text-foreground">{displayLabel(notionPreview?.template_label || selectedTemplate?.label, 'Executive summary')}</p>
+frontend/src/components/product/WorkflowPublishActions.tsx:765:                  <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{displayLabel(notionPreview?.template_description || selectedTemplate?.description, 'Executive handoff template')}</p>
+frontend/src/components/product/WorkflowPublishActions.tsx:775:                        const isActive = template.id === (notionPreview?.template_id || selectedTemplateId);
+frontend/src/components/product/WorkflowPublishActions.tsx:777:                          <button
+frontend/src/components/product/WorkflowPublishActions.tsx:779:                            type="button"
+frontend/src/components/product/WorkflowPublishActions.tsx:781:                            onClick={() => {
+frontend/src/components/product/WorkflowPublishActions.tsx:783:                              previewNotionMutation.mutate(template.id);
+frontend/src/components/product/WorkflowPublishActions.tsx:792:                          </button>
+frontend/src/components/product/WorkflowPublishActions.tsx:826:                    ? 'Published. You can reopen the created Notion page from here.'
+frontend/src/components/product/WorkflowPublishActions.tsx:830:                  <Button variant="outline" onClick={openNotionPage} disabled={!canOpenPublishedNotionPage}>
+frontend/src/components/product/WorkflowPublishActions.tsx:833:                  <Button disabled={publishNotionMutation.isPending} onClick={() => publishNotionMutation.mutate(selectedTemplateId)}>
+frontend/src/lib/settings-mock.ts:61:    id: 'openai-compat',
+frontend/src/lib/settings-mock.ts:63:    providerFamily: 'openai_compatible',
+frontend/src/lib/settings-mock.ts:64:    mode: 'openai-compatible',
+frontend/src/lib/settings-mock.ts:101:    docProcessingPreset: 'standard',
+frontend/src/lib/settings-mock.ts:124:    docProcessingPreset: 'standard',
+frontend/src/lib/settings-mock.ts:147:    docProcessingPreset: 'standard',
+frontend/src/lib/settings-mock.ts:163:  { id: 'cloud-selected-workflows', label: 'Allow cloud for selected workflows', description: 'Cloud providers such as Hugging Face may be used when explicitly assigned by profile.', enabled: false },
+frontend/src/lib/settings-mock.ts:197:  cloud_selected_workflows: { label: 'Cloud · Selected Workflows', description: 'Cloud provider allowed only for explicitly assigned workflows.' },
+frontend/src/lib/ai-lab-data.ts:262:  selected_documents: LabDocumentOption[];
+frontend/src/lib/ai-lab-data.ts:270:    selectedDocumentIds?: string[];
+frontend/src/lib/ai-lab-data.ts:323:  selected_task_id?: string;
+frontend/src/lib/ai-lab-data.ts:438:  presets: Array<{
+frontend/src/lib/ai-lab-data.ts:612:    openActions: number;
+frontend/src/lib/ai-lab-data.ts:666:async function fetchJson<T>(path: string): Promise<T> {
+frontend/src/lib/ai-lab-data.ts:674:async function postJson<T>(path: string, payload: object): Promise<T> {
+frontend/src/lib/ai-lab-data.ts:699:  return fetchJson<LabOverviewPageData>('/api/lab/overview');
+frontend/src/lib/ai-lab-data.ts:703:  return fetchJson<LabRuntimePayload>('/api/lab/runtime');
+frontend/src/lib/ai-lab-data.ts:708:  return fetchJson<LabChatPageData>(`/api/lab/chat${query}`);
+frontend/src/lib/ai-lab-data.ts:712:  return postJson<CreateLabChatSessionResponse>('/api/lab/chat/sessions', payload);
+frontend/src/lib/ai-lab-data.ts:716:  return postJson<SendLabChatMessageResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/messages`, payload);
+frontend/src/lib/ai-lab-data.ts:720:  return postJson<DeleteLabChatSessionResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/delete`, {});
+frontend/src/lib/ai-lab-data.ts:724:  return fetchJson<LabWorkflowInspectorPageData>('/api/lab/workflow-inspector');
+frontend/src/lib/ai-lab-data.ts:728:  return postJson<RunLabWorkflowInspectorResponse>('/api/lab/workflow-inspector/run', payload);
+frontend/src/lib/ai-lab-data.ts:732:  return fetchJson<LabBenchmarksPageData>('/api/lab/benchmarks');
+frontend/src/lib/ai-lab-data.ts:736:  return fetchJson<LabEvalsPageData>('/api/lab/evals');
+frontend/src/lib/ai-lab-data.ts:740:  return fetchJson<LabArtifactsPageData>('/api/lab/artifacts');
+frontend/src/lib/ai-lab-data.ts:744:  return fetchJson<LabEvidenceOpsPageData>('/api/lab/evidenceops');
+frontend/src/lib/ai-lab-data.ts:748:  return fetchJson<LabEvidenceOpsSearchResponse>(`/api/lab/evidenceops/search?q=${encodeURIComponent(query)}`);
+frontend/src/lib/ai-lab-data.ts:752:  return postJson<{ ok: boolean; diff?: Record<string, unknown>; page: LabEvidenceOpsPageData }>('/api/lab/evidenceops/sync', {});
+frontend/src/lib/ai-lab-data.ts:756:  return postJson<{ ok: boolean; action?: Record<string, unknown>; page: LabEvidenceOpsPageData }>(`/api/lab/evidenceops/actions/${encodeURIComponent(String(actionId))}`, payload);
+frontend/src/lib/preferences-ui.ts:13:  if (!value) return 'Not saved yet';
+frontend/src/lib/preferences-ui.ts:37:    ? 'No credential stored yet. You can add it securely from this screen and it will be saved in the local macOS Keychain.'
+frontend/src/lib/runtime-controls-ui.ts:34:  if (!value) return 'Not saved yet';
+frontend/src/lib/product-api.ts:83:  download_name?: string | null;
+frontend/src/lib/product-api.ts:284:  download_name?: string | null;
+frontend/src/lib/product-api.ts:422:export type ProductActionPlanStatus = 'open' | 'in_progress' | 'blocked' | 'done';
+frontend/src/lib/product-api.ts:451:  open: number;
+frontend/src/lib/product-api.ts:848:  docPresets: RuntimeControlsCatalogItem[];
+frontend/src/lib/product-api.ts:917:async function fetchProductApi<T>(path: string): Promise<T> {
+frontend/src/lib/product-api.ts:964:  return fetchProductApi<ProductCommandCenterResponse>("/api/product/command-center");
+frontend/src/lib/product-api.ts:968:  return fetchProductApi<ProductWorkflowCatalogResponse>("/api/product/workflows");
+frontend/src/lib/product-api.ts:972:  return fetchProductApi<ProductRunHistoryResponse>("/api/product/run-history");
+frontend/src/lib/product-api.ts:1000:  return fetchProductApi<ProductRunHistoryDetailResponse>(`/api/product/run-history/${encodeURIComponent(runId)}`);
+frontend/src/lib/product-api.ts:1008:  return fetchProductApi<ProductArtifactsResponse>("/api/product/artifacts");
+frontend/src/lib/product-api.ts:1012:  return fetchProductApi<ProductArtifactDetailResponse>(`/api/product/artifacts/${encodeURIComponent(artifactId)}`);
+frontend/src/lib/product-api.ts:1016:  return fetchProductApi<LabOverviewResponse>("/api/lab/overview");
+frontend/src/lib/product-api.ts:1020:  return fetchProductApi<LabEvalsResponse>("/api/lab/evals");
+frontend/src/lib/product-api.ts:1024:  return fetchProductApi<ProductDocumentLibraryResponse>("/api/product/document-library");
+frontend/src/lib/product-api.ts:1050:  return fetchProductApi<ProductUploadDocumentsResponse>(`/api/product/upload-jobs/${encodeURIComponent(jobId)}`);
+frontend/src/lib/product-api.ts:1068:  return fetchProductApi<ProductGroundingPreviewResponse>(`/api/product/grounding-preview?${query.toString()}`);
+frontend/src/lib/product-api.ts:1125:  options?: { runId?: string | null; dryRun?: boolean; previewPayload?: Record<string, unknown> | null; selectedCardIndex?: number | null },
+frontend/src/lib/product-api.ts:1135:      selected_card_index: typeof options?.selectedCardIndex === 'number' ? options.selectedCardIndex : undefined,
+frontend/src/lib/product-api.ts:1182:  return fetchProductApi<ProductIntegrationHubResponse>('/api/product/integrations');
+frontend/src/lib/product-api.ts:1186:  return fetchProductApi<ProductNotionEntriesResponse>(`/api/product/integrations/notion?limit=${encodeURIComponent(String(limit))}`);
+frontend/src/lib/product-api.ts:1191:  return fetchProductApi<ProductNextcloudDocumentsResponse>(`/api/product/integrations/nextcloud?limit=${encodeURIComponent(String(normalizedLimit))}`);
+frontend/src/lib/product-api.ts:1272:  return `${PRODUCT_API_BASE_URL}/api/product/integrations/nextcloud/open?${params.toString()}`;
+frontend/src/lib/product-api.ts:1276:export async function fetchProductNextcloudDocumentBlob(options: {
+frontend/src/lib/product-api.ts:1287:    let message = `Product API Nextcloud open failed: ${response.status}`;
+frontend/src/lib/product-api.ts:1326:  return fetchProductApi<RuntimeControlsResponse>('/api/runtime/controls');
+frontend/src/lib/product-api.ts:1334:  return fetchProductApi<PreferencesResponse>('/api/preferences');
+frontend/src/lib/workflow-demo-documents.ts:61:  const selected: ProductDocumentLibraryEntry[] = [];
+frontend/src/lib/workflow-demo-documents.ts:68:    selected.push(match);
+frontend/src/lib/workflow-demo-documents.ts:71:  return selected;
+frontend/src/lib/mock-data.ts:88:  { id: 'm3', provider: 'openai-compatible', model: 'gpt-4o', family: 'GPT-4o', quantization: 'N/A', latency: 3.2, outputChars: 4100, adherence: 0.96, groundedness: 0.93, useCaseFit: 0.94, runtimeBucket: 'cloud_api', profileTag: 'External reference' },
+frontend/src/lib/mock-data.ts:110:  { name: 'list_open_actions', description: 'List all open action items across repositories', status: 'active', lastCall: '2024-03-15T10:45:00Z' },
+frontend/src/lib/mock-data.ts:129:  status: 'open' | 'in_progress' | 'blocked' | 'done'; evidence: string; source: string;
+frontend/src/lib/mock-data.ts:134:  { id: 'ai2', title: 'Draft SCCs appendix for data residency', owner: 'James Park', dueDate: '2024-03-25', priority: 'high', status: 'open', evidence: 'Missing data residency clause in DPA', source: 'Data Processing Addendum 2024' },
+frontend/src/lib/mock-data.ts:136:  { id: 'ai4', title: 'Define incident response SLOs', owner: 'Alex Rivera', dueDate: '2024-03-28', priority: 'high', status: 'open', evidence: 'Vague "reasonable effort" language', source: 'Information Security Policy v3.1' },
+frontend/src/lib/store.ts:23:  setCommandPaletteOpen: (open: boolean) => void;
+frontend/src/lib/store.ts:24:  setRuntimeDrawerOpen: (open: boolean) => void;
+frontend/src/lib/store.ts:36:  setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+frontend/src/lib/store.ts:37:  setRuntimeDrawerOpen: (open) => set({ runtimeDrawerOpen: open }),
