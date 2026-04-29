@@ -14,7 +14,15 @@ from src.app.product_bootstrap import ProductBootstrap
 from src.product.command_center import _normalize_artifact_entry_from_metadata
 from src.product.models import ProductWorkflowRequest
 from src.product.service import build_product_workflow_catalog, list_product_documents, run_product_workflow
-from src.services.evidenceops_local_ops import compare_evidenceops_repository_state, register_evidenceops_entry, update_evidenceops_action_item
+from src.config import get_evidenceops_external_settings
+from src.services.evidenceops_external_targets import build_nextcloud_repository_snapshot
+from src.services.evidenceops_local_ops import (
+    compare_evidenceops_repository_state,
+    list_evidenceops_repository_entries,
+    register_evidenceops_entry,
+    search_evidenceops_repository_entries,
+    update_evidenceops_action_item,
+)
 from src.services.evidenceops_repository import (
     build_evidenceops_repository_snapshot,
     diff_evidenceops_repository_snapshots,
@@ -83,6 +91,43 @@ LAB_CHAT_STOPWORDS = {
     'documento', 'documentos', 'quer', 'querendo', 'dizer', 'sobre', 'qual', 'quais', 'para',
     'por', 'como', 'mais', 'não', 'sim', 'ele', 'ela', 'está', 'esta', 'nas', 'nos', 'das',
 }
+
+
+def _resolve_evidenceops_repository_context(workspace_root: Path) -> dict[str, Any]:
+    repository_root = workspace_root / 'data' / 'corpus_revisado'
+    external_settings = get_evidenceops_external_settings()
+    nextcloud_settings = getattr(external_settings, 'nextcloud', None)
+
+    configured_backend = str(getattr(external_settings, 'repository_backend', '') or '').strip().lower()
+    backend = configured_backend or 'local'
+
+    if backend != 'nextcloud_webdav' and nextcloud_settings is not None:
+        nextcloud_base_url = str(getattr(nextcloud_settings, 'base_url', '') or '').strip()
+        nextcloud_username = str(getattr(nextcloud_settings, 'username', '') or '').strip()
+        nextcloud_password = str(getattr(nextcloud_settings, 'app_password', '') or '').strip()
+        if nextcloud_base_url and nextcloud_username and nextcloud_password:
+            backend = 'nextcloud_webdav'
+
+    if backend == 'nextcloud_webdav' and nextcloud_settings is not None:
+        root_label = str(getattr(nextcloud_settings, 'root_path', '') or '/EvidenceOpsDemo').strip() or '/EvidenceOpsDemo'
+        return {
+            'repository_root': repository_root,
+            'repository_backend': 'nextcloud_webdav',
+            'repository_label': root_label,
+            'repository_display_name': f'NextCloud {root_label}',
+            'repository_tool_name': 'nextcloud_webdav',
+            'external_settings': external_settings,
+        }
+
+    return {
+        'repository_root': repository_root,
+        'repository_backend': 'local',
+        'repository_label': str(repository_root),
+        'repository_display_name': 'corpus_revisado',
+        'repository_tool_name': 'local_repository_scan',
+        'external_settings': external_settings,
+    }
+
 
 
 WORKFLOW_TASK_LABELS = {
@@ -3577,12 +3622,31 @@ def build_lab_artifacts_payload(workspace_root: Path) -> dict[str, Any]:
 
 
 def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
-    repository_root = workspace_root / 'data' / 'corpus_revisado'
-    repository_documents = list_evidenceops_repository_documents(repository_root)
-    repository_summary = summarize_evidenceops_repository_documents(repository_documents)
+    repository_context = _resolve_evidenceops_repository_context(workspace_root)
+    repository_root = repository_context['repository_root']
+    repository_backend = str(repository_context['repository_backend'])
+    repository_label = str(repository_context['repository_label'])
+    repository_display_name = str(repository_context['repository_display_name'])
+    repository_tool_name = str(repository_context['repository_tool_name'])
+    external_settings = repository_context['external_settings']
+
+    repository_documents = list_evidenceops_repository_entries(
+        repository_root,
+        repository_backend=repository_backend,
+        external_settings=external_settings,
+    )
+    repository_summary = {
+        **summarize_evidenceops_repository_documents(repository_documents),
+        'repository_backend': repository_backend,
+    }
+
     repository_snapshot_path = get_phase95_evidenceops_repository_snapshot_path(workspace_root)
     previous_repository_snapshot = load_evidenceops_repository_snapshot(repository_snapshot_path)
-    current_repository_snapshot = build_evidenceops_repository_snapshot(repository_root)
+    current_repository_snapshot = (
+        build_nextcloud_repository_snapshot(settings=external_settings)
+        if repository_backend == 'nextcloud_webdav'
+        else build_evidenceops_repository_snapshot(repository_root)
+    )
     repository_diff = diff_evidenceops_repository_snapshots(previous_repository_snapshot, current_repository_snapshot)
 
     actions = load_evidenceops_actions(get_phase95_evidenceops_action_store_path(workspace_root))
@@ -3595,7 +3659,7 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
     open_actions = [entry for entry in actions if str(entry.get('status') or '').strip().lower() in open_statuses]
     latest_actions = actions[:latest_action_window]
     latest_open_actions = sum(1 for entry in latest_actions if str(entry.get('status') or '').strip().lower() in open_statuses)
-    repository_tool_last_call = _latest_worklog_timestamp(sorted_worklog, tool_names={'local_repository_scan'}, operations={'repository_sync', 'repository_search'})
+    repository_tool_last_call = _latest_worklog_timestamp(sorted_worklog, tool_names={repository_tool_name, 'local_repository_scan'}, operations={'repository_sync', 'repository_search'})
     action_tool_last_call = _latest_worklog_timestamp(sorted_worklog, tool_names={'action_store'}, operations={'action_update'}) or _format_timestamp(action_summary.get('latest_created_at'))
     worklog_tool_last_call = _latest_worklog_timestamp(sorted_worklog)
     action_store_available = bool(actions) or get_phase95_evidenceops_action_store_path(workspace_root).exists()
@@ -3696,7 +3760,7 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
     ]
 
     readiness = [
-        {'target': 'Repository', 'status': 'ready' if repository_documents else 'degraded', 'detail': f"{repository_summary.get('total_documents', 0)} documents visible under corpus_revisado."},
+        {'target': 'Repository', 'status': 'ready' if repository_documents else 'degraded', 'detail': f"{repository_summary.get('total_documents', 0)} documents visible in {repository_display_name}."},
         {'target': 'Action store', 'status': 'ready' if actions else 'degraded', 'detail': f"{action_summary.get('open_actions', 0)} open action(s) persisted."},
         {'target': 'Operations log', 'status': 'ready' if worklog else 'degraded', 'detail': 'Worklog persisted.' if worklog else 'No dedicated EvidenceOps worklog persisted in this workspace yet.'},
     ]
@@ -3738,7 +3802,9 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
             'latestActionWindow': latest_action_window,
             'operationsCount': len(operation_rows),
             'repositoryDocumentCount': _safe_int(repository_summary.get('total_documents')),
-            'repositoryRoot': str(repository_root),
+            'repositoryRoot': repository_label,
+            'repositoryBackend': repository_backend,
+            'repositoryDisplayName': repository_display_name,
             'lastSyncAt': _latest_repository_sync_timestamp(sorted_worklog, previous_repository_snapshot) or _format_timestamp(worklog_summary.get('latest_timestamp')) or _format_timestamp(action_summary.get('latest_created_at')),
             'overdueActions': _safe_int(action_summary.get('overdue_actions')),
             'unassignedActions': _safe_int(action_summary.get('unassigned_open_actions')),
@@ -3767,14 +3833,30 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
 
 
 def build_lab_evidenceops_search_payload(workspace_root: Path, *, query: str) -> dict[str, Any]:
-    repository_root = workspace_root / 'data' / 'corpus_revisado'
-    results = list_evidenceops_repository_documents(repository_root, query=query, limit=20)
+    repository_context = _resolve_evidenceops_repository_context(workspace_root)
+    repository_root = repository_context['repository_root']
+    repository_backend = str(repository_context['repository_backend'])
+    repository_label = str(repository_context['repository_label'])
+    repository_display_name = str(repository_context['repository_display_name'])
+    repository_tool_name = str(repository_context['repository_tool_name'])
+    external_settings = repository_context['external_settings']
+
+    results = search_evidenceops_repository_entries(
+        repository_root,
+        query=query,
+        limit=20,
+        repository_backend=repository_backend,
+        external_settings=external_settings,
+    )
+
     normalized_results = []
     query_tokens = [token for token in str(query or '').lower().split() if token]
     for entry in results:
         relative_path = str(entry.get('relative_path') or '')
         haystack = f"{entry.get('title') or ''} {relative_path}".lower()
-        match_score = float(sum(1 for token in query_tokens if token in haystack) or 1)
+        fallback_score = float(sum(1 for token in query_tokens if token in haystack) or 1)
+        match_score = _safe_float(entry.get('match_score') or fallback_score)
+
         normalized_results.append(
             {
                 'title': str(entry.get('title') or Path(relative_path).stem or 'Document'),
@@ -3784,8 +3866,11 @@ def build_lab_evidenceops_search_payload(workspace_root: Path, *, query: str) ->
                 'sizeKb': round(_safe_float(entry.get('size_bytes') or 0.0) / 1024, 1),
                 'modifiedAt': datetime.fromtimestamp(_safe_float(entry.get('modified_at') or 0.0), tz=timezone.utc).isoformat() if _safe_float(entry.get('modified_at') or 0.0) > 0 else None,
                 'matchScore': match_score,
+                'source': str(entry.get('source') or ('remote' if repository_backend == 'nextcloud_webdav' else 'local')),
+                'repositoryBackend': repository_backend,
             }
         )
+
     if str(query or '').strip():
         register_evidenceops_entry(
             get_phase95_evidenceops_worklog_path(workspace_root),
@@ -3793,11 +3878,11 @@ def build_lab_evidenceops_search_payload(workspace_root: Path, *, query: str) ->
             entry={
                 'timestamp': _now_iso(),
                 'operation': 'repository_search',
-                'tool_used': 'local_repository_scan',
+                'tool_used': repository_tool_name,
                 'query': str(query or '').strip(),
                 'status': 'success',
                 'latency_s': 0.01,
-                'summary': f"Repository search returned {len(normalized_results)} result(s).",
+                'summary': f"Repository search returned {len(normalized_results)} result(s) from {repository_display_name}.",
                 'source_count': len(normalized_results),
                 'document_ids': [],
                 'findings': [],
@@ -3805,20 +3890,30 @@ def build_lab_evidenceops_search_payload(workspace_root: Path, *, query: str) ->
                 'recommended_actions': [],
             },
         )
+
     return {
         'ok': True,
         'meta': _runtime_meta(workspace_root),
         'query': str(query or ''),
-        'repositoryRoot': str(repository_root),
+        'repositoryRoot': repository_label,
+        'repositoryBackend': repository_backend,
+        'repositoryDisplayName': repository_display_name,
         'results': normalized_results,
     }
 
-
 def sync_lab_evidenceops_state(workspace_root: Path) -> dict[str, Any]:
-    repository_root = workspace_root / 'data' / 'corpus_revisado'
+    repository_context = _resolve_evidenceops_repository_context(workspace_root)
+    repository_root = repository_context['repository_root']
+    repository_backend = str(repository_context['repository_backend'])
+    repository_display_name = str(repository_context['repository_display_name'])
+    repository_tool_name = str(repository_context['repository_tool_name'])
+    external_settings = repository_context['external_settings']
+
     diff_payload = compare_evidenceops_repository_state(
         repository_root,
         snapshot_path=get_phase95_evidenceops_repository_snapshot_path(workspace_root),
+        repository_backend=repository_backend,
+        external_settings=external_settings,
     )
     current_total_documents = _safe_int(diff_payload.get('current_total_documents') or 0)
     new_documents_count = _safe_int(diff_payload.get('new_documents_count') or 0)
@@ -3830,7 +3925,7 @@ def sync_lab_evidenceops_state(workspace_root: Path) -> dict[str, Any]:
         entry={
             'timestamp': _now_iso(),
             'operation': 'repository_sync',
-            'tool_used': 'local_repository_scan',
+            'tool_used': repository_tool_name,
             'status': 'success',
             'latency_s': 0.02,
             'summary': f"Repository sync captured {current_total_documents} document(s).",

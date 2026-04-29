@@ -165,3 +165,11 @@ Phase 4.2 Docker deep-click validation completed:
 - Runtime Controls correctly renders Docker provider/model content.
 - Preferences can run provider connection tests without frontend errors.
 
+## Docker EvidenceOps repository validation note
+
+EvidenceOps Readiness/Search now uses the configured NextCloud WebDAV repository in Docker:
+
+- Repository readiness reports documents visible in NextCloud rather than `corpus_revisado`.
+- EvidenceOps search uses `nextcloud_webdav` when NextCloud credentials are configured.
+- Local `data/corpus_revisado` remains available as fallback when NextCloud is not configured.
+
