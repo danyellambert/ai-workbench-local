@@ -830,6 +830,48 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_admin_required_response(self, message: str, *, set_cookie: str | None = None, identity: object | None = None) -> None:
+        payload: dict[str, object] = {
+            "ok": False,
+            "error": message,
+            "required_role": "admin",
+        }
+        if identity is not None:
+            payload["identity"] = identity_payload(identity)
+        body = _json_bytes(payload)
+        self.send_response(HTTPStatus.FORBIDDEN)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+        if set_cookie:
+            self.send_header("Set-Cookie", set_cookie)
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _require_global_write(self, action_label: str) -> bool:
+        identity, set_cookie = public_session_identity(self.headers)
+        if getattr(identity, "can_write_global", False):
+            return True
+        self._send_admin_required_response(
+            f"{action_label} requires admin access.",
+            set_cookie=set_cookie,
+            identity=identity,
+        )
+        return False
+
+    def _require_external_publish(self, action_label: str) -> bool:
+        identity, set_cookie = public_session_identity(self.headers)
+        if getattr(identity, "can_publish_external", False):
+            return True
+        self._send_admin_required_response(
+            f"{action_label} requires admin access.",
+            set_cookie=set_cookie,
+            identity=identity,
+        )
+        return False
+
     def _not_found(self) -> None:
         self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
 
@@ -1099,6 +1141,21 @@ class ProductApiHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
+        if path in {"/api/product/publish-to-trello", "/api/product/publish-trello"}:
+            if not self._require_external_publish("Publishing Trello handoffs"):
+                return
+
+        if path in {"/api/product/publish-to-notion", "/api/product/publish-notion"}:
+            if not self._require_external_publish("Publishing Notion handoffs"):
+                return
+
+        if path.startswith("/api/preferences/connections/") and path.endswith("/test"):
+            if not self._require_global_write("Testing provider credentials"):
+                return
+
+        if path.startswith("/api/preferences/connections/") and path.endswith("/credential"):
+            if not self._require_global_write("Updating provider credentials"):
+                return
 
         if path == "/api/product/upload-documents":
             try:
@@ -1503,6 +1560,13 @@ class ProductApiHandler(BaseHTTPRequestHandler):
     def do_PATCH(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
+        if path == "/api/runtime/controls":
+            if not self._require_global_write("Updating Runtime Controls"):
+                return
+
+        if path == "/api/preferences":
+            if not self._require_global_write("Updating Preferences"):
+                return
 
         try:
             payload = _read_json_body(self)

@@ -121,4 +121,80 @@ if not report["ok"]:
 PY
 
 echo
+
+echo
+echo "== Public admin-only write guard checks =="
+python3 - <<'PY2'
+from __future__ import annotations
+
+import json
+import os
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+frontend_port = os.environ.get("AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT", "8071")
+base_url = f"http://127.0.0.1:{frontend_port}"
+
+report_dir = Path("../ai_decision_studio_functional_baseline/parity_reports")
+report_dir.mkdir(parents=True, exist_ok=True)
+report_path = report_dir / "public_admin_write_guard_report.json"
+
+def request_json(method: str, path: str, payload: dict | None = None, cookie: str | None = None) -> tuple[int, dict, str | None]:
+    data = None
+    headers = {"Accept": "application/json"}
+    if payload is not None:
+        data = json.dumps(payload).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    if cookie:
+        headers["Cookie"] = cookie
+    req = urllib.request.Request(base_url + path, data=data, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            raw = resp.read().decode("utf-8")
+            body = json.loads(raw or "{}")
+            return resp.status, body, resp.headers.get("Set-Cookie")
+    except urllib.error.HTTPError as error:
+        raw = error.read().decode("utf-8")
+        try:
+            body = json.loads(raw or "{}")
+        except Exception:
+            body = {"ok": False, "raw": raw}
+        return error.code, body, error.headers.get("Set-Cookie")
+
+session_status, session_body, set_cookie = request_json("GET", "/api/auth/session")
+cookie = set_cookie.split(";", 1)[0] if set_cookie else None
+
+session_identity = session_body.get("identity") if isinstance(session_body, dict) else {}
+if not isinstance(session_identity, dict):
+    session_identity = {}
+
+checks: dict[str, bool] = {
+    "session_available": session_status == 200 and session_identity.get("role") == "public",
+    "cookie_available": bool(cookie),
+}
+
+probes = {
+    "public_runtime_controls_patch_blocked": ("PATCH", "/api/runtime/controls", {}),
+    "public_preferences_patch_blocked": ("PATCH", "/api/preferences", {}),
+    "public_credential_test_blocked": ("POST", "/api/preferences/connections/readiness_guard_probe/test", {}),
+    "public_credential_update_blocked": ("POST", "/api/preferences/connections/readiness_guard_probe/credential", {"api_key": "readiness-placeholder-not-a-secret"}),
+    "public_trello_publish_blocked": ("POST", "/api/product/publish-to-trello", {}),
+    "public_notion_publish_blocked": ("POST", "/api/product/publish-to-notion", {}),
+}
+
+responses: dict[str, dict] = {}
+for check_name, (method, path, payload) in probes.items():
+    status, body, _ = request_json(method, path, payload, cookie)
+    checks[check_name] = status == 403 and body.get("ok") is False and body.get("required_role") == "admin"
+    responses[check_name] = {"status": status, "body": body}
+
+report = {"ok": all(checks.values()), "checks": checks, "responses": responses}
+report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+print(json.dumps(report, indent=2, ensure_ascii=False))
+
+if not report["ok"]:
+    raise SystemExit(1)
+PY2
+
 echo "== Public/Admin policy readiness check completed =="
