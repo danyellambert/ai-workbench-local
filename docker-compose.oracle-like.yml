@@ -11,6 +11,8 @@ services:
       AI_DECISION_STUDIO_DEPLOYMENT_MODE: "oracle_like"
       PRODUCT_API_HOST: "0.0.0.0"
       PRODUCT_API_PORT: "8011"
+      AI_DECISION_STUDIO_PRODUCT_API_HOST: "0.0.0.0"
+      AI_DECISION_STUDIO_PRODUCT_API_PORT: "8011"
 
       # Persistent paths inside container
       AI_DECISION_STUDIO_BASELINE_ROOT: "/app/baseline"
@@ -29,6 +31,9 @@ services:
       HUGGINGFACE_INFERENCE_API_KEY: "${HUGGINGFACE_INFERENCE_API_KEY:-}"
 
       # EvidenceOps / integrations
+      # Local is the safe default for compose smoke without external secrets.
+      # Set EVIDENCEOPS_REPOSITORY_BACKEND=nextcloud_webdav in .env.oracle when NextCloud is reachable.
+      EVIDENCEOPS_REPOSITORY_BACKEND: "${EVIDENCEOPS_REPOSITORY_BACKEND:-local}"
       EVIDENCEOPS_NEXTCLOUD_BASE_URL: "${EVIDENCEOPS_NEXTCLOUD_BASE_URL:-}"
       EVIDENCEOPS_NEXTCLOUD_USERNAME: "${EVIDENCEOPS_NEXTCLOUD_USERNAME:-}"
       EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD: "${EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD:-}"
