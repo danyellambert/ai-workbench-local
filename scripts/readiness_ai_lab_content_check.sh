@@ -13,19 +13,40 @@ mkdir -p "$(dirname "$REPORT")"
 python3 - <<'PY'
 import json
 import os
+import time
+from http.client import RemoteDisconnected
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 api_base = os.environ.get("AI_DECISION_STUDIO_PRODUCT_API_BASE_URL", "http://127.0.0.1:8013")
 report_path = os.environ.get("AI_DECISION_STUDIO_AI_LAB_CONTENT_REPORT", "../ai_decision_studio_functional_baseline/parity_reports/ai_lab_content_check_report.json")
 
+def _read_json_with_retry(label, opener, *, attempts=6, delay_s=2.0):
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return json.loads(opener().read().decode("utf-8"))
+        except (RemoteDisconnected, URLError, HTTPError, TimeoutError, ConnectionError, json.JSONDecodeError) as exc:
+            last_error = exc
+            print(f"WARN {label} attempt {attempt}/{attempts} failed: {type(exc).__name__}: {exc}")
+            if attempt < attempts:
+                time.sleep(delay_s * attempt)
+    raise last_error
+
 def get(path):
-    return json.loads(urlopen(api_base + path, timeout=60).read().decode("utf-8"))
+    return _read_json_with_retry(
+        f"GET {path}",
+        lambda: urlopen(api_base + path, timeout=90),
+    )
 
 def post(path, payload):
     data = json.dumps(payload).encode("utf-8")
     req = Request(api_base + path, data=data, method="POST", headers={"Content-Type": "application/json"})
-    return json.loads(urlopen(req, timeout=120).read().decode("utf-8"))
+    return _read_json_with_retry(
+        f"POST {path}",
+        lambda: urlopen(req, timeout=180),
+    )
 
 overview = get("/api/lab/overview")
 benchmarks = get("/api/lab/benchmarks")

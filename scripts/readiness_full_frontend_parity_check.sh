@@ -110,8 +110,20 @@ echo "== Settings deep clicks =="
 node .tmp_playwright/settings_deep_clicks_docker.cjs
 
 echo
+echo "== Ensure stack before AI Lab content check =="
+ensure_public_demo_stack
+
+echo
 echo "== AI Lab content check =="
 scripts/readiness_ai_lab_content_check.sh
+
+echo
+echo "== Ensure stack before runbook phases 8-12 check =="
+ensure_public_demo_stack
+
+echo
+echo "== Runbook phases 8-12 check =="
+scripts/readiness_runbook_phases_8_12_check.sh
 
 echo
 echo "== Full frontend parity check completed =="

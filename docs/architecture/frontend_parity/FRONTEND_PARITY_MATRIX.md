@@ -196,3 +196,13 @@ The single readiness gate passed end-to-end in Docker:
 - Product, AI Lab and Settings deep-click checks passed.
 - AI Lab content checks passed for Overview, Benchmarks, Evals, Artifacts, EvidenceOps and Chat.
 
+## Runbook phases 8-12 validation note
+
+A dedicated runbook gate now validates phases 8-12 together:
+
+- Phase 8: Docker backend is healthy and renders real baseline-backed documents, artifacts, benchmarks, evals and EvidenceOps state.
+- Phase 9: workflow parity is covered by write smokes and frontend workflow UI smoke against real indexed documents.
+- Phase 10: local validation uses a writable overlay root distinct from the sanitized source baseline; final per-user `/data/users/{user_id}` isolation remains part of Oracle-like hardening if multi-user auth is enabled.
+- Phase 11: public read surfaces render and generic runtime/preferences mutation probes do not silently mutate global settings.
+- Phase 12: provider integrations are ready, provider metadata renders without raw secret fields, and Docker env inspection is redacted.
+
