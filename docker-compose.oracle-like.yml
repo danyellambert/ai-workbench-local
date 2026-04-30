@@ -1,0 +1,90 @@
+services:
+  product-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.public-demo
+    image: ai-decision-studio-product-api:oracle-like
+    container_name: ai-decision-studio-product-api-oracle-like
+    restart: unless-stopped
+    environment:
+      # Runtime mode
+      AI_DECISION_STUDIO_DEPLOYMENT_MODE: "oracle_like"
+      PRODUCT_API_HOST: "0.0.0.0"
+      PRODUCT_API_PORT: "8011"
+
+      # Persistent paths inside container
+      AI_DECISION_STUDIO_BASELINE_ROOT: "/app/baseline"
+      APP_BASELINE_ROOT: "/app/baseline"
+      APP_RUNTIME_ROOT: "/app/runtime"
+      APP_ARTIFACT_ROOT: "/app/artifacts"
+      APP_USERS_ROOT: "/app/users"
+
+      # Provider URLs
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-http://ollama:11434/v1}"
+      OLLAMA_HOSTED_BASE_URL: "${OLLAMA_HOSTED_BASE_URL:-https://ollama.com/api}"
+      HUGGINGFACE_INFERENCE_BASE_URL: "${HUGGINGFACE_INFERENCE_BASE_URL:-https://router.huggingface.co/v1}"
+
+      # Provider secrets must come from .env.oracle on the host.
+      OLLAMA_HOSTED_API_KEY: "${OLLAMA_HOSTED_API_KEY:-}"
+      HUGGINGFACE_INFERENCE_API_KEY: "${HUGGINGFACE_INFERENCE_API_KEY:-}"
+
+      # EvidenceOps / integrations
+      EVIDENCEOPS_NEXTCLOUD_BASE_URL: "${EVIDENCEOPS_NEXTCLOUD_BASE_URL:-}"
+      EVIDENCEOPS_NEXTCLOUD_USERNAME: "${EVIDENCEOPS_NEXTCLOUD_USERNAME:-}"
+      EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD: "${EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD:-}"
+      EVIDENCEOPS_NEXTCLOUD_ROOT_PATH: "${EVIDENCEOPS_NEXTCLOUD_ROOT_PATH:-/EvidenceOpsDemo}"
+
+      EVIDENCEOPS_TRELLO_API_KEY: "${EVIDENCEOPS_TRELLO_API_KEY:-}"
+      EVIDENCEOPS_TRELLO_TOKEN: "${EVIDENCEOPS_TRELLO_TOKEN:-}"
+      EVIDENCEOPS_TRELLO_BOARD_ID: "${EVIDENCEOPS_TRELLO_BOARD_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_OPEN_ID: "${EVIDENCEOPS_TRELLO_LIST_OPEN_ID:-}"
+
+      EVIDENCEOPS_NOTION_API_KEY: "${EVIDENCEOPS_NOTION_API_KEY:-}"
+      EVIDENCEOPS_NOTION_DATABASE_ID: "${EVIDENCEOPS_NOTION_DATABASE_ID:-}"
+
+      # Optional sidecar/export service.
+      PRESENTATION_EXPORT_BASE_URL: "${PRESENTATION_EXPORT_BASE_URL:-}"
+
+    volumes:
+      - "${AI_DECISION_STUDIO_BASELINE_ROOT:-/opt/ai-decision-studio/data/baseline}:/app/baseline:ro"
+      - "${AI_DECISION_STUDIO_RUNTIME_ROOT:-/opt/ai-decision-studio/data/runtime}:/app/runtime"
+      - "${AI_DECISION_STUDIO_ARTIFACT_ROOT:-/opt/ai-decision-studio/data/artifacts}:/app/artifacts"
+      - "${AI_DECISION_STUDIO_USERS_ROOT:-/opt/ai-decision-studio/data/users}:/app/users"
+
+    expose:
+      - "8011"
+
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8011/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+
+    networks:
+      - ai-decision-studio-private
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend-public-demo
+    image: ai-decision-studio-frontend:oracle-like
+    container_name: ai-decision-studio-frontend-oracle-like
+    restart: unless-stopped
+    depends_on:
+      product-api:
+        condition: service_healthy
+    ports:
+      - "${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/"]
+      interval: 20s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    networks:
+      - ai-decision-studio-private
+
+networks:
+  ai-decision-studio-private:
+    driver: bridge
