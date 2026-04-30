@@ -50,6 +50,12 @@ services:
       # Optional sidecar/export service.
       PRESENTATION_EXPORT_BASE_URL: "${PRESENTATION_EXPORT_BASE_URL:-}"
 
+      AI_DECISION_STUDIO_ADMIN_USERNAME: "${AI_DECISION_STUDIO_ADMIN_USERNAME:-}"
+      AI_DECISION_STUDIO_ADMIN_PASSWORD_HASH: "${AI_DECISION_STUDIO_ADMIN_PASSWORD_HASH:-}"
+      AI_DECISION_STUDIO_SESSION_SECRET: "${AI_DECISION_STUDIO_SESSION_SECRET:-}"
+
+
+
     volumes:
       - "${AI_DECISION_STUDIO_BASELINE_ROOT:-/opt/ai-decision-studio/data/baseline}:/app/baseline:ro"
       - "${AI_DECISION_STUDIO_RUNTIME_ROOT:-/opt/ai-decision-studio/data/runtime}:/app/runtime"

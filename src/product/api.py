@@ -13,7 +13,15 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from src.app.product_bootstrap import ProductBootstrap, build_product_bootstrap
-from src.product.access_control import identity_payload, public_session_identity
+from src.product.access_control import (
+    admin_auth_configured,
+    authenticate_admin_credentials,
+    clear_admin_session_cookie,
+    create_admin_session_cookie,
+    identity_payload,
+    public_session_identity,
+    request_identity,
+)
 from src.config import ProductApiSettings, get_product_api_settings
 from src.rag.loaders import load_document
 from src.product.command_center import (
@@ -807,6 +815,21 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         except BrokenPipeError:
             return
 
+    def _send_json_with_cookies(self, status: int, payload: object, *, cookies: list[str] | None = None) -> None:
+        body = _json_bytes(payload)
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        if getattr(self, "settings", None) and self.settings.allow_cors:
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+        for cookie in cookies or []:
+            if cookie:
+                self.send_header("Set-Cookie", cookie)
+        self.end_headers()
+        self.wfile.write(body)
+
     def _send_file(self, path: Path) -> None:
         body = path.read_bytes()
         content_type, _ = mimetypes.guess_type(str(path))
@@ -838,20 +861,14 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         }
         if identity is not None:
             payload["identity"] = identity_payload(identity)
-        body = _json_bytes(payload)
-        self.send_response(HTTPStatus.FORBIDDEN)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
-        if set_cookie:
-            self.send_header("Set-Cookie", set_cookie)
-        self.end_headers()
-        self.wfile.write(body)
+        self._send_json_with_cookies(
+            HTTPStatus.FORBIDDEN,
+            payload,
+            cookies=[set_cookie] if set_cookie else None,
+        )
 
     def _require_global_write(self, action_label: str) -> bool:
-        identity, set_cookie = public_session_identity(self.headers)
+        identity, set_cookie = request_identity(self.headers)
         if getattr(identity, "can_write_global", False):
             return True
         self._send_admin_required_response(
@@ -862,7 +879,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         return False
 
     def _require_external_publish(self, action_label: str) -> bool:
-        identity, set_cookie = public_session_identity(self.headers)
+        identity, set_cookie = request_identity(self.headers)
         if getattr(identity, "can_publish_external", False):
             return True
         self._send_admin_required_response(
@@ -875,9 +892,64 @@ class ProductApiHandler(BaseHTTPRequestHandler):
     def _not_found(self) -> None:
         self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
 
-    def _send_auth_session_response(self) -> None:
+    def _send_admin_login_response(self) -> None:
+        try:
+            payload = _read_json_body(self)
+        except ValueError as error:
+            self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
+        username = str(payload.get("username") or "").strip()
+        password = str(payload.get("password") or "")
+
+        if not admin_auth_configured():
+            self._send_json(
+                HTTPStatus.SERVICE_UNAVAILABLE,
+                {
+                    "ok": False,
+                    "error": "Admin authentication is not configured.",
+                    "required_env": [
+                        "AI_DECISION_STUDIO_ADMIN_USERNAME",
+                        "AI_DECISION_STUDIO_ADMIN_PASSWORD_HASH",
+                        "AI_DECISION_STUDIO_SESSION_SECRET",
+                    ],
+                },
+            )
+            return
+
+        if not authenticate_admin_credentials(username, password):
+            self._send_json(HTTPStatus.UNAUTHORIZED, {"ok": False, "error": "Invalid admin credentials."})
+            return
+
+        admin_cookie = create_admin_session_cookie()
+        identity, _ = request_identity({"Cookie": admin_cookie.split(";", 1)[0]})
+        self._send_json_with_cookies(
+            HTTPStatus.OK,
+            {
+                **identity_payload(identity),
+                "auth": {"admin_configured": True},
+            },
+            cookies=[admin_cookie],
+        )
+
+    def _send_admin_logout_response(self) -> None:
         identity, set_cookie = public_session_identity(self.headers)
+        cookies = [clear_admin_session_cookie()]
+        if set_cookie:
+            cookies.append(set_cookie)
+        self._send_json_with_cookies(
+            HTTPStatus.OK,
+            {
+                **identity_payload(identity),
+                "auth": {"admin_configured": admin_auth_configured(), "logged_out": True},
+            },
+            cookies=cookies,
+        )
+
+    def _send_auth_session_response(self) -> None:
+        identity, set_cookie = request_identity(self.headers)
         payload = identity_payload(identity)
+        payload["auth"] = {"admin_configured": admin_auth_configured()}
         body = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
 
         self.send_response(HTTPStatus.OK)
@@ -1141,6 +1213,13 @@ class ProductApiHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
+        if path == "/api/auth/admin/login":
+            self._send_admin_login_response()
+            return
+
+        if path == "/api/auth/admin/logout":
+            self._send_admin_logout_response()
+            return
         if path in {"/api/product/publish-to-trello", "/api/product/publish-trello"}:
             if not self._require_external_publish("Publishing Trello handoffs"):
                 return
