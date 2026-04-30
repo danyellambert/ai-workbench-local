@@ -60,3 +60,4 @@ frontend/playwright-report/
 runtime-state-diagnosis*.txt
 .tmp_playwright/
 test-results/
+.env.oracle
