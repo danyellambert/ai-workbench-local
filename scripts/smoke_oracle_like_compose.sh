@@ -113,12 +113,16 @@ summary = {
     "evidenceops_summary": evidenceops.get("summary"),
 }
 
+evidenceops_summary = summary["evidenceops_summary"] or {}
+
 checks = {
     "health_ok": bool(health.get("ok")),
     "workflow_count_gte_4": summary["workflow_count"] >= 4,
     "document_count_gte_10": summary["document_count"] >= 10,
     "artifacts_visible": int((summary["artifact_summary"] or {}).get("totalArtifacts") or 0) > 0,
-    "evidenceops_visible": int((summary["evidenceops_summary"] or {}).get("openActions") or 0) > 0,
+    "evidenceops_endpoint_ok": bool(evidenceops.get("ok")),
+    "evidenceops_backend_known": evidenceops_summary.get("repositoryBackend") in {"local", "nextcloud_webdav"},
+    "evidenceops_tools_render": int(evidenceops_summary.get("toolsTotal") or 0) > 0,
 }
 
 report = {
