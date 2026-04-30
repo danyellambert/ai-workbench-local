@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from src.app.product_bootstrap import ProductBootstrap, build_product_bootstrap
+from src.product.access_control import identity_payload, public_session_identity
 from src.config import ProductApiSettings, get_product_api_settings
 from src.rag.loaders import load_document
 from src.product.command_center import (
@@ -832,6 +833,22 @@ class ProductApiHandler(BaseHTTPRequestHandler):
     def _not_found(self) -> None:
         self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
 
+    def _send_auth_session_response(self) -> None:
+        identity, set_cookie = public_session_identity(self.headers)
+        payload = identity_payload(identity)
+        body = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+        if set_cookie:
+            self.send_header("Set-Cookie", set_cookie)
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_OPTIONS(self) -> None:  # noqa: N802
         self.send_response(HTTPStatus.NO_CONTENT)
         if self.settings.allow_cors:
@@ -843,6 +860,10 @@ class ProductApiHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
+
+        if path == "/api/auth/session":
+            self._send_auth_session_response()
+            return
         query = parse_qs(parsed.query)
 
         if path == "/" and self.settings.enable_web_frontend:
