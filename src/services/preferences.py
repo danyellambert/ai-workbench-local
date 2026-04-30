@@ -208,9 +208,16 @@ def _build_provider_connections(
         current.setdefault("usageNote", _connection_usage_note(current))
         current["credentialManagement"] = _credential_management_for_connection(current)
         current["supportsCredentialUpdate"] = _supports_ui_credential_update(current)
-        if str(test_result.get("checked_at") or "").strip():
+        test_result_base_url = str(test_result.get("baseUrl") or test_result.get("base_url") or "").strip()
+        current_base_url = str(current.get("baseUrl") or current.get("base_url") or "").strip()
+        test_result_matches_connection = not test_result_base_url or test_result_base_url == current_base_url
+
+        if test_result_matches_connection and str(test_result.get("checked_at") or "").strip():
             current["lastChecked"] = str(test_result.get("checked_at") or current.get("lastChecked") or "")
-        if str(test_result.get("status") or "") in {"connected", "degraded", "disconnected", "not_configured"}:
+        if (
+            test_result_matches_connection
+            and str(test_result.get("status") or "") in {"connected", "degraded", "disconnected", "not_configured"}
+        ):
             current["status"] = str(test_result.get("status"))
 
         if (
@@ -1015,6 +1022,7 @@ def test_preferences_connection(bootstrap: ProductBootstrap, connection_id: str)
         "checked_at": checked_at,
         "latency_ms": latency_ms,
         "error_message": error_message,
+        "baseUrl": str(connection.get("baseUrl") or connection.get("base_url") or "").strip(),
     }
     normalized_state["connection_test_results"] = connection_test_results
     normalized_state["updated_at"] = _utc_now_iso()
