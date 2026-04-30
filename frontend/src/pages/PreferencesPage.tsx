@@ -12,17 +12,16 @@ import {
   Link2,
   Loader2,
   RefreshCw,
-  User,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/sonner';
 import { GlassCard, MetricCard, PageHeader, StatusPill } from '@/components/shared/ui-components';
+import AdminOnlyFeatureCard from '@/components/access/AdminOnlyFeatureCard';
+import { isAdminSession, useAuthSession } from '@/lib/auth-session';
 import {
   getPreferences,
   updatePreferencesConnectionCredential,
@@ -33,7 +32,7 @@ import {
 } from '@/lib/product-api';
 import { CONNECTION_ROLE_LABELS, credentialStatusCopy, formatConnectionCheckedAt } from '@/lib/preferences-ui';
 import { buildCatalogLookup } from '@/lib/runtime-controls-ui';
-import type { OperatorPreferences, ProviderConnection, RuntimeProfile } from '@/types/settings';
+import type { ProviderConnection, RuntimeProfile } from '@/types/settings';
 
 const CapabilityBadge = ({ label }: { label: string }) => (
   <span
@@ -313,32 +312,13 @@ const ProfileCard = ({
   );
 };
 
-const PreferenceToggle = ({
-  label,
-  description,
-  checked,
-  onCheckedChange,
-  disabled = false,
-}: {
-  label: string;
-  description: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  disabled?: boolean;
-}) => (
-  <div className="flex items-center justify-between py-1.5">
-    <div>
-      <Label className="text-xs text-foreground">{label}</Label>
-      <p className="text-[10px] text-muted-foreground">{description}</p>
-    </div>
-    <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
-  </div>
-);
-
 export default function PreferencesPage() {
   const queryClient = useQueryClient();
   const [testingConnectionId, setTestingConnectionId] = useState<string | null>(null);
   const [savingCredentialConnectionId, setSavingCredentialConnectionId] = useState<string | null>(null);
+  const [adminOnlyPreferencesCtaOpen, setAdminOnlyPreferencesCtaOpen] = useState(false);
+  const { data: authSession } = useAuthSession();
+  const isAdmin = isAdminSession(authSession);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['preferences'],
@@ -433,14 +413,33 @@ export default function PreferencesPage() {
   const qualityPostureLookup = useMemo(() => buildCatalogLookup(normalizedData?.catalogs.qualityPostures), [normalizedData?.catalogs.qualityPostures]);
   const docPresetLookup = useMemo(() => buildCatalogLookup(normalizedData?.catalogs.docPresets), [normalizedData?.catalogs.docPresets]);
   const profiles = normalizedData?.runtime_profiles ?? [];
-  const operatorPreferences = normalizedData?.operator_preferences;
   const connectionsById = useMemo(
     () => Object.fromEntries((normalizedData?.provider_connections ?? []).map((connection) => [connection.id, connection] as const)),
     [normalizedData?.provider_connections],
   );
   const isBusy = saveMutation.isPending;
 
+  const preferencesAdminOnlyCard = (
+    <AdminOnlyFeatureCard
+      eyebrow="Admin-only configuration"
+      title="Provider credentials and workspace preferences are protected"
+      description="The public demo never exposes or changes API keys, provider credentials, runtime profiles, or workspace-level preferences. These controls affect the whole AI Decision Studio environment, so they require Admin Mode."
+      valuePoints={[
+        'Review provider metadata and runtime profile posture safely.',
+        'Connect your own providers, keys, and workflow defaults in a guided demo.',
+        'Keep the public demo stable while protecting credentials and global settings.',
+      ]}
+      secondaryLabel="Want to connect your own tools?"
+      secondaryText="Connect with Danyel and we can walk through credentials, providers, runtime profiles, and operator preferences in a private workspace."
+      compact
+    />
+  );
+
   const savePreferences = (payload: PreferencesPatchPayload, successMessage: string) => {
+    if (!isAdmin) {
+      setAdminOnlyPreferencesCtaOpen(true);
+      return;
+    }
     saveMutation.mutate({ payload, successMessage });
   };
 
@@ -448,9 +447,6 @@ export default function PreferencesPage() {
     savePreferences({ active_profile_id: profileId }, 'Active runtime profile updated.');
   };
 
-  const handleOperatorPreferenceChange = (patch: Partial<OperatorPreferences>, successMessage: string) => {
-    savePreferences({ operator_preferences: patch }, successMessage);
-  };
 
   if (isLoading && !normalizedData && !loadTimedOut) {
     return (
@@ -527,6 +523,19 @@ export default function PreferencesPage() {
       </div>
 
       <div className="space-y-6">
+        {adminOnlyPreferencesCtaOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/55 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-2xl">
+              {preferencesAdminOnlyCard}
+              <div className="mt-3 flex justify-end">
+                <Button variant="ghost" size="sm" onClick={() => setAdminOnlyPreferencesCtaOpen(false)}>
+                  Keep exploring the curated demo
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid gap-3 md:grid-cols-3" data-tour="preferences-metrics">
           <MetricCard label="Connections" value={normalizedData.provider_connections.length} icon={Link2} delay={0.03} />
           <MetricCard label="Healthy" value={normalizedData.provider_connections.filter((connection) => connection.status === 'connected').length} icon={Check} glowColor="success" delay={0.06} />
@@ -541,9 +550,9 @@ export default function PreferencesPage() {
               <p className="text-[10px] text-muted-foreground">Preferences persists profile defaults, connections and operator posture for the whole workspace.</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Default export</p>
-              <p className="mt-1 text-sm font-medium text-foreground">{operatorPreferences?.defaultExportFormat?.toUpperCase?.() ?? 'n/a'}</p>
-              <p className="text-[10px] text-muted-foreground">Runtime controls stay focused on the live route; Preferences stays focused on saved defaults.</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Protected writes</p>
+              <p className="mt-1 text-sm font-medium text-foreground">{isAdmin ? 'Admin enabled' : 'Public demo locked'}</p>
+              <p className="text-[10px] text-muted-foreground">Provider tests, credential updates, and profile changes are protected behind Admin Mode.</p>
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Credential handling</p>
@@ -574,9 +583,9 @@ export default function PreferencesPage() {
               <ConnectionCard
                 key={connection.id}
                 connection={connection}
-                onTestConnection={(connectionId) => testConnectionMutation.mutate(connectionId)}
+                onTestConnection={(connectionId) => isAdmin ? testConnectionMutation.mutate(connectionId) : setAdminOnlyPreferencesCtaOpen(true)}
                 isTesting={testingConnectionId === connection.id && testConnectionMutation.isPending}
-                onSaveCredential={(connectionId, apiKey) => credentialMutation.mutate({ connectionId, apiKey })}
+                onSaveCredential={(connectionId, apiKey) => isAdmin ? credentialMutation.mutate({ connectionId, apiKey }) : setAdminOnlyPreferencesCtaOpen(true)}
                 isSavingCredential={savingCredentialConnectionId === connection.id && credentialMutation.isPending}
               />
             ))}
@@ -609,62 +618,6 @@ export default function PreferencesPage() {
           </div>
         </div>
 
-        <Separator />
-
-        <GlassCard data-tour="preferences-operator">
-          <div className="mb-3 flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <h3 className="text-sm font-medium text-foreground">Operator Preferences</h3>
-          </div>
-          {operatorPreferences ? (
-          <div className="space-y-1">
-            <PreferenceToggle
-              label="Show Source Badges"
-              description="Display provenance badges on findings and outputs."
-              checked={operatorPreferences.showSourceBadges}
-              disabled={isBusy}
-              onCheckedChange={(checked) => handleOperatorPreferenceChange({ showSourceBadges: checked }, 'Operator preference updated.')}
-            />
-
-            <div className="flex items-center justify-between py-1.5">
-              <div>
-                <Label className="text-xs text-foreground">Default Export Format</Label>
-                <p className="text-[10px] text-muted-foreground">Used for deck and report exports.</p>
-              </div>
-              <Select value={operatorPreferences.defaultExportFormat} onValueChange={(value) => handleOperatorPreferenceChange({ defaultExportFormat: value as OperatorPreferences['defaultExportFormat'] }, 'Default export format updated.')}>
-                <SelectTrigger className="h-7 w-[120px] bg-secondary/20 text-[10px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pptx">PowerPoint (.pptx)</SelectItem>
-                  <SelectItem value="pdf">PDF</SelectItem>
-                  <SelectItem value="markdown">Markdown</SelectItem>
-                  <SelectItem value="json">JSON</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between py-1.5">
-              <div>
-                <Label className="text-xs text-foreground">Benchmark Baseline</Label>
-                <p className="text-[10px] text-muted-foreground">Default comparison profile for eval and benchmark views.</p>
-              </div>
-              <Select value={operatorPreferences.defaultBenchmarkBaseline} onValueChange={(value) => handleOperatorPreferenceChange({ defaultBenchmarkBaseline: value }, 'Benchmark baseline updated.')}>
-                <SelectTrigger className="h-7 w-[220px] bg-secondary/20 text-[10px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {profiles.map((profile) => (
-                    <SelectItem key={profile.id} value={profile.id} className="text-xs">
-                      {profile.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          ) : null}
-        </GlassCard>
       </div>
     </motion.div>
   );

@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/components/ui/sonner';
+import AdminOnlyFeatureCard from '@/components/access/AdminOnlyFeatureCard';
+import { isAdminSession, useAuthSession } from '@/lib/auth-session';
 import { cn } from '@/lib/utils';
 import {
   getProductIntegrationHub,
@@ -411,6 +413,8 @@ export function WorkflowPublishActions({
   onNotionPublished,
 }: WorkflowPublishActionsProps) {
   const queryClient = useQueryClient();
+  const { data: authSession } = useAuthSession();
+  const isAdmin = isAdminSession(authSession);
   const [dialogTarget, setDialogTarget] = useState<PreviewTarget>(null);
   const templateOptions = useMemo(() => getWorkflowTemplateOptions(workflowId), [workflowId]);
   const [selectedTemplateId, setSelectedTemplateId] = useState(templateOptions[0]?.id ?? 'executive_summary');
@@ -563,6 +567,29 @@ export function WorkflowPublishActions({
     openExternalUrl(notionOpenUrl, 'Publish to Notion first to open the created page.');
   };
 
+  const externalPublishAdminOnlyCard = (
+    <AdminOnlyFeatureCard
+      eyebrow="Admin-only delivery"
+      title="External publishing is protected"
+      description="You can explore workflow results in the public demo, but creating or updating live Trello cards and Notion pages requires Admin Mode because it sends data to external workspaces."
+      valuePoints={[
+        'Preview how delivery handoffs fit your workflow.',
+        'Connect Trello, Notion, or your preferred operations tools in a guided demo.',
+        'Protect shared demo integrations while still showing the delivery loop.',
+      ]}
+      secondaryLabel="Want to see the full delivery loop?"
+      secondaryText="Connect with Danyel and we can run a private demo using your board, workspace, workflow output, and handoff format."
+      compact
+    />
+  );
+
+  if (!isAdmin) {
+    return (
+      <div className={className} data-testid="workflow-publish-actions">
+        {externalPublishAdminOnlyCard}
+      </div>
+    );
+  }
 
   return (
     <>

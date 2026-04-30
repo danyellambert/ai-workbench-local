@@ -17,6 +17,8 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/sonner';
 import { GlassCard, PageHeader, StatusPill } from '@/components/shared/ui-components';
+import AdminOnlyFeatureCard from '@/components/access/AdminOnlyFeatureCard';
+import { isAdminSession, useAuthSession } from '@/lib/auth-session';
 import {
   getRuntimeControls,
   updateRuntimeControls,
@@ -75,6 +77,9 @@ export default function RuntimeControlsPage() {
 
   const [draft, setDraft] = useState<RuntimeProfile | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [adminOnlyRuntimeCtaOpen, setAdminOnlyRuntimeCtaOpen] = useState(false);
+  const { data: authSession } = useAuthSession();
+  const isAdmin = isAdminSession(authSession);
 
   useEffect(() => {
     if (!data?.active_profile) return;
@@ -107,6 +112,22 @@ export default function RuntimeControlsPage() {
   const embeddingConnection = profile ? getRuntimeConnection(data, profile.embeddingConnectionId) : undefined;
   const embeddingModelOptions = ((profile && data?.options.embeddingModelsByConnection[profile.embeddingConnectionId]) || []).filter(Boolean);
 
+
+  const runtimeAdminOnlyCard = (
+    <AdminOnlyFeatureCard
+      eyebrow="Admin-only configuration"
+      title="Runtime configuration is protected"
+      description="You can explore how the current AI workflow behaves in this curated demo. Changing model routing, retrieval, document processing, or execution settings affects the whole workspace, so saving Runtime Controls requires Admin Mode."
+      valuePoints={[
+        'See how AI Decision Studio can be configured for your model stack.',
+        'Review generation, retrieval, embedding, and document processing controls.',
+        'Book a guided demo to tune this against your providers and documents.',
+      ]}
+      secondaryLabel="Want to see this with your own stack?"
+      secondaryText="Connect with Danyel and we can walk through provider routing, retrieval posture, and runtime tradeoffs in a private demo."
+      compact
+    />
+  );
 
   const updateProfile = (updater: (current: RuntimeProfile) => RuntimeProfile) => {
     setDraft((current) => {
@@ -142,6 +163,15 @@ export default function RuntimeControlsPage() {
     });
   };
 
+
+  const handleSaveChanges = () => {
+    if (!profile || saveMutation.isPending) return;
+    if (!isAdmin) {
+      setAdminOnlyRuntimeCtaOpen(true);
+      return;
+    }
+    saveMutation.mutate(profile);
+  };
 
   const handleReset = () => {
     if (!data?.active_profile) return;
@@ -203,6 +233,19 @@ export default function RuntimeControlsPage() {
       </div>
 
       <div className="space-y-6">
+        {adminOnlyRuntimeCtaOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/55 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-2xl">
+              {runtimeAdminOnlyCard}
+              <div className="mt-3 flex justify-end">
+                <Button variant="ghost" size="sm" onClick={() => setAdminOnlyRuntimeCtaOpen(false)}>
+                  Keep exploring the curated demo
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isError && (
           <GlassCard>
             <div className="flex items-center gap-2 text-xs text-glow-warning">
@@ -228,7 +271,7 @@ export default function RuntimeControlsPage() {
               <Button variant="outline" className="h-8 text-xs" onClick={handleReset} disabled={!isDirty || saveMutation.isPending}>
                 Reset
               </Button>
-              <Button className="h-8 text-xs" onClick={() => saveMutation.mutate(profile)} disabled={!isDirty || saveMutation.isPending}>
+              <Button className="h-8 text-xs" onClick={handleSaveChanges} disabled={!isDirty || saveMutation.isPending}>
                 {saveMutation.isPending ? 'Saving…' : 'Save changes'}
               </Button>
             </div>
