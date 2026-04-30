@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import math
 import statistics
 import time
@@ -2511,17 +2512,40 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
         if description and not bucket.get('description'):
             bucket['description'] = description
 
+    def _benchmark_root_candidates() -> list[Path]:
+        candidates: list[Path] = []
+
+        def add(path: Path | None) -> None:
+            if path is None:
+                return
+            resolved = path.expanduser()
+            if resolved not in candidates:
+                candidates.append(resolved)
+
+        add(workspace_root / 'benchmark_runs')
+
+        baseline_root_raw = str(os.getenv('APP_BASELINE_ROOT') or '').strip()
+        if baseline_root_raw:
+            add(Path(baseline_root_raw) / 'benchmark_runs')
+
+        runtime_root_raw = str(os.getenv('APP_RUNTIME_ROOT') or '').strip()
+        if runtime_root_raw:
+            add(Path(runtime_root_raw) / 'benchmark_runs')
+
+        add(workspace_root / 'baseline' / 'benchmark_runs')
+        return candidates
+
     def _collect_paths(*patterns: str) -> list[Path]:
-        benchmark_root = workspace_root / 'benchmark_runs'
-        if not benchmark_root.exists():
-            return []
         collected: list[Path] = []
         seen: set[Path] = set()
-        for pattern in patterns:
-            for path in benchmark_root.glob(pattern):
-                if path not in seen and path.exists():
-                    seen.add(path)
-                    collected.append(path)
+        for benchmark_root in _benchmark_root_candidates():
+            if not benchmark_root.exists():
+                continue
+            for pattern in patterns:
+                for path in benchmark_root.glob(pattern):
+                    if path not in seen and path.exists():
+                        seen.add(path)
+                        collected.append(path)
         return sorted(collected)
 
     def _phase45_category(benchmark_name: str) -> str:

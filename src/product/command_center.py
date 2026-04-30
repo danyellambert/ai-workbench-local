@@ -156,42 +156,68 @@ def _resolve_baseline_uri_path(raw_uri: str, metadata_path: Path) -> Path | None
     return candidate if candidate.exists() else None
 
 
-def _resolve_artifact_sidecar_path(raw_path: object, metadata_path: Path) -> Path | None:
-    text = str(raw_path or "").strip()
-    if not text:
+def _resolve_artifact_sidecar_path(value: object, metadata_path: Path) -> Path | None:
+    raw_value = str(value or "").strip()
+    if not raw_value:
         return None
 
-    baseline_candidate = _resolve_baseline_uri_path(text, metadata_path)
-    if baseline_candidate is not None:
-        return baseline_candidate
+    artifact_dir = metadata_path.parent.resolve(strict=False)
 
-    candidate = Path(text).expanduser()
-    if candidate.exists():
-        return candidate.resolve(strict=False)
-    if not candidate.is_absolute():
-        relative_candidate = (metadata_path.parent / candidate).resolve(strict=False)
-        if relative_candidate.exists():
-            return relative_candidate
-    sibling_candidate = (metadata_path.parent / candidate.name).resolve(strict=False)
-    if sibling_candidate.exists():
-        return sibling_candidate
-    parts = list(candidate.parts)
-    export_id = metadata_path.parent.name
-    if export_id in parts:
-        export_index = parts.index(export_id)
-        suffix = parts[export_index + 1 :]
-        if suffix:
-            reconstructed = metadata_path.parent.joinpath(*suffix).resolve(strict=False)
-            if reconstructed.exists():
-                return reconstructed
-    if "presentation_exports" in parts:
-        root_index = parts.index("presentation_exports")
-        suffix = parts[root_index + 1 :]
-        if suffix:
-            reconstructed = metadata_path.parents[1].joinpath(*suffix).resolve(strict=False)
-            if reconstructed.exists():
-                return reconstructed
-    return None
+    def sibling_candidate(name: str) -> Path | None:
+        clean_name = name.strip().split("/")[-1]
+        if not clean_name:
+            return None
+
+        candidates = [artifact_dir / clean_name]
+
+        # Legacy Oracle-like baseline exports stored sidecars next to metadata,
+        # while metadata may point at baseline://external_files/<hash>_<filename>.
+        if "_" in clean_name:
+            candidates.append(artifact_dir / clean_name.split("_", 1)[1])
+
+        # Preview manifests historically used both hyphen and underscore names.
+        candidates.extend(
+            [
+                artifact_dir / clean_name.replace("_", "-"),
+                artifact_dir / clean_name.replace("-", "_"),
+            ]
+        )
+
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate.resolve(strict=False)
+        return None
+
+    if raw_value.startswith("baseline://external_files/"):
+        resolved = sibling_candidate(raw_value.removeprefix("baseline://external_files/"))
+        return resolved if resolved is not None else None
+
+    if raw_value.startswith("baseline://artifacts/"):
+        relative = raw_value.removeprefix("baseline://artifacts/").strip("/")
+        if relative:
+            parts = relative.split("/")
+            if parts and parts[-1]:
+                resolved = sibling_candidate(parts[-1])
+                if resolved is not None:
+                    return resolved
+        return artifact_dir
+
+    candidate = Path(raw_value)
+    if candidate.is_absolute():
+        if candidate.exists():
+            return candidate.resolve(strict=False)
+
+        # If an old absolute path points at /app/baseline/artifacts or /app/artifacts,
+        # keep the current metadata directory as the source of truth.
+        resolved = sibling_candidate(candidate.name)
+        return resolved if resolved is not None else candidate.resolve(strict=False)
+
+    resolved = (metadata_path.parent / candidate).resolve(strict=False)
+    if resolved.exists():
+        return resolved
+
+    sibling = sibling_candidate(candidate.name)
+    return sibling if sibling is not None else resolved
 
 
 def _artifact_asset_entries(metadata_payload: dict[str, Any], metadata_path: Path) -> list[dict[str, object]]:
