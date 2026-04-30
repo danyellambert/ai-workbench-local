@@ -3,6 +3,7 @@ import { FileText, Upload, Search, Grid, List, AlertTriangle, Check, Database, L
 import { PageHeader, StatusPill, GlassCard, MetricCard } from '@/components/shared/ui-components';
 import { deleteProductDocuments, getProductDocumentLibrary, getProductUploadJob, type ProductDocumentLibraryEntry, type ProductUploadDocumentsResponse, uploadProductDocuments } from '@/lib/product-api';
 import { NextcloudImportSheet } from '@/components/product/NextcloudImportSheet';
+import AdminOnlyFeatureCard from '@/components/access/AdminOnlyFeatureCard';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,26 @@ const pipelineSteps = [
 ];
 
 type UploadFeedbackState = { type: 'success' | 'error' | 'info'; message: string } | null;
+
+
+type AuthSession = {
+  identity?: {
+    role?: string;
+  };
+  auth?: {
+    admin_configured?: boolean;
+  };
+};
+
+async function fetchAuthSession(): Promise<AuthSession> {
+  const response = await fetch('/api/auth/session', {
+    credentials: 'include',
+    headers: { Accept: 'application/json' },
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload?.error || 'Could not load auth session.');
+  return payload;
+}
 
 function formatDate(value?: string | null): string {
   if (!value) return '—';
@@ -51,6 +72,7 @@ export default function DocumentsPage() {
   const [documentPendingDelete, setDocumentPendingDelete] = useState<ProductDocumentLibraryEntry | null>(null);
   const [nextcloudSheetOpen, setNextcloudSheetOpen] = useState(false);
   const [uploadLockedDialogOpen, setUploadLockedDialogOpen] = useState(false);
+  const [adminOnlyDocumentCtaOpen, setAdminOnlyDocumentCtaOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const handledUploadTerminalStateRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
@@ -61,6 +83,14 @@ export default function DocumentsPage() {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+
+  const { data: authSession } = useQuery({
+    queryKey: ['auth-session'],
+    queryFn: fetchAuthSession,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const isAdmin = authSession?.identity?.role === 'admin';
 
   const { data: uploadJob } = useQuery({
     queryKey: ['product-upload-job', activeUploadJobId],
@@ -169,13 +199,39 @@ export default function DocumentsPage() {
   const pipelineStageLookup = new Map((pipelineJob?.steps || []).map(step => [step.key, step]));
   const pipelineStatusMessage = pipelineJob?.message || (uploadInProgress ? 'Preparing ingestion pipeline...' : 'Pipeline status will appear here during document indexing.');
 
+  const documentAdminOnlyCard = (
+    <AdminOnlyFeatureCard
+      eyebrow="Curated demo workspace"
+      title="Unlock private document onboarding"
+      description="This public workspace is curated so every visitor can explore stable documents, workflows, run history, and artifacts. Adding, importing, or deleting documents changes the shared demo library, so those actions are protected behind Admin Mode."
+      valuePoints={[
+        'Test AI Decision Studio with your own contracts, policies, CVs, reports, or evidence packs.',
+        'See how ingestion, extraction, chunking, retrieval, and workflow outputs behave on private files.',
+        'Run a guided demo without disturbing the public baseline that other visitors are exploring.',
+      ]}
+      secondaryLabel="Want to plug in your own documents?"
+      secondaryText="Connect with Danyel and we can run a private walkthrough using your document set, your workflow goals, and the integrations you care about."
+      ctaHref={LINKEDIN_DEMO_URL}
+      ctaLabel="Connect with Danyel on LinkedIn"
+    />
+  );
+
   const openUploadLockedDialog = () => {
     setDropActive(false);
     setUploadLockedDialogOpen(true);
   };
 
+  const openAdminOnlyDocumentCta = () => {
+    setDropActive(false);
+    setAdminOnlyDocumentCtaOpen(true);
+  };
+
   const handleOpenFilePicker = () => {
     if (uploadInProgress) return;
+    if (!isAdmin) {
+      openAdminOnlyDocumentCta();
+      return;
+    }
     if (!directUploadEnabled) {
       openUploadLockedDialog();
       return;
@@ -184,6 +240,10 @@ export default function DocumentsPage() {
   };
 
   const handleFilesSelected = (fileList: FileList | File[] | null) => {
+    if (!isAdmin) {
+      openAdminOnlyDocumentCta();
+      return;
+    }
     if (!directUploadEnabled) {
       openUploadLockedDialog();
       return;
@@ -195,6 +255,10 @@ export default function DocumentsPage() {
 
   const requestDeleteDocument = (document: ProductDocumentLibraryEntry) => {
     if (deleteMutation.isPending) return;
+    if (!isAdmin) {
+      openAdminOnlyDocumentCta();
+      return;
+    }
     setDocumentPendingDelete(document);
   };
 
@@ -204,16 +268,22 @@ export default function DocumentsPage() {
   };
 
   useEffect(() => {
-    const openNextcloudImportForTour = () => setNextcloudSheetOpen(true);
+    const openNextcloudImportForTour = () => {
+      if (!isAdmin) {
+        openAdminOnlyDocumentCta();
+        return;
+      }
+      setNextcloudSheetOpen(true);
+    };
     window.addEventListener('workbench-tour:open-nextcloud-import', openNextcloudImportForTour);
     return () => window.removeEventListener('workbench-tour:open-nextcloud-import', openNextcloudImportForTour);
-  }, []);
+  }, [isAdmin]);
 
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" variants={stagger} initial="initial" animate="animate">
       <PageHeader title="Document Library" description="Ingest, index and manage your document corpus for AI-powered analysis.">
         <div className="-m-1 flex items-center gap-2 rounded-xl p-1" data-tour="documents-page-actions">
-          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => setNextcloudSheetOpen(true)} disabled={uploadInProgress} data-testid="open-nextcloud-import" data-tour="documents-nextcloud-button">
+          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => isAdmin ? setNextcloudSheetOpen(true) : openAdminOnlyDocumentCta()} disabled={uploadInProgress} data-testid="open-nextcloud-import" data-tour="documents-nextcloud-button">
             <FolderTree className="w-3.5 h-3.5 mr-2" /> Import from Nextcloud
           </Button>
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={handleOpenFilePicker} disabled={uploadInProgress}>
@@ -236,6 +306,7 @@ export default function DocumentsPage() {
       <NextcloudImportSheet
         open={nextcloudSheetOpen}
         onOpenChange={setNextcloudSheetOpen}
+        adminOnlyBlocked={!isAdmin}
         onImportStarted={(payload) => {
           handledUploadTerminalStateRef.current = null;
           setActiveUploadJobId(payload.job_id);
@@ -246,6 +317,19 @@ export default function DocumentsPage() {
           });
         }}
       />
+
+      {adminOnlyDocumentCtaOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/55 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl">
+            {documentAdminOnlyCard}
+            <div className="mt-3 flex justify-end">
+              <Button variant="ghost" size="sm" onClick={() => setAdminOnlyDocumentCtaOpen(false)}>
+                Keep exploring the curated demo
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" data-tour="documents-stats">

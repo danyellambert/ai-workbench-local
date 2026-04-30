@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/sonner';
+import AdminOnlyFeatureCard from '@/components/access/AdminOnlyFeatureCard';
 import {
   getProductNextcloudDocuments,
   buildProductNextcloudOpenUrl,
@@ -19,6 +20,7 @@ type NextcloudImportSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImportStarted?: (payload: ProductUploadDocumentsResponse) => void;
+  adminOnlyBlocked?: boolean;
 };
 
 type FolderNode = {
@@ -184,7 +186,7 @@ function preventTourOutsideDismiss(event: Event) {
   if (isGuidedTourActive()) event.preventDefault();
 }
 
-export function NextcloudImportSheet({ open, onOpenChange, onImportStarted }: NextcloudImportSheetProps) {
+export function NextcloudImportSheet({ open, onOpenChange, onImportStarted, adminOnlyBlocked = false }: NextcloudImportSheetProps) {
   const [search, setSearch] = useState('');
   const [currentPath, setCurrentPath] = useState('');
   const [focusedRelativePath, setFocusedRelativePath] = useState<string | null>(null);
@@ -407,6 +409,37 @@ export function NextcloudImportSheet({ open, onOpenChange, onImportStarted }: Ne
   const breadcrumbs = currentPath.split('/').filter(Boolean);
   const activeLabel = currentPath ? humanizeFolderName(breadcrumbs[breadcrumbs.length - 1]) : 'All files';
   const selectedPdfCount = selectedDocuments.filter(isPdfDocument).length;
+
+  if (adminOnlyBlocked) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full overflow-y-auto border-border/60 bg-card/95 p-6 backdrop-blur-xl sm:max-w-xl">
+          <SheetHeader>
+            <SheetTitle>Import from Nextcloud</SheetTitle>
+            <SheetDescription>
+              Connect a private corpus when Admin Mode is active.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-5">
+            <AdminOnlyFeatureCard
+              eyebrow="Curated demo workspace"
+              title="Nextcloud import is protected"
+              description="The public demo lets visitors explore the curated document library without changing the shared baseline. Importing from Nextcloud adds documents and indexes to the workspace, so it is reserved for Admin Mode until private overlay imports are enabled."
+              valuePoints={[
+                'Bring your own corpus into a private walkthrough.',
+                'Validate extraction, indexing, and workflow behavior on real documents.',
+                'Keep the public demo stable while showing the full ingestion path live.',
+              ]}
+              secondaryLabel="Want to test your own Nextcloud folder?"
+              secondaryText="Connect with Danyel and we can run a guided demo using your folder structure, PDFs, and workflow goals."
+              ctaHref="https://www.linkedin.com/in/danyel-/"
+              ctaLabel="Connect with Danyel on LinkedIn"
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

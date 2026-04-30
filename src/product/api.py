@@ -1237,6 +1237,9 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 return
 
         if path == "/api/product/upload-documents":
+            if not self._require_global_write("Uploading documents into the shared demo library"):
+                return
+
             try:
                 uploaded_files = _read_multipart_files(self)
                 if not uploaded_files:
@@ -1263,6 +1266,9 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/product/integrations/nextcloud/import":
+            if not self._require_global_write("Importing documents into the shared demo library"):
+                return
+
             try:
                 raw_documents = payload.get("documents") if isinstance(payload.get("documents"), list) else None
                 if raw_documents is not None:
@@ -1293,6 +1299,9 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/product/delete-documents":
+            if not self._require_global_write("Deleting documents from the shared demo library"):
+                return
+
             try:
                 raw_document_ids = payload.get("document_ids") if isinstance(payload.get("document_ids"), list) else []
                 document_ids = [str(item).strip() for item in raw_document_ids if str(item).strip()]
