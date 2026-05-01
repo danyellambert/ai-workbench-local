@@ -1518,18 +1518,43 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
         if path == "/api/product/generate-deck":
             try:
+                identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+
                 result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
                 product_result = ProductWorkflowResult.model_validate(result_payload)
                 run_id = str(payload.get("run_id") or "").strip() or None
+
+                deck_settings = self.bootstrap.presentation_export_settings
+                history_path = get_product_workflow_history_path(self.bootstrap.workspace_root)
+                write_scope = "global"
+                overlay_artifact_root = None
+
+                if not identity.can_write_global:
+                    overlay_artifact_root = identity.overlay_root / "artifacts" / "presentation_exports"
+                    overlay_artifact_root.mkdir(parents=True, exist_ok=True)
+                    deck_settings = replace(
+                        self.bootstrap.presentation_export_settings,
+                        local_artifact_dir=overlay_artifact_root,
+                    )
+                    history_path = identity.overlay_root / "runs" / "workflow_history.json"
+                    write_scope = "session_overlay"
+
                 export_result, artifacts = generate_product_workflow_deck(
                     product_result,
-                    settings=self.bootstrap.presentation_export_settings,
+                    settings=deck_settings,
                     workspace_root=self.bootstrap.workspace_root,
                 )
+
+                if isinstance(export_result, dict):
+                    export_result["write_scope"] = write_scope
+                    if overlay_artifact_root is not None:
+                        export_result["overlay_artifact_root"] = str(overlay_artifact_root)
+
+                artifact_items = [artifact.model_dump(mode="json") for artifact in artifacts]
+
                 if run_id:
-                    artifact_items = [artifact.model_dump(mode="json") for artifact in artifacts]
                     update_product_workflow_history_entry(
-                        get_product_workflow_history_path(self.bootstrap.workspace_root),
+                        history_path,
                         run_id,
                         {
                             "artifacts": [artifact.download_name or artifact.label for artifact in artifacts if artifact.available],
@@ -1538,14 +1563,19 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                             "export_result": export_result,
                         },
                     )
-                    attach_artifact_lineage(self.bootstrap.workspace_root, run_id=run_id, artifacts=artifact_items, export_result=export_result)
-                self._send_json(
+                    if identity.can_write_global:
+                        attach_artifact_lineage(self.bootstrap.workspace_root, run_id=run_id, artifacts=artifact_items, export_result=export_result)
+
+                self._send_json_with_cookies(
                     HTTPStatus.OK,
                     {
                         "ok": True,
+                        "write_scope": write_scope,
+                        "overlay_root": str(identity.overlay_root) if not identity.can_write_global else None,
                         "export_result": export_result,
-                        "artifacts": [artifact.model_dump(mode="json") for artifact in artifacts],
+                        "artifacts": artifact_items,
                     },
+                    cookies=[set_cookie] if set_cookie else None,
                 )
             except Exception as error:  # pragma: no cover - defensive API surface
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
