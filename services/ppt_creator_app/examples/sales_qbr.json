@@ -1,0 +1,86 @@
+{
+  "presentation": {
+    "title": "Sales operating review",
+    "subtitle": "Commercial performance and execution priorities",
+    "client_name": "Revenue Leadership",
+    "author": "PPT Creator",
+    "date": "2026-03-26",
+    "theme": "dark_boardroom",
+    "footer_text": "Sales pipeline brand pack",
+    "primary_color": "6B1F2B",
+    "secondary_color": "F59E0B"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "Sales operating review",
+      "subtitle": "Commercial performance and execution priorities",
+      "layout_variant": "hero_cover",
+      "eyebrow": "Revenue review"
+    },
+    {
+      "type": "agenda",
+      "title": "Agenda",
+      "bullets": [
+        "Performance",
+        "Pipeline",
+        "Execution risks",
+        "Next actions"
+      ]
+    },
+    {
+      "type": "metrics",
+      "title": "Headline performance",
+      "metrics": [
+        {
+          "value": "$8.4M",
+          "label": "pipeline added"
+        },
+        {
+          "value": "31%",
+          "label": "win rate"
+        },
+        {
+          "value": "104%",
+          "label": "plan attainment"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "title": "Quarterly revenue trend",
+      "layout_variant": "column",
+      "chart_categories": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "chart_series": [
+        {
+          "name": "Revenue",
+          "values": [
+            5.2,
+            6.1,
+            7.4,
+            8.4
+          ]
+        }
+      ]
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "bullets": [
+        "Protect pipeline quality",
+        "Reduce deal slippage",
+        "Focus coaching on conversion moments"
+      ]
+    },
+    {
+      "type": "closing",
+      "title": "Closing thought",
+      "quote": "Execution quality compounds when the operating rhythm stays consistent."
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "presentation": {
+    "title": "Layout showcase",
+    "subtitle": "Visual proof of supported slide families",
+    "client_name": "PPT Creator",
+    "author": "PPT Creator",
+    "date": "2026-03-29",
+    "theme": "executive_premium_minimal",
+    "footer_text": "Layout showcase"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "Layout showcase",
+      "subtitle": "Visual proof of supported slide families",
+      "layout_variant": "hero_cover",
+      "eyebrow": "Gallery"
+    },
+    {
+      "type": "section",
+      "title": "Core narrative layouts",
+      "subtitle": "Reusable building blocks for executive decks",
+      "section_label": "Overview"
+    },
+    {
+      "type": "agenda",
+      "title": "Agenda",
+      "bullets": [
+        "Narrative context",
+        "Evidence and metrics",
+        "Decision structure",
+        "Executive summary"
+      ]
+    },
+    {
+      "type": "bullets",
+      "title": "Narrative context",
+      "subtitle": "Fast-scanning executive framing",
+      "layout_variant": "full_width",
+      "bullets": [
+        "Use fewer points with clearer hierarchy",
+        "Keep whitespace deliberate",
+        "Favor decisions over raw detail"
+      ]
+    },
+    {
+      "type": "cards",
+      "title": "Cards",
+      "cards": [
+        {"title": "Insight", "body": "Summarize one sharp idea per card."},
+        {"title": "Evidence", "body": "Attach the proof that matters most."},
+        {"title": "Action", "body": "Translate the point into an operating move."}
+      ]
+    },
+    {
+      "type": "metrics",
+      "title": "Metrics",
+      "layout_variant": "compact",
+      "metrics": [
+        {"value": "31%", "label": "win rate"},
+        {"value": "$8.4M", "label": "pipeline added"},
+        {"value": "104%", "label": "plan attainment"},
+        {"value": "4.3x", "label": "prep speed"}
+      ]
+    },
+    {
+      "type": "chart",
+      "title": "Chart",
+      "layout_variant": "line",
+      "chart_categories": ["Jan", "Feb", "Mar", "Apr"],
+      "chart_series": [
+        {"name": "Signal", "values": [12, 18, 23, 29]}
+      ]
+    },
+    {
+      "type": "image_text",
+      "title": "Image + text",
+      "subtitle": "Placeholder and crop behavior",
+      "layout_variant": "image_left",
+      "body": "Combine one visual narrative anchor with a short structured explanation.",
+      "bullets": [
+        "Use a premium contextual visual",
+        "Keep the narrative concise",
+        "Let the layout preserve whitespace"
+      ],
+      "image_caption": "Contextual executive visual placeholder"
+    },
+    {
+      "type": "timeline",
+      "title": "Timeline",
+      "timeline_items": [
+        {"title": "Diagnose", "body": "Clarify the problem first.", "tag": "Week 1"},
+        {"title": "Pilot", "body": "Run one narrow operating motion.", "tag": "Week 2"},
+        {"title": "Scale", "body": "Expand only after the signal is clear.", "tag": "Week 3"}
+      ]
+    },
+    {
+      "type": "comparison",
+      "title": "Comparison",
+      "comparison_columns": [
+        {"title": "Current state", "body": "Too many parallel priorities blur the decision."},
+        {"title": "Target state", "bullets": ["Narrow scope", "Sharper choices", "Clear owners"]}
+      ]
+    },
+    {
+      "type": "two_column",
+      "title": "Two-column",
+      "two_column_columns": [
+        {"title": "Context", "body": "Use one side for diagnosis and framing."},
+        {"title": "Decision", "bullets": ["Clarify the move", "Explain why now", "Show the next step"]}
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Table",
+      "table_columns": ["Area", "Status", "Action"],
+      "table_rows": [
+        ["Pipeline", "Stable", "Maintain cadence"],
+        ["Enablement", "Mixed", "Refresh assets"],
+        ["Governance", "Needs work", "Clarify owners"]
+      ]
+    },
+    {
+      "type": "faq",
+      "title": "FAQ",
+      "faq_items": [
+        {"title": "Why now?", "body": "Because execution friction is already visible."},
+        {"title": "What changes first?", "body": "Start with one workflow and one owner."},
+        {"title": "How do we scale?", "body": "Only after measurable operating lift."}
+      ]
+    },
+    {
+      "type": "summary",
+      "title": "Summary",
+      "body": "The strongest decks keep the story narrow, the proof readable, and the action path explicit.",
+      "bullets": [
+        "Reduce density",
+        "Sharpen the decision",
+        "Preserve whitespace"
+      ]
+    },
+    {
+      "type": "closing",
+      "title": "Closing",
+      "quote": "A strong deck is a structured decision tool, not just a formatted document.",
+      "attribution": "PPT Creator"
+    }
+  ]
+}

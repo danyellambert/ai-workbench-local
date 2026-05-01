@@ -1,0 +1,103 @@
+{
+  "presentation": {
+    "title": "Quarterly board review",
+    "subtitle": "Executive summary deck",
+    "client_name": "Aurelia Systems",
+    "author": "PPT Creator",
+    "date": "2026-03-23",
+    "footer_text": "Aurelia Systems • Board Materials",
+    "theme": "dark_boardroom"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "Quarterly board review",
+      "subtitle": "Performance, priorities, and next-quarter risks",
+      "eyebrow": "Board materials"
+    },
+    {
+      "type": "metrics",
+      "title": "Headline metrics",
+      "layout_variant": "compact",
+      "metrics": [
+        {
+          "value": "$14.2M",
+          "label": "ARR",
+          "trend": "+18% YoY"
+        },
+        {
+          "value": "116%",
+          "label": "net revenue retention",
+          "trend": "Above plan"
+        },
+        {
+          "value": "13.4",
+          "label": "months runway",
+          "trend": "Stable"
+        },
+        {
+          "value": "2",
+          "label": "priority risks",
+          "trend": "Actively managed"
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "title": "Quarterly revenue progression",
+      "subtitle": "Illustrative revenue trend over the last four quarters",
+      "eyebrow": "Trend view",
+      "layout_variant": "column",
+      "chart_categories": ["Q1", "Q2", "Q3", "Q4"],
+      "chart_series": [
+        {
+          "name": "Revenue ($M)",
+          "values": [10.8, 11.9, 13.1, 14.2]
+        }
+      ]
+    },
+    {
+      "type": "image_text",
+      "title": "Risk lens",
+      "layout_variant": "image_left",
+      "body": "The next quarter depends on disciplined execution in go-to-market productivity and infrastructure resilience.",
+      "bullets": [
+        "Hiring pace must stay aligned to actual productivity gains.",
+        "Platform resilience remains a board-level confidence topic.",
+        "Capital allocation should continue to favor compounding bets."
+      ],
+      "image_caption": "Optional board visual placeholder"
+    },
+    {
+      "type": "comparison",
+      "title": "Operating trade-off",
+      "subtitle": "Board discipline requires seeing both the cost of drift and the benefit of focus",
+      "eyebrow": "Decision lens",
+      "comparison_columns": [
+        {
+          "title": "If execution drifts",
+          "body": "The company absorbs more operational noise and slower learning cycles.",
+          "bullets": [
+            "Hiring outpaces productivity",
+            "Resilience issues remain visible for too long"
+          ],
+          "footer": "Higher strategic drag"
+        },
+        {
+          "title": "If execution stays disciplined",
+          "body": "Leadership compounds confidence through clearer prioritization and better operating leverage.",
+          "bullets": [
+            "Capital stays aligned to compounding bets",
+            "Board reporting becomes more decision-useful"
+          ],
+          "footer": "Higher decision quality"
+        }
+      ]
+    },
+    {
+      "type": "closing",
+      "title": "Board takeaway",
+      "quote": "The company is in a stronger position when performance discipline and strategic clarity move together."
+    }
+  ]
+}

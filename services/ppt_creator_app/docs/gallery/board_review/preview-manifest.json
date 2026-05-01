@@ -1,0 +1,48 @@
+{
+  "manifest_version": 1,
+  "mode": "preview",
+  "basename": "board_review",
+  "output_dir": "/Users/danyellambert/ppt_creator_app/docs/gallery/board_review",
+  "presentation_title": "Quarterly board review",
+  "theme": "dark_boardroom",
+  "preview_count": 6,
+  "preview_source": "spec",
+  "real_preview": false,
+  "backend_requested": "synthetic",
+  "backend_used": "synthetic",
+  "office_runtime": null,
+  "office_conversion_strategy": null,
+  "input_pptx": null,
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "board_review-01.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/board_review/board_review-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "board_review-02.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/board_review/board_review-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "board_review-03.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/board_review/board_review-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "board_review-04.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/board_review/board_review-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "board_review-05.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/board_review/board_review-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "board_review-06.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/board_review/board_review-06.png"
+    }
+  ]
+}

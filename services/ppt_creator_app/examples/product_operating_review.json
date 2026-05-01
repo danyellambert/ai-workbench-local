@@ -1,0 +1,98 @@
+{
+  "presentation": {
+    "title": "Product portfolio review",
+    "subtitle": "Roadmap, adoption, and product decisions",
+    "client_name": "Product Leadership",
+    "author": "PPT Creator",
+    "date": "2026-03-26",
+    "theme": "startup_minimal",
+    "footer_text": "Product signal brand pack",
+    "primary_color": "0F766E",
+    "secondary_color": "7C3AED"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "Product portfolio review",
+      "subtitle": "Roadmap, adoption, and product decisions",
+      "layout_variant": "hero_cover",
+      "eyebrow": "Product review"
+    },
+    {
+      "type": "agenda",
+      "title": "Agenda",
+      "bullets": [
+        "Product signals",
+        "Roadmap choices",
+        "Risks",
+        "Next quarter"
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Portfolio snapshot",
+      "table_columns": [
+        "Area",
+        "Status",
+        "Action"
+      ],
+      "table_rows": [
+        [
+          "Core workflow",
+          "Healthy",
+          "Sustain investment"
+        ],
+        [
+          "New bets",
+          "Mixed",
+          "Reduce parallel scope"
+        ]
+      ]
+    },
+    {
+      "type": "chart",
+      "title": "Adoption trend",
+      "layout_variant": "line",
+      "chart_categories": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr"
+      ],
+      "chart_series": [
+        {
+          "name": "Active teams",
+          "values": [
+            12,
+            16,
+            21,
+            29
+          ]
+        }
+      ]
+    },
+    {
+      "type": "faq",
+      "title": "Leadership FAQ",
+      "faq_items": [
+        {
+          "title": "What should move first?",
+          "body": "Prioritize the workflow with the strongest usage pull and clearest value signal."
+        },
+        {
+          "title": "What should wait?",
+          "body": "Pause low-conviction initiatives until the roadmap is more concentrated."
+        }
+      ]
+    },
+    {
+      "type": "summary",
+      "title": "Recommendation",
+      "bullets": [
+        "Concentrate roadmap scope",
+        "Protect core adoption",
+        "Use clear decision gates"
+      ]
+    }
+  ]
+}

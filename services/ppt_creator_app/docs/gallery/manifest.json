@@ -1,0 +1,60 @@
+{
+  "items": [
+    {
+      "example": "ai_sales.json",
+      "title": "AI copilots for sales teams",
+      "slide_count": 10,
+      "thumbnail_sheet": "docs/gallery/ai_sales/ai_sales-thumbnails.png",
+      "preview_dir": "docs/gallery/ai_sales"
+    },
+    {
+      "example": "board_review.json",
+      "title": "Quarterly board review",
+      "slide_count": 6,
+      "thumbnail_sheet": "docs/gallery/board_review/board_review-thumbnails.png",
+      "preview_dir": "docs/gallery/board_review"
+    },
+    {
+      "example": "board_strategy_review.json",
+      "title": "Strategy review",
+      "slide_count": 5,
+      "thumbnail_sheet": "docs/gallery/board_strategy_review/board_strategy_review-thumbnails.png",
+      "preview_dir": "docs/gallery/board_strategy_review"
+    },
+    {
+      "example": "consulting_steerco.json",
+      "title": "Consulting engagement review",
+      "slide_count": 5,
+      "thumbnail_sheet": "docs/gallery/consulting_steerco/consulting_steerco-thumbnails.png",
+      "preview_dir": "docs/gallery/consulting_steerco"
+    },
+    {
+      "example": "layout_showcase.json",
+      "title": "Layout showcase",
+      "slide_count": 15,
+      "thumbnail_sheet": "docs/gallery/layout_showcase/layout_showcase-thumbnails.png",
+      "preview_dir": "docs/gallery/layout_showcase"
+    },
+    {
+      "example": "product_operating_review.json",
+      "title": "Product portfolio review",
+      "slide_count": 6,
+      "thumbnail_sheet": "docs/gallery/product_operating_review/product_operating_review-thumbnails.png",
+      "preview_dir": "docs/gallery/product_operating_review"
+    },
+    {
+      "example": "product_strategy.json",
+      "title": "Product strategy priorities",
+      "slide_count": 5,
+      "thumbnail_sheet": "docs/gallery/product_strategy/product_strategy-thumbnails.png",
+      "preview_dir": "docs/gallery/product_strategy"
+    },
+    {
+      "example": "sales_qbr.json",
+      "title": "Sales operating review",
+      "slide_count": 6,
+      "thumbnail_sheet": "docs/gallery/sales_qbr/sales_qbr-thumbnails.png",
+      "preview_dir": "docs/gallery/sales_qbr"
+    }
+  ]
+}

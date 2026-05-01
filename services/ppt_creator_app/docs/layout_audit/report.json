@@ -1,0 +1,84 @@
+{
+  "mode": "layout-audit",
+  "input": "examples/layout_showcase.json",
+  "theme": "executive_premium_minimal",
+  "preview_source": "rendered_pptx",
+  "preview_manifest": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/preview-manifest.json",
+  "thumbnail_sheet": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-thumbnails.png",
+  "review_status": "ok",
+  "average_score": 100,
+  "audited_layouts": [
+    {
+      "layout": "title",
+      "status": "ok",
+      "score": 100,
+      "risk_level": "low",
+      "issues": [],
+      "likely_overflow_regions": [],
+      "likely_collision_regions": []
+    },
+    {
+      "layout": "metrics",
+      "status": "ok",
+      "score": 100,
+      "risk_level": "low",
+      "issues": [],
+      "likely_overflow_regions": [],
+      "likely_collision_regions": []
+    },
+    {
+      "layout": "comparison",
+      "status": "ok",
+      "score": 100,
+      "risk_level": "low",
+      "issues": [],
+      "likely_overflow_regions": [],
+      "likely_collision_regions": []
+    },
+    {
+      "layout": "two_column",
+      "status": "ok",
+      "score": 100,
+      "risk_level": "low",
+      "issues": [],
+      "likely_overflow_regions": [],
+      "likely_collision_regions": []
+    },
+    {
+      "layout": "table",
+      "status": "ok",
+      "score": 100,
+      "risk_level": "low",
+      "issues": [],
+      "likely_overflow_regions": [],
+      "likely_collision_regions": []
+    },
+    {
+      "layout": "faq",
+      "status": "ok",
+      "score": 100,
+      "risk_level": "low",
+      "issues": [],
+      "likely_overflow_regions": [],
+      "likely_collision_regions": []
+    },
+    {
+      "layout": "summary",
+      "status": "ok",
+      "score": 100,
+      "risk_level": "low",
+      "issues": [],
+      "likely_overflow_regions": [],
+      "likely_collision_regions": []
+    },
+    {
+      "layout": "closing",
+      "status": "ok",
+      "score": 100,
+      "risk_level": "low",
+      "issues": [],
+      "likely_overflow_regions": [],
+      "likely_collision_regions": []
+    }
+  ]
+}

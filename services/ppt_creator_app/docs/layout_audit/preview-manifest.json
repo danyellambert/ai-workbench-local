@@ -1,0 +1,93 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "layout_showcase_audit",
+  "output_dir": "/Users/danyellambert/ppt_creator_app/docs/layout_audit",
+  "presentation_title": "layout_showcase",
+  "theme": "executive_premium_minimal",
+  "preview_count": 15,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "/private/var/folders/nm/jmt711nd43gcd9c2p0bwpz8h0000gn/T/ppt_creator_layout_audit_lksuwiid/layout_showcase.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "layout_showcase_audit-01.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "layout_showcase_audit-02.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "layout_showcase_audit-03.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "layout_showcase_audit-04.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "layout_showcase_audit-05.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "layout_showcase_audit-06.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "layout_showcase_audit-07.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-07.png"
+    },
+    {
+      "slide_number": 8,
+      "filename": "layout_showcase_audit-08.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-08.png"
+    },
+    {
+      "slide_number": 9,
+      "filename": "layout_showcase_audit-09.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-09.png"
+    },
+    {
+      "slide_number": 10,
+      "filename": "layout_showcase_audit-10.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-10.png"
+    },
+    {
+      "slide_number": 11,
+      "filename": "layout_showcase_audit-11.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-11.png"
+    },
+    {
+      "slide_number": 12,
+      "filename": "layout_showcase_audit-12.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-12.png"
+    },
+    {
+      "slide_number": 13,
+      "filename": "layout_showcase_audit-13.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-13.png"
+    },
+    {
+      "slide_number": 14,
+      "filename": "layout_showcase_audit-14.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-14.png"
+    },
+    {
+      "slide_number": 15,
+      "filename": "layout_showcase_audit-15.png",
+      "path": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-15.png"
+    }
+  ]
+}

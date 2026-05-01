@@ -66,6 +66,7 @@ copy_path "frontend"
 
 copy_path "docs/deployment"
 copy_path "deploy/oracle"
+copy_path "services/ppt_creator_app"
 
 copy_path "scripts/prepare_oracle_data_root.sh"
 copy_path "scripts/smoke_oracle_like_compose.sh"
@@ -242,6 +243,9 @@ required_paths = [
     "docs/deployment/ORACLE_OPERATIONS_RUNBOOK.md",
     "docs/deployment/PHASE_13_2_ORACLE_HARDENING_HANDOFF.md",
     "deploy/oracle/Caddyfile.example",
+    "services/ppt_creator_app/Dockerfile",
+    "services/ppt_creator_app/pyproject.toml",
+    "services/ppt_creator_app/bin/run_ppt_creator_api_container.sh",
     "scripts/smoke_oracle_like_compose.sh",
     "scripts/validate_oracle_environment_contract.sh",
     "scripts/cleanup_public_session_overlays.py",

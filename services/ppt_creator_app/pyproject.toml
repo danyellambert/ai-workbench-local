@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ppt-creator"
+version = "0.1.0"
+description = "Reusable JSON-to-PPTX creator with an Executive Premium Minimal theme."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "Pillow>=10.0,<11.0",
+  "python-pptx>=0.6.23,<1.0.0",
+  "pydantic>=2.6,<3.0",
+]
+
+[project.scripts]
+ppt-creator = "ppt_creator.cli:main"
+ppt-creator-ai = "ppt_creator_ai.cli:main"
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2.0",
+  "pytest>=8.0,<9.0",
+  "ruff>=0.12,<0.13",
+  "twine>=5.0,<6.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["ppt_creator*", "ppt_creator_ai*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+  "F",
+  "I",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
