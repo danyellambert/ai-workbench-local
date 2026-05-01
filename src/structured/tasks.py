@@ -3974,9 +3974,9 @@ class DocumentAgentTaskHandler(TaskHandler):
                     "error": str(error),
                 }
 
-        if request.source_document_ids and (not (risks or gaps or actions) or (not risks and not actions)):
+        if request.source_document_ids and not (risks or gaps or actions):
             raise RuntimeError(
-                "document_risk_review_quality_gate_failed: extraction returned zero or sparse risks, gaps, "
+                "document_risk_review_quality_gate_failed: extraction returned zero risks, gaps, "
                 "and mitigation actions after retry"
             )
 
