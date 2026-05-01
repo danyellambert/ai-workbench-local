@@ -310,12 +310,13 @@ def _run_product_upload_job(
     job_id: str,
     uploaded_files: list[_ApiUploadedFile],
     bootstrap: ProductBootstrap,
+    rag_settings: Any | None = None,
 ) -> None:
     try:
         mark_product_upload_job_running(job_id, message="Running ingestion pipeline.")
         total_documents = len(uploaded_files)
         loaded_documents = []
-        effective_rag_settings = build_effective_rag_settings(default_settings=bootstrap.rag_settings, workspace_root=bootstrap.workspace_root)
+        effective_rag_settings = rag_settings or build_effective_rag_settings(default_settings=bootstrap.rag_settings, workspace_root=bootstrap.workspace_root)
         vlm_enhancement_enabled = bool(
             getattr(effective_rag_settings, "pdf_evidence_pipeline_enabled", False)
             or getattr(effective_rag_settings, "pdf_docling_picture_description", False)
@@ -426,11 +427,12 @@ def _run_product_cached_nextcloud_import_job(
     cached_entries: list[dict[str, Any]],
     uploaded_files: list[_ApiUploadedFile],
     bootstrap: ProductBootstrap,
+    rag_settings: Any | None = None,
 ) -> None:
     """Activate prebuilt public-corpus vectors while preserving the normal UX contract."""
     try:
         mark_product_upload_job_running(job_id, message="Running ingestion pipeline.")
-        effective_rag_settings = build_effective_rag_settings(default_settings=bootstrap.rag_settings, workspace_root=bootstrap.workspace_root)
+        effective_rag_settings = rag_settings or build_effective_rag_settings(default_settings=bootstrap.rag_settings, workspace_root=bootstrap.workspace_root)
         loaded_documents = []
         index_status: dict[str, Any] = {}
 
@@ -636,6 +638,7 @@ def start_product_cached_nextcloud_import_job(
     cached_entries: list[dict[str, Any]],
     uploaded_files: list[_ApiUploadedFile] | None = None,
     ignored_count: int = 0,
+    rag_settings: Any | None = None,
 ) -> dict[str, Any]:
     uploaded_files = list(uploaded_files or [])
     job_payload = create_product_upload_job(
@@ -649,6 +652,7 @@ def start_product_cached_nextcloud_import_job(
             "cached_entries": list(cached_entries),
             "uploaded_files": uploaded_files,
             "bootstrap": bootstrap,
+            "rag_settings": rag_settings,
         },
         daemon=True,
     )
@@ -661,6 +665,7 @@ def start_product_upload_job(
     bootstrap: ProductBootstrap,
     uploaded_files: list[_ApiUploadedFile],
     ignored_count: int = 0,
+    rag_settings: Any | None = None,
 ) -> dict[str, Any]:
     job_payload = create_product_upload_job(uploaded_count=len(uploaded_files), ignored_count=ignored_count)
     thread = threading.Thread(
@@ -669,6 +674,7 @@ def start_product_upload_job(
             "job_id": str(job_payload.get("job_id") or ""),
             "uploaded_files": list(uploaded_files),
             "bootstrap": bootstrap,
+            "rag_settings": rag_settings,
         },
         daemon=True,
     )
@@ -698,6 +704,7 @@ def start_product_nextcloud_batch_import_job(
     *,
     bootstrap: ProductBootstrap,
     documents: list[dict[str, Any]],
+    rag_settings: Any | None = None,
 ) -> dict[str, Any]:
     normalized_documents = [item for item in documents if isinstance(item, dict) and _nextcloud_import_item_has_locator(item)]
     if not normalized_documents:
@@ -737,13 +744,14 @@ def start_product_nextcloud_batch_import_job(
 
     if cached_entries:
         job_payload = start_product_cached_nextcloud_import_job(
-            bootstrap=bootstrap,
-            cached_entries=cached_entries,
-            uploaded_files=uploaded_files,
-            ignored_count=0,
-        )
+              bootstrap=bootstrap,
+              cached_entries=cached_entries,
+              uploaded_files=uploaded_files,
+              ignored_count=0,
+              rag_settings=rag_settings,
+          )
     else:
-        job_payload = start_product_upload_job(bootstrap=bootstrap, uploaded_files=uploaded_files, ignored_count=0)
+        job_payload = start_product_upload_job(bootstrap=bootstrap, uploaded_files=uploaded_files, ignored_count=0, rag_settings=rag_settings)
 
     total_selected = len(cached_entries) + len(uploaded_files)
     if total_selected == 1:
@@ -770,9 +778,11 @@ def start_product_nextcloud_import_job(
     title: str | None = None,
     category: str | None = None,
     webdav_url: str | None = None,
+    rag_settings: Any | None = None,
 ) -> dict[str, Any]:
     return start_product_nextcloud_batch_import_job(
         bootstrap=bootstrap,
+        rag_settings=rag_settings,
         documents=[
             {
                 "relative_path": relative_path,
@@ -1302,11 +1312,29 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 if not any(_nextcloud_import_item_has_locator(item) for item in import_documents):
                     self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "relative_path, document_id, filename, title or webdav_url is required."})
                     return
+                identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                rag_settings_override = None
+                if not identity.can_write_global:
+                    overlay_index_root = identity.overlay_root / "indexes"
+                    overlay_index_root.mkdir(parents=True, exist_ok=True)
+                    effective_rag_settings = build_effective_rag_settings(
+                        default_settings=self.bootstrap.rag_settings,
+                        workspace_root=self.bootstrap.workspace_root,
+                    )
+                    rag_settings_override = replace(
+                        effective_rag_settings,
+                        store_path=overlay_index_root / "rag_store.json",
+                        chroma_path=overlay_index_root / "chroma",
+                    )
+
                 job_payload = start_product_nextcloud_batch_import_job(
                     bootstrap=self.bootstrap,
                     documents=import_documents,
+                    rag_settings=rag_settings_override,
                 )
-                self._send_json(HTTPStatus.OK, job_payload)
+                job_payload["write_scope"] = "global" if identity.can_write_global else "session_overlay"
+                job_payload["overlay_root"] = str(identity.overlay_root) if not identity.can_write_global else None
+                self._send_json_with_cookies(HTTPStatus.OK, job_payload, cookies=[set_cookie] if set_cookie else None)
             except FileNotFoundError as error:
                 self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": str(error)})
             except Exception as error:  # pragma: no cover - defensive API surface
