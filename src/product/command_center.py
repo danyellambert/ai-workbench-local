@@ -848,6 +848,16 @@ def build_product_artifact_payload(
 ) -> dict[str, object]:
     artifact_root = get_artifact_root(bootstrap.workspace_root) / "presentation_exports"
     entries = _build_artifact_entries(bootstrap, additional_artifact_roots=additional_artifact_roots)
+    entries = sorted(
+        entries,
+        key=lambda entry: (
+            str(entry.get("status") or "").strip().lower() == "ready",
+            str(entry.get("created_at") or ""),
+            int(entry.get("asset_count") or 0),
+            int(entry.get("preview_count") or 0),
+        ),
+        reverse=True,
+    )
     completed_count = sum(1 for entry in entries if str(entry.get("status") or "") == "ready")
     error_count = sum(1 for entry in entries if str(entry.get("status") or "") == "error")
     artifact_roots = [str(artifact_root)]
