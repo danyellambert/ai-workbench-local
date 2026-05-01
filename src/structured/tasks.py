@@ -247,6 +247,7 @@ class TaskHandler:
         except Exception:
             return [user_message]
 
+
     def _collect_response_text(self, provider, request: TaskExecutionRequest, prompt: str) -> str:
         from ..services.runtime_economics import get_provider_native_usage_metrics
 
@@ -284,15 +285,8 @@ class TaskHandler:
                         "provider_requested": telemetry.get("provider_requested") or request.provider,
                         "model": request.model,
                         "duration_s": duration_s,
-                        "prompt_chars": len(prompt or ""),
-                        "context_window": request.context_window,
-                        "temperature": request.temperature,
-                        "top_p": request.top_p,
-                        "max_tokens": request.max_tokens,
-                        "prompt_profile": request.prompt_profile,
-                        "success": error_message is None,
-                        **({"native_usage": native_usage} if native_usage else {}),
                         **({"error": error_message} if error_message else {}),
+                        **(native_usage or {}),
                     }
                 )
 
@@ -3880,14 +3874,21 @@ class DocumentAgentTaskHandler(TaskHandler):
                 update={
                     "input_text": (
                         "Review the selected document as a risk and decision-readiness reviewer. "
-                        "Identify grounded contractual, operational, security, commercial, liability, compliance, "
-                        "ambiguity, ownership, deadline, evidence-gap, approval, or decision-readiness risks. "
-                        "Use only the selected document evidence. Return concrete risks, gaps, and mitigation actions "
-                        "rather than an empty result when review-relevant obligations, risks, gaps, ambiguities, or "
-                        "approval considerations are present."
+                        "Prioritize a compact risk-first extraction for Document Review. "
+                        "Do not exhaust the response budget on general entity extraction. "
+                        "Put risks, action_items, and missing_information early in the JSON before verbose entities, relationships, extracted_fields, dates, and numbers. "
+                        "Keep entities, relationships, extracted_fields, dates, and numbers minimal. "
+                        "Focus on 1 to 5 concrete evidence-grounded risks, 0 to 5 evidence gaps, and 1 to 5 mitigation actions. "
+                        "Identify contractual, operational, security, commercial, liability, compliance, ambiguity, ownership, "
+                        "deadline, evidence-gap, approval, or decision-readiness risks. "
+                        "Use only selected-document evidence. "
+                        "If the selected document contains review-relevant obligations, risk language, liability terms, "
+                        "indemnification, renewal, termination, audit, data-use, ownership, approval, or ambiguity signals, "
+                        "do not return empty risks/actions. Return at least one grounded risk."
                     ),
                     "temperature": 0.0,
                     "top_p": min(float(request.top_p or 0.95), 0.7),
+                    "max_tokens": max(int(request.max_tokens or 0), 8192),
                     "telemetry": {
                         **self._telemetry_dict(request),
                         "document_review_primary_extraction_prompted": True,
@@ -3912,19 +3913,21 @@ class DocumentAgentTaskHandler(TaskHandler):
         empty_extraction_retry_metadata: dict[str, object] | None = None
         if request.source_document_ids and (not (risks or gaps or actions) or (not risks and not actions)):
             retry_input = (
-                "Review the selected document as a risk and decision-readiness reviewer. "
-                "Quality gate retry: the previous extraction returned zero or sparse risks, gaps and mitigation actions. "
-                "Identify grounded contractual, operational, security, commercial, liability, compliance, ambiguity, "
-                "ownership, deadline, evidence-gap, approval, or decision-readiness risks. "
-                "Use only the selected document evidence. Return concrete risks, gaps, and mitigation actions. "
-                "Do not return an empty or gap-only result when review-relevant obligations, risks, ambiguities, "
-                "or approval considerations are present."
+                "Quality gate retry for Document Review. The previous structured extraction returned zero or sparse "
+                "risks, gaps, and mitigation actions. Return compact valid JSON for the extraction schema. "
+                "Put risks, action_items, and missing_information early in the JSON before verbose entities, "
+                "relationships, extracted_fields, dates, and numbers. Keep non-risk fields minimal. "
+                "Focus on 1 to 5 concrete evidence-grounded risks, 0 to 5 evidence gaps, and 1 to 5 mitigation actions. "
+                "Use only selected-document evidence. Do not return empty risks/actions when the document contains "
+                "liability, indemnification, renewal, termination, audit, data-use, ownership, approval, ambiguity, "
+                "missing-control, or decision-readiness signals."
             ).strip()
             retry_request = request.model_copy(
                 update={
                     "input_text": retry_input,
                     "temperature": 0.0,
                     "top_p": min(float(request.top_p or 0.95), 0.7),
+                    "max_tokens": max(int(request.max_tokens or 0), 8192),
                     "telemetry": {
                         **self._telemetry_dict(request),
                         "document_review_empty_extraction_retry": True,
