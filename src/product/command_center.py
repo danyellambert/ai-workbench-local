@@ -375,20 +375,166 @@ def _coerce_request_payload(entry: dict[str, object]) -> dict[str, object] | Non
     return payload
 
 
-def _count_product_workflow_findings(result: ProductWorkflowResult | None) -> int:
+def _count_product_workflow_findings(*args, **kwargs) -> int:
+    """Count the most useful visible outcome for each product workflow.
+
+    The Run History column is named findings for historical UI reasons, but not every
+    workflow emits literal `findings`. Action Plan emits actions/deadlines/risks,
+    Candidate Review emits strengths/signals, and Policy Comparison emits comparison
+    findings or highlights. This function counts real structured outputs only; it
+    does not invent synthetic findings.
+    """
+
+    def _as_dict(value):
+        if isinstance(value, dict):
+            return value
+        if hasattr(value, "model_dump"):
+            try:
+                dumped = value.model_dump(mode="json")
+                return dumped if isinstance(dumped, dict) else {}
+            except Exception:
+                return {}
+        return {}
+
+    def _clean_len(value) -> int:
+        if isinstance(value, list):
+            return len([item for item in value if str(item or "").strip()])
+        if isinstance(value, dict):
+            return len([key for key, item in value.items() if str(item or "").strip()])
+        return 1 if str(value or "").strip() else 0
+
+    def _walk(value, depth: int = 0):
+        if depth > 5:
+            return
+        if isinstance(value, dict):
+            yield value
+            for nested in value.values():
+                yield from _walk(nested, depth + 1)
+        elif isinstance(value, list):
+            for item in value:
+                yield from _walk(item, depth + 1)
+        else:
+            dumped = _as_dict(value)
+            if dumped:
+                yield from _walk(dumped, depth + 1)
+
+    result = kwargs.get("result")
+    if result is None:
+        for arg in args:
+            if hasattr(arg, "workflow_id") or hasattr(arg, "structured_result") or isinstance(arg, dict):
+                result = arg
+                break
+
     if result is None:
         return 0
 
-    if result.workflow_id == "document_review":
-        try:
-            view = build_document_review_view(result)
-        except Exception:
-            view = {}
-        findings = view.get("findings") if isinstance(view, dict) else []
-        if isinstance(findings, list):
-            return len(findings)
+    result_dict = _as_dict(result)
+    workflow_id = str(
+        result_dict.get("workflow_id")
+        or getattr(result, "workflow_id", "")
+        or kwargs.get("workflow_id", "")
+        or ""
+    ).lower()
 
-    return len(result.highlights or [])
+    containers = [result_dict]
+
+    structured_result = result_dict.get("structured_result") or getattr(result, "structured_result", None)
+    if structured_result is not None:
+        containers.append(_as_dict(structured_result))
+        validated_output = getattr(structured_result, "validated_output", None)
+        if validated_output is not None:
+            containers.append(_as_dict(validated_output))
+        parsed_json = getattr(structured_result, "parsed_json", None)
+        if parsed_json is not None:
+            containers.append(_as_dict(parsed_json))
+
+    for attr in ("validated_output", "parsed_json", "result_view", "response_payload"):
+        value = result_dict.get(attr) if isinstance(result_dict, dict) else None
+        if value:
+            containers.append(_as_dict(value))
+
+    # Include top-level ProductWorkflowResult lists.
+    for attr in ("highlights", "warnings", "artifacts"):
+        value = result_dict.get(attr)
+        if value:
+            containers.append({attr: value})
+
+    key_sets = {
+        "action_plan_evidence_review": [
+            "actions",
+            "action_items",
+            "recommended_actions",
+            "checklist_preview",
+            "deadlines",
+            "important_dates",
+            "risks",
+            "blockers",
+            "evidence_gaps",
+            "missing_information",
+        ],
+        "policy_contract_comparison": [
+            "comparison_findings",
+            "findings",
+            "differences",
+            "key_differences",
+            "recommendations",
+            "key_points",
+            "highlights",
+            "risks",
+            "gaps",
+        ],
+        "candidate_review": [
+            "strengths",
+            "seniority_signals",
+            "skills",
+            "concerns",
+            "risks",
+            "key_points",
+            "highlights",
+            "recommendations",
+        ],
+        "document_review": [
+            "findings",
+            "risks",
+            "gaps",
+            "missing_information",
+            "actions",
+            "action_items",
+            "key_points",
+            "highlights",
+        ],
+    }
+
+    selected_keys = key_sets.get(workflow_id)
+    if not selected_keys:
+        selected_keys = [
+            "findings",
+            "actions",
+            "action_items",
+            "recommendations",
+            "key_points",
+            "highlights",
+            "risks",
+            "gaps",
+        ]
+
+    counts: list[int] = []
+
+    for container in containers:
+        for obj in _walk(container):
+            for key in selected_keys:
+                if key in obj:
+                    counts.append(_clean_len(obj.get(key)))
+
+            structured_response = obj.get("structured_response")
+            if isinstance(structured_response, dict):
+                for key in selected_keys:
+                    if key in structured_response:
+                        counts.append(_clean_len(structured_response.get(key)))
+
+    # Prefer the strongest workflow-specific signal, not a sum that double-counts
+    # the same item repeated in payload, structured_response and highlights.
+    return max(counts or [0])
 
 
 def build_product_workflow_history_entry(

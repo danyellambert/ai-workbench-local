@@ -4873,25 +4873,155 @@ Grounded input:
         request: TaskExecutionRequest,
         context_strategy: str,
     ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        operational_request = request
+        if request.source_document_ids:
+            operational_request = request.model_copy(
+                update={
+                    "input_text": (
+                        "Extract a compact operational action plan from the selected documents. "
+                        "Prioritize action_items, important_dates, risks, and missing_information early in the JSON. "
+                        "Do not spend the response budget on verbose general entities or relationships. "
+                        "Focus on 1 to 8 concrete grounded actions, 1 to 8 due dates or timing constraints when present, "
+                        "and 0 to 6 operational risks or blockers. "
+                        "Use only selected-document evidence. "
+                        "Treat committee action items, remediation tasks, NCR/nonconformance items, audit checklist gaps, "
+                        "vendor access review tasks, owners, assignees, target dates, closure notes, evidence requests, "
+                        "dependencies, blockers, and governance follow-ups as actionable operational items. "
+                        "If the selected documents contain owners, due dates, remediation language, evidence gaps, "
+                        "committee actions, audit findings, or nonconformance remediation, do not return empty action_items."
+                    ),
+                    "temperature": 0.0,
+                    "top_p": min(float(request.top_p or 0.95), 0.7),
+                    "max_tokens": max(int(request.max_tokens or 0), 8192),
+                    "telemetry": {
+                        **self._telemetry_dict(request),
+                        "action_plan_primary_extraction_prompted": True,
+                        "current_stage": "action_plan_primary_extraction",
+                    },
+                }
+            )
+
         nested_result = self._run_nested_structured_task(
-            request=request,
+            request=operational_request,
             task_type="extraction",
             context_strategy="document_scan" if request.source_document_ids else context_strategy,
         )
+        if operational_request is not request:
+            self._merge_nested_task_telemetry(
+                request,
+                nested_result,
+                nested_telemetry=self._telemetry_dict(operational_request),
+            )
+
         if not nested_result.success or not isinstance(nested_result.validated_output, ExtractionPayload):
             raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "operational_task_extraction_tool_failed")
 
-        payload = nested_result.validated_output
-        actions = normalize_agent_bullet_points([item.description for item in payload.action_items], limit=8)
-        deadlines = normalize_agent_bullet_points(
-            [
-                item.due_date
+        def _project_payload(payload: ExtractionPayload) -> tuple[list[str], list[str], list[str]]:
+            action_texts = []
+            for item in payload.action_items:
+                text = str(
+                    getattr(item, "description", None)
+                    or getattr(item, "title", None)
+                    or getattr(item, "action", None)
+                    or ""
+                ).strip()
+                if text:
+                    action_texts.append(text)
+
+            due_dates = [
+                str(getattr(item, "due_date", "") or "").strip()
                 for item in payload.action_items
-                if item.due_date
-            ] + list(payload.important_dates),
-            limit=6,
-        )
-        risks = normalize_agent_bullet_points([item.description for item in payload.risks], limit=6)
+                if str(getattr(item, "due_date", "") or "").strip()
+            ]
+            due_dates.extend([str(value or "").strip() for value in payload.important_dates if str(value or "").strip()])
+
+            risk_texts = []
+            for item in payload.risks:
+                text = str(
+                    getattr(item, "description", None)
+                    or getattr(item, "title", None)
+                    or getattr(item, "risk", None)
+                    or ""
+                ).strip()
+                if text:
+                    risk_texts.append(text)
+
+            return (
+                normalize_agent_bullet_points(action_texts, limit=8),
+                normalize_agent_bullet_points(due_dates, limit=8),
+                normalize_agent_bullet_points(risk_texts, limit=6),
+            )
+
+        payload = nested_result.validated_output
+        actions, deadlines, risks = _project_payload(payload)
+
+        empty_extraction_retry_metadata: dict[str, object] | None = None
+        if request.source_document_ids and not (actions or deadlines or risks):
+            retry_input = (
+                "Quality gate retry for Action Plan / Evidence Review. The previous extraction returned zero "
+                "actions, zero deadlines, and zero operational risks. Return compact valid JSON for the extraction schema. "
+                "Put action_items, important_dates, risks, and missing_information early in the JSON before verbose "
+                "entities, relationships, extracted_fields, dates, and numbers. Keep non-operational fields minimal. "
+                "Extract concrete tasks, owners, target dates, remediation actions, evidence requests, blockers, "
+                "audit checklist gaps, committee action items, NCR/nonconformance remediation items, and governance "
+                "follow-ups explicitly present in the selected documents. Use only selected-document evidence. "
+                "Do not return empty action_items when the selected documents contain owners, due dates, remediation "
+                "language, evidence gaps, action registers, committee actions, audit findings, or closure tasks."
+            ).strip()
+            retry_request = request.model_copy(
+                update={
+                    "input_text": retry_input,
+                    "temperature": 0.0,
+                    "top_p": min(float(request.top_p or 0.95), 0.7),
+                    "max_tokens": max(int(request.max_tokens or 0), 8192),
+                    "telemetry": {
+                        **self._telemetry_dict(request),
+                        "action_plan_empty_extraction_retry": True,
+                        "current_stage": "action_plan_empty_extraction_retry",
+                    },
+                }
+            )
+            try:
+                retry_result = self._run_nested_structured_task(
+                    request=retry_request,
+                    task_type="extraction",
+                    context_strategy="document_scan" if request.source_document_ids else context_strategy,
+                )
+                self._merge_nested_task_telemetry(
+                    request,
+                    retry_result,
+                    nested_telemetry=self._telemetry_dict(retry_request),
+                )
+                if retry_result.success and isinstance(retry_result.validated_output, ExtractionPayload):
+                    retry_payload = retry_result.validated_output
+                    retry_actions, retry_deadlines, retry_risks = _project_payload(retry_payload)
+                    empty_extraction_retry_metadata = {
+                        "used": True,
+                        "success": bool(retry_actions or retry_deadlines or retry_risks),
+                        "actions": len(retry_actions),
+                        "deadlines": len(retry_deadlines),
+                        "risks": len(retry_risks),
+                    }
+                    if retry_actions or retry_deadlines or retry_risks:
+                        nested_result = retry_result
+                        payload = retry_payload
+                        actions = retry_actions
+                        deadlines = retry_deadlines
+                        risks = retry_risks
+                else:
+                    empty_extraction_retry_metadata = {
+                        "used": True,
+                        "success": False,
+                        "validation_error": retry_result.validation_error,
+                        "parsing_error": retry_result.parsing_error,
+                    }
+            except Exception as error:
+                empty_extraction_retry_metadata = {
+                    "used": True,
+                    "success": False,
+                    "error": str(error),
+                }
+
         key_points = normalize_agent_bullet_points([*actions[:4], *deadlines[:1], *risks[:1]], limit=6)
         confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.78)
         if not actions:
@@ -4919,6 +5049,7 @@ Grounded input:
                     "actions": actions,
                     "deadlines": deadlines,
                     "risks": risks,
+                    "empty_extraction_retry": empty_extraction_retry_metadata,
                     "extraction_payload": payload.model_dump(mode="json"),
                 },
                 confidence=confidence,
@@ -4927,6 +5058,7 @@ Grounded input:
             ),
             nested_result,
         )
+
 
     def _run_policy_compliance_tool(
         self,
