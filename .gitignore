@@ -61,3 +61,5 @@ runtime-state-diagnosis*.txt
 .tmp_playwright/
 test-results/
 .env.oracle
+.env.docker.local
+ads-local-restore.override.yml
