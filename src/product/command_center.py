@@ -966,8 +966,24 @@ def build_product_command_center_payload(bootstrap: ProductBootstrap, *, recent_
     }
 
 
-def build_product_document_library_payload(bootstrap: ProductBootstrap) -> dict[str, object]:
+def build_product_document_library_payload(
+    bootstrap: ProductBootstrap,
+    *,
+    additional_documents: list[object] | None = None,
+) -> dict[str, object]:
     documents = list_product_documents(bootstrap.rag_settings)
+
+    if additional_documents:
+        merged_by_id: dict[str, object] = {}
+        anonymous_index = 0
+        for item in [*documents, *additional_documents]:
+            document_id = str(getattr(item, "document_id", "") or "").strip()
+            if not document_id:
+                anonymous_index += 1
+                document_id = f"__anonymous_document_{anonymous_index}"
+            merged_by_id[document_id] = item
+        documents = list(merged_by_id.values())
+
     direct_upload_enabled = bool(getattr(bootstrap.product_settings, "allow_direct_uploads", True))
     status_counts: dict[str, int] = {
         "indexed": 0,
@@ -977,9 +993,9 @@ def build_product_document_library_payload(bootstrap: ProductBootstrap) -> dict[
         "pending": 0,
     }
     for item in documents:
-        status_counts[item.status] = status_counts.get(item.status, 0) + 1
+        status_counts[getattr(item, "status", "pending")] = status_counts.get(getattr(item, "status", "pending"), 0) + 1
 
-    indexed_documents = sum(1 for item in documents if item.indexed_at)
+    indexed_documents = sum(1 for item in documents if getattr(item, "indexed_at", None))
     return {
         "ok": True,
         "summary": {
@@ -989,13 +1005,13 @@ def build_product_document_library_payload(bootstrap: ProductBootstrap) -> dict[
             "error_documents": int(status_counts.get("error") or 0),
             "pending_documents": int(status_counts.get("pending") or 0),
             "indexing_documents": int(status_counts.get("indexing") or 0),
-            "total_chunks": sum(int(item.chunk_count or 0) for item in documents),
-            "total_chars": sum(int(item.char_count or 0) for item in documents),
+            "total_chunks": sum(int(getattr(item, "chunk_count", 0) or 0) for item in documents),
+            "total_chars": sum(int(getattr(item, "char_count", 0) or 0) for item in documents),
         },
         "capabilities": {
             "direct_upload_enabled": direct_upload_enabled,
             "nextcloud_import_enabled": True,
             "public_demo_mode": not direct_upload_enabled,
         },
-        "documents": [item.model_dump(mode="json") for item in documents],
+        "documents": [item.model_dump(mode="json") for item in documents if hasattr(item, "model_dump")],
     }

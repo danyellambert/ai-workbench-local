@@ -151,6 +151,15 @@ def _resolve_product_workflow_runtime_request(
         explicit_fields=explicit_fields,
     )
 
+def _build_overlay_rag_settings(*, bootstrap: ProductBootstrap, overlay_root: Path):
+    overlay_index_root = overlay_root / "indexes"
+    return replace(
+        bootstrap.rag_settings,
+        store_path=overlay_index_root / "rag_store.json",
+        chroma_path=overlay_index_root / "chroma",
+    )
+
+
 def _resolve_product_artifact_path(
     *,
     bootstrap: ProductBootstrap,
@@ -1061,12 +1070,41 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/product/documents":
-            documents = [item.model_dump(mode="json") for item in list_product_documents(self.bootstrap.rag_settings)]
-            self._send_json(HTTPStatus.OK, {"ok": True, "documents": documents})
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            documents = list_product_documents(self.bootstrap.rag_settings)
+            if not identity.can_write_global:
+                overlay_rag_settings = _build_overlay_rag_settings(
+                    bootstrap=self.bootstrap,
+                    overlay_root=identity.overlay_root,
+                )
+                overlay_documents = list_product_documents(overlay_rag_settings)
+                merged_by_id = {str(item.document_id): item for item in documents if str(item.document_id).strip()}
+                for item in overlay_documents:
+                    merged_by_id[str(item.document_id)] = item
+                documents = list(merged_by_id.values())
+            payload = {
+                "ok": True,
+                "read_scope": "global" if identity.can_write_global else "global_plus_session_overlay",
+                "documents": [item.model_dump(mode="json") for item in documents],
+            }
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/product/document-library":
-            self._send_json(HTTPStatus.OK, build_product_document_library_payload(self.bootstrap))
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            additional_documents = []
+            if not identity.can_write_global:
+                overlay_rag_settings = _build_overlay_rag_settings(
+                    bootstrap=self.bootstrap,
+                    overlay_root=identity.overlay_root,
+                )
+                additional_documents = list_product_documents(overlay_rag_settings)
+            payload = build_product_document_library_payload(
+                self.bootstrap,
+                additional_documents=additional_documents,
+            )
+            payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/product/integrations/nextcloud/open":
