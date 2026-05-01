@@ -42,6 +42,8 @@ copy_path() {
         --exclude .pytest_cache \
         --exclude __pycache__ \
         --exclude '*.pyc' \
+        --exclude .DS_Store \
+        --exclude '._*' \
         "$SRC"/ "$DST"/
     else
       cp -R "$SRC" "$DST"
@@ -63,9 +65,26 @@ copy_path "src"
 copy_path "frontend"
 
 copy_path "docs/deployment"
+copy_path "deploy/oracle"
+
 copy_path "scripts/prepare_oracle_data_root.sh"
 copy_path "scripts/smoke_oracle_like_compose.sh"
 copy_path "scripts/readiness_oracle_like_deploy_check.sh"
+copy_path "scripts/validate_oracle_environment_contract.sh"
+copy_path "scripts/readiness_oracle_like_service_topology_check.sh"
+
+copy_path "scripts/cleanup_public_session_overlays.py"
+copy_path "scripts/backup_oracle_data_root.sh"
+copy_path "scripts/restore_oracle_data_root.sh"
+copy_path "scripts/oracle_health_ops_report.py"
+
+copy_path "scripts/readiness_phase_13_2_public_session_retention_check.sh"
+copy_path "scripts/readiness_phase_13_2_backup_restore_check.sh"
+copy_path "scripts/readiness_phase_13_2_oracle_exposure_check.sh"
+copy_path "scripts/readiness_phase_13_2_health_ops_check.sh"
+copy_path "scripts/readiness_phase_13_2_oracle_hardening_check.sh"
+
+find "$BUNDLE_ROOT" \( -name ".DS_Store" -o -name "._*" \) -type f -delete
 
 python3 - <<'PY'
 import json
@@ -221,7 +240,15 @@ required_paths = [
     "src",
     "frontend",
     "docs/deployment/ORACLE_OPERATIONS_RUNBOOK.md",
+    "docs/deployment/PHASE_13_2_ORACLE_HARDENING_HANDOFF.md",
+    "deploy/oracle/Caddyfile.example",
     "scripts/smoke_oracle_like_compose.sh",
+    "scripts/validate_oracle_environment_contract.sh",
+    "scripts/cleanup_public_session_overlays.py",
+    "scripts/backup_oracle_data_root.sh",
+    "scripts/restore_oracle_data_root.sh",
+    "scripts/oracle_health_ops_report.py",
+    "scripts/readiness_phase_13_2_oracle_hardening_check.sh",
 ]
 
 checks = {
@@ -230,6 +257,7 @@ checks = {
     "no_real_env_files": not forbidden_files(bundle_root),
     "no_secret_findings": not secret_findings(bundle_root),
     "no_runtime_or_baseline_data": not heavy_or_runtime_paths(bundle_root),
+    "no_macos_metadata": not list(bundle_root.rglob(".DS_Store")) and not list(bundle_root.rglob("._*")),
     "file_count_gt_20": count_files(bundle_root) > 20,
 }
 
