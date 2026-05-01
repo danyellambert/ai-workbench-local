@@ -599,7 +599,7 @@ def build_product_rerun_request_payload(entry: dict[str, object]) -> dict[str, o
     return normalized
 
 
-def build_product_run_history_payload(bootstrap: ProductBootstrap, *, recent_limit: int = 25) -> dict[str, object]:
+def build_product_run_history_payload(bootstrap: ProductBootstrap, *, recent_limit: int = 25, additional_history_paths: list[Path] | None = None) -> dict[str, object]:
     history_path = get_product_workflow_history_path(bootstrap.workspace_root)
     document_lookup = _build_document_lookup(bootstrap)
     history_entries = load_product_workflow_history(history_path)
@@ -613,17 +613,32 @@ def build_product_run_history_payload(bootstrap: ProductBootstrap, *, recent_lim
         runtime_entries = load_runtime_execution_log(get_runtime_execution_log_path(bootstrap.workspace_root))
         entries = _build_run_entries_from_runtime_log(runtime_entries, document_lookup=document_lookup)
         source = "runtime_execution_fallback"
+    additional_sources: list[str] = []
+    for additional_path in additional_history_paths or []:
+        additional_entries = [
+            _normalize_history_entry(entry, document_lookup=document_lookup, source="session_overlay_workflow_history")
+            for entry in load_product_workflow_history(additional_path)
+        ]
+        if additional_entries:
+            additional_sources.append(str(additional_path))
+            entries.extend(additional_entries)
+
+    if additional_sources:
+        source = f"{source}+session_overlay"
+        entries = sorted(entries, key=lambda entry: str(entry.get("timestamp") or entry.get("created_at") or ""))
+
     summary = summarize_product_workflow_history(entries)
     return {
         "ok": True,
         "source": source,
         "history_path": str(history_path),
+        "additional_history_paths": additional_sources,
         "summary": summary,
         "runs": list(reversed(entries[-recent_limit:])),
     }
 
 
-def build_product_run_detail_payload(bootstrap: ProductBootstrap, *, run_id: str) -> dict[str, object] | None:
+def build_product_run_detail_payload(bootstrap: ProductBootstrap, *, run_id: str, additional_history_paths: list[Path] | None = None) -> dict[str, object] | None:
     history_path = get_product_workflow_history_path(bootstrap.workspace_root)
     document_lookup = _build_document_lookup(bootstrap)
     history_entries = load_product_workflow_history(history_path)
@@ -635,6 +650,16 @@ def build_product_run_detail_payload(bootstrap: ProductBootstrap, *, run_id: str
                 "history_path": str(history_path),
                 "run": _normalize_history_entry(entry, document_lookup=document_lookup, source="product_workflow_history"),
             }
+
+    for additional_path in additional_history_paths or []:
+        for entry in load_product_workflow_history(additional_path):
+            if str(entry.get("id") or "").strip() == str(run_id or "").strip():
+                return {
+                    "ok": True,
+                    "source": "session_overlay_workflow_history",
+                    "history_path": str(additional_path),
+                    "run": _normalize_history_entry(entry, document_lookup=document_lookup, source="session_overlay_workflow_history"),
+                }
 
     runtime_entries = _build_run_entries_from_runtime_log(
         load_runtime_execution_log(get_runtime_execution_log_path(bootstrap.workspace_root)),

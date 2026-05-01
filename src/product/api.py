@@ -1153,16 +1153,41 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/product/run-history":
-            self._send_json(HTTPStatus.OK, build_product_run_history_payload(self.bootstrap, recent_limit=100))
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            additional_history_paths = []
+            if not identity.can_write_global:
+                additional_history_paths.append(identity.overlay_root / "runs" / "workflow_history.json")
+            payload = build_product_run_history_payload(
+                self.bootstrap,
+                recent_limit=100,
+                additional_history_paths=additional_history_paths,
+            )
+            payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path.startswith("/api/product/run-history/"):
             run_id = path.removeprefix("/api/product/run-history/").strip("/")
-            detail_payload = build_product_run_detail_payload(self.bootstrap, run_id=run_id)
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            additional_history_paths = []
+            if not identity.can_write_global:
+                additional_history_paths.append(identity.overlay_root / "runs" / "workflow_history.json")
+            detail_payload = build_product_run_detail_payload(
+                self.bootstrap,
+                run_id=run_id,
+                additional_history_paths=additional_history_paths,
+            )
             if detail_payload is None:
-                self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Run history entry not found."})
+                self._send_json_with_cookies(
+                    HTTPStatus.NOT_FOUND,
+                    {"ok": False, "error": "Run history entry not found."},
+                    cookies=[set_cookie] if set_cookie else None,
+                )
                 return
-            self._send_json(HTTPStatus.OK, _hydrate_run_detail_with_workflow_response(detail_payload))
+            hydrated_payload = _hydrate_run_detail_with_workflow_response(detail_payload)
+            if isinstance(hydrated_payload, dict):
+                hydrated_payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
+            self._send_json_with_cookies(HTTPStatus.OK, hydrated_payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/product/artifacts":
