@@ -3886,6 +3886,78 @@ class DocumentAgentTaskHandler(TaskHandler):
         risks = normalize_agent_bullet_points([item.description for item in payload.risks], limit=8)
         gaps = normalize_agent_bullet_points(payload.missing_information, limit=6)
         actions = normalize_agent_bullet_points([item.description for item in payload.action_items], limit=6)
+
+        empty_extraction_retry_metadata: dict[str, object] | None = None
+        if request.source_document_ids and not (risks or gaps or actions):
+            retry_input = (
+                f"{request.input_text.strip()}\n\n"
+                "Quality gate retry: the previous extraction returned zero risks, gaps and mitigation actions. "
+                "Review the selected document again. Identify grounded contractual, operational, security, "
+                "commercial, liability, compliance, ambiguity, ownership, deadline, evidence-gap, approval, "
+                "or decision-readiness risks. Use only the selected document evidence. "
+                "Do not return an empty result unless the document truly contains no review-relevant obligations, "
+                "risks, gaps, ambiguities, or approval considerations."
+            ).strip()
+            retry_request = request.model_copy(
+                update={
+                    "input_text": retry_input,
+                    "temperature": 0.0,
+                    "top_p": min(float(request.top_p or 0.95), 0.7),
+                    "telemetry": {
+                        **self._telemetry_dict(request),
+                        "document_review_empty_extraction_retry": True,
+                        "current_stage": "document_review_empty_extraction_retry",
+                    },
+                }
+            )
+            try:
+                retry_result = self._run_nested_structured_task(
+                    request=retry_request,
+                    task_type="extraction",
+                    context_strategy="document_scan" if request.source_document_ids else context_strategy,
+                )
+                if retry_result.success and isinstance(retry_result.validated_output, ExtractionPayload):
+                    retry_payload = retry_result.validated_output
+                    retry_risks = normalize_agent_bullet_points([item.description for item in retry_payload.risks], limit=8)
+                    retry_gaps = normalize_agent_bullet_points(retry_payload.missing_information, limit=6)
+                    retry_actions = normalize_agent_bullet_points([item.description for item in retry_payload.action_items], limit=6)
+                    if retry_risks or retry_gaps or retry_actions:
+                        payload = retry_payload
+                        nested_result = retry_result
+                        risks = retry_risks
+                        gaps = retry_gaps
+                        actions = retry_actions
+                        empty_extraction_retry_metadata = {
+                            "success": True,
+                            "reason": "initial_extraction_returned_zero_items",
+                            "risks": len(risks),
+                            "gaps": len(gaps),
+                            "actions": len(actions),
+                        }
+                    else:
+                        empty_extraction_retry_metadata = {
+                            "success": False,
+                            "reason": "retry_returned_zero_items",
+                        }
+                else:
+                    empty_extraction_retry_metadata = {
+                        "success": False,
+                        "reason": "retry_failed_validation",
+                        "error": retry_result.validation_error or retry_result.parsing_error,
+                    }
+            except Exception as error:
+                empty_extraction_retry_metadata = {
+                    "success": False,
+                    "reason": "retry_exception",
+                    "error": str(error),
+                }
+
+        if request.source_document_ids and not (risks or gaps or actions):
+            raise RuntimeError(
+                "document_risk_review_quality_gate_failed: extraction returned zero risks, gaps, "
+                "and mitigation actions after retry"
+            )
+
         key_points = normalize_agent_bullet_points([*risks[:3], *gaps[:2], *actions[:2]], limit=6)
         confidence = float(nested_result.quality_score or nested_result.overall_confidence or 0.79)
         if not risks and gaps:
@@ -3943,6 +4015,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     "extraction_payload": payload.model_dump(mode="json"),
                     **({"findings_synthesis": findings_payload.model_dump(mode="json")} if findings_payload is not None else {}),
                     **({"findings_synthesis_metadata": findings_synthesis_metadata} if findings_synthesis_metadata else {}),
+                    **({"empty_extraction_retry": empty_extraction_retry_metadata} if empty_extraction_retry_metadata else {}),
                 },
                 confidence=confidence,
                 needs_review=bool(gaps and not risks),
