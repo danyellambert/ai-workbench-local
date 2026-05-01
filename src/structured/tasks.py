@@ -247,7 +247,6 @@ class TaskHandler:
         except Exception:
             return [user_message]
 
-
     def _collect_response_text(self, provider, request: TaskExecutionRequest, prompt: str) -> str:
         from ..services.runtime_economics import get_provider_native_usage_metrics
 
@@ -285,8 +284,15 @@ class TaskHandler:
                         "provider_requested": telemetry.get("provider_requested") or request.provider,
                         "model": request.model,
                         "duration_s": duration_s,
+                        "prompt_chars": len(prompt or ""),
+                        "context_window": request.context_window,
+                        "temperature": request.temperature,
+                        "top_p": request.top_p,
+                        "max_tokens": request.max_tokens,
+                        "prompt_profile": request.prompt_profile,
+                        "success": error_message is None,
+                        **({"native_usage": native_usage} if native_usage else {}),
                         **({"error": error_message} if error_message else {}),
-                        **(native_usage or {}),
                     }
                 )
 
@@ -5180,6 +5186,64 @@ Grounded input:
             tool_runs,
         )
 
+    def _merge_nested_task_telemetry(
+        self,
+        request: TaskExecutionRequest,
+        nested_result: StructuredResult,
+        *,
+        nested_telemetry: dict[str, object] | None = None,
+    ) -> None:
+        parent_telemetry = self._telemetry_dict(request)
+        if not isinstance(parent_telemetry, dict):
+            return
+
+        metadata = nested_result.execution_metadata if isinstance(nested_result.execution_metadata, dict) else {}
+        source_telemetry = metadata.get("telemetry") if isinstance(metadata.get("telemetry"), dict) else nested_telemetry
+        if not isinstance(source_telemetry, dict):
+            return
+
+        source_calls = source_telemetry.get("provider_calls")
+        if isinstance(source_calls, list):
+            parent_calls = parent_telemetry.setdefault("provider_calls", [])
+            if isinstance(parent_calls, list):
+                seen = {
+                    repr(sorted(call.items()))
+                    for call in parent_calls
+                    if isinstance(call, dict)
+                }
+                for call in source_calls:
+                    if not isinstance(call, dict):
+                        continue
+                    key = repr(sorted(call.items()))
+                    if key in seen:
+                        continue
+                    parent_calls.append(dict(call))
+                    seen.add(key)
+
+        source_timings = source_telemetry.get("timings_s")
+        if isinstance(source_timings, dict):
+            parent_timings = parent_telemetry.setdefault("timings_s", {})
+            if isinstance(parent_timings, dict):
+                for key, value in source_timings.items():
+                    if not isinstance(key, str) or not isinstance(value, (int, float)):
+                        continue
+                    current = parent_timings.get(key)
+                    if isinstance(current, (int, float)):
+                        parent_timings[key] = round(float(current) + float(value), 4)
+                    else:
+                        parent_timings[key] = round(float(value), 4)
+
+        source_attempts = source_telemetry.get("parse_attempts")
+        if isinstance(source_attempts, list):
+            parent_attempts = parent_telemetry.setdefault("parse_attempts", [])
+            if isinstance(parent_attempts, list):
+                parent_attempts.extend([dict(item) for item in source_attempts if isinstance(item, dict)])
+
+        for key in ("provider_requested", "provider_effective", "provider_fallback_reason"):
+            if key in source_telemetry and key not in parent_telemetry:
+                parent_telemetry[key] = source_telemetry[key]
+
+
     def _run_nested_structured_task(
         self,
         *,
@@ -5188,7 +5252,26 @@ Grounded input:
         context_strategy: str,
         source_document_ids: list[str] | None = None,
     ) -> StructuredResult:
+        import copy
+
         from .service import structured_service
+
+        parent_telemetry = self._telemetry_dict(request)
+        nested_telemetry = {
+            key: copy.deepcopy(value)
+            for key, value in parent_telemetry.items()
+            if key not in {"provider_calls", "parse_attempts", "timings_s", "current_stage"}
+        }
+        nested_telemetry.update(
+            {
+                "parent_task_type": request.task_type,
+                "nested_task_type": task_type,
+                "nested_context_strategy": context_strategy,
+                "provider_calls": [],
+                "parse_attempts": [],
+                "timings_s": {},
+            }
+        )
 
         nested_request = request.model_copy(
             update={
@@ -5198,10 +5281,12 @@ Grounded input:
                 "source_document_ids": list(source_document_ids or request.source_document_ids),
                 "context_strategy": context_strategy,
                 "progress_callback": None,
-                "telemetry": {},
+                "telemetry": nested_telemetry,
             }
         )
-        return structured_service.execute_task(nested_request)
+        nested_result = structured_service.execute_task(nested_request)
+        self._merge_nested_task_telemetry(request, nested_result, nested_telemetry=nested_telemetry)
+        return nested_result
 
     def _build_document_label_map(self, document_ids: list[str]) -> dict[str, str]:
         from ..services.document_context import _find_documents, _get_rag_index
