@@ -950,7 +950,12 @@ def build_product_artifact_detail_payload(
 def build_product_command_center_payload(bootstrap: ProductBootstrap, *, recent_limit: int = 5) -> dict[str, object]:
     documents = list_product_documents(bootstrap.rag_settings)
     run_history = build_product_run_history_payload(bootstrap, recent_limit=recent_limit)
-    artifact_payload = build_product_artifact_payload(bootstrap, recent_limit=recent_limit)
+    artifact_payload = build_product_artifact_payload(bootstrap, recent_limit=max(recent_limit * 4, recent_limit))
+    ready_recent_artifacts = [
+        item
+        for item in (artifact_payload.get("artifacts") or [])
+        if str(item.get("status") or "").strip().lower() == "ready"
+    ][:recent_limit]
     return {
         "ok": True,
         "summary": {
@@ -962,7 +967,7 @@ def build_product_command_center_payload(bootstrap: ProductBootstrap, *, recent_
             "workflow_count": len(bootstrap.workflow_catalog),
         },
         "recent_runs": run_history.get("runs") or [],
-        "recent_artifacts": artifact_payload.get("artifacts") or [],
+        "recent_artifacts": ready_recent_artifacts,
     }
 
 
