@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from src.product.models import ProductArtifact, ProductWorkflowRequest, ProductWorkflowResult
-from src.product.presenters import build_product_result_sections
+from src.product.presenters import build_document_review_view, build_product_result_sections
 from src.product.service import list_product_documents
 from src.storage.product_workflow_history import load_product_workflow_history, summarize_product_workflow_history
 from src.storage.runtime_execution_log import load_runtime_execution_log
@@ -375,6 +375,22 @@ def _coerce_request_payload(entry: dict[str, object]) -> dict[str, object] | Non
     return payload
 
 
+def _count_product_workflow_findings(result: ProductWorkflowResult | None) -> int:
+    if result is None:
+        return 0
+
+    if result.workflow_id == "document_review":
+        try:
+            view = build_document_review_view(result)
+        except Exception:
+            view = {}
+        findings = view.get("findings") if isinstance(view, dict) else []
+        if isinstance(findings, list):
+            return len(findings)
+
+    return len(result.highlights or [])
+
+
 def build_product_workflow_history_entry(
     *,
     request: ProductWorkflowRequest,
@@ -402,7 +418,7 @@ def build_product_workflow_history_entry(
         "document_ids": list(request.document_ids),
         "documents": [document_lookup.get(document_id, document_id) for document_id in request.document_ids],
         "document_count": len(request.document_ids),
-        "findings_count": len(result.highlights or []) if result is not None else 0,
+        "findings_count": _count_product_workflow_findings(result),
         "warning_count": len(result.warnings or []) if result is not None else 0,
         "recommendation": result.recommendation if result is not None else None,
         "artifacts": [artifact.download_name or artifact.label for artifact in artifacts if artifact.available],
@@ -489,7 +505,11 @@ def _normalize_history_entry(
         "document_ids": document_ids,
         "documents": documents,
         "document_count": int(entry.get("document_count") or len(document_ids) or len(documents) or 0),
-        "findings_count": entry.get("findings_count"),
+        "findings_count": (
+            _count_product_workflow_findings(ProductWorkflowResult.model_validate(response_payload))
+            if isinstance(response_payload, dict)
+            else entry.get("findings_count")
+        ),
         "warning_count": entry.get("warning_count"),
         "recommendation": entry.get("recommendation"),
         "artifacts": artifact_labels,
