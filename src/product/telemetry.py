@@ -477,8 +477,17 @@ def execute_product_workflow_with_telemetry(
     document_lookup: dict[str, str] | None = None,
     surface: str = "product_api",
     reran_from_run_id: str | None = None,
+    workflow_history_path: Path | None = None,
+    runtime_execution_log_path: Path | None = None,
+    lab_workflow_runs_path: Path | None = None,
+    product_telemetry_path: Path | None = None,
+    persist_runtime_evals: bool = True,
 ) -> dict[str, Any]:
     resolved_document_lookup = document_lookup or {}
+    workflow_history_path = workflow_history_path or get_product_workflow_history_path(bootstrap.workspace_root)
+    runtime_execution_log_path = runtime_execution_log_path or get_runtime_execution_log_path(bootstrap.workspace_root)
+    lab_workflow_runs_path = lab_workflow_runs_path or get_lab_workflow_runs_path(bootstrap.workspace_root)
+    product_telemetry_path = product_telemetry_path or get_product_telemetry_path(bootstrap.workspace_root)
     started_at = _now_iso()
     trace_id = build_trace_id(request.workflow_id)
     run_id = build_run_id(request.workflow_id)
@@ -496,13 +505,14 @@ def execute_product_workflow_with_telemetry(
         history_entry["surface"] = surface
         history_entry["reran_from_run_id"] = reran_from_run_id
         history_entry["status_classification"] = "live"
-        append_product_workflow_history_entry(get_product_workflow_history_path(bootstrap.workspace_root), history_entry)
-        append_runtime_execution_log_entry(get_runtime_execution_log_path(bootstrap.workspace_root), runtime_entry)
+        append_product_workflow_history_entry(workflow_history_path, history_entry)
+        append_runtime_execution_log_entry(runtime_execution_log_path, runtime_entry)
         run_record = _build_lab_run_record(run_id=run_id, trace_id=trace_id, request=request, result=result, runtime_entry=runtime_entry, surface=surface, reran_from_run_id=reran_from_run_id)
-        append_lab_workflow_run(get_lab_workflow_runs_path(bootstrap.workspace_root), run_record)
+        append_lab_workflow_run(lab_workflow_runs_path, run_record)
         telemetry_run = _build_telemetry_run(run_id=run_id, trace_id=trace_id, request=request, result=result, runtime_entry=runtime_entry, history_entry=history_entry, surface=surface, started_at=started_at, completed_at=_now_iso(), reran_from_run_id=reran_from_run_id)
-        append_product_telemetry_run(get_product_telemetry_path(bootstrap.workspace_root), telemetry_run)
-        persist_product_runtime_evals(bootstrap=bootstrap, telemetry_run=telemetry_run, result=result)
+        append_product_telemetry_run(product_telemetry_path, telemetry_run)
+        if persist_runtime_evals:
+            persist_product_runtime_evals(bootstrap=bootstrap, telemetry_run=telemetry_run, result=result)
         return {"result": result, "run_id": run_id, "trace_id": trace_id, "history_entry": history_entry, "runtime_entry": runtime_entry, "telemetry_run": telemetry_run, "run_record": run_record}
     except Exception as error:
         finished_perf = datetime.now(timezone.utc)
@@ -515,9 +525,10 @@ def execute_product_workflow_with_telemetry(
         history_entry["surface"] = surface
         history_entry["reran_from_run_id"] = reran_from_run_id
         history_entry["status_classification"] = "live"
-        append_product_workflow_history_entry(get_product_workflow_history_path(bootstrap.workspace_root), history_entry)
-        append_runtime_execution_log_entry(get_runtime_execution_log_path(bootstrap.workspace_root), runtime_entry)
+        append_product_workflow_history_entry(workflow_history_path, history_entry)
+        append_runtime_execution_log_entry(runtime_execution_log_path, runtime_entry)
         telemetry_run = _build_telemetry_run(run_id=run_id, trace_id=trace_id, request=request, result=None, runtime_entry=runtime_entry, history_entry=history_entry, surface=surface, started_at=started_at, completed_at=_now_iso(), error_message=str(error), reran_from_run_id=reran_from_run_id)
-        append_product_telemetry_run(get_product_telemetry_path(bootstrap.workspace_root), telemetry_run)
-        persist_product_runtime_evals(bootstrap=bootstrap, telemetry_run=telemetry_run, result=None)
+        append_product_telemetry_run(product_telemetry_path, telemetry_run)
+        if persist_runtime_evals:
+            persist_product_runtime_evals(bootstrap=bootstrap, telemetry_run=telemetry_run, result=None)
         raise

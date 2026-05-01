@@ -1331,15 +1331,28 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     }
                 except Exception:
                     document_lookup = {}
+                identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                telemetry_kwargs = {}
+                if not identity.can_write_global:
+                    overlay_runs_root = identity.overlay_root / "runs"
+                    telemetry_kwargs = {
+                        "workflow_history_path": overlay_runs_root / "workflow_history.json",
+                        "runtime_execution_log_path": overlay_runs_root / "runtime_execution_log.json",
+                        "lab_workflow_runs_path": overlay_runs_root / "lab_workflow_runs.json",
+                        "product_telemetry_path": overlay_runs_root / "telemetry_runs.json",
+                        "persist_runtime_evals": False,
+                    }
+
                 telemetry_execution = execute_product_workflow_with_telemetry(
                     bootstrap=self.bootstrap,
                     request=request,
                     document_lookup=document_lookup,
-                    surface="product_api",
+                    surface="product_api" if identity.can_write_global else "product_api_public_overlay",
+                    **telemetry_kwargs,
                 )
                 result = telemetry_execution["result"]
                 history_entry = telemetry_execution.get("history_entry") if isinstance(telemetry_execution, dict) else None
-                self._send_json(
+                self._send_json_with_cookies(
                     HTTPStatus.OK,
                     _build_product_workflow_response_payload(
                         result=result,
@@ -1347,8 +1360,11 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                         extra={
                             "trace_id": str((history_entry or {}).get("trace_id") or "").strip() or None,
                             "surface": str((history_entry or {}).get("surface") or "").strip() or None,
+                            "history_entry": history_entry,
+                            "write_scope": "global" if identity.can_write_global else "session_overlay",
                         },
                     ),
+                    cookies=[set_cookie] if set_cookie else None,
                 )
             except Exception as error:  # pragma: no cover - defensive API surface
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
