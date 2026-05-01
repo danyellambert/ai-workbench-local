@@ -423,14 +423,14 @@ export function NextcloudImportSheet({ open, onOpenChange, onImportStarted, admi
           <div className="mt-5">
             <AdminOnlyFeatureCard
               eyebrow="Curated demo workspace"
-              title="Nextcloud import is protected"
-              description="The public demo lets visitors explore the curated document library without changing the shared baseline. Importing from Nextcloud adds documents and indexes to the workspace, so it is reserved for Admin Mode until private overlay imports are enabled."
+              title="Curated Nextcloud import is open"
+              description="This Nextcloud source is curated and controlled by Danyel, so visitors can browse and import approved demo PDFs without Admin Mode. Private folders and custom uploads still belong in a guided demo."
               valuePoints={[
                 'Bring your own corpus into a private walkthrough.',
                 'Validate extraction, indexing, and workflow behavior on real documents.',
                 'Keep the public demo stable while showing the full ingestion path live.',
               ]}
-              secondaryLabel="Want to test your own Nextcloud folder?"
+              secondaryLabel="Want to connect your own folder?"
               secondaryText="Connect with Danyel and we can run a guided demo using your folder structure, PDFs, and workflow goals."
               ctaHref="https://www.linkedin.com/in/danyel-/"
               ctaLabel="Connect with Danyel on LinkedIn"

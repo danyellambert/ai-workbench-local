@@ -1220,14 +1220,6 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         if path == "/api/auth/admin/logout":
             self._send_admin_logout_response()
             return
-        if path in {"/api/product/publish-to-trello", "/api/product/publish-trello"}:
-            if not self._require_external_publish("Publishing Trello handoffs"):
-                return
-
-        if path in {"/api/product/publish-to-notion", "/api/product/publish-notion"}:
-            if not self._require_external_publish("Publishing Notion handoffs"):
-                return
-
         if path.startswith("/api/preferences/connections/") and path.endswith("/test"):
             if not self._require_global_write("Testing provider credentials"):
                 return
@@ -1266,8 +1258,6 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/product/integrations/nextcloud/import":
-            if not self._require_global_write("Importing documents into the shared demo library"):
-                return
 
             try:
                 raw_documents = payload.get("documents") if isinstance(payload.get("documents"), list) else None
@@ -1452,10 +1442,12 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
         if path in {"/api/product/publish-to-trello", "/api/product/publish-trello"}:
             try:
-                result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
-                product_result = ProductWorkflowResult.model_validate(result_payload)
                 publish_options = payload.get("publish_options") if isinstance(payload.get("publish_options"), dict) else {}
                 dry_run = _coerce_bool_flag(payload.get("dry_run") if "dry_run" in payload else publish_options.get("dry_run"))
+                if not dry_run and not self._require_external_publish("Publishing Trello handoffs"):
+                    return
+                result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
+                product_result = ProductWorkflowResult.model_validate(result_payload)
                 run_id = str(payload.get("run_id") or "").strip() or None
                 preview_payload = payload.get('preview_payload') if isinstance(payload.get('preview_payload'), dict) else None
                 raw_selected_card_index = payload.get('selected_card_index') if 'selected_card_index' in payload else publish_options.get('selected_card_index')
@@ -1479,10 +1471,12 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
         if path in {"/api/product/publish-to-notion", "/api/product/publish-notion"}:
             try:
-                result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
-                product_result = ProductWorkflowResult.model_validate(result_payload)
                 publish_options = payload.get("publish_options") if isinstance(payload.get("publish_options"), dict) else {}
                 dry_run = _coerce_bool_flag(payload.get("dry_run") if "dry_run" in payload else publish_options.get("dry_run"))
+                if not dry_run and not self._require_external_publish("Publishing Notion handoffs"):
+                    return
+                result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
+                product_result = ProductWorkflowResult.model_validate(result_payload)
                 run_id = str(payload.get("run_id") or "").strip() or None
                 template_id = str(payload.get('template_id') or '').strip() or None
                 preview_payload = payload.get('preview_payload') if isinstance(payload.get('preview_payload'), dict) else None

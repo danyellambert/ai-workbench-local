@@ -182,7 +182,8 @@ public_guard_results = []
 for method, path, payload in [
     ("PATCH", "/api/runtime/controls", {}),
     ("PATCH", "/api/preferences", {}),
-    ("POST", "/api/product/publish-to-trello", {}),
+    ("POST", "/api/product/publish-to-trello", {"dry_run": False}),
+    ("POST", "/api/product/publish-to-notion", {"dry_run": False}),
     ("POST", "/api/product/upload-documents", {}),
 ]:
     status, body, _ = request(method, path, payload)
@@ -194,8 +195,25 @@ for method, path, payload in [
         "error": body.get("error") if isinstance(body, dict) else None,
     })
 
+public_allowed_results = []
+for method, path, payload in [
+    ("POST", "/api/product/integrations/nextcloud/import", {"documents": []}),
+    ("POST", "/api/product/publish-to-trello", {"dry_run": True}),
+    ("POST", "/api/product/publish-to-notion", {"dry_run": True}),
+]:
+    status, body, _ = request(method, path, payload)
+    public_allowed_results.append({
+        "method": method,
+        "path": path,
+        "status": status,
+        "required_role": body.get("required_role") if isinstance(body, dict) else None,
+        "error": body.get("error") if isinstance(body, dict) else None,
+    })
+
 details["public_guard_results"] = public_guard_results
+details["public_allowed_results"] = public_allowed_results
 checks["public_guards_locked"] = all(item["status"] == 403 and item["required_role"] == "admin" for item in public_guard_results)
+checks["public_curated_import_and_previews_allowed"] = all(item["status"] != 403 and item["required_role"] != "admin" for item in public_allowed_results)
 
 report["ok"] = all(checks.values())
 report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

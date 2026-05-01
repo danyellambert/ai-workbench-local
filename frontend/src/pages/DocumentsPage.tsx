@@ -91,6 +91,12 @@ export default function DocumentsPage() {
     refetchOnReconnect: false,
   });
   const isAdmin = authSession?.identity?.role === 'admin';
+  useEffect(() => {
+    if (isAdmin && adminOnlyDocumentCtaOpen) {
+      setAdminOnlyDocumentCtaOpen(false);
+    }
+  }, [adminOnlyDocumentCtaOpen, isAdmin]);
+
 
   const { data: uploadJob } = useQuery({
     queryKey: ['product-upload-job', activeUploadJobId],
@@ -191,6 +197,7 @@ export default function DocumentsPage() {
   const documents = data?.documents ?? [];
   const summary = data?.summary;
   const directUploadEnabled = data?.capabilities?.direct_upload_enabled ?? true;
+  const canUseDirectUpload = isAdmin || directUploadEnabled;
   const filtered = documents.filter(d => {
     const haystack = `${d.name} ${d.file_type || ''} ${d.loader_strategy_label || ''}`.toLowerCase();
     return haystack.includes(search.toLowerCase());
@@ -202,15 +209,15 @@ export default function DocumentsPage() {
   const documentAdminOnlyCard = (
     <AdminOnlyFeatureCard
       eyebrow="Curated demo workspace"
-      title="Unlock private document onboarding"
-      description="This public workspace is curated so every visitor can explore stable documents, workflows, run history, and artifacts. Adding, importing, or deleting documents changes the shared demo library, so those actions are protected behind Admin Mode."
+      title="Use the curated Nextcloud corpus"
+      description="This public workspace stays stable, but Import from Nextcloud is open because it browses a curated corpus controlled by Danyel. Uploading private files, deleting documents, or connecting a custom folder still requires Admin Mode."
       valuePoints={[
-        'Test AI Decision Studio with your own contracts, policies, CVs, reports, or evidence packs.',
-        'See how ingestion, extraction, chunking, retrieval, and workflow outputs behave on private files.',
-        'Run a guided demo without disturbing the public baseline that other visitors are exploring.',
+        'Browse approved demo PDFs from Nextcloud and import them into the current workspace without needing Admin Mode.',
+        'Use private uploads only in guided demos, so the shared public baseline does not get polluted by visitor files.',
+        'Connect with Danyel if you want to test your own contracts, policies, CVs, reports, or evidence packs.',
       ]}
-      secondaryLabel="Want to plug in your own documents?"
-      secondaryText="Connect with Danyel and we can run a private walkthrough using your document set, your workflow goals, and the integrations you care about."
+      secondaryLabel="Want to test your own documents?"
+      secondaryText="Connect with Danyel and we can run a private walkthrough using your files, workflow goals, and delivery integrations."
       ctaHref={LINKEDIN_DEMO_URL}
       ctaLabel="Connect with Danyel on LinkedIn"
     />
@@ -228,14 +235,14 @@ export default function DocumentsPage() {
 
   const handleOpenFilePicker = () => {
     if (uploadInProgress) return;
+
     if (!isAdmin) {
       openAdminOnlyDocumentCta();
       return;
     }
-    if (!directUploadEnabled) {
-      openUploadLockedDialog();
-      return;
-    }
+
+    setAdminOnlyDocumentCtaOpen(false);
+    setUploadLockedDialogOpen(false);
     fileInputRef.current?.click();
   };
 
@@ -244,7 +251,7 @@ export default function DocumentsPage() {
       openAdminOnlyDocumentCta();
       return;
     }
-    if (!directUploadEnabled) {
+    if (!canUseDirectUpload) {
       openUploadLockedDialog();
       return;
     }
@@ -268,13 +275,7 @@ export default function DocumentsPage() {
   };
 
   useEffect(() => {
-    const openNextcloudImportForTour = () => {
-      if (!isAdmin) {
-        openAdminOnlyDocumentCta();
-        return;
-      }
-      setNextcloudSheetOpen(true);
-    };
+    const openNextcloudImportForTour = () => { setNextcloudSheetOpen(true); };
     window.addEventListener('workbench-tour:open-nextcloud-import', openNextcloudImportForTour);
     return () => window.removeEventListener('workbench-tour:open-nextcloud-import', openNextcloudImportForTour);
   }, [isAdmin]);
@@ -283,7 +284,7 @@ export default function DocumentsPage() {
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" variants={stagger} initial="initial" animate="animate">
       <PageHeader title="Document Library" description="Ingest, index and manage your document corpus for AI-powered analysis.">
         <div className="-m-1 flex items-center gap-2 rounded-xl p-1" data-tour="documents-page-actions">
-          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => isAdmin ? setNextcloudSheetOpen(true) : openAdminOnlyDocumentCta()} disabled={uploadInProgress} data-testid="open-nextcloud-import" data-tour="documents-nextcloud-button">
+          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => setNextcloudSheetOpen(true)} disabled={uploadInProgress} data-testid="open-nextcloud-import" data-tour="documents-nextcloud-button">
             <FolderTree className="w-3.5 h-3.5 mr-2" /> Import from Nextcloud
           </Button>
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs" onClick={handleOpenFilePicker} disabled={uploadInProgress}>
@@ -292,7 +293,7 @@ export default function DocumentsPage() {
         </div>
       </PageHeader>
 
-      {directUploadEnabled ? (
+      {canUseDirectUpload ? (
         <input
           ref={fileInputRef}
           type="file"
@@ -306,7 +307,7 @@ export default function DocumentsPage() {
       <NextcloudImportSheet
         open={nextcloudSheetOpen}
         onOpenChange={setNextcloudSheetOpen}
-        adminOnlyBlocked={!isAdmin}
+        adminOnlyBlocked={false}
         onImportStarted={(payload) => {
           handledUploadTerminalStateRef.current = null;
           setActiveUploadJobId(payload.job_id);
@@ -318,7 +319,7 @@ export default function DocumentsPage() {
         }}
       />
 
-      {adminOnlyDocumentCtaOpen && (
+      {adminOnlyDocumentCtaOpen && !isAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/55 px-4 backdrop-blur-sm">
           <div className="w-full max-w-2xl">
             {documentAdminOnlyCard}
@@ -420,7 +421,7 @@ export default function DocumentsPage() {
             event.preventDefault();
             setDropActive(false);
             if (uploadInProgress) return;
-            if (!directUploadEnabled) {
+            if (!canUseDirectUpload) {
               openUploadLockedDialog();
               return;
             }

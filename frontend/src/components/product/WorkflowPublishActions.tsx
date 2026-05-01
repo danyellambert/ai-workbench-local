@@ -71,6 +71,9 @@ const NOTION_TEMPLATE_OPTIONS: Record<string, NotionTemplateOption[]> = {
   ],
 };
 
+const CURRENT_TRELLO_PAGE_URL = 'https://trello.com/b/FhIjewpo/mcp-actions';
+const CURRENT_NOTION_PAGE_URL = 'https://www.notion.so/3431594b7fc080eebe5fdece0899b226?v=3431594b7fc080aca35f000cb7e0cca4';
+
 function getWorkflowTemplateOptions(workflowId: string): NotionTemplateOption[] {
   return NOTION_TEMPLATE_OPTIONS[workflowId] ?? [{ id: 'executive_summary', label: 'Executive summary', description: 'Default workflow handoff.' }];
 }
@@ -414,8 +417,11 @@ export function WorkflowPublishActions({
 }: WorkflowPublishActionsProps) {
   const queryClient = useQueryClient();
   const { data: authSession } = useAuthSession();
-  const isAdmin = isAdminSession(authSession);
+  const canPublishExternal = isAdminSession(authSession);
+  const isAdmin = canPublishExternal;
   const [dialogTarget, setDialogTarget] = useState<PreviewTarget>(null);
+  const [showTrelloPublishBlockedCard, setShowTrelloPublishBlockedCard] = useState(false);
+  const [showNotionPublishBlockedCard, setShowNotionPublishBlockedCard] = useState(false);
   const templateOptions = useMemo(() => getWorkflowTemplateOptions(workflowId), [workflowId]);
   const [selectedTemplateId, setSelectedTemplateId] = useState(templateOptions[0]?.id ?? 'executive_summary');
   const [selectedTrelloCardIndex, setSelectedTrelloCardIndex] = useState(0);
@@ -449,6 +455,7 @@ export function WorkflowPublishActions({
     },
     onSuccess: (payload) => {
       setTrelloPreview(payload);
+      setShowTrelloPublishBlockedCard(false);
       setDialogTarget('trello');
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : 'Trello preview failed.'),
@@ -488,6 +495,7 @@ export function WorkflowPublishActions({
     onSuccess: (payload) => {
       if (payload.template_id) setSelectedTemplateId(String(payload.template_id));
       setNotionPreview(payload);
+      setShowNotionPublishBlockedCard(false);
       setDialogTarget('notion');
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : 'Notion preview failed.'),
@@ -567,6 +575,81 @@ export function WorkflowPublishActions({
     openExternalUrl(notionOpenUrl, 'Publish to Notion first to open the created page.');
   };
 
+  const openCurrentTrelloPage = () => {
+    openExternalUrl(CURRENT_TRELLO_PAGE_URL, 'The current Trello board URL is not configured.');
+  };
+
+  const openCurrentNotionPage = () => {
+    openExternalUrl(CURRENT_NOTION_PAGE_URL, 'The current Notion database URL is not configured.');
+  };
+
+  const handlePublishTrello = () => {
+    if (!canPublishExternal) {
+      setShowTrelloPublishBlockedCard(true);
+      toast.error('Publishing to Trello requires Admin Mode. You can still preview the card and open the current board.');
+      return;
+    }
+    publishTrelloMutation.mutate();
+  };
+
+  const handlePublishNotion = () => {
+    if (!canPublishExternal) {
+      setShowNotionPublishBlockedCard(true);
+      toast.error('Publishing to Notion requires Admin Mode. You can still preview the handoff and open the current database.');
+      return;
+    }
+    publishNotionMutation.mutate(selectedTemplateId);
+  };
+
+  const renderPublishBlockedOverlay = (
+    platform: 'trello' | 'notion',
+    onClose: () => void,
+  ) => {
+    const isTrello = platform === 'trello';
+
+    return (
+      <div className="absolute inset-0 z-[80] flex items-center justify-center rounded-2xl bg-slate-950/75 p-6 backdrop-blur-sm">
+        <div className="w-full max-w-xl">
+          <AdminOnlyFeatureCard
+            eyebrow="Public preview mode"
+            title={isTrello ? 'Publishing to Trello requires Admin Mode' : 'Publishing to Notion requires Admin Mode'}
+            description={
+              isTrello
+                ? 'Visitors can inspect the planned Trello card and open the current board, but creating or updating live cards is limited to Admin Mode.'
+                : 'Visitors can inspect the planned Notion handoff and open the current database, but creating live pages is limited to Admin Mode.'
+            }
+            valuePoints={
+              isTrello
+                ? [
+                    'Preview the selected card before anything is sent.',
+                    'Open the current Trello board to see the live public workspace.',
+                    'Connect with Danyel for a guided demo using your own operations board.',
+                  ]
+                : [
+                    'Preview the page structure before anything is sent.',
+                    'Open the current Notion database to see the live public workspace.',
+                    'Connect with Danyel for a guided demo using your own executive handoff format.',
+                  ]
+            }
+            secondaryLabel="Want to test this with your own workspace?"
+            secondaryText={
+              isTrello
+                ? 'Connect with Danyel and we can run a guided demo using your own operations board and workflow handoff.'
+                : 'Connect with Danyel and we can run a guided demo using your own Notion database and handoff format.'
+            }
+            ctaLabel="Connect with Danyel on LinkedIn"
+            ctaHref="https://www.linkedin.com/in/danyel-/"
+          />
+          <div className="mt-4 flex justify-center">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Keep exploring preview
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const externalPublishAdminOnlyCard = (
     <AdminOnlyFeatureCard
       eyebrow="Admin-only delivery"
@@ -583,7 +666,7 @@ export function WorkflowPublishActions({
     />
   );
 
-  if (!isAdmin) {
+  if (false && !isAdmin) {
     return (
       <div className={className} data-testid="workflow-publish-actions">
         {externalPublishAdminOnlyCard}
@@ -640,7 +723,7 @@ export function WorkflowPublishActions({
       </GlassCard>
 
       <Dialog open={dialogTarget !== null} onOpenChange={(open) => !open && setDialogTarget(null)}>
-        <DialogContent className="flex max-h-[92vh] flex-col overflow-hidden border-border/60 bg-background/95 sm:max-w-5xl">
+        <DialogContent className="fixed left-1/2 top-1/2 z-50 flex max-h-[86vh] w-[calc(100vw-2rem)] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border-border/60 bg-background/95 shadow-2xl sm:max-w-5xl">
           {dialogTarget === 'trello' ? (
             <>
               <DialogHeader>
@@ -763,10 +846,13 @@ export function WorkflowPublishActions({
                     : 'Preview only. Nothing is created in Trello until you click “Publish selected card”.'}
                 </p>
                 <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={openCurrentTrelloPage}>
+                    Open current Trello page <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
                   <Button variant="outline" onClick={openTrelloPage} disabled={!canOpenPublishedTrelloPage}>
                     {canOpenPublishedTrelloPage ? 'Open page' : 'Open page after publish'} <ExternalLink className="ml-2 h-4 w-4" />
                   </Button>
-                  <Button disabled={publishTrelloMutation.isPending} onClick={() => publishTrelloMutation.mutate()}>
+                  <Button disabled={publishTrelloMutation.isPending} onClick={handlePublishTrello}>
                     {publishTrelloMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KanbanSquare className="mr-2 h-4 w-4" />}
                     {trelloCards.length ? `Publish selected card${trelloCards.length > 1 ? ` (#${selectedTrelloCardIndex + 1})` : ""}` : "Publish to Trello"}
                   </Button>
@@ -854,10 +940,13 @@ export function WorkflowPublishActions({
                     : 'Preview only. Nothing is created in Notion until you click “Publish to Notion”.'}
                 </p>
                 <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={openCurrentNotionPage}>
+                    Open current Notion page <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
                   <Button variant="outline" onClick={openNotionPage} disabled={!canOpenPublishedNotionPage}>
                     {canOpenPublishedNotionPage ? 'Open page' : 'Open page after publish'} <ExternalLink className="ml-2 h-4 w-4" />
                   </Button>
-                  <Button disabled={publishNotionMutation.isPending} onClick={() => publishNotionMutation.mutate(selectedTemplateId)}>
+                  <Button disabled={publishNotionMutation.isPending} onClick={handlePublishNotion}>
                     {publishNotionMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ScrollText className="mr-2 h-4 w-4" />}
                     Publish to Notion
                   </Button>
@@ -865,6 +954,12 @@ export function WorkflowPublishActions({
               </DialogFooter>
             </>
           ) : null}
+          {dialogTarget === 'trello' && showTrelloPublishBlockedCard
+            ? renderPublishBlockedOverlay('trello', () => setShowTrelloPublishBlockedCard(false))
+            : null}
+          {dialogTarget === 'notion' && showNotionPublishBlockedCard
+            ? renderPublishBlockedOverlay('notion', () => setShowNotionPublishBlockedCard(false))
+            : null}
         </DialogContent>
       </Dialog>
     </>
