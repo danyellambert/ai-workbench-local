@@ -3908,6 +3908,12 @@ class DocumentAgentTaskHandler(TaskHandler):
             task_type="extraction",
             context_strategy="document_scan" if request.source_document_ids else context_strategy,
         )
+        if initial_extraction_request is not request:
+            self._merge_nested_task_telemetry(
+                request,
+                nested_result,
+                nested_telemetry=self._telemetry_dict(initial_extraction_request),
+            )
         if not nested_result.success or not isinstance(nested_result.validated_output, ExtractionPayload):
             raise RuntimeError(nested_result.validation_error or nested_result.parsing_error or "document_risk_review_tool_failed")
 
@@ -3946,6 +3952,11 @@ class DocumentAgentTaskHandler(TaskHandler):
                     request=retry_request,
                     task_type="extraction",
                     context_strategy="document_scan" if request.source_document_ids else context_strategy,
+                )
+                self._merge_nested_task_telemetry(
+                    request,
+                    retry_result,
+                    nested_telemetry=self._telemetry_dict(retry_request),
                 )
                 if retry_result.success and isinstance(retry_result.validated_output, ExtractionPayload):
                     retry_payload = retry_result.validated_output
