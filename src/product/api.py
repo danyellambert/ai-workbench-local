@@ -20,6 +20,7 @@ from src.product.access_control import (
     create_admin_session_cookie,
     identity_payload,
     public_session_identity,
+    public_session_quota_status,
     request_identity,
 )
 from src.config import ProductApiSettings, get_product_api_settings
@@ -158,6 +159,17 @@ def _build_overlay_rag_settings(*, bootstrap: ProductBootstrap, overlay_root: Pa
         store_path=overlay_index_root / "rag_store.json",
         chroma_path=overlay_index_root / "chroma",
     )
+
+
+def _public_session_quota_error_payload(identity) -> dict | None:
+    quota = public_session_quota_status(identity)
+    if quota.get("ok"):
+        return None
+    return {
+        "ok": False,
+        "error": quota.get("message") or "Public demo session storage quota exceeded.",
+        "quota": quota,
+    }
 
 
 def _resolve_product_artifact_path(
@@ -1390,6 +1402,14 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "relative_path, document_id, filename, title or webdav_url is required."})
                     return
                 identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                quota_error = _public_session_quota_error_payload(identity)
+                if quota_error is not None:
+                    self._send_json_with_cookies(
+                        HTTPStatus.TOO_MANY_REQUESTS,
+                        quota_error,
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
+                    return
                 rag_settings_override = None
                 if not identity.can_write_global:
                     overlay_index_root = identity.overlay_root / "indexes"
@@ -1462,6 +1482,14 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 except Exception:
                     document_lookup = {}
                 identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                quota_error = _public_session_quota_error_payload(identity)
+                if quota_error is not None:
+                    self._send_json_with_cookies(
+                        HTTPStatus.TOO_MANY_REQUESTS,
+                        quota_error,
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
+                    return
                 telemetry_kwargs = {}
                 if not identity.can_write_global:
                     overlay_runs_root = identity.overlay_root / "runs"
@@ -1504,6 +1532,14 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             try:
                 run_id = path.removeprefix("/api/product/run-history/").removesuffix("/rerun").strip("/")
                 identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                quota_error = _public_session_quota_error_payload(identity)
+                if quota_error is not None:
+                    self._send_json_with_cookies(
+                        HTTPStatus.TOO_MANY_REQUESTS,
+                        quota_error,
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
+                    return
                 additional_history_paths = []
                 if not identity.can_write_global:
                     additional_history_paths.append(identity.overlay_root / "runs" / "workflow_history.json")
@@ -1596,6 +1632,14 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         if path == "/api/product/generate-deck":
             try:
                 identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                quota_error = _public_session_quota_error_payload(identity)
+                if quota_error is not None:
+                    self._send_json_with_cookies(
+                        HTTPStatus.TOO_MANY_REQUESTS,
+                        quota_error,
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
+                    return
 
                 result_payload = payload.get("result") if isinstance(payload.get("result"), dict) else payload
                 product_result = ProductWorkflowResult.model_validate(result_payload)

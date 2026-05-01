@@ -18,6 +18,8 @@ SESSION_ID_RE = re.compile(r"^sess_[a-zA-Z0-9_-]{24,80}$")
 ADMIN_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 12
 PBKDF2_SCHEME = "pbkdf2_sha256"
 DEFAULT_PBKDF2_ITERATIONS = 260_000
+DEFAULT_PUBLIC_SESSION_MAX_MB = 250
+PUBLIC_SESSION_MAX_MB_ENV = "AI_DECISION_STUDIO_PUBLIC_SESSION_MAX_MB"
 
 
 @dataclass(frozen=True)
@@ -91,6 +93,74 @@ def ensure_overlay_dirs(overlay_root: Path) -> None:
             '{\n  "version": 1,\n  "kind": "public_session_overlay"\n}\n',
             encoding="utf-8",
         )
+
+
+def _directory_size_bytes(path: Path) -> int:
+    total = 0
+    if not path.exists():
+        return 0
+    for item in path.rglob("*"):
+        try:
+            if item.is_file():
+                total += item.stat().st_size
+        except OSError:
+            continue
+    return total
+
+
+def public_session_max_bytes_from_env() -> int:
+    raw = str(os.environ.get(PUBLIC_SESSION_MAX_MB_ENV) or "").strip()
+    if not raw:
+        return DEFAULT_PUBLIC_SESSION_MAX_MB * 1024 * 1024
+    try:
+        value_mb = int(raw)
+    except ValueError:
+        return DEFAULT_PUBLIC_SESSION_MAX_MB * 1024 * 1024
+    if value_mb <= 0:
+        return 0
+    return value_mb * 1024 * 1024
+
+
+def public_session_quota_status(identity: RequestIdentity) -> dict:
+    if identity.can_write_global:
+        return {
+            "ok": True,
+            "scope": "global",
+            "enforced": False,
+            "message": "Admin/global writes are not subject to public session quota.",
+        }
+
+    limit_bytes = public_session_max_bytes_from_env()
+    size_bytes = _directory_size_bytes(identity.overlay_root)
+
+    if limit_bytes <= 0:
+        return {
+            "ok": True,
+            "scope": "session_overlay",
+            "enforced": False,
+            "size_bytes": size_bytes,
+            "limit_bytes": limit_bytes,
+            "message": "Public session quota is disabled.",
+        }
+
+    ok = size_bytes <= limit_bytes
+    size_mb = round(size_bytes / 1024 / 1024, 3)
+    limit_mb = round(limit_bytes / 1024 / 1024, 3)
+    return {
+        "ok": ok,
+        "scope": "session_overlay",
+        "enforced": True,
+        "size_bytes": size_bytes,
+        "limit_bytes": limit_bytes,
+        "size_mb": size_mb,
+        "limit_mb": limit_mb,
+        "usage_ratio": round(size_bytes / limit_bytes, 4) if limit_bytes else None,
+        "message": (
+            "Public demo session is within the temporary storage quota."
+            if ok
+            else f"This public demo session reached its temporary storage limit ({size_mb} MB used / {limit_mb} MB limit)."
+        ),
+    }
 
 
 def public_session_identity(
