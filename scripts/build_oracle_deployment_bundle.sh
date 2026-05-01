@@ -84,6 +84,8 @@ copy_path "scripts/readiness_phase_13_2_backup_restore_check.sh"
 copy_path "scripts/readiness_phase_13_2_oracle_exposure_check.sh"
 copy_path "scripts/readiness_phase_13_2_health_ops_check.sh"
 copy_path "scripts/readiness_phase_13_2_oracle_hardening_check.sh"
+copy_path "scripts/readiness_phase_13_3_oracle_sidecars_check.sh"
+copy_path "scripts/readiness_phase_13_3_oracle_sidecars_smoke.sh"
 
 find "$BUNDLE_ROOT" \( -name ".DS_Store" -o -name "._*" \) -type f -delete
 
