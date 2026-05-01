@@ -3874,8 +3874,30 @@ class DocumentAgentTaskHandler(TaskHandler):
         context_strategy: str,
         sources: list[AgentSource],
     ) -> tuple[DocumentAgentPayload, StructuredResult]:
+        initial_extraction_request = request
+        if request.source_document_ids:
+            initial_extraction_request = request.model_copy(
+                update={
+                    "input_text": (
+                        "Review the selected document as a risk and decision-readiness reviewer. "
+                        "Identify grounded contractual, operational, security, commercial, liability, compliance, "
+                        "ambiguity, ownership, deadline, evidence-gap, approval, or decision-readiness risks. "
+                        "Use only the selected document evidence. Return concrete risks, gaps, and mitigation actions "
+                        "rather than an empty result when review-relevant obligations, risks, gaps, ambiguities, or "
+                        "approval considerations are present."
+                    ),
+                    "temperature": 0.0,
+                    "top_p": min(float(request.top_p or 0.95), 0.7),
+                    "telemetry": {
+                        **self._telemetry_dict(request),
+                        "document_review_primary_extraction_prompted": True,
+                        "current_stage": "document_review_primary_extraction",
+                    },
+                }
+            )
+
         nested_result = self._run_nested_structured_task(
-            request=request,
+            request=initial_extraction_request,
             task_type="extraction",
             context_strategy="document_scan" if request.source_document_ids else context_strategy,
         )
@@ -3888,15 +3910,15 @@ class DocumentAgentTaskHandler(TaskHandler):
         actions = normalize_agent_bullet_points([item.description for item in payload.action_items], limit=6)
 
         empty_extraction_retry_metadata: dict[str, object] | None = None
-        if request.source_document_ids and not (risks or gaps or actions):
+        if request.source_document_ids and (not (risks or gaps or actions) or (not risks and not actions)):
             retry_input = (
-                f"{request.input_text.strip()}\n\n"
-                "Quality gate retry: the previous extraction returned zero risks, gaps and mitigation actions. "
-                "Review the selected document again. Identify grounded contractual, operational, security, "
-                "commercial, liability, compliance, ambiguity, ownership, deadline, evidence-gap, approval, "
-                "or decision-readiness risks. Use only the selected document evidence. "
-                "Do not return an empty result unless the document truly contains no review-relevant obligations, "
-                "risks, gaps, ambiguities, or approval considerations."
+                "Review the selected document as a risk and decision-readiness reviewer. "
+                "Quality gate retry: the previous extraction returned zero or sparse risks, gaps and mitigation actions. "
+                "Identify grounded contractual, operational, security, commercial, liability, compliance, ambiguity, "
+                "ownership, deadline, evidence-gap, approval, or decision-readiness risks. "
+                "Use only the selected document evidence. Return concrete risks, gaps, and mitigation actions. "
+                "Do not return an empty or gap-only result when review-relevant obligations, risks, ambiguities, "
+                "or approval considerations are present."
             ).strip()
             retry_request = request.model_copy(
                 update={
@@ -3929,7 +3951,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                         actions = retry_actions
                         empty_extraction_retry_metadata = {
                             "success": True,
-                            "reason": "initial_extraction_returned_zero_items",
+                            "reason": "initial_extraction_returned_zero_or_sparse_items",
                             "risks": len(risks),
                             "gaps": len(gaps),
                             "actions": len(actions),
@@ -3952,9 +3974,9 @@ class DocumentAgentTaskHandler(TaskHandler):
                     "error": str(error),
                 }
 
-        if request.source_document_ids and not (risks or gaps or actions):
+        if request.source_document_ids and (not (risks or gaps or actions) or (not risks and not actions)):
             raise RuntimeError(
-                "document_risk_review_quality_gate_failed: extraction returned zero risks, gaps, "
+                "document_risk_review_quality_gate_failed: extraction returned zero or sparse risks, gaps, "
                 "and mitigation actions after retry"
             )
 

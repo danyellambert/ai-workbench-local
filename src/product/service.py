@@ -57,7 +57,7 @@ DOCUMENT_AGENT_WORKFLOW_DEFAULTS: dict[ProductWorkflowId, dict[str, object]] = {
         "agent_intent": "document_risk_review",
         "agent_tool": "review_document_risks",
         "agent_answer_mode": "friendly",
-        "document_review_findings_synthesis_enabled": True,
+        "document_review_findings_synthesis_enabled": False,
         "document_review_findings_prompt_style": "hybrid",
     },
     "policy_contract_comparison": {
