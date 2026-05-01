@@ -1398,38 +1398,77 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         if path.startswith("/api/product/run-history/") and path.endswith("/rerun"):
             try:
                 run_id = path.removeprefix("/api/product/run-history/").removesuffix("/rerun").strip("/")
-                detail_payload = build_product_run_detail_payload(self.bootstrap, run_id=run_id)
+                identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                additional_history_paths = []
+                if not identity.can_write_global:
+                    additional_history_paths.append(identity.overlay_root / "runs" / "workflow_history.json")
+
+                detail_payload = build_product_run_detail_payload(
+                    self.bootstrap,
+                    run_id=run_id,
+                    additional_history_paths=additional_history_paths,
+                )
                 if detail_payload is None:
-                    self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Run history entry not found."})
+                    self._send_json_with_cookies(
+                        HTTPStatus.NOT_FOUND,
+                        {"ok": False, "error": "Run history entry not found."},
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
                     return
+
                 run_entry = detail_payload.get("run") if isinstance(detail_payload, dict) else None
                 if not isinstance(run_entry, dict):
-                    self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "Run history entry could not be decoded."})
+                    self._send_json_with_cookies(
+                        HTTPStatus.BAD_REQUEST,
+                        {"ok": False, "error": "Run history entry could not be decoded."},
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
                     return
+
                 rerun_payload = build_product_rerun_request_payload(run_entry)
                 if rerun_payload is None:
-                    self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": "This run cannot be replayed because its request payload is incomplete."})
+                    self._send_json_with_cookies(
+                        HTTPStatus.BAD_REQUEST,
+                        {"ok": False, "error": "This run cannot be replayed because its request payload is incomplete."},
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
                     return
+
                 request = ProductWorkflowRequest.model_validate(rerun_payload)
                 request = _resolve_product_workflow_runtime_request(
                     self.bootstrap,
                     request,
                     explicit_fields=set(rerun_payload.keys()),
                 )
+
                 try:
                     document_lookup = {item.document_id: item.name for item in list_product_documents(self.bootstrap.rag_settings)}
                 except Exception:
                     document_lookup = {}
+
+                telemetry_kwargs = {}
+                if not identity.can_write_global:
+                    overlay_runs_root = identity.overlay_root / "runs"
+                    telemetry_kwargs = {
+                        "workflow_history_path": overlay_runs_root / "workflow_history.json",
+                        "runtime_execution_log_path": overlay_runs_root / "runtime_execution_log.json",
+                        "lab_workflow_runs_path": overlay_runs_root / "lab_workflow_runs.json",
+                        "product_telemetry_path": overlay_runs_root / "telemetry_runs.json",
+                        "persist_runtime_evals": False,
+                    }
+
                 telemetry_execution = execute_product_workflow_with_telemetry(
                     bootstrap=self.bootstrap,
                     request=request,
                     document_lookup=document_lookup,
-                    surface="product_api_rerun",
+                    surface="product_api_rerun" if identity.can_write_global else "product_api_public_overlay",
                     reran_from_run_id=run_id,
+                    **telemetry_kwargs,
                 )
                 result = telemetry_execution["result"]
                 history_entry = telemetry_execution.get("history_entry") if isinstance(telemetry_execution, dict) else None
-                self._send_json(
+
+                self._send_json_with_cookies(
                     HTTPStatus.OK,
                     _build_product_workflow_response_payload(
                         result=result,
@@ -1437,10 +1476,13 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                         extra={
                             "trace_id": str((history_entry or {}).get("trace_id") or "").strip() or None,
                             "surface": str((history_entry or {}).get("surface") or "").strip() or None,
+                            "history_entry": history_entry,
                             "reran_from_run_id": run_id,
                             "source_run": run_entry,
+                            "write_scope": "global" if identity.can_write_global else "session_overlay",
                         },
                     ),
+                    cookies=[set_cookie] if set_cookie else None,
                 )
             except Exception as error:  # pragma: no cover - defensive API surface
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
