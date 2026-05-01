@@ -329,15 +329,33 @@ def _normalize_artifact_entry_from_metadata(metadata_path: Path) -> dict[str, ob
     }
 
 
-def _build_artifact_entries(bootstrap: ProductBootstrap) -> list[dict[str, object]]:
-    artifact_root = get_artifact_root(bootstrap.workspace_root) / "presentation_exports"
+def _build_artifact_entries(
+    bootstrap: ProductBootstrap,
+    *,
+    additional_artifact_roots: list[Path] | None = None,
+) -> list[dict[str, object]]:
+    global_artifact_root = get_artifact_root(bootstrap.workspace_root) / "presentation_exports"
+    artifact_roots: list[Path] = [global_artifact_root]
+    for root in additional_artifact_roots or []:
+        if root is None:
+            continue
+        artifact_roots.append(Path(root))
+
+    metadata_paths: list[Path] = []
+    seen_paths: set[str] = set()
+    for artifact_root in artifact_roots:
+        if artifact_root.exists() and artifact_root.is_dir():
+            for metadata_path in artifact_root.glob("**/metadata.json"):
+                key = str(metadata_path.resolve(strict=False))
+                if key not in seen_paths:
+                    seen_paths.add(key)
+                    metadata_paths.append(metadata_path)
+
     entries: list[dict[str, object]] = []
-    if artifact_root.exists() and artifact_root.is_dir():
-        metadata_paths = sorted(artifact_root.glob("**/metadata.json"), key=lambda item: item.stat().st_mtime, reverse=True)
-        for metadata_path in metadata_paths:
-            entry = _normalize_artifact_entry_from_metadata(metadata_path)
-            if entry is not None:
-                entries.append(entry)
+    for metadata_path in sorted(metadata_paths, key=lambda item: item.stat().st_mtime, reverse=True):
+        entry = _normalize_artifact_entry_from_metadata(metadata_path)
+        if entry is not None:
+            entries.append(entry)
     return entries
 
 
@@ -822,14 +840,22 @@ def build_product_run_detail_payload(bootstrap: ProductBootstrap, *, run_id: str
     return None
 
 
-def build_product_artifact_payload(bootstrap: ProductBootstrap, *, recent_limit: int = 25) -> dict[str, object]:
+def build_product_artifact_payload(
+    bootstrap: ProductBootstrap,
+    *,
+    recent_limit: int = 25,
+    additional_artifact_roots: list[Path] | None = None,
+) -> dict[str, object]:
     artifact_root = get_artifact_root(bootstrap.workspace_root) / "presentation_exports"
-    entries = _build_artifact_entries(bootstrap)
+    entries = _build_artifact_entries(bootstrap, additional_artifact_roots=additional_artifact_roots)
     completed_count = sum(1 for entry in entries if str(entry.get("status") or "") == "ready")
     error_count = sum(1 for entry in entries if str(entry.get("status") or "") == "error")
+    artifact_roots = [str(artifact_root)]
+    artifact_roots.extend(str(Path(root)) for root in additional_artifact_roots or [])
     return {
         "ok": True,
         "artifact_root": str(artifact_root),
+        "artifact_roots": artifact_roots,
         "summary": {
             "total_artifacts": len(entries),
             "completed_artifacts": completed_count,
@@ -839,14 +865,34 @@ def build_product_artifact_payload(bootstrap: ProductBootstrap, *, recent_limit:
     }
 
 
-def build_product_artifact_detail_payload(bootstrap: ProductBootstrap, *, artifact_id: str) -> dict[str, object] | None:
+def build_product_artifact_detail_payload(
+    bootstrap: ProductBootstrap,
+    *,
+    artifact_id: str,
+    additional_artifact_roots: list[Path] | None = None,
+) -> dict[str, object] | None:
     normalized_id = str(artifact_id or "").strip()
     if not normalized_id:
         return None
-    artifact_root = get_artifact_root(bootstrap.workspace_root) / "presentation_exports"
-    metadata_path = artifact_root / normalized_id / "metadata.json"
-    if not metadata_path.exists():
+
+    global_artifact_root = get_artifact_root(bootstrap.workspace_root) / "presentation_exports"
+    candidate_roots: list[Path] = []
+    for root in additional_artifact_roots or []:
+        candidate_roots.append(Path(root))
+    candidate_roots.append(global_artifact_root)
+
+    artifact_root = global_artifact_root
+    metadata_path: Path | None = None
+    for candidate_root in candidate_roots:
+        candidate_metadata_path = candidate_root / normalized_id / "metadata.json"
+        if candidate_metadata_path.exists():
+            artifact_root = candidate_root
+            metadata_path = candidate_metadata_path
+            break
+
+    if metadata_path is None:
         return None
+
     artifact_entry = _normalize_artifact_entry_from_metadata(metadata_path)
     if artifact_entry is None:
         return None

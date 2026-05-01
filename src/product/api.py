@@ -151,7 +151,12 @@ def _resolve_product_workflow_runtime_request(
         explicit_fields=explicit_fields,
     )
 
-def _resolve_product_artifact_path(*, bootstrap: ProductBootstrap, raw_path: str) -> Path:
+def _resolve_product_artifact_path(
+    *,
+    bootstrap: ProductBootstrap,
+    raw_path: str,
+    additional_allowed_roots: list[Path] | None = None,
+) -> Path:
     candidate = Path(str(raw_path or "").strip()).expanduser()
     if not str(candidate).strip():
         raise ValueError("Artifact path is required.")
@@ -165,6 +170,9 @@ def _resolve_product_artifact_path(*, bootstrap: ProductBootstrap, raw_path: str
         (workspace_root / ".runtime").resolve(strict=False),
         Path(bootstrap.presentation_export_settings.local_artifact_dir).resolve(strict=False),
     ]
+    for root in additional_allowed_roots or []:
+        allowed_roots.append(Path(root).resolve(strict=False))
+
     if not any(resolved.is_relative_to(root) for root in allowed_roots):
         raise ValueError("Artifact path is outside the allowed artifact roots.")
     if not resolved.exists() or not resolved.is_file():
@@ -1201,22 +1209,53 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/product/artifacts":
-            self._send_json(HTTPStatus.OK, build_product_artifact_payload(self.bootstrap, recent_limit=100))
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            additional_artifact_roots = []
+            if not identity.can_write_global:
+                additional_artifact_roots.append(identity.overlay_root / "artifacts" / "presentation_exports")
+            payload = build_product_artifact_payload(
+                self.bootstrap,
+                recent_limit=100,
+                additional_artifact_roots=additional_artifact_roots,
+            )
+            payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path.startswith("/api/product/artifacts/"):
             artifact_id = path.removeprefix("/api/product/artifacts/").strip("/")
-            artifact_payload = build_product_artifact_detail_payload(self.bootstrap, artifact_id=artifact_id)
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            additional_artifact_roots = []
+            if not identity.can_write_global:
+                additional_artifact_roots.append(identity.overlay_root / "artifacts" / "presentation_exports")
+            artifact_payload = build_product_artifact_detail_payload(
+                self.bootstrap,
+                artifact_id=artifact_id,
+                additional_artifact_roots=additional_artifact_roots,
+            )
             if artifact_payload is None:
-                self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Artifact not found."})
+                self._send_json_with_cookies(
+                    HTTPStatus.NOT_FOUND,
+                    {"ok": False, "error": "Artifact not found."},
+                    cookies=[set_cookie] if set_cookie else None,
+                )
                 return
-            self._send_json(HTTPStatus.OK, artifact_payload)
+            artifact_payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
+            self._send_json_with_cookies(HTTPStatus.OK, artifact_payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/product/artifact":
             try:
+                identity, _set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                additional_allowed_roots = []
+                if not identity.can_write_global:
+                    additional_allowed_roots.append(identity.overlay_root / "artifacts")
                 raw_path = str((query.get("path") or [""])[0])
-                artifact_path = _resolve_product_artifact_path(bootstrap=self.bootstrap, raw_path=raw_path)
+                artifact_path = _resolve_product_artifact_path(
+                    bootstrap=self.bootstrap,
+                    raw_path=raw_path,
+                    additional_allowed_roots=additional_allowed_roots,
+                )
                 self._send_file(artifact_path)
             except FileNotFoundError as error:
                 self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": str(error)})
