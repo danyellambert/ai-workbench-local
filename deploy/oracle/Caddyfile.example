@@ -1,0 +1,29 @@
+# AI Decision Studio — Oracle Always Free Caddy reverse proxy template
+#
+# Manual steps:
+# 1. Point DNS A record for AI_DECISION_STUDIO_PUBLIC_DOMAIN to the Oracle VM public IP.
+# 2. Open OCI ingress only for 80/tcp and 443/tcp publicly.
+# 3. Keep 8011, 8787, 11434, 8085 and 8080 closed to the public internet.
+# 4. Run frontend on localhost via AI_DECISION_STUDIO_FRONTEND_BIND_HOST=127.0.0.1.
+
+{
+  email {$AI_DECISION_STUDIO_ACME_EMAIL}
+}
+
+{$AI_DECISION_STUDIO_PUBLIC_DOMAIN} {
+  encode gzip zstd
+
+  reverse_proxy 127.0.0.1:{$AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT}
+
+  header {
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    X-Frame-Options "DENY"
+    Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  }
+
+  log {
+    output file /var/log/caddy/ai-decision-studio.access.log
+    format json
+  }
+}
