@@ -3538,6 +3538,24 @@ def build_lab_evals_payload(workspace_root: Path, *, additional_product_telemetr
 
     live_cases, live_summary = _build_live_product_eval_cases(scope, historical_entries)
 
+    recent_live_window_size = 10
+    recent_live_cases = live_cases[:recent_live_window_size]
+    recent_live_verdict_counter = Counter(str(item.get('verdict') or 'WARN') for item in recent_live_cases)
+    recent_live_summary = {
+        'total': len(recent_live_cases),
+        'pass': int(recent_live_verdict_counter.get('PASS', 0)),
+        'warn': int(recent_live_verdict_counter.get('WARN', 0)),
+        'fail': int(recent_live_verdict_counter.get('FAIL', 0)),
+        'review': sum(1 for item in recent_live_cases if bool(item.get('needsReview'))),
+        'passRate': round((int(recent_live_verdict_counter.get('PASS', 0)) / max(len(recent_live_cases), 1)) * 100) if recent_live_cases else 0,
+    }
+    recent_live_window = {
+        'label': f"last {len(recent_live_cases)} visible product check{'s' if len(recent_live_cases) != 1 else ''}" if recent_live_cases else 'no recent visible product checks',
+        'size': len(recent_live_cases),
+        'maxSize': recent_live_window_size,
+        'source': 'visible product telemetry',
+    }
+
     combined_cases = sorted([*live_cases, *historical_cases], key=lambda item: str(item.get('timestamp') or ''), reverse=True)
     combined_watchlist = [item for item in combined_cases if str(item.get('verdict') or '') in {'WARN', 'FAIL'} or bool(item.get('needsReview'))]
     fail_cases = [item for item in combined_cases if str(item.get('verdict') or '') == 'FAIL']
@@ -3582,6 +3600,7 @@ def build_lab_evals_payload(workspace_root: Path, *, additional_product_telemetr
         'cases': combined_cases[:120],
         'historicalCases': historical_cases[:80],
         'liveCases': live_cases[:40],
+        'recentLiveCases': recent_live_cases,
         'providerBreakdown': provider_breakdown,
         'taskBreakdown': task_breakdown,
         'liveProviderBreakdown': live_summary.get('providerBreakdown') or [],
@@ -3595,6 +3614,15 @@ def build_lab_evals_payload(workspace_root: Path, *, additional_product_telemetr
             'total': int(live_summary.get('total') or 0),
         },
         'livePassRate': int(live_summary.get('passRate') or 0),
+        'recentLiveTotals': {
+            'pass': int(recent_live_summary.get('pass') or 0),
+            'warn': int(recent_live_summary.get('warn') or 0),
+            'fail': int(recent_live_summary.get('fail') or 0),
+            'review': int(recent_live_summary.get('review') or 0),
+            'total': int(recent_live_summary.get('total') or 0),
+        },
+        'recentLivePassRate': int(recent_live_summary.get('passRate') or 0),
+        'recentLiveWindow': recent_live_window,
         'watchlist': combined_watchlist[:16],
         'liveWatchlist': [item for item in live_cases if str(item.get('verdict') or '') in {'WARN', 'FAIL'} or bool(item.get('needsReview'))][:10],
         'historicalWatchlist': [item for item in historical_cases if str(item.get('verdict') or '') in {'WARN', 'FAIL'} or bool(item.get('needsReview'))][:10],

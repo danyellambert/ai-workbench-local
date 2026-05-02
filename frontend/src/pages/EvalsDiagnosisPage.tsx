@@ -56,8 +56,10 @@ export default function EvalsDiagnosisPage() {
   const liveCases = data?.liveCases ?? [];
   const totals = data?.totals ?? { total: 0, pass: 0, warn: 0, fail: 0, review: 0 };
   const liveTotals = data?.liveTotals ?? { total: 0, pass: 0, warn: 0, fail: 0, review: 0 };
+  const recentLiveTotals = data?.recentLiveTotals ?? liveTotals;
   const passRate = data?.passRate ?? 0;
   const livePassRate = data?.livePassRate ?? 0;
+  const recentLivePassRate = data?.recentLivePassRate ?? livePassRate;
   const providerBreakdown = data?.providerBreakdown ?? [];
   const taskBreakdown = data?.taskBreakdown ?? [];
   const liveProviderBreakdown = data?.liveProviderBreakdown ?? [];
@@ -70,6 +72,7 @@ export default function EvalsDiagnosisPage() {
   const uncoveredTaskTypes = data?.scope?.uncoveredTaskTypes ?? [];
   const historicalWindow = data?.scope?.historicalWindow;
   const liveWindow = data?.scope?.liveWindow;
+  const recentLiveWindow = data?.recentLiveWindow ?? liveWindow;
   const workflowCoverage = data?.scope?.workflowCoverage;
   const observedWorkflowCount = workflowCoverage?.observed ?? activeWorkflowLabels.length ?? 0;
   const historicalWorkflowCoverage = workflowCoverage?.historical ?? 0;
@@ -122,8 +125,8 @@ export default function EvalsDiagnosisPage() {
         metrics={[
           { label: 'Historical Pass', value: `${passRate}%`, subtitle: 'retained eval baseline · product-scoped', icon: ShieldCheck, status: passRate >= 85 ? 'healthy' : passRate >= 70 ? 'warning' : 'error' },
           { label: 'Historical Cases', value: totals.total, subtitle: historicalWindow?.label ?? 'retained eval DB', icon: CheckCircle2, status: totals.total > 0 ? 'neutral' : 'warning' },
-          { label: 'Live Pass', value: `${livePassRate}%`, subtitle: 'retained product telemetry', icon: Activity, status: liveTotals.total > 0 ? (livePassRate >= 85 ? 'healthy' : livePassRate >= 70 ? 'warning' : 'error') : 'neutral' },
-          { label: 'Live Runs', value: liveTotals.total, subtitle: liveWindow?.label ?? 'not a fixed 24h window', icon: Clock, status: liveTotals.total > 0 ? 'healthy' : 'warning' },
+          { label: 'Recent Live Pass', value: `${recentLivePassRate}%`, subtitle: recentLiveWindow?.label ?? 'last 10 visible product checks', icon: Activity, status: recentLiveTotals.total > 0 ? (recentLivePassRate >= 85 ? 'healthy' : recentLivePassRate >= 70 ? 'warning' : 'error') : 'neutral' },
+          { label: 'All Live Checks', value: liveTotals.total, subtitle: liveWindow?.label ?? 'retained product telemetry', icon: Clock, status: liveTotals.total > 0 ? 'healthy' : 'warning' },
           { label: 'Active Tasks', value: activeTaskTypes.length, subtitle: 'task types seen in product workflows', icon: Eye, status: activeTaskTypes.length > 0 ? 'healthy' : 'warning' },
         ]}
         />

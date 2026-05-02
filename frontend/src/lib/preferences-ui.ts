@@ -27,13 +27,13 @@ export function credentialStatusCopy(connection: ProviderConnection): string {
   }
   if (connection.apiKeyConfigured) {
     if (connection.credentialManagement === 'macos_keychain') {
-      return 'Credential stored locally in the macOS Keychain and never returned to the frontend.';
+      return 'Credential stored in the deployment credential store and never returned to the frontend.';
     }
     return connection.credentialManagement === 'env_only'
       ? 'Credential configured outside the UI and managed via environment or secure external config.'
       : 'Credential configured for this connection.';
   }
   return connection.credentialManagement === 'macos_keychain'
-    ? 'No credential stored yet. You can add it securely from this screen and it will be saved in the local macOS Keychain.'
+    ? 'No credential stored yet. You can add it securely from this screen and it will be saved in the deployment credential store.'
     : 'Credentials are not configured in the current environment.';
 }

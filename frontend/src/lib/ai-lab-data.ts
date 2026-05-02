@@ -517,6 +517,9 @@ export interface LabEvalsPageData {
   };
   passRate: number;
   livePassRate?: number;
+  recentLivePassRate?: number;
+  recentLiveTotals?: { pass: number; warn: number; fail: number; review: number; total: number };
+  recentLiveWindow?: { label?: string; size?: number; maxSize?: number; source?: string };
   totals: { pass: number; warn: number; fail: number; review: number; total: number };
   liveTotals?: { pass: number; warn: number; fail: number; review: number; total: number };
   suites: Array<{ name: string; total: number; pass: number; warn: number; fail: number; needsReview: number; lastRun: string }>;

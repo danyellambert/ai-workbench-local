@@ -174,7 +174,7 @@ def _supports_ui_credential_update(connection: dict[str, Any]) -> bool:
 def _connection_usage_note(connection: dict[str, Any]) -> str:
     mode = str(connection.get("mode") or "local")
     if _supports_ui_credential_update(connection):
-        return "Credential can be stored locally in the macOS Keychain. The frontend never receives the saved secret back."
+        return "Credential is managed by the deployment credential store for supported connections. The frontend never receives the saved secret back."
     if mode == "local":
         return "Connection metadata is editable in workspace preferences. Credentials remain managed outside the UI."
     if mode == "hosted":
@@ -878,10 +878,10 @@ def build_preferences_payload(bootstrap: ProductBootstrap) -> dict[str, Any]:
             "embeddingModelsByConnection": embedding_models_by_connection,
         },
         "credential_policy": {
-            "mode": "macos_keychain_for_supported_connections",
+            "mode": "deployment_credential_store_for_supported_connections",
             "can_update_from_ui": True,
             "notes": [
-                "OpenAI, Hugging Face Inference and Ollama Hosted credentials can be stored locally in the macOS Keychain.",
+                "OpenAI, Hugging Face Inference and Ollama Hosted credentials can be stored in the deployment credential store when UI credential updates are enabled.",
                 "The frontend never receives credential values in clear text.",
                 "Other connections continue using configured/not-configured state and editable non-secret metadata only.",
             ],
@@ -910,9 +910,9 @@ def update_preferences_connection_credential(bootstrap: ProductBootstrap, connec
     secret_value = str(api_key or "").strip()
     ok = delete_secret(secret_key) if not secret_value else set_secret(secret_key, secret_value)
     if not ok:
-        raise ValueError("Could not update the credential in the local macOS Keychain.")
+        raise ValueError("Could not update the credential in the deployment credential store.")
     if secret_value and str(get_secret(secret_key) or "").strip() != secret_value:
-        raise ValueError("Credential was saved, but the runtime could not read back the new Keychain value.")
+        raise ValueError("Credential was saved, but the runtime could not read back the updated credential.")
 
     _refresh_bootstrap_provider_registry(bootstrap)
 
