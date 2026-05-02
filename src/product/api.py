@@ -1150,11 +1150,36 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
 
         if path == "/api/lab/overview":
-            self._send_json(HTTPStatus.OK, build_lab_overview_payload(self.bootstrap.workspace_root))
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            additional_workflow_history_paths = []
+            additional_runtime_log_paths = []
+            additional_product_telemetry_paths = []
+            if not identity.can_write_global:
+                overlay_runs_root = identity.overlay_root / "runs"
+                additional_workflow_history_paths.append(overlay_runs_root / "workflow_history.json")
+                additional_runtime_log_paths.append(overlay_runs_root / "runtime_execution_log.json")
+                additional_product_telemetry_paths.append(overlay_runs_root / "telemetry_runs.json")
+            payload = build_lab_overview_payload(
+                self.bootstrap.workspace_root,
+                additional_workflow_history_paths=additional_workflow_history_paths,
+                additional_runtime_log_paths=additional_runtime_log_paths,
+                additional_product_telemetry_paths=additional_product_telemetry_paths,
+            )
+            payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/lab/runtime":
-            self._send_json(HTTPStatus.OK, build_lab_runtime_payload(self.bootstrap.workspace_root))
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            additional_runtime_log_paths = []
+            if not identity.can_write_global:
+                additional_runtime_log_paths.append(identity.overlay_root / "runs" / "runtime_execution_log.json")
+            payload = build_lab_runtime_payload(
+                self.bootstrap.workspace_root,
+                additional_runtime_log_paths=additional_runtime_log_paths,
+            )
+            payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/lab/chat":
@@ -1171,7 +1196,16 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/lab/evals":
-            self._send_json(HTTPStatus.OK, build_lab_evals_payload(self.bootstrap.workspace_root))
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            additional_product_telemetry_paths = []
+            if not identity.can_write_global:
+                additional_product_telemetry_paths.append(identity.overlay_root / "runs" / "telemetry_runs.json")
+            payload = build_lab_evals_payload(
+                self.bootstrap.workspace_root,
+                additional_product_telemetry_paths=additional_product_telemetry_paths,
+            )
+            payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/lab/artifacts":

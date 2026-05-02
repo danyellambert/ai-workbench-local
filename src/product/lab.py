@@ -551,11 +551,19 @@ def _document_lookup(documents: list[dict[str, Any]]) -> dict[str, dict[str, Any
     return lookup
 
 
-def _load_runtime_state(workspace_root: Path) -> dict[str, Any]:
+def _load_runtime_state(workspace_root: Path, *, additional_runtime_log_paths: list[Path] | None = None) -> dict[str, Any]:
     controls_state = load_runtime_controls_state(get_runtime_controls_state_path(workspace_root)) or {}
     profile = controls_state.get('profile') if isinstance(controls_state.get('profile'), dict) else {}
     rag_store = load_rag_store(get_rag_store_path(workspace_root)) or {}
-    runtime_entries = _sort_runtime_entries(load_runtime_execution_log(get_runtime_execution_log_path(workspace_root)))
+    runtime_entries_raw = list(load_runtime_execution_log(get_runtime_execution_log_path(workspace_root)))
+    additional_runtime_sources: list[str] = []
+    for additional_path in additional_runtime_log_paths or []:
+        additional_entries = load_runtime_execution_log(additional_path)
+        if additional_entries:
+            additional_runtime_sources.append(str(additional_path))
+            runtime_entries_raw.extend(additional_entries)
+
+    runtime_entries = _sort_runtime_entries(runtime_entries_raw)
     documents = _workspace_documents(workspace_root)
     document_lookup = _document_lookup(documents)
     chunks = rag_store.get('chunks') if isinstance(rag_store.get('chunks'), list) else []
@@ -621,6 +629,7 @@ def _load_runtime_state(workspace_root: Path) -> dict[str, Any]:
         'documents': documents,
         'document_lookup': document_lookup,
         'runtime_entries': runtime_entries,
+        'additional_runtime_sources': additional_runtime_sources,
         'product_runtime_entries': product_runtime_entries,
         'surface_runtime_entries': surface_runtime_entries,
         'surface_scope': surface_scope,
@@ -848,8 +857,8 @@ def _build_runtime_watchouts(runtime_state: dict[str, Any], runtime_payload: dic
     return notes[:4]
 
 
-def build_lab_runtime_payload(workspace_root: Path) -> dict[str, Any]:
-    runtime_state = _load_runtime_state(workspace_root)
+def build_lab_runtime_payload(workspace_root: Path, *, additional_runtime_log_paths: list[Path] | None = None) -> dict[str, Any]:
+    runtime_state = _load_runtime_state(workspace_root, additional_runtime_log_paths=additional_runtime_log_paths)
     runtime = _build_runtime_core_payload(runtime_state)
     all_runtime_entries = runtime_state['runtime_entries']
     product_runtime_entries = runtime_state['product_runtime_entries']
@@ -987,16 +996,35 @@ def build_lab_runtime_payload(workspace_root: Path) -> dict[str, Any]:
         'recent_traces': _build_recent_trace_rows(surface_entries, runtime_state['document_lookup']),
         'timeline': _build_runtime_timeline(surface_entries),
         'cross_surface_notes': LAB_CROSS_SURFACE_NOTES,
+        'additional_runtime_log_paths': runtime_state.get('additional_runtime_sources') or [],
     }
     payload['watchouts'] = _build_runtime_watchouts(runtime_state, payload)
     return payload
 
 
-def build_lab_overview_payload(workspace_root: Path) -> dict[str, Any]:
-    runtime_payload = build_lab_runtime_payload(workspace_root)
-    eval_payload = build_lab_evals_payload(workspace_root)
+def build_lab_overview_payload(
+    workspace_root: Path,
+    *,
+    additional_workflow_history_paths: list[Path] | None = None,
+    additional_runtime_log_paths: list[Path] | None = None,
+    additional_product_telemetry_paths: list[Path] | None = None,
+) -> dict[str, Any]:
+    runtime_payload = build_lab_runtime_payload(workspace_root, additional_runtime_log_paths=additional_runtime_log_paths)
+    eval_payload = build_lab_evals_payload(workspace_root, additional_product_telemetry_paths=additional_product_telemetry_paths)
     evidence_payload = build_lab_evidenceops_payload(workspace_root)
     workflow_history = _read_json(get_product_workflow_history_path(workspace_root), [])
+    if not isinstance(workflow_history, list):
+        workflow_history = []
+    additional_workflow_history_sources: list[str] = []
+    for additional_path in additional_workflow_history_paths or []:
+        additional_history = _read_json(additional_path, [])
+        if isinstance(additional_history, list) and additional_history:
+            additional_workflow_history_sources.append(str(additional_path))
+            workflow_history.extend(additional_history)
+    workflow_history = sorted(
+        [item for item in workflow_history if isinstance(item, dict)],
+        key=lambda item: str(item.get('timestamp') or item.get('created_at') or ''),
+    )
     workflow_counts: Counter[str] = Counter()
     warning_runs = 0
     for item in workflow_history:
@@ -3207,7 +3235,7 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
     }
 
 
-def _build_product_eval_scope(workspace_root: Path) -> dict[str, Any]:
+def _build_product_eval_scope(workspace_root: Path, *, additional_product_telemetry_paths: list[Path] | None = None) -> dict[str, Any]:
     catalog = build_product_workflow_catalog()
     workflow_labels = {workflow_id: definition.label for workflow_id, definition in catalog.items()}
     capable_task_types = sorted({task_type for definition in catalog.values() for task_type in definition.backend_task_types})
@@ -3221,7 +3249,13 @@ def _build_product_eval_scope(workspace_root: Path) -> dict[str, Any]:
         if workflow_id in catalog:
             observed_workflow_ids.add(workflow_id)
 
-    telemetry_runs = load_product_telemetry_runs(get_product_telemetry_path(workspace_root))
+    telemetry_runs = list(load_product_telemetry_runs(get_product_telemetry_path(workspace_root)))
+    additional_telemetry_sources: list[str] = []
+    for additional_path in additional_product_telemetry_paths or []:
+        additional_runs = load_product_telemetry_runs(additional_path)
+        if additional_runs:
+            additional_telemetry_sources.append(str(additional_path))
+            telemetry_runs.extend(additional_runs)
     for run in telemetry_runs:
         if not isinstance(run, dict):
             continue
@@ -3243,6 +3277,7 @@ def _build_product_eval_scope(workspace_root: Path) -> dict[str, Any]:
         'observed_workflow_labels': [workflow_labels[workflow_id] for workflow_id in sorted(observed_workflow_ids)],
         'observed_task_types': observed_task_types,
         'telemetry_runs': telemetry_runs,
+        'additional_telemetry_sources': additional_telemetry_sources,
         'workflow_history_count': len([entry for entry in workflow_history if isinstance(entry, dict)]),
     }
 
@@ -3388,8 +3423,8 @@ def _build_live_product_eval_cases(scope: dict[str, Any], historical_entries: li
     return live_cases, live_summary
 
 
-def build_lab_evals_payload(workspace_root: Path) -> dict[str, Any]:
-    scope = _build_product_eval_scope(workspace_root)
+def build_lab_evals_payload(workspace_root: Path, *, additional_product_telemetry_paths: list[Path] | None = None) -> dict[str, Any]:
+    scope = _build_product_eval_scope(workspace_root, additional_product_telemetry_paths=additional_product_telemetry_paths)
     observed_task_types = [task_type for task_type in (scope.get('observed_task_types') or []) if str(task_type or '').strip()]
     all_entries = load_eval_runs(get_phase8_eval_db_path(workspace_root))
     historical_entries = []
