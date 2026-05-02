@@ -1,0 +1,6 @@
+services:
+  product-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.aws-slim-product-api
+    image: ai-decision-studio-product-api:aws-slim
