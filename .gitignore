@@ -63,3 +63,7 @@ test-results/
 .env.oracle
 .env.docker.local
 ads-local-restore.override.yml
+# Nextcloud runtime/golden state must stay outside Git
+nextcloud-golden-baseline*.tar.gz
+nextcloud_golden_baseline/
+nextcloud_volume_backups/

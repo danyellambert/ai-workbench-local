@@ -80,6 +80,9 @@ copy_path "scripts/readiness_oracle_like_service_topology_check.sh"
 copy_path "scripts/cleanup_public_session_overlays.py"
 copy_path "scripts/backup_oracle_data_root.sh"
 copy_path "scripts/restore_oracle_data_root.sh"
+copy_path "docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md"
+copy_path "scripts/readiness_nextcloud_golden_baseline_check.sh"
+copy_path "scripts/restore_nextcloud_golden_baseline.sh"
 copy_path "scripts/oracle_health_ops_report.py"
 
 copy_path "scripts/readiness_phase_13_2_public_session_retention_check.sh"
@@ -256,6 +259,9 @@ required_paths = [
     "scripts/cleanup_public_session_overlays.py",
     "scripts/backup_oracle_data_root.sh",
     "scripts/restore_oracle_data_root.sh",
+    "docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md",
+    "scripts/readiness_nextcloud_golden_baseline_check.sh",
+    "scripts/restore_nextcloud_golden_baseline.sh",
     "scripts/oracle_health_ops_report.py",
     "scripts/readiness_phase_13_2_oracle_hardening_check.sh",
 ]
