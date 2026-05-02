@@ -67,3 +67,6 @@ ads-local-restore.override.yml
 nextcloud-golden-baseline*.tar.gz
 nextcloud_golden_baseline/
 nextcloud_volume_backups/
+# AI Lab runtime/golden state must stay outside Git
+ai-lab-golden-state*.tar.gz
+ai_lab_golden_state/

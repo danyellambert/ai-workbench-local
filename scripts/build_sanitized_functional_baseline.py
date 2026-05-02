@@ -71,13 +71,36 @@ def should_copy_external_file(src: Path) -> bool:
     return True
 
 
+
+def looks_like_safe_external_path(raw_path: str) -> bool:
+    """Filter false-positive absolute paths captured from markdown tables/log blobs."""
+    if len(raw_path) > 1024:
+        return False
+
+    if "\\n" in raw_path or "\\r" in raw_path:
+        return False
+
+    if "|" in raw_path:
+        return False
+
+    if raw_path.count("/Users/") + raw_path.count("/private/") + raw_path.count("/var/folders/") > 1:
+        return False
+
+    return True
+
 def copy_external_files(paths: set[str], external_dir: Path) -> dict[str, str]:
     mapping: dict[str, str] = {}
     external_dir.mkdir(parents=True, exist_ok=True)
 
     for raw_path in sorted(paths):
-        src = Path(raw_path)
-        if not src.exists() or not src.is_file():
+        if not looks_like_safe_external_path(raw_path):
+            continue
+
+        try:
+            src = Path(raw_path)
+            if not src.exists() or not src.is_file():
+                continue
+        except OSError:
             continue
 
         if not should_copy_external_file(src):
