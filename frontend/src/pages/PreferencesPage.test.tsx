@@ -12,6 +12,30 @@ vi.mock('@/components/ui/sonner', () => ({
   },
 }));
 
+
+vi.mock('@/lib/auth-session', () => ({
+  useAuthSession: () => ({
+    data: {
+      ok: true,
+      mode: 'admin',
+      is_admin: true,
+      access: {
+        role: 'admin',
+        can_write_global: true,
+        can_publish_external: true,
+      },
+      session: {
+        id: 'test-admin-session',
+        type: 'admin',
+      },
+    },
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn(),
+  }),
+  isAdminSession: () => true,
+}));
+
 vi.mock('@/lib/product-api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/product-api')>('@/lib/product-api');
   return {
@@ -38,7 +62,7 @@ function buildPreferencesResponse(activeProfileId = 'workspace-default'): Prefer
         authMethod: 'none',
         apiKeyConfigured: false,
         status: 'connected',
-        preferredModel: 'qwen2.5:7b',
+        preferredModel: 'nemotron-3-super:cloud',
         lastChecked: '2026-04-16T13:00:00+00:00',
         description: 'Primary local runtime.',
         capabilities: {
@@ -62,7 +86,7 @@ function buildPreferencesResponse(activeProfileId = 'workspace-default'): Prefer
         id: 'workspace-default',
         name: 'Workspace Default',
         primaryConnectionId: 'ollama',
-        primaryModel: 'qwen2.5:7b',
+        primaryModel: 'nemotron-3-super:cloud',
         fallbackEnabled: false,
         fallbackChain: [],
         executionPolicy: 'local_only',
@@ -109,7 +133,7 @@ function buildPreferencesResponse(activeProfileId = 'workspace-default'): Prefer
         id: 'deep-review',
         name: 'Deep Review',
         primaryConnectionId: 'ollama',
-        primaryModel: 'qwen2.5:7b',
+        primaryModel: 'nemotron-3-super:cloud',
         fallbackEnabled: false,
         fallbackChain: [],
         executionPolicy: 'prefer_local_burst_hosted',
@@ -191,7 +215,7 @@ function buildPreferencesResponse(activeProfileId = 'workspace-default'): Prefer
       promptProfiles: [{ value: 'neutro', label: 'Neutro' }],
     },
     options: {
-      modelsByConnection: { ollama: ['qwen2.5:7b'] },
+      modelsByConnection: { ollama: ['nemotron-3-super:cloud'] },
       embeddingModelsByConnection: { ollama: ['embeddinggemma:300m'] },
     },
     credential_policy: {

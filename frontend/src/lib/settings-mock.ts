@@ -15,7 +15,7 @@ export const PROVIDER_CONNECTIONS: ProviderConnection[] = [
     authMethod: 'none',
     apiKeyConfigured: false,
     status: 'connected',
-    preferredModel: 'qwen2.5:32b-instruct-q5_K_M',
+    preferredModel: 'nemotron-3-super:cloud',
     lastChecked: '2 min ago',
     description: 'Local Ollama daemon on GPU workstation. No API key required and suited to primary day-to-day execution.',
     capabilities: { generation: true, embeddings: true, reranking: false, structuredOutputs: true, vision: false, toolCalling: false, streaming: true },

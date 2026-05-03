@@ -104,8 +104,12 @@ WORKFLOW_CATALOG = [
     {"workflowId": "workflow-inspector", "label": "Workflow Inspector"},
 ]
 
-PRODUCT_CONNECTION_BLACKLIST = {"huggingface_local"}
+# Do not surface local/experimental Hugging Face runtimes in the
+# public product Preferences UI. Hugging Face Inference remains available
+# when explicitly configured as a remote/cloud provider.
+PRODUCT_CONNECTION_BLACKLIST = {"huggingface_local", "huggingface_server"}
 BLOCKED_PRODUCT_MODELS = {"pptagent-q8"}
+DEMO_PREFERRED_OLLAMA_MODEL = "nemotron-3-super:cloud"
 
 
 def _canonical_ollama_hosted_model(model: str | None) -> str:
@@ -450,6 +454,10 @@ def _build_connections(registry: dict[str, dict[str, Any]]) -> tuple[list[dict[s
             embedding_models_by_connection[provider_key] = _list_models(provider_entry, embedding=True) or static_embedding_models
 
         if provider_key == "ollama":
+            demo_preferred_model = _canonical_ollama_hosted_model(DEMO_PREFERRED_OLLAMA_MODEL)
+            if demo_preferred_model and demo_preferred_model not in models_by_connection[provider_key]:
+                models_by_connection[provider_key].insert(0, demo_preferred_model)
+
             for embedding_model in [
                 *static_embedding_models,
                 _default_ollama_embedding_model(),
@@ -459,7 +467,10 @@ def _build_connections(registry: dict[str, dict[str, Any]]) -> tuple[list[dict[s
                     models_by_connection[provider_key].append(normalized_embedding_model)
                 if normalized_embedding_model and normalized_embedding_model not in embedding_models_by_connection[provider_key]:
                     embedding_models_by_connection[provider_key].append(normalized_embedding_model)
+
         preferred_model = str(provider_entry.get("default_model") or static_config.get("defaultModel") or "")
+        if provider_key == "ollama":
+            preferred_model = _canonical_ollama_hosted_model(DEMO_PREFERRED_OLLAMA_MODEL)
         if _is_blocked_product_model(preferred_model):
             preferred_model = models_by_connection.get(provider_key, [""])[0] if models_by_connection.get(provider_key) else ""
         connections.append(
