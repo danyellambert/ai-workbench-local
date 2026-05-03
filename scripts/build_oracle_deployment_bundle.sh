@@ -87,6 +87,7 @@ copy_path "docs/deployment/AI_LAB_GOLDEN_STATE_RESTORE.md"
 copy_path "scripts/readiness_ai_lab_golden_state_check.sh"
 copy_path "scripts/readiness_public_ai_lab_overlay_check.sh"
 copy_path "scripts/readiness_preferences_evals_surface_check.sh"
+copy_path "scripts/readiness_required_integrations_check.sh"
 copy_path "scripts/restore_ai_lab_golden_state.sh"
 copy_path "scripts/oracle_health_ops_report.py"
 
@@ -271,6 +272,7 @@ required_paths = [
     "scripts/readiness_ai_lab_golden_state_check.sh",
     "scripts/readiness_public_ai_lab_overlay_check.sh",
     "scripts/readiness_preferences_evals_surface_check.sh",
+    "scripts/readiness_required_integrations_check.sh",
     "scripts/restore_ai_lab_golden_state.sh",
     "scripts/oracle_health_ops_report.py",
     "scripts/readiness_phase_13_2_oracle_hardening_check.sh",

@@ -415,6 +415,9 @@ def build_external_targets_status(
             "token": resolved_settings.trello.token,
             "board_id": resolved_settings.trello.board_id,
             "list_open_id": resolved_settings.trello.list_open_id,
+            "list_review_id": resolved_settings.trello.list_review_id,
+            "list_approved_id": resolved_settings.trello.list_approved_id,
+            "list_done_id": resolved_settings.trello.list_done_id,
         }.items()
         if not str(value or "").strip()
     ]
