@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_FILE=".env.oracle"
-PROJECT="ai-decision-studio"
-COMPOSE_FILE="docker-compose.oracle-like.yml"
-OVERRIDE_FILE="docker-compose.aws-slim.override.yml"
-BASE_URL="http://127.0.0.1:8011"
+ENV_FILE="${ENV_FILE:-.env.oracle}"
+PROJECT="${PROJECT:-ai-decision-studio}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.oracle-like.yml}"
+OVERRIDE_FILE="${OVERRIDE_FILE:-docker-compose.aws-slim.override.yml}"
+BASE_URL="${BASE_URL:-http://127.0.0.1:8011}"
 REPORT="../ai_decision_studio_functional_baseline/parity_reports/evidenceops_ui_cache_readiness_report.json"
 MAX_HIT_MS=2500
 

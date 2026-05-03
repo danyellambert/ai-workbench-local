@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_FILE=".env.oracle"
+ENV_FILE="${ENV_FILE:-.env.oracle}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in

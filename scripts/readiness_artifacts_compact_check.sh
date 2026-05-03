@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="http://127.0.0.1:8071"
+BASE_URL="${BASE_URL:-http://127.0.0.1:8071}"
 REPORT="../ai_decision_studio_functional_baseline/parity_reports/artifacts_compact_readiness_report.json"
 MAX_COMPACT_BYTES=250000
 MAX_COMPACT_MS=2500

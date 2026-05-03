@@ -4,10 +4,10 @@ set -euo pipefail
 ARCHIVE=""
 MANIFEST=""
 EXPECTED_SHA=""
-ENV_FILE=".env.oracle"
-PROJECT="ai-decision-studio"
-COMPOSE_FILE="docker-compose.oracle-like.yml"
-OVERRIDE_FILE="docker-compose.aws-slim.override.yml"
+ENV_FILE="${ENV_FILE:-.env.oracle}"
+PROJECT="${PROJECT:-ai-decision-studio}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.oracle-like.yml}"
+OVERRIDE_FILE="${OVERRIDE_FILE:-docker-compose.aws-slim.override.yml}"
 VOLUME="ai-decision-studio_nextcloud_app"
 WEBDAV_USER="danyel"
 ROOT_PATH="/EvidenceOpsDemo"
@@ -177,12 +177,12 @@ for item in "0=localhost" "1=127.0.0.1" "2=nextcloud" "3=127.0.0.1:8085"; do
 done
 
 echo
-echo "== Update .env.oracle WebDAV values =="
+echo "== Update ${ENV_FILE} WebDAV values =="
 WEBDAV_USER="$WEBDAV_USER" ROOT_PATH="$ROOT_PATH" python3 - <<'PY'
 import os
 from pathlib import Path
 
-p = Path(".env.oracle")
+p = Path(os.environ.get("ENV_FILE", ".env.oracle"))
 lines = p.read_text(encoding="utf-8").splitlines()
 
 user = os.environ["WEBDAV_USER"]

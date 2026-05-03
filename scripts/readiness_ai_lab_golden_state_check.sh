@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_FILE=".env.oracle"
-BASE_URL="http://127.0.0.1:8071"
+ENV_FILE="${ENV_FILE:-.env.oracle}"
+BASE_URL="${BASE_URL:-http://127.0.0.1:8071}"
 MIN_BENCHMARK_RUNS="1"
 MIN_BENCHMARK_MODELS="1"
 MIN_EVIDENCEOPS_ACTIONS="1"

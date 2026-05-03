@@ -4,10 +4,10 @@ set -euo pipefail
 ARCHIVE=""
 MANIFEST=""
 EXPECTED_SHA=""
-ENV_FILE=".env.oracle"
-PROJECT="ai-decision-studio"
-COMPOSE_FILE="docker-compose.oracle-like.yml"
-OVERRIDE_FILE="docker-compose.aws-slim.override.yml"
+ENV_FILE="${ENV_FILE:-.env.oracle}"
+PROJECT="${PROJECT:-ai-decision-studio}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.oracle-like.yml}"
+OVERRIDE_FILE="${OVERRIDE_FILE:-docker-compose.aws-slim.override.yml}"
 DATA_ROOT="/opt/ai-decision-studio/data"
 DELETE_ARCHIVE=0
 SKIP_BACKUP=0
