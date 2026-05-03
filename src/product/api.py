@@ -1304,10 +1304,17 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             additional_artifact_roots = []
             if not identity.can_write_global:
                 additional_artifact_roots.append(identity.overlay_root / "artifacts" / "presentation_exports")
+            try:
+                requested_limit = int((query.get("limit") or ["100"])[0])
+            except Exception:
+                requested_limit = 100
+            recent_limit = max(1, min(requested_limit, 500))
+            compact = str((query.get("compact") or ["0"])[0]).strip().lower() in {"1", "true", "yes", "on"}
             payload = build_product_artifact_payload(
                 self.bootstrap,
-                recent_limit=100,
+                recent_limit=recent_limit,
                 additional_artifact_roots=additional_artifact_roots,
+                compact=compact,
             )
             payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
             self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)

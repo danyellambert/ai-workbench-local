@@ -883,11 +883,52 @@ def build_product_run_detail_payload(bootstrap: ProductBootstrap, *, run_id: str
     return None
 
 
+
+def _compact_product_artifact_entry(entry: dict[str, object]) -> dict[str, object]:
+    """Return the fields needed for Deck Center list/cards without heavy sidecar metadata.
+
+    Full sidecar metadata, review payloads, preview slides and asset inventory remain
+    available from /api/product/artifacts/<artifact_id>.
+    """
+
+    keep_keys = [
+        "id",
+        "name",
+        "title",
+        "type",
+        "workflow_label",
+        "created_at",
+        "size",
+        "status",
+        "status_reason",
+        "export_kind",
+        "local_pptx_path",
+        "local_contract_path",
+        "local_payload_path",
+        "local_review_path",
+        "local_preview_manifest_path",
+        "local_thumbnail_sheet_path",
+        "pptx_size_bytes",
+        "slide_count",
+        "preview_count",
+        "review_status",
+        "average_score",
+        "issue_count",
+        "warning_count",
+        "error_message",
+        "warnings",
+        "asset_count",
+        "has_preview",
+        "has_review",
+    ]
+    return {key: entry.get(key) for key in keep_keys if key in entry}
+
 def build_product_artifact_payload(
     bootstrap: ProductBootstrap,
     *,
     recent_limit: int = 25,
     additional_artifact_roots: list[Path] | None = None,
+    compact: bool = False,
 ) -> dict[str, object]:
     artifact_root = get_artifact_root(bootstrap.workspace_root) / "presentation_exports"
     entries = _build_artifact_entries(bootstrap, additional_artifact_roots=additional_artifact_roots)
@@ -905,6 +946,10 @@ def build_product_artifact_payload(
     error_count = sum(1 for entry in entries if str(entry.get("status") or "") == "error")
     artifact_roots = [str(artifact_root)]
     artifact_roots.extend(str(Path(root)) for root in additional_artifact_roots or [])
+    recent_artifacts = entries[:recent_limit]
+    if compact:
+        recent_artifacts = [_compact_product_artifact_entry(entry) for entry in recent_artifacts]
+
     return {
         "ok": True,
         "artifact_root": str(artifact_root),
@@ -914,7 +959,14 @@ def build_product_artifact_payload(
             "completed_artifacts": completed_count,
             "error_artifacts": error_count,
         },
-        "artifacts": entries[:recent_limit],
+        "artifacts": recent_artifacts,
+        "pagination": {
+            "limit": recent_limit,
+            "returned": len(recent_artifacts),
+            "total": len(entries),
+            "has_more": len(entries) > recent_limit,
+        },
+        "compact": compact,
     }
 
 

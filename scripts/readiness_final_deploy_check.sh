@@ -27,6 +27,7 @@ scripts/readiness_required_integrations_check.sh --env-file "$ENV_FILE"
 scripts/readiness_required_providers_check.sh --env-file "$ENV_FILE"
 scripts/readiness_evidenceops_ui_cache_check.sh --env-file "$ENV_FILE"
 scripts/readiness_run_history_compact_check.sh --env-file "$ENV_FILE"
+scripts/readiness_artifacts_compact_check.sh --env-file "$ENV_FILE"
 
 echo
 echo "OK: final deploy readiness battery passed"

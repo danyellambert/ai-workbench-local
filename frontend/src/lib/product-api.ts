@@ -1005,7 +1005,7 @@ export async function rerunProductRunHistoryEntry(runId: string): Promise<Produc
 }
 
 export function getProductArtifacts(): Promise<ProductArtifactsResponse> {
-  return fetchProductApi<ProductArtifactsResponse>("/api/product/artifacts");
+  return fetchProductApi<ProductArtifactsResponse>("/api/product/artifacts?compact=1&limit=100");
 }
 
 export function getProductArtifactEntry(artifactId: string): Promise<ProductArtifactDetailResponse> {
