@@ -969,7 +969,7 @@ export function getProductWorkflows(): Promise<ProductWorkflowCatalogResponse> {
 }
 
 export function getProductRunHistory(): Promise<ProductRunHistoryResponse> {
-  return fetchProductApi<ProductRunHistoryResponse>("/api/product/run-history");
+  return fetchProductApi<ProductRunHistoryResponse>("/api/product/run-history?compact=1&limit=100");
 }
 
 export function buildWorkflowResponseFromRunHistory(detail?: ProductRunHistoryDetailResponse | null): ProductRunWorkflowResponse | null {

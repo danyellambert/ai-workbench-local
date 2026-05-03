@@ -90,6 +90,7 @@ copy_path "scripts/readiness_preferences_evals_surface_check.sh"
 copy_path "scripts/readiness_required_integrations_check.sh"
 copy_path "scripts/readiness_final_deploy_check.sh"
 copy_path "scripts/readiness_evidenceops_ui_cache_check.sh"
+copy_path "scripts/readiness_run_history_compact_check.sh"
 copy_path "docs/deployment/REDEPLOY_FAST_PATH.md"
 copy_path "scripts/measure_surface_latency.sh"
 copy_path "scripts/readiness_required_providers_check.sh"
@@ -280,6 +281,7 @@ required_paths = [
     "scripts/readiness_required_integrations_check.sh",
     "scripts/readiness_final_deploy_check.sh",
     "scripts/readiness_evidenceops_ui_cache_check.sh",
+    "scripts/readiness_run_history_compact_check.sh",
     "docs/deployment/REDEPLOY_FAST_PATH.md",
     "scripts/measure_surface_latency.sh",
     "scripts/readiness_required_providers_check.sh",

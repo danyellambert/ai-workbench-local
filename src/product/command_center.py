@@ -689,6 +689,38 @@ def _normalize_history_entry(
     }
 
 
+
+def _compact_run_history_entry(entry: dict[str, object]) -> dict[str, object]:
+    """Return the fields needed for the run-history list without heavy payload blobs.
+
+    Full request/response/result/artifact payloads remain available from
+    /api/product/run-history/<run_id>.
+    """
+
+    keep_keys = [
+        "id",
+        "timestamp",
+        "workflow_id",
+        "workflow_label",
+        "status",
+        "provider",
+        "model",
+        "duration_s",
+        "duration_label",
+        "document_ids",
+        "documents",
+        "document_count",
+        "findings_count",
+        "warning_count",
+        "recommendation",
+        "artifacts",
+        "error_message",
+        "can_rerun",
+        "notes",
+        "source",
+    ]
+    return {key: entry.get(key) for key in keep_keys if key in entry}
+
 def _build_run_entries_from_runtime_log(
     entries: list[dict[str, object]],
     *,
@@ -763,7 +795,7 @@ def build_product_rerun_request_payload(entry: dict[str, object]) -> dict[str, o
     return normalized
 
 
-def build_product_run_history_payload(bootstrap: ProductBootstrap, *, recent_limit: int = 25, additional_history_paths: list[Path] | None = None) -> dict[str, object]:
+def build_product_run_history_payload(bootstrap: ProductBootstrap, *, recent_limit: int = 25, additional_history_paths: list[Path] | None = None, compact: bool = False) -> dict[str, object]:
     history_path = get_product_workflow_history_path(bootstrap.workspace_root)
     document_lookup = _build_document_lookup(bootstrap)
     history_entries = load_product_workflow_history(history_path)
@@ -792,13 +824,24 @@ def build_product_run_history_payload(bootstrap: ProductBootstrap, *, recent_lim
         entries = sorted(entries, key=lambda entry: str(entry.get("timestamp") or entry.get("created_at") or ""))
 
     summary = summarize_product_workflow_history(entries)
+    recent_runs = list(reversed(entries[-recent_limit:]))
+    if compact:
+        recent_runs = [_compact_run_history_entry(entry) for entry in recent_runs]
+
     return {
         "ok": True,
         "source": source,
         "history_path": str(history_path),
         "additional_history_paths": additional_sources,
         "summary": summary,
-        "runs": list(reversed(entries[-recent_limit:])),
+        "runs": recent_runs,
+        "pagination": {
+            "limit": recent_limit,
+            "returned": len(recent_runs),
+            "total": int(summary.get("total_runs") or len(entries)),
+            "has_more": len(entries) > recent_limit,
+        },
+        "compact": compact,
     }
 
 

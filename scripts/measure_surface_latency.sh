@@ -43,7 +43,7 @@ report = Path(sys.argv[3])
 
 paths = [
     "/health",
-    "/api/product/run-history",
+    "/api/product/run-history?compact=1&limit=100",
     "/api/product/artifacts",
     "/api/lab/overview",
     "/api/lab/runtime",

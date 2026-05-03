@@ -1259,10 +1259,17 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             additional_history_paths = []
             if not identity.can_write_global:
                 additional_history_paths.append(identity.overlay_root / "runs" / "workflow_history.json")
+            try:
+                requested_limit = int((query.get("limit") or ["100"])[0])
+            except Exception:
+                requested_limit = 100
+            recent_limit = max(1, min(requested_limit, 500))
+            compact = str((query.get("compact") or ["0"])[0]).strip().lower() in {"1", "true", "yes", "on"}
             payload = build_product_run_history_payload(
                 self.bootstrap,
-                recent_limit=100,
+                recent_limit=recent_limit,
                 additional_history_paths=additional_history_paths,
+                compact=compact,
             )
             payload["read_scope"] = "global" if identity.can_write_global else "global_plus_session_overlay"
             self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
