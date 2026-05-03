@@ -55,6 +55,9 @@ copy_path() {
 
 copy_path "docker-compose.oracle-like.yml"
 copy_path ".env.oracle.example"
+copy_path ".env.aws.example"
+copy_path ".env.docker.example"
+copy_path ".env.local.example"
 copy_path ".dockerignore"
 copy_path "Dockerfile.public-demo"
 copy_path "Dockerfile.aws-slim-product-api"
@@ -96,6 +99,10 @@ copy_path "scripts/readiness_candidate_review_contract_check.sh"
 copy_path "docs/deployment/REDEPLOY_FAST_PATH.md"
 copy_path "scripts/measure_surface_latency.sh"
 copy_path "scripts/readiness_required_providers_check.sh"
+copy_path "scripts/deploy_aws_slim.sh"
+copy_path "scripts/smoke_aws_slim.sh"
+copy_path "scripts/run_local_docker.sh"
+copy_path "scripts/run_local_dev.sh"
 copy_path "scripts/restore_ai_lab_golden_state.sh"
 copy_path "scripts/oracle_health_ops_report.py"
 
@@ -118,7 +125,7 @@ from pathlib import Path
 bundle_root = Path(os.environ["BUNDLE_ROOT"]).resolve()
 report_path = Path(os.environ["REPORT"]).resolve()
 
-forbidden_names = {".env", ".env.local", ".env.production", ".env.oracle"}
+forbidden_names = {".env", ".env.local", ".env.docker", ".env.docker.local", ".env.aws", ".env.aws.local", ".env.oracle", ".env.oracle.local", ".env.production", ".env.production.local"}
 
 def count_files(path: Path) -> int:
     return sum(1 for item in path.rglob("*") if item.is_file())
@@ -192,6 +199,9 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
     # are likely to be accidentally committed.
     inspect_names = {
         ".env.oracle.example",
+    ".env.aws.example",
+    ".env.docker.example",
+    ".env.local.example",
         "docker-compose.oracle-like.yml",
         "docker-compose.yml",
         "docker-compose.yaml",
@@ -256,6 +266,9 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
 required_paths = [
     "docker-compose.oracle-like.yml",
     ".env.oracle.example",
+    ".env.aws.example",
+    ".env.docker.example",
+    ".env.local.example",
     "Dockerfile.public-demo",
     "Dockerfile.frontend-public-demo",
     "requirements-public-demo.txt",
@@ -287,8 +300,13 @@ required_paths = [
     "scripts/readiness_artifacts_compact_check.sh",
     "scripts/readiness_candidate_review_contract_check.sh",
     "docs/deployment/REDEPLOY_FAST_PATH.md",
+    "docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md",
     "scripts/measure_surface_latency.sh",
     "scripts/readiness_required_providers_check.sh",
+    "scripts/deploy_aws_slim.sh",
+    "scripts/smoke_aws_slim.sh",
+    "scripts/run_local_docker.sh",
+    "scripts/run_local_dev.sh",
     "scripts/restore_ai_lab_golden_state.sh",
     "scripts/oracle_health_ops_report.py",
     "scripts/readiness_phase_13_2_oracle_hardening_check.sh",
