@@ -7,15 +7,20 @@ from typing import Any
 
 _SECTION_ALIASES: dict[str, tuple[str, ...]] = {
     "title": ("title", "role title", "job title", "position"),
-    "seniority": ("seniority", "level", "seniority level"),
+    "seniority": ("seniority", "target seniority", "level", "seniority level"),
     "must_haves": (
         "must have",
+        "must-have",
         "must-haves",
         "must haves",
+        "must-have requirements",
+        "must have requirements",
         "required",
         "requirements",
         "required skills",
         "core requirements",
+        "role requirements",
+        "minimum requirements",
     ),
     "nice_to_haves": (
         "nice to have",
@@ -40,6 +45,11 @@ _SECTION_ALIASES: dict[str, tuple[str, ...]] = {
     "red_flags": (
         "red flags",
         "watchouts",
+        "watch-outs",
+        "watchout",
+        "role-specific watchouts",
+        "role specific watchouts",
+        "role watchouts",
         "risks",
         "screen outs",
         "screen-outs",
@@ -68,7 +78,11 @@ def _strip_source_decorators(value: str) -> str:
 
 def _looks_like_document_label(value: str) -> bool:
     lowered = value.casefold()
-    return bool(re.search(r"\.(pdf|doc|docx|txt|md)$", value, flags=re.IGNORECASE) or (("role brief" in lowered or "job description" in lowered or "hiring brief" in lowered) and any(token in lowered for token in ("pdf", "doc", "docx", "txt", "md"))))
+    role_label_pattern = r"\b(jd|role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition)\b"
+    return bool(
+        re.search(r"\.(pdf|doc|docx|txt|md)$", value, flags=re.IGNORECASE)
+        or (re.search(role_label_pattern, lowered) and any(token in lowered for token in ("pdf", "doc", "docx", "txt", "md")))
+    )
 
 
 def _clean_text(value: object) -> str | None:

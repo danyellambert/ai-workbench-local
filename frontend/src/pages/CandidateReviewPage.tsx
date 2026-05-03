@@ -55,7 +55,7 @@ const workflowSteps = [
 
 function isCandidateLikeDocument(document: ProductDocumentLibraryEntry): boolean {
   const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`.toLowerCase();
-  return /(cv|resume|candidate|curriculum|hiring)/.test(haystack);
+  return /(cv|resume|candidate|curriculum|francis\s+taylor)/.test(haystack);
 }
 
 const ROLE_BRIEF_NONE = '__none__';
@@ -72,7 +72,8 @@ interface CandidateReviewRoleContext {
 
 function isRoleBriefDocument(document: ProductDocumentLibraryEntry): boolean {
   const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`.toLowerCase();
-  return /(role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition)/.test(haystack) && !isCandidateLikeDocument(document);
+  const roleBriefLike = /(\bjd\b|role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition)/.test(haystack);
+  return roleBriefLike && !isCandidateLikeDocument(document);
 }
 
 function stripSourceDecorators(value: string): string {
@@ -85,7 +86,7 @@ function stripSourceDecorators(value: string): string {
 
 function looksLikeDocumentLabel(value: string): boolean {
   const lowered = value.toLowerCase();
-  return /\.(pdf|doc|docx|txt|md)$/i.test(value) || ((/role brief|job description|job brief|hiring brief/.test(lowered)) && /(pdf|doc|docx|txt|md)/.test(lowered));
+  return /\.(pdf|doc|docx|txt|md)$/i.test(value) || (((/\bjd\b|role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition/).test(lowered)) && /(pdf|doc|docx|txt|md)/.test(lowered));
 }
 
 function cleanText(value: unknown): string | null {
@@ -153,7 +154,7 @@ function deriveRoleTitleFromDocumentName(rawLabel?: string | null): string | nul
   if (!value) return null;
   const withoutExtension = value.replace(/\.(pdf|doc|docx|txt|md)$/i, '').trim();
   const normalized = withoutExtension
-    .replace(/\b(role brief|job description|job brief|hiring brief|position brief|scorecard|requisition)\b/gi, '')
+    .replace(/\b(jd|role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition)\b/gi, '')
     .replace(/[\-_]+/g, ' ')
     .replace(/\s{2,}/g, ' ')
     .trim();
@@ -588,9 +589,9 @@ export default function CandidateReviewPage() {
   const evidenceTable = getTable(sections, 'Evidence highlights');
   const evidenceTableRows = useMemo(() => normalizeEvidenceRows(evidenceTable?.rows ?? []), [evidenceTable?.rows]);
   const strengths = candidateReviewView?.strengths?.length ? candidateReviewView.strengths : (sections?.strengths ?? []);
-  const gaps = candidateReviewView?.gaps ?? [];
-  const senioritySignals = candidateReviewView?.seniority_signals ?? [];
-  const watchouts = candidateReviewView?.watchouts?.length ? candidateReviewView.watchouts : (sections?.watchouts ?? []);
+  const gaps = candidateReviewView?.gaps?.length ? candidateReviewView.gaps : (sections?.warnings ?? []);
+  const senioritySignals = candidateReviewView?.seniority_signals?.length ? candidateReviewView.seniority_signals : (sections?.highlights ?? []);
+  const watchouts = candidateReviewView?.watchouts?.length ? candidateReviewView.watchouts : (sections?.watchouts ?? sections?.warnings ?? []);
   const nextSteps = candidateReviewView?.next_steps?.length ? candidateReviewView.next_steps : (sections?.next_steps ?? []);
   const documentMetrics = candidateReviewView?.document_metrics ?? null;
   const showSourceBlockCount = documentMetrics?.show_source_block_count ?? ((workflowResponse?.result?.grounding_preview?.source_block_count ?? previewQuery.data?.preview?.source_block_count ?? 0) > 0);

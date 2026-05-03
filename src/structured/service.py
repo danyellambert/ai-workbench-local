@@ -1437,30 +1437,77 @@ class StructuredOutputService:
         }
         return aliases.get(cleaned, cleaned or 'correctness')
     def _parse_date_range_to_month_interval(self, value: str | None) -> tuple[int, int] | None:
+        from datetime import datetime
+
         text = (value or '').strip()
         if not text:
             return None
-        match = re.search(r'(\d{4})-(\d{2}).*?(\d{4})-(\d{2})', text)
+
+        normalized = (
+            text.replace('–', '-')
+            .replace('—', '-')
+            .replace('−', '-')
+            .replace(' à ', ' to ')
+            .replace(' au ', ' to ')
+        )
+
+        current = datetime.now()
+        current_month = current.year * 12 + (current.month - 1)
+
+        month_map = {
+            'janvier': 1, 'january': 1, 'jan': 1,
+            'février': 2, 'fevrier': 2, 'february': 2, 'feb': 2,
+            'mars': 3, 'march': 3, 'mar': 3,
+            'avril': 4, 'april': 4, 'apr': 4,
+            'mai': 5, 'may': 5,
+            'juin': 6, 'june': 6, 'jun': 6,
+            'juillet': 7, 'july': 7, 'jul': 7,
+            'août': 8, 'aout': 8, 'august': 8, 'aug': 8,
+            'septembre': 9, 'september': 9, 'sep': 9, 'sept': 9,
+            'octobre': 10, 'october': 10, 'oct': 10,
+            'novembre': 11, 'november': 11, 'nov': 11,
+            'décembre': 12, 'decembre': 12, 'december': 12, 'dec': 12,
+        }
+
+        present_pattern = r"(?:present|current|now|ongoing|today|présent|actuel|aujourd’hui|aujourd'hui)"
+
+        match = re.search(r'(\d{4})-(\d{2}).*?(\d{4})-(\d{2})', normalized)
         if match:
             start_year, start_month, end_year, end_month = map(int, match.groups())
             return (start_year * 12 + (start_month - 1), end_year * 12 + (end_month - 1))
-        month_map = {
-            'janvier':1,'january':1,'février':2,'fevrier':2,'february':2,'mars':3,'march':3,'avril':4,'april':4,
-            'mai':5,'may':5,'juin':6,'june':6,'juillet':7,'july':7,'août':8,'aout':8,'august':8,
-            'septembre':9,'september':9,'octobre':10,'october':10,'novembre':11,'november':11,'décembre':12,'decembre':12,'december':12,
-        }
-        match = re.search(r'([A-Za-zÀ-ÿ]+)\s+(\d{4}).*?([A-Za-zÀ-ÿ]+)\s+(\d{4})', text)
+
+        match = re.search(r'(\d{4})-(\d{2}).*?' + present_pattern, normalized, flags=re.IGNORECASE)
+        if match:
+            start_year, start_month = map(int, match.groups())
+            return (start_year * 12 + (start_month - 1), current_month)
+
+        match = re.search(r'([A-Za-zÀ-ÿ]+)\s+(\d{4}).*?([A-Za-zÀ-ÿ]+)\s+(\d{4})', normalized)
         if match:
             start_month_name, start_year, end_month_name, end_year = match.groups()
             start_month = month_map.get(start_month_name.lower())
             end_month = month_map.get(end_month_name.lower())
             if start_month and end_month:
                 return (int(start_year) * 12 + (start_month - 1), int(end_year) * 12 + (end_month - 1))
-        match = re.search(r'(\d{4}).*?(\d{4})', text)
+
+        match = re.search(r'([A-Za-zÀ-ÿ]+)\s+(\d{4}).*?' + present_pattern, normalized, flags=re.IGNORECASE)
+        if match:
+            start_month_name, start_year = match.groups()
+            start_month = month_map.get(start_month_name.lower())
+            if start_month:
+                return (int(start_year) * 12 + (start_month - 1), current_month)
+
+        match = re.search(r'(\d{4}).*?(\d{4})', normalized)
         if match:
             start_year, end_year = map(int, match.groups())
             return (start_year * 12, end_year * 12 + 11)
+
+        match = re.search(r'(\d{4}).*?' + present_pattern, normalized, flags=re.IGNORECASE)
+        if match:
+            start_year = int(match.group(1))
+            return (start_year * 12, current_month)
+
         return None
+
     def _compute_experience_years_from_entries(self, entries: list[ExperienceEntry]) -> float:
         intervals: list[tuple[int, int]] = []
         for entry in entries:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+import re
 
 from src.structured.base import CVAnalysisPayload
 
@@ -130,6 +131,39 @@ def _candidate_seniority_signals(payload: CVAnalysisPayload) -> list[str]:
     return _dedupe(signals, limit=4)
 
 
+
+def _role_requirement_has_cv_support(requirement: object, haystack: str) -> bool:
+    text = _clean_text(requirement) or ""
+    tokens = [
+        token.casefold()
+        for token in re.findall(r"[A-Za-z][A-Za-z0-9+#./-]{3,}", text)
+        if token.casefold() not in {"with", "from", "that", "this", "role", "must", "have", "required", "preferred"}
+    ]
+    if not tokens:
+        return False
+    hits = sum(1 for token in tokens if token in haystack)
+    return hits >= min(2, len(tokens))
+
+
+def _candidate_gaps(payload: CVAnalysisPayload, role_context: dict[str, Any]) -> list[str]:
+    gaps: list[object] = [*(getattr(payload, "improvement_areas", None) or [])]
+    haystack = _candidate_haystack(payload)
+
+    for item in (role_context.get("must_haves") or [])[:4]:
+        if not _role_requirement_has_cv_support(item, haystack):
+            gaps.append(f"Role requirement needs validation because it is not explicit in the CV evidence: {item}")
+
+    if not gaps and not (getattr(payload, "skills", None) or []):
+        gaps.append("Explicit skill evidence is limited in the current CV extraction.")
+
+    if not gaps and (getattr(payload, "experience_entries", None) or []) and not _has_keywords(payload, ("lead", "leader", "leadership", "manager", "owner", "ownership")):
+        gaps.append("Leadership and ownership evidence should be validated because it is not explicit in the extracted CV signals.")
+
+    if not gaps and role_context.get("seniority"):
+        gaps.append(f"Validate fit against the target seniority ({role_context.get('seniority')}) because no explicit gap was produced by the model.")
+
+    return _dedupe(gaps, limit=6)
+
 def _candidate_watchouts(payload: CVAnalysisPayload, role_context: dict[str, Any]) -> list[str]:
     watchouts: list[object] = [*(getattr(payload, "improvement_areas", None) or [])]
     if not (getattr(payload, "experience_entries", None) or []):
@@ -221,7 +255,7 @@ def build_candidate_review_view(result: ProductWorkflowResult) -> dict[str, Any]
         }
 
     strengths = _dedupe(list(getattr(payload, "strengths", None) or []), limit=6)
-    gaps = _dedupe(list(getattr(payload, "improvement_areas", None) or []), limit=6)
+    gaps = _candidate_gaps(payload, role_context)
     top_skills = _dedupe(list(getattr(payload, "skills", None) or []), limit=6)
 
     return {
