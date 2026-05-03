@@ -1072,6 +1072,7 @@ export async function runProductWorkflow(payload: {
   workflow_id: string;
   document_ids: string[];
   input_text?: string;
+  role_brief_document_id?: string | null;
   provider?: string;
   model?: string | null;
   temperature?: number;

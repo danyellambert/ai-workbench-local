@@ -124,6 +124,49 @@ function buildWorkflowResponse(): ProductRunWorkflowResponse {
       next_steps: ['Probe system ownership depth', 'Validate hiring scorecard against stakeholder feedback'],
       evidence_highlights: [['Retrieval systems', '0.92', 'CV', 'Led ranking and search quality improvements.']],
     },
+    candidate_review_view: {
+      candidate_profile: {
+        name: 'Sarah Chen',
+        headline: 'Senior ML Engineer · Retrieval & Platforms',
+        location: 'Remote',
+        seniority_band: 'senior',
+        experience_years: 5,
+        top_skills: ['Retrieval systems', 'ML platforms'],
+        languages: [],
+      },
+      education: [
+        {
+          degree: 'M.S. Computer Science',
+          institution: 'Pacific Coast University',
+          year: '2021',
+          details: null,
+        },
+      ],
+      role_context: {
+        title: 'Scientist II, Preclinical R&D - Medical Devices',
+        seniority: 'Scientist II',
+        must_haves: ['3+ years of experience in preclinical research', 'GLP study coordination'],
+        nice_to_haves: [],
+        leadership_expectations: [],
+        interview_focus: ['Leadership scope'],
+        red_flags: ['No evidence of enterprise-scale ownership'],
+      },
+      strengths: ['Strong retrieval systems background', 'Clear seniority signals in platform ownership'],
+      gaps: ['Missing or weakly evidenced must-have: 3+ years of experience in preclinical research'],
+      seniority_signals: ['Senior platform ownership'],
+      watchouts: ['Role-specific watchout to validate: No evidence of enterprise-scale ownership'],
+      next_steps: ['Probe leadership scope with concrete examples.'],
+      recommendation: 'Advance to panel interview.',
+      summary: 'Sarah Chen shows strong senior ML systems and retrieval grounding experience.',
+      artifacts: [],
+      document_metrics: {
+        strategy: 'document_scan',
+        document_ids: ['doc-cv'],
+        context_chars: 640,
+        source_block_count: 4,
+        show_source_block_count: true,
+      },
+    },
   };
 }
 
@@ -156,19 +199,56 @@ describe('CandidateReviewPage', () => {
           status: 'indexed',
           warnings: [],
         },
+        {
+          document_id: 'doc-jd',
+          name: 'JD_Scientist_II_Preclinical_RD_Medical_Devices.pdf',
+          file_type: 'pdf',
+          char_count: 2200,
+          chunk_count: 5,
+          indexed_at: '2026-04-18T12:05:00',
+          loader_strategy_label: 'Manual Upload',
+          status: 'indexed',
+          warnings: [],
+        },
       ],
     });
 
-    vi.mocked(getProductGroundingPreview).mockResolvedValue({
-      ok: true,
-      preview: {
-        strategy: 'document_scan',
-        document_ids: ['doc-cv'],
-        context_chars: 640,
-        source_block_count: 4,
-        preview_text: 'Sarah Chen led ML platform and retrieval initiatives across hiring packet evidence.',
-        warnings: [],
-      },
+    vi.mocked(getProductGroundingPreview).mockImplementation(async ({ documentIds }) => {
+      if (documentIds?.includes('doc-jd')) {
+        return {
+          ok: true,
+          preview: {
+            strategy: 'document_scan',
+            document_ids: ['doc-jd'],
+            context_chars: 920,
+            source_block_count: 3,
+            preview_text: [
+              'Title: Scientist II, Preclinical R&D - Medical Devices',
+              'Seniority: Scientist II',
+              'Must-have requirements:',
+              '- 3+ years of experience in preclinical research',
+              '- GLP study coordination',
+              'Interview focus:',
+              '- Leadership scope',
+              'Role-specific watchouts:',
+              '- No evidence of enterprise-scale ownership',
+            ].join('\n'),
+            warnings: [],
+          },
+        };
+      }
+
+      return {
+        ok: true,
+        preview: {
+          strategy: 'document_scan',
+          document_ids: ['doc-cv'],
+          context_chars: 640,
+          source_block_count: 4,
+          preview_text: 'Sarah Chen led ML platform and retrieval initiatives across hiring packet evidence.',
+          warnings: [],
+        },
+      };
     });
 
     vi.mocked(runProductWorkflow).mockResolvedValue(buildWorkflowResponse());
@@ -263,11 +343,26 @@ describe('CandidateReviewPage', () => {
       expect(screen.getByTestId('candidate-review-candidate-name')).toHaveTextContent('Sarah Chen - Senior ML Engineer CV.pdf');
     });
 
+    await waitFor(() => {
+      expect(screen.getByText('Scientist II, Preclinical R&D - Medical Devices')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByRole('button', { name: /run candidate review/i }));
+
+    await waitFor(() => {
+      expect(runProductWorkflow).toHaveBeenCalledWith(expect.objectContaining({
+        workflow_id: 'candidate_review',
+        role_brief_document_id: 'doc-jd',
+      }));
+    });
 
     expect(await screen.findByText('Sarah Chen')).toBeInTheDocument();
     expect(screen.getByText('Advance to panel interview.')).toBeInTheDocument();
     expect(screen.getAllByText('Strong retrieval systems background').length).toBeGreaterThan(0);
+    expect(screen.getByText('Education snapshot available')).toBeInTheDocument();
+    expect(screen.getByText(/Pacific Coast University/)).toBeInTheDocument();
+    expect(screen.getByText('Missing or weakly evidenced must-have: 3+ years of experience in preclinical research')).toBeInTheDocument();
+    expect(screen.getAllByText('Role-specific watchout to validate: No evidence of enterprise-scale ownership').length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole('button', { name: /generate deck/i }));
 

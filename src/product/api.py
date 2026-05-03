@@ -76,6 +76,7 @@ from src.product.preindexed_corpus import (
     simulate_preindexed_document_stages,
     source_payload_for_preindexed_entry,
 )
+from src.product.candidate_review_presenter import build_candidate_review_view
 from src.product.presenters import build_document_review_view, build_policy_comparison_view, build_product_result_sections
 from src.product.service import (
     build_grounding_preview,
@@ -245,6 +246,8 @@ def _build_product_workflow_response_payload(
         response_payload["comparison_view"] = build_policy_comparison_view(result)
     if result.workflow_id == "action_plan_evidence_review":
         response_payload["action_plan_view"] = build_action_plan_view(result)
+    if result.workflow_id == "candidate_review":
+        response_payload["candidate_review_view"] = build_candidate_review_view(result)
     if extra:
         response_payload.update(extra)
     return response_payload

@@ -77,6 +77,7 @@ class ProductWorkflowRequest(BaseModel):
     workflow_id: ProductWorkflowId
     document_ids: list[str] = Field(default_factory=list)
     input_text: str = ""
+    role_brief_document_id: str | None = None
     provider: str = "ollama"
     model: str | None = None
     prompt_profile: str | None = None

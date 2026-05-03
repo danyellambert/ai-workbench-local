@@ -53,6 +53,16 @@ const workflowSteps = [
   { key: 'export', label: 'Export' },
 ] as const;
 
+function isRoleBriefLikeText(value: string): boolean {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[._-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return /(^|\s)(jd|job description|job brief|role brief|hiring brief|position brief|job posting|scorecard|requisition)(\s|$)/.test(normalized);
+}
+
 function isCandidateLikeDocument(document: ProductDocumentLibraryEntry): boolean {
   const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`.toLowerCase();
   return /(cv|resume|candidate|curriculum|francis\s+taylor)/.test(haystack);
@@ -71,9 +81,8 @@ interface CandidateReviewRoleContext {
 }
 
 function isRoleBriefDocument(document: ProductDocumentLibraryEntry): boolean {
-  const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`.toLowerCase();
-  const roleBriefLike = /(\bjd\b|role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition)/.test(haystack);
-  return roleBriefLike && !isCandidateLikeDocument(document);
+  const haystack = `${document.name} ${document.file_type || ''} ${document.loader_strategy_label || ''}`;
+  return isRoleBriefLikeText(haystack) && !isCandidateLikeDocument(document);
 }
 
 function stripSourceDecorators(value: string): string {
@@ -86,7 +95,7 @@ function stripSourceDecorators(value: string): string {
 
 function looksLikeDocumentLabel(value: string): boolean {
   const lowered = value.toLowerCase();
-  return /\.(pdf|doc|docx|txt|md)$/i.test(value) || (((/\bjd\b|role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition/).test(lowered)) && /(pdf|doc|docx|txt|md)/.test(lowered));
+  return /\.(pdf|doc|docx|txt|md)$/i.test(value) || (isRoleBriefLikeText(lowered) && /(pdf|doc|docx|txt|md)/.test(lowered));
 }
 
 function cleanText(value: unknown): string | null {
@@ -94,11 +103,25 @@ function cleanText(value: unknown): string | null {
   return cleaned || null;
 }
 
+function cleanMultilineText(value: unknown): string {
+  return String(value ?? '')
+    .replace(/\[source:[^\]]+\]/gi, '')
+    .replace(/\bsource\s*:\s*[^\n]+/gi, '')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function normalizeBullets(values: Array<unknown>, limit = 8): string[] {
   const normalized: string[] = [];
   const seen = new Set<string>();
   for (const value of values) {
-    const cleaned = cleanText(value)?.replace(/^[\-\*\u2022\d\.)\s]+/, '').trim();
+    // Remove only real bullet/list prefixes:
+    // "- item", "* item", "• item", "1. item", "1) item".
+    // Do not remove requirement numbers such as "3+ years".
+    const cleaned = cleanText(value)
+      ?.replace(/^\s*(?:[-*\u2022]\s+|\d+[\.)]\s+)/, '')
+      .trim();
     if (!cleaned) continue;
     const key = cleaned.toLowerCase();
     if (seen.has(key)) continue;
@@ -121,27 +144,42 @@ function canonicalRoleSectionName(rawName: string): keyof CandidateReviewRoleCon
     level: 'seniority',
     'seniority level': 'seniority',
     'must have': 'must_haves',
+    'must-have': 'must_haves',
+    'must-have requirements': 'must_haves',
+    'must have requirements': 'must_haves',
     'must-haves': 'must_haves',
     'must haves': 'must_haves',
     required: 'must_haves',
     requirements: 'must_haves',
     'required skills': 'must_haves',
+    'core requirements': 'must_haves',
+    'role requirements': 'must_haves',
+    'minimum requirements': 'must_haves',
     preferred: 'nice_to_haves',
     'preferred qualifications': 'nice_to_haves',
     bonus: 'nice_to_haves',
     'nice to have': 'nice_to_haves',
     'nice-to-have': 'nice_to_haves',
+    'nice-to-have signals': 'nice_to_haves',
+    'nice to have signals': 'nice_to_haves',
     'nice to haves': 'nice_to_haves',
     leadership: 'leadership_expectations',
     ownership: 'leadership_expectations',
     scope: 'leadership_expectations',
     'leadership expectations': 'leadership_expectations',
+    'leadership / scope expectations': 'leadership_expectations',
+    'leadership scope expectations': 'leadership_expectations',
     'interview focus': 'interview_focus',
     'interview priorities': 'interview_focus',
     assessment: 'interview_focus',
     'evaluation focus': 'interview_focus',
     'red flags': 'red_flags',
     watchouts: 'red_flags',
+    'watch-outs': 'red_flags',
+    watchout: 'red_flags',
+    'role-specific watchouts': 'red_flags',
+    'role specific watchouts': 'red_flags',
+    'role watchouts': 'red_flags',
     risks: 'red_flags',
     'screen outs': 'red_flags',
     'screen-outs': 'red_flags',
@@ -154,7 +192,7 @@ function deriveRoleTitleFromDocumentName(rawLabel?: string | null): string | nul
   if (!value) return null;
   const withoutExtension = value.replace(/\.(pdf|doc|docx|txt|md)$/i, '').trim();
   const normalized = withoutExtension
-    .replace(/\b(jd|role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition)\b/gi, '')
+    .replace(/(^|[\s._-]+)(jd|role brief|job description|job brief|hiring brief|position brief|job posting|scorecard|requisition)(?=$|[\s._-]+)/gi, ' ')
     .replace(/[\-_]+/g, ' ')
     .replace(/\s{2,}/g, ' ')
     .trim();
@@ -166,7 +204,15 @@ function deriveRoleTitleFromDocumentName(rawLabel?: string | null): string | nul
 function normalizeRoleBriefText(rawText?: string | null, fallbackDocumentName?: string | null): CandidateReviewRoleContext {
   const text = String(rawText || '').trim();
   if (!text) {
-    return { title: null, seniority: null, must_haves: [], nice_to_haves: [], leadership_expectations: [], interview_focus: [], red_flags: [] };
+    return {
+      title: deriveRoleTitleFromDocumentName(fallbackDocumentName),
+      seniority: null,
+      must_haves: [],
+      nice_to_haves: [],
+      leadership_expectations: [],
+      interview_focus: [],
+      red_flags: [],
+    };
   }
 
   const sections: Partial<Record<keyof CandidateReviewRoleContext, string[]>> = {};
@@ -183,6 +229,12 @@ function normalizeRoleBriefText(rawText?: string | null, fallbackDocumentName?: 
         if (trailing) sections[maybeSection] = [...(sections[maybeSection] || []), trailing];
         continue;
       }
+
+      // Unknown headings should not leak into the previous recognized section.
+      // This prevents lines like "Final instruction:" or future role headings
+      // from being interpreted as bullets under interview_focus/watchouts.
+      current = null;
+      continue;
     }
     if (current) sections[current] = [...(sections[current] || []), line];
   }
@@ -462,12 +514,16 @@ export default function CandidateReviewPage() {
       if (selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE) setSelectedRoleBriefDocumentId(ROLE_BRIEF_NONE);
       return;
     }
-    if (selectedRoleBriefDocumentId === ROLE_BRIEF_NONE && recommendedRoleBriefDocument) {
-      setSelectedRoleBriefDocumentId(recommendedRoleBriefDocument.document_id);
+
+    const fallbackRoleBriefDocument = recommendedRoleBriefDocument ?? roleBriefDocuments[0] ?? null;
+
+    if (selectedRoleBriefDocumentId === ROLE_BRIEF_NONE && fallbackRoleBriefDocument) {
+      setSelectedRoleBriefDocumentId(fallbackRoleBriefDocument.document_id);
       return;
     }
+
     if (selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE && !roleBriefDocuments.some((document) => document.document_id === selectedRoleBriefDocumentId)) {
-      setSelectedRoleBriefDocumentId(recommendedRoleBriefDocument?.document_id ?? ROLE_BRIEF_NONE);
+      setSelectedRoleBriefDocumentId(fallbackRoleBriefDocument?.document_id ?? ROLE_BRIEF_NONE);
     }
   }, [recommendedRoleBriefDocument, roleBriefDocuments, selectedRoleBriefDocumentId]);
 
@@ -489,7 +545,7 @@ export default function CandidateReviewPage() {
   });
 
   const rawRoleBriefText = useMemo(
-    () => cleanText(roleBriefPreviewQuery.data?.preview.preview_text) || '',
+    () => cleanMultilineText(roleBriefPreviewQuery.data?.preview.preview_text),
     [roleBriefPreviewQuery.data?.preview.preview_text],
   );
   const normalizedRoleBrief = useMemo(() => normalizeRoleBriefText(rawRoleBriefText, selectedRoleBriefDocument?.name), [rawRoleBriefText, selectedRoleBriefDocument?.name]);
@@ -535,7 +591,8 @@ export default function CandidateReviewPage() {
       runProductWorkflow({
         workflow_id: 'candidate_review',
         document_ids: selectedDocumentId ? [selectedDocumentId] : [],
-        input_text: generatedCandidateReviewInputText,
+        role_brief_document_id: selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE ? selectedRoleBriefDocumentId : null,
+        input_text: selectedRoleBriefDocumentId !== ROLE_BRIEF_NONE ? undefined : generatedCandidateReviewInputText,
         context_strategy: 'document_scan',
         use_document_context: true,
       }),
@@ -588,6 +645,18 @@ export default function CandidateReviewPage() {
   const experienceRows = useMemo(() => normalizeExperienceRows(experienceTable?.rows ?? []), [experienceTable?.rows]);
   const evidenceTable = getTable(sections, 'Evidence highlights');
   const evidenceTableRows = useMemo(() => normalizeEvidenceRows(evidenceTable?.rows ?? []), [evidenceTable?.rows]);
+  const educationTable = getTable(sections, 'Education snapshot');
+  const educationRows = useMemo(() => {
+    const fromCandidateView = Array.isArray(candidateReviewView?.education)
+      ? candidateReviewView.education
+          .map((item: any) => [item.degree, item.institution, item.period || item.year || item.details].filter(Boolean).join(' · '))
+          .filter(Boolean)
+      : [];
+    const fromSections = (educationTable?.rows ?? [])
+      .map((row: any) => Array.isArray(row) ? row.filter(Boolean).join(' · ') : String(row || '').trim())
+      .filter(Boolean);
+    return fromCandidateView.length ? fromCandidateView : fromSections;
+  }, [candidateReviewView?.education, educationTable?.rows]);
   const strengths = candidateReviewView?.strengths?.length ? candidateReviewView.strengths : (sections?.strengths ?? []);
   const gaps = candidateReviewView?.gaps?.length ? candidateReviewView.gaps : (sections?.warnings ?? []);
   const senioritySignals = candidateReviewView?.seniority_signals?.length ? candidateReviewView.seniority_signals : (sections?.highlights ?? []);
@@ -822,8 +891,17 @@ export default function CandidateReviewPage() {
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <GraduationCap className="w-3.5 h-3.5" />
-                {sections?.tables.some((table) => table.title === 'Education snapshot') ? 'Education snapshot available' : 'Education snapshot will appear when available'}
+                {educationRows.length ? 'Education snapshot available' : 'Education snapshot will appear when available'}
               </div>
+              {educationRows.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {educationRows.slice(0, 4).map((item, index) => (
+                    <p key={`${item}-${index}`} className="text-xs text-muted-foreground leading-relaxed">
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
 

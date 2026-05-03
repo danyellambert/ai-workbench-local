@@ -37,6 +37,7 @@ from .models import (
     ProductWorkflowRequest,
     ProductWorkflowResult,
 )
+from .candidate_review_context import normalize_role_brief_text_with_model, render_candidate_review_input_text
 
 DEFAULT_WORKFLOW_QUERIES: dict[ProductWorkflowId, str] = {
     "document_review": "List the main risks, gaps and red flags in the selected documents. Produce grounded executive findings, top blockers, business impact and recommended next actions.",
@@ -870,13 +871,68 @@ def run_action_plan_evidence_review_workflow(request: ProductWorkflowRequest) ->
     )
 
 
+def _candidate_review_request_with_role_brief(request: ProductWorkflowRequest) -> tuple[ProductWorkflowRequest, dict[str, Any] | None, dict[str, Any], list[str]]:
+    role_brief_document_id = str(getattr(request, "role_brief_document_id", None) or "").strip()
+    if not role_brief_document_id:
+        return request, None, {}, []
+
+    warnings: list[str] = []
+    raw_role_brief_text = build_structured_document_context(
+        query="Extract the hiring thesis, must-haves, preferred signals, leadership scope, interview focus and red flags from this role brief.",
+        document_ids=[role_brief_document_id],
+        strategy="document_scan",
+        max_chars=50000,
+    ).strip()
+
+    if not raw_role_brief_text:
+        warnings.append("Role brief document was selected, but no document context could be assembled.")
+        return request, None, {"source": "empty_document_context"}, warnings
+
+    manual_context_window = request.context_window if request.context_window_mode == "manual" else None
+    role_context, normalization_metadata = normalize_role_brief_text_with_model(
+        raw_role_brief_text,
+        provider=request.provider,
+        model=request.model,
+        temperature=0.0,
+        top_p=request.top_p,
+        max_tokens=min(int(request.max_tokens or 1400), 2000),
+        context_window=manual_context_window,
+    )
+    normalized_input_text = render_candidate_review_input_text(role_context) if role_context.raw_text else request.input_text
+    if not str(normalized_input_text or "").strip():
+        normalized_input_text = request.input_text
+
+    effective_request = request.model_copy(update={"input_text": normalized_input_text})
+    if normalization_metadata.get("source") == "heuristic_fallback":
+        warnings.append("Role brief normalization used deterministic fallback because the model normalization did not complete.")
+
+    role_context_payload = role_context.to_dict()
+    role_context_payload.pop("raw_text", None)
+    return effective_request, role_context_payload, normalization_metadata, warnings
+
 def run_candidate_review_workflow(request: ProductWorkflowRequest) -> ProductWorkflowResult:
-    return _run_structured_product_workflow(
-        request,
+    effective_request, role_context, normalization_metadata, role_warnings = _candidate_review_request_with_role_brief(request)
+    result = _run_structured_product_workflow(
+        effective_request,
         task_type="cv_analysis",
         workflow_label="Candidate Review",
         deck_export_kind=CANDIDATE_REVIEW_EXPORT_KIND,
     )
+
+    role_brief_document_id = str(getattr(request, "role_brief_document_id", None) or "").strip()
+    if role_brief_document_id:
+        result.debug_metadata["role_brief_document_id"] = role_brief_document_id
+        result.debug_metadata["role_context"] = role_context or {}
+        result.debug_metadata["role_normalization"] = normalization_metadata or {}
+        existing_warnings = list(result.warnings or [])
+        for warning in role_warnings:
+            if warning and warning not in existing_warnings:
+                existing_warnings.append(warning)
+        result.warnings = existing_warnings
+        if result.status == "completed" and existing_warnings:
+            result.status = "warning"
+
+    return result
 
 
 def run_product_workflow(request: ProductWorkflowRequest) -> ProductWorkflowResult:
