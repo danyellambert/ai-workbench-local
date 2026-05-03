@@ -70,3 +70,22 @@ nextcloud_volume_backups/
 # AI Lab runtime/golden state must stay outside Git
 ai-lab-golden-state*.tar.gz
 ai_lab_golden_state/
+
+# Environment contracts: real env files stay local/host-only.
+.env
+.env.local
+.env.docker
+.env.docker.local
+.env.aws
+.env.aws.local
+.env.oracle
+.env.oracle.local
+.env.production
+.env.production.local
+
+# Versioned safe examples.
+!.env.example
+!.env.local.example
+!.env.docker.example
+!.env.aws.example
+!.env.oracle.example
