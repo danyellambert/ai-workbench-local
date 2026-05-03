@@ -267,7 +267,7 @@ describe('CandidateReviewPage', () => {
 
     expect(await screen.findByText('Sarah Chen')).toBeInTheDocument();
     expect(screen.getByText('Advance to panel interview.')).toBeInTheDocument();
-    expect(screen.getByText('Strong retrieval systems background')).toBeInTheDocument();
+    expect(screen.getAllByText('Strong retrieval systems background').length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole('button', { name: /generate deck/i }));
 

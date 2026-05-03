@@ -26,6 +26,8 @@ _SECTION_ALIASES: dict[str, tuple[str, ...]] = {
         "nice to have",
         "nice-to-have",
         "nice to haves",
+        "nice-to-have signals",
+        "nice to have signals",
         "preferred",
         "preferred qualifications",
         "bonus",
@@ -33,6 +35,8 @@ _SECTION_ALIASES: dict[str, tuple[str, ...]] = {
     "leadership_expectations": (
         "leadership",
         "leadership expectations",
+        "leadership / scope expectations",
+        "leadership scope expectations",
         "ownership",
         "scope",
     ),
@@ -139,6 +143,13 @@ def _extract_sections(text: str) -> dict[str, list[str]]:
                 if trailing:
                     sections.setdefault(current, []).append(trailing)
                 continue
+
+            # Unknown headings should not leak into the previous recognized
+            # section. This matters for renderer-only instructions such as
+            # "Final instruction:" and for future role brief headings.
+            current = None
+            continue
+
         if current is not None:
             sections.setdefault(current, []).append(line)
     return sections

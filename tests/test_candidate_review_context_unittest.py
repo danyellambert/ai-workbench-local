@@ -18,19 +18,25 @@ class CandidateReviewContextTests(unittest.TestCase):
             - MLOps
             Nice-to-have signals:
             - Marketplace experience
+            Leadership / scope expectations:
+            - Lead cross-functional delivery
             Interview focus:
             - production incident handling
             - stakeholder communication
             Red flags:
             - no ownership examples
+            Final instruction: preserve the output shape
             """
         )
 
         self.assertEqual(context.title, "Senior ML Engineer")
         self.assertEqual(context.seniority, "Senior")
-        self.assertEqual(context.must_haves[:2], ["Python", "MLOps"])
+        self.assertEqual(context.must_haves, ["Python", "MLOps"])
+        self.assertEqual(context.nice_to_haves, ["Marketplace experience"])
+        self.assertEqual(context.leadership_expectations, ["Lead cross-functional delivery"])
         self.assertIn("stakeholder communication", context.interview_focus)
-        self.assertIn("no ownership examples", context.red_flags)
+        self.assertEqual(context.red_flags, ["no ownership examples"])
+        self.assertNotIn("Final instruction", " ".join(context.red_flags))
 
     def test_render_candidate_review_input_text_is_deterministic(self) -> None:
         context = normalize_role_brief_text(

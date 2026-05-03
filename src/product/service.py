@@ -836,6 +836,9 @@ def _run_structured_product_workflow(
             "expected_outputs": list(workflow_definition.expected_outputs),
             "preferred_context_strategy": workflow_definition.preferred_context_strategy,
             "deck_export_label": workflow_definition.default_export_label,
+            "input_text": effective_query,
+            "effective_query": effective_query,
+            "query": effective_query,
         },
     )
 

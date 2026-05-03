@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 import re
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -50,6 +50,9 @@ SUPPORTED_EXECUTIVE_DECK_EXPORT_KINDS = list(EXECUTIVE_DECK_EXPORT_KIND_LABELS.k
 EXECUTIVE_DECK_EXPORT_KIND_ALIASES = {
     BENCHMARK_EVAL_EXECUTIVE_REVIEW_PRODUCT_EXPORT_KIND: DEFAULT_PRESENTATION_EXPORT_KIND,
 }
+
+
+T = TypeVar("T")
 
 
 def _clean_text(value: object) -> str | None:
@@ -915,7 +918,7 @@ def _compact_text_list(values: list[object], *, limit: int = 4, max_chars: int =
     return [_truncate_cell(value, max_chars=max_chars) for value in _dedupe_texts(values, limit=limit)]
 
 
-def _chunk_list[T](values: list[T], *, chunk_size: int) -> list[list[T]]:
+def _chunk_list(values: list[T], *, chunk_size: int) -> list[list[T]]:
     if chunk_size <= 0:
         return [values]
     return [values[index : index + chunk_size] for index in range(0, len(values), chunk_size)]
