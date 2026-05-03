@@ -183,3 +183,11 @@ Não expor se:
 - /app/users não estiver writable;
 - public workflow/import estiver mutando global;
 - secrets reais estiverem em arquivos versionados.
+
+
+Required Hugging Face Inference provider:
+
+```env
+    HUGGINGFACE_INFERENCE_BASE_URL=https://router.huggingface.co/v1
+    HUGGINGFACE_INFERENCE_API_KEY=
+```

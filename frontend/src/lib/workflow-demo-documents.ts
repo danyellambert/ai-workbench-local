@@ -1,3 +1,4 @@
+
 import type { ProductDocumentLibraryEntry } from '@/lib/product-api';
 
 export const WORKFLOW_RECOMMENDED_DOCUMENTS = {
