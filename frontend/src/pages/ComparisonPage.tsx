@@ -252,6 +252,24 @@ export default function ComparisonPage() {
   const differences: ProductPolicyComparisonDiff[] = comparisonView?.differences ?? [];
   const mustFixItems = comparisonView?.must_fix_items ?? [];
   const negotiationPriorities = comparisonView?.negotiation_priorities ?? [];
+  const comparisonWatchouts = useMemo(() => {
+    const directWatchouts = comparisonView?.watchouts?.filter((item) => item && !/retrieval backend note|canonical json|local fallback/i.test(item)) ?? [];
+    if (directWatchouts.length > 0) return directWatchouts;
+
+    const mustFixWatchouts = mustFixItems
+      .map((item) => item.title || item.detail || item.recommendation || '')
+      .filter(Boolean)
+      .map((item) => `Validate before approval: ${item}`);
+
+    if (mustFixWatchouts.length > 0) return mustFixWatchouts.slice(0, 4);
+
+    return differences
+      .filter((item) => item.impact === 'breaking' || item.impact === 'significant')
+      .map((item) => item.business_impact || item.recommendation || item.clause)
+      .filter(Boolean)
+      .slice(0, 4);
+  }, [comparisonView?.watchouts, differences, mustFixItems]);
+
   const allArtifacts = useMemo(
     () => dedupeArtifacts([...(comparisonView?.artifacts ?? []), ...generatedArtifacts]),
     [comparisonView?.artifacts, generatedArtifacts],
@@ -572,7 +590,7 @@ export default function ComparisonPage() {
         <GlassCard>
           <h3 className="text-sm font-medium text-foreground mb-3">Watchouts</h3>
           <div className="space-y-2 text-xs text-muted-foreground">
-            {(comparisonView?.watchouts ?? []).length > 0 ? (comparisonView?.watchouts ?? []).map((item) => (
+            {comparisonWatchouts.length > 0 ? comparisonWatchouts.map((item) => (
               <p key={item}>• {item}</p>
             )) : <p>Watchouts will appear here after the workflow runs.</p>}
           </div>

@@ -492,6 +492,74 @@ def _truncate_ui_text(value: object, *, max_chars: int = 280) -> str:
     return f"{shortened or cleaned[: max_chars - 3].strip()}..."
 
 
+def _is_operational_technical_note(value: object) -> bool:
+    text = str(value or "").strip().lower()
+    if not text:
+        return True
+    technical_markers = [
+        "retrieval backend note",
+        "retrieval served by",
+        "canonical json",
+        "local fallback",
+        "debug",
+        "trace",
+    ]
+    return any(marker in text for marker in technical_markers)
+
+
+def _build_policy_comparison_watchouts(
+    *,
+    differences: list[dict[str, Any]],
+    must_fix_items: list[dict[str, Any]],
+    sections: dict[str, Any],
+    limitations: list[str],
+    result_warnings: list[str],
+) -> list[str]:
+    candidates: list[object] = []
+
+    for item in must_fix_items:
+        title = _clean_optional_text(item.get("title"))
+        detail = _clean_optional_text(item.get("detail"))
+        recommendation = _clean_optional_text(item.get("recommendation"))
+        if title and detail:
+            candidates.append(f"Validate before approval: {title} — {detail}")
+        elif title:
+            candidates.append(f"Validate before approval: {title}")
+        if recommendation and not _is_operational_technical_note(recommendation):
+            candidates.append(recommendation)
+
+    for diff in differences:
+        impact = str(diff.get("impact") or "").strip().lower()
+        if impact not in {"breaking", "significant"}:
+            continue
+        clause = _clean_optional_text(diff.get("clause"))
+        business_impact = _clean_optional_text(diff.get("business_impact"))
+        recommendation = _clean_optional_text(diff.get("recommendation"))
+        prefix = "Must resolve before approval" if impact == "breaking" else "Confirm operational impact"
+        if clause and business_impact:
+            candidates.append(f"{prefix}: {clause} — {business_impact}")
+        elif business_impact:
+            candidates.append(f"{prefix}: {business_impact}")
+        elif clause:
+            candidates.append(f"{prefix}: {clause}")
+        if recommendation and not _is_operational_technical_note(recommendation):
+            candidates.append(recommendation)
+
+    for item in sections.get("watchouts") or []:
+        if not _is_operational_technical_note(item):
+            candidates.append(item)
+
+    for item in limitations:
+        if not _is_operational_technical_note(item):
+            candidates.append(item)
+
+    for item in result_warnings:
+        if not _is_operational_technical_note(item):
+            candidates.append(item)
+
+    return _dedupe_texts(candidates, limit=6)
+
+
 def _comparison_document_summary_lookup(payload: DocumentAgentPayload) -> dict[str, dict[str, Any]]:
     structured_response = payload.structured_response if isinstance(payload.structured_response, dict) else {}
     raw_summaries = structured_response.get("document_summaries") if isinstance(structured_response.get("document_summaries"), list) else []
@@ -640,7 +708,13 @@ def build_policy_comparison_view(result: ProductWorkflowResult) -> dict[str, Any
     if not negotiation_priorities and result.recommendation:
         negotiation_priorities = [_clean_text(result.recommendation)]
 
-    watchouts = _dedupe_texts([*(sections.get("watchouts") or []), *limitations, *(result.warnings or [])], limit=6)
+    watchouts = _build_policy_comparison_watchouts(
+        differences=differences,
+        must_fix_items=must_fix_items,
+        sections=sections,
+        limitations=limitations,
+        result_warnings=list(result.warnings or []),
+    )
     next_steps = _dedupe_texts([*(sections.get("next_steps") or []), *recommended_actions], limit=6)
 
     run_steps = [
