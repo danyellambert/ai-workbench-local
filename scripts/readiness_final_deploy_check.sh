@@ -25,6 +25,7 @@ scripts/readiness_public_ai_lab_overlay_check.sh --env-file "$ENV_FILE"
 scripts/readiness_preferences_evals_surface_check.sh --env-file "$ENV_FILE"
 scripts/readiness_required_integrations_check.sh --env-file "$ENV_FILE"
 scripts/readiness_required_providers_check.sh --env-file "$ENV_FILE"
+scripts/readiness_evidenceops_ui_cache_check.sh --env-file "$ENV_FILE"
 
 echo
 echo "OK: final deploy readiness battery passed"

@@ -191,3 +191,12 @@ Required Hugging Face Inference provider:
     HUGGINGFACE_INFERENCE_BASE_URL=https://router.huggingface.co/v1
     HUGGINGFACE_INFERENCE_API_KEY=
 ```
+
+EvidenceOps UI cache policy:
+
+    EVIDENCEOPS_UI_CACHE_MODE=persistent_until_sync
+    EVIDENCEOPS_UI_CACHE_PATH=/app/runtime/cache/lab/evidenceops_payload.json
+
+The EvidenceOps UI cache is persistent and intentionally does not expire automatically.
+Normal UI reads use the last known good snapshot immediately.
+Nextcloud/WebDAV rescans happen through explicit sync, deploy warmup, or state restore.

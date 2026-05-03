@@ -3923,7 +3923,7 @@ def build_lab_artifacts_payload(workspace_root: Path) -> dict[str, Any]:
     }
 
 
-def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
+def _build_lab_evidenceops_payload_uncached(workspace_root: Path) -> dict[str, Any]:
     repository_context = _resolve_evidenceops_repository_context(workspace_root)
     repository_root = repository_context['repository_root']
     repository_backend = str(repository_context['repository_backend'])
@@ -4134,6 +4134,136 @@ def build_lab_evidenceops_payload(workspace_root: Path) -> dict[str, Any]:
     }
 
 
+
+def _evidenceops_ui_cache_enabled() -> bool:
+    import os
+
+    mode = str(os.environ.get('EVIDENCEOPS_UI_CACHE_MODE') or 'persistent_until_sync').strip().lower()
+    return mode not in {'0', 'false', 'off', 'disabled', 'none'}
+
+
+def _evidenceops_ui_cache_path(workspace_root: Path) -> Path:
+    import os
+
+    configured = str(os.environ.get('EVIDENCEOPS_UI_CACHE_PATH') or '').strip()
+    if configured:
+        return Path(configured)
+    return Path(workspace_root) / 'runtime' / 'cache' / 'lab' / 'evidenceops_payload.json'
+
+
+def _load_evidenceops_ui_cache(workspace_root: Path) -> dict[str, Any] | None:
+    cache_path = _evidenceops_ui_cache_path(workspace_root)
+    if not cache_path.exists():
+        return None
+
+    try:
+        payload = json.loads(cache_path.read_text(encoding='utf-8'))
+    except Exception:
+        return None
+
+    if not isinstance(payload, dict):
+        return None
+    if payload.get('ok') is not True:
+        return None
+
+    return payload
+
+
+def _evidenceops_ui_cache_updated_at(cache_path: Path) -> str | None:
+    try:
+        from datetime import datetime, timezone
+
+        if not cache_path.exists():
+            return None
+        return datetime.fromtimestamp(cache_path.stat().st_mtime, tz=timezone.utc).isoformat()
+    except Exception:
+        return None
+
+
+def _annotate_evidenceops_ui_cache_payload(
+    payload: dict[str, Any],
+    *,
+    workspace_root: Path,
+    cache_status: str,
+) -> dict[str, Any]:
+    annotated = dict(payload)
+    meta = dict(annotated.get('meta') or {})
+    cache_path = _evidenceops_ui_cache_path(workspace_root)
+    cache_exists = cache_path.exists()
+
+    meta['evidenceopsCache'] = {
+        'mode': 'persistent_until_sync',
+        'status': cache_status,
+        'path': str(cache_path),
+        'exists': cache_exists,
+        'updatedAt': _evidenceops_ui_cache_updated_at(cache_path),
+        'servedAt': _now_iso(),
+        'refreshPolicy': 'manual_sync_or_deploy_warmup',
+        'notes': [
+            'The UI serves the last known good EvidenceOps snapshot immediately.',
+            'Nextcloud/WebDAV rescan is intentionally explicit because repository state changes rarely.',
+            'Run /api/lab/evidenceops/sync or the final deploy readiness check to refresh this cache.',
+        ],
+    }
+    annotated['meta'] = meta
+    return annotated
+
+
+def _store_evidenceops_ui_cache(workspace_root: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    cache_path = _evidenceops_ui_cache_path(workspace_root)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Write once first so the persisted metadata can accurately report exists/updatedAt.
+    cache_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+
+    stored_payload = _annotate_evidenceops_ui_cache_payload(
+        payload,
+        workspace_root=workspace_root,
+        cache_status='stored',
+    )
+
+    cache_path.write_text(json.dumps(stored_payload, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+    return stored_payload
+
+
+def invalidate_evidenceops_ui_cache(workspace_root: Path) -> None:
+    cache_path = _evidenceops_ui_cache_path(workspace_root)
+    try:
+        cache_path.unlink()
+    except FileNotFoundError:
+        return
+    except Exception:
+        return
+
+
+def build_lab_evidenceops_payload(
+    workspace_root: Path,
+    *,
+    refresh_cache: bool = False,
+    use_cache: bool = True,
+) -> dict[str, Any]:
+    cache_enabled = _evidenceops_ui_cache_enabled()
+
+    if cache_enabled and use_cache and not refresh_cache:
+        cached_payload = _load_evidenceops_ui_cache(workspace_root)
+        if cached_payload is not None:
+            return _annotate_evidenceops_ui_cache_payload(
+                cached_payload,
+                workspace_root=workspace_root,
+                cache_status='hit',
+            )
+
+    payload = _build_lab_evidenceops_payload_uncached(workspace_root)
+
+    if cache_enabled and use_cache:
+        return _store_evidenceops_ui_cache(workspace_root, payload)
+
+    return _annotate_evidenceops_ui_cache_payload(
+        payload,
+        workspace_root=workspace_root,
+        cache_status='bypass',
+    )
+
 def build_lab_evidenceops_search_payload(workspace_root: Path, *, query: str) -> dict[str, Any]:
     repository_context = _resolve_evidenceops_repository_context(workspace_root)
     repository_root = repository_context['repository_root']
@@ -4239,7 +4369,7 @@ def sync_lab_evidenceops_state(workspace_root: Path) -> dict[str, Any]:
             'recommended_actions': [],
         },
     )
-    return {'ok': True, 'diff': diff_payload, 'page': build_lab_evidenceops_payload(workspace_root)}
+    return {'ok': True, 'diff': diff_payload, 'page': build_lab_evidenceops_payload(workspace_root, refresh_cache=True)}
 
 
 def update_lab_evidenceops_action(workspace_root: Path, *, action_id: int, status: str | None = None, owner: str | None = None) -> dict[str, Any]:
@@ -4273,4 +4403,4 @@ def update_lab_evidenceops_action(workspace_root: Path, *, action_id: int, statu
             'recommended_actions': [],
         },
     )
-    return {'ok': True, 'action': updated, 'page': build_lab_evidenceops_payload(workspace_root)}
+    return {'ok': True, 'action': updated, 'page': build_lab_evidenceops_payload(workspace_root, refresh_cache=True)}
