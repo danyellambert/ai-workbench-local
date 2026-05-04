@@ -1,5 +1,35 @@
 # AI Decision Studio — AWS fresh EC2 bootstrap runbook
 
+## Current validated AWS slim contract
+
+This runbook assumes the current AWS slim deployment contract:
+
+- real runtime env: `.env.aws`;
+- safe example env: `.env.aws.example`;
+- env contract validation:
+
+    python3 scripts/validate_aws_env_contract.py --env .env.aws --example .env.aws.example
+
+- real and example envs must have the same keys;
+- local/dev-only Vite proxy must be disabled in AWS:
+  - `VITE_PRODUCT_API_PROXY_ENABLED=0`;
+  - `VITE_PRODUCT_API_PROXY_TARGET=`;
+- compose files:
+  - `docker-compose.oracle-like.yml`;
+  - `docker-compose.aws-slim.override.yml`;
+- deploy command:
+
+    ENV_FILE=.env.aws scripts/deploy_aws_slim.sh
+
+- smoke command:
+
+    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws_slim.sh
+
+Do not commit real env files. `.env.aws` must stay ignored by Git.
+
+The AWS host may be an applied bundle directory rather than a Git worktree. `scripts/readiness_multi_environment_contract_check.sh` auto-detects that mode and skips local host/dev runner checks that would otherwise require host-level `npm`.
+
+
 This runbook describes how to rebuild the AWS demo environment from a fresh EC2
 instance.
 
@@ -437,3 +467,81 @@ If containers fail after a compose change:
 
 Keep `.env.oracle` only as a compatibility fallback on migrated hosts. New AWS
 hosts should use `.env.aws` as the real env file.
+
+## Final post-rebuild readiness
+
+After a fresh AWS EC2 bootstrap or controlled rebuild, validate the stack from inside the VM:
+
+    cd /opt/ai-decision-studio/app
+    set -e
+
+    python3 scripts/validate_aws_env_contract.py --env .env.aws --example .env.aws.example
+
+    scripts/readiness_multi_environment_contract_check.sh
+
+    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws_slim.sh
+
+    BASE_URL=http://127.0.0.1:8071 scripts/readiness_admin_session_isolation_check.sh
+
+    ENV_FILE=.env.aws scripts/readiness_trello_public_visibility_check.sh
+
+    docker compose \
+      --env-file .env.aws \
+      -p ai-decision-studio \
+      -f docker-compose.oracle-like.yml \
+      -f docker-compose.aws-slim.override.yml \
+      ps
+
+Expected results:
+
+- env contract returns `ok: true`;
+- multi-environment contract readiness passes without manual skip flags;
+- AWS slim smoke passes;
+- admin session isolation passes;
+- Trello public visibility passes;
+- all stack services are `healthy`.
+
+Expected stack services:
+
+- `frontend`;
+- `product-api`;
+- `nextcloud`;
+- `ollama`;
+- `ppt-creator`.
+
+For public/external validation from the operator machine:
+
+    BASE_URL=http://<PUBLIC_IP>:8071
+
+Validate:
+
+    curl -fsS "$BASE_URL" >/tmp/ads_frontend.html
+    curl -fsS "$BASE_URL/health" | python3 -m json.tool
+    curl -fsS "$BASE_URL/api/auth/session" | python3 -m json.tool
+    curl -fsS "$BASE_URL/api/preferences" -o /tmp/ads_preferences.json
+    curl -fsS "$BASE_URL/api/product/document-library" -o /tmp/ads_doclib.json
+    curl -fsS "$BASE_URL/api/product/run-history?compact=1&limit=100" -o /tmp/ads_run_history.json
+
+The real AI Lab runtime endpoint is:
+
+    /api/lab/runtime
+
+Do not use `/api/lab/runtime-observability`; that is not a backend route.
+
+Real external AI Lab/API endpoints validated after rebuild:
+
+    /api/lab/overview
+    /api/lab/runtime
+    /api/lab/workflow-inspector
+    /api/lab/benchmarks
+    /api/lab/evals
+    /api/lab/artifacts
+    /api/lab/evidenceops
+    /api/product/artifacts
+    /api/runtime/controls
+
+Admin external validation should confirm:
+
+- `/api/auth/admin/login` returns role `admin`;
+- `/api/auth/session` returns `can_publish_external: true`;
+- `/api/preferences/connections/huggingface_inference/test` returns `status: connected`.

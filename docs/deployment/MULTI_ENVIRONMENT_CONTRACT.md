@@ -78,3 +78,5 @@ initially bootstrapped from the Oracle-like topology. The safe migration path is
 5. only then switch deploy scripts to .env.aws
 
 Do not delete .env.oracle from a live host until .env.aws has passed smoke.
+
+For full local app usage, see [`LOCAL_FULL_APP_DEV.md`](LOCAL_FULL_APP_DEV.md).
