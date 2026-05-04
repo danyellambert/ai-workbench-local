@@ -6,7 +6,7 @@ PROJECT="${PROJECT:-ai-decision-studio}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.oracle-like.yml}"
 OVERRIDE_FILE="${OVERRIDE_FILE:-docker-compose.aws-slim.override.yml}"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8011}"
-REPORT="../ai_decision_studio_functional_baseline/parity_reports/required_integrations_readiness_report.json"
+REPORT="runtime/ai_decision_studio_functional_baseline/parity_reports/required_integrations_readiness_report.json"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in

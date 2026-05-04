@@ -138,7 +138,7 @@ restore_nextcloud_golden_baseline() {
   local root_path
 
   volume="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_VOLUME "${PROJECT_NAME}_nextcloud_app")"
-  archive="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_ARCHIVE "../ai_decision_studio_functional_baseline/nextcloud_golden_baseline/nextcloud-golden-baseline-v1.tar.gz")"
+  archive="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_ARCHIVE "./runtime/ai_decision_studio_functional_baseline/nextcloud_golden_baseline/nextcloud-golden-baseline-v1.tar.gz")"
   expected_sha="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_SHA256 "4dd4fb301249fa2ed6e6cc7e223df3beaed2a175b85c352b24ff3ca95636ddb2")"
   user="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_USER "$(get_env_value EVIDENCEOPS_NEXTCLOUD_USERNAME danyel)")"
   root_path="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_ROOT "$(get_env_value EVIDENCEOPS_NEXTCLOUD_ROOT_PATH /EvidenceOpsDemo)")"

@@ -3,7 +3,7 @@ set -euo pipefail
 
 COMPOSE_FILE="${AI_DECISION_STUDIO_ORACLE_COMPOSE_FILE:-docker-compose.oracle-like.yml}"
 ENV_EXAMPLE="${AI_DECISION_STUDIO_ORACLE_ENV_EXAMPLE:-.env.oracle.example}"
-REPORT="${AI_DECISION_STUDIO_ORACLE_READINESS_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/oracle_like_deploy_readiness_report.json}"
+REPORT="${AI_DECISION_STUDIO_ORACLE_READINESS_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_like_deploy_readiness_report.json}"
 
 mkdir -p "$(dirname "$REPORT")"
 
@@ -21,7 +21,7 @@ from pathlib import Path
 
 compose_file = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_COMPOSE_FILE", "docker-compose.oracle-like.yml"))
 env_example = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_ENV_EXAMPLE", ".env.oracle.example"))
-report_path = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_READINESS_REPORT", "../ai_decision_studio_functional_baseline/parity_reports/oracle_like_deploy_readiness_report.json"))
+report_path = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_READINESS_REPORT", "runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_like_deploy_readiness_report.json"))
 
 secret_patterns = re.compile(r"(?i)(api[_-]?key|token|password|secret)\s*[:=]\s*[^\\s'\"]+")
 

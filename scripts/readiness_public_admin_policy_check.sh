@@ -2,10 +2,10 @@
 set -euo pipefail
 
 COMPOSE_FILE="${AI_DECISION_STUDIO_ORACLE_COMPOSE_FILE:-docker-compose.oracle-like.yml}"
-DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-../ai_decision_studio_functional_baseline/oracle_like_data}"
+DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-runtime/ai_decision_studio_functional_baseline/oracle_like_data}"
 FRONTEND_PORT="${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8071}"
 FRONTEND_BASE_URL="http://127.0.0.1:${FRONTEND_PORT}"
-REPORT="${AI_DECISION_STUDIO_PUBLIC_ADMIN_POLICY_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/public_admin_policy_check_report.json}"
+REPORT="${AI_DECISION_STUDIO_PUBLIC_ADMIN_POLICY_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/public_admin_policy_check_report.json}"
 
 export AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT="$FRONTEND_PORT"
 export AI_DECISION_STUDIO_BASELINE_ROOT="$(cd "$DATA_ROOT/baseline" && pwd)"
@@ -55,7 +55,7 @@ frontend = f"http://127.0.0.1:{os.environ.get('AI_DECISION_STUDIO_FRONTEND_PUBLI
 users_root = Path(os.environ["AI_DECISION_STUDIO_USERS_ROOT"])
 report_path = Path(os.environ.get(
     "AI_DECISION_STUDIO_PUBLIC_ADMIN_POLICY_REPORT",
-    "../ai_decision_studio_functional_baseline/parity_reports/public_admin_policy_check_report.json",
+    "runtime/ai_decision_studio_functional_baseline/parity_reports/public_admin_policy_check_report.json",
 ))
 
 def fetch_session(cookie_header=None):
@@ -136,7 +136,7 @@ from pathlib import Path
 frontend_port = os.environ.get("AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT", "8071")
 base_url = f"http://127.0.0.1:{frontend_port}"
 
-report_dir = Path("../ai_decision_studio_functional_baseline/parity_reports")
+report_dir = Path("runtime/ai_decision_studio_functional_baseline/parity_reports")
 report_dir.mkdir(parents=True, exist_ok=True)
 report_path = report_dir / "public_admin_write_guard_report.json"
 

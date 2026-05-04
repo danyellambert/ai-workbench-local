@@ -128,7 +128,7 @@ Runs:
 Run:
 
     export COMPOSE_PROJECT_NAME=ai-decision-studio
-    export AI_DECISION_STUDIO_ORACLE_DATA_ROOT="$(cd ../ai_decision_studio_functional_baseline/oracle_like_data && pwd)"
+    export AI_DECISION_STUDIO_ORACLE_DATA_ROOT="$(cd runtime/ai_decision_studio_functional_baseline/oracle_like_data && pwd)"
     export AI_DECISION_STUDIO_READINESS_BASE_URL="http://127.0.0.1:8071"
     export AI_DECISION_STUDIO_PUBLIC_SESSION_MAX_MB=250
     export AI_DECISION_STUDIO_MAX_BACKUP_AGE_HOURS=48

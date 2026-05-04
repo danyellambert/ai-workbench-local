@@ -12,15 +12,15 @@ This is not a Docker test yet.
 
 The smoke used a temporary overlay copied from:
 
-- Source: `../ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline`
-- Overlay: `../ai_decision_studio_functional_baseline/current_backend_smoke_overlay`
+- Source: `runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline`
+- Overlay: `runtime/ai_decision_studio_functional_baseline/current_backend_smoke_overlay`
 
 The Product API was started with:
 
-- `APP_WORKSPACE_ROOT=../ai_decision_studio_functional_baseline/current_backend_smoke_overlay`
-- `APP_RUNTIME_ROOT=../ai_decision_studio_functional_baseline/current_backend_smoke_overlay/.runtime`
-- `APP_ARTIFACT_ROOT=../ai_decision_studio_functional_baseline/current_backend_smoke_overlay/artifacts`
-- `PRESENTATION_EXPORT_LOCAL_ARTIFACT_DIR=../ai_decision_studio_functional_baseline/current_backend_smoke_overlay/artifacts/presentation_exports`
+- `APP_WORKSPACE_ROOT=runtime/ai_decision_studio_functional_baseline/current_backend_smoke_overlay`
+- `APP_RUNTIME_ROOT=runtime/ai_decision_studio_functional_baseline/current_backend_smoke_overlay/.runtime`
+- `APP_ARTIFACT_ROOT=runtime/ai_decision_studio_functional_baseline/current_backend_smoke_overlay/artifacts`
+- `PRESENTATION_EXPORT_LOCAL_ARTIFACT_DIR=runtime/ai_decision_studio_functional_baseline/current_backend_smoke_overlay/artifacts/presentation_exports`
 - `PRODUCT_API_SERVER_PORT=8012`
 
 ## Result

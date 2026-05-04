@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPORT="../ai_decision_studio_functional_baseline/parity_reports/candidate_review_contract_readiness_report.json"
+REPORT="runtime/ai_decision_studio_functional_baseline/parity_reports/candidate_review_contract_readiness_report.json"
 ENV_FILE=""
 PROJECT="${PROJECT:-ai-decision-studio}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.oracle-like.yml}"

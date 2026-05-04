@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://127.0.0.1:8071}"
-REPORT="../ai_decision_studio_functional_baseline/parity_reports/run_history_compact_readiness_report.json"
+REPORT="runtime/ai_decision_studio_functional_baseline/parity_reports/run_history_compact_readiness_report.json"
 MAX_COMPACT_BYTES=2000000
 MAX_COMPACT_MS=2500
 

@@ -4,7 +4,7 @@ set -euo pipefail
 ENV_FILE="${ENV_FILE:-.env.oracle}"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8071}"
 MIN_DOCS="20"
-REPORT="../ai_decision_studio_functional_baseline/parity_reports/nextcloud_golden_baseline_readiness_report.json"
+REPORT="runtime/ai_decision_studio_functional_baseline/parity_reports/nextcloud_golden_baseline_readiness_report.json"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in

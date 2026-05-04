@@ -9,7 +9,7 @@ It is not a frozen API snapshot.
 The first staging step copies real local state outside Git into:
 
 ```bash
-../ai_decision_studio_functional_baseline/current_raw_stage
+runtime/ai_decision_studio_functional_baseline/current_raw_stage
 ```
 
 The raw stage is intentionally not committed because it contains local absolute paths and large runtime/artifact files.

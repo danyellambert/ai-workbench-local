@@ -2,10 +2,10 @@
 set -euo pipefail
 
 COMPOSE_FILE="${AI_DECISION_STUDIO_ORACLE_COMPOSE_FILE:-docker-compose.oracle-like.yml}"
-DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-../ai_decision_studio_functional_baseline/oracle_like_data}"
+DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-runtime/ai_decision_studio_functional_baseline/oracle_like_data}"
 FRONTEND_PORT="${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8069}"
 FRONTEND_BASE_URL="http://127.0.0.1:${FRONTEND_PORT}"
-REPORT="${AI_DECISION_STUDIO_ORACLE_COMPOSE_SMOKE_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/oracle_like_compose_smoke_report.json}"
+REPORT="${AI_DECISION_STUDIO_ORACLE_COMPOSE_SMOKE_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_like_compose_smoke_report.json}"
 
 BASELINE_ROOT="$(cd "$DATA_ROOT/baseline" && pwd)"
 RUNTIME_ROOT="$(cd "$DATA_ROOT/runtime" && pwd)"
@@ -88,7 +88,7 @@ from urllib.request import urlopen
 frontend = f"http://127.0.0.1:{os.environ.get('AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT', '8069')}"
 report_path = os.environ.get(
     "AI_DECISION_STUDIO_ORACLE_COMPOSE_SMOKE_REPORT",
-    "../ai_decision_studio_functional_baseline/parity_reports/oracle_like_compose_smoke_report.json",
+    "runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_like_compose_smoke_report.json",
 )
 
 def get(path):

@@ -3,7 +3,7 @@ set -euo pipefail
 
 API_PORT="${AI_DECISION_STUDIO_PRODUCT_API_PUBLIC_PORT:-8013}"
 BASE_URL="${AI_DECISION_STUDIO_PRODUCT_API_BASE_URL:-http://127.0.0.1:${API_PORT}}"
-REPORT_OUT="${AI_DECISION_STUDIO_DOCKER_WORKFLOW_WRITE_REPORT:-../ai_decision_studio_functional_baseline/current_docker_workflow_write_smoke_report.json}"
+REPORT_OUT="${AI_DECISION_STUDIO_DOCKER_WORKFLOW_WRITE_REPORT:-runtime/ai_decision_studio_functional_baseline/current_docker_workflow_write_smoke_report.json}"
 WORKFLOW_ID="${AI_DECISION_STUDIO_WRITE_SMOKE_WORKFLOW_ID:-document_review}"
 DOCUMENT_ID="${AI_DECISION_STUDIO_WRITE_SMOKE_DOCUMENT_ID:-}"
 

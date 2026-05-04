@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SOURCE_BASELINE="${AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT:-../ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline}"
-DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-../ai_decision_studio_functional_baseline/oracle_like_data}"
-REPORT="${AI_DECISION_STUDIO_ORACLE_DATA_PREP_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/oracle_data_root_prepare_report.json}"
+SOURCE_BASELINE="${AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT:-runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline}"
+DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-runtime/ai_decision_studio_functional_baseline/oracle_like_data}"
+REPORT="${AI_DECISION_STUDIO_ORACLE_DATA_PREP_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_data_root_prepare_report.json}"
 RESET="${AI_DECISION_STUDIO_ORACLE_DATA_RESET:-0}"
 
 BASELINE_DST="$DATA_ROOT/baseline"
@@ -71,9 +71,9 @@ import os
 import re
 from pathlib import Path
 
-source_baseline = Path(os.environ.get("AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT", "../ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline")).resolve()
-data_root = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_DATA_ROOT", "../ai_decision_studio_functional_baseline/oracle_like_data")).resolve()
-report_path = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_DATA_PREP_REPORT", "../ai_decision_studio_functional_baseline/parity_reports/oracle_data_root_prepare_report.json")).resolve()
+source_baseline = Path(os.environ.get("AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT", "runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline")).resolve()
+data_root = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_DATA_ROOT", "runtime/ai_decision_studio_functional_baseline/oracle_like_data")).resolve()
+report_path = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_DATA_PREP_REPORT", "runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_data_root_prepare_report.json")).resolve()
 
 baseline = data_root / "baseline"
 runtime = data_root / "runtime"

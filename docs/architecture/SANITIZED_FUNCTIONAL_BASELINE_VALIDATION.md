@@ -4,13 +4,13 @@ This document records the validation step for the sanitized functional baseline 
 
 ## Baseline validated
 
-../ai_decision_studio_functional_baseline/current_sanitized_baseline
+runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline
 
 ## Validation command
 
 python3 scripts/validate_sanitized_functional_baseline.py \
-  --baseline-dir ../ai_decision_studio_functional_baseline/current_sanitized_baseline \
-  --out ../ai_decision_studio_functional_baseline/current_sanitized_baseline/validation_report.json
+  --baseline-dir runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline \
+  --out runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline/validation_report.json
 
 ## Latest validation result
 

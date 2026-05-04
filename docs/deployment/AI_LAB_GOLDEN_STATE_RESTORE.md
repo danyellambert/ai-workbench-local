@@ -6,11 +6,11 @@ This document defines the slim AI Lab historical state restore used by AI Decisi
 
 The official v1 archive is stored outside Git:
 
-../ai_decision_studio_functional_baseline/ai_lab_golden_state/ai-lab-golden-state-v1.tar.gz
+runtime/ai_decision_studio_functional_baseline/ai_lab_golden_state/ai-lab-golden-state-v1.tar.gz
 
 Manifest:
 
-../ai_decision_studio_functional_baseline/ai_lab_golden_state/ai-lab-golden-state-v1.manifest.json
+runtime/ai_decision_studio_functional_baseline/ai_lab_golden_state/ai-lab-golden-state-v1.manifest.json
 
 SHA256:
 

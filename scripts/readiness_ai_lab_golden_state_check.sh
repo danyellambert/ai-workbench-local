@@ -7,7 +7,7 @@ MIN_BENCHMARK_RUNS="1"
 MIN_BENCHMARK_MODELS="1"
 MIN_EVIDENCEOPS_ACTIONS="1"
 MIN_HISTORICAL_CASES="1"
-REPORT="../ai_decision_studio_functional_baseline/parity_reports/ai_lab_golden_state_readiness_report.json"
+REPORT="runtime/ai_decision_studio_functional_baseline/parity_reports/ai_lab_golden_state_readiness_report.json"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in

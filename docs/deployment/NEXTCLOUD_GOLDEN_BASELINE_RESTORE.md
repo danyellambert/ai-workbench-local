@@ -6,11 +6,11 @@ This document defines the frozen Nextcloud baseline used by AI Decision Studio A
 
 The official v1 archive is stored outside Git:
 
-../ai_decision_studio_functional_baseline/nextcloud_golden_baseline/nextcloud-golden-baseline-v1.tar.gz
+runtime/ai_decision_studio_functional_baseline/nextcloud_golden_baseline/nextcloud-golden-baseline-v1.tar.gz
 
 Manifest:
 
-../ai_decision_studio_functional_baseline/nextcloud_golden_baseline/nextcloud-golden-baseline-v1.manifest.json
+runtime/ai_decision_studio_functional_baseline/nextcloud_golden_baseline/nextcloud-golden-baseline-v1.manifest.json
 
 SHA256:
 

@@ -194,7 +194,7 @@ From your local Mac checkout:
 
 The bundle path defaults to:
 
-    ../ai_decision_studio_functional_baseline/oracle_deployment_bundle/ai-decision-studio-oracle-app-bundle.tar.gz
+    runtime/ai_decision_studio_functional_baseline/oracle_deployment_bundle/ai-decision-studio-oracle-app-bundle.tar.gz
 
 The bundle name still says `oracle` for historical compatibility. The bundle now
 contains the AWS env template and AWS slim scripts too.
@@ -213,7 +213,7 @@ From your local Mac:
 
     EC2_HOST=ubuntu@<EC2_PUBLIC_IP>
     SSH_KEY=~/.ssh/ai-decision-studio-aws.pem
-    BUNDLE="../ai_decision_studio_functional_baseline/oracle_deployment_bundle/ai-decision-studio-oracle-app-bundle.tar.gz"
+    BUNDLE="runtime/ai_decision_studio_functional_baseline/oracle_deployment_bundle/ai-decision-studio-oracle-app-bundle.tar.gz"
 
     scp -i "$SSH_KEY" "$BUNDLE" "$EC2_HOST:~/ads_uploads/"
     scp -i "$SSH_KEY" .env.aws "$EC2_HOST:~/ads_uploads/.env.aws"

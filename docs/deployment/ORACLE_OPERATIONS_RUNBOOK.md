@@ -68,7 +68,7 @@ Required files on the host:
 
 Use the prepared Oracle-like data root as the source:
 
-../ai_decision_studio_functional_baseline/oracle_like_data
+runtime/ai_decision_studio_functional_baseline/oracle_like_data
 
 Copy its contents into:
 

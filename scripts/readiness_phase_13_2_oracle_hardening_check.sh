@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "== Phase 13.2 Oracle hardening readiness =="
 
-export AI_DECISION_STUDIO_ORACLE_DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-$(cd ../ai_decision_studio_functional_baseline/oracle_like_data && pwd)}"
+export AI_DECISION_STUDIO_ORACLE_DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-$(cd runtime/ai_decision_studio_functional_baseline/oracle_like_data && pwd)}"
 export AI_DECISION_STUDIO_READINESS_BASE_URL="${AI_DECISION_STUDIO_READINESS_BASE_URL:-http://127.0.0.1:${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8071}}"
 export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ai-decision-studio}"
 

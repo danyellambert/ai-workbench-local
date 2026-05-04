@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OUT_DIR="${AI_DECISION_STUDIO_ORACLE_BUNDLE_DIR:-../ai_decision_studio_functional_baseline/oracle_deployment_bundle}"
+OUT_DIR="${AI_DECISION_STUDIO_ORACLE_BUNDLE_DIR:-runtime/ai_decision_studio_functional_baseline/oracle_deployment_bundle}"
 BUNDLE_NAME="${AI_DECISION_STUDIO_ORACLE_BUNDLE_NAME:-ai-decision-studio-oracle-app-bundle}"
 BUNDLE_ROOT="$OUT_DIR/$BUNDLE_NAME"
 ARCHIVE_PATH="$OUT_DIR/${BUNDLE_NAME}.tar.gz"
-REPORT="${AI_DECISION_STUDIO_ORACLE_BUNDLE_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/oracle_deployment_bundle_report.json}"
+REPORT="${AI_DECISION_STUDIO_ORACLE_BUNDLE_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_deployment_bundle_report.json}"
 
 export OUT_DIR
 export BUNDLE_NAME

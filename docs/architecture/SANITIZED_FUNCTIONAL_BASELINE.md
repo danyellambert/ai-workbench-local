@@ -7,13 +7,13 @@ The sanitized functional baseline is generated outside Git from the raw function
 ## Input
 
 ```bash
-../ai_decision_studio_functional_baseline/current_raw_stage
+runtime/ai_decision_studio_functional_baseline/current_raw_stage
 ```
 
 ## Output
 
 ```bash
-../ai_decision_studio_functional_baseline/current_sanitized_baseline
+runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline
 ```
 
 ## Purpose

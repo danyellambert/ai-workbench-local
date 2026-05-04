@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPORT="${AI_DECISION_STUDIO_PHASE13_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/phase_13_oracle_final_report.json}"
+REPORT="${AI_DECISION_STUDIO_PHASE13_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/phase_13_oracle_final_report.json}"
 REPORT_DIR="$(dirname "$REPORT")"
 
 mkdir -p "$REPORT_DIR"
 
 export AI_DECISION_STUDIO_ORACLE_COMPOSE_FILE="${AI_DECISION_STUDIO_ORACLE_COMPOSE_FILE:-docker-compose.oracle-like.yml}"
-export AI_DECISION_STUDIO_ORACLE_DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-../ai_decision_studio_functional_baseline/oracle_like_data}"
-export AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT="${AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT:-../ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline}"
+export AI_DECISION_STUDIO_ORACLE_DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-runtime/ai_decision_studio_functional_baseline/oracle_like_data}"
+export AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT="${AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT:-runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline}"
 export AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT="${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8069}"
 export EVIDENCEOPS_REPOSITORY_BACKEND="${EVIDENCEOPS_REPOSITORY_BACKEND:-local}"
 
@@ -114,11 +114,11 @@ data = {
     "checks": {step["name"]: step["ok"] for step in steps},
     "steps": steps,
     "artifacts": {
-        "oracle_like_deploy_report": "../ai_decision_studio_functional_baseline/parity_reports/oracle_like_deploy_readiness_report.json",
-        "oracle_data_root_prepare_report": "../ai_decision_studio_functional_baseline/parity_reports/oracle_data_root_prepare_report.json",
-        "oracle_like_compose_smoke_report": "../ai_decision_studio_functional_baseline/parity_reports/oracle_like_compose_smoke_report.json",
-        "oracle_deployment_bundle_report": "../ai_decision_studio_functional_baseline/parity_reports/oracle_deployment_bundle_report.json",
-        "oracle_deployment_bundle": "../ai_decision_studio_functional_baseline/oracle_deployment_bundle/ai-decision-studio-oracle-app-bundle.tar.gz",
+        "oracle_like_deploy_report": "runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_like_deploy_readiness_report.json",
+        "oracle_data_root_prepare_report": "runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_data_root_prepare_report.json",
+        "oracle_like_compose_smoke_report": "runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_like_compose_smoke_report.json",
+        "oracle_deployment_bundle_report": "runtime/ai_decision_studio_functional_baseline/parity_reports/oracle_deployment_bundle_report.json",
+        "oracle_deployment_bundle": "runtime/ai_decision_studio_functional_baseline/oracle_deployment_bundle/ai-decision-studio-oracle-app-bundle.tar.gz",
     },
 }
 

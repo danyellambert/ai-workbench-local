@@ -3,7 +3,7 @@ set -euo pipefail
 
 BASE_URL="http://127.0.0.1:8071"
 ITERATIONS=5
-REPORT="../ai_decision_studio_functional_baseline/parity_reports/surface_latency_report.json"
+REPORT="runtime/ai_decision_studio_functional_baseline/parity_reports/surface_latency_report.json"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in

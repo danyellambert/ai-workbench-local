@@ -3,9 +3,9 @@ set -euo pipefail
 
 API_BASE="${AI_DECISION_STUDIO_PRODUCT_API_BASE_URL:-http://127.0.0.1:8013}"
 FRONTEND_BASE="${AI_DECISION_STUDIO_FRONTEND_BASE_URL:-http://127.0.0.1:8059}"
-BASELINE_ROOT="${AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT:-../ai_decision_studio_functional_baseline/current_frontend_parity_overlay}"
-SANITIZED_BASELINE_ROOT="${AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT:-../ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline}"
-REPORT="${AI_DECISION_STUDIO_PHASES_8_12_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/runbook_phases_8_12_report.json}"
+BASELINE_ROOT="${AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT:-runtime/ai_decision_studio_functional_baseline/current_frontend_parity_overlay}"
+SANITIZED_BASELINE_ROOT="${AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT:-runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline}"
+REPORT="${AI_DECISION_STUDIO_PHASES_8_12_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/runbook_phases_8_12_report.json}"
 
 mkdir -p "$(dirname "$REPORT")"
 
@@ -27,9 +27,9 @@ from urllib.request import Request, urlopen
 
 api_base = os.environ.get("AI_DECISION_STUDIO_PRODUCT_API_BASE_URL", "http://127.0.0.1:8013")
 frontend_base = os.environ.get("AI_DECISION_STUDIO_FRONTEND_BASE_URL", "http://127.0.0.1:8059")
-baseline_root = Path(os.environ.get("AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT", "../ai_decision_studio_functional_baseline/current_frontend_parity_overlay")).resolve()
-sanitized_baseline_root = Path(os.environ.get("AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT", "../ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline")).resolve()
-report_path = Path(os.environ.get("AI_DECISION_STUDIO_PHASES_8_12_REPORT", "../ai_decision_studio_functional_baseline/parity_reports/runbook_phases_8_12_report.json"))
+baseline_root = Path(os.environ.get("AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT", "runtime/ai_decision_studio_functional_baseline/current_frontend_parity_overlay")).resolve()
+sanitized_baseline_root = Path(os.environ.get("AI_DECISION_STUDIO_SANITIZED_BASELINE_ROOT", "runtime/ai_decision_studio_functional_baseline/current_sanitized_baseline/baseline")).resolve()
+report_path = Path(os.environ.get("AI_DECISION_STUDIO_PHASES_8_12_REPORT", "runtime/ai_decision_studio_functional_baseline/parity_reports/runbook_phases_8_12_report.json"))
 
 def load_json(path):
     with urlopen(api_base + path, timeout=60) as response:

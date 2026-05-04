@@ -28,7 +28,7 @@ COMPOSE_FILE="docker-compose.frontend-public-demo.yml"
 if [ -z "${AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT:-}" ]; then
   echo "Missing AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT" >&2
   echo "Example:" >&2
-  echo 'export AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT="$(cd ../ai_decision_studio_functional_baseline/current_backend_smoke_overlay && pwd)"' >&2
+  echo 'export AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT="$(cd runtime/ai_decision_studio_functional_baseline/current_backend_smoke_overlay && pwd)"' >&2
   exit 1
 fi
 

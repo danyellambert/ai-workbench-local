@@ -92,3 +92,6 @@ ai_lab_golden_state/
 
 # Local host/dev runtime state
 runtime/
+
+# Local functional baseline runtime state
+runtime/ai_decision_studio_functional_baseline/

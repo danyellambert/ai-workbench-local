@@ -33,7 +33,7 @@ fi
 if [ -z "${AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT:-}" ]; then
   echo "Missing AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT" >&2
   echo "Example:" >&2
-  echo 'export AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT="$(cd ../ai_decision_studio_functional_baseline/current_backend_smoke_overlay && pwd)"' >&2
+  echo 'export AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT="$(cd runtime/ai_decision_studio_functional_baseline/current_backend_smoke_overlay && pwd)"' >&2
   exit 1
 fi
 
@@ -45,8 +45,8 @@ fi
 export AI_DECISION_STUDIO_PRODUCT_API_PUBLIC_PORT="${AI_DECISION_STUDIO_PRODUCT_API_PUBLIC_PORT:-8013}"
 export AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT="${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8059}"
 
-SNAP_OUT="${AI_DECISION_STUDIO_DOCKER_SMOKE_OUT:-../ai_decision_studio_functional_baseline/current_docker_script_smoke_snapshot}"
-REPORT_OUT="${AI_DECISION_STUDIO_DOCKER_SMOKE_REPORT:-../ai_decision_studio_functional_baseline/current_docker_script_smoke_report.json}"
+SNAP_OUT="${AI_DECISION_STUDIO_DOCKER_SMOKE_OUT:-runtime/ai_decision_studio_functional_baseline/current_docker_script_smoke_snapshot}"
+REPORT_OUT="${AI_DECISION_STUDIO_DOCKER_SMOKE_REPORT:-runtime/ai_decision_studio_functional_baseline/current_docker_script_smoke_report.json}"
 
 cleanup() {
   if [ "$KEEP_UP" != "1" ]; then

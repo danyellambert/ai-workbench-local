@@ -21,7 +21,7 @@ The compose stack expects:
 
 During the smoke, this pointed to:
 
-- `../ai_decision_studio_functional_baseline/current_backend_smoke_overlay`
+- `runtime/ai_decision_studio_functional_baseline/current_backend_smoke_overlay`
 
 Inside the backend container, it is mounted at:
 

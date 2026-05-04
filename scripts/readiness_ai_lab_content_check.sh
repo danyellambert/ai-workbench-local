@@ -2,7 +2,7 @@
 set -euo pipefail
 
 API_BASE="${AI_DECISION_STUDIO_PRODUCT_API_BASE_URL:-http://127.0.0.1:8013}"
-REPORT="${AI_DECISION_STUDIO_AI_LAB_CONTENT_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/ai_lab_content_check_report.json}"
+REPORT="${AI_DECISION_STUDIO_AI_LAB_CONTENT_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/ai_lab_content_check_report.json}"
 
 echo "== AI Lab content check =="
 echo "api=$API_BASE"
@@ -20,7 +20,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 api_base = os.environ.get("AI_DECISION_STUDIO_PRODUCT_API_BASE_URL", "http://127.0.0.1:8013")
-report_path = os.environ.get("AI_DECISION_STUDIO_AI_LAB_CONTENT_REPORT", "../ai_decision_studio_functional_baseline/parity_reports/ai_lab_content_check_report.json")
+report_path = os.environ.get("AI_DECISION_STUDIO_AI_LAB_CONTENT_REPORT", "runtime/ai_decision_studio_functional_baseline/parity_reports/ai_lab_content_check_report.json")
 
 def _read_json_with_retry(label, opener, *, attempts=6, delay_s=2.0):
     last_error = None

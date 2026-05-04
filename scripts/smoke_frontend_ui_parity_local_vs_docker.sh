@@ -3,8 +3,8 @@ set -euo pipefail
 
 LOCAL_FRONTEND_URL="${AI_DECISION_STUDIO_LOCAL_FRONTEND_URL:-http://127.0.0.1:8080}"
 DOCKER_FRONTEND_URL="${AI_DECISION_STUDIO_DOCKER_FRONTEND_URL:-http://127.0.0.1:8059}"
-REPORT_OUT="${AI_DECISION_STUDIO_UI_PARITY_REPORT:-../ai_decision_studio_functional_baseline/parity_reports/ui_route_parity_report.json}"
-SCREENSHOT_DIR="${AI_DECISION_STUDIO_UI_PARITY_SCREENSHOTS:-../ai_decision_studio_functional_baseline/parity_reports/ui_route_screenshots}"
+REPORT_OUT="${AI_DECISION_STUDIO_UI_PARITY_REPORT:-runtime/ai_decision_studio_functional_baseline/parity_reports/ui_route_parity_report.json}"
+SCREENSHOT_DIR="${AI_DECISION_STUDIO_UI_PARITY_SCREENSHOTS:-runtime/ai_decision_studio_functional_baseline/parity_reports/ui_route_screenshots}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SPEC_DIR="$ROOT_DIR/.tmp_playwright"
