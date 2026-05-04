@@ -99,6 +99,7 @@ copy_path "scripts/readiness_candidate_review_contract_check.sh"
 copy_path "docs/deployment/REDEPLOY_FAST_PATH.md"
 copy_path "scripts/measure_surface_latency.sh"
 copy_path "scripts/readiness_required_providers_check.sh"
+copy_path "scripts/readiness_admin_session_isolation_check.sh"
 copy_path "scripts/deploy_aws_slim.sh"
 copy_path "scripts/smoke_aws_slim.sh"
 copy_path "scripts/validate_aws_env_contract.py"
@@ -305,6 +306,7 @@ required_paths = [
     "docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md",
     "scripts/measure_surface_latency.sh",
     "scripts/readiness_required_providers_check.sh",
+    "scripts/readiness_admin_session_isolation_check.sh",
     "scripts/deploy_aws_slim.sh",
     "scripts/smoke_aws_slim.sh",
     "scripts/validate_aws_env_contract.py",

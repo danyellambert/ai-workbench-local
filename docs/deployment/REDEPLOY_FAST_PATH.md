@@ -68,6 +68,8 @@ Required AWS final check:
       --env-file .env.aws \
       --base-url http://127.0.0.1:8011
 
+    BASE_URL=http://127.0.0.1:8071 scripts/readiness_admin_session_isolation_check.sh
+
 ## Oracle fast path
 
 From the Oracle VM:
