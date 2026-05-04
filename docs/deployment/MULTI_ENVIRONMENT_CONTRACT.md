@@ -28,6 +28,9 @@ localhost means different things depending on where code runs:
 
 ## AWS slim deployment
 
+For a fresh EC2 rebuild, use `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`.
+For code-only redeploys on an existing AWS host, use the slim fast path below.
+
 AWS currently uses the proven Oracle-like compose base plus an AWS-specific
 slim override:
 

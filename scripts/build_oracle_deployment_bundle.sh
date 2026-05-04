@@ -301,6 +301,7 @@ required_paths = [
     "scripts/readiness_candidate_review_contract_check.sh",
     "docs/deployment/REDEPLOY_FAST_PATH.md",
     "docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md",
+    "docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md",
     "scripts/measure_surface_latency.sh",
     "scripts/readiness_required_providers_check.sh",
     "scripts/deploy_aws_slim.sh",
