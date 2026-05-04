@@ -5,11 +5,6 @@ ENV_FILE="${ENV_FILE:-.env.aws}"
 PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ai-decision-studio}"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8071}"
 
-if [[ ! -f "$ENV_FILE" && "$ENV_FILE" == ".env.aws" && -f ".env.oracle" ]]; then
-  echo "WARN: .env.aws not found; falling back to legacy .env.oracle on this host." >&2
-  ENV_FILE=".env.oracle"
-fi
-
 echo "== AWS slim smoke =="
 echo "env_file=$ENV_FILE"
 echo "base_url=$BASE_URL"

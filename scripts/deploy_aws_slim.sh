@@ -5,11 +5,6 @@ ENV_FILE="${ENV_FILE:-.env.aws}"
 PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ai-decision-studio}"
 PUBLIC_PORT="${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8071}"
 
-if [[ ! -f "$ENV_FILE" && "$ENV_FILE" == ".env.aws" && -f ".env.oracle" ]]; then
-  echo "WARN: .env.aws not found; falling back to legacy .env.oracle on this host." >&2
-  ENV_FILE=".env.oracle"
-fi
-
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "ERROR: env file not found: $ENV_FILE" >&2
   echo "Create it from .env.aws.example on AWS." >&2

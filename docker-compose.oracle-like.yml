@@ -34,7 +34,7 @@ services:
       OLLAMA_HOSTED_BASE_URL: "${OLLAMA_HOSTED_BASE_URL:-https://ollama.com/api}"
       HUGGINGFACE_INFERENCE_BASE_URL: "${HUGGINGFACE_INFERENCE_BASE_URL:-https://router.huggingface.co/v1}"
 
-      # Provider secrets must come from .env.oracle on the host.
+      # Provider secrets must come from the target env file on the host.
       OLLAMA_HOSTED_API_KEY: "${OLLAMA_HOSTED_API_KEY:-}"
       HUGGINGFACE_INFERENCE_API_KEY: "${HUGGINGFACE_INFERENCE_API_KEY:-}"
 
