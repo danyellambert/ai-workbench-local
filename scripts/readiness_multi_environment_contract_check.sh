@@ -35,6 +35,9 @@ do
   bash -n "$script"
 done
 
+scripts/run_local_dev.sh --check
+ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
+
 if grep -Rqs 'falling back to legacy .env.oracle' scripts/deploy_aws_slim.sh scripts/smoke_aws_slim.sh; then
   echo "ERROR: AWS slim scripts must not fall back to .env.oracle." >&2
   exit 1

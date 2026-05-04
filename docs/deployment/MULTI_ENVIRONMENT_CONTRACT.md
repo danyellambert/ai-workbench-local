@@ -8,7 +8,9 @@ local Docker, AWS, and Oracle can coexist without rewriting paths or URLs.
 | Mode | Real env file | Safe example | Main command |
 | --- | --- | --- | --- |
 | Local host/dev | .env.local or legacy .env | .env.local.example | scripts/run_local_dev.sh |
+| Local host/dev check | `.env.local` or legacy `.env` | `.env.local.example` | `scripts/run_local_dev.sh --check` |
 | Local Docker | .env.docker | .env.docker.example | scripts/run_local_docker.sh |
+| Local Docker config check | `.env.docker` | `.env.docker.example` | `ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only` |
 | AWS slim VM | .env.aws | .env.aws.example | scripts/deploy_aws_slim.sh |
 | Oracle VM | .env.oracle | .env.oracle.example | existing Oracle runbooks/scripts |
 
