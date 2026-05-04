@@ -3,6 +3,10 @@ set -euo pipefail
 
 echo "== Multi-environment contract readiness =="
 
+SKIP_LOCAL_DEV_CHECK="${SKIP_LOCAL_DEV_CHECK:-0}"
+SKIP_LOCAL_DOCKER_CHECK="${SKIP_LOCAL_DOCKER_CHECK:-0}"
+
+
 required_examples=(
   ".env.local.example"
   ".env.docker.example"
@@ -35,8 +39,16 @@ do
   bash -n "$script"
 done
 
-ENV_FILE=.env.local.example scripts/run_local_dev.sh --check
-ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
+if [ "$SKIP_LOCAL_DEV_CHECK" = "1" ]; then
+  echo "SKIP: local host/dev contract check"
+else
+  ENV_FILE=.env.local.example scripts/run_local_dev.sh --check
+fi
+if [ "$SKIP_LOCAL_DOCKER_CHECK" = "1" ]; then
+  echo "SKIP: local Docker compose contract check"
+else
+  ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
+fi
 grep -q 'PRODUCT_API_PROXY_ENABLED' frontend/vite.config.ts
 grep -q 'PRODUCT_API_DEV_PROXY' frontend/vite.config.ts
 grep -q '"/api"' frontend/vite.config.ts
