@@ -107,6 +107,7 @@ from src.storage.lab_state import (
     delete_lab_chat_session,
     get_lab_chat_session,
     update_lab_chat_session_runtime,
+    upsert_lab_chat_session,
 )
 from src.storage.product_workflow_history import append_product_workflow_history_entry, update_product_workflow_history_entry
 from src.storage.runtime_paths import (
@@ -119,6 +120,75 @@ from src.storage.runtime_paths import (
 
 class ReusableThreadingHTTPServer(ThreadingHTTPServer):
     allow_reuse_address = True
+
+
+
+def _lab_overlay_chat_sessions_path(identity: object) -> Path:
+    return Path(getattr(identity, "overlay_root")) / "state" / "lab" / "chat_sessions.json"
+
+
+def _lab_overlay_workflow_runs_path(identity: object) -> Path:
+    return Path(getattr(identity, "overlay_root")) / "state" / "lab" / "workflow_runs.json"
+
+
+def _lab_chat_payload_for_identity(
+    *,
+    bootstrap: ProductBootstrap,
+    identity: object,
+    session_id: str | None = None,
+) -> dict[str, Any]:
+    additional_paths = [] if getattr(identity, "can_write_global", False) else [_lab_overlay_chat_sessions_path(identity)]
+    payload = build_lab_chat_payload(
+        bootstrap.workspace_root,
+        session_id=session_id,
+        additional_session_paths=additional_paths,
+    )
+    payload["read_scope"] = "global" if getattr(identity, "can_write_global", False) else "global_plus_session_overlay"
+    return payload
+
+
+def _lab_workflow_inspector_payload_for_identity(
+    *,
+    bootstrap: ProductBootstrap,
+    identity: object,
+) -> dict[str, Any]:
+    additional_paths = [] if getattr(identity, "can_write_global", False) else [_lab_overlay_workflow_runs_path(identity)]
+    payload = build_lab_workflow_inspector_payload(
+        bootstrap.workspace_root,
+        additional_run_paths=additional_paths,
+    )
+    payload["read_scope"] = "global" if getattr(identity, "can_write_global", False) else "global_plus_session_overlay"
+    return payload
+
+
+def _fork_global_lab_chat_session_to_overlay(
+    *,
+    global_path: Path,
+    overlay_path: Path,
+    session_id: str,
+) -> dict[str, object]:
+    global_session = get_lab_chat_session(global_path, session_id)
+    if global_session is None:
+        raise KeyError(f"Chat session not found: {session_id}")
+
+    fork = create_lab_chat_session(
+        overlay_path,
+        title=str(global_session.get("title") or "AI Lab chat session"),
+        document_ids=[str(item) for item in (global_session.get("document_ids") or []) if str(item or "").strip()],
+    )
+    fork["messages"] = [
+        dict(message)
+        for message in (global_session.get("messages") if isinstance(global_session.get("messages"), list) else [])
+        if isinstance(message, dict)
+    ]
+
+    runtime = dict(global_session.get("runtime") if isinstance(global_session.get("runtime"), dict) else {})
+    runtime["forked_from_global_session_id"] = session_id
+    runtime["fork_scope"] = "session_overlay"
+    fork["runtime"] = runtime
+
+    return upsert_lab_chat_session(overlay_path, fork)
+
 
 
 def _json_bytes(payload: object) -> bytes:
@@ -1186,12 +1256,16 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/lab/chat":
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             session_id = str((query.get("session_id") or [""])[0]).strip() or None
-            self._send_json(HTTPStatus.OK, build_lab_chat_payload(self.bootstrap.workspace_root, session_id=session_id))
+            payload = _lab_chat_payload_for_identity(bootstrap=self.bootstrap, identity=identity, session_id=session_id)
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/lab/workflow-inspector":
-            self._send_json(HTTPStatus.OK, build_lab_workflow_inspector_payload(self.bootstrap.workspace_root))
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            payload = _lab_workflow_inspector_payload_for_identity(bootstrap=self.bootstrap, identity=identity)
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/lab/benchmarks":
@@ -1815,7 +1889,9 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/lab/workflow-inspector/run":
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             try:
+                runs_path = get_lab_workflow_runs_path(self.bootstrap.workspace_root) if identity.can_write_global else _lab_overlay_workflow_runs_path(identity)
                 execution = execute_lab_workflow_inspector_run(
                     bootstrap=self.bootstrap,
                     task_id=str(payload.get("task_id") or payload.get("workflow_id") or self.bootstrap.product_settings.default_workflow),
@@ -1824,6 +1900,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     input_text=(str(payload.get("input_text")) if payload.get("input_text") is not None else None),
                     provider=(str(payload.get("provider")) if payload.get("provider") is not None else None),
                     model=(str(payload.get("model")) if payload.get("model") is not None else None),
+                    runs_path=runs_path,
                 )
                 result = execution.get("result")
                 request = execution.get("request")
@@ -1832,7 +1909,8 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     "ok": True,
                     "run": run_record,
                     "result": result.model_dump(mode="json") if hasattr(result, "model_dump") else result,
-                    "page": build_lab_workflow_inspector_payload(self.bootstrap.workspace_root),
+                    "page": _lab_workflow_inspector_payload_for_identity(bootstrap=self.bootstrap, identity=identity),
+                    "write_scope": "global" if identity.can_write_global else "session_overlay",
                 }
                 if getattr(request, "workflow_id", None) == "document_review":
                     response_payload["result_view"] = build_document_review_view(result)
@@ -1846,61 +1924,94 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/lab/chat/sessions":
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             try:
                 document_ids = [str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()]
                 if not document_ids:
                     document_ids = _default_lab_document_ids(self.bootstrap, minimum=1)
+                sessions_path = get_lab_chat_sessions_path(self.bootstrap.workspace_root) if identity.can_write_global else _lab_overlay_chat_sessions_path(identity)
                 session = create_lab_chat_session(
-                    get_lab_chat_sessions_path(self.bootstrap.workspace_root),
+                    sessions_path,
                     title=str(payload.get("title") or "AI Lab chat session"),
                     document_ids=document_ids,
                 )
-                self._send_json(HTTPStatus.OK, {"ok": True, "session": session, "page": build_lab_chat_payload(self.bootstrap.workspace_root)})
+                page = _lab_chat_payload_for_identity(bootstrap=self.bootstrap, identity=identity, session_id=str(session.get("session_id") or ""))
+                self._send_json_with_cookies(HTTPStatus.OK, {"ok": True, "session": session, "page": page, "write_scope": "global" if identity.can_write_global else "session_overlay"}, cookies=[set_cookie] if set_cookie else None)
             except Exception as error:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+                self._send_json_with_cookies(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)}, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path.startswith("/api/lab/chat/sessions/") and path.endswith("/delete"):
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             session_id = path.removeprefix("/api/lab/chat/sessions/").removesuffix("/delete").strip("/")
+            sessions_path = get_lab_chat_sessions_path(self.bootstrap.workspace_root) if identity.can_write_global else _lab_overlay_chat_sessions_path(identity)
             try:
-                deletion = delete_lab_chat_session(get_lab_chat_sessions_path(self.bootstrap.workspace_root), session_id)
+                deletion = delete_lab_chat_session(sessions_path, session_id)
                 next_session_id = deletion.get("active_session_id") if isinstance(deletion, dict) else None
-                self._send_json(HTTPStatus.OK, {
+                self._send_json_with_cookies(HTTPStatus.OK, {
                     "ok": True,
                     "session_id": session_id,
                     "deleted": True,
-                    "page": build_lab_chat_payload(self.bootstrap.workspace_root, session_id=(str(next_session_id) if next_session_id else None)),
-                })
+                    "write_scope": "global" if identity.can_write_global else "session_overlay",
+                    "page": _lab_chat_payload_for_identity(bootstrap=self.bootstrap, identity=identity, session_id=(str(next_session_id) if next_session_id else None)),
+                }, cookies=[set_cookie] if set_cookie else None)
             except KeyError:
-                self._send_json(HTTPStatus.OK, {
+                self._send_json_with_cookies(HTTPStatus.OK, {
                     "ok": True,
                     "session_id": session_id,
                     "deleted": False,
-                    "warning": "Chat session was already absent.",
-                    "page": build_lab_chat_payload(self.bootstrap.workspace_root),
-                })
+                    "warning": "Chat session was already absent in the writable scope.",
+                    "write_scope": "global" if identity.can_write_global else "session_overlay",
+                    "page": _lab_chat_payload_for_identity(bootstrap=self.bootstrap, identity=identity),
+                }, cookies=[set_cookie] if set_cookie else None)
             except Exception as error:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+                self._send_json_with_cookies(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)}, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path.startswith("/api/lab/chat/sessions/") and path.endswith("/messages"):
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             try:
-                session_id = path.removeprefix("/api/lab/chat/sessions/").removesuffix("/messages").strip("/")
+                requested_session_id = path.removeprefix("/api/lab/chat/sessions/").removesuffix("/messages").strip("/")
+                global_sessions_path = get_lab_chat_sessions_path(self.bootstrap.workspace_root)
+                sessions_path = global_sessions_path
+                effective_session_id = requested_session_id
+                forked_from_session_id = None
+
+                if not identity.can_write_global:
+                    overlay_sessions_path = _lab_overlay_chat_sessions_path(identity)
+                    if get_lab_chat_session(overlay_sessions_path, requested_session_id) is not None:
+                        sessions_path = overlay_sessions_path
+                    elif get_lab_chat_session(global_sessions_path, requested_session_id) is not None:
+                        fork = _fork_global_lab_chat_session_to_overlay(
+                            global_path=global_sessions_path,
+                            overlay_path=overlay_sessions_path,
+                            session_id=requested_session_id,
+                        )
+                        sessions_path = overlay_sessions_path
+                        effective_session_id = str(fork.get("session_id") or "")
+                        forked_from_session_id = requested_session_id
+                    else:
+                        sessions_path = overlay_sessions_path
+
                 response_payload = execute_lab_chat_turn(
                     bootstrap=self.bootstrap,
-                    session_id=session_id,
+                    session_id=effective_session_id,
                     content=str(payload.get("content") or ""),
                     document_ids=[str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()],
+                    sessions_path=sessions_path,
                 )
-                self._send_json(HTTPStatus.OK, {
+                self._send_json_with_cookies(HTTPStatus.OK, {
                     "ok": True,
-                    "session_id": session_id,
+                    "session_id": effective_session_id,
+                    "requested_session_id": requested_session_id,
+                    "forked_from_session_id": forked_from_session_id,
+                    "write_scope": "global" if identity.can_write_global else "session_overlay",
                     "assistant_message": response_payload.get("assistant_message"),
                     "artifact_path": response_payload.get("artifact_path"),
-                    "page": build_lab_chat_payload(self.bootstrap.workspace_root, session_id=session_id),
-                })
+                    "page": _lab_chat_payload_for_identity(bootstrap=self.bootstrap, identity=identity, session_id=effective_session_id),
+                }, cookies=[set_cookie] if set_cookie else None)
             except Exception as error:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+                self._send_json_with_cookies(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)}, cookies=[set_cookie] if set_cookie else None)
             return
 
         if path == "/api/lab/evidenceops/sync":

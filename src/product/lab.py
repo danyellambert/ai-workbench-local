@@ -1082,14 +1082,65 @@ def build_lab_overview_payload(
     }
 
 
-def build_lab_chat_payload(workspace_root: Path, session_id: str | None = None) -> dict[str, Any]:
+
+def _scoped_lab_state_copy(item: dict[str, Any], scope: str) -> dict[str, Any]:
+    copied = dict(item)
+    copied['scope'] = scope
+    copied['is_global'] = scope == 'global'
+    return copied
+
+
+def _state_updated_sort_key(item: dict[str, Any]) -> str:
+    return str(item.get('updated_at') or item.get('created_at') or '')
+
+
+def _load_lab_chat_sessions_with_overlays(
+    global_path: Path,
+    additional_session_paths: list[Path] | None = None,
+) -> list[dict[str, Any]]:
+    sessions: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    for path, scope in [*((item, 'session_overlay') for item in (additional_session_paths or [])), (global_path, 'global')]:
+        for session in load_lab_chat_sessions(path):
+            if not isinstance(session, dict):
+                continue
+            session_id = str(session.get('session_id') or '').strip()
+            if not session_id or session_id in seen:
+                continue
+            seen.add(session_id)
+            sessions.append(_scoped_lab_state_copy(session, scope))
+
+    sessions.sort(key=_state_updated_sort_key, reverse=True)
+    return sessions
+
+
+def _load_lab_workflow_runs_with_overlays(
+    global_path: Path,
+    additional_run_paths: list[Path] | None = None,
+) -> list[dict[str, Any]]:
+    runs: list[dict[str, Any]] = []
+
+    for path, scope in [(global_path, 'global'), *((item, 'session_overlay') for item in (additional_run_paths or []))]:
+        for run in load_lab_workflow_runs(path):
+            if not isinstance(run, dict):
+                continue
+            runs.append(_scoped_lab_state_copy(run, scope))
+
+    runs.sort(key=_state_updated_sort_key, reverse=True)
+    return runs
+
+
+
+def build_lab_chat_payload(workspace_root: Path, session_id: str | None = None, *, additional_session_paths: list[Path] | None = None) -> dict[str, Any]:
     runtime_payload = build_lab_runtime_payload(workspace_root)
     documents = _workspace_documents(workspace_root)
     document_lookup = _document_lookup(documents)
-    sessions = load_lab_chat_sessions(get_lab_chat_sessions_path(workspace_root))
+    global_chat_sessions_path = get_lab_chat_sessions_path(workspace_root)
+    sessions = _load_lab_chat_sessions_with_overlays(global_chat_sessions_path, additional_session_paths)
     active_session = None
     if session_id:
-        active_session = get_lab_chat_session(get_lab_chat_sessions_path(workspace_root), session_id)
+        active_session = next((session for session in sessions if str(session.get('session_id') or '') == str(session_id)), None)
     if active_session is None and sessions:
         active_session = sessions[0]
 
@@ -1134,6 +1185,8 @@ def build_lab_chat_payload(workspace_root: Path, session_id: str | None = None) 
         sessions_summary.append(
             {
                 'session_id': str(session.get('session_id') or ''),
+                'scope': str(session.get('scope') or 'global'),
+                'is_global': bool(session.get('scope') == 'global'),
                 'title': str(session.get('title') or 'AI Lab chat session'),
                 'updated_at': _format_timestamp(session.get('updated_at') or session.get('created_at')),
                 'message_count': len(session_messages),
@@ -1826,12 +1879,13 @@ def execute_lab_chat_turn(
     session_id: str,
     content: str,
     document_ids: list[str] | None = None,
+    sessions_path: Path | None = None,
 ) -> dict[str, Any]:
     normalized_content = str(content or '').strip()
     if not normalized_content:
         raise ValueError('Message content is required.')
 
-    sessions_path = get_lab_chat_sessions_path(bootstrap.workspace_root)
+    sessions_path = sessions_path or get_lab_chat_sessions_path(bootstrap.workspace_root)
     session = get_lab_chat_session(sessions_path, session_id)
     if session is None:
         raise KeyError(f'Chat session not found: {session_id}')
@@ -2125,14 +2179,14 @@ def _resolve_inspector_document_ids(
     return selected[:max(minimum_documents, len(selected))]
 
 
-def build_lab_workflow_inspector_payload(workspace_root: Path) -> dict[str, Any]:
+def build_lab_workflow_inspector_payload(workspace_root: Path, *, additional_run_paths: list[Path] | None = None) -> dict[str, Any]:
     documents = _workspace_documents(workspace_root)
     document_lookup = _document_lookup(documents)
     task_options = _build_workflow_task_options(workspace_root)
     document_options = _document_options_for_inspector(workspace_root)
     workflow_runs = [
         run
-        for run in load_lab_workflow_runs(get_lab_workflow_runs_path(workspace_root))
+        for run in _load_lab_workflow_runs_with_overlays(get_lab_workflow_runs_path(workspace_root), additional_run_paths)
         if str(run.get('workflow_id') or run.get('task_id') or '').strip() in WORKFLOW_INSPECTOR_TASK_IDS
     ]
 
@@ -2379,6 +2433,7 @@ def execute_lab_workflow_inspector_run(
     input_text: str | None = None,
     provider: str | None = None,
     model: str | None = None,
+    runs_path: Path | None = None,
 ) -> dict[str, Any]:
     workflow_id = str(task_id or 'document_review').strip() or 'document_review'
     if workflow_id not in WORKFLOW_TASK_LABELS:
@@ -2463,7 +2518,7 @@ def execute_lab_workflow_inspector_run(
         'request_payload': request.model_dump(mode='json') if hasattr(request, 'model_dump') else {},
         'response_payload': result.model_dump(mode='json') if hasattr(result, 'model_dump') else {},
     }
-    saved = append_lab_workflow_run(get_lab_workflow_runs_path(bootstrap.workspace_root), run_record)
+    saved = append_lab_workflow_run(runs_path or get_lab_workflow_runs_path(bootstrap.workspace_root), run_record)
     return {'result': result, 'request': request, 'run_record': saved}
 
 
