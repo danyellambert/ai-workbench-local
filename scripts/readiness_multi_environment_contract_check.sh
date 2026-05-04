@@ -37,9 +37,20 @@ done
 
 ENV_FILE=.env.local.example scripts/run_local_dev.sh --check
 ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
-
-grep -q 'PRODUCT_API_PROXY_TARGET' frontend/vite.config.ts
+grep -q 'PRODUCT_API_PROXY_ENABLED' frontend/vite.config.ts
+grep -q 'PRODUCT_API_DEV_PROXY' frontend/vite.config.ts
 grep -q '"/api"' frontend/vite.config.ts
+grep -q '^VITE_PRODUCT_API_PROXY_ENABLED=1$' .env.local.example
+grep -q '^VITE_PRODUCT_API_BASE_URL=http://127.0.0.1:5173$' .env.local.example
+grep -q '^VITE_PRODUCT_API_PROXY_TARGET=http://127.0.0.1:8011$' .env.local.example
+grep -q '^VITE_PRODUCT_API_PROXY_ENABLED=0$' .env.aws.example
+
+grep -q 'PRODUCT_API_PROXY_ENABLED' frontend/vite.config.ts
+grep -q 'PRODUCT_API_DEV_PROXY' frontend/vite.config.ts
+grep -q '"/api"' frontend/vite.config.ts
+grep -q '^VITE_PRODUCT_API_PROXY_ENABLED=1$' .env.local.example
+grep -q '^VITE_PRODUCT_API_BASE_URL=http://127.0.0.1:5173$' .env.local.example
+grep -q '^VITE_PRODUCT_API_PROXY_TARGET=http://127.0.0.1:8011$' .env.local.example
 
 if grep -Rqs 'falling back to legacy .env.oracle' scripts/deploy_aws_slim.sh scripts/smoke_aws_slim.sh; then
   echo "ERROR: AWS slim scripts must not fall back to .env.oracle." >&2

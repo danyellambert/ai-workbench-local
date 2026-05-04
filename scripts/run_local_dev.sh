@@ -7,6 +7,7 @@ API_PORT="${PRODUCT_API_SERVER_PORT:-8011}"
 FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 LOG_DIR="${LOG_DIR:-/tmp/ai-decision-studio-local-dev}"
+PYTHON_BIN="${PYTHON_BIN:-}"
 CHECK_ONLY="false"
 PRINT_ONLY="false"
 
@@ -186,7 +187,17 @@ export AI_DECISION_STUDIO_PRODUCT_API_PORT
 
 validate_local_dev_paths
 
-require_command python3
+if [ -z "${PYTHON_BIN:-}" ]; then
+  if [ -x ".venv/bin/python" ]; then
+    PYTHON_BIN=".venv/bin/python"
+  else
+    PYTHON_BIN="python3"
+  fi
+fi
+
+echo "python_bin=$PYTHON_BIN"
+
+require_command "$PYTHON_BIN"
 require_command npm
 require_command curl
 
@@ -203,7 +214,7 @@ fi
 if [ "$PRINT_ONLY" = "true" ]; then
   cat <<EOF_PRINT
 Start API:
-  ENV_FILE=$ENV_FILE python3 main_product_api.py
+  ENV_FILE=$ENV_FILE "$PYTHON_BIN" main_product_api.py
 
 Start frontend:
   VITE_PRODUCT_API_BASE_URL=http://$API_HOST:$API_PORT npm --prefix frontend run dev:frontend -- --host $FRONTEND_HOST --port $FRONTEND_PORT
@@ -245,7 +256,7 @@ trap cleanup EXIT INT TERM
 
 echo "== Starting product API =="
 echo "log=$API_LOG"
-PYTHONUNBUFFERED=1 python3 main_product_api.py >"$API_LOG" 2>&1 &
+PYTHONUNBUFFERED=1 "$PYTHON_BIN" main_product_api.py >"$API_LOG" 2>&1 &
 API_PID="$!"
 
 echo "api_pid=$API_PID"
@@ -276,7 +287,11 @@ done
 
 echo "== Starting frontend =="
 echo "log=$FRONTEND_LOG"
-VITE_PRODUCT_API_BASE_URL="http://$API_HOST:$API_PORT" \
+# Local host/dev uses Vite as the same-origin API proxy. This mirrors the
+# production reverse-proxy shape without changing AWS/Docker/Oracle runtime code.
+VITE_PRODUCT_API_BASE_URL="${VITE_PRODUCT_API_BASE_URL:-http://$FRONTEND_HOST:$FRONTEND_PORT}" \
+VITE_PRODUCT_API_PROXY_ENABLED="${VITE_PRODUCT_API_PROXY_ENABLED:-1}" \
+VITE_PRODUCT_API_PROXY_TARGET="${VITE_PRODUCT_API_PROXY_TARGET:-http://$API_HOST:$API_PORT}" \
   npm --prefix frontend run dev:frontend -- --host "$FRONTEND_HOST" --port "$FRONTEND_PORT" \
   >"$FRONTEND_LOG" 2>&1 &
 FRONTEND_PID="$!"
