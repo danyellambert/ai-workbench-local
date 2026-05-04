@@ -116,13 +116,15 @@ load_env() {
   if [ -f "$ENV_FILE" ]; then
     load_dotenv_file "$ENV_FILE"
     echo "env_file=$ENV_FILE"
-  elif [ -f ".env" ]; then
-    echo "WARN: $ENV_FILE not found; falling back to legacy .env for local dev." >&2
+  elif [ -f ".env" ] && [ "${RUN_LOCAL_DEV_ALLOW_LEGACY_ENV:-0}" = "1" ]; then
+    echo "WARN: $ENV_FILE not found; falling back to legacy .env because RUN_LOCAL_DEV_ALLOW_LEGACY_ENV=1." >&2
     load_dotenv_file ".env"
     echo "env_file=.env"
   else
-    echo "WARN: no $ENV_FILE or .env found; using process defaults." >&2
-    echo "env_file=<process-defaults>"
+    echo "ERROR: env file not found: $ENV_FILE" >&2
+    echo "Create .env.local from .env.local.example or copy your legacy .env to .env.local and fix host-local paths." >&2
+    echo "For local host/dev, APP_USERS_ROOT must be writable and must not point to /app/users." >&2
+    exit 1
   fi
 
   API_HOST="${PRODUCT_API_SERVER_NAME:-$API_HOST}"
@@ -137,7 +139,52 @@ require_command() {
   fi
 }
 
+validate_local_dev_paths() {
+  local users_root="${APP_USERS_ROOT:-${AI_DECISION_STUDIO_USERS_ROOT:-}}"
+
+  if [ -z "$users_root" ]; then
+    echo "ERROR: APP_USERS_ROOT is required for local host/dev." >&2
+    echo "Set APP_USERS_ROOT=runtime/local_dev/users in .env.local." >&2
+    exit 1
+  fi
+
+  if [[ "$users_root" == /app ]] || [[ "$users_root" == /app/* ]]; then
+    echo "ERROR: APP_USERS_ROOT points to a container path: $users_root" >&2
+    echo "For local host/dev, set APP_USERS_ROOT to a writable local path, for example:" >&2
+    echo "  APP_USERS_ROOT=runtime/local_dev/users" >&2
+    echo "This preserves public-session overlays locally instead of disabling them." >&2
+    exit 1
+  fi
+
+  APP_USERS_ROOT="$users_root"
+  AI_DECISION_STUDIO_USERS_ROOT="$users_root"
+  export APP_USERS_ROOT
+  export AI_DECISION_STUDIO_USERS_ROOT
+
+  mkdir -p "$APP_USERS_ROOT/public_sessions"
+  echo "users_root=$APP_USERS_ROOT"
+}
+
 load_env
+
+# Keep all known product-api host/port env names aligned. Different parts of
+# the repo historically used different names; local dev must not depend on only
+# one alias.
+PRODUCT_API_SERVER_NAME="$API_HOST"
+PRODUCT_API_SERVER_PORT="$API_PORT"
+PRODUCT_API_HOST="$API_HOST"
+PRODUCT_API_PORT="$API_PORT"
+AI_DECISION_STUDIO_PRODUCT_API_HOST="$API_HOST"
+AI_DECISION_STUDIO_PRODUCT_API_PORT="$API_PORT"
+
+export PRODUCT_API_SERVER_NAME
+export PRODUCT_API_SERVER_PORT
+export PRODUCT_API_HOST
+export PRODUCT_API_PORT
+export AI_DECISION_STUDIO_PRODUCT_API_HOST
+export AI_DECISION_STUDIO_PRODUCT_API_PORT
+
+validate_local_dev_paths
 
 require_command python3
 require_command npm
@@ -198,7 +245,7 @@ trap cleanup EXIT INT TERM
 
 echo "== Starting product API =="
 echo "log=$API_LOG"
-python3 main_product_api.py >"$API_LOG" 2>&1 &
+PYTHONUNBUFFERED=1 python3 main_product_api.py >"$API_LOG" 2>&1 &
 API_PID="$!"
 
 echo "api_pid=$API_PID"

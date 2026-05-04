@@ -89,3 +89,6 @@ ai_lab_golden_state/
 !.env.docker.example
 !.env.aws.example
 !.env.oracle.example
+
+# Local host/dev runtime state
+runtime/
