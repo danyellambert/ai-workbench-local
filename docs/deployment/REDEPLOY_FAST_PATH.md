@@ -70,6 +70,8 @@ Required AWS final check:
 
     BASE_URL=http://127.0.0.1:8071 scripts/readiness_admin_session_isolation_check.sh
 
+    ENV_FILE=.env.aws scripts/readiness_trello_public_visibility_check.sh
+
 ## Oracle fast path
 
 From the Oracle VM:

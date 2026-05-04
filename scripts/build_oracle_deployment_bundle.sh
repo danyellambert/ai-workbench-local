@@ -91,6 +91,7 @@ copy_path "scripts/readiness_ai_lab_golden_state_check.sh"
 copy_path "scripts/readiness_public_ai_lab_overlay_check.sh"
 copy_path "scripts/readiness_preferences_evals_surface_check.sh"
 copy_path "scripts/readiness_required_integrations_check.sh"
+copy_path "scripts/readiness_trello_public_visibility_check.sh"
 copy_path "scripts/readiness_final_deploy_check.sh"
 copy_path "scripts/readiness_evidenceops_ui_cache_check.sh"
 copy_path "scripts/readiness_run_history_compact_check.sh"
@@ -296,6 +297,7 @@ required_paths = [
     "scripts/readiness_public_ai_lab_overlay_check.sh",
     "scripts/readiness_preferences_evals_surface_check.sh",
     "scripts/readiness_required_integrations_check.sh",
+    "scripts/readiness_trello_public_visibility_check.sh",
     "scripts/readiness_final_deploy_check.sh",
     "scripts/readiness_evidenceops_ui_cache_check.sh",
     "scripts/readiness_run_history_compact_check.sh",
