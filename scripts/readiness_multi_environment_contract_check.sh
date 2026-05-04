@@ -3,8 +3,8 @@ set -euo pipefail
 
 echo "== Multi-environment contract readiness =="
 
-SKIP_LOCAL_DEV_CHECK="${SKIP_LOCAL_DEV_CHECK:-0}"
-SKIP_LOCAL_DOCKER_CHECK="${SKIP_LOCAL_DOCKER_CHECK:-0}"
+SKIP_LOCAL_DEV_CHECK="${SKIP_LOCAL_DEV_CHECK:-auto}"
+SKIP_LOCAL_DOCKER_CHECK="${SKIP_LOCAL_DOCKER_CHECK:-auto}"
 
 
 required_examples=(
@@ -38,6 +38,25 @@ for script in \
 do
   bash -n "$script"
 done
+
+if [ "$SKIP_LOCAL_DEV_CHECK" = "auto" ] || [ "$SKIP_LOCAL_DOCKER_CHECK" = "auto" ]; then
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    DEFAULT_SKIP_LOCAL_RUNNER_CHECKS=0
+  else
+    DEFAULT_SKIP_LOCAL_RUNNER_CHECKS=1
+  fi
+
+  if [ "$SKIP_LOCAL_DEV_CHECK" = "auto" ]; then
+    SKIP_LOCAL_DEV_CHECK="$DEFAULT_SKIP_LOCAL_RUNNER_CHECKS"
+  fi
+
+  if [ "$SKIP_LOCAL_DOCKER_CHECK" = "auto" ]; then
+    SKIP_LOCAL_DOCKER_CHECK="$DEFAULT_SKIP_LOCAL_RUNNER_CHECKS"
+  fi
+fi
+
+echo "local_dev_check_skipped=$SKIP_LOCAL_DEV_CHECK"
+echo "local_docker_check_skipped=$SKIP_LOCAL_DOCKER_CHECK"
 
 if [ "$SKIP_LOCAL_DEV_CHECK" = "1" ]; then
   echo "SKIP: local host/dev contract check"
