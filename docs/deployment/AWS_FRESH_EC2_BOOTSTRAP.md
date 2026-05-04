@@ -227,6 +227,13 @@ Validate:
 
 Expected permission is `600`.
 
+Before building, verify that the real AWS env and the safe example expose the
+same key contract:
+
+    python3 scripts/validate_aws_env_contract.py \
+      --env .env.aws \
+      --example .env.aws.example
+
 ## Step 7 — Validate the AWS env and compose config
 
 On the EC2 host:

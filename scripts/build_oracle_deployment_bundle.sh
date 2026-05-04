@@ -101,6 +101,7 @@ copy_path "scripts/measure_surface_latency.sh"
 copy_path "scripts/readiness_required_providers_check.sh"
 copy_path "scripts/deploy_aws_slim.sh"
 copy_path "scripts/smoke_aws_slim.sh"
+copy_path "scripts/validate_aws_env_contract.py"
 copy_path "scripts/run_local_docker.sh"
 copy_path "scripts/run_local_dev.sh"
 copy_path "scripts/restore_ai_lab_golden_state.sh"
@@ -306,6 +307,7 @@ required_paths = [
     "scripts/readiness_required_providers_check.sh",
     "scripts/deploy_aws_slim.sh",
     "scripts/smoke_aws_slim.sh",
+    "scripts/validate_aws_env_contract.py",
     "scripts/run_local_docker.sh",
     "scripts/run_local_dev.sh",
     "scripts/restore_ai_lab_golden_state.sh",
