@@ -202,6 +202,8 @@ export interface LabChatMessageSource {
   label: string;
   detail?: string | null;
   score?: number | null;
+  scoreKind?: string | null;
+  scoreLabel?: string | null;
 }
 
 export interface LabChatMessage {

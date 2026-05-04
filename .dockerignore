@@ -41,3 +41,17 @@ tests/golden
 .tmp_playwright/
 test-results/
 playwright-report/
+# Local runtime/state must never enter Docker build context
+runtime/
+!.env.example
+!.env.*.example
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+frontend/node_modules/
+frontend/dist/
+dist/
+*.tar.gz
+*.zip

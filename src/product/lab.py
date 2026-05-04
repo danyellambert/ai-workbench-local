@@ -1287,8 +1287,49 @@ def _normalize_chat_prompt(value: str) -> str:
 
 
 def _is_automated_lab_chat_prompt(value: str) -> bool:
+    # AI Lab suggested prompts should behave like normal grounded chat turns.
+    # Older builds routed exact suggested prompts into the product document_review
+    # workflow, which produced template-like answers that did not match the prompt.
+    return False
+
+
+def _lab_chat_suggested_prompt_instruction(value: str) -> str | None:
     normalized = _normalize_chat_prompt(value)
-    return normalized in {_normalize_chat_prompt(prompt) for prompt in LAB_CHAT_AUTOMATED_PROMPTS}
+
+    if normalized == _normalize_chat_prompt('Summarize the main control gaps in the selected evidence.'):
+        return (
+            'Answer as a grounded control-gap review. Use only the selected document evidence.\n'
+            'Return concise bullets with: Control gap, Evidence, Risk/impact, and Suggested mitigation.\n'
+            'If a gap is inferred rather than explicitly stated, label it as an inference.'
+        )
+
+    if normalized == _normalize_chat_prompt('Turn the findings into next actions with owners and due dates.'):
+        return (
+            'Answer as a grounded action plan. Use only the selected document evidence.\n'
+            'Return action bullets with these fields: Action, Owner role, Timing/due date, Evidence, Priority.\n'
+            'If the document does not name a specific owner or due date, say "Proposed owner role" '
+            'or "Proposed timing" instead of inventing a named person or exact date.'
+        )
+
+    if normalized == _normalize_chat_prompt('What appears risky, unsupported or contradictory in these documents?'):
+        return (
+            'Answer as a grounded risk/contradiction review. Use only the selected document evidence.\n'
+            'Group the answer into: Risky, Unsupported, Contradictory, and Verify next.\n'
+            'For every item, include the evidence basis or state that the item is an inference.'
+        )
+
+    return None
+
+
+def _apply_lab_chat_prompt_policy(content: str) -> str:
+    instruction = _lab_chat_suggested_prompt_instruction(content)
+    if not instruction:
+        return content
+
+    return (
+        f'{instruction}\n\n'
+        f'User request: {content}'
+    )
 
 
 def _looks_portuguese(value: str) -> bool:
@@ -1461,20 +1502,35 @@ def _build_document_qa_answer(*, question: str, documents: list[dict[str, Any]],
     )
 
 
+def _normalize_lab_chat_source_score(value: object) -> float | None:
+    try:
+        score = float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+
+    if score != score or score <= 0:
+        return None
+
+    if score > 1:
+        score = score / 100 if score <= 100 else 1.0
+
+    return min(0.98, max(0.01, score))
+
+
 def _sources_from_evidence(evidence: list[dict[str, str]]) -> list[dict[str, Any]]:
     sources: list[dict[str, Any]] = []
     for index, item in enumerate(evidence[:6]):
-        try:
-            score = float(item.get('score') or 0.0)
-        except (TypeError, ValueError):
-            score = 0.0
-        sources.append(
-            {
-                'label': str(item.get('source') or f'Source {index + 1}'),
-                'detail': _trim_text(str(item.get('excerpt') or ''), max_chars=240),
-                'score': min(0.98, max(0.45, 0.78 + min(score, 1.0) * 0.18 - index * 0.03)),
-            }
-        )
+        source: dict[str, Any] = {
+            'label': str(item.get('source') or f'Source {index + 1}'),
+            'detail': _trim_text(str(item.get('excerpt') or ''), max_chars=240),
+            'score_kind': 'grounded_source',
+        }
+        normalized_score = _normalize_lab_chat_source_score(item.get('score'))
+        if normalized_score is not None:
+            source['score'] = normalized_score
+            source['score_kind'] = 'retrieval_relevance'
+            source['score_label'] = 'Relevance'
+        sources.append(source)
     return sources
 
 
@@ -1541,20 +1597,19 @@ def _render_chat_assistant_content(result: Any) -> str:
 def _sources_from_document_agent_payload(payload: DocumentAgentPayload) -> list[dict[str, Any]]:
     sources: list[dict[str, Any]] = []
     for index, source in enumerate(payload.sources[:6]):
-        score = getattr(source, 'score', None)
-        if score is None:
-            score = 0.9 - index * 0.04
-        try:
-            normalized_score = float(score)
-        except (TypeError, ValueError):
-            normalized_score = 0.9 - index * 0.04
-        sources.append(
-            {
-                'label': str(getattr(source, 'source', None) or getattr(source, 'document_id', None) or f'Source {index + 1}'),
-                'detail': _trim_text(str(getattr(source, 'snippet', None) or getattr(source, 'document_id', None) or 'grounded document'), max_chars=240),
-                'score': min(0.98, max(0.45, normalized_score)),
-            }
-        )
+        item: dict[str, Any] = {
+            'label': str(getattr(source, 'source', None) or getattr(source, 'document_id', None) or f'Source {index + 1}'),
+            'detail': _trim_text(str(getattr(source, 'snippet', None) or getattr(source, 'document_id', None) or 'grounded document'), max_chars=240),
+            'score_kind': 'grounded_source',
+        }
+
+        normalized_score = _normalize_lab_chat_source_score(getattr(source, 'score', None))
+        if normalized_score is not None:
+            item['score'] = normalized_score
+            item['score_kind'] = 'retrieval_relevance'
+            item['score_label'] = 'Relevance'
+
+        sources.append(item)
     return sources
 
 
@@ -1787,14 +1842,14 @@ def execute_lab_chat_turn(
     if not current_document_ids:
         raise ValueError('At least one indexed document is required to execute AI LAB chat.')
 
-    effective_content = _contextualize_lab_chat_content(normalized_content, session)
-
-    append_lab_chat_message(sessions_path, session_id=session_id, role='user', content=normalized_content)
+    effective_content = _apply_lab_chat_prompt_policy(_contextualize_lab_chat_content(normalized_content, session))
 
     if str(session.get('title') or '').strip().lower() == 'ai lab chat session':
         session['title'] = _trim_text(normalized_content, max_chars=72) or 'AI Lab chat session'
         session['document_ids'] = current_document_ids
-        upsert_lab_chat_session(sessions_path, session)
+        session = upsert_lab_chat_session(sessions_path, session)
+
+    append_lab_chat_message(sessions_path, session_id=session_id, role='user', content=normalized_content)
 
     provider, model = _workflow_request_defaults(bootstrap.workspace_root)
     if not _is_automated_lab_chat_prompt(normalized_content):

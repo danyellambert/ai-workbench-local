@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { KeyboardEvent, useEffect, useMemo, useState } from 'react';
+import { Fragment, KeyboardEvent, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Send, FileText, Sparkles, AlertTriangle, Loader2, FolderClock, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { AiLabSectionIntro, DataSourceBadge } from '@/components/ai-lab/AiLabSectionIntro';
@@ -87,6 +87,19 @@ function normalizeMessageSources(sources: unknown): LabChatMessageSource[] {
 
     const record = source as Record<string, unknown>;
     const rawScore = typeof record.score === 'number' ? record.score : null;
+    const rawScoreKind =
+      typeof record.score_kind === 'string'
+        ? record.score_kind
+        : typeof record.scoreKind === 'string'
+          ? record.scoreKind
+          : null;
+    const rawScoreLabel =
+      typeof record.score_label === 'string'
+        ? record.score_label
+        : typeof record.scoreLabel === 'string'
+          ? record.scoreLabel
+          : null;
+
     return [
       {
         label:
@@ -106,10 +119,97 @@ function normalizeMessageSources(sources: unknown): LabChatMessageSource[] {
                 ? record.path
                 : null,
         score: rawScore == null ? null : rawScore <= 1 ? rawScore * 100 : rawScore,
+        scoreKind: rawScoreKind,
+        scoreLabel: rawScoreLabel,
       },
     ];
   });
 }
+
+
+function renderInlineMarkdown(text: string): ReactNode[] {
+  return text.split(/(\*\*[^*]+?\*\*)/g).map((segment, index) => {
+    const boldMatch = segment.match(/^\*\*(.+?)\*\*$/);
+    if (boldMatch) {
+      return (
+        <strong key={`bold-${index}`} className="font-semibold text-foreground">
+          {boldMatch[1]}
+        </strong>
+      );
+    }
+
+    return <Fragment key={`text-${index}`}>{segment}</Fragment>;
+  });
+}
+
+function normalizeMarkdownLine(line: string) {
+  return line.trim().replace(/^[-•]\s+/, '');
+}
+
+function isStructuredChatBlock(lines: string[]) {
+  return lines.some((line) =>
+    /\*\*(Action|Owner role|Timing\/due date|Evidence|Priority|Control gap|Risk\/impact|Suggested mitigation|Risky|Unsupported|Contradictory|Verify next):\*\*/i.test(line),
+  );
+}
+
+function renderMessageBlock(block: string, blockIndex: number): ReactNode {
+  const lines = block
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (!lines.length) {
+    return null;
+  }
+
+  if (isStructuredChatBlock(lines)) {
+    return (
+      <div key={`block-${blockIndex}`} className="rounded-lg border border-border/30 bg-background/20 px-3 py-2 space-y-1.5">
+        {lines.map((line, lineIndex) => (
+          <p key={`block-${blockIndex}-line-${lineIndex}`} className="text-xs leading-relaxed">
+            {renderInlineMarkdown(normalizeMarkdownLine(line))}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  if (lines.every((line) => /^[-•]\s+/.test(line))) {
+    return (
+      <ul key={`block-${blockIndex}`} className="list-disc pl-4 space-y-1">
+        {lines.map((line, lineIndex) => (
+          <li key={`block-${blockIndex}-item-${lineIndex}`} className="text-xs leading-relaxed">
+            {renderInlineMarkdown(normalizeMarkdownLine(line))}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  return (
+    <div key={`block-${blockIndex}`} className="space-y-1.5">
+      {lines.map((line, lineIndex) => (
+        <p key={`block-${blockIndex}-p-${lineIndex}`} className="text-xs leading-relaxed">
+          {renderInlineMarkdown(line)}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function renderMessageContent(content: string) {
+  const blocks = String(content || '')
+    .split(/\n\s*\n/g)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  if (!blocks.length) {
+    return null;
+  }
+
+  return <div className="space-y-3">{blocks.map((block, index) => renderMessageBlock(block, index))}</div>;
+}
+
 
 function normalizeMessages(messages: unknown): LabChatMessage[] {
   if (!Array.isArray(messages)) {
@@ -375,8 +475,8 @@ export default function ChatPage() {
   }, [availableDocuments, documentFilter]);
 
   const sendMutation = useMutation({
-    mutationFn: async () => {
-      const content = input.trim();
+    mutationFn: async (contentOverride?: string) => {
+      const content = (typeof contentOverride === 'string' ? contentOverride : input).trim();
       if (!content) {
         throw new Error('Message content is required.');
       }
@@ -449,11 +549,12 @@ export default function ChatPage() {
       ? 'Select at least one document to ground the next turn.'
       : null;
 
-  const handleSend = async () => {
-    if (!canSend || sendMutation.isPending || !input.trim()) {
+  const handleSend = async (contentOverride?: string) => {
+    const content = (typeof contentOverride === 'string' ? contentOverride : input).trim();
+    if (!canSend || sendMutation.isPending || !content) {
       return;
     }
-    await sendMutation.mutateAsync();
+    await sendMutation.mutateAsync(content);
   };
 
   const handleInputKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
@@ -541,7 +642,7 @@ export default function ChatPage() {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className={`max-w-[80%] rounded-xl p-4 ${msg.role === 'user' ? 'bg-primary/10 border border-primary/20' : 'glass'}`}>
-                    <p className="text-xs text-foreground leading-relaxed whitespace-pre-line">{msg.content}</p>
+                    <div className="text-xs text-foreground leading-relaxed">{renderMessageContent(msg.content)}</div>
                     {msg.sources?.length ? (
                       <div className="mt-3 pt-3 border-t border-border/30">
                         <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider mb-1.5">Grounding</p>
@@ -554,8 +655,12 @@ export default function ChatPage() {
                               <FileText className="w-3 h-3" />
                               {source.label}
                               {source.detail ? <span className="text-muted-foreground/70">· {source.detail}</span> : null}
-                              {operatorPreferences.showSourceBadges && typeof source.score === 'number' ? (
-                                <span className="text-primary/60">{source.score.toFixed(0)}%</span>
+                              {operatorPreferences.showSourceBadges ? (
+                                typeof source.score === 'number' ? (
+                                  <span className="text-primary/60">Retrieved</span>
+                                ) : (
+                                  <span className="text-muted-foreground/50">Grounded source</span>
+                                )
                               ) : null}
                             </span>
                           ))}
@@ -580,8 +685,11 @@ export default function ChatPage() {
             {(Array.isArray(data?.suggested_prompts) ? data.suggested_prompts : []).map((prompt) => (
               <button
                 key={prompt}
-                onClick={() => setInput(prompt)}
-                className="text-[10px] px-3 py-1.5 rounded-lg bg-secondary/30 border border-border/50 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                onClick={() => {
+                  void handleSend(prompt);
+                }}
+                disabled={!canSend || sendMutation.isPending}
+                className="text-[10px] px-3 py-1.5 rounded-lg bg-secondary/30 border border-border/50 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Sparkles className="w-3 h-3 inline mr-1" />
                 {prompt}
