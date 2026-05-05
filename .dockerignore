@@ -54,3 +54,75 @@ frontend/dist/
 dist/
 *.tar.gz
 *.zip
+
+# >>> AI Decision Studio local/generated hygiene
+
+# Local-only machine/runtime state
+.DS_Store
+**/.DS_Store
+.vscode
+.clinerules
+.pytest_cache
+__pycache__
+**/__pycache__
+.venv
+.venv_*
+.venv_policy_comparison
+node_modules
+frontend/node_modules
+frontend/dist
+frontend/playwright-report
+.tmp_playwright
+
+# Runtime, caches, generated outputs
+runtime
+.runtime
+.runtime_policy_comparison_real
+.chroma_rag
+artifacts
+outputs
+materials_local
+screenshots_ai_lab
+screenshots_gradio
+screenshots_frontend
+
+# Local logs/dbs/scratch
+.chat_history.json
+.phase55_langchain_shadow_log.json
+.phase55_langgraph_shadow_log.json
+.phase6_document_agent_log.json
+.phase7_model_comparison_log.json
+.phase8_eval_runs.sqlite3
+.phase95_evidenceops_actions.sqlite3
+.runtime_execution_log.json
+runtime-provider-trace*.log
+runtime-state-diagnosis*.txt
+implementation_plan.md
+implementation_task_draft.md
+proximos_passos.md
+s.txt
+
+# Generated benchmark/data outputs
+benchmark_pdfs
+benchmark_runs
+phase5_eval/reports
+phase5_eval/resume_benchmark*
+phase8_eval/.DS_Store
+data/corpus_revisado
+data/eval
+data/external
+data/processed
+data/synthetic
+data/materials_demo/checklist
+data/materials_demo/code_analysis
+data/materials_demo/cv_analysis
+data/materials_demo/extraction
+data/materials_demo/summary
+
+# Local legacy scratch
+old/auxiliar.py
+diagnostics/__pycache__
+scripts/__pycache__
+src/**/__pycache__
+tests/__pycache__
+# <<< AI Decision Studio local/generated hygiene
