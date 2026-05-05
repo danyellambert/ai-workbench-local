@@ -42,18 +42,22 @@ In practical terms, the project already demonstrates how to:
 
 ## Current product reading
 
-The current official reading of the repository is:
+The current deployable product path is:
 
-- **Gradio** is the main product-facing workflow surface
-- **Streamlit** is the AI Lab and engineering dashboard
-- **Product API** is the backend foundation for workflow-oriented product integration
-- **React/Vite frontend** is the web product shell and long-term product surface under active integration
+- **React/Vite frontend** as the current web product shell
+- **Product API** as the backend contract for document-grounded workflows, run history, artifacts, preferences, and lab surfaces
+- **Docker Compose / AWS slim deployment** as the validated runtime topology
+
+The earlier surfaces are still useful, but they are no longer the main deployment contract:
+
+- **Gradio** is a secondary workflow surface preserved from product exploration
+- **Streamlit** is a historical AI Lab and engineering dashboard surface
 
 This keeps the repository coherent:
 
-- the **workflow layer** solves a real business problem
-- the **AI Lab layer** keeps that workflow layer measurable, auditable, and evolvable
-- the **frontend** expresses the long-term product UX without pretending every integration is already complete
+- the **frontend + Product API path** represents the current deployable product
+- the **workflow layer** solves real document-centered business problems
+- the **AI Lab layer** preserves the evaluation, benchmark, observability, and experimentation history behind the product
 
 ## What is already implemented
 
