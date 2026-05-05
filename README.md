@@ -1,4 +1,4 @@
-# AI Workbench Local
+# AI Decision Studio
 
 ## Live web app
 
@@ -17,7 +17,7 @@ This repository now includes a live deployment of the React/Vite product surface
   </a>
 </p>
 
-**AI Workbench Local** is a local-first applied AI platform for **document-grounded decision workflows**, **structured execution**, **evaluation**, and **executive artifact generation**.
+**AI Decision Studio** is a local-first applied AI platform for **document-grounded decision workflows**, **structured execution**, **evaluation**, and **executive artifact generation**.
 
 This repository is meant to present a complete AI product system — not just a model wrapper, a chatbot demo, or a loose collection of experiments.
 
@@ -231,7 +231,7 @@ This is a **full-stack applied AI system** with a Python platform core, a React 
 ## Architecture at a glance
 
 ```text
-                           AI Workbench Local
+                           AI Decision Studio
 
                 ┌────────────────────────────────────┐
                 │       Product / Workflow Layer     │
@@ -314,27 +314,33 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-### 3. Run the main AI Lab application
+### 3. Run the local product stack
+
+The current product path is the Product API plus the React frontend.
 
 ```bash
-streamlit run main.py
+ENV_FILE=.env.local scripts/run_local_dev.sh
 ```
 
-`main.py` is the canonical local entrypoint for the engineering surface.
+This starts:
 
-### 4. Optional: run the OpenAI-compatible sample app
+- the Product API from `main_product_api.py`;
+- the React/Vite frontend from `frontend/`;
+- local runtime paths from the selected env file.
+
+For a non-blocking contract check, use:
 
 ```bash
-streamlit run main_openai.py
+ENV_FILE=.env.local.example scripts/run_local_dev.sh --check
 ```
 
-### 5. Optional: start the product API
+### 4. Optional: start only the Product API
 
 ```bash
 python main_product_api.py
 ```
 
-### 6. Optional: run the web product frontend
+### 5. Optional: run only the web product frontend
 
 ```bash
 cd frontend
@@ -342,31 +348,45 @@ npm install
 npm run dev
 ```
 
-The frontend runs on `http://localhost:8080` by default.
+For product-level validation, prefer `scripts/run_local_dev.sh` so the frontend and backend use the same local contract.
 
-### 7. Optional: run the Gradio product surface
+### 6. Optional: run the containerized product baseline
+
+```bash
+ENV_FILE=.env.docker scripts/run_local_docker.sh
+```
+
+For a non-building Docker contract check, use:
+
+```bash
+ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
+```
+
+### 7. Optional: run historical Streamlit / OpenAI-compatible surfaces
+
+These entrypoints are preserved as earlier engineering surfaces. They are useful for understanding the project evolution, but they are not the primary product path.
+
+```bash
+streamlit run main.py
+streamlit run main_openai.py
+```
+
+### 8. Optional: run the historical Gradio product surface
 
 ```bash
 python main_gradio.py
 ```
 
-### 8. Optional: start the executive renderer host helper
+### 9. Optional: start the executive renderer host helper
 
 ```bash
 bash scripts/run_ppt_creator_renderer_host.sh
 ```
 
-### 9. Optional: start the local EvidenceOps MCP server
+### 10. Optional: start the local EvidenceOps MCP server
 
 ```bash
 python scripts/run_evidenceops_mcp_server.py
-```
-
-### 10. Optional: run the containerized baseline
-
-```bash
-docker build -t ai-workbench-local .
-docker run --rm -p 8501:8501 --env-file .env ai-workbench-local
 ```
 
 ---
@@ -495,9 +515,9 @@ For reviewers who want to verify the claims quickly, here are direct pointers in
 | Eval foundation | `docs/PHASE_8_EVAL_FOUNDATION.md`, `scripts/report_phase8_eval_store.py`, `scripts/run_phase8_live_evals.py` |
 | EvidenceOps MCP | `src/mcp/evidenceops_server.py`, `scripts/run_evidenceops_mcp_server.py`, `docs/PHASE_9_5_EVIDENCEOPS_MCP_LOCAL_SERVER.md` |
 | Executive deck generation | `src/services/presentation_export.py`, `docs/EXECUTIVE_DECK_GENERATION_*`, `scripts/run_presentation_export_smoke_suite.py` |
-| Engineering hardening | `Dockerfile`, `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`, smoke/integration tests in `tests/` |
+| Deployment and hardening | `Dockerfile.public-demo`, `Dockerfile.aws-slim-product-api`, `Dockerfile.frontend-public-demo`, `docker-compose.oracle-like.yml`, `docker-compose.aws-slim.override.yml`, `docs/deployment/`, smoke/integration tests in `tests/` |
 
-This section exists for a simple reason: a professional README should be impressive, but it should also be easy to defend line by line in a technical interview.
+This section exists for a simple reason: the README should make the current product architecture easy to verify line by line.
 
 ---
 
@@ -517,7 +537,8 @@ This section exists for a simple reason: a professional README should be impress
 
 ### Active direction
 
-- wire the **web product frontend** into the product API and backend workflows
+- continue hardening the multi-environment deployment path across local dev, local Docker, AWS, and future Oracle deployment
+- keep historical engineering surfaces documented without making them the primary product path
 - sharpen the **product vs lab split** between frontend, Gradio, and Streamlit surfaces
 - deepen **Executive Deck Generation** as a reusable product capability
 - continue raising **evaluation and benchmark rigor** for routing, retrieval, OCR/VLM, and runtime choices
@@ -557,20 +578,20 @@ Reference: `ROADMAP.md`
 
 ---
 
-## Why this is a strong portfolio project
+## Why this repository is technically meaningful
 
-This repository is intentionally designed to be defendable in technical interviews.
+AI Decision Studio is organized as a product system rather than a single prompt demo.
 
-It shows evidence of ability across:
+It demonstrates:
 
-- **product design** — defining workflows that map to real business problems
-- **software architecture** — layered modules, multiple entrypoints, reusable services
-- **LLM application engineering** — RAG, structured outputs, routing, guardrails, context strategies
-- **AI evaluation** — benchmarks, local eval stores, regression signals, diagnosis
-- **operations** — logs, runtime summaries, local persistence, environment-driven configuration
-- **ecosystem thinking** — MCP, external renderer boundaries, product API evolution, and reusable artifact pipelines
+- **product workflow design** — document review, policy comparison, action planning, candidate review, and executive deck generation;
+- **software architecture** — separated product API, frontend surface, provider layer, storage layer, retrieval layer, structured workflow layer, and export services;
+- **LLM application engineering** — RAG, structured outputs, routing, guardrails, context strategies, and provider abstraction;
+- **evaluation discipline** — benchmarks, local eval stores, regression signals, diagnosis, and historical quality evidence;
+- **operational maturity** — logs, runtime summaries, persistence, environment-driven configuration, public/admin session separation, and deployment contracts;
+- **integration boundaries** — EvidenceOps, MCP, Nextcloud/WebDAV, Trello/Notion handoff paths, and an external presentation renderer.
 
-In short, this repository reads like the work of someone building a real AI product system — not just a prompt demo.
+In short, the repository documents the evolution from early local experimentation to a multi-surface AI product with measurable behavior and deployable runtime contracts.
 
 ---
 
