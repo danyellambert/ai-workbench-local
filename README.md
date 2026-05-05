@@ -370,6 +370,12 @@ streamlit run main.py
 streamlit run main_openai.py
 ```
 
+The historical Streamlit Docker image is intentionally labeled as legacy:
+
+```bash
+docker build -f Dockerfile.legacy-streamlit -t ai-decision-studio-streamlit-legacy .
+```
+
 ### 8. Optional: run the historical Gradio product surface
 
 ```bash

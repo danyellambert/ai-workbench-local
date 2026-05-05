@@ -33,7 +33,7 @@ bundle_script = bundle_script_path.read_text(encoding="utf-8") if bundle_script_
 
 require("ppt_creator_service_source_exists", ppt_root.exists())
 for rel in [
-    "Dockerfile",
+    "Dockerfile.legacy-streamlit",
     "pyproject.toml",
     "bin/run_ppt_creator_api_container.sh",
     "ppt_creator",
