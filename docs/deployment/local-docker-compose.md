@@ -1,0 +1,47 @@
+# Local Docker Compose
+
+Use this document when running the current AI Decision Studio product locally through Docker Compose.
+
+Official local Docker topology:
+
+- compose file: docker-compose.oracle-like.yml
+- env file: .env.docker
+- frontend Dockerfile: Dockerfile.frontend-public-demo
+- local product API Dockerfile: Dockerfile.public-demo
+- product API entrypoint: main_product_api.py
+
+Expected services:
+
+- nextcloud
+- ollama
+- ppt-creator
+- product-api
+- frontend
+
+Data payload used locally:
+
+- runtime/ai_decision_studio_functional_baseline/oracle_like_data/baseline mounted to /app/baseline
+- runtime/ai_decision_studio_functional_baseline/oracle_like_data/runtime mounted to /app/runtime
+- runtime/ai_decision_studio_functional_baseline/oracle_like_data/artifacts mounted to /app/artifacts
+- runtime/ai_decision_studio_functional_baseline/oracle_like_data/users mounted to /app/users
+
+Basic validation:
+
+1. Confirm .env.docker exists.
+2. Confirm the four oracle_like_data roots exist.
+3. Render the compose config.
+4. Build and start the stack.
+5. Confirm the frontend and product-api containers are healthy.
+6. Confirm the frontend reaches product-api through the Docker network.
+
+Example commands:
+
+- docker compose --env-file .env.docker -f docker-compose.oracle-like.yml config --services
+- docker compose --env-file .env.docker -f docker-compose.oracle-like.yml up -d --build
+- docker compose --env-file .env.docker -f docker-compose.oracle-like.yml ps
+
+There is also a helper script for local Docker operation:
+
+- scripts/run_local_docker.sh
+
+Do not use legacy/compose/docker-compose.frontend-public-demo.yml for the current product. That file is preserved for historical smoke/readiness context only.
