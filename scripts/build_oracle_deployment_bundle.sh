@@ -280,7 +280,7 @@ required_paths = [
     "src",
     "frontend",
     "docs/deployment/ORACLE_OPERATIONS_RUNBOOK.md",
-    "docs/deployment/PHASE_13_2_ORACLE_HARDENING_HANDOFF.md",
+    "docs/deployment/oracle-hardening-handoff.md",
     "deploy/oracle/Caddyfile.example",
     "services/ppt_creator_app/Dockerfile",
     "services/ppt_creator_app/pyproject.toml",

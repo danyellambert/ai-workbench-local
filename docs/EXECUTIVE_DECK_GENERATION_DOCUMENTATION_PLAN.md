@@ -18,10 +18,10 @@ This document exists to answer, in operational terms, four questions:
 ### Already documented
 
 #### Capability / product vision
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+- `docs/architecture/executive-deck-generation/product-capability.md`
 
 #### Technical productization of the first slice
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
+- `docs/architecture/executive-deck-generation/productization.md`
 
 #### Concrete P1 contract
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
@@ -48,7 +48,7 @@ This document exists to answer, in operational terms, four questions:
 ## 1. Capability / product
 
 ### 1.1 Capability map
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+- `docs/architecture/executive-deck-generation/product-capability.md`
 
 ### 1.2 Complete documentation plan
 - `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
@@ -80,7 +80,7 @@ This document exists to answer, in operational terms, four questions:
 
 ## 3. Architecture and integration
 
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
+- `docs/architecture/executive-deck-generation/productization.md`
 - `legacy/docs/archive/executive-deck-generation-service-architecture.md`
 - `docs/EXECUTIVE_DECK_GENERATION_API_CONTRACT.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ARTIFACT_LIFECYCLE.md`

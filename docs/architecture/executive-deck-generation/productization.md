@@ -6,7 +6,7 @@ This document should now be read as the **technical documentation for the first 
 
 The official capability context and catalog are in:
 
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+- `docs/architecture/executive-deck-generation/product-capability.md`
 
 Here, the focus is narrower:
 
@@ -20,7 +20,7 @@ At this moment, the prioritized technical slice remains:
 
 `ppt_creator_app` enters as the **specialized executive rendering layer** within this broader capability.
 
-> In short: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md` defines the product capability; this document details the technical productization of the first slice.
+> In short: `docs/architecture/executive-deck-generation/product-capability.md` defines the product capability; this document details the technical productization of the first slice.
 
 Important complementary documents for fully implementing the capability:
 
@@ -149,7 +149,7 @@ There is already a concrete foundation for the first slice.
 #### Base document for the current technical slice
 
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+- `docs/architecture/executive-deck-generation/product-capability.md`
 
 #### Contract and adapter service already implemented
 

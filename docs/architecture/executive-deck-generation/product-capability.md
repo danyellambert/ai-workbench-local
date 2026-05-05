@@ -338,7 +338,7 @@ Main files:
 - `src/services/presentation_export.py`
 - `tests/test_presentation_export_unittest.py`
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
+- `docs/architecture/executive-deck-generation/productization.md`
 
 ### Still missing
 
@@ -489,7 +489,7 @@ This capability will be well defined when the roadmap makes clear:
 
 - `ROADMAP.md`
 - `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
+- `docs/architecture/executive-deck-generation/productization.md`
 - `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
 - `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ROUTING.md`

@@ -27,7 +27,7 @@ The Round 3 decision layer reuses existing repository artifacts:
 This decision layer is also consumed by the final closure bundle:
 
 - `scripts/report_phase8_5_closure.py`
-- `docs/PHASE_8_5_CLOSURE.md`
+- `docs/architecture/evals/closure.md`
 
 ## Conservative decision order
 

@@ -81,7 +81,7 @@ If some slices are implemented but still intentionally bounded by missing eviden
 
 If you want to upgrade Phase 8.5 from the current conservative local closure to the broader expanded benchmark target, use:
 
-- `docs/PHASE_8_5_EXPANDED_COMPLETION_ROADMAP.md`
+- `docs/architecture/evals/expanded-completion-roadmap.md`
 
 That roadmap covers the remaining work around:
 

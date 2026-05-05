@@ -23,3 +23,9 @@ Legacy docs moved in the docs cleanup:
 
 - legacy/docs/phases/ — historical phase notes and implementation history.
 - legacy/docs/archive/ — superseded indexes/runbooks or old subsystem documents.
+
+
+Additional historical phase docs moved:
+
+- legacy/docs/phases/publication-and-positioning.md
+- legacy/docs/phases/product-split-gradio-ai-lab.md

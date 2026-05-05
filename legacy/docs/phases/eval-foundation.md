@@ -41,7 +41,7 @@ python scripts/run_phase8_live_evals.py --preflight-only
 python scripts/run_phase8_live_evals.py --limit-structured-docs 3
 ```
 - separate GitHub Actions workflow for environment-dependent live evals in `.github/workflows/phase8-evals-live.yml`
-- operating routine document for continuous use in `docs/PHASE_8_EVAL_OPERATING_RHYTHM.md`
+- operating routine document for continuous use in `docs/architecture/evals/operating-rhythm.md`
 - GitHub Actions workflow for deterministic eval/test coverage in `.github/workflows/phase8-evals.yml`
 - aggregated report script:
 

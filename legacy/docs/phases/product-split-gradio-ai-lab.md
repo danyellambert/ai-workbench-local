@@ -882,6 +882,6 @@ The Streamlit AI Lab should be considered well-positioned for this stage when:
 ## Related documents
 
 - `docs/PROJECT_POSITIONING_TWO_TRACKS.md`
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+- `docs/architecture/executive-deck-generation/product-capability.md`
 - `docs/EXECUTIVE_DECK_GENERATION_UI_EVOLUTION.md`
 - `ROADMAP.md`

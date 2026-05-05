@@ -68,7 +68,7 @@ Current state:
 
 | Phase | Status | Canonical document | Main outcome |
 | --- | --- | --- | --- |
-| 0 | Completed | `docs/PHASE_0_PUBLICATION_AND_POSITIONING.md` | Safe publication baseline |
+| 0 | Completed | `legacy/docs/phases/publication-and-positioning.md` | Safe publication baseline |
 | 0.5 | Completed | `legacy/docs/phases/repository-governance.md` | Repository governance and publication discipline |
 | 1 | Completed | `legacy/docs/phases/product-foundation.md` | Usable local product baseline |
 | 2 | Completed | `legacy/docs/phases/modular-architecture.md` | Clearer modular architecture |
@@ -80,12 +80,12 @@ Current state:
 | 6 | Completed | `legacy/docs/phases/document-operations-copilot.md` | Workflow-oriented document copilot |
 | 7 | Completed | `legacy/docs/phases/phase-7-model-comparison.md` | Repeatable model comparison layer |
 | 8 | Active | `legacy/docs/phases/eval-foundation.md` | Persistent local evaluation foundation |
-| 8.5 | Bounded reference | `docs/PHASE_8_5_CLOSURE.md` | Runtime, retrieval, and adaptation decision support |
+| 8.5 | Bounded reference | `docs/architecture/evals/closure.md` | Runtime, retrieval, and adaptation decision support |
 | 9 | Bounded reference | later technical references | System observability and runtime visibility |
 | 9.25 | Bounded reference | `legacy/docs/phases/runtime-economics-and-evidenceops-foundation.md` | Runtime economics and budget-aware routing |
 | 9.5 | Bounded reference | `legacy/docs/phases/local-evidenceops-mcp-server.md` | MCP and operational integration foundation |
 | 10 | Bounded reference | `legacy/docs/phases/engineering-hardening.md` | Engineering hardening |
-| 10.25 | Bounded reference | `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md` | Product/lab surface split |
+| 10.25 | Bounded reference | `legacy/docs/phases/product-split-gradio-ai-lab.md` | Product/lab surface split |
 | 10.5 | Planned | future bounded reference | Hybrid deployment |
 | 11 | Planned | future bounded reference | Final publication package |
 
@@ -141,7 +141,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_0_PUBLICATION_AND_POSITIONING.md`
+- `legacy/docs/phases/publication-and-positioning.md`
 
 ### Phase 0.5 — Repository governance
 
@@ -297,7 +297,7 @@ Primary document:
 
 Related document:
 
-- `docs/PHASE_8_EVAL_OPERATING_RHYTHM.md`
+- `docs/architecture/evals/operating-rhythm.md`
 
 ### Phase 8.5 — Runtime, retrieval, and adaptation decision support
 
@@ -313,9 +313,9 @@ Current focus:
 
 Primary references:
 
-- `docs/PHASE_8_5_DECISION_GATE.md`
-- `docs/PHASE_8_5_CLOSURE.md`
-- `docs/PHASE_8_5_EXPANDED_COMPLETION_ROADMAP.md`
+- `docs/architecture/evals/decision-gate.md`
+- `docs/architecture/evals/closure.md`
+- `docs/architecture/evals/expanded-completion-roadmap.md`
 
 ### Phase 9 — Observability
 
@@ -350,8 +350,8 @@ Current focus:
 Primary references:
 
 - `legacy/docs/phases/local-evidenceops-mcp-server.md`
-- `docs/PHASE_9_5_EVIDENCEOPS_VERTICAL_SLICE.md`
-- `docs/PHASE_9_5_EXTERNAL_TARGET_ARCHITECTURE.md`
+- `docs/architecture/evidenceops/vertical-slice.md`
+- `docs/architecture/evidenceops/external-target-architecture.md`
 
 ### Phase 10 — Engineering hardening
 
@@ -376,9 +376,9 @@ Current focus:
 
 Primary references:
 
-- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md`
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
+- `legacy/docs/phases/product-split-gradio-ai-lab.md`
+- `docs/architecture/executive-deck-generation/product-capability.md`
+- `docs/architecture/executive-deck-generation/productization.md`
 
 ### Phase 10.5 — Hybrid deployment
 

@@ -23,7 +23,7 @@ This file is the main entry point for the repository documentation.
 
 | Phase | Summary document | Focus |
 | --- | --- | --- |
-| 0 | `docs/PHASE_0_PUBLICATION_AND_POSITIONING.md` | Safe publication baseline |
+| 0 | `legacy/docs/phases/publication-and-positioning.md` | Safe publication baseline |
 | 0.5 | `legacy/docs/phases/repository-governance.md` | Repository governance |
 | 1 | `legacy/docs/phases/product-foundation.md` | Product and UX baseline |
 | 2 | `legacy/docs/phases/modular-architecture.md` | Modular architecture |
@@ -86,14 +86,14 @@ This file is the main entry point for the repository documentation.
 The files below remain valuable technical references, but they are not part of the canonical completed-phase summary path yet:
 
 - `legacy/docs/phases/eval-foundation.md`
-- `docs/PHASE_8_EVAL_OPERATING_RHYTHM.md`
-- `docs/PHASE_8_5_DECISION_GATE.md`
-- `docs/PHASE_8_5_CLOSURE.md`
+- `docs/architecture/evals/operating-rhythm.md`
+- `docs/architecture/evals/decision-gate.md`
+- `docs/architecture/evals/closure.md`
 - `legacy/docs/phases/runtime-economics-and-evidenceops-foundation.md`
 - `legacy/docs/phases/local-evidenceops-mcp-server.md`
 - `legacy/docs/phases/engineering-hardening.md`
-- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md`
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+- `legacy/docs/phases/product-split-gradio-ai-lab.md`
+- `docs/architecture/executive-deck-generation/product-capability.md`
 
 ## Legacy aliases
 

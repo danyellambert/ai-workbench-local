@@ -562,8 +562,8 @@ Reference: `ROADMAP.md`
 - `legacy/docs/archive/old-documentation-index.md` — organized documentation map
 - `docs/POSITIONING_PROJECT_TWO_TRACKS.md` — official workflow-vs-lab framing
 - `legacy/docs/phases/engineering-hardening.md` — engineering maturity direction
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md` — executive artifact capability direction
-- `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md` — rationale for the surface split
+- `docs/architecture/executive-deck-generation/product-capability.md` — executive artifact capability direction
+- `legacy/docs/phases/product-split-gradio-ai-lab.md` — rationale for the surface split
 
 ### Important capability clusters
 

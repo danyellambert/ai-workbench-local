@@ -7,9 +7,9 @@ Document and begin implementation of the first technical slice of the **Executiv
 - **AI Decision Studio**
 - **`ppt_creator_app`**
 
-> For the complete product reading, deck catalog, and capability roadmap, also see: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
+> For the complete product reading, deck catalog, and capability roadmap, also see: `docs/architecture/executive-deck-generation/product-capability.md`
 
-> For the technical productization reading of the first slice in the current ecosystem, also see: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
+> For the technical productization reading of the first slice in the current ecosystem, also see: `docs/architecture/executive-deck-generation/productization.md`
 
 The focus of this round remains the path:
 
@@ -205,5 +205,5 @@ For the complete capability process inside AI Decision Studio, including:
 
 see:
 
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
-- `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
+- `docs/architecture/executive-deck-generation/product-capability.md`
+- `docs/architecture/executive-deck-generation/productization.md`
