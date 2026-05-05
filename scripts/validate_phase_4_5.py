@@ -175,7 +175,7 @@ def validate_rag_flow() -> str:
 
 def validate_ollama_native_path() -> None:
     settings = OllamaSettings(
-        project_name="AI Workbench Local",
+        project_name="AI Decision Studio",
         base_url="http://localhost:11434/v1",
         default_model="qwen2.5-coder:7b",
         default_temperature=0.2,
