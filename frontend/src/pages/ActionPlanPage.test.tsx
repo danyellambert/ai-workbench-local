@@ -33,6 +33,28 @@ vi.mock('@/lib/product-api', async () => {
   };
 });
 
+
+vi.mock('@/lib/auth-session', () => ({
+  useAuthSession: () => ({
+    data: {
+      mode: 'admin',
+      is_admin: true,
+      identity: {
+        role: 'admin',
+        can_write_global: true,
+        can_publish_external: true,
+        session_id: 'test-admin-session',
+        id: 'test-admin-session',
+        type: 'admin',
+      },
+      auth: {
+        admin_configured: true,
+      },
+    },
+  }),
+  isAdminSession: () => true,
+}));
+
 function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: {
