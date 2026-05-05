@@ -69,22 +69,22 @@ Current state:
 | Phase | Status | Canonical document | Main outcome |
 | --- | --- | --- | --- |
 | 0 | Completed | `docs/PHASE_0_PUBLICATION_AND_POSITIONING.md` | Safe publication baseline |
-| 0.5 | Completed | `docs/PHASE_0_5_REPOSITORY_GOVERNANCE.md` | Repository governance and publication discipline |
-| 1 | Completed | `docs/PHASE_1_PRODUCT_FOUNDATION.md` | Usable local product baseline |
-| 2 | Completed | `docs/PHASE_2_MODULAR_ARCHITECTURE.md` | Clearer modular architecture |
-| 3 | Completed | `docs/PHASE_3_MULTI_PROVIDER_FOUNDATION.md` | Multi-provider and prompt-profile foundation |
-| 4 | Completed | `docs/PHASE_4_DOCUMENT_RAG_FOUNDATION.md` | First document-grounded RAG flow |
-| 4.5 | Completed | `docs/PHASE_4_5_VALIDATION.md` | Benchmarked and validated RAG |
-| 5 | Completed | `docs/PHASE_5_SUMMARY.md` | Structured outputs and evidence-grounded CV workflows |
-| 5.5 | Completed | `docs/PHASE_5_5_FRAMEWORK_EVOLUTION.md` | Controlled LangChain and LangGraph evolution |
-| 6 | Completed | `docs/PHASE_6_DOCUMENT_OPERATIONS_COPILOT.md` | Workflow-oriented document copilot |
-| 7 | Completed | `docs/PHASE_7_MODEL_COMPARISON.md` | Repeatable model comparison layer |
-| 8 | Active | `docs/PHASE_8_EVAL_FOUNDATION.md` | Persistent local evaluation foundation |
+| 0.5 | Completed | `legacy/docs/phases/repository-governance.md` | Repository governance and publication discipline |
+| 1 | Completed | `legacy/docs/phases/product-foundation.md` | Usable local product baseline |
+| 2 | Completed | `legacy/docs/phases/modular-architecture.md` | Clearer modular architecture |
+| 3 | Completed | `legacy/docs/phases/multi-provider-foundation.md` | Multi-provider and prompt-profile foundation |
+| 4 | Completed | `legacy/docs/phases/document-grounded-rag-foundation.md` | First document-grounded RAG flow |
+| 4.5 | Completed | `legacy/docs/phases/phase-4-5-validation.md` | Benchmarked and validated RAG |
+| 5 | Completed | `legacy/docs/phases/structured-outputs-and-evidence-grounded-cv-extraction.md` | Structured outputs and evidence-grounded CV workflows |
+| 5.5 | Completed | `legacy/docs/phases/framework-evolution-with-langchain-and-langgraph.md` | Controlled LangChain and LangGraph evolution |
+| 6 | Completed | `legacy/docs/phases/document-operations-copilot.md` | Workflow-oriented document copilot |
+| 7 | Completed | `legacy/docs/phases/phase-7-model-comparison.md` | Repeatable model comparison layer |
+| 8 | Active | `legacy/docs/phases/eval-foundation.md` | Persistent local evaluation foundation |
 | 8.5 | Bounded reference | `docs/PHASE_8_5_CLOSURE.md` | Runtime, retrieval, and adaptation decision support |
 | 9 | Bounded reference | later technical references | System observability and runtime visibility |
-| 9.25 | Bounded reference | `docs/PHASE_9_25_RUNTIME_ECONOMICS_AND_EVIDENCEOPS_LOCAL.md` | Runtime economics and budget-aware routing |
-| 9.5 | Bounded reference | `docs/PHASE_9_5_EVIDENCEOPS_MCP_LOCAL_SERVER.md` | MCP and operational integration foundation |
-| 10 | Bounded reference | `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md` | Engineering hardening |
+| 9.25 | Bounded reference | `legacy/docs/phases/runtime-economics-and-evidenceops-foundation.md` | Runtime economics and budget-aware routing |
+| 9.5 | Bounded reference | `legacy/docs/phases/local-evidenceops-mcp-server.md` | MCP and operational integration foundation |
+| 10 | Bounded reference | `legacy/docs/phases/engineering-hardening.md` | Engineering hardening |
 | 10.25 | Bounded reference | `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md` | Product/lab surface split |
 | 10.5 | Planned | future bounded reference | Hybrid deployment |
 | 11 | Planned | future bounded reference | Final publication package |
@@ -154,7 +154,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_0_5_REPOSITORY_GOVERNANCE.md`
+- `legacy/docs/phases/repository-governance.md`
 
 ### Phase 1 — Product foundation
 
@@ -167,7 +167,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_1_PRODUCT_FOUNDATION.md`
+- `legacy/docs/phases/product-foundation.md`
 
 ### Phase 2 — Modular architecture
 
@@ -180,7 +180,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_2_MODULAR_ARCHITECTURE.md`
+- `legacy/docs/phases/modular-architecture.md`
 
 ### Phase 3 — Multi-provider foundation
 
@@ -194,7 +194,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_3_MULTI_PROVIDER_FOUNDATION.md`
+- `legacy/docs/phases/multi-provider-foundation.md`
 
 ### Phase 4 — Document-grounded RAG foundation
 
@@ -206,7 +206,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_4_DOCUMENT_RAG_FOUNDATION.md`
+- `legacy/docs/phases/document-grounded-rag-foundation.md`
 
 ### Phase 4.5 — RAG validation and hardening
 
@@ -220,8 +220,8 @@ Goal:
 
 Primary documents:
 
-- `docs/PHASE_4_5_VALIDATION.md`
-- `docs/PHASE_4_5_BENCHMARK_RESULTS.md`
+- `legacy/docs/phases/phase-4-5-validation.md`
+- `legacy/docs/phases/phase-4-5-benchmark-results.md`
 
 ### Phase 5 — Structured outputs and evidence-grounded CV workflows
 
@@ -234,9 +234,9 @@ Goal:
 
 Primary documents:
 
-- `docs/PHASE_5_SUMMARY.md`
+- `legacy/docs/phases/structured-outputs-and-evidence-grounded-cv-extraction.md`
 - `docs/EVIDENCE_CV_PIPELINE.md`
-- `docs/PHASE_5_EVIDENCE_PACK.md`
+- `legacy/docs/phases/phase-5-evidence-pack.md`
 
 ### Phase 5.5 — Framework evolution
 
@@ -249,7 +249,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_5_5_FRAMEWORK_EVOLUTION.md`
+- `legacy/docs/phases/framework-evolution-with-langchain-and-langgraph.md`
 
 ### Phase 6 — Document Operations Copilot
 
@@ -262,7 +262,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_6_DOCUMENT_OPERATIONS_COPILOT.md`
+- `legacy/docs/phases/document-operations-copilot.md`
 
 ### Phase 7 — Model comparison and benchmarking
 
@@ -275,7 +275,7 @@ Goal:
 
 Primary document:
 
-- `docs/PHASE_7_MODEL_COMPARISON.md`
+- `legacy/docs/phases/phase-7-model-comparison.md`
 
 ---
 
@@ -293,7 +293,7 @@ Current focus:
 
 Primary document:
 
-- `docs/PHASE_8_EVAL_FOUNDATION.md`
+- `legacy/docs/phases/eval-foundation.md`
 
 Related document:
 
@@ -336,7 +336,7 @@ Current focus:
 
 Primary document:
 
-- `docs/PHASE_9_25_RUNTIME_ECONOMICS_AND_EVIDENCEOPS_LOCAL.md`
+- `legacy/docs/phases/runtime-economics-and-evidenceops-foundation.md`
 
 ### Phase 9.5 — EvidenceOps MCP and operational integrations
 
@@ -349,7 +349,7 @@ Current focus:
 
 Primary references:
 
-- `docs/PHASE_9_5_EVIDENCEOPS_MCP_LOCAL_SERVER.md`
+- `legacy/docs/phases/local-evidenceops-mcp-server.md`
 - `docs/PHASE_9_5_EVIDENCEOPS_VERTICAL_SLICE.md`
 - `docs/PHASE_9_5_EXTERNAL_TARGET_ARCHITECTURE.md`
 
@@ -363,7 +363,7 @@ Current focus:
 
 Primary document:
 
-- `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`
+- `legacy/docs/phases/engineering-hardening.md`
 
 ### Phase 10.25 — Product/lab surface split and executive deck generation
 

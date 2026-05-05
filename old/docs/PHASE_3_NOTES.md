@@ -2,4 +2,4 @@
 
 The canonical English summary for this completed phase now lives in:
 
-- `docs/PHASE_3_MULTI_PROVIDER_FOUNDATION.md`
+- `legacy/docs/phases/multi-provider-foundation.md`

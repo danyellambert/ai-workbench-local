@@ -515,11 +515,11 @@ For reviewers who want to verify the claims quickly, here are direct pointers in
 | --- | --- |
 | Product web surface | `frontend/src/App.tsx`, `frontend/src/pages/`, `frontend/src/components/` |
 | Product API foundation | `main_product_api.py`, `src/product/api.py`, `src/product/service.py`, `src/product/models.py` |
-| Structured outputs | `src/structured/`, `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md` |
-| Document Operations Copilot | `src/structured/document_agent.py`, `docs/PHASE_6_DOCUMENT_OPERATIONS_COPILOT.md` |
-| Model comparison | `src/services/model_comparison.py`, `docs/PHASE_7_MODEL_COMPARISON.md`, `scripts/report_phase7_model_comparison_log.py` |
-| Eval foundation | `docs/PHASE_8_EVAL_FOUNDATION.md`, `scripts/report_phase8_eval_store.py`, `scripts/run_phase8_live_evals.py` |
-| EvidenceOps MCP | `src/mcp/evidenceops_server.py`, `scripts/run_evidenceops_mcp_server.py`, `docs/PHASE_9_5_EVIDENCEOPS_MCP_LOCAL_SERVER.md` |
+| Structured outputs | `src/structured/`, `legacy/docs/phases/phase-5-structured-output-foundation.md` |
+| Document Operations Copilot | `src/structured/document_agent.py`, `legacy/docs/phases/document-operations-copilot.md` |
+| Model comparison | `src/services/model_comparison.py`, `legacy/docs/phases/phase-7-model-comparison.md`, `scripts/report_phase7_model_comparison_log.py` |
+| Eval foundation | `legacy/docs/phases/eval-foundation.md`, `scripts/report_phase8_eval_store.py`, `scripts/run_phase8_live_evals.py` |
+| EvidenceOps MCP | `src/mcp/evidenceops_server.py`, `scripts/run_evidenceops_mcp_server.py`, `legacy/docs/phases/local-evidenceops-mcp-server.md` |
 | Executive deck generation | `src/services/presentation_export.py`, `docs/EXECUTIVE_DECK_GENERATION_*`, `scripts/run_presentation_export_smoke_suite.py` |
 | Deployment and hardening | `Dockerfile.public-demo`, `Dockerfile.aws-slim-product-api`, `Dockerfile.frontend-public-demo`, `docker-compose.oracle-like.yml`, `docker-compose.aws-slim.override.yml`, `docs/deployment/`, smoke/integration tests in `tests/` |
 
@@ -559,20 +559,20 @@ Reference: `ROADMAP.md`
 ### Best starting points
 
 - `ROADMAP.md` — project chronology and direction
-- `docs/INDEX_DOCUMENTATION.md` — organized documentation map
+- `legacy/docs/archive/old-documentation-index.md` — organized documentation map
 - `docs/POSITIONING_PROJECT_TWO_TRACKS.md` — official workflow-vs-lab framing
-- `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md` — engineering maturity direction
+- `legacy/docs/phases/engineering-hardening.md` — engineering maturity direction
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md` — executive artifact capability direction
 - `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md` — rationale for the surface split
 
 ### Important capability clusters
 
-- `docs/PHASE_4_DOCUMENT_RAG_FOUNDATION.md`
-- `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md`
-- `docs/PHASE_6_DOCUMENT_OPERATIONS_COPILOT.md`
-- `docs/PHASE_7_MODEL_COMPARISON.md`
-- `docs/PHASE_8_EVAL_FOUNDATION.md`
-- `docs/PHASE_9_5_EVIDENCEOPS_MCP_LOCAL_SERVER.md`
+- `legacy/docs/phases/document-grounded-rag-foundation.md`
+- `legacy/docs/phases/phase-5-structured-output-foundation.md`
+- `legacy/docs/phases/document-operations-copilot.md`
+- `legacy/docs/phases/phase-7-model-comparison.md`
+- `legacy/docs/phases/eval-foundation.md`
+- `legacy/docs/phases/local-evidenceops-mcp-server.md`
 - `docs/EXECUTIVE_DECK_GENERATION_*.md`
 
 ### Documentation naming conventions
