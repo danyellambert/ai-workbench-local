@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="${REPO_ROOT:-$(pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+
+
 FRONTEND_DIR="$REPO_ROOT/frontend"
 OUT_DIR="${OUT_DIR:-$REPO_ROOT/.tmp_action_plan_isolated_selected_e2e}"
 FRONTEND_TMP_DIR="$FRONTEND_DIR/.tmp_action_plan_isolated_selected_e2e"

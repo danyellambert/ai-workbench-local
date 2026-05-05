@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "$0")" && pwd)}"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+
 OUT_DIR="${OUT_DIR:-$REPO_ROOT/.tmp_candidate_review_validation}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 source "$REPO_ROOT/scripts/ai_lab_shell_lib.sh"
 reset_ai_lab_output_dir "$OUT_DIR"
-write_ai_lab_run_meta "$OUT_DIR" "./candidate_review_validation_e2e.sh"
+write_ai_lab_run_meta "$OUT_DIR" "scripts/validation/candidate_review_validation_e2e.sh"
 ensure_rollup_native "$REPO_ROOT"
 export OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://localhost:11434/v1}"
 export OLLAMA_MODEL="${OLLAMA_MODEL:-nemotron:30b}"

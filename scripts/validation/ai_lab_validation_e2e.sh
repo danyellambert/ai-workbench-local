@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "$0")" && pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+
+
 OUT_DIR="${OUT_DIR:-$REPO_ROOT/.tmp_ai_lab_e2e}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 
@@ -17,7 +20,7 @@ reset_ai_lab_output_dir "$OUT_DIR"
 if [ -n "$PRESERVED_FRONTEND_SMOKE" ]; then
   mv "$PRESERVED_FRONTEND_SMOKE" "$OUT_DIR/frontend-smoke.log"
 fi
-write_ai_lab_run_meta "$OUT_DIR" "AI_LAB_WORKFLOW_TIMEOUT_SECONDS=${AI_LAB_WORKFLOW_TIMEOUT_SECONDS:-45} ./ai_lab_validation_e2e.sh"
+write_ai_lab_run_meta "$OUT_DIR" "AI_LAB_WORKFLOW_TIMEOUT_SECONDS=${AI_LAB_WORKFLOW_TIMEOUT_SECONDS:-45} scripts/validation/ai_lab_validation_e2e.sh"
 ensure_rollup_native "$REPO_ROOT"
 
 export OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://localhost:11434/v1}"
