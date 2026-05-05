@@ -4,7 +4,7 @@ This file is the main entry point for the repository documentation.
 
 ## Reading order
 
-1. `README.md`
+1. `legacy/docs/non-current/phase-4-5-chart-assets.md`
 2. `ROADMAP.md`
 3. `docs/PROJECT_POSITIONING_TWO_TRACKS.md`
 4. completed phase summaries in chronological order

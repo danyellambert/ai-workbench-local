@@ -184,7 +184,7 @@ The sibling project is already mature enough to enter as a specialized service.
 
 #### Main documentation
 
-- `services/ppt_creator_app/README.md`
+- `services/ppt_creator_app/legacy/docs/non-current/phase-4-5-chart-assets.md`
 - `services/ppt_creator_app/NEXT_STEPS.md`
 
 #### Capabilities already available
@@ -200,7 +200,7 @@ The sibling project is already mature enough to enter as a specialized service.
 
 #### Useful existing endpoints
 
-According to `README.md` and `ppt_creator/api.py`, endpoints such as these already exist:
+According to `legacy/docs/non-current/phase-4-5-chart-assets.md` and `ppt_creator/api.py`, endpoints such as these already exist:
 
 - `GET /health`
 - `GET /artifact`

@@ -746,7 +746,7 @@ Avoid legacy/internal naming in new paths.
 ```text
 data/functional_baseline/
   manifest.json
-  README.md
+  legacy/docs/non-current/phase-4-5-chart-assets.md
 
   runtime/
     state/

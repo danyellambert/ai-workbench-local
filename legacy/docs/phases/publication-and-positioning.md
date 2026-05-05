@@ -19,7 +19,7 @@ This phase created the minimum level of repository hygiene required for everythi
 
 - environment-specific env examples: `.env.local.example`, `.env.docker.example`, `.env.aws.example`, `.env.oracle.example`
 - `.gitignore`
-- the root `README.md`
+- the root `legacy/docs/non-current/phase-4-5-chart-assets.md`
 
 ## Closure
 

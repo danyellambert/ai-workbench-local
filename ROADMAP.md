@@ -416,7 +416,7 @@ Each later phase builds on explicit evidence and infrastructure from the previou
 
 ## 8. Recommended reading order
 
-1. `README.md`
+1. `legacy/docs/non-current/phase-4-5-chart-assets.md`
 2. `ROADMAP.md`
 3. `docs/DOCUMENTATION_INDEX.md`
 4. `docs/PROJECT_POSITIONING_TWO_TRACKS.md`
