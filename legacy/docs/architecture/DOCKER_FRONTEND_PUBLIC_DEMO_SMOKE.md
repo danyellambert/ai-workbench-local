@@ -40,7 +40,7 @@ The smoke introduced:
 
 - `Dockerfile.public-demo`
 - `Dockerfile.frontend-public-demo`
-- `docker-compose.frontend-public-demo.yml`
+- `legacy/compose/docker-compose.frontend-public-demo.yml`
 - `frontend/nginx.public-demo.conf`
 - `requirements-public-demo.txt`
 

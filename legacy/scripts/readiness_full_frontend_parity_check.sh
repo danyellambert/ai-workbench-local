@@ -22,7 +22,7 @@ mkdir -p "$REPORT_DIR"
 ensure_public_demo_stack() {
   echo
   echo "== Ensure public demo stack is running =="
-  docker compose -f docker-compose.frontend-public-demo.yml up -d
+  docker compose -f legacy/compose/docker-compose.frontend-public-demo.yml up -d
 
   echo
   echo "== Wait for stack after restart =="
@@ -83,7 +83,7 @@ curl -I -fsS "$AI_DECISION_STUDIO_FRONTEND_BASE_URL/favicon.svg" >/dev/null
 
 echo
 echo "== Existing readiness scripts =="
-scripts/smoke_docker_public_demo.sh
+legacy/scripts/smoke_docker_public_demo.sh
 ensure_public_demo_stack
 scripts/smoke_docker_workflow_write.sh
 scripts/smoke_docker_policy_comparison_write.sh

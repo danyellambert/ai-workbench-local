@@ -14,7 +14,7 @@ for arg in "$@"; do
       ;;
     *)
       echo "Unknown argument: $arg" >&2
-      echo "Usage: scripts/readiness_docker_full_check.sh [--skip-build] [--keep-up]" >&2
+      echo "Usage: legacy/scripts/readiness_docker_full_check.sh [--skip-build] [--keep-up]" >&2
       exit 2
       ;;
   esac
@@ -23,7 +23,7 @@ done
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-COMPOSE_FILE="docker-compose.frontend-public-demo.yml"
+COMPOSE_FILE="legacy/compose/docker-compose.frontend-public-demo.yml"
 
 if [ -z "${AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT:-}" ]; then
   echo "Missing AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT" >&2
@@ -53,9 +53,9 @@ echo "frontend_base_url=$AI_DECISION_STUDIO_FRONTEND_BASE_URL"
 echo
 echo "== 1/4 Public demo Docker smoke =="
 if [ "$SKIP_BUILD" = "1" ]; then
-  scripts/smoke_docker_public_demo.sh --skip-build --keep-up
+  legacy/scripts/smoke_docker_public_demo.sh --skip-build --keep-up
 else
-  scripts/smoke_docker_public_demo.sh --keep-up
+  legacy/scripts/smoke_docker_public_demo.sh --keep-up
 fi
 
 echo

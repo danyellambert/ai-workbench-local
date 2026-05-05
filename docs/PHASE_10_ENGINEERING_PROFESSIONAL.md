@@ -6,7 +6,7 @@ Close the engineering-hardening track with a more reliable baseline for executio
 
 ## What entered this phase
 
-- `Dockerfile.legacy-streamlit` and `.dockerignore` for reproducible execution of the historical Streamlit application
+- `legacy/docker/Dockerfile.legacy-streamlit` and `.dockerignore` for reproducible execution of the historical Streamlit application
 - centralized logging in `src/services/app_logging.py`
 - a minimum standard for UI error messages in `src/services/app_errors.py`
 - real Streamlit smoke tests using `streamlit.testing.v1`

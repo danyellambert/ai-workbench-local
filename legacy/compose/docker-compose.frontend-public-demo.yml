@@ -3,7 +3,7 @@ name: ai-decision-studio-frontend-public-demo
 services:
   product-api:
     build:
-      context: .
+      context: ../..
       dockerfile: Dockerfile.public-demo
     image: ai-decision-studio-product-api:frontend-public-demo
     container_name: ai-decision-studio-product-api-frontend-public-demo
@@ -102,7 +102,7 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ../..
       dockerfile: Dockerfile.frontend-public-demo
       args:
         VITE_PRODUCT_API_BASE_URL: "/"

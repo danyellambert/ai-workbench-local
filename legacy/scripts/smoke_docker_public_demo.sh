@@ -14,7 +14,7 @@ for arg in "$@"; do
       ;;
     *)
       echo "Unknown argument: $arg" >&2
-      echo "Usage: scripts/smoke_docker_public_demo.sh [--skip-build] [--keep-up]" >&2
+      echo "Usage: legacy/scripts/smoke_docker_public_demo.sh [--skip-build] [--keep-up]" >&2
       exit 2
       ;;
   esac
@@ -23,7 +23,7 @@ done
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-COMPOSE_FILE="docker-compose.frontend-public-demo.yml"
+COMPOSE_FILE="legacy/compose/docker-compose.frontend-public-demo.yml"
 
 if [ ! -f "$COMPOSE_FILE" ]; then
   echo "Missing compose file: $COMPOSE_FILE" >&2
