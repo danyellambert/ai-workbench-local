@@ -1,20 +1,17 @@
 # AI Decision Studio
 
-## Live web app
+## Deployment status
 
-### [Open AI Decision Studio on Vercel](https://ai-workbench-local.vercel.app/)
+The current validated deployment target is the **AWS slim Docker deployment**.
 
-**Production URL:** https://ai-workbench-local.vercel.app/
-
-This repository now includes a live deployment of the React/Vite product surface on Vercel.
+- Current runtime path: **Product API + React/Vite frontend** through Docker Compose.
+- AWS deploy path: `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md` and `docs/deployment/REDEPLOY_FAST_PATH.md`.
+- CI status: `product-ci.yml` validates Product API, frontend tests/build, and Docker/AWS compose contracts without deploying.
+- Earlier Vercel work was **frontend-only / historical** and should not be treated as the current production contract.
 
 <p align="center">
-  <a href="https://ai-workbench-local.vercel.app/">
-    <img src="data/materials_demo/Screenshot%202026-04-06%20at%2004.42.30.png" alt="AI Decision Studio landing page screenshot" width="49%" />
-  </a>
-  <a href="https://ai-workbench-local.vercel.app/">
-    <img src="data/materials_demo/Screenshot%202026-04-06%20at%2004.43.03.png" alt="AI Decision Studio application screenshot" width="49%" />
-  </a>
+  <img src="data/materials_demo/Screenshot%202026-04-06%20at%2004.42.30.png" alt="AI Decision Studio landing page screenshot" width="49%" />
+  <img src="data/materials_demo/Screenshot%202026-04-06%20at%2004.43.03.png" alt="AI Decision Studio application screenshot" width="49%" />
 </p>
 
 **AI Decision Studio** is a local-first applied AI platform for **document-grounded decision workflows**, **structured execution**, **evaluation**, and **executive artifact generation**.
