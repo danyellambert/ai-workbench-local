@@ -9,11 +9,6 @@ The current validated deployment target is the **AWS slim Docker deployment**.
 - CI status: `product-ci.yml` validates Product API, frontend tests/build, and Docker/AWS compose contracts without deploying.
 - Earlier Vercel work was **frontend-only / historical** and should not be treated as the current production contract.
 
-<p align="center">
-  <img src="data/materials_demo/Screenshot%202026-04-06%20at%2004.42.30.png" alt="AI Decision Studio landing page screenshot" width="49%" />
-  <img src="data/materials_demo/Screenshot%202026-04-06%20at%2004.43.03.png" alt="AI Decision Studio application screenshot" width="49%" />
-</p>
-
 **AI Decision Studio** is a local-first applied AI platform for **document-grounded decision workflows**, **structured execution**, **evaluation**, and **executive artifact generation**.
 
 This repository is meant to present a complete AI product system — not just a model wrapper, a chatbot demo, or a loose collection of experiments.

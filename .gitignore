@@ -32,6 +32,7 @@ benchmark_pdfs/*
 !benchmark_pdfs/README.md
 old/
 diagnostics/
+data/
 
 phase5_eval/reports/
 phase5_eval/resume_benchmark_quick/
@@ -40,8 +41,6 @@ phase5_eval/resume_benchmark_full/
 data/*
 !data/materials_demo/
 data/materials_demo/*
-!data/materials_demo/README.md
-!data/materials_demo/public_material_sources.json
 historico/
 .clinerules
 
@@ -175,10 +174,6 @@ phase8_eval/.DS_Store
 data/*
 !data/materials_demo/
 data/materials_demo/*
-!data/materials_demo/README.md
-!data/materials_demo/public_material_sources.json
-!data/materials_demo/Screenshot 2026-04-06 at 04.42.30.png
-!data/materials_demo/Screenshot 2026-04-06 at 04.43.03.png
 
 # Local legacy scratch
 old/auxiliar.py

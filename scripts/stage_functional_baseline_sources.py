@@ -34,7 +34,6 @@ SOURCE_PATHS = [
     "artifacts/presentation_exports",
     "data/corpus_revisado/frontend_demo_grounded_v1",
     "data/corpus_revisado/option_b_synthetic_premium",
-    "data/materials_demo",
 ]
 
 
