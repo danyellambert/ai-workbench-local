@@ -129,10 +129,10 @@ def build_rewrite_map(workspace_root: str, absolute_paths: set[str], external_fi
         mapping[source] = target
 
     known_roots = [
-        "/Users/danyellambert/Downloads/Corpus_revisado/option_a_public_corpus_v2",
-        "/Users/danyellambert/ppt_creator_app/outputs/ai_workbench_export_previews",
-        "/Users/danyellambert/ppt_creator_app/outputs/ai_workbench_export_smoke_suite_previews",
-        "/Users/danyellambert/ppt_creator_app/outputs/beautification_targeted_previews",
+        "/private/local/corpus/option_a_public_corpus_v2",
+        "/private/ppt_creator_app/outputs/ai_workbench_export_previews",
+        "/private/ppt_creator_app/outputs/ai_workbench_export_smoke_suite_previews",
+        "/private/ppt_creator_app/outputs/beautification_targeted_previews",
         "/private/hybrid cloud",
     ]
 

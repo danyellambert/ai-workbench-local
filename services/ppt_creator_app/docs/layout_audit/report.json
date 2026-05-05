@@ -3,8 +3,8 @@
   "input": "examples/layout_showcase.json",
   "theme": "executive_premium_minimal",
   "preview_source": "rendered_pptx",
-  "preview_manifest": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/preview-manifest.json",
-  "thumbnail_sheet": "/Users/danyellambert/ppt_creator_app/docs/layout_audit/layout_showcase_audit-thumbnails.png",
+  "preview_manifest": "services/ppt_creator_app/docs/layout_audit/preview-manifest.json",
+  "thumbnail_sheet": "services/ppt_creator_app/docs/layout_audit/layout_showcase_audit-thumbnails.png",
   "review_status": "ok",
   "average_score": 100,
   "audited_layouts": [

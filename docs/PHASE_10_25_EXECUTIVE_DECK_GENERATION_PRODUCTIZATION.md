@@ -184,8 +184,8 @@ The sibling project is already mature enough to enter as a specialized service.
 
 #### Main documentation
 
-- `/Users/danyellambert/ppt_creator_app/README.md`
-- `/Users/danyellambert/ppt_creator_app/NEXT_STEPS.md`
+- `services/ppt_creator_app/README.md`
+- `services/ppt_creator_app/NEXT_STEPS.md`
 
 #### Capabilities already available
 

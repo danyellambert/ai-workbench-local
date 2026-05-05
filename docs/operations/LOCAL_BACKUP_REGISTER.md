@@ -1,57 +1,67 @@
 # Local Backup Register
 
-This file records local safety backups created before repository hardening, seed extraction, multi-user refactoring, Dockerization, or deployment preparation.
+This file is a sanitized template for documenting local-only backups.
 
-Do not commit secrets, .env contents, API keys, or private credentials here.
+Do not commit:
 
-## Backup 2026-04-27 11:14 America/Sao_Paulo
+- private machine paths;
+- usernames;
+- real `.env` files;
+- SSH keys;
+- cloud credentials;
+- backup archives;
+- backup manifests containing private paths or secrets.
 
+Keep real backup paths and generated manifests in an ignored local location such as `runtime/repo_cleanup/` or another private backup directory.
+
+## Backup entry template
+
+Date/time:
+Timezone:
+Operator:
+Branch:
+Commit:
 Purpose:
 
-- Preserve the complete local working tree before production-readiness changes.
-- Preserve ignored state that Git branches do not protect.
-- Preserve runtime state, artifacts, benchmarks, local data, frontend build context, and source files.
-- Preserve Git history separately using a Git bundle.
+Backup type:
+- git bundle:
+- filesystem snapshot:
+- data-root archive:
+- database export:
+- other:
 
-Backup root:
+Local backup location:
+<private local path, not committed>
 
-/Users/danyellambert/Downloads/aula4_SAFE_BACKUP_2026_04_27_111457
+Included:
+- repository refs:
+- runtime state:
+- artifacts:
+- baseline/data:
+- users/overlays:
+- deployment env examples only:
 
-Working tree backup:
+Excluded:
+- real .env files:
+- secrets:
+- cloud credentials:
+- node_modules / virtualenvs:
+- generated caches:
+- private absolute paths:
 
-/Users/danyellambert/Downloads/aula4_SAFE_BACKUP_2026_04_27_111457/Aula 4 - Criacao de Chatbot com IA em Tempo Real
+Verification:
+- archive exists:
+- manifest reviewed:
+- restore tested:
+- no secrets found:
+- no private paths committed:
 
-Git bundle:
+Restore notes:
+<commands or private notes kept outside the public repository>
 
-/Users/danyellambert/Downloads/aula4_SAFE_BACKUP_2026_04_27_111457/repository_all_refs.bundle
+## Recommended storage
 
-Manifest:
+Store real backup registers and manifests outside Git, for example:
 
-/Users/danyellambert/Downloads/aula4_SAFE_BACKUP_2026_04_27_111457/MANIFEST.txt
-
-Source Git HEAD:
-
-1143ddce03df6da7a4d04503d0cf6db99f00710a
-
-Source branch:
-
-main
-
-Important local state preserved:
-
-- .runtime
-- .chroma_rag
-- .env
-- artifacts
-- benchmark_runs
-- benchmark_pdfs
-- data
-- frontend
-- src
-
-Validation notes:
-
-- Safe backup size: approximately 5.3 GB.
-- Git bundle verification: OK.
-- .git was intentionally excluded from the working tree backup.
-- Git history is preserved in repository_all_refs.bundle.
+- `runtime/repo_cleanup/local_backup_register_private.md`
+- `/private/backup/location/MANIFEST.txt`

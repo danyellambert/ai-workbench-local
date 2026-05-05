@@ -2,7 +2,7 @@
 
 **Status:** updated clean-runbook version  
 **Project name:** AI Decision Studio  
-**Legacy/internal course name:** do not use “Aula 4” in new public-facing docs, repository descriptions, Docker service names, or portfolio copy. Use **AI Decision Studio** or **AI Studio** instead.  
+**Legacy/internal naming:** do not use previous internal labels in new public-facing docs, repository descriptions, Docker service names, or portfolio copy. Use **AI Decision Studio** or **AI Studio** instead.
 **Core correction from previous attempt:** do **not** convert the product into frozen JSON payloads. Docker must run the real backend over a real, sanitized, functional baseline state.
 
 ---
@@ -739,7 +739,7 @@ Alternative public-facing name:
 data/demo_baseline/
 ```
 
-Avoid “Aula 4” naming in new paths.
+Avoid legacy/internal naming in new paths.
 
 ### Bundle structure
 
@@ -866,7 +866,7 @@ scripts/validate_functional_baseline.py
 - no raw API keys;
 - no tokens;
 - no local secret files;
-- no unreviewed `/Users/...` paths;
+- no unreviewed `/private/local/user` paths;
 - no path traversal;
 - no missing referenced files.
 

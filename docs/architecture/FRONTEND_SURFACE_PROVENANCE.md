@@ -145,7 +145,7 @@ Provider credentials for workflows are separate from baseline document listing.
 
 ### Path rewrite requirement
 
-Do not commit unreviewed absolute paths such as `/Users/...`.
+Do not commit unreviewed absolute paths such as `/private/local/user`.
 
 Rewrite local or service-specific paths into logical URIs and validate every referenced file.
 

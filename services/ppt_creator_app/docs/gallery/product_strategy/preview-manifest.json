@@ -2,7 +2,7 @@
   "manifest_version": 1,
   "mode": "preview",
   "basename": "product_strategy",
-  "output_dir": "/Users/danyellambert/ppt_creator_app/docs/gallery/product_strategy",
+  "output_dir": "services/ppt_creator_app/docs/gallery/product_strategy",
   "presentation_title": "Product strategy priorities",
   "theme": "consulting_clean",
   "preview_count": 5,
@@ -17,27 +17,27 @@
     {
       "slide_number": 1,
       "filename": "product_strategy-01.png",
-      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/product_strategy/product_strategy-01.png"
+      "path": "services/ppt_creator_app/docs/gallery/product_strategy/product_strategy-01.png"
     },
     {
       "slide_number": 2,
       "filename": "product_strategy-02.png",
-      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/product_strategy/product_strategy-02.png"
+      "path": "services/ppt_creator_app/docs/gallery/product_strategy/product_strategy-02.png"
     },
     {
       "slide_number": 3,
       "filename": "product_strategy-03.png",
-      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/product_strategy/product_strategy-03.png"
+      "path": "services/ppt_creator_app/docs/gallery/product_strategy/product_strategy-03.png"
     },
     {
       "slide_number": 4,
       "filename": "product_strategy-04.png",
-      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/product_strategy/product_strategy-04.png"
+      "path": "services/ppt_creator_app/docs/gallery/product_strategy/product_strategy-04.png"
     },
     {
       "slide_number": 5,
       "filename": "product_strategy-05.png",
-      "path": "/Users/danyellambert/ppt_creator_app/docs/gallery/product_strategy/product_strategy-05.png"
+      "path": "services/ppt_creator_app/docs/gallery/product_strategy/product_strategy-05.png"
     }
   ]
 }

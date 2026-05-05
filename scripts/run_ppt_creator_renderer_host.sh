@@ -11,7 +11,9 @@ if [[ -f "$ROOT/.env" ]]; then
   done < "$ROOT/.env"
 fi
 
-APP_ROOT="${PPT_CREATOR_APP_ROOT:-/Users/danyellambert/ppt_creator_app}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+APP_ROOT="${PPT_CREATOR_APP_ROOT:-$REPO_ROOT/services/ppt_creator_app}"
 PYTHON_BIN="${PPT_CREATOR_APP_PYTHON_BIN:-$APP_ROOT/.conda-env/bin/python}"
 HOST="${PPT_CREATOR_APP_HOST:-127.0.0.1}"
 PORT="${PPT_CREATOR_APP_PORT:-8787}"

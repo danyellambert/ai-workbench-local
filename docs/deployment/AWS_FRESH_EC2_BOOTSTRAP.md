@@ -187,7 +187,7 @@ On the EC2 host:
 
 From your local Mac checkout:
 
-    cd "/Users/danyellambert/Downloads/Aula 4 - Criacao de Chatbot com IA em Tempo Real"
+    cd "/path/to/ai-decision-studio"
 
     git status --short
     scripts/build_oracle_deployment_bundle.sh

@@ -46,7 +46,7 @@ Golden Surface is a parity ruler only. It is not the Docker seed source and must
 
 ## Review findings
 
-The raw snapshot contains absolute local paths under artifact payloads, including `/Users/.../artifacts/presentation_exports/...`.
+The raw snapshot contains absolute local paths under artifact payloads, including `/private/local/user/artifacts/presentation_exports/...`.
 
 Therefore:
 
