@@ -84,7 +84,6 @@ ai_lab_golden_state/
 .env.production.local
 
 # Versioned safe examples.
-!.env.example
 !.env.local.example
 !.env.docker.example
 !.env.aws.example

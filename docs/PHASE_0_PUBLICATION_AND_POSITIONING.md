@@ -7,7 +7,7 @@ Establish a safe and publishable foundation for the repository before expanding 
 ## What changed
 
 - secrets and configuration moved toward environment-based handling
-- `.env.example` became part of the repository setup
+- the initial all-in-one env example later evolved into environment-specific examples
 - `.gitignore` was reviewed to keep local and sensitive material out of version control
 - the repository received a clearer project name and a more explicit problem statement
 
@@ -17,7 +17,7 @@ This phase created the minimum level of repository hygiene required for everythi
 
 ## Key artifacts
 
-- `.env.example`
+- environment-specific env examples: `.env.local.example`, `.env.docker.example`, `.env.aws.example`, `.env.oracle.example`
 - `.gitignore`
 - the root `README.md`
 

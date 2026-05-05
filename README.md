@@ -311,7 +311,7 @@ pip install -r requirements.txt
 ### 2. Create your environment file
 
 ```bash
-cp .env.example .env
+cp .env.local.example .env.local
 ```
 
 ### 3. Run the local product stack
@@ -444,7 +444,7 @@ This split matters because the repository already contains both a **product-faci
 
 ## Configuration themes
 
-The `.env.example` file reflects the intended shape of the platform:
+Environment-specific example files define the intended runtime contracts:
 
 - local runtime defaults for **Ollama**
 - optional **OpenAI** and **Hugging Face** lanes
