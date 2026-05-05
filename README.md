@@ -367,8 +367,8 @@ ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
 These entrypoints are preserved as earlier engineering surfaces. They are useful for understanding the project evolution, but they are not the primary product path.
 
 ```bash
-streamlit run main.py
-streamlit run main_openai.py
+streamlit run legacy/entrypoints/main_streamlit_lab.py
+streamlit run legacy/entrypoints/main_openai_streamlit.py
 ```
 
 The historical Streamlit Docker image is intentionally labeled as legacy:
@@ -380,7 +380,7 @@ docker build -f Dockerfile.legacy-streamlit -t ai-decision-studio-streamlit-lega
 ### 8. Optional: run the historical Gradio product surface
 
 ```bash
-python main_gradio.py
+python legacy/entrypoints/main_gradio_product_surface.py
 ```
 
 ### 9. Optional: start the executive renderer host helper

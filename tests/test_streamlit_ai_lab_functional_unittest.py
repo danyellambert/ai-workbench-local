@@ -789,7 +789,7 @@ class StreamlitAiLabFunctionalTests(unittest.TestCase):
                 )
 
             mocks = SimpleNamespace(**{name: stack.enter_context(patcher) for name, patcher in common_patches.items()})
-            app = AppTest.from_file("main.py")
+            app = AppTest.from_file("legacy/entrypoints/main_streamlit_lab.py")
             app.run(timeout=30)
             yield app, temp_root, mocks, provider, rag_settings
 
@@ -894,7 +894,7 @@ class StreamlitAiLabFunctionalTests(unittest.TestCase):
             self._build_real_uploaded_file("data/corpus_revisado/option_b_synthetic_premium/README_plus_metadata.txt"),
             self._build_real_uploaded_file("data/corpus_revisado/option_b_storylines.csv"),
             self._build_real_uploaded_file("data/corpus_revisado/option_a_public_corpus_v2/contracts_and_procurement/common_paper_sla.md"),
-            self._build_real_uploaded_file("main.py"),
+            self._build_real_uploaded_file("legacy/entrypoints/main_streamlit_lab.py"),
         ]
 
         def _rag_settings_transform(rag_settings: RagSettings) -> RagSettings:

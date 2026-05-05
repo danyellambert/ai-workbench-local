@@ -13,7 +13,7 @@ script_run_context._LOGGER.disabled = True
 
 class StreamlitAppSmokeTests(unittest.TestCase):
     def test_main_openai_compatible_app_renders_and_handles_local_fallback_chat(self) -> None:
-        app = AppTest.from_file("main_openai.py")
+        app = AppTest.from_file("legacy/entrypoints/main_openai_streamlit.py")
         app.run(timeout=20)
 
         self.assertEqual(len(app.exception), 0)
@@ -31,7 +31,7 @@ class StreamlitAppSmokeTests(unittest.TestCase):
         self.assertIn("OPENAI_API_KEY", messages[-1]["content"])
 
     def test_main_ai_lab_renders_core_tabs_and_operational_controls(self) -> None:
-        app = AppTest.from_file("main.py")
+        app = AppTest.from_file("legacy/entrypoints/main_streamlit_lab.py")
         app.run(timeout=20)
 
         self.assertEqual(len(app.exception), 0)

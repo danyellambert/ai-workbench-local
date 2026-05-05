@@ -4,7 +4,7 @@ try:
     import gradio as gr  # noqa: F401
 except Exception as error:  # pragma: no cover - CLI guard
     raise SystemExit(
-        "Gradio is not installed in the current environment. Add `gradio` to the environment before running `main_gradio.py`."
+        "Gradio is not installed in the current environment. Add `gradio` to the environment before running `legacy/entrypoints/main_gradio_product_surface.py`."
     ) from error
 
 from src.app.product_bootstrap import build_product_bootstrap

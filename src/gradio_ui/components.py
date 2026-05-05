@@ -61,7 +61,7 @@ def build_step_header_html(*, step: str, title: str, body: str) -> str:
 
 def build_topbar_html(*, app_name: str, show_ai_lab_entry: bool = True) -> str:
     link_html = (
-        '<a class="product-link-pill" href="./main.py" target="_blank">Open AI Lab</a>'
+        '<span class="product-link-pill">Historical AI Lab: legacy/entrypoints/main_streamlit_lab.py</span>'
         if show_ai_lab_entry
         else ""
     )
