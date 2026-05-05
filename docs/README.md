@@ -6,6 +6,7 @@ Start here if you are new to the repository:
 
 - product/overview.md — what the product is today and what surfaces are active.
 - architecture/current-product-surface.md — how the frontend, product API, sidecars, and data roots relate.
+- architecture/frontend-parity.md — curated frontend parity reference for the current product surface.
 - architecture/data-payload.md — the versioned Docker/AWS data payload and the four mounted roots.
 - deployment/local-docker-compose.md — how to run the current product locally with Docker Compose.
 - deployment/aws-slim-deploy.md — how the AWS slim deployment is structured.
