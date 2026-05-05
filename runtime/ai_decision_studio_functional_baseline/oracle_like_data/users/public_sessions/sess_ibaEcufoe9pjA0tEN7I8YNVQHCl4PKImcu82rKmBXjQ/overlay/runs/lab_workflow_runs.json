@@ -1,0 +1,2424 @@
+[
+  {
+    "run_id": "run_document_review_9e857ae3f7e7",
+    "task_id": "document_review",
+    "workflow_id": "document_review",
+    "created_at": "2026-05-02T21:44:55.710347+00:00",
+    "updated_at": "2026-05-02T21:44:55.710350+00:00",
+    "status": "warning",
+    "input_text": "",
+    "document_ids": [
+      "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+    ],
+    "document_names": [
+      "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+    ],
+    "confidence": 0.9,
+    "needs_review": true,
+    "source_count": 4,
+    "provider": "ollama_hosted",
+    "model": "nemotron-3-nano:30b-cloud",
+    "review_reason": "No explicit liability cap amount is specified in the Agreement; Open-ended questions may require additional human reading when the document has contextual ambiguity.",
+    "summary": "CTR-010 Master Service Agreement Review: 2 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Uncapped liability exposure Main evidence gap: No explicit liability cap amount is specified in the Agreement",
+    "execution_mode": "product_api_public_overlay",
+    "result_title": "Document Review result",
+    "trace_id": "trace_document_review_7d3ba61c8126",
+    "latency_s": 27.4667,
+    "total_tokens": 8095.0,
+    "context_chars": 4980.0,
+    "result": {
+      "workflow_id": "document_review",
+      "workflow_label": "Document Review",
+      "status": "warning",
+      "summary": "CTR-010 Master Service Agreement Review: 2 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Uncapped liability exposure Main evidence gap: No explicit liability cap amount is specified in the Agreement",
+      "highlights": [
+        "Uncapped liability exposure",
+        "Short claim limitation period",
+        "No explicit liability cap amount is specified in the Agreement",
+        "Assess need for liability cap amendment"
+      ],
+      "recommendation": "Assess need for liability cap amendment",
+      "structured_result": {
+        "success": true,
+        "task_type": "document_agent",
+        "execution_id": "6c281cbe-f418-4c11-b6c6-c173d05fb32b",
+        "executed_at": "2026-05-02T21:44:55.623331",
+        "raw_output_text": null,
+        "parsed_json": {
+          "task_type": "document_agent",
+          "schema_version": "1.0",
+          "agent_label": "Document Operations Copilot",
+          "user_intent": "document_risk_review",
+          "intent_reason": "product_workflow_default:document_review",
+          "answer_mode": "friendly",
+          "tool_used": "review_document_risks",
+          "summary": "CTR-010 Master Service Agreement Review: 2 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Uncapped liability exposure Main evidence gap: No explicit liability cap amount is specified in the Agreement",
+          "key_points": [
+            "Uncapped liability exposure",
+            "Short claim limitation period",
+            "No explicit liability cap amount is specified in the Agreement",
+            "Assess need for liability cap amendment"
+          ],
+          "limitations": [
+            "No explicit liability cap amount is specified in the Agreement",
+            "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+          ],
+          "recommended_actions": [
+            "Assess need for liability cap amendment",
+            "Open the cited source excerpts to confirm the interpretation before acting."
+          ],
+          "guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled by document scan to prioritize broader document coverage.",
+            "The response includes traceable sources for manual auditing.",
+            "The agent avoids stating facts without strong grounding in the selected documents."
+          ],
+          "available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": false,
+              "availability_reason": "requires_at_least_2_documents"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "compared_documents": [],
+          "comparison_findings": [],
+          "document_review_decision_summary": null,
+          "document_review_findings": [],
+          "document_review_top_blockers": [],
+          "document_review_business_impact": [],
+          "checklist_preview": [],
+          "structured_response": {
+            "review_type": "risk_gap_review",
+            "risks": [
+              "Uncapped liability exposure",
+              "Short claim limitation period"
+            ],
+            "gaps": [
+              "No explicit liability cap amount is specified in the Agreement"
+            ],
+            "actions": [
+              "Assess need for liability cap amendment"
+            ],
+            "extraction_payload": {
+              "task_type": "extraction",
+              "schema_version": "1.0",
+              "main_subject": "CTR-010 Master Service Agreement Review",
+              "entities": [
+                {
+                  "type": "organization",
+                  "value": "Meridian Holdings Ltd.",
+                  "confidence": 0.96,
+                  "source_text": "Meridian Holdings Ltd. (Customer)",
+                  "position_start": 0,
+                  "position_end": 30
+                },
+                {
+                  "type": "organization",
+                  "value": "Northwind Cloud Systems LLC",
+                  "confidence": 0.96,
+                  "source_text": "Northwind Cloud Systems LLC (Provider)",
+                  "position_start": 31,
+                  "position_end": 70
+                },
+                {
+                  "type": "organization",
+                  "value": "State of Delaware",
+                  "confidence": 0.95,
+                  "source_text": "Governing Law State of Delaware",
+                  "position_start": 120,
+                  "position_end": 140
+                },
+                {
+                  "type": "person",
+                  "value": "Document Review",
+                  "confidence": 0.9,
+                  "source_text": "Document Review",
+                  "position_start": 119,
+                  "position_end": 134
+                }
+              ],
+              "categories": [
+                "Master Service Agreement",
+                "Contract",
+                "Agreement",
+                "Legal Agreement"
+              ],
+              "relationships": [
+                {
+                  "from_entity": "Meridian Holdings Ltd.",
+                  "to_entity": "Northwind Cloud Systems LLC",
+                  "relationship": "counterparty",
+                  "confidence": 0.9,
+                  "evidence": "Meridian Holdings Ltd. (Customer) and Northwind Cloud Systems LLC (Provider)"
+                }
+              ],
+              "extracted_fields": [
+                {
+                  "name": "effective_date",
+                  "value": "2024-01-15",
+                  "evidence": "Effective Date 2024-01-15"
+                },
+                {
+                  "name": "annual_contract_value",
+                  "value": "USD 2,400,000 annually",
+                  "evidence": "Annual Contract Value USD 2,400,000 annually"
+                },
+                {
+                  "name": "initial_term",
+                  "value": "36 months",
+                  "evidence": "Initial Term 36 months starting 2024-01-15"
+                },
+                {
+                  "name": "governing_law",
+                  "value": "State of Delaware",
+                  "evidence": "Governing Law State of Delaware"
+                },
+                {
+                  "name": "renewal_notice_period",
+                  "value": "90 days",
+                  "evidence": "notice is delivered 90 days before the renewal date"
+                },
+                {
+                  "name": "document_type",
+                  "value": "Master Service Agreement",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                },
+                {
+                  "name": "counterparties",
+                  "value": "Meridian Holdings Ltd.; Northwind Cloud Systems LLC; State of Delaware",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                },
+                {
+                  "name": "covered_clauses",
+                  "value": "Governing Law",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                }
+              ],
+              "important_dates": [
+                "2024-01-15",
+                "2024-01-12"
+              ],
+              "important_numbers": [
+                "12"
+              ],
+              "risks": [
+                {
+                  "description": "Uncapped liability exposure",
+                  "impact": "Potential unlimited financial liability for general commercial claims",
+                  "owner": null,
+                  "due_date": null,
+                  "evidence": "Clause 7.3 — Unlimited Liability. Each party shall be liable to the other for all losses, damages, costs, and expenses arising out of or related to this Agreement, and no monetary cap or aggregate limit shall apply unless expressly stated in the applicable service order."
+                },
+                {
+                  "description": "Short claim limitation period",
+                  "impact": "Reduced window to bring claims compared to Meridian’s 24‑month standard",
+                  "owner": null,
+                  "due_date": "within twelve (12) months after the event giving rise to the claim, regardless of any contrary statute of",
+                  "evidence": "Clause 7.8 — Limitation Period. Any claim arising under or related to this Agreement must be brought within twelve (12) months after the event giving rise to the claim, regardless of any contrary statute of limitations."
+                }
+              ],
+              "action_items": [
+                {
+                  "description": "Assess need for liability cap amendment",
+                  "owner": "Legal",
+                  "due_date": null,
+                  "status": "pending",
+                  "evidence": "Section 7.3 creates uncapped financial exposure; consider adding a liability cap."
+                }
+              ],
+              "missing_information": [
+                "No explicit liability cap amount is specified in the Agreement"
+              ]
+            },
+            "findings_synthesis_metadata": {
+              "success": false,
+              "skipped": true,
+              "reason": "document_review_findings_synthesis_disabled"
+            }
+          },
+          "sources": [
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 1,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMaster Service Agreement v4.2\nCounterparty draft used by Meridian for legal review and workflow testing.\nDocument ID\nCTR-010\nOwner\nLegal / Procurement\nStatus\nCounterparty Draft — Under Revi"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 2,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "nder written service orders. Applicable service\nlevels are set out in the Cloud Infrastructure SLA, and personal-data obligations are addressed in the Data Processing\nAddendum 2024. In the event of inconsistency, the more specific document governs only for the subject matter it expressly\ncovers.\nCommercial Schedule\nField\nDraft Position\nInitial Term\n36 months starting 2024-01-15\nRenewal\nAutomatic 1"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 3,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "commercially reasonable efforts to investigate security events\naffecting the Services and shall keep Customer reasonably informed of material developments.\nClause 2.9 — Audit Materials. Provider may satisfy diligence requests by providing a current certification package,\nexecutive summary, or other summary materials selected by Provider. Customer shall not have an on-site or remote audit\n[Page 2]\n"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 4,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "in such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements, derived schemas, prompt patterns, runbooks, or\nautomation artifacts developed jointly in connection with the Services shall be jointly owned by the parties, and each party\nmay use such derivatives without further consent or accounting to the other party.\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-01"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 5,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "ndemnification. Provider shall defend and indemnify Customer from third-party claims alleging\nintellectual-property infringement or unauthorized disclosure of Customer Data caused by Provider. Customer shall defend\nand indemnify Provider for claims arising from Customer materials or configurations supplied by Customer. Neither party\nwill be responsible for consequential damages outside this sectio"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 6,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "6) months unless terminated earlier in accordance with this\nAgreement.\nClause 8.2 — Automatic Renewal. Following the initial term, the Agreement renews automatically for successive\ntwelve-month periods unless either party delivers written notice of non-renewal at least ninety (90) days before the end of\nthe then-current term.\nClause 8.4 — Termination for Convenience. Neither party may terminate th"
+            }
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "review_document_risks",
+              "status": "success",
+              "detail": "Risk and gap analysis completed."
+            }
+          ],
+          "confidence": 0.9,
+          "needs_review": false,
+          "needs_review_reason": null
+        },
+        "validated_output": {
+          "task_type": "document_agent",
+          "schema_version": "1.0",
+          "agent_label": "Document Operations Copilot",
+          "user_intent": "document_risk_review",
+          "intent_reason": "product_workflow_default:document_review",
+          "answer_mode": "friendly",
+          "tool_used": "review_document_risks",
+          "summary": "CTR-010 Master Service Agreement Review: 2 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Uncapped liability exposure Main evidence gap: No explicit liability cap amount is specified in the Agreement",
+          "key_points": [
+            "Uncapped liability exposure",
+            "Short claim limitation period",
+            "No explicit liability cap amount is specified in the Agreement",
+            "Assess need for liability cap amendment"
+          ],
+          "limitations": [
+            "No explicit liability cap amount is specified in the Agreement",
+            "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+          ],
+          "recommended_actions": [
+            "Assess need for liability cap amendment",
+            "Open the cited source excerpts to confirm the interpretation before acting."
+          ],
+          "guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled by document scan to prioritize broader document coverage.",
+            "The response includes traceable sources for manual auditing.",
+            "The agent avoids stating facts without strong grounding in the selected documents."
+          ],
+          "available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": false,
+              "availability_reason": "requires_at_least_2_documents"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "compared_documents": [],
+          "comparison_findings": [],
+          "document_review_decision_summary": null,
+          "document_review_findings": [],
+          "document_review_top_blockers": [],
+          "document_review_business_impact": [],
+          "checklist_preview": [],
+          "structured_response": {
+            "review_type": "risk_gap_review",
+            "risks": [
+              "Uncapped liability exposure",
+              "Short claim limitation period"
+            ],
+            "gaps": [
+              "No explicit liability cap amount is specified in the Agreement"
+            ],
+            "actions": [
+              "Assess need for liability cap amendment"
+            ],
+            "extraction_payload": {
+              "task_type": "extraction",
+              "schema_version": "1.0",
+              "main_subject": "CTR-010 Master Service Agreement Review",
+              "entities": [
+                {
+                  "type": "organization",
+                  "value": "Meridian Holdings Ltd.",
+                  "confidence": 0.96,
+                  "source_text": "Meridian Holdings Ltd. (Customer)",
+                  "position_start": 0,
+                  "position_end": 30
+                },
+                {
+                  "type": "organization",
+                  "value": "Northwind Cloud Systems LLC",
+                  "confidence": 0.96,
+                  "source_text": "Northwind Cloud Systems LLC (Provider)",
+                  "position_start": 31,
+                  "position_end": 70
+                },
+                {
+                  "type": "organization",
+                  "value": "State of Delaware",
+                  "confidence": 0.95,
+                  "source_text": "Governing Law State of Delaware",
+                  "position_start": 120,
+                  "position_end": 140
+                },
+                {
+                  "type": "person",
+                  "value": "Document Review",
+                  "confidence": 0.9,
+                  "source_text": "Document Review",
+                  "position_start": 119,
+                  "position_end": 134
+                }
+              ],
+              "categories": [
+                "Master Service Agreement",
+                "Contract",
+                "Agreement",
+                "Legal Agreement"
+              ],
+              "relationships": [
+                {
+                  "from_entity": "Meridian Holdings Ltd.",
+                  "to_entity": "Northwind Cloud Systems LLC",
+                  "relationship": "counterparty",
+                  "confidence": 0.9,
+                  "evidence": "Meridian Holdings Ltd. (Customer) and Northwind Cloud Systems LLC (Provider)"
+                }
+              ],
+              "extracted_fields": [
+                {
+                  "name": "effective_date",
+                  "value": "2024-01-15",
+                  "evidence": "Effective Date 2024-01-15"
+                },
+                {
+                  "name": "annual_contract_value",
+                  "value": "USD 2,400,000 annually",
+                  "evidence": "Annual Contract Value USD 2,400,000 annually"
+                },
+                {
+                  "name": "initial_term",
+                  "value": "36 months",
+                  "evidence": "Initial Term 36 months starting 2024-01-15"
+                },
+                {
+                  "name": "governing_law",
+                  "value": "State of Delaware",
+                  "evidence": "Governing Law State of Delaware"
+                },
+                {
+                  "name": "renewal_notice_period",
+                  "value": "90 days",
+                  "evidence": "notice is delivered 90 days before the renewal date"
+                },
+                {
+                  "name": "document_type",
+                  "value": "Master Service Agreement",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                },
+                {
+                  "name": "counterparties",
+                  "value": "Meridian Holdings Ltd.; Northwind Cloud Systems LLC; State of Delaware",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                },
+                {
+                  "name": "covered_clauses",
+                  "value": "Governing Law",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                }
+              ],
+              "important_dates": [
+                "2024-01-15",
+                "2024-01-12"
+              ],
+              "important_numbers": [
+                "12"
+              ],
+              "risks": [
+                {
+                  "description": "Uncapped liability exposure",
+                  "impact": "Potential unlimited financial liability for general commercial claims",
+                  "owner": null,
+                  "due_date": null,
+                  "evidence": "Clause 7.3 — Unlimited Liability. Each party shall be liable to the other for all losses, damages, costs, and expenses arising out of or related to this Agreement, and no monetary cap or aggregate limit shall apply unless expressly stated in the applicable service order."
+                },
+                {
+                  "description": "Short claim limitation period",
+                  "impact": "Reduced window to bring claims compared to Meridian’s 24‑month standard",
+                  "owner": null,
+                  "due_date": "within twelve (12) months after the event giving rise to the claim, regardless of any contrary statute of",
+                  "evidence": "Clause 7.8 — Limitation Period. Any claim arising under or related to this Agreement must be brought within twelve (12) months after the event giving rise to the claim, regardless of any contrary statute of limitations."
+                }
+              ],
+              "action_items": [
+                {
+                  "description": "Assess need for liability cap amendment",
+                  "owner": "Legal",
+                  "due_date": null,
+                  "status": "pending",
+                  "evidence": "Section 7.3 creates uncapped financial exposure; consider adding a liability cap."
+                }
+              ],
+              "missing_information": [
+                "No explicit liability cap amount is specified in the Agreement"
+              ]
+            },
+            "findings_synthesis_metadata": {
+              "success": false,
+              "skipped": true,
+              "reason": "document_review_findings_synthesis_disabled"
+            }
+          },
+          "sources": [
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 1,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMaster Service Agreement v4.2\nCounterparty draft used by Meridian for legal review and workflow testing.\nDocument ID\nCTR-010\nOwner\nLegal / Procurement\nStatus\nCounterparty Draft — Under Revi"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 2,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "nder written service orders. Applicable service\nlevels are set out in the Cloud Infrastructure SLA, and personal-data obligations are addressed in the Data Processing\nAddendum 2024. In the event of inconsistency, the more specific document governs only for the subject matter it expressly\ncovers.\nCommercial Schedule\nField\nDraft Position\nInitial Term\n36 months starting 2024-01-15\nRenewal\nAutomatic 1"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 3,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "commercially reasonable efforts to investigate security events\naffecting the Services and shall keep Customer reasonably informed of material developments.\nClause 2.9 — Audit Materials. Provider may satisfy diligence requests by providing a current certification package,\nexecutive summary, or other summary materials selected by Provider. Customer shall not have an on-site or remote audit\n[Page 2]\n"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 4,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "in such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements, derived schemas, prompt patterns, runbooks, or\nautomation artifacts developed jointly in connection with the Services shall be jointly owned by the parties, and each party\nmay use such derivatives without further consent or accounting to the other party.\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-01"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 5,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "ndemnification. Provider shall defend and indemnify Customer from third-party claims alleging\nintellectual-property infringement or unauthorized disclosure of Customer Data caused by Provider. Customer shall defend\nand indemnify Provider for claims arising from Customer materials or configurations supplied by Customer. Neither party\nwill be responsible for consequential damages outside this sectio"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 6,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "6) months unless terminated earlier in accordance with this\nAgreement.\nClause 8.2 — Automatic Renewal. Following the initial term, the Agreement renews automatically for successive\ntwelve-month periods unless either party delivers written notice of non-renewal at least ninety (90) days before the end of\nthe then-current term.\nClause 8.4 — Termination for Convenience. Neither party may terminate th"
+            }
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "review_document_risks",
+              "status": "success",
+              "detail": "Risk and gap analysis completed."
+            }
+          ],
+          "confidence": 0.9,
+          "needs_review": false,
+          "needs_review_reason": null
+        },
+        "error": null,
+        "validation_error": null,
+        "parsing_error": null,
+        "repair_applied": false,
+        "source_documents": [
+          "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+        ],
+        "context_used": true,
+        "execution_metadata": {
+          "agent_intent": "document_risk_review",
+          "agent_intent_label": "Document risk review",
+          "agent_intent_reason": "product_workflow_default:document_review",
+          "agent_tool": "review_document_risks",
+          "agent_tool_label": "Review risks and gaps",
+          "agent_tool_reason": "product_workflow_default:document_review",
+          "agent_answer_mode": "friendly",
+          "agent_context_strategy": "document_scan",
+          "agent_document_count": 1,
+          "agent_source_count": 6,
+          "agent_available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": false,
+              "availability_reason": "requires_at_least_2_documents"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "needs_review": false,
+          "needs_review_reason": null,
+          "agent_limitations": [
+            "No explicit liability cap amount is specified in the Agreement",
+            "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+          ],
+          "agent_recommended_actions": [
+            "Assess need for liability cap amendment",
+            "Open the cited source excerpts to confirm the interpretation before acting."
+          ],
+          "agent_guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled by document scan to prioritize broader document coverage.",
+            "The response includes traceable sources for manual auditing.",
+            "The agent avoids stating facts without strong grounding in the selected documents."
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "review_document_risks",
+              "status": "success",
+              "detail": "Risk and gap analysis completed."
+            }
+          ],
+          "retrieval_backend_used": null,
+          "retrieval_backend_message": null,
+          "retrieval_strategy_used": null,
+          "retrieval_strategy_requested": null,
+          "execution_strategy_requested": "langgraph_context_retry",
+          "execution_strategy_used": "langgraph_context_retry",
+          "execution_strategy_fallback_reason": null,
+          "workflow_id": "lgw-2aa09ad7",
+          "workflow_route_decision": "coverage_first_document_agent",
+          "workflow_guardrail_decision": "finish_ok",
+          "provider": "ollama_hosted",
+          "provider_requested": "ollama_hosted",
+          "provider_effective": "ollama_hosted",
+          "model": "nemotron-3-nano:30b-cloud",
+          "resolved_context_window": 8192,
+          "context_window_cap": 8192,
+          "document_chars_estimate": 7329,
+          "telemetry": {
+            "product_workflow_id": "document_review",
+            "product_workflow_label": "Document Review",
+            "product_surface": "gradio",
+            "product_workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md",
+            "product_workflow_expected_outputs": [
+              "Executive review summary",
+              "Grounded findings and risks",
+              "Recommended next actions",
+              "Document Review deck artifact"
+            ],
+            "product_deck_export_kind": "document_review_deck",
+            "agent_intent": "document_risk_review",
+            "agent_tool": "review_document_risks",
+            "agent_answer_mode": "friendly",
+            "document_review_findings_synthesis_enabled": false,
+            "document_review_findings_prompt_style": "hybrid",
+            "agent_intent_reason": "product_workflow_default:document_review",
+            "agent_tool_reason": "product_workflow_default:document_review",
+            "agent_context_strategy": "document_scan",
+            "provider_requested": "ollama_hosted",
+            "provider_effective": "ollama_hosted",
+            "agent_available_tools": [
+              {
+                "name": "consult_documents",
+                "label": "Consult indexed documents",
+                "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "summarize_document",
+                "label": "Summarize document",
+                "description": "Generate a grounded executive summary for the selected document or document set.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "draft_business_response",
+                "label": "Draft document-grounded response",
+                "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "extract_structured_data",
+                "label": "Extract structured information",
+                "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+                "answer_mode": "json",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "compare_documents",
+                "label": "Compare documents",
+                "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+                "answer_mode": "comparison_structured",
+                "min_document_count": 2,
+                "available": false,
+                "availability_reason": "requires_at_least_2_documents"
+              },
+              {
+                "name": "generate_operational_checklist",
+                "label": "Generate operational checklist",
+                "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+                "answer_mode": "checklist",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "review_policy_compliance",
+                "label": "Review policy/compliance",
+                "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "review_document_risks",
+                "label": "Review risks and gaps",
+                "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "extract_operational_tasks",
+                "label": "Extract operational tasks",
+                "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "assist_technical_document",
+                "label": "Assist technical document",
+                "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              }
+            ],
+            "provider_calls": [
+              {
+                "stage": "extraction_single_pass",
+                "provider": "ollama_hosted",
+                "provider_requested": "ollama_hosted",
+                "model": "nemotron-3-nano:30b-cloud",
+                "duration_s": 23.503,
+                "prompt_chars": 13135,
+                "context_window": 8192,
+                "temperature": 0.0,
+                "top_p": 0.7,
+                "max_tokens": 8192,
+                "prompt_profile": "neutro",
+                "success": true,
+                "native_usage": {
+                  "usage_source": "ollama_native_usage",
+                  "cost_source": "provider_native_usage_unpriced",
+                  "prompt_tokens": 2986,
+                  "completion_tokens": 5109,
+                  "total_tokens": 8095
+                }
+              }
+            ],
+            "timings_s": {
+              "document_load_s": 0.0868,
+              "provider_total_s": 23.503,
+              "parsing_s": 0.0292,
+              "total_s": 24.0624
+            },
+            "parse_attempts": [
+              {
+                "stage": "extraction_single_pass",
+                "strategy": "initial",
+                "success": true
+              }
+            ]
+          },
+          "workflow_total_s": 24.7728,
+          "workflow_attempts": 1,
+          "workflow_context_strategies": [
+            "document_scan"
+          ],
+          "workflow_trace": [
+            {
+              "node": "prepare_agent_request",
+              "detail": "Preparing initial request for the document agent",
+              "attempt": 1,
+              "context_strategy": "retrieval"
+            },
+            {
+              "node": "classify_intent",
+              "detail": "Using explicit agent intent from telemetry: product_workflow_default:document_review",
+              "attempt": 1,
+              "context_strategy": "retrieval"
+            },
+            {
+              "node": "select_tool",
+              "detail": "Using explicit agent tool from telemetry: product_workflow_default:document_review",
+              "attempt": 1,
+              "context_strategy": "retrieval"
+            },
+            {
+              "node": "route_agent_context_strategy",
+              "detail": "Selecting agent context strategy: coverage_first_document_agent",
+              "attempt": 1,
+              "context_strategy": "document_scan"
+            },
+            {
+              "node": "execute_task",
+              "detail": "Executing structured_service within the LangGraph workflow",
+              "attempt": 1,
+              "context_strategy": "document_scan",
+              "success": true
+            },
+            {
+              "node": "evaluate_agent_guardrails",
+              "detail": "Agent response accepted with no additional guardrail",
+              "attempt": 1,
+              "context_strategy": "document_scan",
+              "success": true
+            }
+          ],
+          "workflow_node_count": 6
+        },
+        "available_render_modes": [
+          {
+            "mode": "json",
+            "label": "JSON",
+            "available": true,
+            "priority": 1
+          },
+          {
+            "mode": "friendly",
+            "label": "Friendly view",
+            "available": true,
+            "priority": 0
+          }
+        ],
+        "primary_render_mode": "friendly",
+        "overall_confidence": 0.9,
+        "quality_score": 0.9
+      },
+      "grounding_preview": {
+        "strategy": "retrieval",
+        "document_ids": [
+          "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+        ],
+        "context_chars": 4980,
+        "source_block_count": 4,
+        "preview_text": "[Source: Master Service Agreement v4.2.pdf]\ncommercially reasonable efforts to investigate security events\naffecting the Services and shall keep Customer reasonably informed of material developments.\nClause 2.9 — Audit Materials. Provider may satisfy diligence requests by providing a current certification package,\nexecutive summary, or other summary materials selected by Provider. Customer shall not have an on-site or remote audit\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nright unless required by non-waivable law.\nReview cue: clauses 2.7 and 2.9 are intentionally softer than Meridian policy and baseline language. They\nare suitable targets for contract-gap extraction and recommendation workflows.\n3. Data Use and Intellectual Property\nClause 3.2 — Service Data. Provider may collect and use service telemetry, diagnostic output, and de-identified usage\ninformation to operate, secure, improve, and train Provider service features, provided that Provider does not intentionally\nidentify Customer personnel in such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements,\n\n[Source: Master Service Agreement v4.2.pdf]\nin such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements, derived schemas, prompt patterns, runbooks, or\nautomation artifacts developed jointly in connection with the Services shall be jointly owned by the parties, and each party\nmay use such derivatives without further consent or accounting to the other party.\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 3\n4. Liability and Indemnification\nClause 7.1 — Exclusion of Certain Damages. Neither party will be liable for lost profits, revenue, goodwill, or indirect,\nincidental, special, exemplary, or consequential damages, except to the extent such damages are awarded to a third party\nunder an indemnified claim.\nClause 7.3 — Unlimited Liability. Each party shall be liable to the other for all losses, damages, costs, and expenses\narising out of or related to this Agreement, and no monetary cap or aggregate limit shall apply unless expressly stated in the\napplicable service order.\nClause 7.5 — Indemnification. Provider shall defend and indemnify Customer from third-party cl\n\n[Source: Master Service Agreement v4.2.pdf]\nnder written service orders. Applicable service\nlevels are set out in the Cloud Infrastructure SLA, and personal-data obligations are addressed in the Data Processing\nAddendum 2024. In the event of inconsistency, the more specific document governs only for the subject matter it expressly\ncovers.\nCommercial Schedule\nField\nDraft Position\nInitial Term\n36 months starting 2024-01-15\nRenewal\nAutomatic 12-month renewals unless notice is delivered 90 days before the renewal date\nAnnual Contract Value\nUSD 2,400,000 excluding approved overages and taxes\nPrimary Services\nManaged retrieval cluster, secure API gateway, support coverage, analytics observability\nOrder of Precedence\nMSA → Service Order → Cloud Infrastructure SLA → Data Processing Addendum\n2. Security, Service, and Audit Support\nClause 2.4 — Reasonable Security Measures. Provider shall maintain administrative, technical, and physical safeguards\ndesigned to protect Customer Data against unauthorized access, loss, or misuse, using security measures consistent with\ngenerally accepted industry practice.\nClause 2.7 — Incident Cooperation. Provider shall use commercially reasonable efforts to investigate security events\naffecting the Ser\n\n[Source: Master Service Agreement v4.2.pdf]\n[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMaster Service Agreement v4.2\nCounterparty draft used by Meridian for legal review and workflow testing.\nDocument ID\nCTR-010\nOwner\nLegal / Procurement\nStatus\nCounterparty Draft — Under Review\nEffective Date\n2024-01-15\nCustomer\nMeridian Holdings Ltd.\nCounterparty\nNorthwind Cloud Systems LLC\nContract Value\nUSD 2,400,000 annually\nGoverning Law\nState of Delaware\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Parties, Scope, and Order of Precedence\nThis Master Service Agreement (the Agreement) is entered into by and between Meridian Holdings Ltd. (Customer) and\nNorthwind Cloud Systems LLC (Provider) for managed cloud retrieval, analytics acceleration, and knowledge-operations\nsupport services used by Meridian enterprise teams.\nThe Agreement governs production and pre-production services ordered under written service orders. Applicable service\nlevels are set out in the Cloud",
+        "warnings": []
+      },
+      "artifacts": [],
+      "deck_export_kind": "document_review_deck",
+      "deck_available": true,
+      "warnings": [
+        "No explicit liability cap amount is specified in the Agreement",
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "debug_metadata": {
+        "task_type": "document_agent",
+        "provider": "ollama_hosted",
+        "model": "nemotron-3-nano:30b-cloud",
+        "prompt_profile": "neutro",
+        "top_p": 0.95,
+        "max_tokens": 4352,
+        "context_strategy": "retrieval",
+        "source_documents": [
+          "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+        ],
+        "workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md",
+        "expected_outputs": [
+          "Executive review summary",
+          "Grounded findings and risks",
+          "Recommended next actions",
+          "Document Review deck artifact"
+        ],
+        "preferred_context_strategy": "retrieval",
+        "deck_export_label": "Document Review Deck",
+        "run_id": "run_document_review_9e857ae3f7e7",
+        "trace_id": "trace_document_review_7d3ba61c8126",
+        "surface": "product_api_public_overlay",
+        "latency_s": 27.4667,
+        "total_tokens": 8095,
+        "prompt_tokens": 2986,
+        "completion_tokens": 5109,
+        "cost_usd": null,
+        "source_count": 4,
+        "context_chars": 4980
+      }
+    },
+    "trace": {
+      "trace_id": "trace_document_review_7d3ba61c8126",
+      "spans": [
+        {
+          "span_id": "span_select_19da159b",
+          "name": "select_documents",
+          "stage": "select_documents",
+          "status": "completed",
+          "detail": "1 document(s) selected",
+          "duration_ms": 0
+        },
+        {
+          "span_id": "span_context_0f714fb3",
+          "name": "build_context",
+          "stage": "build_context",
+          "status": "completed",
+          "detail": "Strategy: retrieval",
+          "duration_ms": 0
+        },
+        {
+          "span_id": "span_generate_1c88fe18",
+          "name": "generate_structured_output",
+          "stage": "generate",
+          "status": "completed",
+          "detail": "langgraph_context_retry",
+          "duration_ms": 23503
+        },
+        {
+          "span_id": "span_parse_66392830",
+          "name": "parse_and_validate",
+          "stage": "parse_validate",
+          "status": "completed",
+          "detail": "Structured payload parsing and validation",
+          "duration_ms": 29
+        },
+        {
+          "span_id": "span_trace_0_cd221b",
+          "name": "prepare_agent_request",
+          "stage": "workflow_trace",
+          "status": "completed",
+          "detail": "Preparing initial request for the document agent",
+          "duration_ms": null,
+          "attempt": 1,
+          "context_strategy": "retrieval"
+        },
+        {
+          "span_id": "span_trace_1_340dfd",
+          "name": "classify_intent",
+          "stage": "workflow_trace",
+          "status": "completed",
+          "detail": "Using explicit agent intent from telemetry: product_workflow_default:document_review",
+          "duration_ms": null,
+          "attempt": 1,
+          "context_strategy": "retrieval"
+        },
+        {
+          "span_id": "span_trace_2_85e5b9",
+          "name": "select_tool",
+          "stage": "workflow_trace",
+          "status": "completed",
+          "detail": "Using explicit agent tool from telemetry: product_workflow_default:document_review",
+          "duration_ms": null,
+          "attempt": 1,
+          "context_strategy": "retrieval"
+        },
+        {
+          "span_id": "span_trace_3_711dc9",
+          "name": "route_agent_context_strategy",
+          "stage": "workflow_trace",
+          "status": "completed",
+          "detail": "Selecting agent context strategy: coverage_first_document_agent",
+          "duration_ms": null,
+          "attempt": 1,
+          "context_strategy": "document_scan"
+        },
+        {
+          "span_id": "span_trace_4_315cf7",
+          "name": "execute_task",
+          "stage": "workflow_trace",
+          "status": "completed",
+          "detail": "Executing structured_service within the LangGraph workflow",
+          "duration_ms": null,
+          "attempt": 1,
+          "context_strategy": "document_scan"
+        },
+        {
+          "span_id": "span_trace_5_699648",
+          "name": "evaluate_agent_guardrails",
+          "stage": "workflow_trace",
+          "status": "completed",
+          "detail": "Agent response accepted with no additional guardrail",
+          "duration_ms": null,
+          "attempt": 1,
+          "context_strategy": "document_scan"
+        },
+        {
+          "span_id": "span_total_407b68a8",
+          "name": "complete_run",
+          "stage": "total",
+          "status": "completed",
+          "detail": "End-to-end product workflow run",
+          "duration_ms": 27467
+        }
+      ],
+      "warnings": [
+        "No explicit liability cap amount is specified in the Agreement",
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ]
+    },
+    "request_payload": {
+      "workflow_id": "document_review",
+      "document_ids": [
+        "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+      ],
+      "input_text": "",
+      "provider": "ollama_hosted",
+      "model": "nemotron-3-nano:30b-cloud",
+      "prompt_profile": "neutro",
+      "temperature": 0.2,
+      "top_p": 0.95,
+      "max_tokens": 4352,
+      "context_window_mode": "auto",
+      "context_window": null,
+      "use_document_context": true,
+      "context_strategy": "retrieval"
+    },
+    "response_payload": {
+      "workflow_id": "document_review",
+      "workflow_label": "Document Review",
+      "status": "warning",
+      "summary": "CTR-010 Master Service Agreement Review: 2 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Uncapped liability exposure Main evidence gap: No explicit liability cap amount is specified in the Agreement",
+      "highlights": [
+        "Uncapped liability exposure",
+        "Short claim limitation period",
+        "No explicit liability cap amount is specified in the Agreement",
+        "Assess need for liability cap amendment"
+      ],
+      "recommendation": "Assess need for liability cap amendment",
+      "structured_result": {
+        "success": true,
+        "task_type": "document_agent",
+        "execution_id": "6c281cbe-f418-4c11-b6c6-c173d05fb32b",
+        "executed_at": "2026-05-02T21:44:55.623331",
+        "raw_output_text": null,
+        "parsed_json": {
+          "task_type": "document_agent",
+          "schema_version": "1.0",
+          "agent_label": "Document Operations Copilot",
+          "user_intent": "document_risk_review",
+          "intent_reason": "product_workflow_default:document_review",
+          "answer_mode": "friendly",
+          "tool_used": "review_document_risks",
+          "summary": "CTR-010 Master Service Agreement Review: 2 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Uncapped liability exposure Main evidence gap: No explicit liability cap amount is specified in the Agreement",
+          "key_points": [
+            "Uncapped liability exposure",
+            "Short claim limitation period",
+            "No explicit liability cap amount is specified in the Agreement",
+            "Assess need for liability cap amendment"
+          ],
+          "limitations": [
+            "No explicit liability cap amount is specified in the Agreement",
+            "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+          ],
+          "recommended_actions": [
+            "Assess need for liability cap amendment",
+            "Open the cited source excerpts to confirm the interpretation before acting."
+          ],
+          "guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled by document scan to prioritize broader document coverage.",
+            "The response includes traceable sources for manual auditing.",
+            "The agent avoids stating facts without strong grounding in the selected documents."
+          ],
+          "available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": false,
+              "availability_reason": "requires_at_least_2_documents"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "compared_documents": [],
+          "comparison_findings": [],
+          "document_review_decision_summary": null,
+          "document_review_findings": [],
+          "document_review_top_blockers": [],
+          "document_review_business_impact": [],
+          "checklist_preview": [],
+          "structured_response": {
+            "review_type": "risk_gap_review",
+            "risks": [
+              "Uncapped liability exposure",
+              "Short claim limitation period"
+            ],
+            "gaps": [
+              "No explicit liability cap amount is specified in the Agreement"
+            ],
+            "actions": [
+              "Assess need for liability cap amendment"
+            ],
+            "extraction_payload": {
+              "task_type": "extraction",
+              "schema_version": "1.0",
+              "main_subject": "CTR-010 Master Service Agreement Review",
+              "entities": [
+                {
+                  "type": "organization",
+                  "value": "Meridian Holdings Ltd.",
+                  "confidence": 0.96,
+                  "source_text": "Meridian Holdings Ltd. (Customer)",
+                  "position_start": 0,
+                  "position_end": 30
+                },
+                {
+                  "type": "organization",
+                  "value": "Northwind Cloud Systems LLC",
+                  "confidence": 0.96,
+                  "source_text": "Northwind Cloud Systems LLC (Provider)",
+                  "position_start": 31,
+                  "position_end": 70
+                },
+                {
+                  "type": "organization",
+                  "value": "State of Delaware",
+                  "confidence": 0.95,
+                  "source_text": "Governing Law State of Delaware",
+                  "position_start": 120,
+                  "position_end": 140
+                },
+                {
+                  "type": "person",
+                  "value": "Document Review",
+                  "confidence": 0.9,
+                  "source_text": "Document Review",
+                  "position_start": 119,
+                  "position_end": 134
+                }
+              ],
+              "categories": [
+                "Master Service Agreement",
+                "Contract",
+                "Agreement",
+                "Legal Agreement"
+              ],
+              "relationships": [
+                {
+                  "from_entity": "Meridian Holdings Ltd.",
+                  "to_entity": "Northwind Cloud Systems LLC",
+                  "relationship": "counterparty",
+                  "confidence": 0.9,
+                  "evidence": "Meridian Holdings Ltd. (Customer) and Northwind Cloud Systems LLC (Provider)"
+                }
+              ],
+              "extracted_fields": [
+                {
+                  "name": "effective_date",
+                  "value": "2024-01-15",
+                  "evidence": "Effective Date 2024-01-15"
+                },
+                {
+                  "name": "annual_contract_value",
+                  "value": "USD 2,400,000 annually",
+                  "evidence": "Annual Contract Value USD 2,400,000 annually"
+                },
+                {
+                  "name": "initial_term",
+                  "value": "36 months",
+                  "evidence": "Initial Term 36 months starting 2024-01-15"
+                },
+                {
+                  "name": "governing_law",
+                  "value": "State of Delaware",
+                  "evidence": "Governing Law State of Delaware"
+                },
+                {
+                  "name": "renewal_notice_period",
+                  "value": "90 days",
+                  "evidence": "notice is delivered 90 days before the renewal date"
+                },
+                {
+                  "name": "document_type",
+                  "value": "Master Service Agreement",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                },
+                {
+                  "name": "counterparties",
+                  "value": "Meridian Holdings Ltd.; Northwind Cloud Systems LLC; State of Delaware",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                },
+                {
+                  "name": "covered_clauses",
+                  "value": "Governing Law",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                }
+              ],
+              "important_dates": [
+                "2024-01-15",
+                "2024-01-12"
+              ],
+              "important_numbers": [
+                "12"
+              ],
+              "risks": [
+                {
+                  "description": "Uncapped liability exposure",
+                  "impact": "Potential unlimited financial liability for general commercial claims",
+                  "owner": null,
+                  "due_date": null,
+                  "evidence": "Clause 7.3 — Unlimited Liability. Each party shall be liable to the other for all losses, damages, costs, and expenses arising out of or related to this Agreement, and no monetary cap or aggregate limit shall apply unless expressly stated in the applicable service order."
+                },
+                {
+                  "description": "Short claim limitation period",
+                  "impact": "Reduced window to bring claims compared to Meridian’s 24‑month standard",
+                  "owner": null,
+                  "due_date": "within twelve (12) months after the event giving rise to the claim, regardless of any contrary statute of",
+                  "evidence": "Clause 7.8 — Limitation Period. Any claim arising under or related to this Agreement must be brought within twelve (12) months after the event giving rise to the claim, regardless of any contrary statute of limitations."
+                }
+              ],
+              "action_items": [
+                {
+                  "description": "Assess need for liability cap amendment",
+                  "owner": "Legal",
+                  "due_date": null,
+                  "status": "pending",
+                  "evidence": "Section 7.3 creates uncapped financial exposure; consider adding a liability cap."
+                }
+              ],
+              "missing_information": [
+                "No explicit liability cap amount is specified in the Agreement"
+              ]
+            },
+            "findings_synthesis_metadata": {
+              "success": false,
+              "skipped": true,
+              "reason": "document_review_findings_synthesis_disabled"
+            }
+          },
+          "sources": [
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 1,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMaster Service Agreement v4.2\nCounterparty draft used by Meridian for legal review and workflow testing.\nDocument ID\nCTR-010\nOwner\nLegal / Procurement\nStatus\nCounterparty Draft — Under Revi"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 2,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "nder written service orders. Applicable service\nlevels are set out in the Cloud Infrastructure SLA, and personal-data obligations are addressed in the Data Processing\nAddendum 2024. In the event of inconsistency, the more specific document governs only for the subject matter it expressly\ncovers.\nCommercial Schedule\nField\nDraft Position\nInitial Term\n36 months starting 2024-01-15\nRenewal\nAutomatic 1"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 3,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "commercially reasonable efforts to investigate security events\naffecting the Services and shall keep Customer reasonably informed of material developments.\nClause 2.9 — Audit Materials. Provider may satisfy diligence requests by providing a current certification package,\nexecutive summary, or other summary materials selected by Provider. Customer shall not have an on-site or remote audit\n[Page 2]\n"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 4,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "in such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements, derived schemas, prompt patterns, runbooks, or\nautomation artifacts developed jointly in connection with the Services shall be jointly owned by the parties, and each party\nmay use such derivatives without further consent or accounting to the other party.\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-01"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 5,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "ndemnification. Provider shall defend and indemnify Customer from third-party claims alleging\nintellectual-property infringement or unauthorized disclosure of Customer Data caused by Provider. Customer shall defend\nand indemnify Provider for claims arising from Customer materials or configurations supplied by Customer. Neither party\nwill be responsible for consequential damages outside this sectio"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 6,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "6) months unless terminated earlier in accordance with this\nAgreement.\nClause 8.2 — Automatic Renewal. Following the initial term, the Agreement renews automatically for successive\ntwelve-month periods unless either party delivers written notice of non-renewal at least ninety (90) days before the end of\nthe then-current term.\nClause 8.4 — Termination for Convenience. Neither party may terminate th"
+            }
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "review_document_risks",
+              "status": "success",
+              "detail": "Risk and gap analysis completed."
+            }
+          ],
+          "confidence": 0.9,
+          "needs_review": false,
+          "needs_review_reason": null
+        },
+        "validated_output": {
+          "task_type": "document_agent",
+          "schema_version": "1.0",
+          "agent_label": "Document Operations Copilot",
+          "user_intent": "document_risk_review",
+          "intent_reason": "product_workflow_default:document_review",
+          "answer_mode": "friendly",
+          "tool_used": "review_document_risks",
+          "summary": "CTR-010 Master Service Agreement Review: 2 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Uncapped liability exposure Main evidence gap: No explicit liability cap amount is specified in the Agreement",
+          "key_points": [
+            "Uncapped liability exposure",
+            "Short claim limitation period",
+            "No explicit liability cap amount is specified in the Agreement",
+            "Assess need for liability cap amendment"
+          ],
+          "limitations": [
+            "No explicit liability cap amount is specified in the Agreement",
+            "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+          ],
+          "recommended_actions": [
+            "Assess need for liability cap amendment",
+            "Open the cited source excerpts to confirm the interpretation before acting."
+          ],
+          "guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled by document scan to prioritize broader document coverage.",
+            "The response includes traceable sources for manual auditing.",
+            "The agent avoids stating facts without strong grounding in the selected documents."
+          ],
+          "available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": false,
+              "availability_reason": "requires_at_least_2_documents"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "compared_documents": [],
+          "comparison_findings": [],
+          "document_review_decision_summary": null,
+          "document_review_findings": [],
+          "document_review_top_blockers": [],
+          "document_review_business_impact": [],
+          "checklist_preview": [],
+          "structured_response": {
+            "review_type": "risk_gap_review",
+            "risks": [
+              "Uncapped liability exposure",
+              "Short claim limitation period"
+            ],
+            "gaps": [
+              "No explicit liability cap amount is specified in the Agreement"
+            ],
+            "actions": [
+              "Assess need for liability cap amendment"
+            ],
+            "extraction_payload": {
+              "task_type": "extraction",
+              "schema_version": "1.0",
+              "main_subject": "CTR-010 Master Service Agreement Review",
+              "entities": [
+                {
+                  "type": "organization",
+                  "value": "Meridian Holdings Ltd.",
+                  "confidence": 0.96,
+                  "source_text": "Meridian Holdings Ltd. (Customer)",
+                  "position_start": 0,
+                  "position_end": 30
+                },
+                {
+                  "type": "organization",
+                  "value": "Northwind Cloud Systems LLC",
+                  "confidence": 0.96,
+                  "source_text": "Northwind Cloud Systems LLC (Provider)",
+                  "position_start": 31,
+                  "position_end": 70
+                },
+                {
+                  "type": "organization",
+                  "value": "State of Delaware",
+                  "confidence": 0.95,
+                  "source_text": "Governing Law State of Delaware",
+                  "position_start": 120,
+                  "position_end": 140
+                },
+                {
+                  "type": "person",
+                  "value": "Document Review",
+                  "confidence": 0.9,
+                  "source_text": "Document Review",
+                  "position_start": 119,
+                  "position_end": 134
+                }
+              ],
+              "categories": [
+                "Master Service Agreement",
+                "Contract",
+                "Agreement",
+                "Legal Agreement"
+              ],
+              "relationships": [
+                {
+                  "from_entity": "Meridian Holdings Ltd.",
+                  "to_entity": "Northwind Cloud Systems LLC",
+                  "relationship": "counterparty",
+                  "confidence": 0.9,
+                  "evidence": "Meridian Holdings Ltd. (Customer) and Northwind Cloud Systems LLC (Provider)"
+                }
+              ],
+              "extracted_fields": [
+                {
+                  "name": "effective_date",
+                  "value": "2024-01-15",
+                  "evidence": "Effective Date 2024-01-15"
+                },
+                {
+                  "name": "annual_contract_value",
+                  "value": "USD 2,400,000 annually",
+                  "evidence": "Annual Contract Value USD 2,400,000 annually"
+                },
+                {
+                  "name": "initial_term",
+                  "value": "36 months",
+                  "evidence": "Initial Term 36 months starting 2024-01-15"
+                },
+                {
+                  "name": "governing_law",
+                  "value": "State of Delaware",
+                  "evidence": "Governing Law State of Delaware"
+                },
+                {
+                  "name": "renewal_notice_period",
+                  "value": "90 days",
+                  "evidence": "notice is delivered 90 days before the renewal date"
+                },
+                {
+                  "name": "document_type",
+                  "value": "Master Service Agreement",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                },
+                {
+                  "name": "counterparties",
+                  "value": "Meridian Holdings Ltd.; Northwind Cloud Systems LLC; State of Delaware",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                },
+                {
+                  "name": "covered_clauses",
+                  "value": "Governing Law",
+                  "evidence": "CTR-010 Master Service Agreement Review"
+                }
+              ],
+              "important_dates": [
+                "2024-01-15",
+                "2024-01-12"
+              ],
+              "important_numbers": [
+                "12"
+              ],
+              "risks": [
+                {
+                  "description": "Uncapped liability exposure",
+                  "impact": "Potential unlimited financial liability for general commercial claims",
+                  "owner": null,
+                  "due_date": null,
+                  "evidence": "Clause 7.3 — Unlimited Liability. Each party shall be liable to the other for all losses, damages, costs, and expenses arising out of or related to this Agreement, and no monetary cap or aggregate limit shall apply unless expressly stated in the applicable service order."
+                },
+                {
+                  "description": "Short claim limitation period",
+                  "impact": "Reduced window to bring claims compared to Meridian’s 24‑month standard",
+                  "owner": null,
+                  "due_date": "within twelve (12) months after the event giving rise to the claim, regardless of any contrary statute of",
+                  "evidence": "Clause 7.8 — Limitation Period. Any claim arising under or related to this Agreement must be brought within twelve (12) months after the event giving rise to the claim, regardless of any contrary statute of limitations."
+                }
+              ],
+              "action_items": [
+                {
+                  "description": "Assess need for liability cap amendment",
+                  "owner": "Legal",
+                  "due_date": null,
+                  "status": "pending",
+                  "evidence": "Section 7.3 creates uncapped financial exposure; consider adding a liability cap."
+                }
+              ],
+              "missing_information": [
+                "No explicit liability cap amount is specified in the Agreement"
+              ]
+            },
+            "findings_synthesis_metadata": {
+              "success": false,
+              "skipped": true,
+              "reason": "document_review_findings_synthesis_disabled"
+            }
+          },
+          "sources": [
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 1,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMaster Service Agreement v4.2\nCounterparty draft used by Meridian for legal review and workflow testing.\nDocument ID\nCTR-010\nOwner\nLegal / Procurement\nStatus\nCounterparty Draft — Under Revi"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 2,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "nder written service orders. Applicable service\nlevels are set out in the Cloud Infrastructure SLA, and personal-data obligations are addressed in the Data Processing\nAddendum 2024. In the event of inconsistency, the more specific document governs only for the subject matter it expressly\ncovers.\nCommercial Schedule\nField\nDraft Position\nInitial Term\n36 months starting 2024-01-15\nRenewal\nAutomatic 1"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 3,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "commercially reasonable efforts to investigate security events\naffecting the Services and shall keep Customer reasonably informed of material developments.\nClause 2.9 — Audit Materials. Provider may satisfy diligence requests by providing a current certification package,\nexecutive summary, or other summary materials selected by Provider. Customer shall not have an on-site or remote audit\n[Page 2]\n"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 4,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "in such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements, derived schemas, prompt patterns, runbooks, or\nautomation artifacts developed jointly in connection with the Services shall be jointly owned by the parties, and each party\nmay use such derivatives without further consent or accounting to the other party.\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-01"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 5,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "ndemnification. Provider shall defend and indemnify Customer from third-party claims alleging\nintellectual-property infringement or unauthorized disclosure of Customer Data caused by Provider. Customer shall defend\nand indemnify Provider for claims arising from Customer materials or configurations supplied by Customer. Neither party\nwill be responsible for consequential damages outside this sectio"
+            },
+            {
+              "source": "Master Service Agreement v4.2.pdf",
+              "document_id": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+              "file_type": "pdf",
+              "chunk_id": 6,
+              "score": null,
+              "vector_score": null,
+              "lexical_score": null,
+              "snippet": "6) months unless terminated earlier in accordance with this\nAgreement.\nClause 8.2 — Automatic Renewal. Following the initial term, the Agreement renews automatically for successive\ntwelve-month periods unless either party delivers written notice of non-renewal at least ninety (90) days before the end of\nthe then-current term.\nClause 8.4 — Termination for Convenience. Neither party may terminate th"
+            }
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "review_document_risks",
+              "status": "success",
+              "detail": "Risk and gap analysis completed."
+            }
+          ],
+          "confidence": 0.9,
+          "needs_review": false,
+          "needs_review_reason": null
+        },
+        "error": null,
+        "validation_error": null,
+        "parsing_error": null,
+        "repair_applied": false,
+        "source_documents": [
+          "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+        ],
+        "context_used": true,
+        "execution_metadata": {
+          "agent_intent": "document_risk_review",
+          "agent_intent_label": "Document risk review",
+          "agent_intent_reason": "product_workflow_default:document_review",
+          "agent_tool": "review_document_risks",
+          "agent_tool_label": "Review risks and gaps",
+          "agent_tool_reason": "product_workflow_default:document_review",
+          "agent_answer_mode": "friendly",
+          "agent_context_strategy": "document_scan",
+          "agent_document_count": 1,
+          "agent_source_count": 6,
+          "agent_available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": false,
+              "availability_reason": "requires_at_least_2_documents"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "needs_review": false,
+          "needs_review_reason": null,
+          "agent_limitations": [
+            "No explicit liability cap amount is specified in the Agreement",
+            "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+          ],
+          "agent_recommended_actions": [
+            "Assess need for liability cap amendment",
+            "Open the cited source excerpts to confirm the interpretation before acting."
+          ],
+          "agent_guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled by document scan to prioritize broader document coverage.",
+            "The response includes traceable sources for manual auditing.",
+            "The agent avoids stating facts without strong grounding in the selected documents."
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "review_document_risks",
+              "status": "success",
+              "detail": "Risk and gap analysis completed."
+            }
+          ],
+          "retrieval_backend_used": null,
+          "retrieval_backend_message": null,
+          "retrieval_strategy_used": null,
+          "retrieval_strategy_requested": null,
+          "execution_strategy_requested": "langgraph_context_retry",
+          "execution_strategy_used": "langgraph_context_retry",
+          "execution_strategy_fallback_reason": null,
+          "workflow_id": "lgw-2aa09ad7",
+          "workflow_route_decision": "coverage_first_document_agent",
+          "workflow_guardrail_decision": "finish_ok",
+          "provider": "ollama_hosted",
+          "provider_requested": "ollama_hosted",
+          "provider_effective": "ollama_hosted",
+          "model": "nemotron-3-nano:30b-cloud",
+          "resolved_context_window": 8192,
+          "context_window_cap": 8192,
+          "document_chars_estimate": 7329,
+          "telemetry": {
+            "product_workflow_id": "document_review",
+            "product_workflow_label": "Document Review",
+            "product_surface": "gradio",
+            "product_workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md",
+            "product_workflow_expected_outputs": [
+              "Executive review summary",
+              "Grounded findings and risks",
+              "Recommended next actions",
+              "Document Review deck artifact"
+            ],
+            "product_deck_export_kind": "document_review_deck",
+            "agent_intent": "document_risk_review",
+            "agent_tool": "review_document_risks",
+            "agent_answer_mode": "friendly",
+            "document_review_findings_synthesis_enabled": false,
+            "document_review_findings_prompt_style": "hybrid",
+            "agent_intent_reason": "product_workflow_default:document_review",
+            "agent_tool_reason": "product_workflow_default:document_review",
+            "agent_context_strategy": "document_scan",
+            "provider_requested": "ollama_hosted",
+            "provider_effective": "ollama_hosted",
+            "agent_available_tools": [
+              {
+                "name": "consult_documents",
+                "label": "Consult indexed documents",
+                "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "summarize_document",
+                "label": "Summarize document",
+                "description": "Generate a grounded executive summary for the selected document or document set.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "draft_business_response",
+                "label": "Draft document-grounded response",
+                "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "extract_structured_data",
+                "label": "Extract structured information",
+                "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+                "answer_mode": "json",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "compare_documents",
+                "label": "Compare documents",
+                "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+                "answer_mode": "comparison_structured",
+                "min_document_count": 2,
+                "available": false,
+                "availability_reason": "requires_at_least_2_documents"
+              },
+              {
+                "name": "generate_operational_checklist",
+                "label": "Generate operational checklist",
+                "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+                "answer_mode": "checklist",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "review_policy_compliance",
+                "label": "Review policy/compliance",
+                "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "review_document_risks",
+                "label": "Review risks and gaps",
+                "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "extract_operational_tasks",
+                "label": "Extract operational tasks",
+                "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "assist_technical_document",
+                "label": "Assist technical document",
+                "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              }
+            ],
+            "provider_calls": [
+              {
+                "stage": "extraction_single_pass",
+                "provider": "ollama_hosted",
+                "provider_requested": "ollama_hosted",
+                "model": "nemotron-3-nano:30b-cloud",
+                "duration_s": 23.503,
+                "prompt_chars": 13135,
+                "context_window": 8192,
+                "temperature": 0.0,
+                "top_p": 0.7,
+                "max_tokens": 8192,
+                "prompt_profile": "neutro",
+                "success": true,
+                "native_usage": {
+                  "usage_source": "ollama_native_usage",
+                  "cost_source": "provider_native_usage_unpriced",
+                  "prompt_tokens": 2986,
+                  "completion_tokens": 5109,
+                  "total_tokens": 8095
+                }
+              }
+            ],
+            "timings_s": {
+              "document_load_s": 0.0868,
+              "provider_total_s": 23.503,
+              "parsing_s": 0.0292,
+              "total_s": 24.0624
+            },
+            "parse_attempts": [
+              {
+                "stage": "extraction_single_pass",
+                "strategy": "initial",
+                "success": true
+              }
+            ]
+          },
+          "workflow_total_s": 24.7728,
+          "workflow_attempts": 1,
+          "workflow_context_strategies": [
+            "document_scan"
+          ],
+          "workflow_trace": [
+            {
+              "node": "prepare_agent_request",
+              "detail": "Preparing initial request for the document agent",
+              "attempt": 1,
+              "context_strategy": "retrieval"
+            },
+            {
+              "node": "classify_intent",
+              "detail": "Using explicit agent intent from telemetry: product_workflow_default:document_review",
+              "attempt": 1,
+              "context_strategy": "retrieval"
+            },
+            {
+              "node": "select_tool",
+              "detail": "Using explicit agent tool from telemetry: product_workflow_default:document_review",
+              "attempt": 1,
+              "context_strategy": "retrieval"
+            },
+            {
+              "node": "route_agent_context_strategy",
+              "detail": "Selecting agent context strategy: coverage_first_document_agent",
+              "attempt": 1,
+              "context_strategy": "document_scan"
+            },
+            {
+              "node": "execute_task",
+              "detail": "Executing structured_service within the LangGraph workflow",
+              "attempt": 1,
+              "context_strategy": "document_scan",
+              "success": true
+            },
+            {
+              "node": "evaluate_agent_guardrails",
+              "detail": "Agent response accepted with no additional guardrail",
+              "attempt": 1,
+              "context_strategy": "document_scan",
+              "success": true
+            }
+          ],
+          "workflow_node_count": 6
+        },
+        "available_render_modes": [
+          {
+            "mode": "json",
+            "label": "JSON",
+            "available": true,
+            "priority": 1
+          },
+          {
+            "mode": "friendly",
+            "label": "Friendly view",
+            "available": true,
+            "priority": 0
+          }
+        ],
+        "primary_render_mode": "friendly",
+        "overall_confidence": 0.9,
+        "quality_score": 0.9
+      },
+      "grounding_preview": {
+        "strategy": "retrieval",
+        "document_ids": [
+          "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+        ],
+        "context_chars": 4980,
+        "source_block_count": 4,
+        "preview_text": "[Source: Master Service Agreement v4.2.pdf]\ncommercially reasonable efforts to investigate security events\naffecting the Services and shall keep Customer reasonably informed of material developments.\nClause 2.9 — Audit Materials. Provider may satisfy diligence requests by providing a current certification package,\nexecutive summary, or other summary materials selected by Provider. Customer shall not have an on-site or remote audit\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nright unless required by non-waivable law.\nReview cue: clauses 2.7 and 2.9 are intentionally softer than Meridian policy and baseline language. They\nare suitable targets for contract-gap extraction and recommendation workflows.\n3. Data Use and Intellectual Property\nClause 3.2 — Service Data. Provider may collect and use service telemetry, diagnostic output, and de-identified usage\ninformation to operate, secure, improve, and train Provider service features, provided that Provider does not intentionally\nidentify Customer personnel in such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements,\n\n[Source: Master Service Agreement v4.2.pdf]\nin such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements, derived schemas, prompt patterns, runbooks, or\nautomation artifacts developed jointly in connection with the Services shall be jointly owned by the parties, and each party\nmay use such derivatives without further consent or accounting to the other party.\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 3\n4. Liability and Indemnification\nClause 7.1 — Exclusion of Certain Damages. Neither party will be liable for lost profits, revenue, goodwill, or indirect,\nincidental, special, exemplary, or consequential damages, except to the extent such damages are awarded to a third party\nunder an indemnified claim.\nClause 7.3 — Unlimited Liability. Each party shall be liable to the other for all losses, damages, costs, and expenses\narising out of or related to this Agreement, and no monetary cap or aggregate limit shall apply unless expressly stated in the\napplicable service order.\nClause 7.5 — Indemnification. Provider shall defend and indemnify Customer from third-party cl\n\n[Source: Master Service Agreement v4.2.pdf]\nnder written service orders. Applicable service\nlevels are set out in the Cloud Infrastructure SLA, and personal-data obligations are addressed in the Data Processing\nAddendum 2024. In the event of inconsistency, the more specific document governs only for the subject matter it expressly\ncovers.\nCommercial Schedule\nField\nDraft Position\nInitial Term\n36 months starting 2024-01-15\nRenewal\nAutomatic 12-month renewals unless notice is delivered 90 days before the renewal date\nAnnual Contract Value\nUSD 2,400,000 excluding approved overages and taxes\nPrimary Services\nManaged retrieval cluster, secure API gateway, support coverage, analytics observability\nOrder of Precedence\nMSA → Service Order → Cloud Infrastructure SLA → Data Processing Addendum\n2. Security, Service, and Audit Support\nClause 2.4 — Reasonable Security Measures. Provider shall maintain administrative, technical, and physical safeguards\ndesigned to protect Customer Data against unauthorized access, loss, or misuse, using security measures consistent with\ngenerally accepted industry practice.\nClause 2.7 — Incident Cooperation. Provider shall use commercially reasonable efforts to investigate security events\naffecting the Ser\n\n[Source: Master Service Agreement v4.2.pdf]\n[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMaster Service Agreement v4.2\nCounterparty draft used by Meridian for legal review and workflow testing.\nDocument ID\nCTR-010\nOwner\nLegal / Procurement\nStatus\nCounterparty Draft — Under Review\nEffective Date\n2024-01-15\nCustomer\nMeridian Holdings Ltd.\nCounterparty\nNorthwind Cloud Systems LLC\nContract Value\nUSD 2,400,000 annually\nGoverning Law\nState of Delaware\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Parties, Scope, and Order of Precedence\nThis Master Service Agreement (the Agreement) is entered into by and between Meridian Holdings Ltd. (Customer) and\nNorthwind Cloud Systems LLC (Provider) for managed cloud retrieval, analytics acceleration, and knowledge-operations\nsupport services used by Meridian enterprise teams.\nThe Agreement governs production and pre-production services ordered under written service orders. Applicable service\nlevels are set out in the Cloud",
+        "warnings": []
+      },
+      "artifacts": [],
+      "deck_export_kind": "document_review_deck",
+      "deck_available": true,
+      "warnings": [
+        "No explicit liability cap amount is specified in the Agreement",
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "debug_metadata": {
+        "task_type": "document_agent",
+        "provider": "ollama_hosted",
+        "model": "nemotron-3-nano:30b-cloud",
+        "prompt_profile": "neutro",
+        "top_p": 0.95,
+        "max_tokens": 4352,
+        "context_strategy": "retrieval",
+        "source_documents": [
+          "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+        ],
+        "workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md",
+        "expected_outputs": [
+          "Executive review summary",
+          "Grounded findings and risks",
+          "Recommended next actions",
+          "Document Review deck artifact"
+        ],
+        "preferred_context_strategy": "retrieval",
+        "deck_export_label": "Document Review Deck",
+        "run_id": "run_document_review_9e857ae3f7e7",
+        "trace_id": "trace_document_review_7d3ba61c8126",
+        "surface": "product_api_public_overlay",
+        "latency_s": 27.4667,
+        "total_tokens": 8095,
+        "prompt_tokens": 2986,
+        "completion_tokens": 5109,
+        "cost_usd": null,
+        "source_count": 4,
+        "context_chars": 4980
+      }
+    }
+  }
+]

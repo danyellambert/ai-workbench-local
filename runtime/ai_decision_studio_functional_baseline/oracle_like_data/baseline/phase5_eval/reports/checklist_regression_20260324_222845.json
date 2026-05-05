@@ -1,0 +1,480 @@
+{
+  "generated_at": "2026-03-24T22:28:45.131868",
+  "fixture": "baseline://external_files/f42f51b38f96b8e3_06_checklist_who_surgical_gold.json",
+  "provider": "ollama",
+  "model": null,
+  "context_strategy": "document_scan",
+  "resolved_document": {
+    "document_id": "2e0548b2429cec5206c6f5e21c69a3ef0c426b8318bdb8c6c88be3c80d92d77d",
+    "name": "9789241598590_eng.pdf",
+    "file_type": "pdf",
+    "chunk_count": 39
+  },
+  "success": true,
+  "validation_error": null,
+  "parsing_error": null,
+  "execution_metadata": {
+    "checklist_mode": "full_document_direct",
+    "checklist_profile": "generic",
+    "full_document_chars": 46233,
+    "sanitized_document_chars": 1416,
+    "checklist_question_count": 17,
+    "checklist_line_count": 49,
+    "context_chars_sent": 1416,
+    "context_note": "Checklist gerado com o documento inteiro porque o tamanho ainda é seguro para envio direto.",
+    "stages": [
+      {
+        "stage_type": "full_document_direct",
+        "label": "Checklist generation input",
+        "chars_sent": 1416,
+        "context_preview": "Surgical Safety Checklist\nHas the patient confirmed his/her identity,\nsite, procedure, and consent?\nYes\nIs the site marked?\nNot applicable\nIs the anaesthesia machine and medication\ncheck complete?\nIs the pulse oximeter on the patient and\nfunctioning?\nDoes the patient have a:\nKnown allergy?\nNo\nDifficult airway or aspiration risk?\nYes, and equipment/assistance available\nRisk of >500ml blood loss (7ml/kg in children)?\nYes, and two IVs/central access and fluids\nplanned\nConfirm all team members have\nintroduced themselves by name and role.\nConfirm the patient’s name, procedure,\nand where the incision will be made.\nHas antibiotic prophylaxis been given within\nthe last 60 minutes?\nAnticipated Critical Events\nTo Surgeon:\nWhat are the critical or non-routine steps?\nHow long will the case take?\nWhat is the anticipated blood loss?\nTo Anaesthetist:\nAre there any patient-specific concerns?\nTo Nursing Team:\nHas sterility (including indicator results)\nbeen confirmed?\nAre there equipment issues or any concerns?\nIs essential imaging displayed\nrmed?\nIs essential imaging displayed?\nNurse Verbally Confirms:\nThe name of the procedure\nCompletion of instrument, sponge and needle\ncounts\nSpecimen labelling (read specimen labels aloud,\nincluding patient name)\nWhether there are any equipment problems to be\naddressed\nTo Surgeon, Anaesthetist and Nurse:\nWhat are the key concerns for recovery and\nmanagement of this patient?",
+        "prompt_preview": "\nYou are a checklist generator.\nConvert the input into an operational checklist and return only valid JSON.\nUse the actual instructions provided. Do not copy example placeholder values.\n- Be as extractive as possible: prefer wording that stays very close to the source text.\n- Do not paraphrase aggressively when the source already contains a clear checklist instruction.\n- Do not add implied actions, process milestones, or inferred next steps that are not explicitly stated.\n- Do not invent dependencies between items unless the source explicitly states a dependency.\n- Do not invent estimated time values.\n- Convert EACH explicit required action into its own checklist item.\n- If one sentence contains multiple imperative actions joined by commas or `and`, split them into separate items.\n- If the source contains multiple explicit questions on the same line or in the same block, split them into separate checklist items.\n- Preserve blocking or approval conditions as their own checklist items when explicitly stated.\n- Do not collapse multiple grounded actions into one generic item.\n- Ignore front matter, publishing notes, copyright text, cataloguing metadata, and general introduction when operational checklist content is present.\n- Prioritize the actual checklist steps and operational phases over narrative explanation.\n- If the document contains an explicit checklist block with direct questions or short action prompts, prioritize that block and ignore surrounding implementation guidance, rollout advice, training notes, culture/change-management text, and measurement commentary.\n- If the source has phases or sections, preserve them through item wording or categories instead of flattening everything into one generic task.\n- Preserve the order in which checklist items appear in the source.\n- Do not skip explicit checklist questions even when a long explanatory paragraph follows them.\n- Respect the original phase boundaries from the document. Do not move items from one phase into another.\n- Avoid duplicating the same checklist step across phases unless the source explicitly repeats it in multiple phases.\n- If the document is long, still try to cover the whole document rather than only the first operational block.\n- If a phrase is a question in the source checklist, you may convert it into a concise imperative title, but keep it semantically very close to the original wording.\n- For every checklist item, populate `source_text` with the closest literal source line and `evidence` with a short grounded snippet.\n- If you cannot point to a grounded source line/snippet for an item, do not include that item.\n\nRequirements or instructions:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nContext:\nSurgical Safety Checklist\nHas the patient confirmed his/her identity,\nsite, procedure, and consent?\nYes\nIs the site marked?\nNot applicable\nIs the anaesthesia machine and medication\ncheck complete?\nIs the pulse oximeter on the patient and\nfunctioning?\nDoes the patient have a:\nKnown allergy?\nNo\nDifficult airway or aspiration risk?\nYes, and equipment/assistance available\nRisk of >500ml blood loss (7ml/kg in children)?\nYes, and two IVs/central access and fluids\nplanned\nConfirm all team members have\nintroduced themselves by name and role.\nConfirm the patient’s name, procedure,\nand where the incision will be made.\nHas antibiotic prophylaxis been given within\nthe last 60 minutes?\nAnticipated Critical Events\nTo Surgeon:\nWhat are the critical or non-routine steps?\nHow long will the case take?\nWhat is the anticipated blood loss?\nTo Anaesthetist:\nAre there any patient-specific concerns?\nTo Nursing Team:\nHas sterility (including indicator results)\nbeen confirmed?\nAre there equipment issues or any concerns?\nIs essential imaging displayed\nrmed?\nIs essential imaging displayed?\nNurse Verbally Confirms:\nThe name of the procedure\nCompletion of instrument, sponge and needle\ncounts\nSpecimen labelling (read specimen labels aloud,\nincluding patient name)\nWhether there are any equipment problems to be\naddressed\nTo Surgeon, Anaesthetist and Nurse:\nWhat are the key concerns for recovery and\nmanagement of this patient?\n\nReturn this JSON structure:\n{\n  \"task_type\": \"checklist\",\n  \"title\": \"Checklist title based on the input\",\n  \"description\": \"Checklist purpose based on the input\",\n  \"items\": [\n    {\n      \"id\": \"item-1\",\n      \"title\": \"Real action item\",\n      \"description\": \"Specific action derived closely from the source text\",\n      \"source_text\": \"Closest literal source line supporting this item\",\n      \"evidence\": \"Short quoted snippet copied from the source\",\n      \"category\": null,\n      \"priority\": null,\n      \"status\": \"pending\",\n      \"dependencies\": [],\n      \"estimated_time_minutes\": null\n    }\n  ],\n  \"total_items\": 1,\n  \"completed_items\": 0,\n  \"progress_percentage\": 0.0\n}\n"
+      }
+    ],
+    "resolved_context_window": 24576,
+    "context_window_cap": 8192,
+    "document_chars_estimate": 46157
+  },
+  "payload": {
+    "task_type": "checklist",
+    "schema_version": "1.0",
+    "title": "Surgical Safety Checklist",
+    "description": "Ensure all necessary pre-operative and intra-operative checks are completed to ensure patient safety.",
+    "items": [
+      {
+        "id": "item-1",
+        "title": "Has the patient confirmed his/her identity, site, procedure, and consent",
+        "description": "Has the patient confirmed his/her identity, site, procedure, and consent?",
+        "source_text": "Has the patient confirmed his/her identity, site, procedure, and consent?",
+        "evidence": "Has the patient confirmed his/her identity, site, procedure, and consent?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-2",
+        "title": "Is the site marked",
+        "description": "Is the site marked?",
+        "source_text": "Is the site marked?",
+        "evidence": "Is the site marked?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-3",
+        "title": "Is the anaesthesia machine and medication check complete",
+        "description": "Is the anaesthesia machine and medication check complete?",
+        "source_text": "Is the anaesthesia machine and medication check complete?",
+        "evidence": "Is the anaesthesia machine and medication check complete?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-4",
+        "title": "Is the pulse oximeter on the patient and functioning",
+        "description": "Is the pulse oximeter on the patient and functioning?",
+        "source_text": "Is the pulse oximeter on the patient and functioning?",
+        "evidence": "Is the pulse oximeter on the patient and functioning?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-5",
+        "title": "Does the patient have a: Known allergy",
+        "description": "Does the patient have a: Known allergy?",
+        "source_text": "Does the patient have a: Known allergy?",
+        "evidence": "Does the patient have a: Known allergy?",
+        "category": "Does the patient have a",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-6",
+        "title": "Difficult airway or aspiration risk",
+        "description": "Difficult airway or aspiration risk?",
+        "source_text": "Difficult airway or aspiration risk?",
+        "evidence": "Difficult airway or aspiration risk?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-7",
+        "title": "Risk of >500ml blood loss (7ml/kg in children)",
+        "description": "Risk of >500ml blood loss (7ml/kg in children)?",
+        "source_text": "Risk of >500ml blood loss (7ml/kg in children)?",
+        "evidence": "Risk of >500ml blood loss (7ml/kg in children)?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-8",
+        "title": "Confirm all team members have introduced themselves by name and role",
+        "description": "Confirm all team members have introduced themselves by name and role.",
+        "source_text": "Confirm all team members have introduced themselves by name and role.",
+        "evidence": "Confirm all team members have introduced themselves by name and role.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-9",
+        "title": "Confirm the patient’s name, procedure, and where the incision will be made",
+        "description": "Confirm the patient’s name, procedure, and where the incision will be made.",
+        "source_text": "Confirm the patient’s name, procedure, and where the incision will be made.",
+        "evidence": "Confirm the patient’s name, procedure, and where the incision will be made.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-10",
+        "title": "Has antibiotic prophylaxis been given within the last 60 minutes",
+        "description": "Has antibiotic prophylaxis been given within the last 60 minutes?",
+        "source_text": "Has antibiotic prophylaxis been given within the last 60 minutes?",
+        "evidence": "Has antibiotic prophylaxis been given within the last 60 minutes?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-11",
+        "title": "To Surgeon: What are the critical or non-routine steps",
+        "description": "To Surgeon: What are the critical or non-routine steps?",
+        "source_text": "To Surgeon: What are the critical or non-routine steps?",
+        "evidence": "To Surgeon: What are the critical or non-routine steps?",
+        "category": "To Surgeon",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-12",
+        "title": "How long will the case take",
+        "description": "How long will the case take?",
+        "source_text": "How long will the case take?",
+        "evidence": "How long will the case take?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-13",
+        "title": "What is the anticipated blood loss",
+        "description": "What is the anticipated blood loss?",
+        "source_text": "What is the anticipated blood loss?",
+        "evidence": "What is the anticipated blood loss?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-14",
+        "title": "To Anaesthetist: Are there any patient-specific concerns",
+        "description": "To Anaesthetist: Are there any patient-specific concerns?",
+        "source_text": "To Anaesthetist: Are there any patient-specific concerns?",
+        "evidence": "To Anaesthetist: Are there any patient-specific concerns?",
+        "category": "To Anaesthetist",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-15",
+        "title": "To Nursing Team: Has sterility (including indicator results) been confirmed",
+        "description": "To Nursing Team: Has sterility (including indicator results) been confirmed?",
+        "source_text": "To Nursing Team: Has sterility (including indicator results) been confirmed?",
+        "evidence": "To Nursing Team: Has sterility (including indicator results) been confirmed?",
+        "category": "To Nursing Team",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-16",
+        "title": "Are there equipment issues or any concerns",
+        "description": "Are there equipment issues or any concerns?",
+        "source_text": "Are there equipment issues or any concerns?",
+        "evidence": "Are there equipment issues or any concerns?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-17",
+        "title": "Is essential imaging displayed",
+        "description": "Is essential imaging displayed?",
+        "source_text": "Is essential imaging displayed?",
+        "evidence": "Is essential imaging displayed?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-18",
+        "title": "Nurse Verbally Confirms: The name of the procedure",
+        "description": "Nurse Verbally Confirms: The name of the procedure",
+        "source_text": "Nurse Verbally Confirms: The name of the procedure",
+        "evidence": "Nurse Verbally Confirms: The name of the procedure",
+        "category": "Nurse Verbally Confirms",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-19",
+        "title": "Completion of instrument, sponge and needle counts",
+        "description": "Completion of instrument, sponge and needle counts",
+        "source_text": "Completion of instrument, sponge and needle counts",
+        "evidence": "Completion of instrument, sponge and needle counts",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-20",
+        "title": "Specimen labelling (read specimen labels aloud, including patient name)",
+        "description": "Specimen labelling (read specimen labels aloud, including patient name)",
+        "source_text": "Specimen labelling (read specimen labels aloud, including patient name)",
+        "evidence": "Specimen labelling (read specimen labels aloud, including patient name)",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-21",
+        "title": "Whether there are any equipment problems to be addressed",
+        "description": "Whether there are any equipment problems to be addressed",
+        "source_text": "Whether there are any equipment problems to be addressed",
+        "evidence": "Whether there are any equipment problems to be addressed",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-22",
+        "title": "To Surgeon, Anaesthetist and Nurse: What are the key concerns for recovery and management of this patient",
+        "description": "To Surgeon, Anaesthetist and Nurse: What are the key concerns for recovery and management of this patient?",
+        "source_text": "To Surgeon, Anaesthetist and Nurse: What are the key concerns for recovery and management of this patient?",
+        "evidence": "To Surgeon, Anaesthetist and Nurse: What are the key concerns for recovery and management of this patient?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      }
+    ],
+    "total_items": 22,
+    "completed_items": 0,
+    "progress_percentage": 0.0
+  },
+  "evaluation": {
+    "status": "FAIL",
+    "coverage": 1.0,
+    "expected_items": 22,
+    "matched_items": 22,
+    "missing_items": [],
+    "matched": [
+      {
+        "expected_id": "identity_site_procedure_consent",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 0,
+        "matched_title": "Has the patient confirmed his/her identity, site, procedure, and consent"
+      },
+      {
+        "expected_id": "site_marked",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 1,
+        "matched_title": "Is the site marked"
+      },
+      {
+        "expected_id": "anaesthesia_machine_medication_check",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 2,
+        "matched_title": "Is the anaesthesia machine and medication check complete"
+      },
+      {
+        "expected_id": "pulse_oximeter_functioning",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 3,
+        "matched_title": "Is the pulse oximeter on the patient and functioning"
+      },
+      {
+        "expected_id": "known_allergy",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 4,
+        "matched_title": "Does the patient have a: Known allergy"
+      },
+      {
+        "expected_id": "difficult_airway_aspiration_risk",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 5,
+        "matched_title": "Difficult airway or aspiration risk"
+      },
+      {
+        "expected_id": "blood_loss_risk_preop",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 6,
+        "matched_title": "Risk of >500ml blood loss (7ml/kg in children)"
+      },
+      {
+        "expected_id": "team_introductions",
+        "phase": "Before skin incision",
+        "matched_item_index": 7,
+        "matched_title": "Confirm all team members have introduced themselves by name and role"
+      },
+      {
+        "expected_id": "confirm_name_procedure_incision_site",
+        "phase": "Before skin incision",
+        "matched_item_index": 8,
+        "matched_title": "Confirm the patient’s name, procedure, and where the incision will be made"
+      },
+      {
+        "expected_id": "antibiotic_prophylaxis",
+        "phase": "Before skin incision",
+        "matched_item_index": 9,
+        "matched_title": "Has antibiotic prophylaxis been given within the last 60 minutes"
+      },
+      {
+        "expected_id": "surgeon_critical_steps",
+        "phase": "Before skin incision",
+        "matched_item_index": 10,
+        "matched_title": "To Surgeon: What are the critical or non-routine steps"
+      },
+      {
+        "expected_id": "surgeon_case_duration",
+        "phase": "Before skin incision",
+        "matched_item_index": 11,
+        "matched_title": "How long will the case take"
+      },
+      {
+        "expected_id": "surgeon_anticipated_blood_loss",
+        "phase": "Before skin incision",
+        "matched_item_index": 12,
+        "matched_title": "What is the anticipated blood loss"
+      },
+      {
+        "expected_id": "anaesthetist_patient_specific_concerns",
+        "phase": "Before skin incision",
+        "matched_item_index": 13,
+        "matched_title": "To Anaesthetist: Are there any patient-specific concerns"
+      },
+      {
+        "expected_id": "sterility_confirmed",
+        "phase": "Before skin incision",
+        "matched_item_index": 14,
+        "matched_title": "To Nursing Team: Has sterility (including indicator results) been confirmed"
+      },
+      {
+        "expected_id": "equipment_issues_or_concerns",
+        "phase": "Before skin incision",
+        "matched_item_index": 15,
+        "matched_title": "Are there equipment issues or any concerns"
+      },
+      {
+        "expected_id": "essential_imaging_displayed",
+        "phase": "Before skin incision",
+        "matched_item_index": 16,
+        "matched_title": "Is essential imaging displayed"
+      },
+      {
+        "expected_id": "procedure_name_confirmed",
+        "phase": "Before patient leaves operating room",
+        "matched_item_index": 17,
+        "matched_title": "Nurse Verbally Confirms: The name of the procedure"
+      },
+      {
+        "expected_id": "instrument_sponge_needle_counts",
+        "phase": "Before patient leaves operating room",
+        "matched_item_index": 18,
+        "matched_title": "Completion of instrument, sponge and needle counts"
+      },
+      {
+        "expected_id": "specimen_labelling",
+        "phase": "Before patient leaves operating room",
+        "matched_item_index": 19,
+        "matched_title": "Specimen labelling (read specimen labels aloud, including patient name)"
+      },
+      {
+        "expected_id": "equipment_problems_to_be_addressed",
+        "phase": "Before patient leaves operating room",
+        "matched_item_index": 20,
+        "matched_title": "Whether there are any equipment problems to be addressed"
+      },
+      {
+        "expected_id": "recovery_management_concerns",
+        "phase": "Before patient leaves operating room",
+        "matched_item_index": 21,
+        "matched_title": "To Surgeon, Anaesthetist and Nurse: What are the key concerns for recovery and management of this patient"
+      }
+    ],
+    "duplicate_ids": [],
+    "artifact_items": [],
+    "style_issue_items": [],
+    "order_breaks": [],
+    "collapsed_items": [
+      {
+        "item_index": 8,
+        "title": "Confirm the patient’s name, procedure, and where the incision will be made",
+        "matched_expected_ids": [
+          "confirm_name_procedure_incision_site",
+          "procedure_name_confirmed"
+        ]
+      },
+      {
+        "item_index": 21,
+        "title": "To Surgeon, Anaesthetist and Nurse: What are the key concerns for recovery and management of this patient",
+        "matched_expected_ids": [
+          "anaesthetist_patient_specific_concerns",
+          "recovery_management_concerns"
+        ]
+      }
+    ],
+    "unexpected_items": [],
+    "reasons": [
+      "collapsed items detected: 2"
+    ]
+  }
+}

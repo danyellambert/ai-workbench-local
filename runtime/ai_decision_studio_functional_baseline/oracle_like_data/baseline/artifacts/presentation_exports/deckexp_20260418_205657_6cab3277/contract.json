@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe Access Review Evidence Log addresses gaps in control closure by requiring verification of incomplete evidence items, while the Privileged Account Approval Email mandates ongoing governance through scoped access, continuous logging, and quarterly vendor recertification to sustain compliance.\n\n- Access Review Evidence Log requires verification of missing or unverified evidence items to close controls.  \n- Privileged Account Approval Email requires quarterly vendor confirmation and recertification of access.  \n- Evidence Log focuses on artifact provenance and status tracking; Approval Email emphasizes usage scoping and logging compliance.  \n- Evidence Log applies to vendor oversight controls; Approval Email governs privileged access for specific administrators.  \n- Evidence Log closure depends on resolving incomplete items; Approval Email requires periodic vendor validation to maintain access.  \n- Evidence Log is a control register; Approval Email is a governance directive with enforceable conditions.",
+  "key_highlights": [
+    "The Access Review Evidence Log addresses gaps in control closure by requiring verification of incomplete evidence items, while the Privileged Account Approval Email mandates ongoing governance through scoped access, continuous logging, and quarterly vendor recertification to sustain compliance.",
+    "Access Review Evidence Log requires verification of missing or unverified evidence items to close controls.",
+    "Privileged Account Approval Email requires quarterly vendor confirmation and recertification of access.",
+    "Evidence Log focuses on artifact provenance and status tracking; Approval Email emphasizes usage scoping and logging compliance.",
+    "Evidence Log applies to vendor oversight controls; Approval Email governs privileged access for specific administrators.",
+    "Evidence Log closure depends on resolving incomplete items; Approval Email requires periodic vendor validation to maintain access."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Control closure depends on verification of missing or in-progress evidence items. | Artifact provenance must be confirm…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on strict task scoping and logging compliance | Governance requires periodic vendor validation an…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log addresses gaps in…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+        ],
+        [
+          "auditability_delta",
+          "Access Review Evidence Log requires verification of missing…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+        ],
+        [
+          "approval_change",
+          "Privileged Account Approval Email requires quarterly vendor confirmation…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+        ],
+        [
+          "approval_change",
+          "Evidence Log focuses on artifact provenance and status…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): Artifact provenance must be confirmed before evidence can satisfy control require…"
+        ],
+        [
+          "approval_change",
+          "Evidence Log applies to vendor oversight controls; Approval…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+        ],
+        [
+          "approval_change",
+          "Evidence Log closure depends on resolving incomplete items;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

@@ -1,0 +1,311 @@
+{
+  "total_cases": 2,
+  "successful_cases": 2,
+  "failed_cases": 0,
+  "runtime_path_breakdown": [
+    {
+      "runtime_path": "direct_runtime",
+      "runtime_path_label": "Direct runtime",
+      "case_count": 2,
+      "successful_cases": 2,
+      "failed_cases": 0,
+      "candidate_count": 1,
+      "path_overhead_expected": false,
+      "backend_examples": [
+        "ollama::embeddinggemma:300m"
+      ]
+    }
+  ],
+  "model_resolution_summary": {
+    "counts": {
+      "exact": 2
+    },
+    "substitutions": []
+  },
+  "runtime_family_resolution_summary": {
+    "counts": {
+      "exact": 2
+    },
+    "substitutions": []
+  },
+  "generation": {
+    "total_cases": 0,
+    "successful_cases": 0,
+    "failed_cases": 0,
+    "runtime_path_breakdown": [],
+    "candidate_ranking": [],
+    "top_candidate": null
+  },
+  "embeddings": {
+    "total_cases": 2,
+    "successful_cases": 2,
+    "failed_cases": 0,
+    "runtime_path_breakdown": [
+      {
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "case_count": 2,
+        "successful_cases": 2,
+        "failed_cases": 0,
+        "candidate_count": 1,
+        "path_overhead_expected": false,
+        "backend_examples": [
+          "ollama::embeddinggemma:300m"
+        ]
+      }
+    ],
+    "candidate_ranking": [
+      {
+        "candidate": "ollama::embeddinggemma:300m::code_retrieval",
+        "provider": "ollama",
+        "model": "embeddinggemma:300m",
+        "candidate_role": "baseline_general_retrieval",
+        "model_effective": "embeddinggemma:300m",
+        "model_resolution_status": "exact",
+        "subset_id": "code_retrieval",
+        "subset_label": "Code retrieval subset",
+        "subset_kind": "code",
+        "requested_runtime_family": "ollama_local",
+        "resolved_runtime_family": "ollama_local",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "embeddinggemma:300m",
+        "backend_equivalence_key": "ollama::embeddinggemma:300m",
+        "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+        "path_overhead_expected": false,
+        "case_count": 1,
+        "success_rate": 1.0,
+        "avg_hit_at_1": 0.5,
+        "avg_hit_at_k": 0.5,
+        "avg_mrr": 0.5,
+        "avg_indexing_seconds": 2.493,
+        "avg_retrieval_seconds": 0.1586,
+        "avg_total_wall_time_s": 2.8107
+      },
+      {
+        "candidate": "ollama::embeddinggemma:300m::general_retrieval",
+        "provider": "ollama",
+        "model": "embeddinggemma:300m",
+        "candidate_role": "baseline_general_retrieval",
+        "model_effective": "embeddinggemma:300m",
+        "model_resolution_status": "exact",
+        "subset_id": "general_retrieval",
+        "subset_label": "General document retrieval",
+        "subset_kind": "general",
+        "requested_runtime_family": "ollama_local",
+        "resolved_runtime_family": "ollama_local",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "embeddinggemma:300m",
+        "backend_equivalence_key": "ollama::embeddinggemma:300m",
+        "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+        "path_overhead_expected": false,
+        "case_count": 1,
+        "success_rate": 1.0,
+        "avg_hit_at_1": 0.5,
+        "avg_hit_at_k": 0.5,
+        "avg_mrr": 0.5,
+        "avg_indexing_seconds": 141.2311,
+        "avg_retrieval_seconds": 0.6989,
+        "avg_total_wall_time_s": 142.6294
+      }
+    ],
+    "subset_rankings": [
+      {
+        "subset_id": "code_retrieval",
+        "subset_label": "Code retrieval subset",
+        "subset_kind": "code",
+        "case_count": 1,
+        "candidate_ranking": [
+          {
+            "candidate": "ollama::embeddinggemma:300m::code_retrieval",
+            "provider": "ollama",
+            "model": "embeddinggemma:300m",
+            "candidate_role": "baseline_general_retrieval",
+            "model_effective": "embeddinggemma:300m",
+            "model_resolution_status": "exact",
+            "subset_id": "code_retrieval",
+            "subset_label": "Code retrieval subset",
+            "subset_kind": "code",
+            "requested_runtime_family": "ollama_local",
+            "resolved_runtime_family": "ollama_local",
+            "runtime_path": "direct_runtime",
+            "runtime_path_label": "Direct runtime",
+            "backend_equivalence_type": "native_runtime",
+            "backend_provider_resolved": "ollama",
+            "backend_model_ref_resolved": "embeddinggemma:300m",
+            "backend_equivalence_key": "ollama::embeddinggemma:300m",
+            "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+            "path_overhead_expected": false,
+            "case_count": 1,
+            "success_rate": 1.0,
+            "avg_hit_at_1": 0.5,
+            "avg_hit_at_k": 0.5,
+            "avg_mrr": 0.5,
+            "avg_indexing_seconds": 2.493,
+            "avg_retrieval_seconds": 0.1586,
+            "avg_total_wall_time_s": 2.8107
+          }
+        ],
+        "top_candidate": {
+          "candidate": "ollama::embeddinggemma:300m::code_retrieval",
+          "provider": "ollama",
+          "model": "embeddinggemma:300m",
+          "candidate_role": "baseline_general_retrieval",
+          "model_effective": "embeddinggemma:300m",
+          "model_resolution_status": "exact",
+          "subset_id": "code_retrieval",
+          "subset_label": "Code retrieval subset",
+          "subset_kind": "code",
+          "requested_runtime_family": "ollama_local",
+          "resolved_runtime_family": "ollama_local",
+          "runtime_path": "direct_runtime",
+          "runtime_path_label": "Direct runtime",
+          "backend_equivalence_type": "native_runtime",
+          "backend_provider_resolved": "ollama",
+          "backend_model_ref_resolved": "embeddinggemma:300m",
+          "backend_equivalence_key": "ollama::embeddinggemma:300m",
+          "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+          "path_overhead_expected": false,
+          "case_count": 1,
+          "success_rate": 1.0,
+          "avg_hit_at_1": 0.5,
+          "avg_hit_at_k": 0.5,
+          "avg_mrr": 0.5,
+          "avg_indexing_seconds": 2.493,
+          "avg_retrieval_seconds": 0.1586,
+          "avg_total_wall_time_s": 2.8107
+        }
+      },
+      {
+        "subset_id": "general_retrieval",
+        "subset_label": "General document retrieval",
+        "subset_kind": "general",
+        "case_count": 1,
+        "candidate_ranking": [
+          {
+            "candidate": "ollama::embeddinggemma:300m::general_retrieval",
+            "provider": "ollama",
+            "model": "embeddinggemma:300m",
+            "candidate_role": "baseline_general_retrieval",
+            "model_effective": "embeddinggemma:300m",
+            "model_resolution_status": "exact",
+            "subset_id": "general_retrieval",
+            "subset_label": "General document retrieval",
+            "subset_kind": "general",
+            "requested_runtime_family": "ollama_local",
+            "resolved_runtime_family": "ollama_local",
+            "runtime_path": "direct_runtime",
+            "runtime_path_label": "Direct runtime",
+            "backend_equivalence_type": "native_runtime",
+            "backend_provider_resolved": "ollama",
+            "backend_model_ref_resolved": "embeddinggemma:300m",
+            "backend_equivalence_key": "ollama::embeddinggemma:300m",
+            "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+            "path_overhead_expected": false,
+            "case_count": 1,
+            "success_rate": 1.0,
+            "avg_hit_at_1": 0.5,
+            "avg_hit_at_k": 0.5,
+            "avg_mrr": 0.5,
+            "avg_indexing_seconds": 141.2311,
+            "avg_retrieval_seconds": 0.6989,
+            "avg_total_wall_time_s": 142.6294
+          }
+        ],
+        "top_candidate": {
+          "candidate": "ollama::embeddinggemma:300m::general_retrieval",
+          "provider": "ollama",
+          "model": "embeddinggemma:300m",
+          "candidate_role": "baseline_general_retrieval",
+          "model_effective": "embeddinggemma:300m",
+          "model_resolution_status": "exact",
+          "subset_id": "general_retrieval",
+          "subset_label": "General document retrieval",
+          "subset_kind": "general",
+          "requested_runtime_family": "ollama_local",
+          "resolved_runtime_family": "ollama_local",
+          "runtime_path": "direct_runtime",
+          "runtime_path_label": "Direct runtime",
+          "backend_equivalence_type": "native_runtime",
+          "backend_provider_resolved": "ollama",
+          "backend_model_ref_resolved": "embeddinggemma:300m",
+          "backend_equivalence_key": "ollama::embeddinggemma:300m",
+          "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+          "path_overhead_expected": false,
+          "case_count": 1,
+          "success_rate": 1.0,
+          "avg_hit_at_1": 0.5,
+          "avg_hit_at_k": 0.5,
+          "avg_mrr": 0.5,
+          "avg_indexing_seconds": 141.2311,
+          "avg_retrieval_seconds": 0.6989,
+          "avg_total_wall_time_s": 142.6294
+        }
+      }
+    ],
+    "subset_notes": [
+      {
+        "subset_id": "code_retrieval",
+        "subset_label": "Code retrieval subset",
+        "subset_kind": "code",
+        "reason": "same_as_general_winner",
+        "provider": "ollama",
+        "model": "embeddinggemma:300m",
+        "model_effective": "embeddinggemma:300m",
+        "candidate_role": "baseline_general_retrieval",
+        "message": "The code subset currently reuses `ollama::embeddinggemma:300m` as the best available local code fallback because no stronger dedicated code embedding won cleanly in this environment."
+      }
+    ],
+    "top_candidate": {
+      "candidate": "ollama::embeddinggemma:300m::general_retrieval",
+      "provider": "ollama",
+      "model": "embeddinggemma:300m",
+      "candidate_role": "baseline_general_retrieval",
+      "model_effective": "embeddinggemma:300m",
+      "model_resolution_status": "exact",
+      "subset_id": "general_retrieval",
+      "subset_label": "General document retrieval",
+      "subset_kind": "general",
+      "requested_runtime_family": "ollama_local",
+      "resolved_runtime_family": "ollama_local",
+      "runtime_path": "direct_runtime",
+      "runtime_path_label": "Direct runtime",
+      "backend_equivalence_type": "native_runtime",
+      "backend_provider_resolved": "ollama",
+      "backend_model_ref_resolved": "embeddinggemma:300m",
+      "backend_equivalence_key": "ollama::embeddinggemma:300m",
+      "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+      "path_overhead_expected": false,
+      "case_count": 1,
+      "success_rate": 1.0,
+      "avg_hit_at_1": 0.5,
+      "avg_hit_at_k": 0.5,
+      "avg_mrr": 0.5,
+      "avg_indexing_seconds": 141.2311,
+      "avg_retrieval_seconds": 0.6989,
+      "avg_total_wall_time_s": 142.6294
+    }
+  },
+  "rerankers": {
+    "total_cases": 0,
+    "successful_cases": 0,
+    "failed_cases": 0,
+    "candidate_ranking": [],
+    "best_tradeoff": null,
+    "support_level": "scaffolded_only"
+  },
+  "ocr_vlm": {
+    "total_cases": 0,
+    "successful_cases": 0,
+    "failed_cases": 0,
+    "variant_ranking": [],
+    "best_ocr_tradeoff": null,
+    "best_vlm_tradeoff": null,
+    "support_level": "scaffolded_only"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "manifest_version": 1,
+  "mode": "preview",
+  "basename": "candidate_review_deck",
+  "output_dir": "baseline://external/Users_danyellambert_ppt_creator_app_outputs_ai_workbench_export_previews/deckexp_20260422_122645_2e1f36ce",
+  "presentation_title": "AI Workbench Local — Candidate Review · Sarah Chen",
+  "theme": "executive_premium_minimal",
+  "preview_count": 8,
+  "preview_source": "spec",
+  "real_preview": false,
+  "backend_requested": "synthetic",
+  "backend_used": "synthetic",
+  "office_runtime": null,
+  "office_conversion_strategy": null,
+  "input_pptx": null,
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "candidate_review_deck-01.png",
+      "path": "baseline://external_files/b2a17627bc16899f_candidate_review_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "candidate_review_deck-02.png",
+      "path": "baseline://external_files/e4c8f74baa35d219_candidate_review_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "candidate_review_deck-03.png",
+      "path": "baseline://external_files/3d3a7198f53399c6_candidate_review_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "candidate_review_deck-04.png",
+      "path": "baseline://external_files/7dfc62e5ce9226ca_candidate_review_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "candidate_review_deck-05.png",
+      "path": "baseline://external_files/75cc2177fd789383_candidate_review_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "candidate_review_deck-06.png",
+      "path": "baseline://external_files/50001201c87992d6_candidate_review_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "candidate_review_deck-07.png",
+      "path": "baseline://external_files/028ebf278e566c23_candidate_review_deck-07.png"
+    },
+    {
+      "slide_number": 8,
+      "filename": "candidate_review_deck-08.png",
+      "path": "baseline://external_files/1d5c5255dd7b8643_candidate_review_deck-08.png"
+    }
+  ]
+}

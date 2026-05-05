@@ -1,0 +1,112 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Vendor Risk Assessment Template.pdf",
+  "file_type": "pdf",
+  "file_hash": "0cbc2315b4fe8707528f79a87c3f5f817039497453e8665ad69e1fd8ce105a10",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nRSK-001  Vendor Risk Assessment Template\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nVendor Risk Assessment Template\nSpreadsheet-export style assessment register used for vendor review and action tracking.\nDocument ID\nRSK-001\nOwner\nVendor Risk Management\nFormat\nSpreadsheet export to PDF\nSnapshot Date\n2024-03-14\nStatus\nActive assessment\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are fictional.\nWorksheet export from the Vendor Risk workspace. The sheet below is intentionally preserved in a spreadsheet-like layout to test PDF extraction from dense operational tables.\nVendor\nDomain\nAssessment Question\nCurrent Position / Evidence\nOwner\nDue\nStatus\nResidual\nRisk\nNorthwind Cloud\nSystems\nContracting\nIs there a liability cap aligned to\nMeridian baseline?\nMSA v4.2 Section 7.3 is\nunlimited; baseline calls for 2×\nannual value.\nMaria Santos\n2024-03-22\nIn progress\nCritical\nNorthwind Cloud\nSystems\nPrivacy\nIs EU transfer mechanism\ndocumented?\nDPA Appendix C reserved; no\nexecuted SCC package attached.\nJames Park\n2024-03-25\nOpen\nHigh\nNorthwind Cloud\nSystems\nAvailability\nDoes SLA meet enterprise\ntarget?\nCurrent SLA sets 99.5% monthly\nuptime; Meridian target is\n99.95%.\nMaria Santos\n2024-03-20\nDone\nMedium\nNorthwind Cloud\nSystems\nSecurity\nIs incident notification window\nexplicit?\nPolicy and MSA use vague\nreasonable-efforts language.\nAlex Rivera\n2024-03-28\nOpen\nHigh\nNorthwind Cloud\nSystems\nOperational\nHas vendor SOC2 Type II\nreport been reviewed?\nAwaiting vendor response and\nreport delivery.\nAlex Rivera\n2024-04-01\nBlocked\nMedium\nNorthwind Cloud\nSystems\nSubprocess\nors\nAre material changes\nproactively notified?\nPortal notice only; formal change\nnotice process requested.\nOlivia Grant\n2024-03-27\nOpen\nMedium\nOpen Dependencies\n●\nBlocked item mirrors frontend action ai6: SOC2 Type II report pending from vendor.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nRSK-001  Vendor Risk Assessment Template\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\n●\nRows intentionally map to the key contract, privacy, SLA, and incident-response findings for cross-workflow grounding.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 2350,
+    "final_text_chars": 2350,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2056,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "table"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 307,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 24,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 5739,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nRSK-001  Vendor Risk Assessment Template\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nVendor Risk Assessment Template\nSpreadsheet-export style assessment register used for vendor review and action tracking.\nDocument ID\nRSK-001\nOwner\nVendor Risk Management\nFormat\nSpreadsheet export to PDF\nSnapshot Date\n2024-03-14\nStatus\nActive assessment\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are fictional.\nWorksheet export from the Vendor Risk workspace. The sheet below is intentionally preserved in a spreadsheet-like layout to test PDF extraction from dense operational tables.\nVendor\nDomain\nAssessment Question\nCurrent Position / Evidence\nOwner\nDue\nStatus\nResidual\nRisk\nNorthwind Cloud\nSystems\nContracting\nIs there a liability cap aligned to\nMeridian baseline?\nMSA v4.2 Section 7.3 is\nunlimited; baseline calls for 2×\nannual value.\nMaria Santos\n2024-03-22\nIn progress\nCritical\nNorthwind Cloud\nSystems\nPrivacy\nIs EU transfer mechanism\ndocumented?\nDPA Appendix C reserved; no\nexecuted SCC package attached.\nJames Park\n2024-03-25\nOpen\nHigh\nNorthwind Cloud\nSystems\nAvailability\nDoes SLA meet enterprise\ntarget?\nCurrent SLA sets 99.5% monthly\nuptime; Meridian target is\n99.95%.\nMaria Santos\n2024-03-20\nDone\nMedium\nNorthwind Cloud\nSystems\nSecurity\nIs incident notification window\nexplicit?\nPolicy and MSA use vague\nreasonable-efforts language.\nAlex Rivera\n2024-03-28\nOpen\nHigh\nNorthwind Cloud\nSystems\nOperational\nHas vendor SOC2 Type II\nreport been reviewed?\nAwaiting vendor response and\nreport delivery.\nAlex Rivera\n2024-04-01\nBlocked\nMedium\nNorthwind Cloud\nSystems\nSubprocess\nors\nAre material changes\nproactively notified?\nPortal notice only; formal change\nnotice process requested.\nOlivia Grant\n2024-03-27\nOpen\nMedium\nOpen Dependencies\n●\nBlocked item mirrors frontend action ai6: SOC2 Type II report pending from vendor.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nRSK-001  Vendor Risk Assessment Template\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\n●\nRows intentionally map to the key contract, privacy, SLA, and incident-response findings for cross-workflow grounding.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic risk template is text/vector content; Docling/text extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "risk/Vendor Risk Assessment Template.pdf",
+    "nextcloud_relative_path": "risk/Vendor Risk Assessment Template.pdf",
+    "source_relative_path": "risk/Vendor Risk Assessment Template.pdf",
+    "filename": "Vendor Risk Assessment Template.pdf",
+    "title": "Vendor Risk Assessment Template",
+    "category": "risk",
+    "preindex": {
+      "relative_path": "risk/Vendor Risk Assessment Template.pdf",
+      "filename": "Vendor Risk Assessment Template.pdf",
+      "title": "Vendor Risk Assessment Template",
+      "category": "risk",
+      "document_id": "risk/Vendor Risk Assessment Template.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:46"
+}

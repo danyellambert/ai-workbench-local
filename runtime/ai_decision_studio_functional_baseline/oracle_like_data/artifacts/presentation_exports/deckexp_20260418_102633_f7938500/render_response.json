@@ -1,0 +1,1607 @@
+{
+  "mode": "render",
+  "rendered": true,
+  "dry_run": false,
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck.pptx",
+  "presentation_title": "AI Workbench Local — Policy / Contract Comparison",
+  "theme": "executive_premium_minimal",
+  "slide_count": 6,
+  "missing_asset_count": 0,
+  "missing_assets": [],
+  "quality_review": {
+    "mode": "review",
+    "presentation_title": "AI Workbench Local — Policy / Contract Comparison",
+    "theme": "executive_premium_minimal",
+    "slide_count": 6,
+    "slides": [
+      {
+        "slide_number": 1,
+        "slide_type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 1.8,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 2,
+        "slide_type": "summary",
+        "title": "Executive summary",
+        "score": 30,
+        "status": "attention",
+        "content_weight": 3.59,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 6,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 16.3,
+        "risk_level": "high",
+        "likely_overflow_regions": [
+          "body"
+        ],
+        "likely_collision_regions": [
+          "summary:narrative",
+          "summary:panel_width_pressure",
+          "summary:takeaway_1",
+          "summary:takeaway_2",
+          "summary:takeaway_3",
+          "summary:takeaways"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "summary:narrative",
+            "density": 15.313,
+            "threshold": 4.2,
+            "severity": "high",
+            "message": "summary narrative region is dense enough to risk crowding"
+          },
+          {
+            "region": "summary:takeaways",
+            "density": 4.438,
+            "threshold": 3.8,
+            "severity": "medium",
+            "message": "summary takeaways panel is dense enough to risk clipping"
+          },
+          {
+            "region": "summary:panel_width_pressure",
+            "density": 8.069,
+            "threshold": 4.2,
+            "severity": "high",
+            "message": "summary takeaways are dense enough to overwhelm the side panel width"
+          },
+          {
+            "region": "summary:takeaway_1",
+            "density": 4.727,
+            "threshold": 4.5,
+            "severity": "medium",
+            "message": "summary takeaway row 1 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "region": "summary:takeaway_2",
+            "density": 4.716,
+            "threshold": 4.5,
+            "severity": "medium",
+            "message": "summary takeaway row 2 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "region": "summary:takeaway_3",
+            "density": 4.737,
+            "threshold": 4.5,
+            "severity": "medium",
+            "message": "summary takeaway row 3 is dense enough to risk clipping inside the panel"
+          }
+        ],
+        "severity_counts": {
+          "high": 3,
+          "medium": 4,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "high",
+            "message": "body text is dense for a single executive slide"
+          },
+          {
+            "severity": "high",
+            "message": "summary narrative region is dense enough to risk crowding"
+          },
+          {
+            "severity": "medium",
+            "message": "summary takeaways panel is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "summary takeaways are dense enough to overwhelm the side panel width"
+          },
+          {
+            "severity": "medium",
+            "message": "summary takeaway row 1 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "severity": "medium",
+            "message": "summary takeaway row 2 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "severity": "medium",
+            "message": "summary takeaway row 3 is dense enough to risk clipping inside the panel"
+          }
+        ]
+      },
+      {
+        "slide_number": 3,
+        "slide_type": "metrics",
+        "title": "Executive snapshot",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 6.14,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 4,
+        "slide_type": "table",
+        "title": "Comparison findings",
+        "score": 0,
+        "status": "attention",
+        "content_weight": 20.49,
+        "overflow_risk_count": 2,
+        "clipping_risk_count": 2,
+        "collision_risk_count": 26,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 117.31,
+        "risk_level": "high",
+        "likely_overflow_regions": [
+          "table"
+        ],
+        "likely_collision_regions": [
+          "table:column_2",
+          "table:column_3",
+          "table:column_4",
+          "table:r1c4",
+          "table:r2c4",
+          "table:r3c2",
+          "table:r3c3",
+          "table:r3c4",
+          "table:r4c2",
+          "table:r4c3",
+          "table:r4c4",
+          "table:r5c2",
+          "table:r5c3",
+          "table:r5c4",
+          "table:r6c2",
+          "table:r6c3",
+          "table:r6c4",
+          "table:r7c2",
+          "table:r7c3",
+          "table:r7c4",
+          "table:r8c2",
+          "table:r8c3",
+          "table:r8c4",
+          "table:row_3",
+          "table:row_6",
+          "table:row_8"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "table:column_2",
+            "density": 5.376,
+            "threshold": 2.8,
+            "severity": "high",
+            "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "region": "table:column_3",
+            "density": 6.061,
+            "threshold": 2.8,
+            "severity": "high",
+            "message": "table column 3 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "region": "table:column_4",
+            "density": 12.063,
+            "threshold": 2.8,
+            "severity": "high",
+            "message": "table column 4 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "region": "table:r1c4",
+            "density": 15.834,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r1c4 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r2c4",
+            "density": 20.057,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r2c4 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:row_3",
+            "density": 7.239,
+            "threshold": 7.1,
+            "severity": "medium",
+            "message": "table row 3 is dense enough to compress vertically"
+          },
+          {
+            "region": "table:r3c2",
+            "density": 8.445,
+            "threshold": 8.0,
+            "severity": "medium",
+            "message": "table cell r3c2 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r3c3",
+            "density": 10.556,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r3c3 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r3c4",
+            "density": 20.057,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r3c4 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r4c2",
+            "density": 8.445,
+            "threshold": 8.0,
+            "severity": "medium",
+            "message": "table cell r4c2 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r4c3",
+            "density": 10.556,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r4c3 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r4c4",
+            "density": 16.89,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r4c4 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r5c2",
+            "density": 8.445,
+            "threshold": 8.0,
+            "severity": "medium",
+            "message": "table cell r5c2 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r5c3",
+            "density": 10.556,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r5c3 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r5c4",
+            "density": 16.89,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r5c4 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:row_6",
+            "density": 7.239,
+            "threshold": 7.1,
+            "severity": "medium",
+            "message": "table row 6 is dense enough to compress vertically"
+          },
+          {
+            "region": "table:r6c2",
+            "density": 8.445,
+            "threshold": 8.0,
+            "severity": "medium",
+            "message": "table cell r6c2 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r6c3",
+            "density": 10.556,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r6c3 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r6c4",
+            "density": 20.057,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r6c4 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r7c2",
+            "density": 8.445,
+            "threshold": 8.0,
+            "severity": "medium",
+            "message": "table cell r7c2 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r7c3",
+            "density": 10.556,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r7c3 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r7c4",
+            "density": 17.945,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r7c4 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:row_8",
+            "density": 7.239,
+            "threshold": 7.1,
+            "severity": "medium",
+            "message": "table row 8 is dense enough to compress vertically"
+          },
+          {
+            "region": "table:r8c2",
+            "density": 8.445,
+            "threshold": 8.0,
+            "severity": "medium",
+            "message": "table cell r8c2 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r8c3",
+            "density": 10.556,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r8c3 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:r8c4",
+            "density": 20.057,
+            "threshold": 8.0,
+            "severity": "high",
+            "message": "table cell r8c4 is dense enough to risk clipping"
+          }
+        ],
+        "severity_counts": {
+          "high": 18,
+          "medium": 10,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "high",
+            "message": "table has many rows and may feel overloaded"
+          },
+          {
+            "severity": "medium",
+            "message": "some table cells are likely too long"
+          },
+          {
+            "severity": "high",
+            "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "severity": "high",
+            "message": "table column 3 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "severity": "high",
+            "message": "table column 4 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r1c4 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r2c4 is dense enough to risk clipping"
+          },
+          {
+            "severity": "medium",
+            "message": "table row 3 is dense enough to compress vertically"
+          },
+          {
+            "severity": "medium",
+            "message": "table cell r3c2 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r3c3 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r3c4 is dense enough to risk clipping"
+          },
+          {
+            "severity": "medium",
+            "message": "table cell r4c2 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r4c3 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r4c4 is dense enough to risk clipping"
+          },
+          {
+            "severity": "medium",
+            "message": "table cell r5c2 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r5c3 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r5c4 is dense enough to risk clipping"
+          },
+          {
+            "severity": "medium",
+            "message": "table row 6 is dense enough to compress vertically"
+          },
+          {
+            "severity": "medium",
+            "message": "table cell r6c2 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r6c3 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r6c4 is dense enough to risk clipping"
+          },
+          {
+            "severity": "medium",
+            "message": "table cell r7c2 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r7c3 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r7c4 is dense enough to risk clipping"
+          },
+          {
+            "severity": "medium",
+            "message": "table row 8 is dense enough to compress vertically"
+          },
+          {
+            "severity": "medium",
+            "message": "table cell r8c2 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r8c3 is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "table cell r8c4 is dense enough to risk clipping"
+          }
+        ]
+      },
+      {
+        "slide_number": 5,
+        "slide_type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "score": 93,
+        "status": "ok",
+        "content_weight": 5.31,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.07,
+        "risk_level": "medium",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [
+          "two_column:split_imbalance"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "two_column:split_imbalance",
+            "density": 1.394,
+            "threshold": 1.32,
+            "severity": "medium",
+            "message": "two-column panels are materially imbalanced and may compete for space"
+          }
+        ],
+        "severity_counts": {
+          "high": 0,
+          "medium": 1,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "two-column panels are materially imbalanced and may compete for space"
+          }
+        ]
+      },
+      {
+        "slide_number": 6,
+        "slide_type": "bullets",
+        "title": "Next steps",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 1.89,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      }
+    ],
+    "missing_assets": [],
+    "average_score": 70,
+    "status": "review",
+    "issue_count": 36,
+    "warning_count": 36,
+    "severity_counts": {
+      "high": 21,
+      "medium": 15,
+      "low": 0
+    },
+    "overflow_risk_count": 2,
+    "clipping_risk_count": 3,
+    "collision_risk_count": 33,
+    "balance_warning_count": 0,
+    "top_risk_slides": [
+      {
+        "slide_number": 4,
+        "title": "Comparison findings",
+        "risk_level": "high",
+        "overflow_risk_count": 2,
+        "clipping_risk_count": 2,
+        "collision_risk_count": 26,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 117.31
+      },
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "high",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 6,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 16.3
+      },
+      {
+        "slide_number": 5,
+        "title": "Recommendation vs watchouts",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.07
+      }
+    ],
+    "issues": [
+      "slide 02 (Executive summary): body text is dense for a single executive slide",
+      "slide 02 (Executive summary): summary narrative region is dense enough to risk crowding",
+      "slide 02 (Executive summary): summary takeaways panel is dense enough to risk clipping",
+      "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+      "slide 02 (Executive summary): summary takeaway row 1 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 2 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 3 is dense enough to risk clipping inside the panel",
+      "slide 04 (Comparison findings): table has many rows and may feel overloaded",
+      "slide 04 (Comparison findings): some table cells are likely too long",
+      "slide 04 (Comparison findings): table column 2 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Comparison findings): table column 3 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Comparison findings): table column 4 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Comparison findings): table cell r1c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r2c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table row 3 is dense enough to compress vertically",
+      "slide 04 (Comparison findings): table cell r3c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r3c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r3c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r4c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r4c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r4c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r5c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r5c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r5c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table row 6 is dense enough to compress vertically",
+      "slide 04 (Comparison findings): table cell r6c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r6c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r6c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r7c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r7c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r7c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table row 8 is dense enough to compress vertically",
+      "slide 04 (Comparison findings): table cell r8c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r8c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r8c4 is dense enough to risk clipping",
+      "slide 05 (Recommendation vs watchouts): two-column panels are materially imbalanced and may compete for space"
+    ],
+    "warnings": [
+      "slide 02 (Executive summary): body text is dense for a single executive slide",
+      "slide 02 (Executive summary): summary narrative region is dense enough to risk crowding",
+      "slide 02 (Executive summary): summary takeaways panel is dense enough to risk clipping",
+      "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+      "slide 02 (Executive summary): summary takeaway row 1 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 2 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 3 is dense enough to risk clipping inside the panel",
+      "slide 04 (Comparison findings): table has many rows and may feel overloaded",
+      "slide 04 (Comparison findings): some table cells are likely too long",
+      "slide 04 (Comparison findings): table column 2 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Comparison findings): table column 3 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Comparison findings): table column 4 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Comparison findings): table cell r1c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r2c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table row 3 is dense enough to compress vertically",
+      "slide 04 (Comparison findings): table cell r3c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r3c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r3c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r4c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r4c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r4c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r5c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r5c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r5c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table row 6 is dense enough to compress vertically",
+      "slide 04 (Comparison findings): table cell r6c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r6c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r6c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r7c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r7c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r7c4 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table row 8 is dense enough to compress vertically",
+      "slide 04 (Comparison findings): table cell r8c2 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r8c3 is dense enough to risk clipping",
+      "slide 04 (Comparison findings): table cell r8c4 is dense enough to risk clipping",
+      "slide 05 (Recommendation vs watchouts): two-column panels are materially imbalanced and may compete for space"
+    ]
+  },
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500",
+  "preview_source": "spec",
+  "preview_result": {
+    "mode": "preview",
+    "output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500",
+    "preview_count": 6,
+    "previews": [
+      "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-01.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-02.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-03.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-04.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-05.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-06.png"
+    ],
+    "thumbnail_sheet": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-thumbnails.png",
+    "quality_review": {
+      "mode": "review",
+      "presentation_title": "AI Workbench Local — Policy / Contract Comparison",
+      "theme": "executive_premium_minimal",
+      "slide_count": 6,
+      "slides": [
+        {
+          "slide_number": 1,
+          "slide_type": "title",
+          "title": "AI Workbench Local — Policy / Contract Comparison",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 1.8,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        },
+        {
+          "slide_number": 2,
+          "slide_type": "summary",
+          "title": "Executive summary",
+          "score": 30,
+          "status": "attention",
+          "content_weight": 3.59,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 1,
+          "collision_risk_count": 6,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 16.3,
+          "risk_level": "high",
+          "likely_overflow_regions": [
+            "body"
+          ],
+          "likely_collision_regions": [
+            "summary:narrative",
+            "summary:panel_width_pressure",
+            "summary:takeaway_1",
+            "summary:takeaway_2",
+            "summary:takeaway_3",
+            "summary:takeaways"
+          ],
+          "layout_pressure_signals": [
+            {
+              "region": "summary:narrative",
+              "density": 15.313,
+              "threshold": 4.2,
+              "severity": "high",
+              "message": "summary narrative region is dense enough to risk crowding"
+            },
+            {
+              "region": "summary:takeaways",
+              "density": 4.438,
+              "threshold": 3.8,
+              "severity": "medium",
+              "message": "summary takeaways panel is dense enough to risk clipping"
+            },
+            {
+              "region": "summary:panel_width_pressure",
+              "density": 8.069,
+              "threshold": 4.2,
+              "severity": "high",
+              "message": "summary takeaways are dense enough to overwhelm the side panel width"
+            },
+            {
+              "region": "summary:takeaway_1",
+              "density": 4.727,
+              "threshold": 4.5,
+              "severity": "medium",
+              "message": "summary takeaway row 1 is dense enough to risk clipping inside the panel"
+            },
+            {
+              "region": "summary:takeaway_2",
+              "density": 4.716,
+              "threshold": 4.5,
+              "severity": "medium",
+              "message": "summary takeaway row 2 is dense enough to risk clipping inside the panel"
+            },
+            {
+              "region": "summary:takeaway_3",
+              "density": 4.737,
+              "threshold": 4.5,
+              "severity": "medium",
+              "message": "summary takeaway row 3 is dense enough to risk clipping inside the panel"
+            }
+          ],
+          "severity_counts": {
+            "high": 3,
+            "medium": 4,
+            "low": 0
+          },
+          "issues": [
+            {
+              "severity": "high",
+              "message": "body text is dense for a single executive slide"
+            },
+            {
+              "severity": "high",
+              "message": "summary narrative region is dense enough to risk crowding"
+            },
+            {
+              "severity": "medium",
+              "message": "summary takeaways panel is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "summary takeaways are dense enough to overwhelm the side panel width"
+            },
+            {
+              "severity": "medium",
+              "message": "summary takeaway row 1 is dense enough to risk clipping inside the panel"
+            },
+            {
+              "severity": "medium",
+              "message": "summary takeaway row 2 is dense enough to risk clipping inside the panel"
+            },
+            {
+              "severity": "medium",
+              "message": "summary takeaway row 3 is dense enough to risk clipping inside the panel"
+            }
+          ]
+        },
+        {
+          "slide_number": 3,
+          "slide_type": "metrics",
+          "title": "Executive snapshot",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 6.14,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        },
+        {
+          "slide_number": 4,
+          "slide_type": "table",
+          "title": "Comparison findings",
+          "score": 0,
+          "status": "attention",
+          "content_weight": 20.49,
+          "overflow_risk_count": 2,
+          "clipping_risk_count": 2,
+          "collision_risk_count": 26,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 117.31,
+          "risk_level": "high",
+          "likely_overflow_regions": [
+            "table"
+          ],
+          "likely_collision_regions": [
+            "table:column_2",
+            "table:column_3",
+            "table:column_4",
+            "table:r1c4",
+            "table:r2c4",
+            "table:r3c2",
+            "table:r3c3",
+            "table:r3c4",
+            "table:r4c2",
+            "table:r4c3",
+            "table:r4c4",
+            "table:r5c2",
+            "table:r5c3",
+            "table:r5c4",
+            "table:r6c2",
+            "table:r6c3",
+            "table:r6c4",
+            "table:r7c2",
+            "table:r7c3",
+            "table:r7c4",
+            "table:r8c2",
+            "table:r8c3",
+            "table:r8c4",
+            "table:row_3",
+            "table:row_6",
+            "table:row_8"
+          ],
+          "layout_pressure_signals": [
+            {
+              "region": "table:column_2",
+              "density": 5.376,
+              "threshold": 2.8,
+              "severity": "high",
+              "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+            },
+            {
+              "region": "table:column_3",
+              "density": 6.061,
+              "threshold": 2.8,
+              "severity": "high",
+              "message": "table column 3 is dense enough to risk cramped cells across multiple rows"
+            },
+            {
+              "region": "table:column_4",
+              "density": 12.063,
+              "threshold": 2.8,
+              "severity": "high",
+              "message": "table column 4 is dense enough to risk cramped cells across multiple rows"
+            },
+            {
+              "region": "table:r1c4",
+              "density": 15.834,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r1c4 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r2c4",
+              "density": 20.057,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r2c4 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:row_3",
+              "density": 7.239,
+              "threshold": 7.1,
+              "severity": "medium",
+              "message": "table row 3 is dense enough to compress vertically"
+            },
+            {
+              "region": "table:r3c2",
+              "density": 8.445,
+              "threshold": 8.0,
+              "severity": "medium",
+              "message": "table cell r3c2 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r3c3",
+              "density": 10.556,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r3c3 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r3c4",
+              "density": 20.057,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r3c4 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r4c2",
+              "density": 8.445,
+              "threshold": 8.0,
+              "severity": "medium",
+              "message": "table cell r4c2 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r4c3",
+              "density": 10.556,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r4c3 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r4c4",
+              "density": 16.89,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r4c4 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r5c2",
+              "density": 8.445,
+              "threshold": 8.0,
+              "severity": "medium",
+              "message": "table cell r5c2 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r5c3",
+              "density": 10.556,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r5c3 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r5c4",
+              "density": 16.89,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r5c4 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:row_6",
+              "density": 7.239,
+              "threshold": 7.1,
+              "severity": "medium",
+              "message": "table row 6 is dense enough to compress vertically"
+            },
+            {
+              "region": "table:r6c2",
+              "density": 8.445,
+              "threshold": 8.0,
+              "severity": "medium",
+              "message": "table cell r6c2 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r6c3",
+              "density": 10.556,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r6c3 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r6c4",
+              "density": 20.057,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r6c4 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r7c2",
+              "density": 8.445,
+              "threshold": 8.0,
+              "severity": "medium",
+              "message": "table cell r7c2 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r7c3",
+              "density": 10.556,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r7c3 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r7c4",
+              "density": 17.945,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r7c4 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:row_8",
+              "density": 7.239,
+              "threshold": 7.1,
+              "severity": "medium",
+              "message": "table row 8 is dense enough to compress vertically"
+            },
+            {
+              "region": "table:r8c2",
+              "density": 8.445,
+              "threshold": 8.0,
+              "severity": "medium",
+              "message": "table cell r8c2 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r8c3",
+              "density": 10.556,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r8c3 is dense enough to risk clipping"
+            },
+            {
+              "region": "table:r8c4",
+              "density": 20.057,
+              "threshold": 8.0,
+              "severity": "high",
+              "message": "table cell r8c4 is dense enough to risk clipping"
+            }
+          ],
+          "severity_counts": {
+            "high": 18,
+            "medium": 10,
+            "low": 0
+          },
+          "issues": [
+            {
+              "severity": "high",
+              "message": "table has many rows and may feel overloaded"
+            },
+            {
+              "severity": "medium",
+              "message": "some table cells are likely too long"
+            },
+            {
+              "severity": "high",
+              "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+            },
+            {
+              "severity": "high",
+              "message": "table column 3 is dense enough to risk cramped cells across multiple rows"
+            },
+            {
+              "severity": "high",
+              "message": "table column 4 is dense enough to risk cramped cells across multiple rows"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r1c4 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r2c4 is dense enough to risk clipping"
+            },
+            {
+              "severity": "medium",
+              "message": "table row 3 is dense enough to compress vertically"
+            },
+            {
+              "severity": "medium",
+              "message": "table cell r3c2 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r3c3 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r3c4 is dense enough to risk clipping"
+            },
+            {
+              "severity": "medium",
+              "message": "table cell r4c2 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r4c3 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r4c4 is dense enough to risk clipping"
+            },
+            {
+              "severity": "medium",
+              "message": "table cell r5c2 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r5c3 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r5c4 is dense enough to risk clipping"
+            },
+            {
+              "severity": "medium",
+              "message": "table row 6 is dense enough to compress vertically"
+            },
+            {
+              "severity": "medium",
+              "message": "table cell r6c2 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r6c3 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r6c4 is dense enough to risk clipping"
+            },
+            {
+              "severity": "medium",
+              "message": "table cell r7c2 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r7c3 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r7c4 is dense enough to risk clipping"
+            },
+            {
+              "severity": "medium",
+              "message": "table row 8 is dense enough to compress vertically"
+            },
+            {
+              "severity": "medium",
+              "message": "table cell r8c2 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r8c3 is dense enough to risk clipping"
+            },
+            {
+              "severity": "high",
+              "message": "table cell r8c4 is dense enough to risk clipping"
+            }
+          ]
+        },
+        {
+          "slide_number": 5,
+          "slide_type": "two_column",
+          "title": "Recommendation vs watchouts",
+          "score": 93,
+          "status": "ok",
+          "content_weight": 5.31,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.07,
+          "risk_level": "medium",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [
+            "two_column:split_imbalance"
+          ],
+          "layout_pressure_signals": [
+            {
+              "region": "two_column:split_imbalance",
+              "density": 1.394,
+              "threshold": 1.32,
+              "severity": "medium",
+              "message": "two-column panels are materially imbalanced and may compete for space"
+            }
+          ],
+          "severity_counts": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+          },
+          "issues": [
+            {
+              "severity": "medium",
+              "message": "two-column panels are materially imbalanced and may compete for space"
+            }
+          ]
+        },
+        {
+          "slide_number": 6,
+          "slide_type": "bullets",
+          "title": "Next steps",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 1.89,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        }
+      ],
+      "missing_assets": [],
+      "average_score": 70,
+      "status": "review",
+      "issue_count": 36,
+      "warning_count": 36,
+      "severity_counts": {
+        "high": 21,
+        "medium": 15,
+        "low": 0
+      },
+      "overflow_risk_count": 2,
+      "clipping_risk_count": 3,
+      "collision_risk_count": 33,
+      "balance_warning_count": 0,
+      "top_risk_slides": [
+        {
+          "slide_number": 4,
+          "title": "Comparison findings",
+          "risk_level": "high",
+          "overflow_risk_count": 2,
+          "clipping_risk_count": 2,
+          "collision_risk_count": 26,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 117.31
+        },
+        {
+          "slide_number": 2,
+          "title": "Executive summary",
+          "risk_level": "high",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 1,
+          "collision_risk_count": 6,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 16.3
+        },
+        {
+          "slide_number": 5,
+          "title": "Recommendation vs watchouts",
+          "risk_level": "medium",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.07
+        }
+      ],
+      "issues": [
+        "slide 02 (Executive summary): body text is dense for a single executive slide",
+        "slide 02 (Executive summary): summary narrative region is dense enough to risk crowding",
+        "slide 02 (Executive summary): summary takeaways panel is dense enough to risk clipping",
+        "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+        "slide 02 (Executive summary): summary takeaway row 1 is dense enough to risk clipping inside the panel",
+        "slide 02 (Executive summary): summary takeaway row 2 is dense enough to risk clipping inside the panel",
+        "slide 02 (Executive summary): summary takeaway row 3 is dense enough to risk clipping inside the panel",
+        "slide 04 (Comparison findings): table has many rows and may feel overloaded",
+        "slide 04 (Comparison findings): some table cells are likely too long",
+        "slide 04 (Comparison findings): table column 2 is dense enough to risk cramped cells across multiple rows",
+        "slide 04 (Comparison findings): table column 3 is dense enough to risk cramped cells across multiple rows",
+        "slide 04 (Comparison findings): table column 4 is dense enough to risk cramped cells across multiple rows",
+        "slide 04 (Comparison findings): table cell r1c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r2c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table row 3 is dense enough to compress vertically",
+        "slide 04 (Comparison findings): table cell r3c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r3c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r3c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r4c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r4c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r4c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r5c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r5c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r5c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table row 6 is dense enough to compress vertically",
+        "slide 04 (Comparison findings): table cell r6c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r6c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r6c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r7c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r7c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r7c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table row 8 is dense enough to compress vertically",
+        "slide 04 (Comparison findings): table cell r8c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r8c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r8c4 is dense enough to risk clipping",
+        "slide 05 (Recommendation vs watchouts): two-column panels are materially imbalanced and may compete for space"
+      ],
+      "warnings": [
+        "slide 02 (Executive summary): body text is dense for a single executive slide",
+        "slide 02 (Executive summary): summary narrative region is dense enough to risk crowding",
+        "slide 02 (Executive summary): summary takeaways panel is dense enough to risk clipping",
+        "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+        "slide 02 (Executive summary): summary takeaway row 1 is dense enough to risk clipping inside the panel",
+        "slide 02 (Executive summary): summary takeaway row 2 is dense enough to risk clipping inside the panel",
+        "slide 02 (Executive summary): summary takeaway row 3 is dense enough to risk clipping inside the panel",
+        "slide 04 (Comparison findings): table has many rows and may feel overloaded",
+        "slide 04 (Comparison findings): some table cells are likely too long",
+        "slide 04 (Comparison findings): table column 2 is dense enough to risk cramped cells across multiple rows",
+        "slide 04 (Comparison findings): table column 3 is dense enough to risk cramped cells across multiple rows",
+        "slide 04 (Comparison findings): table column 4 is dense enough to risk cramped cells across multiple rows",
+        "slide 04 (Comparison findings): table cell r1c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r2c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table row 3 is dense enough to compress vertically",
+        "slide 04 (Comparison findings): table cell r3c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r3c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r3c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r4c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r4c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r4c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r5c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r5c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r5c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table row 6 is dense enough to compress vertically",
+        "slide 04 (Comparison findings): table cell r6c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r6c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r6c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r7c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r7c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r7c4 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table row 8 is dense enough to compress vertically",
+        "slide 04 (Comparison findings): table cell r8c2 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r8c3 is dense enough to risk clipping",
+        "slide 04 (Comparison findings): table cell r8c4 is dense enough to risk clipping",
+        "slide 05 (Recommendation vs watchouts): two-column panels are materially imbalanced and may compete for space"
+      ]
+    },
+    "preview_artifact_review": {
+      "status": "review",
+      "preview_count": 6,
+      "edge_contact_count": 3,
+      "safe_margin_warning_count": 0,
+      "edge_density_warning_count": 2,
+      "body_edge_contact_count": 3,
+      "safe_area_intrusion_count": 3,
+      "footer_intrusion_count": 1,
+      "corner_density_warning_count": 1,
+      "slides": [
+        {
+          "slide_number": 1,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-01.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1280,
+            "bottom": 690
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1280,
+            "bottom": 471
+          },
+          "edge_contact": true,
+          "safe_margin_warning": true,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.011458,
+          "body_max_edge_ratio": 0.012538,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "foreground touches the slide edge",
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region"
+          ]
+        },
+        {
+          "slide_number": 2,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-02.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1280,
+            "bottom": 690
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1280,
+            "bottom": 521
+          },
+          "edge_contact": true,
+          "safe_margin_warning": true,
+          "edge_density_warning": true,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.025608,
+          "body_max_edge_ratio": 0.028021,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "foreground touches the slide edge",
+            "edge density suggests possible clipping or aggressive packing",
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region"
+          ]
+        },
+        {
+          "slide_number": 3,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-03.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1189,
+            "bottom": 690
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1189,
+            "bottom": 451
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        },
+        {
+          "slide_number": 4,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-04.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1280,
+            "bottom": 690
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1280,
+            "bottom": 651
+          },
+          "edge_contact": true,
+          "safe_margin_warning": true,
+          "edge_density_warning": true,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.05434,
+          "body_max_edge_ratio": 0.48208,
+          "max_corner_ratio": 0.15125,
+          "issues": [
+            "foreground touches the slide edge",
+            "edge density suggests possible clipping or aggressive packing",
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 5,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-05.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1189,
+            "bottom": 690
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1169,
+            "bottom": 521
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        },
+        {
+          "slide_number": 6,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/policy_contract_comparison_deck-06.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1189,
+            "bottom": 690
+          },
+          "body_foreground_bbox": {
+            "left": 95,
+            "top": 82,
+            "right": 894,
+            "bottom": 216
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        }
+      ]
+    },
+    "visual_regression": null,
+    "debug_grid": false,
+    "debug_safe_areas": false,
+    "preview_source": "spec",
+    "real_preview": false,
+    "preview_manifest": "outputs/ai_workbench_export_previews/deckexp_20260418_102633_f7938500/preview-manifest.json",
+    "backend_requested": "synthetic",
+    "backend_used": "synthetic",
+    "backend_fallback_reason": null,
+    "office_runtime": null,
+    "office_conversion_strategy": null
+  }
+}

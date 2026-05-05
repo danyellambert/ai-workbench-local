@@ -1,0 +1,424 @@
+{
+  "total_cases": 34,
+  "successful_cases": 33,
+  "failed_cases": 1,
+  "runtime_path_breakdown": [
+    {
+      "runtime_path": "direct_runtime",
+      "runtime_path_label": "Direct runtime",
+      "case_count": 21,
+      "successful_cases": 21,
+      "failed_cases": 0,
+      "candidate_count": 5,
+      "path_overhead_expected": false,
+      "backend_examples": [
+        "ollama::bge-m3:latest",
+        "ollama::embeddinggemma:300m",
+        "ollama::qwen2.5-coder:7b",
+        "ollama::qwen2.5:7b",
+        "ollama::qwen3-embedding:0.6b"
+      ]
+    },
+    {
+      "runtime_path": "hub_wrapped_runtime",
+      "runtime_path_label": "Hub-wrapped runtime",
+      "case_count": 9,
+      "successful_cases": 8,
+      "failed_cases": 1,
+      "candidate_count": 2,
+      "path_overhead_expected": true,
+      "backend_examples": [
+        "huggingface_local::google/embeddinggemma-300m",
+        "ollama::qwen2.5:7b"
+      ]
+    },
+    {
+      "runtime_path": "unknown_runtime_path",
+      "runtime_path_label": "unknown_runtime_path",
+      "case_count": 4,
+      "successful_cases": 4,
+      "failed_cases": 0,
+      "candidate_count": 1,
+      "path_overhead_expected": false,
+      "backend_examples": []
+    }
+  ],
+  "generation": {
+    "total_cases": 24,
+    "successful_cases": 24,
+    "failed_cases": 0,
+    "runtime_path_breakdown": [
+      {
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "case_count": 16,
+        "successful_cases": 16,
+        "failed_cases": 0,
+        "candidate_count": 2,
+        "path_overhead_expected": false,
+        "backend_examples": [
+          "ollama::qwen2.5-coder:7b",
+          "ollama::qwen2.5:7b"
+        ]
+      },
+      {
+        "runtime_path": "hub_wrapped_runtime",
+        "runtime_path_label": "Hub-wrapped runtime",
+        "case_count": 8,
+        "successful_cases": 8,
+        "failed_cases": 0,
+        "candidate_count": 1,
+        "path_overhead_expected": true,
+        "backend_examples": [
+          "ollama::qwen2.5:7b"
+        ]
+      }
+    ],
+    "candidate_ranking": [
+      {
+        "candidate": "huggingface_server::qwen2.5:7b-ollama",
+        "provider": "huggingface_server",
+        "model": "qwen2.5:7b-ollama",
+        "runtime_path": "hub_wrapped_runtime",
+        "runtime_path_label": "Hub-wrapped runtime",
+        "backend_equivalence_type": "wrapped_backend",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "qwen2.5:7b",
+        "backend_equivalence_key": "ollama::qwen2.5:7b",
+        "equivalent_direct_runtime_key": "ollama::qwen2.5:7b",
+        "path_overhead_expected": true,
+        "case_count": 8,
+        "success_rate": 1.0,
+        "avg_latency_s": 9.5002,
+        "avg_format_adherence": 1.0,
+        "avg_groundedness_score": 0.4101,
+        "avg_schema_adherence": 1.0,
+        "avg_use_case_fit_score": 1.0,
+        "avg_total_tokens": 0.0
+      },
+      {
+        "candidate": "ollama::qwen2.5-coder:7b",
+        "provider": "ollama",
+        "model": "qwen2.5-coder:7b",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "qwen2.5-coder:7b",
+        "backend_equivalence_key": "ollama::qwen2.5-coder:7b",
+        "equivalent_direct_runtime_key": "ollama::qwen2.5-coder:7b",
+        "path_overhead_expected": false,
+        "case_count": 8,
+        "success_rate": 1.0,
+        "avg_latency_s": 14.2387,
+        "avg_format_adherence": 0.75,
+        "avg_groundedness_score": 0.2707,
+        "avg_schema_adherence": 1.0,
+        "avg_use_case_fit_score": 1.0,
+        "avg_total_tokens": 654.0
+      },
+      {
+        "candidate": "ollama::qwen2.5:7b",
+        "provider": "ollama",
+        "model": "qwen2.5:7b",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "qwen2.5:7b",
+        "backend_equivalence_key": "ollama::qwen2.5:7b",
+        "equivalent_direct_runtime_key": "ollama::qwen2.5:7b",
+        "path_overhead_expected": false,
+        "case_count": 8,
+        "success_rate": 1.0,
+        "avg_latency_s": 13.4402,
+        "avg_format_adherence": 0.7097,
+        "avg_groundedness_score": 0.3391,
+        "avg_schema_adherence": 1.0,
+        "avg_use_case_fit_score": 0.984,
+        "avg_total_tokens": 651.625
+      }
+    ],
+    "top_candidate": {
+      "candidate": "huggingface_server::qwen2.5:7b-ollama",
+      "provider": "huggingface_server",
+      "model": "qwen2.5:7b-ollama",
+      "runtime_path": "hub_wrapped_runtime",
+      "runtime_path_label": "Hub-wrapped runtime",
+      "backend_equivalence_type": "wrapped_backend",
+      "backend_provider_resolved": "ollama",
+      "backend_model_ref_resolved": "qwen2.5:7b",
+      "backend_equivalence_key": "ollama::qwen2.5:7b",
+      "equivalent_direct_runtime_key": "ollama::qwen2.5:7b",
+      "path_overhead_expected": true,
+      "case_count": 8,
+      "success_rate": 1.0,
+      "avg_latency_s": 9.5002,
+      "avg_format_adherence": 1.0,
+      "avg_groundedness_score": 0.4101,
+      "avg_schema_adherence": 1.0,
+      "avg_use_case_fit_score": 1.0,
+      "avg_total_tokens": 0.0
+    }
+  },
+  "embeddings": {
+    "total_cases": 4,
+    "successful_cases": 3,
+    "failed_cases": 1,
+    "runtime_path_breakdown": [
+      {
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "case_count": 3,
+        "successful_cases": 3,
+        "failed_cases": 0,
+        "candidate_count": 3,
+        "path_overhead_expected": false,
+        "backend_examples": [
+          "ollama::bge-m3:latest",
+          "ollama::embeddinggemma:300m",
+          "ollama::qwen3-embedding:0.6b"
+        ]
+      },
+      {
+        "runtime_path": "hub_wrapped_runtime",
+        "runtime_path_label": "Hub-wrapped runtime",
+        "case_count": 1,
+        "successful_cases": 0,
+        "failed_cases": 1,
+        "candidate_count": 1,
+        "path_overhead_expected": true,
+        "backend_examples": [
+          "huggingface_local::google/embeddinggemma-300m"
+        ]
+      }
+    ],
+    "candidate_ranking": [
+      {
+        "candidate": "ollama::bge-m3:latest",
+        "provider": "ollama",
+        "model": "bge-m3:latest",
+        "candidate_role": "challenger",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "bge-m3:latest",
+        "backend_equivalence_key": "ollama::bge-m3:latest",
+        "equivalent_direct_runtime_key": "ollama::bge-m3:latest",
+        "path_overhead_expected": false,
+        "case_count": 1,
+        "success_rate": 1.0,
+        "avg_hit_at_1": 0.875,
+        "avg_hit_at_k": 1.0,
+        "avg_mrr": 0.9375,
+        "avg_indexing_seconds": 153.5363,
+        "avg_retrieval_seconds": 0.9834
+      },
+      {
+        "candidate": "ollama::embeddinggemma:300m",
+        "provider": "ollama",
+        "model": "embeddinggemma:300m",
+        "candidate_role": "baseline",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "embeddinggemma:300m",
+        "backend_equivalence_key": "ollama::embeddinggemma:300m",
+        "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+        "path_overhead_expected": false,
+        "case_count": 1,
+        "success_rate": 1.0,
+        "avg_hit_at_1": 0.875,
+        "avg_hit_at_k": 1.0,
+        "avg_mrr": 0.9062,
+        "avg_indexing_seconds": 160.8198,
+        "avg_retrieval_seconds": 0.7629
+      },
+      {
+        "candidate": "ollama::qwen3-embedding:0.6b",
+        "provider": "ollama",
+        "model": "qwen3-embedding:0.6b",
+        "candidate_role": "challenger",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "qwen3-embedding:0.6b",
+        "backend_equivalence_key": "ollama::qwen3-embedding:0.6b",
+        "equivalent_direct_runtime_key": "ollama::qwen3-embedding:0.6b",
+        "path_overhead_expected": false,
+        "case_count": 1,
+        "success_rate": 1.0,
+        "avg_hit_at_1": 0.875,
+        "avg_hit_at_k": 0.875,
+        "avg_mrr": 0.875,
+        "avg_indexing_seconds": 367.5397,
+        "avg_retrieval_seconds": 0.8929
+      },
+      {
+        "candidate": "huggingface_server::embeddinggemma:300m",
+        "provider": "huggingface_server",
+        "model": "embeddinggemma:300m",
+        "candidate_role": "optional_local_hub",
+        "runtime_path": "hub_wrapped_runtime",
+        "runtime_path_label": "Hub-wrapped runtime",
+        "backend_equivalence_type": "wrapped_backend",
+        "backend_provider_resolved": "huggingface_local",
+        "backend_model_ref_resolved": "google/embeddinggemma-300m",
+        "backend_equivalence_key": "huggingface_local::google/embeddinggemma-300m",
+        "equivalent_direct_runtime_key": null,
+        "path_overhead_expected": true,
+        "case_count": 1,
+        "success_rate": 0.0,
+        "avg_hit_at_1": 0.0,
+        "avg_hit_at_k": 0.0,
+        "avg_mrr": 0.0,
+        "avg_indexing_seconds": 0.0,
+        "avg_retrieval_seconds": 0.0
+      }
+    ],
+    "top_candidate": {
+      "candidate": "ollama::bge-m3:latest",
+      "provider": "ollama",
+      "model": "bge-m3:latest",
+      "candidate_role": "challenger",
+      "runtime_path": "direct_runtime",
+      "runtime_path_label": "Direct runtime",
+      "backend_equivalence_type": "native_runtime",
+      "backend_provider_resolved": "ollama",
+      "backend_model_ref_resolved": "bge-m3:latest",
+      "backend_equivalence_key": "ollama::bge-m3:latest",
+      "equivalent_direct_runtime_key": "ollama::bge-m3:latest",
+      "path_overhead_expected": false,
+      "case_count": 1,
+      "success_rate": 1.0,
+      "avg_hit_at_1": 0.875,
+      "avg_hit_at_k": 1.0,
+      "avg_mrr": 0.9375,
+      "avg_indexing_seconds": 153.5363,
+      "avg_retrieval_seconds": 0.9834
+    }
+  },
+  "rerankers": {
+    "total_cases": 2,
+    "successful_cases": 2,
+    "failed_cases": 0,
+    "candidate_ranking": [
+      {
+        "candidate_id": "hybrid_rerank_current_default",
+        "candidate_label": "Hybrid vector + lexical rerank",
+        "candidate_role": "current_default",
+        "provider": "ollama",
+        "model": "embeddinggemma:300m",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "embeddinggemma:300m",
+        "backend_equivalence_key": "ollama::embeddinggemma:300m",
+        "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+        "path_overhead_expected": false,
+        "case_count": 1,
+        "support_status": "fully_supported",
+        "success_rate": 1.0,
+        "avg_hit_at_1": 0.875,
+        "avg_hit_at_k": 1.0,
+        "avg_mrr": 0.9062,
+        "avg_retrieval_seconds": 0.6673,
+        "avg_groundedness_proxy": 0.9062
+      },
+      {
+        "candidate_id": "vector_only_local_baseline",
+        "candidate_label": "Vector-only baseline (lexical weight 0)",
+        "candidate_role": "baseline",
+        "provider": "ollama",
+        "model": "embeddinggemma:300m",
+        "runtime_path": "direct_runtime",
+        "runtime_path_label": "Direct runtime",
+        "backend_equivalence_type": "native_runtime",
+        "backend_provider_resolved": "ollama",
+        "backend_model_ref_resolved": "embeddinggemma:300m",
+        "backend_equivalence_key": "ollama::embeddinggemma:300m",
+        "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+        "path_overhead_expected": false,
+        "case_count": 1,
+        "support_status": "fully_supported",
+        "success_rate": 1.0,
+        "avg_hit_at_1": 0.75,
+        "avg_hit_at_k": 0.875,
+        "avg_mrr": 0.8125,
+        "avg_retrieval_seconds": 1.6168,
+        "avg_groundedness_proxy": 0.8438
+      }
+    ],
+    "best_tradeoff": {
+      "candidate_id": "hybrid_rerank_current_default",
+      "candidate_label": "Hybrid vector + lexical rerank",
+      "candidate_role": "current_default",
+      "provider": "ollama",
+      "model": "embeddinggemma:300m",
+      "runtime_path": "direct_runtime",
+      "runtime_path_label": "Direct runtime",
+      "backend_equivalence_type": "native_runtime",
+      "backend_provider_resolved": "ollama",
+      "backend_model_ref_resolved": "embeddinggemma:300m",
+      "backend_equivalence_key": "ollama::embeddinggemma:300m",
+      "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+      "path_overhead_expected": false,
+      "case_count": 1,
+      "support_status": "fully_supported",
+      "success_rate": 1.0,
+      "avg_hit_at_1": 0.875,
+      "avg_hit_at_k": 1.0,
+      "avg_mrr": 0.9062,
+      "avg_retrieval_seconds": 0.6673,
+      "avg_groundedness_proxy": 0.9062
+    },
+    "support_level": "fully_supported"
+  },
+  "ocr_vlm": {
+    "total_cases": 4,
+    "successful_cases": 4,
+    "failed_cases": 0,
+    "variant_ranking": [
+      {
+        "variant": "evidence_with_vl",
+        "case_count": 4,
+        "avg_latency_s": 2.4093,
+        "avg_f1": 0.75,
+        "helped_cases": 4
+      },
+      {
+        "variant": "evidence_no_vl",
+        "case_count": 4,
+        "avg_latency_s": 2.4303,
+        "avg_f1": 0.75,
+        "helped_cases": 4
+      },
+      {
+        "variant": "legacy_pdf",
+        "case_count": 4,
+        "avg_latency_s": 0.0303,
+        "avg_f1": 0.25,
+        "helped_cases": 0
+      }
+    ],
+    "best_ocr_tradeoff": {
+      "variant": "evidence_no_vl",
+      "case_count": 4,
+      "avg_latency_s": 2.4303,
+      "avg_f1": 0.75,
+      "helped_cases": 4
+    },
+    "best_vlm_tradeoff": {
+      "variant": "evidence_with_vl",
+      "case_count": 4,
+      "avg_latency_s": 2.4093,
+      "avg_f1": 0.75,
+      "helped_cases": 4
+    },
+    "support_level": "partially_supported"
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Senior ML Engineer Role Brief.pdf",
+  "file_type": "pdf",
+  "file_hash": "0c3a863ccf25bf9a57835e1e1f8e01cefa4028c65a7347c8019ce2a28b3123e8",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nHR-002  Senior ML Engineer Role Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nSenior ML Engineer Role Brief\nHiring brief for Meridian’s AI Platform Engineering team.\nDocument ID\nHR-002\nOwner\nAI Platform Engineering\nHiring Manager\nNora Patel\nOpen Date\n2024-02-26\nClassification\nInternal Hiring\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nRole Purpose\nMeridian is hiring a Senior ML Engineer to lead production-grade LLM and retrieval systems used in knowledge search,\nanalyst assistance, and enterprise automation. The role partners with Platform, Security, Product, and Infrastructure teams.\nCore Responsibilities\n●\nDesign and operate production LLM and retrieval pipelines with measurable latency, relevance, and reliability goals.\n●\nLead architecture decisions for fine-tuning, evaluation, observability, and model-serving patterns.\n●\nMentor engineers and influence cross-functional technical roadmaps.\n●\nPartner with Security and Compliance on AI-specific controls, auditability, and regulated-workload requirements.\nRole-Fit Criteria\nRequirement\nType\nNotes\nLLM / transformer expertise\nMust-have\nModel architecture, fine-tuning, and evaluation depth\nexpected.\nProduction ML systems at scale\nMust-have\nExperience with large-scale inference and MLOps\noperations.\nTeam leadership experience\nMust-have\nTechnical leadership and mentoring track record required.\nRAG / retrieval system design\nMust-have\nVector retrieval, chunking, ranking, and relevance\ntrade-offs.\nRegulatory compliance (SOC2, HIPAA)\nNice-to-have\nDirect experience is valuable but trainable.\nEdge / on-prem deployment\nNice-to-have\nUseful for constrained environments and\ncustomer-specific architectures.\nCross-functional collaboration\nNice-to-have\nAbility to work across Product, Infra, Security, and\nAnalytics teams.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 2020,
+    "final_text_chars": 2020,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2014,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 30,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 4283,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nHR-002  Senior ML Engineer Role Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nSenior ML Engineer Role Brief\nHiring brief for Meridian’s AI Platform Engineering team.\nDocument ID\nHR-002\nOwner\nAI Platform Engineering\nHiring Manager\nNora Patel\nOpen Date\n2024-02-26\nClassification\nInternal Hiring\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nRole Purpose\nMeridian is hiring a Senior ML Engineer to lead production-grade LLM and retrieval systems used in knowledge search,\nanalyst assistance, and enterprise automation. The role partners with Platform, Security, Product, and Infrastructure teams.\nCore Responsibilities\n●\nDesign and operate production LLM and retrieval pipelines with measurable latency, relevance, and reliability goals.\n●\nLead architecture decisions for fine-tuning, evaluation, observability, and model-serving patterns.\n●\nMentor engineers and influence cross-functional technical roadmaps.\n●\nPartner with Security and Compliance on AI-specific controls, auditability, and regulated-workload requirements.\nRole-Fit Criteria\nRequirement\nType\nNotes\nLLM / transformer expertise\nMust-have\nModel architecture, fine-tuning, and evaluation depth\nexpected.\nProduction ML systems at scale\nMust-have\nExperience with large-scale inference and MLOps\noperations.\nTeam leadership experience\nMust-have\nTechnical leadership and mentoring track record required.\nRAG / retrieval system design\nMust-have\nVector retrieval, chunking, ranking, and relevance\ntrade-offs.\nRegulatory compliance (SOC2, HIPAA)\nNice-to-have\nDirect experience is valuable but trainable.\nEdge / on-prem deployment\nNice-to-have\nUseful for constrained environments and\ncustomer-specific architectures.\nCross-functional collaboration\nNice-to-have\nAbility to work across Product, Infra, Security, and\nAnalytics teams.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic role brief is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "hiring/Senior ML Engineer Role Brief.pdf",
+    "nextcloud_relative_path": "hiring/Senior ML Engineer Role Brief.pdf",
+    "source_relative_path": "hiring/Senior ML Engineer Role Brief.pdf",
+    "filename": "Senior ML Engineer Role Brief.pdf",
+    "title": "Senior ML Engineer Role Brief",
+    "category": "hiring",
+    "preindex": {
+      "relative_path": "hiring/Senior ML Engineer Role Brief.pdf",
+      "filename": "Senior ML Engineer Role Brief.pdf",
+      "title": "Senior ML Engineer Role Brief",
+      "category": "hiring",
+      "document_id": "hiring/Senior ML Engineer Role Brief.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:24"
+}

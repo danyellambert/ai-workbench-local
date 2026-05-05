@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-03-29T18:46:12.698985",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "code_analysis",
+      "mode": "indexed_document",
+      "status": "WARN",
+      "score": 10,
+      "max_score": 14,
+      "reasons": [
+        "gold:expected issue coverage too low: 2",
+        "gold:refactor-plan coverage too low: 2"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218",
+        "name": "demo_code_analysis.py",
+        "file_type": "py",
+        "chunk_count": 1
+      },
+      "gold_fixture_path": "baseline://external_files/3f5fd09ed6527416_07_code_analysis_demo_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "WARN",
+        "score": 10,
+        "max_score": 14,
+        "reasons": [
+          "expected issue coverage too low: 2",
+          "refactor-plan coverage too low: 2"
+        ],
+        "metrics": {
+          "snippet_summary_hit": 1,
+          "main_purpose_hit": 1,
+          "issue_hits": 2,
+          "refactor_hits": 2,
+          "test_hits": 3,
+          "maintainability_hits": 0,
+          "risk_hits": 1
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "code_analysis",
+        "schema_version": "1.0",
+        "snippet_summary": "Função normalize_scores ajusta pontuações fora do intervalo [0,100] e process agrega resultados.",
+        "main_purpose": "Normalizar pontuações de itens e calcular a média das pontuações normalizadas.",
+        "detected_issues": [
+          {
+            "severity": "high",
+            "category": "runtime_failure",
+            "title": "Divisão por zero quando a lista está vazia",
+            "description": "A média é calculada como total / len(values) sem verificar se values pode estar vazio, podendo gerar ZeroDivisionError.",
+            "evidence": "average = total / len(values) na função process()",
+            "recommendation": "Adicione verificação para lista vazia antes da divisão e defina `average = 0.0` quando não houver valores para agregar."
+          },
+          {
+            "severity": "medium",
+            "category": "correctness",
+            "title": "Modificação in-place de itens da lista de entrada",
+            "description": "A função normalize_scores altera o dicionário de entrada diretamente ao atribuir item[\"score\"] = 100 ou 0, o que pode causar efeitos colaterais inesperados para o chamador.",
+            "evidence": "item[\"score\"] = 100 e item[\"score\"] = 0 dentro do loop de normalize_scores()",
+            "recommendation": "Criar e retornar um novo dicionário com a pontuação normalizada em vez de mutar o objeto original."
+          }
+        ],
+        "readability_improvements": [
+          "Separar a lógica de normalização em uma função pura que não modifica o argumento de entrada."
+        ],
+        "maintainability_improvements": [
+          "Evitar mutação de objetos passados como parâmetro e centralizar a validação de pontuação."
+        ],
+        "refactor_plan": [
+          "Passo 1: Modificar normalize_scores para construir e retornar novos dicionários em vez de mutar item.",
+          "Passo 2: Adicionar verificação de lista vazia antes da divisão da média e definir average = 0.0 quando len(values) == 0."
+        ],
+        "test_suggestions": [
+          "Teste unitário que envia uma lista vazia para process() e verifica que average não levanta exceção e retorna 0.0.",
+          "Teste unitário que envia um item com score = 150 e verifica que o score retornado é 100 sem alterar o objeto original."
+        ],
+        "risk_notes": [
+          "Se a lista de entrada for vazia, o código atual pode gerar ZeroDivisionError ao calcular a média.",
+          "A mutação in-place pode fazer com que chamadores vejam seus objetos alterados inesperadamente, levando a bugs difíceis de rastrear."
+        ]
+      }
+    }
+  ]
+}

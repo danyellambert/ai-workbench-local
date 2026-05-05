@@ -1,0 +1,82 @@
+[
+  {
+    "session_id": "session_6761b6eba3a6",
+    "title": "Turn the findings into next actions with owners and due dates.",
+    "created_at": "2026-05-04T23:59:40.085521+00:00",
+    "updated_at": "2026-05-04T23:59:49.524689+00:00",
+    "status": "completed",
+    "document_ids": [
+      "7ecfe260bb0c381b51a3f5c30dc9460164b344856203153fa9d2e66e0dd30424"
+    ],
+    "messages": [
+      {
+        "id": "msg_9257c1c45e00",
+        "role": "user",
+        "content": "Turn the findings into next actions with owners and due dates.",
+        "timestamp": "2026-05-04T23:59:42.232248+00:00"
+      },
+      {
+        "id": "msg_aa86ced58d23",
+        "role": "assistant",
+        "content": "- **Action:** Conduct security review and due‑diligence before onboarding any new third‑party provider.  \n  **Owner role:** IT/Security Department (approves onboarding).  \n  **Timing/due date:** Proposed timing: Prior to onboarding.  \n  **Evidence:** “No entity … will be onboarded without the approval of Grambling State University Information Technology/Security Department.”; “Due Diligence efforts will include a review …”; “Security review will happen prior to onboarding new provider.” (p.2)  \n  **Priority:** High  \n\n- **Action:** Assign a point of contact for each third‑party/vendor during the onboarding process.  \n  **Owner role:** IT/Security Department (or designated Vendor Management role).  \n  **Timing/due date:** Proposed timing: As part of onboarding.  \n  **Evidence:** “Grambling State University will provide a point of contact for each third party or vendor as part of the onboarding process.” (p.2)  \n  **Priority:** Medium  \n\n- **Action:** Enforce that third‑party credentials are uniquely identifiable and follow university password policies.  \n  **Owner role:** IT/Security Department (security team).  \n  **Timing/due date:** Proposed timing: Ongoing – enforce at onboarding and periodically.  \n  **Evidence:** “Third party credentials must be uniquely identifiable, and password management must follow Grambling State University’s password procedures and policies.” (p.2)  \n  **Priority:** High  \n\n- **Action:** Perform an annual review of existing providers’ security programs and controls.  \n  **Owner role:** IT/Security Department (or Vendor Management team).  \n  **Timing/due date:** Proposed timing: Annually.  \n  **Evidence:** “Existing providers will undergo an annual review to continually monitor their security program and controls.” (p.2)  \n  **Priority:** Medium  \n\n- **Action:** Require immediate surrender of all equipment and supplies upon contract termination or university request.  \n  **Owner role:** Contract/Procurement Manager (proposed).  \n  **Timing/due date:** Proposed timing: Upon termination or request.  \n  **Evidence:** “Upon termination of a contract or at the request of Grambling State University, the third party must surrender all equipment and supplies immediately.” (p.1)  \n  **Priority:** High  \n\n- **Action:** Ensure third‑party personnel report all security incidents directly to their assigned point of contact.  \n  **Owner role:** Assigned Point of Contact (role).  \n  **Timing/due date:** Proposed timing: Immediately upon incident.  \n  **Evidence:** “Third party personnel must report all security incidents directly to their assigned point of contact.” (p.2)  \n  **Priority:** High  \n\n- **Action:** Verify third‑party compliance with university auditing requirements.  \n  **Owner role:** IT/Security Department or Internal Audit (proposed).  \n  **Timing/due date:** Proposed timing: Ongoing – as part of regular audits.  \n  **Evidence:** “Third parties are required to comply with Grambling State University’s auditing requirements.” (p.1)  \n  **Priority:** Medium",
+        "timestamp": "2026-05-04T23:59:49.523789+00:00",
+        "sources": [
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "[Page 1]\nThird Party & Vendor Management Policy\nGrambling State University Information Technology\nJay Ellis, Chief Information Officer\nRevision History:\nVersion Number Revision Date\n1.0\nIntroduction\nThird party entities play an important r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.05,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Grambling State University’s password procedures and policies.\n6. Upon termination of a contract or at the request of Grambling State University, the third\nparty must surrender all equipment and supplies immediately.\n7. Third parties are r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.05,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "contractors with\nwhom it is authorized to share the data, to share only the minimum information necessary, to\nsecurely return or destroy the data upon expiration of the contract, and to provide immediate\nnotification to the campus, wheneve…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0416,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Policy\nThird party access to Grambling State University’s network and system resources must comply\nwith all University’s applicable rules, policies, standards, and agreements.\nGrambling State University will provide a point of contact for…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0416,
+            "score_label": "Relevance"
+          }
+        ],
+        "diagnostics": {
+          "workflow_id": "lab_document_qa",
+          "workflow_label": "Grounded Document Q&A",
+          "provider": "ollama_hosted",
+          "model": "nemotron-3-super:cloud",
+          "context_strategy": "retrieval",
+          "structured_execution_id": "2b62aba4-9b1c-4c10-b012-b57d1823b119",
+          "tool_used": "consult_documents",
+          "answer_mode": "friendly",
+          "confidence": 0.84,
+          "source_count": 4,
+          "latency_s": 7.29
+        }
+      }
+    ],
+    "runtime": {
+      "provider": "ollama_hosted",
+      "model": "nemotron-3-super:cloud",
+      "workflow_id": "lab_document_qa",
+      "avg_latency_s": 7.29,
+      "total_tokens": 0.0,
+      "warning_count": 1,
+      "context_chars": 0,
+      "source_count": 4,
+      "grounded_documents": [
+        "7ecfe260bb0c381b51a3f5c30dc9460164b344856203153fa9d2e66e0dd30424"
+      ]
+    }
+  }
+]

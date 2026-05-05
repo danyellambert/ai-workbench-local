@@ -1,0 +1,731 @@
+{
+  "aggregate": {
+    "files_processed": 10,
+    "vl_called": 2,
+    "vl_skipped": 8,
+    "reasons_most_frequent": [
+      [
+        "scanned_pdf",
+        2
+      ],
+      [
+        "header_fields_missing",
+        2
+      ],
+      [
+        "missing_contacts_after_ocr",
+        1
+      ]
+    ],
+    "document_type_distribution": {
+      "digital_pdf": 8,
+      "scanned_pdf": 2
+    },
+    "vl_value_categories": {
+      "vl_skipped_and_ocr_was_sufficient": 8,
+      "vl_called_and_added_value": 2
+    }
+  },
+  "per_file": [
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0000_simple_classic_one_column_marina.ferreira.pereira.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.002,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 2.0107,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 6.5623,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "c887a36a5be7e7c461c0f3774907b9b5b59c7ad2ed6ed4907ee3a2b60fe041f7",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "marina.ferreira.pereira@example.com"
+          ],
+          "phones": [
+            "+55 11 92887-5892"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": false,
+          "decision": "skip_vl",
+          "reasons": [],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": true,
+            "header_contact_hits": 1,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [],
+          "skipped_because": [
+            "digital_pdf_with_good_ocr_skip_vl"
+          ]
+        }
+      },
+      "vl_value_category": "vl_skipped_and_ocr_was_sufficient"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0037,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 3.2426,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 1.2368,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "c9d998ee804d9fb52cf2551bab157438b3e4768e7c630c801e2a7396fee0fbb5",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "+55 11 92878-8327"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": false,
+          "decision": "skip_vl",
+          "reasons": [],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": true,
+            "header_contact_hits": 2,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [],
+          "skipped_because": [
+            "digital_pdf_with_good_ocr_skip_vl"
+          ]
+        }
+      },
+      "vl_value_category": "vl_skipped_and_ocr_was_sufficient"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0002_hard_compact_sidebar_marina.gomes.ribeiro.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0029,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 2.8635,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 1.1669,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "396f18a409db4bd7474f78486ae93abc2ca5029ca887eea2d8ec509efc77e984",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "marina.gomes.ribeiro@example.com"
+          ],
+          "phones": [
+            "+55 11 92891-2991"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": false,
+          "decision": "skip_vl",
+          "reasons": [],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": true,
+            "header_contact_hits": 2,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [],
+          "skipped_because": [
+            "digital_pdf_with_good_ocr_skip_vl"
+          ]
+        }
+      },
+      "vl_value_category": "vl_skipped_and_ocr_was_sufficient"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0003_simple_dense_executive_ana.barbosa.pereira.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0037,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 1.7097,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 1.176,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "e9ae447fc0c31b69806d5659cab7a8f409078f3f9d8ba6d750cddf1569ee193d",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "ana.barbosa.pereira@example.com"
+          ],
+          "phones": [
+            "+55 11 96237-8651"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": false,
+          "decision": "skip_vl",
+          "reasons": [],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": true,
+            "header_contact_hits": 1,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [],
+          "skipped_because": [
+            "digital_pdf_with_good_ocr_skip_vl"
+          ]
+        }
+      },
+      "vl_value_category": "vl_skipped_and_ocr_was_sufficient"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "legacy": {
+        "elapsed_seconds": 2.3112,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 1.1759,
+        "source_type": "scanned_pdf",
+        "emails_found": 0,
+        "phones_found": 3,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 55.5555,
+        "source_type": "scanned_pdf",
+        "evidence_summary": {
+          "document_id": "182d6a91cf04a3c373661d3dc298fc2b486f613faee7a6c1b1b5adde035bf207",
+          "source_type": "scanned_pdf",
+          "warnings": [
+            "VL selective helped confirm header/contact information"
+          ],
+          "emails_found": 2,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "confirmed",
+          "name_value": "Beatriz Barbosa Martins",
+          "location_value": "Grenoble, France",
+          "emails": [
+            "barbosa.martins@example.com",
+            "beatriz.barbosa.martins@example.com"
+          ],
+          "phones": [
+            "+55 11 98242-5650"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 4,
+          "regions_succeeded": 4,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": true,
+          "decision": "call_vl",
+          "reasons": [
+            "scanned_pdf",
+            "header_fields_missing"
+          ],
+          "document_signals": {
+            "source_type": "scanned_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": false,
+            "header_contact_hits": 1,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [
+            "header_top_block",
+            "contact_block",
+            "top_center",
+            "top_left"
+          ],
+          "skipped_because": []
+        }
+      },
+      "vl_value_category": "vl_called_and_added_value"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0005_hard_classic_one_column_diego.costa.silva.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0836,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 3.2411,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 6.4901,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "4c87d75db0a31753887b5108cf92c9a5b32e5ec5eeec8f5f18b852d05b1fad46",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "diego.costa.silva@example.com"
+          ],
+          "phones": [
+            "+55 11 93050-9635"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": false,
+          "decision": "skip_vl",
+          "reasons": [],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": true,
+            "header_contact_hits": 1,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [],
+          "skipped_because": [
+            "digital_pdf_with_good_ocr_skip_vl"
+          ]
+        }
+      },
+      "vl_value_category": "vl_skipped_and_ocr_was_sufficient"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0006_simple_modern_two_column_lucas.lima.carvalho.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0033,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 3.3479,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 1.2248,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "78be3efde3ebc1b4c02840da69f4d80c8a663255f49ca1c32fa805150677b958",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "lucas.lima.carvalho@example.com"
+          ],
+          "phones": [
+            "+55 11 91163-9002"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": false,
+          "decision": "skip_vl",
+          "reasons": [],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": true,
+            "header_contact_hits": 2,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [],
+          "skipped_because": [
+            "digital_pdf_with_good_ocr_skip_vl"
+          ]
+        }
+      },
+      "vl_value_category": "vl_skipped_and_ocr_was_sufficient"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0007_medium_compact_sidebar_ana.ferreira.souza.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0029,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 2.7657,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 1.2859,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "b6e109d20bae58de4c13a17559d8a259385d30e88f967a91682b709c1506dcc4",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "ana.ferreira.souza@example.com"
+          ],
+          "phones": [
+            "+55 11 91966-3181"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": false,
+          "decision": "skip_vl",
+          "reasons": [],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": true,
+            "header_contact_hits": 2,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [],
+          "skipped_because": [
+            "digital_pdf_with_good_ocr_skip_vl"
+          ]
+        }
+      },
+      "vl_value_category": "vl_skipped_and_ocr_was_sufficient"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0008_hard_dense_executive_diego.ferreira.ribeiro.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0025,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 2.0262,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 1.1934,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "1751c830a23b2060f0aaafd9d430b75ed1211e31e3422773f9a08fbdc87c5d85",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "diego.ferreira.ribeiro@example.com"
+          ],
+          "phones": [
+            "+55 11 97427-3232"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": false,
+          "decision": "skip_vl",
+          "reasons": [],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": true,
+            "header_contact_hits": 1,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [],
+          "skipped_because": [
+            "digital_pdf_with_good_ocr_skip_vl"
+          ]
+        }
+      },
+      "vl_value_category": "vl_skipped_and_ocr_was_sufficient"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+      "legacy": {
+        "elapsed_seconds": 2.0621,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 1.0606,
+        "source_type": "scanned_pdf",
+        "emails_found": 0,
+        "phones_found": 2,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 50.2189,
+        "source_type": "scanned_pdf",
+        "evidence_summary": {
+          "document_id": "c7f253ea14f13a097e64c35911f6a80cf21905247b3e990ede60713f6c03b442",
+          "source_type": "scanned_pdf",
+          "warnings": [
+            "No confirmed email found",
+            "No confirmed phone found",
+            "VL selective added visual candidates that still need review"
+          ],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "visual_candidate",
+          "location_status": "visual_candidate",
+          "name_value": "Matheus Araujo Carvalho",
+          "location_value": "Campinas, Brazil",
+          "emails": [
+            "matheus.araujo.carvalho@example.com"
+          ],
+          "phones": [
+            "+55 11 99489-6568"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 4,
+          "regions_succeeded": 4,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": true,
+          "decision": "call_vl",
+          "reasons": [
+            "scanned_pdf",
+            "missing_contacts_after_ocr",
+            "header_fields_missing"
+          ],
+          "document_signals": {
+            "source_type": "scanned_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 0,
+            "name_missing": true,
+            "location_missing": true,
+            "header_missing": true,
+            "top_fragmented": false,
+            "header_contact_hits": 0,
+            "strong_header_structure_problem": false
+          },
+          "regions_selected": [
+            "header_top_block",
+            "contact_block",
+            "top_center",
+            "top_left"
+          ],
+          "skipped_because": []
+        }
+      },
+      "vl_value_category": "vl_called_and_added_value"
+    }
+  ]
+}

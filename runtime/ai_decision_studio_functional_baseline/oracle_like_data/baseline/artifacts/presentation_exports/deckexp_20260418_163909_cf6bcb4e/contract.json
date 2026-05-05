@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "**Executive Comparison:**  \nThe Access Review Evidence Log (EVD-101) is a formal inventory tracking evidence status for the Q1 2024 Northwind vendor-control review, where missing or incomplete items—such as the archived email-export artifact for EV-002—must be resolved before control closure. In contrast, the Privileged Account Approval Email grants standing access to two named administrators under a pilot program, contingent on strict scoping, logging, and quarterly revalidation, with access contingent on ongoing compliance rather than evidence completion.\n\n- The Access Review Evidence Log requires resolution of missing evidence items before control closure; the Privileged Account Email does not require evidence completion but mandates quarterly recertification.  \n- EV-002’s compliance depends on archiving an email-export artifact in an approved repository; the Privileged Account Email requires vendor confirmation and revalidation upon personnel changes.  \n- The Access Review Evidence Log is tied to a specific vendor-control review cycle (Q1 2024); the Privileged Account Email supports ongoing, standing access under a pilot framework.  \n- Missing items in the Access Review Evidence Log block control closure; access in the Privileged Account Email is conditional on adherence to scoping and logging rules, not evidence completeness.  \n- The Access Review Evidence Log tracks repository locations and status of evidence items; the Privileged Account Email does not reference repository tracking but emphasizes audit-ready logging and governance.  \n- Control closure for the Access Review Evidence Log is contingent on provenance verification of all items; the Privileged Account Email requires continuous oversight and revalidation, not a one-time evidence resolution.",
+  "key_highlights": [
+    "The Access Review Evidence Log (EVD-101) is a formal inventory tracking evidence status for the Q1 2024 Northwind vendor-control review, where missing or incomplete items—such as the archived email-export artifact for EV-002—must be resolved before control closure. In contrast, the Privileged Account Approval Email grants standing access to two named administrators under a pilot program, contingent on strict scoping, logging, and quarterly revalidation, with access contingent on ongoing compliance rather than evidence completion.",
+    "The Access Review Evidence Log requires resolution of missing evidence items before control closure; the Privileged Account Email does not require evidence completion but mandates quarterly recertification.",
+    "EV-002’s compliance depends on archiving an email-export artifact in an approved repository; the Privileged Account Email requires vendor confirmation and revalidation upon personnel changes.",
+    "The Access Review Evidence Log is tied to a specific vendor-control review cycle (Q1 2024); the Privileged Account Email supports ongoing, standing access under a pilot framework.",
+    "Missing items in the Access Review Evidence Log block control closure; access in the Privileged Account Email is conditional on adherence to scoping and logging rules, not evidence completeness.",
+    "The Access Review Evidence Log tracks repository locations and status of evidence items; the Privileged Account Email does not reference repository tracking but emphasizes audit-ready logging and governance."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "EV-002 requires the attached email-export artifact to be archived in the approved repository to satisfy the control. |…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on strict task scoping and logging compliance | Quarterly recertification and vendor confirmation…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log (EVD-101) is a…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a controlled inventory for the…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log requires resolution of…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a controlled inventory for the…"
+        ],
+        [
+          "approval_change",
+          "EV-002’s compliance depends on archiving an email-export artifact…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): EV-002 requires the attached email-export artifact to be archived in the approved…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "The Access Review Evidence Log is tied to…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a controlled inventory for the…"
+        ],
+        [
+          "identity_control_delta",
+          "Missing items in the Access Review Evidence Log…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a controlled inventory for the…"
+        ],
+        [
+          "identity_control_delta",
+          "The Access Review Evidence Log tracks repository locations…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a controlled inventory for the…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

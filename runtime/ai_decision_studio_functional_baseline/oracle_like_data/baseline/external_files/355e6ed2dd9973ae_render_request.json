@@ -1,0 +1,190 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "author": "AI Workbench Local",
+      "date": "2026-04-18",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Comparison Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "subtitle": "Executive comparison review of grounded document differences",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Executive Comparison:  \nThe Access Review Evidence Log (EVD-101) tracks the collection status of required artifacts for the Q1 2024 Northwind vendor-control review, serving as a centralized register to manage evidence submission and identify gaps that block control closure. In contrast, the Privileged Account Approval Email formalizes standing access for specific administrators under defined governance conditions, emphasizing conditional access controls, mandatory logging, and recurring vendor coordination rather than evidence tracking.\n\n- The Access Review Evidence Log functions as an evidence register for a vendor-control review, documenting receipt and status of artifacts like user exports and approvals.  \n- The Privileged Account Approval Email grants formal approval for ongoing privileged access to specific administrators under defined operational and governance conditions.  \n- Evidence status in EVD-101 is indicated by \"received,\" \"missing,\" or \"in progress,\" while the email approval is a one-time governance action requiring periodic revalidation.  \n- EVD-101 requires proactive resolution of missing evidence to close controls; the email approval mandates quarterly recertification and revalidation upon personnel changes.  \n- The email approval specifies access scoping, mandatory logging, and vendor confirmation as ongoing requirements, whereas EVD-101 focuses on artifact collection and provenance verification.  \n- EVD-002 can be satisfied by an archived email-export artifact, linking it to the email summary’s artifact-based governance model, but the email itself governs access rights, not evidence tracking.",
+        "bullets": [
+          "The Access Review Evidence Log (EVD-101) tracks the collection status of re…",
+          "The Access Review Evidence Log functions as an evidence register for a vend…",
+          "The Privileged Account Approval Email grants formal approval for ongoing pr…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Compared docs"
+          },
+          {
+            "value": "8",
+            "label": "Findings"
+          },
+          {
+            "value": "4",
+            "label": "Sources"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Comparison findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Documents",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "document_summary",
+            "Summary of Access Review Evidence Log.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf)",
+            "Missing or incomplete evidence blocks control closure until provenance is verified. | EV-002 can be satisfied by an att…"
+          ],
+          [
+            "document_summary",
+            "Summary of Privileged Account Approval Email.pdf (pdf)",
+            "Privileged Account Approval Email.pdf (pdf)",
+            "Access is conditional on operational constraints and continuous logging integration. | Governance requires proactive ve…"
+          ],
+          [
+            "approval_change",
+            "The Access Review Evidence Log (EVD-101) tracks the…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "The Access Review Evidence Log functions as an…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "The Privileged Account Approval Email grants formal approval…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "Evidence status in EVD-101 is indicated by \"received,\"…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "EVD-101 requires proactive resolution of missing evidence to…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "The email approval specifies access scoping, mandatory logging,…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Open the cited source excerpts to confirm the interpretation before acting.",
+            "bullets": [
+              "Open the cited source excerpts to confirm the interpretation before act…",
+              "Validate critical differences directly in the compared documents before…"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "No critical watchouts recorded for this slice.",
+            "bullets": []
+          }
+        ],
+        "speaker_notes": "Executive decision framing for this slice."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Open the cited source excerpts to confirm the interpretation before acting.",
+          "Validate critical differences directly in the compared documents before consoli…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_142840_35782ff4/policy_contract_comparison_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_142840_35782ff4",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

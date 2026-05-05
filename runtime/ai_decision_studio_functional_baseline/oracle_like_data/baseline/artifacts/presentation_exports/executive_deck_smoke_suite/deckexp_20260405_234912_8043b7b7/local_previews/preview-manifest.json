@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "action_plan_deck_local_fallback",
+  "output_dir": "baseline://artifacts/presentation_exports/executive_deck_smoke_suite/deckexp_20260405_234912_8043b7b7/local_previews",
+  "presentation_title": "action_plan_deck_local_fallback",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/48cc3b1fed6ae914_action_plan_deck_local_fallback.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "action_plan_deck_local_fallback-01.png",
+      "path": "baseline://external_files/698c3f8444cec737_action_plan_deck_local_fallback-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "action_plan_deck_local_fallback-02.png",
+      "path": "baseline://external_files/ec5984b315789e03_action_plan_deck_local_fallback-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "action_plan_deck_local_fallback-03.png",
+      "path": "baseline://external_files/8a09eaceb6160252_action_plan_deck_local_fallback-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "action_plan_deck_local_fallback-04.png",
+      "path": "baseline://external_files/5573f56d49dc441f_action_plan_deck_local_fallback-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "action_plan_deck_local_fallback-05.png",
+      "path": "baseline://external_files/dfbea2e928b613b0_action_plan_deck_local_fallback-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "action_plan_deck_local_fallback-06.png",
+      "path": "baseline://external_files/26a94b431e6cdb8e_action_plan_deck_local_fallback-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "action_plan_deck_local_fallback-07.png",
+      "path": "baseline://external_files/d6be05b651c200fd_action_plan_deck_local_fallback-07.png"
+    }
+  ]
+}

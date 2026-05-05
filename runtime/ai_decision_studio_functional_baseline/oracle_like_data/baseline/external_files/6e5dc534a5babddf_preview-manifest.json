@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "candidate_review_deck",
+  "output_dir": "baseline://outputs/ai_workbench_export_previews/deckexp_20260405_193728_4dd593c5",
+  "presentation_title": "candidate_review_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/7ce3b00679f5fa11_candidate_review_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "candidate_review_deck-01.png",
+      "path": "baseline://external_files/6fefac8bea20a3ee_candidate_review_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "candidate_review_deck-02.png",
+      "path": "baseline://external_files/1bcf6fe9ea8d5cf0_candidate_review_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "candidate_review_deck-03.png",
+      "path": "baseline://external_files/52b59d77b5384d14_candidate_review_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "candidate_review_deck-04.png",
+      "path": "baseline://external_files/46645e37097f7719_candidate_review_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "candidate_review_deck-05.png",
+      "path": "baseline://external_files/89561391fa19dab0_candidate_review_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "candidate_review_deck-06.png",
+      "path": "baseline://external_files/3c2e8c3e32e7a735_candidate_review_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "candidate_review_deck-07.png",
+      "path": "baseline://external_files/448971845b0a7003_candidate_review_deck-07.png"
+    }
+  ]
+}

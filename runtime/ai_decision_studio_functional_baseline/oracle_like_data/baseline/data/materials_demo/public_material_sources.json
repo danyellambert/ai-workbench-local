@@ -1,0 +1,23 @@
+{
+  "name": "Public material sources used to reproduce selected local eval materials",
+  "materials": [
+    {
+      "material_id": "hls_sample_resume_2_1",
+      "task_type": "cv_analysis",
+      "document_name": "Sample-Resume-2-1.pdf",
+      "local_path": "data/materials_demo/cv_analysis/Sample-Resume-2-1.pdf",
+      "source_url": "https://hls.harvard.edu/wp-content/uploads/2023/08/Sample-Resume-2-1.pdf",
+      "source_label": "Harvard Law School",
+      "notes": "Public sample resume used as additional real-document CV gold-set material."
+    },
+    {
+      "material_id": "hls_sample_resume_3",
+      "task_type": "cv_analysis",
+      "document_name": "Sample-Resume-3-.pdf",
+      "local_path": "data/materials_demo/cv_analysis/Sample-Resume-3-.pdf",
+      "source_url": "https://hls.harvard.edu/wp-content/uploads/2023/08/Sample-Resume-3.pdf",
+      "source_label": "Harvard Law School",
+      "notes": "Public sample resume used as additional real-document CV gold-set material."
+    }
+  ]
+}

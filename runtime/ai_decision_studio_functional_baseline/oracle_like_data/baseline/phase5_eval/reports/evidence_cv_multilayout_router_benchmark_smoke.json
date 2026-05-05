@@ -1,0 +1,157 @@
+{
+  "aggregate": {
+    "files_processed": 2,
+    "vl_called": 2,
+    "vl_skipped": 0,
+    "reasons_most_frequent": [
+      [
+        "header_fields_missing",
+        2
+      ]
+    ],
+    "document_type_distribution": {
+      "digital_pdf": 2
+    },
+    "vl_value_categories": {
+      "vl_called_and_added_value": 2
+    }
+  },
+  "per_file": [
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0000_simple_classic_one_column_marina.ferreira.pereira.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0021,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 2.0165,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 23.2747,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "c887a36a5be7e7c461c0f3774907b9b5b59c7ad2ed6ed4907ee3a2b60fe041f7",
+          "source_type": "digital_pdf",
+          "warnings": [
+            "VL selective helped confirm header/contact information"
+          ],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "confirmed",
+          "name_value": "Marina Ferreira Pereira",
+          "location_value": "Lille, France",
+          "emails": [
+            "marina.ferreira.pereira@example.com"
+          ],
+          "phones": [
+            "+55 11 92887-5892"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 2,
+          "regions_succeeded": 2,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": true,
+          "decision": "call_vl",
+          "reasons": [
+            "header_fields_missing"
+          ],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "header_missing": true
+          },
+          "regions_selected": [
+            "header_top_block",
+            "contact_block"
+          ],
+          "skipped_because": []
+        }
+      },
+      "vl_value_category": "vl_called_and_added_value"
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "legacy": {
+        "elapsed_seconds": 0.0139,
+        "strategy": "hybrid",
+        "source_type": null
+      },
+      "evidence_no_vl": {
+        "elapsed_seconds": 4.0446,
+        "source_type": "digital_pdf",
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "not_found",
+        "location_status": "not_found"
+      },
+      "evidence_router": {
+        "elapsed_seconds": 18.0011,
+        "source_type": "digital_pdf",
+        "evidence_summary": {
+          "document_id": "c9d998ee804d9fb52cf2551bab157438b3e4768e7c630c801e2a7396fee0fbb5",
+          "source_type": "digital_pdf",
+          "warnings": [
+            "VL selective helped confirm header/contact information"
+          ],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "confirmed",
+          "name_value": "Gabriel Gomes Almeida",
+          "location_value": "Saclay, France",
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "+55 11 92878-8327"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 2,
+          "regions_succeeded": 2,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        },
+        "vl_router": {
+          "enabled": true,
+          "decision": "call_vl",
+          "reasons": [
+            "header_fields_missing"
+          ],
+          "document_signals": {
+            "source_type": "digital_pdf",
+            "low_text_pages": 0,
+            "contacts_found_after_ocr": 2,
+            "header_missing": true
+          },
+          "regions_selected": [
+            "header_top_block",
+            "contact_block"
+          ],
+          "skipped_because": []
+        }
+      },
+      "vl_value_category": "vl_called_and_added_value"
+    }
+  ]
+}

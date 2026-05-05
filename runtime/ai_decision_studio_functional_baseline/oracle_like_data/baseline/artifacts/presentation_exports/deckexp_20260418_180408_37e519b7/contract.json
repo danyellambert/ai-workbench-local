@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe Access Review Evidence Log addresses gaps in vendor control evidence for Q1 2024, requiring full provenance, ownership, and archival of artifacts to close controls, while the Privileged Account Approval Email governs temporary, scoped access for specific personnel under strict compliance and oversight controls. The former resolves missing evidence to enable control closure; the latter enfors conditional access with quarterly reviews and vendor validation.\n\n- Access Review Evidence Log requires archival of email-export artifacts to resolve outstanding evidence (EV-002).  \n- Privileged Account Approval Email mandates vendor confirmation of personnel for standing privileged access.  \n- Evidence completeness is a prerequisite for control closure in the Access Review Log.  \n- Privileged access is granted conditionally under scoped, logged, and quarterly-reviewed terms.  \n- The Access Review Log focuses on vendor control evidence gaps; the email addresses personnel access governance.  \n- Archiving artifacts resolves status gaps; quarterly recertification enforces ongoing compliance.",
+  "key_highlights": [
+    "The Access Review Evidence Log addresses gaps in vendor control evidence for Q1 2024, requiring full provenance, ownership, and archival of artifacts to close controls, while the Privileged Account Approval Email governs temporary, scoped access for specific personnel under strict compliance and oversight controls. The former resolves missing evidence to enable control closure; the latter enfors conditional access with quarterly reviews and vendor validation.",
+    "Access Review Evidence Log requires archival of email-export artifacts to resolve outstanding evidence (EV-002).",
+    "Privileged Account Approval Email mandates vendor confirmation of personnel for standing privileged access.",
+    "Evidence completeness is a prerequisite for control closure in the Access Review Log.",
+    "Privileged access is granted conditionally under scoped, logged, and quarterly-reviewed terms.",
+    "The Access Review Log focuses on vendor control evidence gaps; the email addresses personnel access governance."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Incomplete evidence blocks control closure until verified. | Archiving the email-export artifact resolves EV-002 status."
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on strict operational and compliance controls. | Oversight mechanisms include quarterly recertifi…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log addresses gaps in…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items tied to Q1 2024 vend…"
+        ],
+        [
+          "auditability_delta",
+          "Access Review Evidence Log requires archival of email-export…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items tied to Q1 2024 vend…"
+        ],
+        [
+          "approval_change",
+          "Privileged Account Approval Email mandates vendor confirmation of…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): EV-002 System owner approval email for privileged vendor accounts Operations Dire…"
+        ],
+        [
+          "auditability_delta",
+          "Evidence completeness is a prerequisite for control closure…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items tied to Q1 2024 vend…"
+        ],
+        [
+          "approval_change",
+          "Privileged access is granted conditionally under scoped, logged,…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items tied to Q1 2024 vend…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "The Access Review Log focuses on vendor control…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items tied to Q1 2024 vend…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

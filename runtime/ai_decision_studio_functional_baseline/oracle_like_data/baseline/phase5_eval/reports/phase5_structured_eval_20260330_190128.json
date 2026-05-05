@@ -1,0 +1,127 @@
+{
+  "generated_at": "2026-03-30T19:01:28.026212",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "summary",
+      "suite_name": "structured_real_document_eval",
+      "mode": "indexed_document",
+      "status": "WARN",
+      "score": 16,
+      "max_score": 27,
+      "reasons": [
+        "gold:required fact coverage too low: 3",
+        "gold:key insight coverage too low: 3"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "07438dc5ba1875770a839cf2f808d313db62778b08325340547622e809806f9b",
+        "name": "asap-2025-annual-report-tagged.pdf",
+        "file_type": "pdf",
+        "chunk_count": 189
+      },
+      "gold_fixture_path": "baseline://external_files/ae0b36897aec9e67_12_summary_asap_2025_annual_report_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "WARN",
+        "score": 16,
+        "max_score": 27,
+        "reasons": [
+          "required fact coverage too low: 3",
+          "key insight coverage too low: 3"
+        ],
+        "thresholds": {
+          "pass_ratio": 0.6,
+          "warn_ratio": 0.42,
+          "notes": "Summary real-document privilegia cobertura factual e sinais executivos, não matching textual exato."
+        },
+        "metrics": {
+          "topic_hits": 5,
+          "fact_hits": 3,
+          "exec_signal_hits": 4,
+          "key_insight_hits": 3,
+          "number_hits": 1
+        }
+      },
+      "thresholds": {
+        "pass_ratio": 0.6,
+        "warn_ratio": 0.42,
+        "notes": "Summary real-document privilegia cobertura factual e sinais executivos, não matching textual exato."
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "Human Spaceflight Risk and Program Concerns",
+            "key_points": [
+              "Artemis missions face significant risk",
+              "Commercial Crew Program challenges",
+              "ISS transition risks"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "The Panel closely monitored Artemis II readiness and has repeatedly raised concern regarding Artemis III and subsequent Artemis mission risk postures.",
+              "The Panel continues to characterize the International Space Station as now entering the riskiest period of its operational life."
+            ]
+          },
+          {
+            "title": "Acquisition Strategy and Technical Authority",
+            "key_points": [
+              "Emerging determinant of safety outcomes",
+              "Workforce attrition concerns"
+            ],
+            "relevance_score": 0.85,
+            "supporting_evidence": [
+              "The ASAP identified acquisition strategy as an emerging determinant of safety outcomes, particularly as NASA increasingly relies on fixed-price contracts and commercial business models.",
+              "Technical authority also remained a central concern throughout the year."
+            ]
+          },
+          {
+            "title": "Workforce and Technical Authority Concerns",
+            "key_points": [
+              "High personnel departure rate",
+              "Impact on technical authority effectiveness"
+            ],
+            "relevance_score": 0.8,
+            "supporting_evidence": [
+              "Throughout 2025, personnel departed NASA at a rate not seen in years.",
+              "The Panel reaffirmed the necessity of independent technical authorities to NASA’s safety posture and expressed concern that workforce attrition, proposed budget reductions, and organizational pressures could erode their effectiveness."
+            ]
+          },
+          {
+            "title": "ISS Transition Risk",
+            "key_points": [
+              "Riskiest period for ISS",
+              "Need for clear transition strategy"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "The Panel continues to characterize the International Space Station as now entering the riskiest period of its operational life.",
+              "NASA’s current plan for transitioning from ISS to one or more commercial destinations features a high-level framework and a timeline that is very tight."
+            ]
+          }
+        ],
+        "executive_summary": "This report highlights significant risks in NASA's human spaceflight programs, particularly for Artemis missions and the Commercial Crew Program. It emphasizes acquisition strategy and technical authority concerns, with workforce attrition posing a critical challenge to safety outcomes. The International Space Station is entering its most risky period, necessitating a clear transition strategy to commercial low-Earth orbit destinations.",
+        "key_insights": [
+          "NASA faces substantial risks in near-term missions and long-term operations due to Artemis program challenges and ISS aging components.",
+          "Acquisition strategies are crucial for safety outcomes, especially with the increasing reliance on fixed-price contracts and commercial business models.",
+          "Workforce attrition and budget reductions could erode technical authority effectiveness, impacting NASA's risk management capacity."
+        ],
+        "reading_time_minutes": 1,
+        "completeness_score": 0.92
+      }
+    }
+  ]
+}

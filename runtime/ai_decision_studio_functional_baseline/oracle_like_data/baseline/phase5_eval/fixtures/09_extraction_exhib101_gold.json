@@ -1,0 +1,339 @@
+{
+  "name": "Real document gold set - extraction exhib101.pdf",
+  "task_type": "extraction",
+  "document_name": "exhib101.pdf",
+  "document_path": "data/materials_demo/extraction/exhib101.pdf",
+  "input_text": "Extract the main subject, legal counterparties, key fields, obligations, indemnities, dates, numbers, and grounded action items from the selected document.",
+  "gold_type": "rubric",
+  "notes": "This gold set is designed for legal-document extraction. Future evaluators should prefer grounded legal obligations, dates, counterparties, clause coverage, and jurisdiction/governing-law fields over shallow title-only extraction.",
+  "expected": {
+    "evaluation_guidance": {
+      "core_required_fields": [
+        "main_subject",
+        "entities",
+        "extracted_fields",
+        "relationships",
+        "action_items",
+        "risks"
+      ],
+      "secondary_but_expected_fields": [
+        "categories",
+        "important_dates",
+        "important_numbers",
+        "clause_coverage",
+        "grounded_evidence_per_field"
+      ],
+      "minimum_entity_hits": 4,
+      "minimum_field_hits": 5,
+      "minimum_action_hits": 4,
+      "minimum_risk_hits": 3,
+      "notes": "The evaluator should prefer outputs that go beyond the title/table-of-contents and recover grounded obligations, name-usage restrictions, indemnification exposure, and forum/governing-law clauses."
+    },
+    "main_subject_aliases": [
+      "Separation Agreement between Enron Corp. and Portland General Electric Company",
+      "Separation Agreement between Enron and Portland General Electric Company",
+      "legal separation agreement connected to the PGE stock issuance"
+    ],
+    "categories_any": [
+      "Separation Agreement",
+      "Legal Agreement",
+      "Contract"
+    ],
+    "entities_present": [
+      {
+        "value_aliases": [
+          "Enron Corp.",
+          "Enron"
+        ],
+        "type_aliases": [
+          "organization"
+        ]
+      },
+      {
+        "value_aliases": [
+          "Portland General Electric Company",
+          "PGE"
+        ],
+        "type_aliases": [
+          "organization"
+        ]
+      },
+      {
+        "value_aliases": [
+          "Bankruptcy Court"
+        ],
+        "type_aliases": [
+          "organization",
+          "court"
+        ]
+      },
+      {
+        "value_aliases": [
+          "Stephen Forbes Cooper LLC"
+        ],
+        "type_aliases": [
+          "organization"
+        ]
+      }
+    ],
+    "fields_present": [
+      {
+        "name_aliases": [
+          "agreement_date",
+          "effective_date",
+          "date"
+        ],
+        "value_aliases": [
+          "April 3, 2006"
+        ]
+      },
+      {
+        "name_aliases": [
+          "document_type",
+          "agreement_type"
+        ],
+        "value_aliases": [
+          "Separation Agreement"
+        ]
+      },
+      {
+        "name_aliases": [
+          "shares_issued",
+          "stock_issuance",
+          "new_pge_common_stock"
+        ],
+        "value_aliases": [
+          "62,500,000 shares",
+          "62,500,000"
+        ]
+      },
+      {
+        "name_aliases": [
+          "governing_law"
+        ],
+        "value_aliases": [
+          "State of Texas",
+          "Texas",
+          "Bankruptcy Code"
+        ]
+      },
+      {
+        "name_aliases": [
+          "jurisdiction",
+          "forum"
+        ],
+        "value_aliases": [
+          "Bankruptcy Court",
+          "exclusive jurisdiction"
+        ]
+      }
+    ],
+    "relationships_present": [
+      {
+        "from_aliases": [
+          "Enron Corp.",
+          "Enron"
+        ],
+        "to_aliases": [
+          "Portland General Electric Company",
+          "PGE"
+        ],
+        "relationship_aliases": [
+          "entered into agreement with",
+          "separation agreement with",
+          "agreement_between"
+        ]
+      },
+      {
+        "from_aliases": [
+          "PGE",
+          "Portland General Electric Company"
+        ],
+        "to_aliases": [
+          "New PGE Common Stock"
+        ],
+        "relationship_aliases": [
+          "issuing",
+          "issues",
+          "stock issuance"
+        ]
+      },
+      {
+        "from_aliases": [
+          "Bankruptcy Court"
+        ],
+        "to_aliases": [
+          "Agreement",
+          "this Agreement"
+        ],
+        "relationship_aliases": [
+          "exclusive jurisdiction",
+          "retains exclusive jurisdiction",
+          "forum for disputes"
+        ]
+      }
+    ],
+    "expected_clause_coverage": [
+      {
+        "clause_aliases": [
+          "Preservation of Records; Cooperation",
+          "records preservation and cooperation"
+        ],
+        "required_terms": [
+          "records",
+          "cooperation"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Confidentiality"
+        ],
+        "required_terms": [
+          "confidential",
+          "information"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Use of Name"
+        ],
+        "required_terms": [
+          "name",
+          "365"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Tax Indemnification"
+        ],
+        "required_terms": [
+          "tax",
+          "indemnification"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Employee Benefits Indemnification"
+        ],
+        "required_terms": [
+          "employee",
+          "benefits",
+          "indemnification"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Submission to Jurisdiction; Consent to Service of Process"
+        ],
+        "required_terms": [
+          "jurisdiction",
+          "Bankruptcy Court"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Waiver of Jury Trial"
+        ],
+        "required_terms": [
+          "jury",
+          "waiver"
+        ]
+      },
+      {
+        "clause_aliases": [
+          "Governing Law"
+        ],
+        "required_terms": [
+          "Texas",
+          "Bankruptcy Code"
+        ]
+      }
+    ],
+    "expected_risks": [
+      {
+        "aliases": [
+          "tax indemnification exposure",
+          "tax liabilities imposed on the PGE Group by reason of Enron taxes",
+          "tax indemnification obligations"
+        ]
+      },
+      {
+        "aliases": [
+          "employee benefits indemnification",
+          "employee benefits liability allocation",
+          "employee benefits indemnification exposure"
+        ]
+      },
+      {
+        "aliases": [
+          "confidentiality misuse or disclosure risk",
+          "restrictions on disclosure of Enron confidential information",
+          "restrictions on disclosure of PGE confidential information"
+        ]
+      }
+    ],
+    "expected_action_items": [
+      {
+        "aliases": [
+          "preserve records and cooperate",
+          "preservation of records; cooperation",
+          "maintain records related to the businesses and proceedings"
+        ]
+      },
+      {
+        "aliases": [
+          "give at least ninety days notice before disposing records",
+          "90 days prior notice before disposal of records",
+          "opportunity for the other party to remove and retain records"
+        ]
+      },
+      {
+        "aliases": [
+          "remove the Enron name within 365 days",
+          "remove Enron trademarks trade names logos and symbols",
+          "amend organizational documents to remove the Enron name"
+        ]
+      },
+      {
+        "aliases": [
+          "remove the Portland General Electric name within 365 days",
+          "remove Portland General Electric trademarks trade names logos and symbols",
+          "amend organizational documents to remove the Portland General Electric name"
+        ]
+      },
+      {
+        "aliases": [
+          "promptly notify the indemnifying party of a third party claim",
+          "claim notice within ten days election period",
+          "indemnification procedures require notice and election"
+        ]
+      },
+      {
+        "aliases": [
+          "deliver transaction documents concurrently with execution",
+          "documents to be delivered by PGE",
+          "stock issuance occurs concurrently with execution and delivery"
+        ]
+      }
+    ],
+    "expected_operational_restrictions": [
+      {
+        "aliases": [
+          "no consequential or punitive damages",
+          "exclusive jurisdiction in the Bankruptcy Court",
+          "waiver of jury trial"
+        ]
+      }
+    ],
+    "important_dates_any": [
+      "April 3, 2006",
+      "March 15, 2007"
+    ],
+    "important_numbers_any": [
+      "62,500,000",
+      "365 days",
+      "90 days"
+    ],
+    "minimum_clause_hits": 6
+  }
+}

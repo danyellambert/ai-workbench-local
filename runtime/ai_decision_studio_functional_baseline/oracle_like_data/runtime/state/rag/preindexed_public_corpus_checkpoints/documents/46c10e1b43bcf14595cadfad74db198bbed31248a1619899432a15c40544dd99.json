@@ -1,0 +1,285 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Technical Architecture Brief.pdf",
+  "file_type": "pdf",
+  "file_hash": "46c10e1b43bcf14595cadfad74db198bbed31248a1619899432a15c40544dd99",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nTechnical Architecture Brief\nEngineering architecture brief with appendices imported from working papers and scan-heavy captures.\nDocument ID\nTEC-001\nOwner\nPlatform Engineering\nVersion\n0.8 draft\nPrepared Date\n2024-02-29\nStatus\nEngineering review draft\nClassification\nInternal / Technical\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Objective and Scope\nThis brief describes the architecture of Meridian’s Knowledge Operations Platform, including the vendor-managed retrieval\nlayer, internal policy services, content pipelines, and observability controls used for the Q2 2024 pilot.\n●\nScope includes retrieval path, orchestration, document ingestion, policy retrieval, and logging boundaries.\nTechnical Reference\nDetail\nTEC-REF-01\n1. Objective and Scope — architecture note maintained by Platform Engineering.\nTEC-CTRL-01\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\n2. System Context\nThe platform combines internal indexing pipelines with the Northwind managed retrieval cluster. User traffic enters through\nMeridian identity and gateway services before requests are brokered to retrieval and summarisation components.\n●\nPrimary dependencies: SSO, API gateway, Northwind cluster, internal policy service, event telemetry.\nTechnical Reference\nDetail\nTEC-REF-02\n2. System Context — architecture note maintained by Platform Engineering.\nTEC-CTRL-02\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 3\n3. Data Classification and Routing\nCorporate data is classified at ingestion. Regulated or confidential content is routed to approved stores, and non-production\nexperimentation uses synthetic or anonymised material only.\n●\nRouting labels drive storage tier, retention policy, and retrieval permissions.\nTechnical Reference\nDetail\nTEC-REF-03\n3. Data Classification and Routing — architecture note maintained by Platform Engineering.\nTEC-CTRL-03\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 4]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 4\n4. Retrieval Pipeline\nDocuments are chunked, embedded, indexed, and routed through reranking and answer-generation layers. The design\nintentionally separates retrieval from generation to preserve evidence and auditability.\n●\nKey controls: chunk metadata, repository lineage, grounded answer citations.\nTechnical Reference\nDetail\nTEC-REF-04\n4. Retrieval Pipeline — architecture note maintained by Platform Engineering.\nTEC-CTRL-04\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 5]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 5\n5. Security Controls\nAuthentication, authorisation, logging, and change review are enforced at the Meridian boundary. Vendor-managed\ncomponents supply telemetry and admin-activity exports to Meridian security tooling.\n●\nQuarterly privileged review and admin approval evidence are required for vendor support access.\nTechnical Reference\nDetail\nTEC-REF-05\n5. Security Controls — architecture note maintained by Platform Engineering.\nTEC-CTRL-05\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 6]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 6\n6. Availability and Recovery\nThe initial pilot targets operational resilience through fallback search paths and dual-run validation, while commercial SLA\nnegotiations remain open.\n●\nCurrent vendor SLA is 99.5% monthly with a temporary pilot-phase exception request in place.\nTechnical Reference\nDetail\nTEC-REF-06\n6. Availability and Recovery — architecture note maintained by Platform Engineering.\nTEC-CTRL-06\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 7]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 7\n7. Model and Evaluation Layer\nGeneration and retrieval settings are evaluated against internal groundedness, adherence, and latency criteria. Structured\nextraction tasks share the same evidence-bearing retrieval layer.\n●\nPrimary tasks include extraction, summary, checklist, contract risk extraction, and CV analysis.\nTechnical Reference\nDetail\nTEC-REF-07\n7. Model and Evaluation Layer — architecture note maintained by Platform Engineering.\nTEC-CTRL-07\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 8]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 8\n8. Open Risks\nOpen issues include vendor liability, transfer mechanisms for EU analytics data, and explicit incident-notification timing.\nThese issues are tracked outside the architecture design but affect go-live gating.\n●\nThe technical design itself remains viable; go-live is conditional on non-technical remediation.\nTechnical Reference\nDetail\nTEC-REF-08\n8. Open Risks — architecture note maintained by Platform Engineering.\nTEC-CTRL-08\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 9]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 9\n9. Operational Readiness\nCutover requires validated ingestion, observability, dashboard alerts, on-call runbooks, and approved evidence routing. The\npilot also depends on archiving technical annexes and diagrams into the document library.\n●\nPages 12-15 intentionally preserve scan-heavy working annexes to test OCR-routing behavior.\nTechnical Reference\nDetail\nTEC-REF-09\n9. Operational Readiness — architecture note maintained by Platform Engineering.\nTEC-CTRL-09\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 10]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 10\n10. Appendix Index\nAppendices include network capture diagrams, control mapping notes, and engineering whiteboard snapshots. Several\npages are image-only imports from working papers and may require OCR fallback.\n●\nThe frontend demo intentionally models these pages as difficult for OCR and indexing.\nTechnical Reference\nDetail\nTEC-REF-10\n10. Appendix Index — architecture note maintained by Platform Engineering.\nTEC-CTRL-10\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 11]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 11\n11. Change Log\nDraft 0.8 integrates vendor-review feedback, adds policy-service boundaries, and records the need to preserve\nevidence-bearing document lineage in downstream workflows.\n●\nNext revision expected after the procurement and privacy gates are cleared.\nTechnical Reference\nDetail\nTEC-REF-11\n11. Change Log — architecture note maintained by Platform Engineering.\nTEC-CTRL-11\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 12]\nImported scan-heavy appendix page\nPage 12\n[Visual enrichment/OCR]\n<!-- image -->\n\n[Page 13]\nImported scan-heavy appendix page\nPage 13\n[Visual enrichment/OCR]\n## Appendix B - control mapping snapshot\nAppendix capture — imported from engineering working papers\n01. Annotated list of control IDs against platform components.\n02. Contains mixed handwritten and typed notes copied from workshop materials.\n03. Text density is intentionally uneven.\n\n[Page 14]\nImported scan-heavy appendix page\nPage 14\n[Visual enrichment/OCR]\n<!-- image -->\n\n[Page 15]\nImported scan-heavy appendix page\nPage 15\n[Visual enrichment/OCR]\n## Appendix D - deployment checklist capture\nAppendix capture — imported from engineering working papers\n01. Pilot launch readiness notes, owner initials, and references to evidence artifacts.\n2. 02 л Contains small-font line items and embedded identifiers.\n03. Image-only page for parser stress testing.\n\n[PDF VISUAL ENRICHMENT - OLLAMA VLM]\nModel: qwen3-vl:235b-cloud\nRenderer: pypdfium2\nRoute source: manifest\nPages described: 12, 13, 14, 15\n\nRoute reason: Pages 1-11 are text-first and should use Docling/text extraction only. Pages 12-15 are embedded image-only appendix captures; OCR gets rough text, but cloud VLM is worth using to preserve diagram/whiteboard/checklist meaning for retrieval.\n\n\n## Page 12 visual notes\n### Visual extraction\n- **Important visible text and headings**  \n  - \"Appendix A — topology capture\"  \n  - Subheading: \"Appendix capture — imported from engineering working papers\"  \n  - Section title: \"Reference topology snapshot\"  \n  - Numbered notes:  \n    - \"01. Northwind retrieval nodes and Meridian gateway dependency map.\"  \n    - \"02. Note handwritten arrows showing fallback path and manual failover conditions.\"  \n    - \"03. Included to test OCR routing and diagram handling.\"  \n\n- **Tables/checklists/forms**  \n  - Numbered list (01–03) defining diagram context, handwritten annotations, and OCR testing purpose.  \n\n- **Diagrams/charts/logos/stamps/signatures**  \n  - Flow diagram with four labeled components:  \n    - \"User traffic (API + SSO)\" → \"Ingress / WAF\" → \"Northwind managed retrieval cluster\"  \n    - \"Meridian policy services\" connected below \"Ingress / WAF\"  \n  - Note 02 references handwritten arrows (in diagram) indicating fallback path and manual failover conditions.  \n\n- **Key facts**  \n  - Dependency map between Northwind retrieval nodes and Meridian gateway.  \n  - Diagram used to test OCR handling of routing and visual structure.  \n  - Footer: \"Imported scan-heavy appendix page\", \"Page 12\".\n\n\n## Page 13 visual notes\n### Visual extraction\n- **Headings**: \"Appendix B — control mapping snapshot\", \"Appendix capture — imported from engineering working papers\"  \n- **Checklist/notes**:  \n  - `01.` Annotated list of control IDs against platform components.  \n  - `02.` Contains mixed handwritten and typed notes copied from workshop materials.  \n  - `03.` Text density is intentionally uneven.  \n- **Footer text**: \"Imported scan-heavy appendix page\", \"Page 13\"  \n- **Key facts**: Appendix is a snapshot imported from engineering working papers; contains mixed handwritten/typed notes; text density is uneven by design; focuses on control IDs mapped to platform components.\n\n\n## Page 14 visual notes\n### Visual extraction  \n- **Important visible text and headings**  \n  - Main heading: `Appendix C — whiteboard incident flow`  \n  - Subheading: `Appendix capture — imported from engineering working papers`  \n  - Section label: `Reference topology snapshot`  \n  - Footer: `Imported scan-heavy appendix page | Page 14`  \n\n- **Tables/checklists/forms**  \n  - Numbered list (01–03) under diagram:  \n    - `01. Escalation path from service alert to security and legal review.`  \n    - `02. Critical timings under discussion: 24h, 48h, and vendor 72h counterproposal.`  \n    - `03. Used to simulate OCR-hard engineering notes.`  \n\n- **Diagrams/charts**  \n  - `Reference topology snapshot` diagram with labeled components and directional connections:  \n    - `User traffic (API + SSO)` → `Ingress / WAF` → `Northwind managed retrieval cluster`  \n    - `Ingress / WAF` → `Meridian policy services` (downward connection)  \n\n- **Key facts for search/QA**  \n  - Critical timing thresholds: `24h`, `48h`, `vendor 72h counterproposal`.  \n  - Incident flow stages: `service alert`, `security and legal review`.  \n  - Simulation purpose: `OCR-hard engineering notes`.  \n  - Component names: `Ingress / WAF`, `Meridian policy services`, `Northwind managed retrieval cluster`, `User traffic (API + SSO)`.\n\n\n## Page 15 visual notes\n### Visual extraction  \n- **Headings**:  \n  - \"Appendix D — deployment checklist capture\"  \n  - \"Appendix capture — imported from engineering working papers\"  \n\n- **Checklist items**:  \n  - `01.` Pilot launch readiness notes, owner initials, and references to evidence artifacts.  \n  - `02.` Contains small-font line items and embedded identifiers.  \n  - `03.` Image-only page for parser stress testing.  \n\n- **Footer**:  \n  - \"Imported scan-heavy appendix page\" (left-aligned)  \n  - \"Page 15\" (right-aligned)  \n\n- **Key facts**:  \n  - Page is explicitly labeled as \"image-only\" for parser stress testing.  \n  - References \"engineering working papers\" as the source of the appendix.  \n  - Mentions \"small-font line items\" and \"embedded identifiers\" as content features.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 15,
+    "baseline_text_chars": 8549,
+    "final_text_chars": 9265,
+    "baseline_text_coverage_ratio": 0.7333,
+    "suspicious_pages": 4,
+    "suspicious_page_numbers": [
+      12,
+      13,
+      14,
+      15
+    ],
+    "docling_enabled": true,
+    "docling_attempted": true,
+    "docling_mode": "selective_pages",
+    "docling_error": null,
+    "docling_pages_used": [
+      12,
+      13,
+      14,
+      15
+    ],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1214,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 747,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 3,
+        "text_chars": 711,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 4,
+        "text_chars": 697,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 5,
+        "text_chars": 710,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 6,
+        "text_chars": 677,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 7,
+        "text_chars": 721,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 8,
+        "text_chars": 708,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 9,
+        "text_chars": 731,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "diagram"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      },
+      {
+        "page_number": 10,
+        "text_chars": 693,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "diagram"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      },
+      {
+        "page_number": 11,
+        "text_chars": 651,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 12,
+        "text_chars": 41,
+        "image_count": 1,
+        "image_area_ratio_estimate": 1.0,
+        "caption_markers": [],
+        "suspicious_score": 0.98,
+        "suspicious_reasons": [
+          "low extracted text",
+          "contains images",
+          "relevant visual area"
+        ],
+        "used_docling": true
+      },
+      {
+        "page_number": 13,
+        "text_chars": 41,
+        "image_count": 1,
+        "image_area_ratio_estimate": 1.0,
+        "caption_markers": [],
+        "suspicious_score": 0.98,
+        "suspicious_reasons": [
+          "low extracted text",
+          "contains images",
+          "relevant visual area"
+        ],
+        "used_docling": true
+      },
+      {
+        "page_number": 14,
+        "text_chars": 41,
+        "image_count": 1,
+        "image_area_ratio_estimate": 1.0,
+        "caption_markers": [],
+        "suspicious_score": 0.98,
+        "suspicious_reasons": [
+          "low extracted text",
+          "contains images",
+          "relevant visual area"
+        ],
+        "used_docling": true
+      },
+      {
+        "page_number": 15,
+        "text_chars": 41,
+        "image_count": 1,
+        "image_area_ratio_estimate": 1.0,
+        "caption_markers": [],
+        "suspicious_score": 0.98,
+        "suspicious_reasons": [
+          "low extracted text",
+          "contains images",
+          "relevant visual area"
+        ],
+        "used_docling": true
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 94,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 542313,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nTechnical Architecture Brief\nEngineering architecture brief with appendices imported from working papers and scan-heavy captures.\nDocument ID\nTEC-001\nOwner\nPlatform Engineering\nVersion\n0.8 draft\nPrepared Date\n2024-02-29\nStatus\nEngineering review draft\nClassification\nInternal / Technical\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Objective and Scope\nThis brief describes the architecture of Meridian’s Knowledge Operations Platform, including the vendor-managed retrieval\nlayer, internal policy services, content pipelines, and observability controls used for the Q2 2024 pilot.\n●\nScope includes retrieval path, orchestration, document ingestion, policy retrieval, and logging boundaries.\nTechnical Reference\nDetail\nTEC-REF-01\n1. Objective and Scope — architecture note maintained by Platform Engineering.\nTEC-CTRL-01\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\n2. System Context\nThe platform combines internal indexing pipelines with the Northwind managed retrieval cluster. User traffic enters through\nMeridian identity and gateway services before requests are brokered to retrieval and summarisation components.\n●\nPrimary dependencies: SSO, API gateway, Northwind cluster, internal policy service, event telemetry.\nTechnical Reference\nDetail\nTEC-REF-02\n2. System Context — architecture note maintained by Platform Engineering.\nTEC-CTRL-02\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 3\n3. Data Classification and Routing\nCorporate data is classified at ingestion. Regulated or confidential content is routed to approved stores, and non-production\nexperimentation uses synthetic or anonymised material only.\n●\nRouting labels drive storage tier, retention policy, and retrieval permissions.\nTechnical Reference\nDetail\nTEC-REF-03\n3. Data Classification and Routing — architecture note maintained by Platform Engineering.\nTEC-CTRL-03\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 4]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 4\n4. Retrieval Pipeline\nDocuments are chunked, embedded, indexed, and routed through reranking and answer-generation layers. The design\nintentionally separates retrieval from generation to preserve evidence and auditability.\n●\nKey controls: chunk metadata, repository lineage, grounded answer citations.\nTechnical Reference\nDetail\nTEC-REF-04\n4. Retrieval Pipeline — architecture note maintained by Platform Engineering.\nTEC-CTRL-04\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 5]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 5\n5. Security Controls\nAuthentication, authorisation, logging, and change review are enforced at the Meridian boundary. Vendor-managed\ncomponents supply telemetry and admin-activity exports to Meridian security tooling.\n●\nQuarterly privileged review and admin approval evidence are required for vendor support access.\nTechnical Reference\nDetail\nTEC-REF-05\n5. Security Controls — architecture note maintained by Platform Engineering.\nTEC-CTRL-05\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 6]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 6\n6. Availability and Recovery\nThe initial pilot targets operational resilience through fallback search paths and dual-run validation, while commercial SLA\nnegotiations remain open.\n●\nCurrent vendor SLA is 99.5% monthly with a temporary pilot-phase exception request in place.\nTechnical Reference\nDetail\nTEC-REF-06\n6. Availability and Recovery — architecture note maintained by Platform Engineering.\nTEC-CTRL-06\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 7]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 7\n7. Model and Evaluation Layer\nGeneration and retrieval settings are evaluated against internal groundedness, adherence, and latency criteria. Structured\nextraction tasks share the same evidence-bearing retrieval layer.\n●\nPrimary tasks include extraction, summary, checklist, contract risk extraction, and CV analysis.\nTechnical Reference\nDetail\nTEC-REF-07\n7. Model and Evaluation Layer — architecture note maintained by Platform Engineering.\nTEC-CTRL-07\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 8]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 8\n8. Open Risks\nOpen issues include vendor liability, transfer mechanisms for EU analytics data, and explicit incident-notification timing.\nThese issues are tracked outside the architecture design but affect go-live gating.\n●\nThe technical design itself remains viable; go-live is conditional on non-technical remediation.\nTechnical Reference\nDetail\nTEC-REF-08\n8. Open Risks — architecture note maintained by Platform Engineering.\nTEC-CTRL-08\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 9]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 9\n9. Operational Readiness\nCutover requires validated ingestion, observability, dashboard alerts, on-call runbooks, and approved evidence routing. The\npilot also depends on archiving technical annexes and diagrams into the document library.\n●\nPages 12-15 intentionally preserve scan-heavy working annexes to test OCR-routing behavior.\nTechnical Reference\nDetail\nTEC-REF-09\n9. Operational Readiness — architecture note maintained by Platform Engineering.\nTEC-CTRL-09\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 10]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 10\n10. Appendix Index\nAppendices include network capture diagrams, control mapping notes, and engineering whiteboard snapshots. Several\npages are image-only imports from working papers and may require OCR fallback.\n●\nThe frontend demo intentionally models these pages as difficult for OCR and indexing.\nTechnical Reference\nDetail\nTEC-REF-10\n10. Appendix Index — architecture note maintained by Platform Engineering.\nTEC-CTRL-10\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 11]\nMeridian Holdings  Frontend Demo Grounded Corpus\nTEC-001  Technical Architecture Brief\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 11\n11. Change Log\nDraft 0.8 integrates vendor-review feedback, adds policy-service boundaries, and records the need to preserve\nevidence-bearing document lineage in downstream workflows.\n●\nNext revision expected after the procurement and privacy gates are cleared.\nTechnical Reference\nDetail\nTEC-REF-11\n11. Change Log — architecture note maintained by Platform Engineering.\nTEC-CTRL-11\nControl dependency reviewed alongside policy, contract, and evidence workflows.\n\n[Page 12]\nImported scan-heavy appendix page\nPage 12\n[Visual enrichment/OCR]\n<!-- image -->\n\n[Page 13]\nImported scan-heavy appendix page\nPage 13\n[Visual enrichment/OCR]\n## Appendix B - control mapping snapshot\nAppendix capture — imported from engineering working papers\n01. Annotated list of control IDs against platform components.\n02. Contains mixed handwritten and typed notes copied from workshop materials.\n03. Text density is intentionally uneven.\n\n[Page 14]\nImported scan-heavy appendix page\nPage 14\n[Visual enrichment/OCR]\n<!-- image -->\n\n[Page 15]\nImported scan-heavy appendix page\nPage 15\n[Visual enrichment/OCR]\n## Appendix D - deployment checklist capture\nAppendix capture — imported from engineering working papers\n01. Pilot launch readiness notes, owner initials, and references to evidence artifacts.\n2. 02 л Contains small-font line items and embedded identifiers.\n03. Image-only page for parser stress testing.",
+    "preindex_pdf_vlm": {
+      "enabled": true,
+      "provider": "ollama",
+      "model": "qwen3-vl:235b-cloud",
+      "base_url": "http://localhost:11434",
+      "renderer": "pypdfium2",
+      "route_source": "manifest",
+      "route_reason": "Pages 1-11 are text-first and should use Docling/text extraction only. Pages 12-15 are embedded image-only appendix captures; OCR gets rough text, but cloud VLM is worth using to preserve diagram/whiteboard/checklist meaning for retrieval.",
+      "page_count": 15,
+      "pages_described": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "page_count_described": 4,
+      "max_pages_fallback": 20,
+      "dpi": 180,
+      "summary_chars": 3937
+    },
+    "source_type": "nextcloud",
+    "relative_path": "technical/Technical Architecture Brief.pdf",
+    "nextcloud_relative_path": "technical/Technical Architecture Brief.pdf",
+    "source_relative_path": "technical/Technical Architecture Brief.pdf",
+    "filename": "Technical Architecture Brief.pdf",
+    "title": "Technical Architecture Brief",
+    "category": "technical",
+    "preindex": {
+      "relative_path": "technical/Technical Architecture Brief.pdf",
+      "filename": "Technical Architecture Brief.pdf",
+      "title": "Technical Architecture Brief",
+      "category": "technical",
+      "document_id": "technical/Technical Architecture Brief.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:51:21"
+}

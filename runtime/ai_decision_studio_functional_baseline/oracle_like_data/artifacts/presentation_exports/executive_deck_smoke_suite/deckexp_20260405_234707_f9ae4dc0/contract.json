@@ -1,0 +1,100 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "evidence_pack_deck",
+  "deck_family": "evidence_audit",
+  "presentation": {
+    "title": "AI Workbench Local — Evidence Pack Review",
+    "subtitle": "Audit / compliance executive handoff grounded in EvidenceOps",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Evidence Pack"
+  },
+  "context": {
+    "review_type": "risk_gap_review",
+    "workflow_id": "wf_123"
+  },
+  "executive_summary": "EvidenceOps encontrou findings e ações abertas.",
+  "key_highlights": [
+    "Missing annual control evidence",
+    "Atualizar evidence register"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Findings",
+      "value": "1"
+    },
+    {
+      "label": "Action items",
+      "value": "1"
+    },
+    {
+      "label": "Open actions",
+      "value": "2"
+    },
+    {
+      "label": "Unique docs",
+      "value": "0"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Findings",
+      "columns": [
+        "Type",
+        "Title",
+        "Description",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "risk",
+          "Missing annual control evidence",
+          "Annual control evidence is missing",
+          "Doc A / page 4"
+        ]
+      ]
+    },
+    {
+      "title": "Action status",
+      "columns": [
+        "Type",
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "recommended_action",
+          "Definir owner do controle anual",
+          "Compliance",
+          "2026-04-10",
+          "open"
+        ],
+        [
+          "recommended_action",
+          "Validar sign-off jurídico",
+          "Legal",
+          "2026-04-12",
+          "in_progress"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Atualizar evidence register",
+  "watchouts": [
+    "Uma evidência ainda depende de validação manual"
+  ],
+  "next_steps": [
+    "Atualizar evidence register",
+    "Definir owner do controle anual"
+  ],
+  "data_sources": [
+    "evidenceops_worklog",
+    "evidenceops_action_store"
+  ]
+}

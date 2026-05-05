@@ -1,0 +1,167 @@
+{
+  "name": "WHO Surgical Safety Checklist 2009",
+  "document_name": "9789241598590_eng.pdf",
+  "input_text": "Generate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.",
+  "expected_sequence": [
+    {
+      "id": "identity_site_procedure_consent",
+      "phase": "Before induction of anaesthesia",
+      "aliases": [
+        "has the patient confirmed his/her identity, site, procedure and consent",
+        "confirm patient identity, site, procedure and consent"
+      ],
+      "required_terms": ["identity", "site", "procedure", "consent"]
+    },
+    {
+      "id": "site_marked",
+      "phase": "Before induction of anaesthesia",
+      "aliases": ["is the site marked", "mark the site", "mark the surgical site"],
+      "required_terms": ["site", "mark"]
+    },
+    {
+      "id": "anaesthesia_machine_medication_check",
+      "phase": "Before induction of anaesthesia",
+      "aliases": [
+        "anaesthesia machine and medication check",
+        "anesthesia machine and medication check"
+      ],
+      "required_terms": ["anaesthesia", "medication", "check"]
+    },
+    {
+      "id": "pulse_oximeter_functioning",
+      "phase": "Before induction of anaesthesia",
+      "aliases": ["pulse oximeter on the patient and functioning", "pulse oximeter"],
+      "required_terms": ["pulse", "oximeter", "function"]
+    },
+    {
+      "id": "known_allergy",
+      "phase": "Before induction of anaesthesia",
+      "aliases": ["known allergy", "known allergies", "patient have a known allergy", "check for known allergies"],
+      "required_terms": ["allergy"]
+    },
+    {
+      "id": "difficult_airway_aspiration_risk",
+      "phase": "Before induction of anaesthesia",
+      "aliases": [
+        "difficult airway or aspiration risk",
+        "difficult airway/aspiration risk",
+        "evaluate airway risk"
+      ],
+      "required_terms": ["airway", "aspiration", "risk"]
+    },
+    {
+      "id": "blood_loss_risk_preop",
+      "phase": "Before induction of anaesthesia",
+      "aliases": [
+        "risk of >500 ml blood loss",
+        "risk of >500ml blood loss",
+        "7 ml/kg in children"
+      ],
+      "required_terms": ["blood", "loss", "risk"]
+    },
+    {
+      "id": "team_introductions",
+      "phase": "Before skin incision",
+      "aliases": [
+        "introduced themselves by name and role",
+        "all team members have introduced themselves"
+      ],
+      "required_terms": ["introduced", "name", "role"]
+    },
+    {
+      "id": "confirm_name_procedure_incision_site",
+      "phase": "Before skin incision",
+      "aliases": [
+        "patient’s name, procedure and where the incision will be made",
+        "patient's name, procedure and where the incision will be made",
+        "verify patient's identity, procedure, and surgical site"
+      ],
+      "required_terms": ["patient", "name", "procedure", "incision"]
+    },
+    {
+      "id": "antibiotic_prophylaxis",
+      "phase": "Before skin incision",
+      "aliases": ["antibiotic prophylaxis", "last 60 minutes"],
+      "required_terms": ["antibiotic", "prophylaxis", "60"]
+    },
+    {
+      "id": "surgeon_critical_steps",
+      "phase": "Before skin incision",
+      "aliases": ["critical or non-routine steps"],
+      "required_terms": ["critical", "non-routine", "steps"]
+    },
+    {
+      "id": "surgeon_case_duration",
+      "phase": "Before skin incision",
+      "aliases": ["how long will the case take"],
+      "required_terms": ["long", "case", "take"]
+    },
+    {
+      "id": "surgeon_anticipated_blood_loss",
+      "phase": "Before skin incision",
+      "aliases": ["anticipated blood loss"],
+      "required_terms": ["anticipated", "blood", "loss"]
+    },
+    {
+      "id": "anaesthetist_patient_specific_concerns",
+      "phase": "Before skin incision",
+      "aliases": ["patient-specific concerns", "patient specific concerns"],
+      "required_terms": ["anaesthetist", "patient", "concerns"]
+    },
+    {
+      "id": "sterility_confirmed",
+      "phase": "Before skin incision",
+      "aliases": ["sterility (including indicator results)", "indicator results"],
+      "required_terms": ["sterility"]
+    },
+    {
+      "id": "equipment_issues_or_concerns",
+      "phase": "Before skin incision",
+      "aliases": ["equipment issues or any concerns", "equipment issues"],
+      "required_terms": ["equipment", "concerns"]
+    },
+    {
+      "id": "essential_imaging_displayed",
+      "phase": "Before skin incision",
+      "aliases": ["essential imaging displayed"],
+      "required_terms": ["essential", "imaging", "displayed"]
+    },
+    {
+      "id": "procedure_name_confirmed",
+      "phase": "Before patient leaves operating room",
+      "aliases": ["name of the procedure"],
+      "required_terms": ["name", "procedure"]
+    },
+    {
+      "id": "instrument_sponge_needle_counts",
+      "phase": "Before patient leaves operating room",
+      "aliases": [
+        "instrument, sponge and needle counts",
+        "completion of instrument, sponge and needle counts",
+        "sponge and needle counts"
+      ],
+      "required_terms": ["sponge", "needle", "counts"]
+    },
+    {
+      "id": "specimen_labelling",
+      "phase": "Before patient leaves operating room",
+      "aliases": ["specimen labelling", "specimen labeling"],
+      "required_terms": ["specimen", "label"]
+    },
+    {
+      "id": "equipment_problems_to_be_addressed",
+      "phase": "Before patient leaves operating room",
+      "aliases": ["equipment problems to be addressed", "check for any equipment problems before patient leaves operating room"],
+      "required_terms": ["equipment", "problems"]
+    },
+    {
+      "id": "recovery_management_concerns",
+      "phase": "Before patient leaves operating room",
+      "aliases": [
+        "key concerns for recovery and management",
+        "recovery and management of this patient"
+      ],
+      "required_terms": ["recovery", "management"]
+    }
+  ]
+}

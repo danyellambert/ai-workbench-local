@@ -1,0 +1,265 @@
+{
+  "mode": "review",
+  "presentation_title": "AI Workbench Local — Document Review",
+  "theme": "executive_premium_minimal",
+  "slide_count": 7,
+  "slides": [
+    {
+      "slide_number": 1,
+      "slide_type": "title",
+      "title": "AI Workbench Local — Document Review",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 1.8,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 2,
+      "slide_type": "summary",
+      "title": "Executive summary",
+      "score": 93,
+      "status": "ok",
+      "content_weight": 3.5,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.2,
+      "risk_level": "medium",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [
+        "summary:panel_width_pressure"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "summary:panel_width_pressure",
+          "density": 4.401,
+          "threshold": 4.2,
+          "severity": "medium",
+          "message": "summary takeaways are dense enough to overwhelm the side panel width"
+        }
+      ],
+      "severity_counts": {
+        "high": 0,
+        "medium": 1,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "summary takeaways are dense enough to overwhelm the side panel width"
+        }
+      ]
+    },
+    {
+      "slide_number": 3,
+      "slide_type": "metrics",
+      "title": "Executive snapshot",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.14,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 4,
+      "slide_type": "table",
+      "title": "Top findings",
+      "score": 72,
+      "status": "review",
+      "content_weight": 4.67,
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 2,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 1.06,
+      "risk_level": "high",
+      "likely_overflow_regions": [
+        "table"
+      ],
+      "likely_collision_regions": [
+        "table:column_2",
+        "table:row_imbalance"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "table:column_2",
+          "density": 3.803,
+          "threshold": 2.8,
+          "severity": "high",
+          "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+        },
+        {
+          "region": "table:row_imbalance",
+          "density": 1.103448275862069,
+          "threshold": 1.05,
+          "severity": "medium",
+          "message": "table rows vary significantly in density and may create visual imbalance"
+        }
+      ],
+      "severity_counts": {
+        "high": 1,
+        "medium": 2,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "some table cells are likely too long"
+        },
+        {
+          "severity": "high",
+          "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+        },
+        {
+          "severity": "medium",
+          "message": "table rows vary significantly in density and may create visual imbalance"
+        }
+      ]
+    },
+    {
+      "slide_number": 5,
+      "slide_type": "table",
+      "title": "Action plan",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 2.67,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 6,
+      "slide_type": "two_column",
+      "title": "Recommendation vs watchouts",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 5.22,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 7,
+      "slide_type": "bullets",
+      "title": "Next steps",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 2.1,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    }
+  ],
+  "missing_assets": [],
+  "average_score": 95,
+  "status": "ok",
+  "issue_count": 4,
+  "warning_count": 4,
+  "severity_counts": {
+    "high": 1,
+    "medium": 3,
+    "low": 0
+  },
+  "overflow_risk_count": 1,
+  "clipping_risk_count": 1,
+  "collision_risk_count": 3,
+  "balance_warning_count": 0,
+  "top_risk_slides": [
+    {
+      "slide_number": 4,
+      "title": "Top findings",
+      "risk_level": "high",
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 2,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 1.06
+    },
+    {
+      "slide_number": 2,
+      "title": "Executive summary",
+      "risk_level": "medium",
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.2
+    }
+  ],
+  "issues": [
+    "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+    "slide 04 (Top findings): some table cells are likely too long",
+    "slide 04 (Top findings): table column 2 is dense enough to risk cramped cells across multiple rows",
+    "slide 04 (Top findings): table rows vary significantly in density and may create visual imbalance"
+  ],
+  "warnings": [
+    "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+    "slide 04 (Top findings): some table cells are likely too long",
+    "slide 04 (Top findings): table column 2 is dense enough to risk cramped cells across multiple rows",
+    "slide 04 (Top findings): table rows vary significantly in density and may create visual imbalance"
+  ]
+}

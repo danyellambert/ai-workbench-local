@@ -1,0 +1,1470 @@
+{
+  "ok": true,
+  "meta": {
+    "source": "derived",
+    "updated_at": "2026-05-04T16:54:42.293566+00:00",
+    "notes": [
+      "EvidenceOps / MCP owns delivery readiness, open action governance and repository-backed search."
+    ],
+    "evidenceopsCache": {
+      "mode": "persistent_until_sync",
+      "status": "stored",
+      "path": "/app/runtime/cache/lab/evidenceops_payload.json",
+      "exists": true,
+      "updatedAt": "2026-05-04T21:22:01.350949+00:00",
+      "servedAt": "2026-05-04T21:22:01.350714+00:00",
+      "refreshPolicy": "manual_sync_or_deploy_warmup",
+      "notes": [
+        "The UI serves the last known good EvidenceOps snapshot immediately.",
+        "Nextcloud/WebDAV rescan is intentionally explicit because repository state changes rarely.",
+        "Run /api/lab/evidenceops/sync or the final deploy readiness check to refresh this cache."
+      ]
+    }
+  },
+  "status": "live",
+  "degraded_reason": null,
+  "summary": {
+    "toolsTotal": 10,
+    "activeTools": 10,
+    "openActions": 72,
+    "latestOpenActions": 7,
+    "latestActionWindow": 10,
+    "operationsCount": 12,
+    "repositoryDocumentCount": 42,
+    "repositoryRoot": "/EvidenceOpsDemo",
+    "repositoryBackend": "nextcloud_webdav",
+    "repositoryDisplayName": "NextCloud /EvidenceOpsDemo",
+    "lastSyncAt": "2026-04-27T15:09:56.836053+00:00",
+    "overdueActions": 0,
+    "unassignedActions": 69,
+    "inProgressActions": 3,
+    "needsReviewActions": 15
+  },
+  "repositoryStats": {
+    "changedDocuments": 0,
+    "newDocuments": 42,
+    "categories": 2,
+    "totalSizeLabel": "10.6 MB"
+  },
+  "searchHints": [
+    "vendor",
+    "policy",
+    "access review",
+    "audit"
+  ],
+  "tools": [
+    {
+      "name": "list_documents",
+      "description": "List repository documents with optional category, suffix and identifier filters.",
+      "status": "active",
+      "lastCall": "2026-04-27T15:09:56.836053+00:00"
+    },
+    {
+      "name": "search_documents",
+      "description": "Search repository documents using local term matching and ranking.",
+      "status": "active",
+      "lastCall": "2026-04-27T15:09:56.836053+00:00"
+    },
+    {
+      "name": "get_document",
+      "description": "Resolve a single repository document by document_id or relative_path.",
+      "status": "active",
+      "lastCall": "2026-04-27T15:09:56.836053+00:00"
+    },
+    {
+      "name": "summarize_repository",
+      "description": "Return the aggregated repository summary for the current evidence corpus.",
+      "status": "active",
+      "lastCall": "2026-04-27T15:09:56.836053+00:00"
+    },
+    {
+      "name": "compare_repository_state",
+      "description": "Compare the current repository against the persisted snapshot to detect drift.",
+      "status": "active",
+      "lastCall": "2026-04-27T15:09:56.836053+00:00"
+    },
+    {
+      "name": "register_evidenceops_entry",
+      "description": "Register worklog entries and materialize derived actions through MCP.",
+      "status": "active",
+      "lastCall": "2026-04-27T15:09:56.836053+00:00"
+    },
+    {
+      "name": "list_actions",
+      "description": "List action-store records with status, owner and review-type filters.",
+      "status": "active",
+      "lastCall": "2026-04-27T12:07:54.542345+00:00"
+    },
+    {
+      "name": "summarize_actions",
+      "description": "Return the aggregated summary of the local action store.",
+      "status": "active",
+      "lastCall": "2026-04-27T12:07:54.542345+00:00"
+    },
+    {
+      "name": "update_action",
+      "description": "Update a stored action while preserving the EvidenceOps approval trail.",
+      "status": "active",
+      "lastCall": "2026-04-27T12:07:54.542345+00:00"
+    },
+    {
+      "name": "summarize_worklog",
+      "description": "Return the aggregated summary of the local EvidenceOps worklog.",
+      "status": "active",
+      "lastCall": "2026-04-27T15:09:56.836053+00:00"
+    }
+  ],
+  "actions": [
+    {
+      "id": "73",
+      "title": "Archive approval with Q1 access-review evidence pack",
+      "status": "in_progress",
+      "owner": "AI Lab operator",
+      "target": "Document Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "in_progress",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": "approved"
+    },
+    {
+      "id": "72",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "in_progress",
+      "owner": "AI Lab operator",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "in_progress",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": "not_required"
+    },
+    {
+      "id": "70",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "69",
+      "title": "Archive EV-002 email-export artifact",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "68",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "67",
+      "title": "Verify provenance of missing or in-progress items",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "66",
+      "title": "Archive email-export artifact for Evidence ID EV-002",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "65",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "64",
+      "title": "Archive EV-002 in approved repository",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "63",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "62",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "61",
+      "title": "Archive EV-002 artifact in approved repository",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "60",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "59",
+      "title": "Verify provenance of in-progress items",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "58",
+      "title": "Provide missing evidence for EV-002",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "57",
+      "title": "Archive EV-002 email-export artifact",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "56",
+      "title": "Forward the result for human review before making a final decision.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "55",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "54",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "53",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "52",
+      "title": "Archive email-export artifact for EV-002",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "51",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "50",
+      "title": "Complete review of all evidence items",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "49",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "48",
+      "title": "Archive EV-002 artifact in approved repository",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "47",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "46",
+      "title": "Complete verification of in-progress items",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "45",
+      "title": "Archive EV-002 email-export artifact",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "44",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "43",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "42",
+      "title": "Confirm receipt of EV-004 privileged activity log",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "41",
+      "title": "Confirm receipt of EV-003 vendor attestation",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "40",
+      "title": "Verify provenance of missing evidence (EV-002)",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "39",
+      "title": "Archive EV-002 email-export artifact in approved repository",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "38",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "37",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "36",
+      "title": "Archive EV-002 artifact in approved repository",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "35",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "34",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "33",
+      "title": "Archive EV-002 email-export artifact in approved repository",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "32",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "31",
+      "title": "Complete verification of all evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "30",
+      "title": "Verify provenance of missing items",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "29",
+      "title": "Archive EV-002 email-export artifact",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "28",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "27",
+      "title": "Complete verification of in-progress items",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "26",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "25",
+      "title": "Archive EV-002 email-export artifact",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "24",
+      "title": "Forward the result for human review before making a final decision.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "23",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "22",
+      "title": "Forward the result for human review before making a final decision.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "21",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "20",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "19",
+      "title": "Complete verification of all evidence items",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "18",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "17",
+      "title": "Archive EV-002 email-export artifact",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "16",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "15",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "14",
+      "title": "Archive EV-002 in approved repository",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "13",
+      "title": "Forward the result for human review before making a final decision.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "12",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "11",
+      "title": "Forward the result for human review before making a final decision.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "10",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "9",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "8",
+      "title": "Complete remediation for EV-005",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "7",
+      "title": "Verify provenance of missing evidence",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "6",
+      "title": "Archive EV-002 email-export artifact in approved repository",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "5",
+      "title": "Forward the result for human review before making a final decision.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "4",
+      "title": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "Action Plan / Evidence Review",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 1,
+      "reviewType": "document_agent",
+      "approvalStatus": ""
+    },
+    {
+      "id": "3",
+      "title": "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "review_document_risks",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 3,
+      "reviewType": "risk_gap_review",
+      "approvalStatus": ""
+    },
+    {
+      "id": "2",
+      "title": "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+      "status": "open",
+      "owner": "Unassigned",
+      "target": "review_document_risks",
+      "priority": "high",
+      "dueDate": "—",
+      "rawStatus": "recommended",
+      "evidence": null,
+      "sourceCount": 3,
+      "reviewType": "risk_gap_review",
+      "approvalStatus": ""
+    },
+    {
+      "id": "1",
+      "title": "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+      "status": "in_progress",
+      "owner": "AI Lab operator",
+      "target": "review_document_risks",
+      "priority": "medium",
+      "dueDate": "—",
+      "rawStatus": "in_progress",
+      "evidence": null,
+      "sourceCount": 6,
+      "reviewType": "risk_gap_review",
+      "approvalStatus": "approved"
+    }
+  ],
+  "operations": [
+    {
+      "id": "2026-04-27T15:09:56.836053+00:00",
+      "operation": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "success",
+      "timestamp": "2026-04-27T15:09:56.836053+00:00",
+      "durationMs": 10,
+      "detail": "Repository search returned 0 result(s)."
+    },
+    {
+      "id": "2026-04-27T15:09:56.825681+00:00",
+      "operation": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "success",
+      "timestamp": "2026-04-27T15:09:56.825681+00:00",
+      "durationMs": 10,
+      "detail": "Repository search returned 0 result(s)."
+    },
+    {
+      "id": "2026-04-27T15:09:56.812399+00:00",
+      "operation": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "success",
+      "timestamp": "2026-04-27T15:09:56.812399+00:00",
+      "durationMs": 10,
+      "detail": "Repository search returned 8 result(s)."
+    },
+    {
+      "id": "2026-04-27T15:06:07.730748+00:00",
+      "operation": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "success",
+      "timestamp": "2026-04-27T15:06:07.730748+00:00",
+      "durationMs": 10,
+      "detail": "Repository search returned 0 result(s)."
+    },
+    {
+      "id": "2026-04-27T15:06:07.725245+00:00",
+      "operation": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "success",
+      "timestamp": "2026-04-27T15:06:07.725245+00:00",
+      "durationMs": 10,
+      "detail": "Repository search returned 0 result(s)."
+    },
+    {
+      "id": "2026-04-27T15:06:07.719189+00:00",
+      "operation": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "success",
+      "timestamp": "2026-04-27T15:06:07.719189+00:00",
+      "durationMs": 10,
+      "detail": "Repository search returned 8 result(s)."
+    },
+    {
+      "id": "2026-04-27T12:07:54.542345+00:00",
+      "operation": "action_update",
+      "tool": "action_store",
+      "status": "success",
+      "timestamp": "2026-04-27T12:07:54.542345+00:00",
+      "durationMs": 10,
+      "detail": "Action 73 updated to in_progress"
+    },
+    {
+      "id": "2026-04-26T09:49:28.574100+00:00",
+      "operation": "action_update",
+      "tool": "action_store",
+      "status": "success",
+      "timestamp": "2026-04-26T09:49:28.574100+00:00",
+      "durationMs": 10,
+      "detail": "Action 75 updated to closed"
+    },
+    {
+      "id": "2026-04-23T22:21:24.685116+00:00",
+      "operation": "action_update",
+      "tool": "action_store",
+      "status": "success",
+      "timestamp": "2026-04-23T22:21:24.685116+00:00",
+      "durationMs": 10,
+      "detail": "Action 74 updated to closed"
+    },
+    {
+      "id": "2026-04-23T22:21:21.785378+00:00",
+      "operation": "action_update",
+      "tool": "action_store",
+      "status": "success",
+      "timestamp": "2026-04-23T22:21:21.785378+00:00",
+      "durationMs": 10,
+      "detail": "Action 74 updated to in_progress"
+    },
+    {
+      "id": "2026-04-23T22:20:59.546173+00:00",
+      "operation": "action_update",
+      "tool": "action_store",
+      "status": "success",
+      "timestamp": "2026-04-23T22:20:59.546173+00:00",
+      "durationMs": 10,
+      "detail": "Action 1 updated to in_progress"
+    },
+    {
+      "id": "2026-04-23T22:20:54.038990+00:00",
+      "operation": "action_update",
+      "tool": "action_store",
+      "status": "success",
+      "timestamp": "2026-04-23T22:20:54.038990+00:00",
+      "durationMs": 10,
+      "detail": "Action 1 updated to recommended"
+    }
+  ],
+  "timeline": [
+    {
+      "id": "2026-04-27T15:09:56.836053+00:00",
+      "label": "repository_search",
+      "detail": "Repository search returned 0 result(s).",
+      "timestamp": "2026-04-27T15:09:56.836053+00:00",
+      "status": "success"
+    },
+    {
+      "id": "2026-04-27T15:09:56.825681+00:00",
+      "label": "repository_search",
+      "detail": "Repository search returned 0 result(s).",
+      "timestamp": "2026-04-27T15:09:56.825681+00:00",
+      "status": "success"
+    },
+    {
+      "id": "2026-04-27T15:09:56.812399+00:00",
+      "label": "repository_search",
+      "detail": "Repository search returned 8 result(s).",
+      "timestamp": "2026-04-27T15:09:56.812399+00:00",
+      "status": "success"
+    },
+    {
+      "id": "2026-04-27T15:06:07.730748+00:00",
+      "label": "repository_search",
+      "detail": "Repository search returned 0 result(s).",
+      "timestamp": "2026-04-27T15:06:07.730748+00:00",
+      "status": "success"
+    },
+    {
+      "id": "2026-04-27T15:06:07.725245+00:00",
+      "label": "repository_search",
+      "detail": "Repository search returned 0 result(s).",
+      "timestamp": "2026-04-27T15:06:07.725245+00:00",
+      "status": "success"
+    },
+    {
+      "id": "2026-04-27T15:06:07.719189+00:00",
+      "label": "repository_search",
+      "detail": "Repository search returned 8 result(s).",
+      "timestamp": "2026-04-27T15:06:07.719189+00:00",
+      "status": "success"
+    },
+    {
+      "id": "2026-04-27T12:07:54.542345+00:00",
+      "label": "action_update",
+      "detail": "Action 73 updated to in_progress",
+      "timestamp": "2026-04-27T12:07:54.542345+00:00",
+      "status": "success"
+    },
+    {
+      "id": "2026-04-26T09:49:28.574100+00:00",
+      "label": "action_update",
+      "detail": "Action 75 updated to closed",
+      "timestamp": "2026-04-26T09:49:28.574100+00:00",
+      "status": "success"
+    }
+  ],
+  "telemetry": [
+    {
+      "event": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-27T15:09:56.836053+00:00"
+    },
+    {
+      "event": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-27T15:09:56.825681+00:00"
+    },
+    {
+      "event": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-27T15:09:56.812399+00:00"
+    },
+    {
+      "event": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-27T15:06:07.730748+00:00"
+    },
+    {
+      "event": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-27T15:06:07.725245+00:00"
+    },
+    {
+      "event": "repository_search",
+      "tool": "local_repository_scan",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-27T15:06:07.719189+00:00"
+    },
+    {
+      "event": "action_update",
+      "tool": "action_store",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-27T12:07:54.542345+00:00"
+    },
+    {
+      "event": "action_update",
+      "tool": "action_store",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-26T09:49:28.574100+00:00"
+    },
+    {
+      "event": "action_update",
+      "tool": "action_store",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-23T22:21:24.685116+00:00"
+    },
+    {
+      "event": "action_update",
+      "tool": "action_store",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-23T22:21:21.785378+00:00"
+    },
+    {
+      "event": "action_update",
+      "tool": "action_store",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-23T22:20:59.546173+00:00"
+    },
+    {
+      "event": "action_update",
+      "tool": "action_store",
+      "status": "ok",
+      "latency": "10ms",
+      "ts": "2026-04-23T22:20:54.038990+00:00"
+    }
+  ],
+  "readiness": [
+    {
+      "target": "Repository",
+      "status": "ready",
+      "detail": "42 documents visible in NextCloud /EvidenceOpsDemo."
+    },
+    {
+      "target": "Action store",
+      "status": "ready",
+      "detail": "72 open action(s) persisted."
+    },
+    {
+      "target": "Operations log",
+      "status": "ready",
+      "detail": "Worklog persisted."
+    }
+  ],
+  "ownershipSummary": [
+    {
+      "owner": "Unassigned",
+      "count": 69
+    },
+    {
+      "owner": "AI Lab operator",
+      "count": 6
+    }
+  ],
+  "operationBreakdown": [
+    {
+      "label": "repository_search",
+      "value": 6
+    },
+    {
+      "label": "action_update",
+      "value": 6
+    }
+  ],
+  "categoryBreakdown": [
+    {
+      "label": "Demo Synthetic Corpus",
+      "value": 26
+    },
+    {
+      "label": "Public Reference Corpus",
+      "value": 16
+    }
+  ],
+  "statusBreakdown": [
+    {
+      "label": "open",
+      "value": 69
+    },
+    {
+      "label": "in_progress",
+      "value": 3
+    }
+  ],
+  "recentSearches": [
+    {
+      "query": "artifact",
+      "timestamp": "2026-04-27T15:09:56.836053+00:00",
+      "hits": 0
+    },
+    {
+      "query": "runtime",
+      "timestamp": "2026-04-27T15:09:56.825681+00:00",
+      "hits": 0
+    },
+    {
+      "query": "vendor",
+      "timestamp": "2026-04-27T15:09:56.812399+00:00",
+      "hits": 8
+    },
+    {
+      "query": "artifact",
+      "timestamp": "2026-04-27T15:06:07.730748+00:00",
+      "hits": 0
+    },
+    {
+      "query": "runtime",
+      "timestamp": "2026-04-27T15:06:07.725245+00:00",
+      "hits": 0
+    },
+    {
+      "query": "vendor",
+      "timestamp": "2026-04-27T15:06:07.719189+00:00",
+      "hits": 8
+    }
+  ]
+}

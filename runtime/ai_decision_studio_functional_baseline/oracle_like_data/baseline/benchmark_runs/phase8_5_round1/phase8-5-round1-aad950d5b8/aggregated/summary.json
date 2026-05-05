@@ -1,0 +1,71 @@
+{
+  "total_cases": 3,
+  "successful_cases": 3,
+  "failed_cases": 0,
+  "generation": {
+    "total_cases": 2,
+    "successful_cases": 2,
+    "failed_cases": 0,
+    "candidate_ranking": [
+      {
+        "candidate": "ollama::qwen2.5:7b",
+        "provider": "ollama",
+        "model": "qwen2.5:7b",
+        "case_count": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 10.9924,
+        "avg_format_adherence": 1.0,
+        "avg_groundedness_score": 0.363,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 1.0,
+        "avg_total_tokens": 405.5
+      }
+    ],
+    "top_candidate": {
+      "candidate": "ollama::qwen2.5:7b",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "case_count": 2,
+      "success_rate": 1.0,
+      "avg_latency_s": 10.9924,
+      "avg_format_adherence": 1.0,
+      "avg_groundedness_score": 0.363,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 1.0,
+      "avg_total_tokens": 405.5
+    }
+  },
+  "embeddings": {
+    "total_cases": 1,
+    "successful_cases": 1,
+    "failed_cases": 0,
+    "candidate_ranking": [
+      {
+        "candidate": "ollama::embeddinggemma:300m",
+        "provider": "ollama",
+        "model": "embeddinggemma:300m",
+        "candidate_role": "baseline",
+        "case_count": 1,
+        "success_rate": 1.0,
+        "avg_hit_at_1": 0.5,
+        "avg_hit_at_k": 0.5,
+        "avg_mrr": 0.5,
+        "avg_indexing_seconds": 130.0244,
+        "avg_retrieval_seconds": 1.1738
+      }
+    ],
+    "top_candidate": {
+      "candidate": "ollama::embeddinggemma:300m",
+      "provider": "ollama",
+      "model": "embeddinggemma:300m",
+      "candidate_role": "baseline",
+      "case_count": 1,
+      "success_rate": 1.0,
+      "avg_hit_at_1": 0.5,
+      "avg_hit_at_k": 0.5,
+      "avg_mrr": 0.5,
+      "avg_indexing_seconds": 130.0244,
+      "avg_retrieval_seconds": 1.1738
+    }
+  }
+}

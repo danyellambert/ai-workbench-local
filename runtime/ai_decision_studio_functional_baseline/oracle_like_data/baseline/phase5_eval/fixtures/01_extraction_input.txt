@@ -1,0 +1,5 @@
+On March 12, 2026, Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation.
+The contract value is R$ 480,000 for a 12-month period starting April 1, 2026.
+Project manager: Mariana Costa. Technical lead: Lucas Pereira.
+The main risk identified is delayed delivery of replacement transformers.
+The next review meeting is scheduled for April 15, 2026.

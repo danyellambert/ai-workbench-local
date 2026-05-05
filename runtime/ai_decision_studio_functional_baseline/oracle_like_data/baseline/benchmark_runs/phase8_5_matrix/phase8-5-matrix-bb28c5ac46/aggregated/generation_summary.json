@@ -1,0 +1,109 @@
+{
+  "total_cases": 2,
+  "successful_cases": 2,
+  "failed_cases": 0,
+  "runtime_path_breakdown": [
+    {
+      "runtime_path": "direct_runtime",
+      "runtime_path_label": "Direct runtime",
+      "case_count": 2,
+      "successful_cases": 2,
+      "failed_cases": 0,
+      "candidate_count": 1,
+      "path_overhead_expected": false,
+      "backend_examples": [
+        "ollama::qwen3.5:4b"
+      ]
+    }
+  ],
+  "candidate_ranking": [
+    {
+      "candidate": "ollama::qwen3.5:4b",
+      "provider": "ollama",
+      "model": "qwen3.5:4b",
+      "runtime_path": "direct_runtime",
+      "runtime_path_label": "Direct runtime",
+      "backend_equivalence_type": "native_runtime",
+      "backend_provider_resolved": "ollama",
+      "backend_model_ref_resolved": "qwen3.5:4b",
+      "backend_equivalence_key": "ollama::qwen3.5:4b",
+      "equivalent_direct_runtime_key": "ollama::qwen3.5:4b",
+      "path_overhead_expected": false,
+      "case_count": 2,
+      "success_rate": 1.0,
+      "avg_latency_s": 9.3903,
+      "avg_format_adherence": 1.0,
+      "avg_groundedness_score": 0.0705,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 1.0,
+      "avg_total_wall_time_s": 9.3903,
+      "avg_ttft_s": 2.9604,
+      "avg_throughput_tokens_per_s": 13.5414,
+      "operational_metric_support": {
+        "total_wall_time_status": {
+          "measured": 2
+        },
+        "ttft_status": {
+          "measured": 2
+        },
+        "throughput_status": {
+          "measured": 2
+        },
+        "cold_start_status": {
+          "estimated": 2
+        },
+        "warm_start_status": {
+          "not_supported": 2
+        },
+        "memory_status": {
+          "estimated": 2
+        }
+      },
+      "avg_total_tokens": 429.5
+    }
+  ],
+  "top_candidate": {
+    "candidate": "ollama::qwen3.5:4b",
+    "provider": "ollama",
+    "model": "qwen3.5:4b",
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "qwen3.5:4b",
+    "backend_equivalence_key": "ollama::qwen3.5:4b",
+    "equivalent_direct_runtime_key": "ollama::qwen3.5:4b",
+    "path_overhead_expected": false,
+    "case_count": 2,
+    "success_rate": 1.0,
+    "avg_latency_s": 9.3903,
+    "avg_format_adherence": 1.0,
+    "avg_groundedness_score": 0.0705,
+    "avg_schema_adherence": 0.0,
+    "avg_use_case_fit_score": 1.0,
+    "avg_total_wall_time_s": 9.3903,
+    "avg_ttft_s": 2.9604,
+    "avg_throughput_tokens_per_s": 13.5414,
+    "operational_metric_support": {
+      "total_wall_time_status": {
+        "measured": 2
+      },
+      "ttft_status": {
+        "measured": 2
+      },
+      "throughput_status": {
+        "measured": 2
+      },
+      "cold_start_status": {
+        "estimated": 2
+      },
+      "warm_start_status": {
+        "not_supported": 2
+      },
+      "memory_status": {
+        "estimated": 2
+      }
+    },
+    "avg_total_tokens": 429.5
+  }
+}

@@ -1,0 +1,734 @@
+{
+  "generated_at": "2026-03-30T18:41:13.832157",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "cv_analysis",
+      "suite_name": "structured_real_document_eval",
+      "mode": "indexed_document",
+      "status": "PASS",
+      "score": 16,
+      "max_score": 24,
+      "reasons": [
+        "gold:education coverage too low: 0"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "4c51cb2dca6ff04e013db136a4ebde95ac5fe9326a4e8a5bec4cd601efa72cfa",
+        "name": "Sample-Resume-3-.pdf",
+        "file_type": "pdf",
+        "chunk_count": 6
+      },
+      "gold_fixture_path": "baseline://external_files/202737c4af11e4a6_16_cv_sample_resume_3_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "PASS",
+        "score": 16,
+        "max_score": 24,
+        "reasons": [
+          "education coverage too low: 0"
+        ],
+        "thresholds": {
+          "pass_ratio": 0.64,
+          "warn_ratio": 0.44,
+          "notes": "CV analysis tolera pequenas variações de wording, mas exige boa cobertura de identidade, educação e experiência."
+        },
+        "metrics": {
+          "personal_hits": 3,
+          "profile_hit": 1,
+          "language_hits": 0,
+          "skill_hits": 4,
+          "interest_hits": 3,
+          "education_hits": 0,
+          "experience_hits": 4,
+          "experience_years_hit": 1
+        }
+      },
+      "thresholds": {
+        "pass_ratio": 0.64,
+        "warn_ratio": 0.44,
+        "notes": "CV analysis tolera pequenas variações de wording, mas exige boa cobertura de identidade, educação e experiência."
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "cv_analysis",
+        "schema_version": "1.0",
+        "personal_info": {
+          "full_name": "Darrell Wiremu Rogers",
+          "email": "dwr5@apple.com",
+          "phone": "+64 22 427 8081",
+          "location": "Auckland, NZ",
+          "links": []
+        },
+        "sections": [
+          {
+            "section_type": "personal_info",
+            "title": "Personal Info",
+            "content": [
+              {
+                "text": "Darrell Wiremu Rogers",
+                "details": {}
+              },
+              {
+                "text": "dwr5@apple.com",
+                "details": {}
+              },
+              {
+                "text": "Auckland, NZ",
+                "details": {}
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "languages",
+            "title": "Languages",
+            "content": [
+              {
+                "text": "Anglais",
+                "details": {}
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "skills",
+            "title": "Skills",
+            "content": [
+              {
+                "text": "Proficient in Tableau and Adobe Photoshop"
+              },
+              {
+                "text": "CPR certified"
+              },
+              {
+                "text": "Louisiana State Notary Public"
+              },
+              {
+                "text": "Avid LSU sports fan – Geaux Tigers!"
+              },
+              {
+                "text": "Enthusiastic and knowledgeable New Zealand Tour Guide"
+              },
+              {
+                "text": "Afrobeats fanatic"
+              },
+              {
+                "text": "AND INTERESTS"
+              },
+              {
+                "text": " Proficient in Tableau and Adobe Photoshop"
+              },
+              {
+                "text": " CPR certified"
+              },
+              {
+                "text": " Louisiana State Notary Public"
+              },
+              {
+                "text": " Avid LSU sports fan – Geaux Tigers!"
+              },
+              {
+                "text": " Enthusiastic and knowledgeable New Zealand Tour Guide"
+              },
+              {
+                "text": " Afrobeats fanatic"
+              },
+              {
+                "text": "SKILLS AND INTERESTS"
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "education",
+            "title": "Education",
+            "content": [
+              {
+                "text": "B.A."
+              },
+              {
+                "text": "Liaised with colleges and universities to establish pipeline into finance and operations roles at Goldman Sachs for recent"
+              },
+              {
+                "text": "2020 Intellectual Contribution Award"
+              },
+              {
+                "text": "PROFESSIONAL EXPERIENCE"
+              },
+              {
+                "text": "KPMG Auckland"
+              },
+              {
+                "text": "Talent Acquisition Manager (July 2020 – Present)"
+              },
+              {
+                "text": "prospective clients or new hires."
+              },
+              {
+                "text": "Associate"
+              },
+              {
+                "text": "graduates. Recruited remotely and on campuses"
+              },
+              {
+                "text": "schedules and frequency of events during COVID-19 pandemic."
+              },
+              {
+                "text": "Nelson College Nelson"
+              },
+              {
+                "text": "Middle School History Teacher"
+              },
+              {
+                "text": "boarding students"
+              },
+              {
+                "text": "necessary."
+              },
+              {
+                "text": "Teach for America New Orleans"
+              },
+              {
+                "text": "resources."
+              },
+              {
+                "text": "Cashier"
+              },
+              {
+                "text": "Manager"
+              },
+              {
+                "text": "FELLOWSHIPS"
+              },
+              {
+                "text": "U.S. Department of State – Fulbright Program Medan"
+              },
+              {
+                "text": "Fulbright English Teaching Assistant"
+              },
+              {
+                "text": "Harvard University Graduate School of Education Cambridge"
+              },
+              {
+                "text": "Equity and Inclusion Fellow"
+              },
+              {
+                "text": "VOLUNTEER EXPERIENCE"
+              },
+              {
+                "text": "Holy Apostle’s Soup Kitchen New York NY"
+              },
+              {
+                "text": "Volunteer ESL Teacher"
+              },
+              {
+                "text": "Big Brother"
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "experience",
+            "title": "Experience",
+            "content": [
+              {
+                "text": "Talent Acquisition Manager | KPMG Auckland, NZ | Auckland, NZ | July 2020 – Present",
+                "details": {
+                  "title": "Talent Acquisition Manager",
+                  "organization": "KPMG Auckland, NZ",
+                  "location": "Auckland, NZ",
+                  "date_range": "July 2020 – Present",
+                  "bullets": [
+                    "Oversee recruitment and hiring for new employees in KPMG’s Auckland office",
+                    "Manage team of three, including conducting annual reviews and taking responsibility for team KPIs",
+                    "Serve on diversity, equity, and inclusion committee to ensure all voices are heard"
+                  ]
+                }
+              },
+              {
+                "text": "Associate, Campus Recruiting | Goldman Sachs Remote | July 2020 – July 2022",
+                "details": {
+                  "title": "Associate, Campus Recruiting",
+                  "organization": "Goldman Sachs Remote",
+                  "location": null,
+                  "date_range": "July 2020 – July 2022",
+                  "bullets": [
+                    "Liaised with colleges and universities to establish pipeline into finance and operations roles at Goldman Sachs for recent graduates",
+                    "Recruited remotely and on campuses, answering questions and facilitating connections between hiring managers and prospective applicants",
+                    "Tasked with major data analysis projects, including revamping recruitment schedules and frequency of events during COVID-19 pandemic"
+                  ]
+                }
+              },
+              {
+                "text": "Middle School History Teacher | Nelson College Nelson, NZ | Nelson, NZ | August 2014 – June 2016",
+                "details": {
+                  "title": "Middle School History Teacher",
+                  "organization": "Nelson College Nelson, NZ",
+                  "location": "Nelson, NZ",
+                  "date_range": "August 2014 – June 2016",
+                  "bullets": [
+                    "Taught levels 2-3 Classics and levels 1-3 History at New Zealand’s oldest state secondary school",
+                    "Assistant coached rugby team, helping develop students’ physical well-being and mental toughness",
+                    "Performed dorm responsibilities for boarding students, including routine wellness checks, floor-wide bonding activities, and conflict resolution when necessary"
+                  ]
+                }
+              },
+              {
+                "text": "Cashier / Manager | LSU Sport Shop Baton Rouge, LA | Baton Rouge, LA | January 2011 – May 2014",
+                "details": {
+                  "title": "Cashier / Manager",
+                  "organization": "LSU Sport Shop Baton Rouge, LA",
+                  "location": "Baton Rouge, LA",
+                  "date_range": "January 2011 – May 2014",
+                  "bullets": [
+                    "Worked at the official gift and merchandise shopping center of LSU athletics",
+                    "Sold apparel, assisted customers, and emphasized school spirit; promoted to manager for senior year"
+                  ]
+                }
+              },
+              {
+                "text": "Fulbright English Teaching Assistant | U.S. Department of State – Fulbright Program Medan, Indonesia | Medan, Indonesia | August 2016 – April 2017",
+                "details": {
+                  "title": "Fulbright English Teaching Assistant",
+                  "organization": "U.S. Department of State – Fulbright Program Medan, Indonesia",
+                  "location": "Medan, Indonesia",
+                  "date_range": "August 2016 – April 2017",
+                  "bullets": [
+                    "Developed and taught English language classes at a public secondary school",
+                    "Participated in Indonesian language classes, improving my ability to communicate with locals and immerse myself in local culture",
+                    "Organized pen pal program between Indonesian high schoolers and high schoolers from Baton Rouge, LA"
+                  ]
+                }
+              },
+              {
+                "text": "Teaching Fellow: “Higher Education and the Law” | Harvard University Graduate School of Education Cambridge, MA | Cambridge, MA | January 2021 – May 2021",
+                "details": {
+                  "title": "Teaching Fellow: “Higher Education and the Law”",
+                  "organization": "Harvard University Graduate School of Education Cambridge, MA",
+                  "location": "Cambridge, MA",
+                  "date_range": "January 2021 – May 2021",
+                  "bullets": [
+                    "Assisted professor Phil Catanzano with lesson-planning, grading, and course management during remote offering of “Higher Education and the Law”"
+                  ]
+                }
+              },
+              {
+                "text": "Equity and Inclusion Fellow | Harvard University Graduate School of Education Cambridge, MA | Cambridge, MA | September 2019 – May 2020",
+                "details": {
+                  "title": "Equity and Inclusion Fellow",
+                  "organization": "Harvard University Graduate School of Education Cambridge, MA",
+                  "location": "Cambridge, MA",
+                  "date_range": "September 2019 – May 2020",
+                  "bullets": [
+                    "Selected to be one of twenty Equity and Inclusion Fellows (EIF)",
+                    "Completed field placement work with Boston Public Schools’ central office",
+                    "Worked alongside cohort of driven educators who shared a commitment to equity in education"
+                  ]
+                }
+              },
+              {
+                "text": "July 2020 – Present",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "July 2020 – Present",
+                  "bullets": []
+                }
+              },
+              {
+                "text": "July 2020 – July 2022",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "July 2020 – July 2022",
+                  "bullets": []
+                }
+              },
+              {
+                "text": "August 2014 – June 2016",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "August 2014 – June 2016",
+                  "bullets": []
+                }
+              },
+              {
+                "text": "January 2011 – May 2014",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "January 2011 – May 2014",
+                  "bullets": []
+                }
+              },
+              {
+                "text": "August 2016 – April 2017",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "August 2016 – April 2017",
+                  "bullets": []
+                }
+              }
+            ],
+            "confidence": 0.8
+          }
+        ],
+        "skills": [
+          "Proficient in Tableau and Adobe Photoshop",
+          "CPR certified",
+          "Louisiana State Notary Public",
+          "Avid LSU sports fan – Geaux Tigers!",
+          "Enthusiastic and knowledgeable New Zealand Tour Guide",
+          "Afrobeats fanatic",
+          "AND INTERESTS",
+          " Proficient in Tableau and Adobe Photoshop",
+          " CPR certified",
+          " Louisiana State Notary Public",
+          " Avid LSU sports fan – Geaux Tigers!",
+          " Enthusiastic and knowledgeable New Zealand Tour Guide",
+          " Afrobeats fanatic",
+          "SKILLS AND INTERESTS"
+        ],
+        "languages": [
+          "Anglais"
+        ],
+        "education_entries": [
+          {
+            "degree": "B.A.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "B.A."
+          },
+          {
+            "degree": "Liaised with colleges and universities to establish pipeline into finance and operations roles at Goldman Sachs for recent",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Liaised with colleges and universities to establish pipeline into finance and operations roles at Goldman Sachs for recent"
+          },
+          {
+            "degree": "2020 Intellectual Contribution Award",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "2020 Intellectual Contribution Award"
+          },
+          {
+            "degree": "PROFESSIONAL EXPERIENCE",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "PROFESSIONAL EXPERIENCE"
+          },
+          {
+            "degree": "KPMG Auckland",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "KPMG Auckland"
+          },
+          {
+            "degree": "Talent Acquisition Manager (July 2020 – Present)",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Talent Acquisition Manager (July 2020 – Present)"
+          },
+          {
+            "degree": "prospective clients or new hires.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "prospective clients or new hires."
+          },
+          {
+            "degree": "Associate",
+            "institution": null,
+            "location": null,
+            "date_range": "July 2020 – July 2022",
+            "description": "Associate"
+          },
+          {
+            "degree": "graduates. Recruited remotely and on campuses",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "graduates. Recruited remotely and on campuses"
+          },
+          {
+            "degree": "schedules and frequency of events during COVID-19 pandemic.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "schedules and frequency of events during COVID-19 pandemic."
+          },
+          {
+            "degree": "Nelson College Nelson",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Nelson College Nelson"
+          },
+          {
+            "degree": "Middle School History Teacher",
+            "institution": null,
+            "location": null,
+            "date_range": "August 2014 – June 2016",
+            "description": "Middle School History Teacher"
+          },
+          {
+            "degree": "boarding students",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "boarding students"
+          },
+          {
+            "degree": "necessary.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "necessary."
+          },
+          {
+            "degree": "Teach for America New Orleans",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Teach for America New Orleans"
+          },
+          {
+            "degree": "resources.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "resources."
+          },
+          {
+            "degree": "Cashier",
+            "institution": null,
+            "location": null,
+            "date_range": "January 2011– May 2013",
+            "description": "Cashier"
+          },
+          {
+            "degree": "Manager",
+            "institution": null,
+            "location": null,
+            "date_range": "June 2013– May 2014",
+            "description": "Manager"
+          },
+          {
+            "degree": "FELLOWSHIPS",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "FELLOWSHIPS"
+          },
+          {
+            "degree": "U.S. Department of State – Fulbright Program Medan",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "U.S. Department of State – Fulbright Program Medan"
+          },
+          {
+            "degree": "Fulbright English Teaching Assistant",
+            "institution": null,
+            "location": null,
+            "date_range": "August 2016 – April 2017",
+            "description": "Fulbright English Teaching Assistant"
+          },
+          {
+            "degree": "Harvard University Graduate School of Education Cambridge",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Harvard University Graduate School of Education Cambridge"
+          },
+          {
+            "degree": "Equity and Inclusion Fellow",
+            "institution": null,
+            "location": null,
+            "date_range": "September 2019– May 2020",
+            "description": "Equity and Inclusion Fellow"
+          },
+          {
+            "degree": "VOLUNTEER EXPERIENCE",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "VOLUNTEER EXPERIENCE"
+          },
+          {
+            "degree": "Holy Apostle’s Soup Kitchen New York NY",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Holy Apostle’s Soup Kitchen New York NY"
+          },
+          {
+            "degree": "Volunteer ESL Teacher",
+            "institution": null,
+            "location": null,
+            "date_range": "November 2020 – July 2022",
+            "description": "Volunteer ESL Teacher"
+          },
+          {
+            "degree": "Big Brother",
+            "institution": null,
+            "location": null,
+            "date_range": "September 2010 – June 2014",
+            "description": "Big Brother"
+          }
+        ],
+        "experience_entries": [
+          {
+            "title": "Talent Acquisition Manager",
+            "organization": "KPMG Auckland, NZ",
+            "location": "Auckland, NZ",
+            "date_range": "July 2020 – Present",
+            "bullets": [
+              "Oversee recruitment and hiring for new employees in KPMG’s Auckland office",
+              "Manage team of three, including conducting annual reviews and taking responsibility for team KPIs",
+              "Serve on diversity, equity, and inclusion committee to ensure all voices are heard"
+            ],
+            "description": "Talent Acquisition Manager | KPMG Auckland, NZ | Auckland, NZ | July 2020 – Present"
+          },
+          {
+            "title": "Associate, Campus Recruiting",
+            "organization": "Goldman Sachs Remote",
+            "location": null,
+            "date_range": "July 2020 – July 2022",
+            "bullets": [
+              "Liaised with colleges and universities to establish pipeline into finance and operations roles at Goldman Sachs for recent graduates",
+              "Recruited remotely and on campuses, answering questions and facilitating connections between hiring managers and prospective applicants",
+              "Tasked with major data analysis projects, including revamping recruitment schedules and frequency of events during COVID-19 pandemic"
+            ],
+            "description": "Associate, Campus Recruiting | Goldman Sachs Remote | July 2020 – July 2022"
+          },
+          {
+            "title": "Middle School History Teacher",
+            "organization": "Nelson College Nelson, NZ",
+            "location": "Nelson, NZ",
+            "date_range": "August 2014 – June 2016",
+            "bullets": [
+              "Taught levels 2-3 Classics and levels 1-3 History at New Zealand’s oldest state secondary school",
+              "Assistant coached rugby team, helping develop students’ physical well-being and mental toughness",
+              "Performed dorm responsibilities for boarding students, including routine wellness checks, floor-wide bonding activities, and conflict resolution when necessary"
+            ],
+            "description": "Middle School History Teacher | Nelson College Nelson, NZ | Nelson, NZ | August 2014 – June 2016"
+          },
+          {
+            "title": "Cashier / Manager",
+            "organization": "LSU Sport Shop Baton Rouge, LA",
+            "location": "Baton Rouge, LA",
+            "date_range": "January 2011 – May 2014",
+            "bullets": [
+              "Worked at the official gift and merchandise shopping center of LSU athletics",
+              "Sold apparel, assisted customers, and emphasized school spirit; promoted to manager for senior year"
+            ],
+            "description": "Cashier / Manager | LSU Sport Shop Baton Rouge, LA | Baton Rouge, LA | January 2011 – May 2014"
+          },
+          {
+            "title": "Fulbright English Teaching Assistant",
+            "organization": "U.S. Department of State – Fulbright Program Medan, Indonesia",
+            "location": "Medan, Indonesia",
+            "date_range": "August 2016 – April 2017",
+            "bullets": [
+              "Developed and taught English language classes at a public secondary school",
+              "Participated in Indonesian language classes, improving my ability to communicate with locals and immerse myself in local culture",
+              "Organized pen pal program between Indonesian high schoolers and high schoolers from Baton Rouge, LA"
+            ],
+            "description": "Fulbright English Teaching Assistant | U.S. Department of State – Fulbright Program Medan, Indonesia | Medan, Indonesia | August 2016 – April 2017"
+          },
+          {
+            "title": "Teaching Fellow: “Higher Education and the Law”",
+            "organization": "Harvard University Graduate School of Education Cambridge, MA",
+            "location": "Cambridge, MA",
+            "date_range": "January 2021 – May 2021",
+            "bullets": [
+              "Assisted professor Phil Catanzano with lesson-planning, grading, and course management during remote offering of “Higher Education and the Law”"
+            ],
+            "description": "Teaching Fellow: “Higher Education and the Law” | Harvard University Graduate School of Education Cambridge, MA | Cambridge, MA | January 2021 – May 2021"
+          },
+          {
+            "title": "Equity and Inclusion Fellow",
+            "organization": "Harvard University Graduate School of Education Cambridge, MA",
+            "location": "Cambridge, MA",
+            "date_range": "September 2019 – May 2020",
+            "bullets": [
+              "Selected to be one of twenty Equity and Inclusion Fellows (EIF)",
+              "Completed field placement work with Boston Public Schools’ central office",
+              "Worked alongside cohort of driven educators who shared a commitment to equity in education"
+            ],
+            "description": "Equity and Inclusion Fellow | Harvard University Graduate School of Education Cambridge, MA | Cambridge, MA | September 2019 – May 2020"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "July 2020 – Present",
+            "bullets": [],
+            "description": "July 2020 – Present"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "July 2020 – July 2022",
+            "bullets": [],
+            "description": "July 2020 – July 2022"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "August 2014 – June 2016",
+            "bullets": [],
+            "description": "August 2014 – June 2016"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "January 2011 – May 2014",
+            "bullets": [],
+            "description": "January 2011 – May 2014"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "August 2016 – April 2017",
+            "bullets": [],
+            "description": "August 2016 – April 2017"
+          }
+        ],
+        "experience_years": 8.9,
+        "strengths": [],
+        "improvement_areas": [],
+        "projects": []
+      }
+    }
+  ]
+}

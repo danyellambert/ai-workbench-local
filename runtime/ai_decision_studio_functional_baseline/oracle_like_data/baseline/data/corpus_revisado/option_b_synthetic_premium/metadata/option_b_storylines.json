@@ -1,0 +1,72 @@
+[
+  {
+    "storyline_id": "SB-01",
+    "name": "Policy Change Detection",
+    "goal": "Detect and summarize substantive security-policy changes between baseline and revision.",
+    "primary_documents": "POL-001;POL-002;TPL-001",
+    "supporting_documents": "AUD-001",
+    "difficulty_level": "easy",
+    "expected_findings": "MFA scope expanded to all workforce accounts; privileged access review frequency increased from semiannual to quarterly; vendor review moved to pre-onboarding plus annual; incident escalation tightened from 72h to 24h; log retention increased from 180 days to 12 months; backup encryption/recovery testing added.",
+    "expected_risks": "Transition backlog for privileged accounts and critical vendors; temporary noncompliance during 30-day transition window.",
+    "expected_missing_clauses": "n/a",
+    "expected_action_items": "Managers must revalidate privileged accounts within 30 days; critical vendor records lacking evidence must be remediated within 30 days.",
+    "expected_supporting_sources": "POL-001;POL-002",
+    "expected_review_flags": "Revision history not explicit enough; policy v2 effective date should align with downstream audit storyline."
+  },
+  {
+    "storyline_id": "SB-02",
+    "name": "Contract Gap Detection",
+    "goal": "Compare approved baseline terms and templates against a weaker counterparty draft.",
+    "primary_documents": "CTR-001;CTR-002;TPL-002",
+    "supporting_documents": "CTR-004;POL-004;MIN-001",
+    "difficulty_level": "medium",
+    "expected_findings": "Vendor draft weakens incident notice, removes audit right, weakens subprocessor controls, omits deletion deadline, broadens de-identified data use, and narrows liability recovery.",
+    "expected_risks": "Delayed incident response; reduced oversight rights; uncontrolled subprocessor changes; offboarding ambiguity; provider data-use expansion; insufficient liability protection.",
+    "expected_missing_clauses": "<=48h incident notice; audit support/right; subprocessor notice and objection path; deletion/return timeline; liability carve-outs; strong DPA precedence language in the draft itself.",
+    "expected_action_items": "Legal return redlines aligned to baseline; vendor management obtain updated subprocessor list/control summary.",
+    "expected_supporting_sources": "CTR-001;CTR-002;CTR-004;POL-004;TPL-002;MIN-001",
+    "expected_review_flags": "Model-improvement language could be missed by shallow clause matching; draft uses softer phrasing such as commercially reasonable efforts."
+  },
+  {
+    "storyline_id": "SB-03",
+    "name": "Compliance Review",
+    "goal": "Test whether contract, policy, and evidence align under an audit checklist.",
+    "primary_documents": "AUD-001;CTR-002;CTR-004",
+    "supporting_documents": "POL-002;POL-004;EVD-001",
+    "difficulty_level": "medium",
+    "expected_findings": "Failed evidence for two vendor admin accounts; incident-notice misalignment; partial subprocessor workflow; partial deletion requirement; control design only partially adequate.",
+    "expected_risks": "Privileged access not fully evidenced; delayed incident notification; subprocessor change risk; weak offboarding/deletion controls.",
+    "expected_missing_clauses": "Deletion timeline in vendor draft; explicit audit-right support; robust subprocessor change workflow.",
+    "expected_action_items": "Reconstruct Q3 evidence; update evidence checklist; reject weak contract language; confirm recurring control owner/workflow in GRC.",
+    "expected_supporting_sources": "AUD-001;CTR-002;CTR-004;POL-002;POL-004;EVD-001",
+    "expected_review_flags": "Audit period/date alignment needs annotation to avoid confusing evaluators."
+  },
+  {
+    "storyline_id": "SB-04",
+    "name": "Evidence Chaining and NCR Escalation",
+    "goal": "Follow a control failure from audit observation to NCR to evidence gap to committee governance.",
+    "primary_documents": "AUD-001;AUD-002;EVD-001;MIN-001",
+    "supporting_documents": "POL-003;TPL-003",
+    "difficulty_level": "hard",
+    "expected_findings": "AUD-001 identifies access-evidence failure; AUD-002 formalizes NCR-2025-017; EVD-001 shows EV-002 missing and EV-005 in progress; MIN-001 sets approval gate and remediation owners.",
+    "expected_risks": "Closure blocked by missing owner approval evidence; provenance weakness if artifacts are not archived correctly; governance escalation may delay onboarding/expansion.",
+    "expected_missing_clauses": "n/a",
+    "expected_action_items": "Provide corrected evidence pack; return contract redlines; obtain updated subprocessor list; decide whether onboarding milestone slips.",
+    "expected_supporting_sources": "AUD-001;AUD-002;EVD-001;MIN-001;POL-003;TPL-003",
+    "expected_review_flags": "Current corpus lacks the underlying attachment for EV-002, making evidence completeness intentionally unresolved."
+  },
+  {
+    "storyline_id": "SB-05",
+    "name": "Remediation Workflow and Closure Readiness",
+    "goal": "Decide whether the issue is ready to close or whether open findings still block approval.",
+    "primary_documents": "AUD-002;EVD-001;MIN-001",
+    "supporting_documents": "CTR-002;CTR-001;TPL-003",
+    "difficulty_level": "medium",
+    "expected_findings": "Issue should remain open until corrected evidence is archived, contract language is aligned, and committee accepts closure criteria.",
+    "expected_risks": "Premature closure; missing evidence sign-off; unresolved contract gaps despite operational remediation.",
+    "expected_missing_clauses": "Same contract gaps as SB-02 if CTR-002 remains unresolved.",
+    "expected_action_items": "Track open owners and due dates; verify evidence completeness; confirm governance acceptance before close-out.",
+    "expected_supporting_sources": "AUD-002;EVD-001;MIN-001;CTR-002;CTR-001;TPL-003",
+    "expected_review_flags": "No explicit closure memo exists yet; good candidate for a future stretch document."
+  }
+]

@@ -1,0 +1,208 @@
+{
+  "base_corpus": "data/corpus_revisado/option_b_synthetic_premium",
+  "derived_corpus": "data/corpus_revisado/frontend_demo_grounded_v1",
+  "flows": [
+    {
+      "workflow": "Document Review",
+      "coverage": "full",
+      "documents": [
+        {
+          "mock_ref": "documents:d1",
+          "path": "contracts/Master Service Agreement v4.2.pdf",
+          "sections": [
+            "Commercial Schedule",
+            "Clause 7.3",
+            "Clause 7.5",
+            "Clause 7.8",
+            "Clause 8.2"
+          ]
+        },
+        {
+          "mock_ref": "documents:d2",
+          "path": "contracts/Data Processing Addendum 2024.pdf",
+          "sections": [
+            "Clause 5.2",
+            "Clause 5.4",
+            "Appendix C status"
+          ]
+        },
+        {
+          "mock_ref": "documents:d4",
+          "path": "contracts/Cloud Infrastructure SLA.pdf",
+          "sections": [
+            "Metric table",
+            "Clause 4.2"
+          ]
+        },
+        {
+          "mock_ref": "documents:d3",
+          "path": "policies/Information Security Policy v3.1.pdf",
+          "sections": [
+            "REQ-IR-07"
+          ]
+        }
+      ],
+      "findings": {
+        "f1": "CTR-010 Clause 7.3 unlimited liability",
+        "f2": "CTR-013 Clauses 5.2 and 5.4 plus GOV-001 GDPR-ART-44 / 46 gaps",
+        "f3": "CTR-012 availability table (99.5%)",
+        "f4": "CTR-010 Clause 8.2 90-day auto-renewal notice",
+        "f5": "POL-031 REQ-IR-07 reasonable-efforts incident timing"
+      }
+    },
+    {
+      "workflow": "Policy / Contract Comparison",
+      "coverage": "full",
+      "documents": [
+        {
+          "path": "contracts/Master Service Agreement v4.2.pdf",
+          "supports": [
+            "cd1",
+            "cd3",
+            "cd5"
+          ]
+        },
+        {
+          "path": "contracts/MSA Negotiation Baseline - Approved Position.pdf",
+          "supports": [
+            "cd1",
+            "cd2",
+            "cd3",
+            "cd5"
+          ]
+        },
+        {
+          "path": "contracts/Cloud Infrastructure SLA.pdf",
+          "supports": [
+            "cd4",
+            "chat:c4"
+          ]
+        },
+        {
+          "path": "contracts/Data Processing Addendum 2024.pdf",
+          "supports": [
+            "cd2"
+          ]
+        },
+        {
+          "path": "legal/Legal Redline Summary - MSA v4.2.pdf",
+          "supports": [
+            "cd1",
+            "cd3",
+            "cd5",
+            "hard-case partial fixes"
+          ]
+        },
+        {
+          "path": "policies/Information Security Policy v3.1.pdf",
+          "supports": [
+            "policy version baseline"
+          ]
+        },
+        {
+          "path": "policies/Information Security Policy v3.2.pdf",
+          "supports": [
+            "policy version comparison"
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "Action Plan / Evidence Review",
+      "coverage": "full",
+      "documents": [
+        "audit/Internal Audit Checklist - Vendor Controls.pdf",
+        "audit/Nonconformance Report - Vendor Access Review.pdf",
+        "audit/Access Review Evidence Log.pdf",
+        "evidence/Privileged Account Approval Email.pdf",
+        "audit/Governance Committee Minutes and Action Items.pdf",
+        "risk/Vendor Risk Assessment Template.pdf",
+        "risk/Temporary Risk Acceptance Request - SLA Uptime.pdf",
+        "audit/Remediation Closure Note - Vendor Access Review.pdf"
+      ],
+      "action_items": {
+        "ai1": "MIN-101 action register + AUD-102 corrective actions",
+        "ai2": "MIN-101 action register + GOV-001 checklist gap",
+        "ai3": "MIN-101 action register + CTR-012 comparison pressure",
+        "ai4": "MIN-101 action register + POL-031 REQ-IR-07",
+        "ai5": "MIN-101 action register + CTR-010 Clause 8.2",
+        "ai6": "RSK-001 blocked SOC2 review row"
+      }
+    },
+    {
+      "workflow": "Candidate Review",
+      "coverage": "substantive_full_anonymized_employers",
+      "documents": [
+        "hiring/Sarah Chen - Senior ML Engineer CV.pdf",
+        "hiring/Senior ML Engineer Role Brief.pdf",
+        "hiring/Hiring Scorecard - Sarah Chen.pdf",
+        "hiring/Interview Feedback Memo - Sarah Chen.pdf"
+      ],
+      "notes": "The frontend mock uses real-company labels in example experience bullets. The derived corpus preserves the same capability signals with fictional employers and institutions for safety and realism."
+    },
+    {
+      "workflow": "Chat / RAG Grounding",
+      "coverage": "full",
+      "documents": [
+        "contracts/Master Service Agreement v4.2.pdf",
+        "contracts/Cloud Infrastructure SLA.pdf",
+        "contracts/Data Processing Addendum 2024.pdf",
+        "policies/Information Security Policy v3.1.pdf",
+        "policies/Data Retention Policy.pdf",
+        "audit/Internal Audit Checklist - Vendor Controls.pdf"
+      ]
+    },
+    {
+      "workflow": "Workflow Inspector / Structured Extraction",
+      "coverage": "full",
+      "fields": [
+        "Contracting Party",
+        "Effective Date",
+        "Annual Value",
+        "Term Duration",
+        "Governing Law",
+        "Liability Cap",
+        "Notice Period",
+        "Policy Version",
+        "Approver",
+        "Approval Date",
+        "Requirement IDs",
+        "Clause IDs"
+      ],
+      "primary_docs": [
+        "contracts/Master Service Agreement v4.2.pdf",
+        "contracts/Data Processing Addendum 2024.pdf",
+        "policies/Information Security Policy v3.1.pdf",
+        "policies/Information Security Policy v3.2.pdf"
+      ]
+    },
+    {
+      "workflow": "Document Library Realism",
+      "coverage": "full",
+      "special_formats": {
+        "email_pdf": "evidence/Privileged Account Approval Email.pdf",
+        "spreadsheet_export_pdf": "risk/Vendor Risk Assessment Template.pdf",
+        "ocr_hard_pdf": "technical/Technical Architecture Brief.pdf",
+        "board_memo": "governance/Q1 2024 Board Memo.pdf",
+        "handbook": "operations/Employee Handbook 2024.pdf"
+      }
+    }
+  ],
+  "ui_only_or_operational_fields": [
+    "documents.status",
+    "documents.size",
+    "documents.chunks",
+    "documents.chars",
+    "documents.loaderStrategy",
+    "documents.indexedAt",
+    "workflowRuns.duration",
+    "workflowRuns.status",
+    "artifacts.*",
+    "systemStats.*",
+    "workflow inspector runtime metrics"
+  ],
+  "not_fully_1_to_1": [
+    "Candidate employer and university names were anonymized / fictionalized to avoid inventing employment history at real organizations.",
+    "Some comparison diffs are grounded across a bundle of related documents (MSA draft + approved baseline + legal redline summary + DPA + SLA), not a single document pair only."
+  ]
+}

@@ -1,0 +1,527 @@
+{
+  "generated_at": "2026-03-30T18:39:46.983286",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "cv_analysis",
+      "suite_name": "structured_real_document_eval",
+      "mode": "indexed_document",
+      "status": "WARN",
+      "score": 13,
+      "max_score": 28,
+      "reasons": [
+        "gold:skill coverage too low: 0",
+        "gold:education coverage too low: 0",
+        "gold:experience_years below expected minimum"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "2d12ecdea955007b22a13e1edcfdcf113a058f7388f835c66c84e4e09ccc45f6",
+        "name": "Sample-Resume-2-1.pdf",
+        "file_type": "pdf",
+        "chunk_count": 3
+      },
+      "gold_fixture_path": "baseline://external_files/440ce3661b67510a_15_cv_sample_resume_2_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "WARN",
+        "score": 13,
+        "max_score": 28,
+        "reasons": [
+          "skill coverage too low: 0",
+          "education coverage too low: 0",
+          "experience_years below expected minimum"
+        ],
+        "thresholds": {
+          "pass_ratio": 0.64,
+          "warn_ratio": 0.44,
+          "notes": "CV analysis tolera pequenas variações de wording, mas exige boa cobertura de identidade, educação e experiência."
+        },
+        "metrics": {
+          "personal_hits": 3,
+          "profile_hit": 1,
+          "language_hits": 0,
+          "skill_hits": 0,
+          "interest_hits": 4,
+          "education_hits": 0,
+          "experience_hits": 5,
+          "experience_years_hit": 0
+        }
+      },
+      "thresholds": {
+        "pass_ratio": 0.64,
+        "warn_ratio": 0.44,
+        "notes": "CV analysis tolera pequenas variações de wording, mas exige boa cobertura de identidade, educação e experiência."
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "cv_analysis",
+        "schema_version": "1.0",
+        "personal_info": {
+          "full_name": "Nathaly Ortiz",
+          "email": "nathalyortiz15@gmail.com",
+          "phone": "(562) 449-0312",
+          "location": "Claremont, CA",
+          "links": []
+        },
+        "sections": [
+          {
+            "section_type": "personal_info",
+            "title": "Personal Info",
+            "content": [
+              {
+                "text": "Nathaly Ortiz",
+                "details": {}
+              },
+              {
+                "text": "nathalyortiz15@gmail.com",
+                "details": {}
+              },
+              {
+                "text": "Claremont, CA",
+                "details": {}
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "skills",
+            "title": "Skills",
+            "content": [
+              {
+                "text": "CAMPUS INVOLVEMENT"
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "education",
+            "title": "Education",
+            "content": [
+              {
+                "text": "B.A."
+              },
+              {
+                "text": "Senior thesis proposal: “The New Borderlands: A modern reading of Gloria Anzaldúa’s influence on Latinx activism in a"
+              },
+              {
+                "text": "post-Trump America”"
+              },
+              {
+                "text": "WORK EXPERIENCE"
+              },
+              {
+                "text": "Hamlin"
+              },
+              {
+                "text": "Student Representative"
+              },
+              {
+                "text": " Assisted in planning and organizing rallies"
+              },
+              {
+                "text": " Drafted pleadings"
+              },
+              {
+                "text": "Camp Acadia Cutler"
+              },
+              {
+                "text": "Counselor (Summer 2022)"
+              },
+              {
+                "text": " Act as key member of Officer Board"
+              },
+              {
+                "text": " Worked with students with learning disabilities"
+              },
+              {
+                "text": "problem-solving and teamwork skills."
+              },
+              {
+                "text": " Earned CPR certification and completed behavioral health training course."
+              },
+              {
+                "text": " Traveled door to door to represent Mayor Bass’s campaign messaging and promote her candidacy."
+              },
+              {
+                "text": "Campaign Intern"
+              },
+              {
+                "text": "Jorge D. Mendoza Charter Academy Los Angeles"
+              },
+              {
+                "text": "Debate Coach (June 2020 – Present)"
+              },
+              {
+                "text": "CAMPUS INVOLVEMENT"
+              },
+              {
+                "text": "Senior Class Co-President (September 2023 – Present)"
+              },
+              {
+                "text": " Plan and execute day- and weekend-long trips"
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "experience",
+            "title": "Experience",
+            "content": [
+              {
+                "text": "Litigation Paralegal | Hamlin, Hamlin & McGill | Albuquerque, NM",
+                "details": {
+                  "title": "Litigation Paralegal",
+                  "organization": "Hamlin, Hamlin & McGill",
+                  "location": "Albuquerque, NM",
+                  "date_range": null,
+                  "bullets": [
+                    "Conducted pre-claim investigation, legal research, and initial case assessments.",
+                    "Drafted pleadings, motions, and appellate documents.",
+                    "Performed variety of administrative duties, such as organizing case files and calendar hearings."
+                  ]
+                }
+              },
+              {
+                "text": "Counselor | Camp Acadia Cutler | Cutler, ME",
+                "details": {
+                  "title": "Counselor",
+                  "organization": "Camp Acadia Cutler",
+                  "location": "Cutler, ME",
+                  "date_range": null,
+                  "bullets": [
+                    "Led excursions and daily programming for middle schoolers at summer camp in coastal Maine.",
+                    "Worked with students with learning disabilities, exhibiting flexibility and compassion while helping them build problem-solving and teamwork skills.",
+                    "Earned CPR certification and completed behavioral health training course."
+                  ]
+                }
+              },
+              {
+                "text": "Campaign Intern | Karen Bass Mayoral Campaign | Los Angeles, CA",
+                "details": {
+                  "title": "Campaign Intern",
+                  "organization": "Karen Bass Mayoral Campaign",
+                  "location": "Los Angeles, CA",
+                  "date_range": null,
+                  "bullets": [
+                    "Researched voter values and tailored talking points to campaign events.",
+                    "Traveled door to door to represent Mayor Bass’s campaign messaging and promote her candidacy.",
+                    "Assisted in planning and organizing rallies, press releases, and other public-facing, campaign-related events."
+                  ]
+                }
+              },
+              {
+                "text": "Debate Coach | Jorge D. Mendoza Charter Academy | Los Angeles, CA",
+                "details": {
+                  "title": "Debate Coach",
+                  "organization": "Jorge D. Mendoza Charter Academy",
+                  "location": "Los Angeles, CA",
+                  "date_range": null,
+                  "bullets": [
+                    "Coached and mentored team of fifth and sixth graders at a Los Angeles high school.",
+                    "Created online programming for team to continue to build skills and camaraderie during Covid-19 pandemic.",
+                    "Won multiple tournaments in the Golden West Debate League."
+                  ]
+                }
+              },
+              {
+                "text": "Senior Class Co-President | Scripps Associated Students (SAS) | Claremont, CA",
+                "details": {
+                  "title": "Senior Class Co-President",
+                  "organization": "Scripps Associated Students (SAS)",
+                  "location": "Claremont, CA",
+                  "date_range": null,
+                  "bullets": [
+                    "Act as key member of Officer Board, representing class and student body interests to administration and trustees.",
+                    "Work to improve Scripps policies and procedures and ensure that SAS is representing the best interests of students.",
+                    "Advocate for peers and empower student body to live confidently, courageously, and collaboratively."
+                  ]
+                }
+              },
+              {
+                "text": "Student Representative | Scripps Associated Students (SAS) | Claremont, CA | Student Representative",
+                "details": {
+                  "title": "Student Representative",
+                  "organization": "Scripps Associated Students (SAS)",
+                  "location": "Claremont, CA",
+                  "date_range": "Student Representative",
+                  "bullets": [
+                    "Act as key member of Officer Board, representing class and student body interests to administration and trustees.",
+                    "Work to improve Scripps policies and procedures and ensure that SAS is representing the best interests of students."
+                  ]
+                }
+              },
+              {
+                "text": "Co-Manager | Outdoor Wilderness Leaders (OWL) | Claremont, CA",
+                "details": {
+                  "title": "Co-Manager",
+                  "organization": "Outdoor Wilderness Leaders (OWL)",
+                  "location": "Claremont, CA",
+                  "date_range": null,
+                  "bullets": [
+                    "Recruit Scripps students to join trips involving hiking, camping, back packing, and skiing.",
+                    "Provide supportive and safe environment for women to explore the outdoors and meet friends.",
+                    "Plan and execute day- and weekend-long trips, including logistics, renting equipment, and budget management."
+                  ]
+                }
+              }
+            ],
+            "confidence": 0.8
+          }
+        ],
+        "skills": [
+          "CAMPUS INVOLVEMENT"
+        ],
+        "languages": [],
+        "education_entries": [
+          {
+            "degree": "B.A.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "B.A."
+          },
+          {
+            "degree": "Senior thesis proposal: “The New Borderlands: A modern reading of Gloria Anzaldúa’s influence on Latinx activism in a",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Senior thesis proposal: “The New Borderlands: A modern reading of Gloria Anzaldúa’s influence on Latinx activism in a"
+          },
+          {
+            "degree": "post-Trump America”",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "post-Trump America”"
+          },
+          {
+            "degree": "WORK EXPERIENCE",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "WORK EXPERIENCE"
+          },
+          {
+            "degree": "Hamlin",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Hamlin"
+          },
+          {
+            "degree": "Student Representative",
+            "institution": null,
+            "location": null,
+            "date_range": "September 2020 – May 2023",
+            "description": "Student Representative"
+          },
+          {
+            "degree": " Assisted in planning and organizing rallies",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": " Assisted in planning and organizing rallies"
+          },
+          {
+            "degree": " Drafted pleadings",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": " Drafted pleadings"
+          },
+          {
+            "degree": "Camp Acadia Cutler",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Camp Acadia Cutler"
+          },
+          {
+            "degree": "Counselor (Summer 2022)",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Counselor (Summer 2022)"
+          },
+          {
+            "degree": " Act as key member of Officer Board",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": " Act as key member of Officer Board"
+          },
+          {
+            "degree": " Worked with students with learning disabilities",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": " Worked with students with learning disabilities"
+          },
+          {
+            "degree": "problem-solving and teamwork skills.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "problem-solving and teamwork skills."
+          },
+          {
+            "degree": " Earned CPR certification and completed behavioral health training course.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": " Earned CPR certification and completed behavioral health training course."
+          },
+          {
+            "degree": " Traveled door to door to represent Mayor Bass’s campaign messaging and promote her candidacy.",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": " Traveled door to door to represent Mayor Bass’s campaign messaging and promote her candidacy."
+          },
+          {
+            "degree": "Campaign Intern",
+            "institution": null,
+            "location": null,
+            "date_range": "September 2021 – December 2022",
+            "description": "Campaign Intern"
+          },
+          {
+            "degree": "Jorge D. Mendoza Charter Academy Los Angeles",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Jorge D. Mendoza Charter Academy Los Angeles"
+          },
+          {
+            "degree": "Debate Coach (June 2020 – Present)",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Debate Coach (June 2020 – Present)"
+          },
+          {
+            "degree": "CAMPUS INVOLVEMENT",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "CAMPUS INVOLVEMENT"
+          },
+          {
+            "degree": "Senior Class Co-President (September 2023 – Present)",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": "Senior Class Co-President (September 2023 – Present)"
+          },
+          {
+            "degree": " Plan and execute day- and weekend-long trips",
+            "institution": null,
+            "location": null,
+            "date_range": null,
+            "description": " Plan and execute day- and weekend-long trips"
+          }
+        ],
+        "experience_entries": [
+          {
+            "title": "Litigation Paralegal",
+            "organization": "Hamlin, Hamlin & McGill",
+            "location": "Albuquerque, NM",
+            "date_range": null,
+            "bullets": [
+              "Conducted pre-claim investigation, legal research, and initial case assessments.",
+              "Drafted pleadings, motions, and appellate documents.",
+              "Performed variety of administrative duties, such as organizing case files and calendar hearings."
+            ],
+            "description": "Litigation Paralegal | Hamlin, Hamlin & McGill | Albuquerque, NM"
+          },
+          {
+            "title": "Counselor",
+            "organization": "Camp Acadia Cutler",
+            "location": "Cutler, ME",
+            "date_range": null,
+            "bullets": [
+              "Led excursions and daily programming for middle schoolers at summer camp in coastal Maine.",
+              "Worked with students with learning disabilities, exhibiting flexibility and compassion while helping them build problem-solving and teamwork skills.",
+              "Earned CPR certification and completed behavioral health training course."
+            ],
+            "description": "Counselor | Camp Acadia Cutler | Cutler, ME"
+          },
+          {
+            "title": "Campaign Intern",
+            "organization": "Karen Bass Mayoral Campaign",
+            "location": "Los Angeles, CA",
+            "date_range": null,
+            "bullets": [
+              "Researched voter values and tailored talking points to campaign events.",
+              "Traveled door to door to represent Mayor Bass’s campaign messaging and promote her candidacy.",
+              "Assisted in planning and organizing rallies, press releases, and other public-facing, campaign-related events."
+            ],
+            "description": "Campaign Intern | Karen Bass Mayoral Campaign | Los Angeles, CA"
+          },
+          {
+            "title": "Debate Coach",
+            "organization": "Jorge D. Mendoza Charter Academy",
+            "location": "Los Angeles, CA",
+            "date_range": null,
+            "bullets": [
+              "Coached and mentored team of fifth and sixth graders at a Los Angeles high school.",
+              "Created online programming for team to continue to build skills and camaraderie during Covid-19 pandemic.",
+              "Won multiple tournaments in the Golden West Debate League."
+            ],
+            "description": "Debate Coach | Jorge D. Mendoza Charter Academy | Los Angeles, CA"
+          },
+          {
+            "title": "Senior Class Co-President",
+            "organization": "Scripps Associated Students (SAS)",
+            "location": "Claremont, CA",
+            "date_range": null,
+            "bullets": [
+              "Act as key member of Officer Board, representing class and student body interests to administration and trustees.",
+              "Work to improve Scripps policies and procedures and ensure that SAS is representing the best interests of students.",
+              "Advocate for peers and empower student body to live confidently, courageously, and collaboratively."
+            ],
+            "description": "Senior Class Co-President | Scripps Associated Students (SAS) | Claremont, CA"
+          },
+          {
+            "title": "Student Representative",
+            "organization": "Scripps Associated Students (SAS)",
+            "location": "Claremont, CA",
+            "date_range": "Student Representative",
+            "bullets": [
+              "Act as key member of Officer Board, representing class and student body interests to administration and trustees.",
+              "Work to improve Scripps policies and procedures and ensure that SAS is representing the best interests of students."
+            ],
+            "description": "Student Representative | Scripps Associated Students (SAS) | Claremont, CA | Student Representative"
+          },
+          {
+            "title": "Co-Manager",
+            "organization": "Outdoor Wilderness Leaders (OWL)",
+            "location": "Claremont, CA",
+            "date_range": null,
+            "bullets": [
+              "Recruit Scripps students to join trips involving hiking, camping, back packing, and skiing.",
+              "Provide supportive and safe environment for women to explore the outdoors and meet friends.",
+              "Plan and execute day- and weekend-long trips, including logistics, renting equipment, and budget management."
+            ],
+            "description": "Co-Manager | Outdoor Wilderness Leaders (OWL) | Claremont, CA"
+          }
+        ],
+        "experience_years": 0.0,
+        "strengths": [],
+        "improvement_areas": [],
+        "projects": []
+      }
+    }
+  ]
+}

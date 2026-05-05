@@ -1,0 +1,169 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Candidate Review · Jane Doe",
+    "subtitle": "Executive hiring summary grounded in cv_analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Candidate Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Candidate Review · Jane Doe",
+      "subtitle": "Executive hiring summary grounded in cv_analysis",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Export kind: candidate_review_deck. Deck family: candidate_review. Sources: structured_result, cv_analysis."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "Jane Doe (São Paulo) apresenta 3.5 ano(s) de experiência estimada, 3 skill(s) mapeadas e 1 experiência(s) estruturada(s).",
+      "bullets": [
+        "Strong applied AI execution",
+        "Good product + engineering bridge",
+        "Python"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Resumo executivo consolidado a partir dos sinais grounded do produto."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "cards": [],
+      "metrics": [
+        {
+          "value": "3.5",
+          "label": "Experience years"
+        },
+        {
+          "value": "3",
+          "label": "Skills"
+        },
+        {
+          "value": "2",
+          "label": "Languages"
+        },
+        {
+          "value": "1",
+          "label": "Experience entries"
+        }
+      ],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "cards",
+      "title": "Strengths snapshot",
+      "bullets": [],
+      "cards": [
+        {
+          "title": "Strength 1",
+          "body": "Strong applied AI execution",
+          "footer": "Positive signal"
+        },
+        {
+          "title": "Strength 2",
+          "body": "Good product + engineering bridge",
+          "footer": "Positive signal"
+        },
+        {
+          "title": "Strength 3",
+          "body": "Python",
+          "footer": "Positive signal"
+        }
+      ],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Top candidate strengths."
+    },
+    {
+      "type": "table",
+      "title": "Experience highlights",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Role",
+        "Organization",
+        "Date",
+        "Evidence"
+      ],
+      "table_rows": [
+        [
+          "Applied AI Engineer",
+          "Acme",
+          "2022-2025",
+          "Built RAG pipelines | Shipped eval-driven AI features"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "two_column",
+      "title": "Gaps vs hiring thesis",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [
+        {
+          "title": "Gaps / risks",
+          "body": "Validate scale/production depth",
+          "bullets": []
+        },
+        {
+          "title": "Hiring thesis",
+          "body": "Advance to the next stage with focused validation of leadership, scope and business ownership.",
+          "bullets": [
+            "Agendar entrevista técnica focada em product thinking e delivery.",
+            "Validar senioridade, liderança e ownership em cenários reais."
+          ]
+        }
+      ],
+      "speaker_notes": "Candidate gaps versus hiring thesis."
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Agendar entrevista técnica focada em product thinking e delivery.",
+        "Validar senioridade, liderança e ownership em cenários reais.",
+        "Validate scale/production depth"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "document_review_deck",
+  "output_dir": "baseline://external/Users_danyellambert_ppt_creator_app_outputs_beautification_targeted_previews/deckexp_20260406_003428_83900a11",
+  "presentation_title": "document_review_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/30145f4ac5192d5e_document_review_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "document_review_deck-01.png",
+      "path": "baseline://external_files/9b03372c5e6b4ae2_document_review_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "document_review_deck-02.png",
+      "path": "baseline://external_files/d0caab701d6e6c6a_document_review_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "document_review_deck-03.png",
+      "path": "baseline://external_files/5243048f9542c39c_document_review_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "document_review_deck-04.png",
+      "path": "baseline://external_files/38a71951659992ac_document_review_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "document_review_deck-05.png",
+      "path": "baseline://external_files/df11bfb549f19de7_document_review_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "document_review_deck-06.png",
+      "path": "baseline://external_files/559ed4f380c3d7c9_document_review_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "document_review_deck-07.png",
+      "path": "baseline://external_files/0494be261f4d9b89_document_review_deck-07.png"
+    }
+  ]
+}

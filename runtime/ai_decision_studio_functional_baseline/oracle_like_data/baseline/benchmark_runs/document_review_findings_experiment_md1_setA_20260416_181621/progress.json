@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-04-16T18:16:21.977361",
+  "status": "running",
+  "documents": [
+    "data/corpus_revisado/option_a_public_corpus_v2/contracts_and_procurement/common_paper_sla.md"
+  ],
+  "configs": [
+    {
+      "key": "heuristic_baseline",
+      "label": "Heuristic baseline",
+      "base_model": "qwen2.5:7b",
+      "findings_model": null,
+      "prompt_style": null,
+      "synthesis_enabled": false
+    },
+    {
+      "key": "qwen2.5_7b_hybrid",
+      "label": "qwen2.5:7b hybrid",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "qwen2.5:7b",
+      "prompt_style": "hybrid",
+      "synthesis_enabled": true
+    },
+    {
+      "key": "nemotron_extractive",
+      "label": "nemotron-3-super:cloud extractive",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "extractive",
+      "synthesis_enabled": true
+    }
+  ],
+  "completed_runs": 0,
+  "total_runs": 3,
+  "runs": []
+}

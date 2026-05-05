@@ -1,0 +1,150 @@
+{
+  "generated_at": "2026-03-29T18:28:07.609969",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "summary",
+      "mode": "indexed_document",
+      "status": "FAIL",
+      "score": 6,
+      "max_score": 31,
+      "reasons": [
+        "gold:required fact coverage too low: 1",
+        "gold:key insight coverage too low: 0",
+        "gold:executive summary is too weak against expected report signals: 0"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e",
+        "name": "fy25-afr-final-tagged.pdf",
+        "file_type": "pdf",
+        "chunk_count": 208
+      },
+      "gold_fixture_path": "baseline://external_files/59b08f4e22a2b3b3_10_summary_fy25_afr_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "FAIL",
+        "score": 6,
+        "max_score": 31,
+        "reasons": [
+          "required fact coverage too low: 1",
+          "key insight coverage too low: 0",
+          "executive summary is too weak against expected report signals: 0"
+        ],
+        "metrics": {
+          "topic_hits": 4,
+          "fact_hits": 1,
+          "exec_signal_hits": 0,
+          "key_insight_hits": 0,
+          "number_hits": 1
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "FY 2025 Financial Highlights and Audit Status",
+            "key_points": [
+              "NASA received an unmodified 'clean' audit opinion for FY 2025, marking the 15th consecutive year without material weaknesses.",
+              "Financial statements are prepared in accordance with FASAB standards and OMB Circular A-136, reflecting complex interagency cost reimbursements and trust fund dependencies."
+            ],
+            "relevance_score": 0.95,
+            "supporting_evidence": [
+              "NASA announced its 2025 Astronaut Candidate Class on Sept. 22, 2025.",
+              "Under the leadership of the Office of the Chief Financial Officer, NASA has once again received an unmodified “clean” audit opinion on its 2025 financial statements for the 15th consecutive year, with no reported material weaknesses.",
+              "The National Aeronautics and Space Administration (NASA) is an independent agency established by Congress on October 1, 1958 by the National Aeronautics and Space Act of 1958.",
+              "These consolidated financial statements are prepared in accordance with FASAB standards in the format prescribed by the Office of Management and Budget (OMB) Circular A-136, Financial Reporting Requirements, Revised (July 2025)."
+            ]
+          },
+          {
+            "title": "Mission Performance and Program Progress",
+            "key_points": [
+              "Artemis II crewed lunar mission remains on schedule for no later than April 2026, with critical milestones such as full assembly of the Space Launch System rocket achieved.",
+              "Earth science data modernization efforts include migration of archives to the centralized Earthdata cloud platform, supporting climate, landslide, and agricultural monitoring applications.",
+              "Key mission successes include OSIRIS-REx asteroid sample return and Parker Solar Probe’s solar research, demonstrating capability in complex scientific objectives.",
+              "Technology demonstrations such as cryogenic fluid management, laser communications (DSOC), and enhanced use lease (EUL) revenue generation contributed $49.1M in lease revenue and supported future space exploration and commercial space sector growth."
+            ],
+            "relevance_score": 0.93,
+            "supporting_evidence": [
+              "NASA announced its 2025 Astronaut Candidate Class on Sept. 22, 2025.",
+              "In FY 2025, our Artemis campaign achieved critical milestones, including fully assembling the Space Launch System rocket, keeping Artemis II’s crewed lunar mission on schedule for no later than April 2026.",
+              "NASA took steps to consolidate and modernize Earth science data archives by migrating several data archives to the centralized Earthdata cloud platform.",
+              "Both the Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-Rex) and Parker Solar Probe missions completed mission success criteria.",
+              "Critical testing and demos with industry have begun for cryogenic fluid management technologies.",
+              "NASA recognized $49.1 million of annual lease revenue in FY 2025 associated with leases under SFFAS 54.",
+              "NASA has identified a limited number of leases where development by the tenant... NASA had 13 leases identified as a Public-Private Partnership under SFFAS 49, that also meet the criteria of a Lease under SFFAS 54."
+            ]
+          },
+          {
+            "title": "Enterprise Risk Management and Internal Controls",
+            "key_points": [
+              "NASA’s Enterprise Risk Management (ERM) framework, led by the ARMO and UNICORN, integrates risk-informed decision-making across mission directorates and centers, providing a unified view of strategic risks and compliance posture.",
+              "Internal controls were assessed as effective with no material weaknesses found, though a significant deficiency in financial reporting oversight related to accrual and budgetary entry practices was identified by auditors.",
+              "The agency is transitioning from SAP ECC to a modern ERP system to enhance analytics, integration, and data accuracy, aligning with broader IT and AI initiatives."
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "The ARMO works in concert with Mission Directorates, Centers, Technical Authorities and Offices to increase awareness, understanding, and consideration of risks to NASA's strategic goals and objectives as well as opportunities to support risk‑informed decision-making.",
+              "The NASA Unified Comprehensive Operational Risk Network (UNICORN), NASA's ERM framework, is the framework for the communication and exchange of risk information between NASA's functional organizations and the Agency leadership (see Figure 2).",
+              "Based on the results of this evaluation, NASA provides reasonable assurance that its system of internal control was operating effectively as of September 30, 2025.",
+              "No material weaknesses were found in the design or implementation of internal controls.",
+              "The SAP Enterprise Central Component (ECC) is NASA’s core financial system and functions as the central hub for the Agency’s business operations.",
+              "With SAP ECC reaching its end-of-life in December 2027, the Chief Information Officer is exploring options to modernize the current centralized core financial system.",
+              "Our objectives are to obtain reasonable assurance about whether the financial statements as a whole are free of material misstatement, whether due to fraud or error, and to issue an auditor’s report that includes our opinion.",
+              "NASA made the change in posting logic based on its interpretation that an estimate could not serve as the basis for recording a budgetary entry for the recognition of a delivered order; Authoritative budgetary accounting guidance does not support this interpretation."
+            ]
+          },
+          {
+            "title": "Technology Demonstrations and Innovation",
+            "key_points": [
+              "NASA advanced cryogenic fluid management, laser communications (DSOC), and other critical technologies through industry partnerships, enabling future deep space missions and commercial space sector growth.",
+              "Investments in these technologies support environmental monitoring, space exploration, and operational efficiency, with demonstrated successes in OSIRIS-REx and Parker Solar Probe missions."
+            ],
+            "relevance_score": 0.88,
+            "supporting_evidence": [
+              "NASA's Earth science data modernization enhances operational efficiency and supports practical applications like climate and agricultural monitoring.",
+              "Critical testing and demos with industry have begun for cryogenic fluid management technologies.",
+              "DSOC utilizes laser communications instead of traditional radio frequency without increasing mass, volume, or power requirements.",
+              "Both the Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-Rex) and Parker Solar Probe missions completed mission success criteria."
+            ]
+          },
+          {
+            "title": "Infrastructure Modernization and Asset Management",
+            "key_points": [
+              "NASA prioritizes mission-critical facilities, divesting low-demand assets, and implements the Agency Master Plan (AMP) to optimize infrastructure use.",
+              "Heritage assets are reported in physical units without depreciation, reflecting cultural value rather than financial cost.",
+              "Lease accounting shows $27M in lease liabilities and $5.4M annual expense, with $49.1M in lease revenue recognized from 13 SFFAS 54 leases."
+            ],
+            "relevance_score": 0.85,
+            "supporting_evidence": [
+              "NASA focuses investments on facilities with the highest demand and mission relevance, particularly those required for Moon to Mars and other human spaceflight objectives, while rapidly divesting assets with little or no mission demand.",
+              "Heritage assets are reported in physical units rather than assigned dollar values.",
+              "Total Liability $ 24 $ 3 $ 27; NASA recognized $5.4 million of annual lease expense in FY 2025",
+              "NASA has identified a limited number of leases where development by the tenant... NASA had 13 leases identified as a Public-Private Partnership under SFFAS 49, that also meet the criteria of a Lease under SFFAS 54."
+            ]
+          }
+        ],
+        "executive_summary": "NASA’s FY 2025 financial statements were audited with an unmodified opinion for the 15th consecutive year, reflecting strong internal controls and effective financial governance. The agency advanced key missions including Artemis II, OSIRIS-REx, and Parker Solar Probe, while modernizing Earth science data and developing critical technologies such as laser communications and cryogenic fluid management. Enterprise risk management and internal control frameworks ensured risk-informed decisions across programs, though a significant deficiency in accrual and budgetary entry practices was noted. Infrastructure modernization, lease revenue generation, and grant oversight further support NASA’s mission alignment and fiscal accountability.",
+        "key_insights": [
+          "NASA’s financial statements are reliable and audited without material weaknesses for the 15th straight year, underscoring robust financial governance.",
+          "Mission successes in Artemis, asteroid sampling, and solar research, along with technology demonstrations, advance both scientific knowledge and commercial space capabilities.",
+          "Enterprise risk management and internal control frameworks are effective, though corrective actions are underway to address a noted deficiency in budgetary entry practices."
+        ],
+        "reading_time_minutes": 3,
+        "completeness_score": 0.93
+      }
+    }
+  ]
+}

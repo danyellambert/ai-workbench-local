@@ -1,0 +1,122 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Master Service Agreement v4.2.pdf",
+  "file_type": "pdf",
+  "file_hash": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMaster Service Agreement v4.2\nCounterparty draft used by Meridian for legal review and workflow testing.\nDocument ID\nCTR-010\nOwner\nLegal / Procurement\nStatus\nCounterparty Draft — Under Review\nEffective Date\n2024-01-15\nCustomer\nMeridian Holdings Ltd.\nCounterparty\nNorthwind Cloud Systems LLC\nContract Value\nUSD 2,400,000 annually\nGoverning Law\nState of Delaware\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Parties, Scope, and Order of Precedence\nThis Master Service Agreement (the Agreement) is entered into by and between Meridian Holdings Ltd. (Customer) and\nNorthwind Cloud Systems LLC (Provider) for managed cloud retrieval, analytics acceleration, and knowledge-operations\nsupport services used by Meridian enterprise teams.\nThe Agreement governs production and pre-production services ordered under written service orders. Applicable service\nlevels are set out in the Cloud Infrastructure SLA, and personal-data obligations are addressed in the Data Processing\nAddendum 2024. In the event of inconsistency, the more specific document governs only for the subject matter it expressly\ncovers.\nCommercial Schedule\nField\nDraft Position\nInitial Term\n36 months starting 2024-01-15\nRenewal\nAutomatic 12-month renewals unless notice is delivered 90 days before the renewal date\nAnnual Contract Value\nUSD 2,400,000 excluding approved overages and taxes\nPrimary Services\nManaged retrieval cluster, secure API gateway, support coverage, analytics observability\nOrder of Precedence\nMSA → Service Order → Cloud Infrastructure SLA → Data Processing Addendum\n2. Security, Service, and Audit Support\nClause 2.4 — Reasonable Security Measures. Provider shall maintain administrative, technical, and physical safeguards\ndesigned to protect Customer Data against unauthorized access, loss, or misuse, using security measures consistent with\ngenerally accepted industry practice.\nClause 2.7 — Incident Cooperation. Provider shall use commercially reasonable efforts to investigate security events\naffecting the Services and shall keep Customer reasonably informed of material developments.\nClause 2.9 — Audit Materials. Provider may satisfy diligence requests by providing a current certification package,\nexecutive summary, or other summary materials selected by Provider. Customer shall not have an on-site or remote audit\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nright unless required by non-waivable law.\nReview cue: clauses 2.7 and 2.9 are intentionally softer than Meridian policy and baseline language. They\nare suitable targets for contract-gap extraction and recommendation workflows.\n3. Data Use and Intellectual Property\nClause 3.2 — Service Data. Provider may collect and use service telemetry, diagnostic output, and de-identified usage\ninformation to operate, secure, improve, and train Provider service features, provided that Provider does not intentionally\nidentify Customer personnel in such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements, derived schemas, prompt patterns, runbooks, or\nautomation artifacts developed jointly in connection with the Services shall be jointly owned by the parties, and each party\nmay use such derivatives without further consent or accounting to the other party.\n\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 3\n4. Liability and Indemnification\nClause 7.1 — Exclusion of Certain Damages. Neither party will be liable for lost profits, revenue, goodwill, or indirect,\nincidental, special, exemplary, or consequential damages, except to the extent such damages are awarded to a third party\nunder an indemnified claim.\nClause 7.3 — Unlimited Liability. Each party shall be liable to the other for all losses, damages, costs, and expenses\narising out of or related to this Agreement, and no monetary cap or aggregate limit shall apply unless expressly stated in the\napplicable service order.\nClause 7.5 — Indemnification. Provider shall defend and indemnify Customer from third-party claims alleging\nintellectual-property infringement or unauthorized disclosure of Customer Data caused by Provider. Customer shall defend\nand indemnify Provider for claims arising from Customer materials or configurations supplied by Customer. Neither party\nwill be responsible for consequential damages outside this section.\nClause 7.8 — Limitation Period. Any claim arising under or related to this Agreement must be brought within twelve (12)\nmonths after the event giving rise to the claim, regardless of any contrary statute of limitations.\nObserved Risk Signals\n●\nSection 7.3 creates uncapped financial exposure because it contains no liability ceiling for general commercial claims.\n●\nSection 7.5 does not clearly align remedies with the Data Processing Addendum or the supplier code of conduct.\n●\nSection 7.8 shortens the claim window to 12 months, which is tighter than Meridian’s approved 24-month fallback for\nstrategic vendors.\n5. Termination, Renewal, and General Terms\nClause 8.1 — Initial Term. The initial term is thirty-six (36) months unless terminated earlier in accordance with this\nAgreement.\nClause 8.2 — Automatic Renewal. Following the initial term, the Agreement renews automatically for successive\ntwelve-month periods unless either party delivers written notice of non-renewal at least ninety (90) days before the end of\nthe then-current term.\nClause 8.4 — Termination for Convenience. Neither party may terminate this Agreement for convenience during the\ninitial term.\nClause 9.6 — Governing Law. This Agreement is governed by the laws of the State of Delaware, without regard to\nconflicts-of-law principles.\nRevision History\nVersion\nDate\nOwner\nSummary\n4.0\n2023-11-27\nNorthwind Legal\nIntroduced shared-derivative language and revised renewal\nmechanics.\n4.1\n2023-12-19\nNorthwind Legal\nAdded 12-month claims limitation and narrowed audit support\nlanguage.\n4.2\n2024-01-12\nNorthwind Legal\nCurrent draft issued for Meridian review.\nReview Routing Hints\n●\nExtract: Contracting Party, Effective Date, Annual Value, Term Duration, Governing Law, Liability Cap, Notice Period.\n●\nFindings: unlimited liability, joint derivative IP, 90-day auto-renewal, short limitation period.\n●\nComparison anchors: liability cap, IP ownership, notice period, audit rights, data-use language.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 3,
+    "baseline_text_chars": 6853,
+    "final_text_chars": 6853,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2626,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 1055,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "table"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      },
+      {
+        "page_number": 3,
+        "text_chars": 3156,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 75,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 10281,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMaster Service Agreement v4.2\nCounterparty draft used by Meridian for legal review and workflow testing.\nDocument ID\nCTR-010\nOwner\nLegal / Procurement\nStatus\nCounterparty Draft — Under Review\nEffective Date\n2024-01-15\nCustomer\nMeridian Holdings Ltd.\nCounterparty\nNorthwind Cloud Systems LLC\nContract Value\nUSD 2,400,000 annually\nGoverning Law\nState of Delaware\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Parties, Scope, and Order of Precedence\nThis Master Service Agreement (the Agreement) is entered into by and between Meridian Holdings Ltd. (Customer) and\nNorthwind Cloud Systems LLC (Provider) for managed cloud retrieval, analytics acceleration, and knowledge-operations\nsupport services used by Meridian enterprise teams.\nThe Agreement governs production and pre-production services ordered under written service orders. Applicable service\nlevels are set out in the Cloud Infrastructure SLA, and personal-data obligations are addressed in the Data Processing\nAddendum 2024. In the event of inconsistency, the more specific document governs only for the subject matter it expressly\ncovers.\nCommercial Schedule\nField\nDraft Position\nInitial Term\n36 months starting 2024-01-15\nRenewal\nAutomatic 12-month renewals unless notice is delivered 90 days before the renewal date\nAnnual Contract Value\nUSD 2,400,000 excluding approved overages and taxes\nPrimary Services\nManaged retrieval cluster, secure API gateway, support coverage, analytics observability\nOrder of Precedence\nMSA → Service Order → Cloud Infrastructure SLA → Data Processing Addendum\n2. Security, Service, and Audit Support\nClause 2.4 — Reasonable Security Measures. Provider shall maintain administrative, technical, and physical safeguards\ndesigned to protect Customer Data against unauthorized access, loss, or misuse, using security measures consistent with\ngenerally accepted industry practice.\nClause 2.7 — Incident Cooperation. Provider shall use commercially reasonable efforts to investigate security events\naffecting the Services and shall keep Customer reasonably informed of material developments.\nClause 2.9 — Audit Materials. Provider may satisfy diligence requests by providing a current certification package,\nexecutive summary, or other summary materials selected by Provider. Customer shall not have an on-site or remote audit\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nright unless required by non-waivable law.\nReview cue: clauses 2.7 and 2.9 are intentionally softer than Meridian policy and baseline language. They\nare suitable targets for contract-gap extraction and recommendation workflows.\n3. Data Use and Intellectual Property\nClause 3.2 — Service Data. Provider may collect and use service telemetry, diagnostic output, and de-identified usage\ninformation to operate, secure, improve, and train Provider service features, provided that Provider does not intentionally\nidentify Customer personnel in such data.\nClause 3.4 — Derivatives and Improvements. Any model refinements, derived schemas, prompt patterns, runbooks, or\nautomation artifacts developed jointly in connection with the Services shall be jointly owned by the parties, and each party\nmay use such derivatives without further consent or accounting to the other party.\n\n[Page 3]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-010  Master Service Agreement v4.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 3\n4. Liability and Indemnification\nClause 7.1 — Exclusion of Certain Damages. Neither party will be liable for lost profits, revenue, goodwill, or indirect,\nincidental, special, exemplary, or consequential damages, except to the extent such damages are awarded to a third party\nunder an indemnified claim.\nClause 7.3 — Unlimited Liability. Each party shall be liable to the other for all losses, damages, costs, and expenses\narising out of or related to this Agreement, and no monetary cap or aggregate limit shall apply unless expressly stated in the\napplicable service order.\nClause 7.5 — Indemnification. Provider shall defend and indemnify Customer from third-party claims alleging\nintellectual-property infringement or unauthorized disclosure of Customer Data caused by Provider. Customer shall defend\nand indemnify Provider for claims arising from Customer materials or configurations supplied by Customer. Neither party\nwill be responsible for consequential damages outside this section.\nClause 7.8 — Limitation Period. Any claim arising under or related to this Agreement must be brought within twelve (12)\nmonths after the event giving rise to the claim, regardless of any contrary statute of limitations.\nObserved Risk Signals\n●\nSection 7.3 creates uncapped financial exposure because it contains no liability ceiling for general commercial claims.\n●\nSection 7.5 does not clearly align remedies with the Data Processing Addendum or the supplier code of conduct.\n●\nSection 7.8 shortens the claim window to 12 months, which is tighter than Meridian’s approved 24-month fallback for\nstrategic vendors.\n5. Termination, Renewal, and General Terms\nClause 8.1 — Initial Term. The initial term is thirty-six (36) months unless terminated earlier in accordance with this\nAgreement.\nClause 8.2 — Automatic Renewal. Following the initial term, the Agreement renews automatically for successive\ntwelve-month periods unless either party delivers written notice of non-renewal at least ninety (90) days before the end of\nthe then-current term.\nClause 8.4 — Termination for Convenience. Neither party may terminate this Agreement for convenience during the\ninitial term.\nClause 9.6 — Governing Law. This Agreement is governed by the laws of the State of Delaware, without regard to\nconflicts-of-law principles.\nRevision History\nVersion\nDate\nOwner\nSummary\n4.0\n2023-11-27\nNorthwind Legal\nIntroduced shared-derivative language and revised renewal\nmechanics.\n4.1\n2023-12-19\nNorthwind Legal\nAdded 12-month claims limitation and narrowed audit support\nlanguage.\n4.2\n2024-01-12\nNorthwind Legal\nCurrent draft issued for Meridian review.\nReview Routing Hints\n●\nExtract: Contracting Party, Effective Date, Annual Value, Term Duration, Governing Law, Liability Cap, Notice Period.\n●\nFindings: unlimited liability, joint derivative IP, 90-day auto-renewal, short limitation period.\n●\nComparison anchors: liability cap, IP ownership, notice period, audit rights, data-use language.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic MSA is text-first; Docling/text extraction is sufficient.",
+      "page_count": 3
+    },
+    "source_type": "nextcloud",
+    "relative_path": "contracts/Master Service Agreement v4.2.pdf",
+    "nextcloud_relative_path": "contracts/Master Service Agreement v4.2.pdf",
+    "source_relative_path": "contracts/Master Service Agreement v4.2.pdf",
+    "filename": "Master Service Agreement v4.2.pdf",
+    "title": "Master Service Agreement v4.2",
+    "category": "contracts",
+    "preindex": {
+      "relative_path": "contracts/Master Service Agreement v4.2.pdf",
+      "filename": "Master Service Agreement v4.2.pdf",
+      "title": "Master Service Agreement v4.2",
+      "category": "contracts",
+      "document_id": "contracts/Master Service Agreement v4.2.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:48:54"
+}

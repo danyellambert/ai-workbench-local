@@ -1,0 +1,387 @@
+{
+  "mode": "review",
+  "presentation_title": "AI Workbench Local — Candidate Review · Sarah Chen",
+  "theme": "executive_premium_minimal",
+  "slide_count": 8,
+  "slides": [
+    {
+      "slide_number": 1,
+      "slide_type": "title",
+      "title": "AI Workbench Local — Candidate Review · Sarah Chen",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 1.8,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 2,
+      "slide_type": "summary",
+      "title": "Executive summary",
+      "score": 65,
+      "status": "attention",
+      "content_weight": 3.2,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 2,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 1.45,
+      "risk_level": "high",
+      "likely_overflow_regions": [
+        "body"
+      ],
+      "likely_collision_regions": [
+        "summary:narrative",
+        "summary:split_imbalance"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "summary:narrative",
+          "density": 5.552,
+          "threshold": 4.2,
+          "severity": "high",
+          "message": "summary narrative region is dense enough to risk crowding"
+        },
+        {
+          "region": "summary:split_imbalance",
+          "density": 0.996,
+          "threshold": 0.9,
+          "severity": "medium",
+          "message": "summary narrative and takeaway panel are imbalanced enough to compete for space"
+        }
+      ],
+      "severity_counts": {
+        "high": 2,
+        "medium": 1,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "high",
+          "message": "body text is dense for a single executive slide"
+        },
+        {
+          "severity": "high",
+          "message": "summary narrative region is dense enough to risk crowding"
+        },
+        {
+          "severity": "medium",
+          "message": "summary narrative and takeaway panel are imbalanced enough to compete for space"
+        }
+      ]
+    },
+    {
+      "slide_number": 3,
+      "slide_type": "metrics",
+      "title": "Executive snapshot",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.14,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 4,
+      "slide_type": "cards",
+      "title": "Strengths snapshot",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.24,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 5,
+      "slide_type": "table",
+      "title": "Evidence highlights",
+      "score": 86,
+      "status": "review",
+      "content_weight": 5.67,
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.16,
+      "risk_level": "medium",
+      "likely_overflow_regions": [
+        "table"
+      ],
+      "likely_collision_regions": [
+        "table:row_imbalance"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "table:row_imbalance",
+          "density": 1.2083333333333335,
+          "threshold": 1.05,
+          "severity": "medium",
+          "message": "table rows vary significantly in density and may create visual imbalance"
+        }
+      ],
+      "severity_counts": {
+        "high": 0,
+        "medium": 2,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "some table cells are likely too long"
+        },
+        {
+          "severity": "medium",
+          "message": "table rows vary significantly in density and may create visual imbalance"
+        }
+      ]
+    },
+    {
+      "slide_number": 6,
+      "slide_type": "table",
+      "title": "Experience highlights",
+      "score": 30,
+      "status": "attention",
+      "content_weight": 7.95,
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 5,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 16.65,
+      "risk_level": "high",
+      "likely_overflow_regions": [
+        "table"
+      ],
+      "likely_collision_regions": [
+        "table:column_4",
+        "table:r1c4",
+        "table:r2c4",
+        "table:r3c4",
+        "table:row_imbalance"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "table:column_4",
+          "density": 7.194,
+          "threshold": 2.8,
+          "severity": "high",
+          "message": "table column 4 is dense enough to risk cramped cells across multiple rows"
+        },
+        {
+          "region": "table:r1c4",
+          "density": 12.378,
+          "threshold": 8.0,
+          "severity": "high",
+          "message": "table cell r1c4 is dense enough to risk clipping"
+        },
+        {
+          "region": "table:r2c4",
+          "density": 12.378,
+          "threshold": 8.0,
+          "severity": "high",
+          "message": "table cell r2c4 is dense enough to risk clipping"
+        },
+        {
+          "region": "table:r3c4",
+          "density": 11.494,
+          "threshold": 8.0,
+          "severity": "high",
+          "message": "table cell r3c4 is dense enough to risk clipping"
+        },
+        {
+          "region": "table:row_imbalance",
+          "density": 1.051282051282051,
+          "threshold": 1.05,
+          "severity": "medium",
+          "message": "table rows vary significantly in density and may create visual imbalance"
+        }
+      ],
+      "severity_counts": {
+        "high": 4,
+        "medium": 2,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "some table cells are likely too long"
+        },
+        {
+          "severity": "high",
+          "message": "table column 4 is dense enough to risk cramped cells across multiple rows"
+        },
+        {
+          "severity": "high",
+          "message": "table cell r1c4 is dense enough to risk clipping"
+        },
+        {
+          "severity": "high",
+          "message": "table cell r2c4 is dense enough to risk clipping"
+        },
+        {
+          "severity": "high",
+          "message": "table cell r3c4 is dense enough to risk clipping"
+        },
+        {
+          "severity": "medium",
+          "message": "table rows vary significantly in density and may create visual imbalance"
+        }
+      ]
+    },
+    {
+      "slide_number": 7,
+      "slide_type": "two_column",
+      "title": "Gaps vs hiring thesis",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.66,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 8,
+      "slide_type": "bullets",
+      "title": "Next steps",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 2.19,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    }
+  ],
+  "missing_assets": [],
+  "average_score": 85,
+  "status": "review",
+  "issue_count": 11,
+  "warning_count": 11,
+  "severity_counts": {
+    "high": 6,
+    "medium": 5,
+    "low": 0
+  },
+  "overflow_risk_count": 2,
+  "clipping_risk_count": 3,
+  "collision_risk_count": 8,
+  "balance_warning_count": 0,
+  "top_risk_slides": [
+    {
+      "slide_number": 6,
+      "title": "Experience highlights",
+      "risk_level": "high",
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 5,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 16.65
+    },
+    {
+      "slide_number": 2,
+      "title": "Executive summary",
+      "risk_level": "high",
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 2,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 1.45
+    },
+    {
+      "slide_number": 5,
+      "title": "Evidence highlights",
+      "risk_level": "medium",
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.16
+    }
+  ],
+  "issues": [
+    "slide 02 (Executive summary): body text is dense for a single executive slide",
+    "slide 02 (Executive summary): summary narrative region is dense enough to risk crowding",
+    "slide 02 (Executive summary): summary narrative and takeaway panel are imbalanced enough to compete for space",
+    "slide 05 (Evidence highlights): some table cells are likely too long",
+    "slide 05 (Evidence highlights): table rows vary significantly in density and may create visual imbalance",
+    "slide 06 (Experience highlights): some table cells are likely too long",
+    "slide 06 (Experience highlights): table column 4 is dense enough to risk cramped cells across multiple rows",
+    "slide 06 (Experience highlights): table cell r1c4 is dense enough to risk clipping",
+    "slide 06 (Experience highlights): table cell r2c4 is dense enough to risk clipping",
+    "slide 06 (Experience highlights): table cell r3c4 is dense enough to risk clipping",
+    "slide 06 (Experience highlights): table rows vary significantly in density and may create visual imbalance"
+  ],
+  "warnings": [
+    "slide 02 (Executive summary): body text is dense for a single executive slide",
+    "slide 02 (Executive summary): summary narrative region is dense enough to risk crowding",
+    "slide 02 (Executive summary): summary narrative and takeaway panel are imbalanced enough to compete for space",
+    "slide 05 (Evidence highlights): some table cells are likely too long",
+    "slide 05 (Evidence highlights): table rows vary significantly in density and may create visual imbalance",
+    "slide 06 (Experience highlights): some table cells are likely too long",
+    "slide 06 (Experience highlights): table column 4 is dense enough to risk cramped cells across multiple rows",
+    "slide 06 (Experience highlights): table cell r1c4 is dense enough to risk clipping",
+    "slide 06 (Experience highlights): table cell r2c4 is dense enough to risk clipping",
+    "slide 06 (Experience highlights): table cell r3c4 is dense enough to risk clipping",
+    "slide 06 (Experience highlights): table rows vary significantly in density and may create visual imbalance"
+  ]
+}

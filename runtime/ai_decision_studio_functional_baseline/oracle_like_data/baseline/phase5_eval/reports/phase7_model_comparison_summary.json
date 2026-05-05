@@ -1,0 +1,1246 @@
+{
+  "log_path": "baseline://external_files/264f9452df4fe1dc_.phase7_model_comparison_log.json",
+  "aggregate": {
+    "total_runs": 5,
+    "total_candidates": 12,
+    "success_rate": 1.0,
+    "avg_latency_s": 4.023,
+    "avg_output_chars": 958.583,
+    "avg_format_adherence": 0.983,
+    "avg_groundedness_score": 0.0,
+    "avg_schema_adherence": 0.0,
+    "avg_use_case_fit_score": 0.0,
+    "provider_counts": {
+      "ollama": 9,
+      "huggingface_inference": 3
+    },
+    "model_counts": {
+      "nemotron-3-nano:30b-cloud": 4,
+      "nemotron-3-super:cloud": 3,
+      "qwen3.5:397b-cloud": 1,
+      "deepseek-v3.1:671b-cloud": 1,
+      "meta-llama/Llama-3.1-8B-Instruct": 2,
+      "deepseek-ai/DeepSeek-R1": 1
+    },
+    "format_counts": {
+      "plain_text": 1,
+      "bullet_list": 4
+    },
+    "runtime_bucket_counts": {
+      "cloud": 12
+    },
+    "quantization_family_counts": {
+      "cloud_managed": 12
+    },
+    "provider_leaderboard": [
+      {
+        "provider": "ollama",
+        "total_candidates": 9,
+        "success_rate": 1.0,
+        "avg_latency_s": 3.861,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 870.667,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "provider": "huggingface_inference",
+        "total_candidates": 3,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.508,
+        "avg_format_adherence": 0.932,
+        "avg_output_chars": 1222.333,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "model_leaderboard": [
+      {
+        "model": "nemotron-3-super:cloud",
+        "total_candidates": 3,
+        "success_rate": 1.0,
+        "avg_latency_s": 1.356,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 876.667,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "nemotron-3-nano:30b-cloud",
+        "total_candidates": 4,
+        "success_rate": 1.0,
+        "avg_latency_s": 2.167,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 1018.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "qwen3.5:397b-cloud",
+        "total_candidates": 1,
+        "success_rate": 1.0,
+        "avg_latency_s": 7.301,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 307.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "deepseek-v3.1:671b-cloud",
+        "total_candidates": 1,
+        "success_rate": 1.0,
+        "avg_latency_s": 14.708,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 827.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "deepseek-ai/DeepSeek-R1",
+        "total_candidates": 1,
+        "success_rate": 1.0,
+        "avg_latency_s": 12.186,
+        "avg_format_adherence": 0.933,
+        "avg_output_chars": 1150.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "meta-llama/Llama-3.1-8B-Instruct",
+        "total_candidates": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 0.669,
+        "avg_format_adherence": 0.931,
+        "avg_output_chars": 1258.5,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "format_leaderboard": [
+      {
+        "response_format": "plain_text",
+        "total_candidates": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 3.162,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 1203.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "response_format": "bullet_list",
+        "total_candidates": 10,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.195,
+        "avg_format_adherence": 0.98,
+        "avg_output_chars": 909.7,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "runtime_bucket_leaderboard": [
+      {
+        "runtime_bucket": "cloud",
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.023,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "quantization_family_leaderboard": [
+      {
+        "quantization_family": "cloud_managed",
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.023,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "retrieval_strategy_leaderboard": [
+      {
+        "retrieval_strategy": "manual_hybrid",
+        "total_runs": 5,
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.022,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "embedding_provider_leaderboard": [
+      {
+        "embedding_provider": "ollama",
+        "total_runs": 2,
+        "total_candidates": 6,
+        "success_rate": 1.0,
+        "avg_latency_s": 6.235,
+        "avg_format_adherence": 0.966,
+        "avg_output_chars": 959.5,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "embedding_model_leaderboard": [
+      {
+        "embedding_model": "embeddinggemma:300m",
+        "total_runs": 2,
+        "total_candidates": 6,
+        "success_rate": 1.0,
+        "avg_latency_s": 6.235,
+        "avg_format_adherence": 0.966,
+        "avg_output_chars": 959.5,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "prompt_profile_leaderboard": [
+      {
+        "prompt_profile": "neutro",
+        "total_runs": 5,
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.022,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "document_usage_leaderboard": [
+      {
+        "document_usage": "with_documents",
+        "total_runs": 5,
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.022,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "benchmark_use_case_leaderboard": [
+      {
+        "benchmark_use_case": "ad_hoc",
+        "total_runs": 3,
+        "total_candidates": 6,
+        "success_rate": 1.0,
+        "avg_latency_s": 1.81,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 957.667,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "benchmark_use_case": "executive_summary",
+        "total_runs": 2,
+        "total_candidates": 6,
+        "success_rate": 1.0,
+        "avg_latency_s": 6.235,
+        "avg_format_adherence": 0.966,
+        "avg_output_chars": 959.5,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "top_provider": {
+      "provider": "ollama",
+      "total_candidates": 9,
+      "success_rate": 1.0,
+      "avg_latency_s": 3.861,
+      "avg_format_adherence": 1.0,
+      "avg_output_chars": 870.667,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_model": {
+      "model": "nemotron-3-super:cloud",
+      "total_candidates": 3,
+      "success_rate": 1.0,
+      "avg_latency_s": 1.356,
+      "avg_format_adherence": 1.0,
+      "avg_output_chars": 876.667,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_format": {
+      "response_format": "plain_text",
+      "total_candidates": 2,
+      "success_rate": 1.0,
+      "avg_latency_s": 3.162,
+      "avg_format_adherence": 1.0,
+      "avg_output_chars": 1203.0,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_runtime_bucket": {
+      "runtime_bucket": "cloud",
+      "total_candidates": 12,
+      "success_rate": 1.0,
+      "avg_latency_s": 4.023,
+      "avg_format_adherence": 0.983,
+      "avg_output_chars": 958.583,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_quantization_family": {
+      "quantization_family": "cloud_managed",
+      "total_candidates": 12,
+      "success_rate": 1.0,
+      "avg_latency_s": 4.023,
+      "avg_format_adherence": 0.983,
+      "avg_output_chars": 958.583,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_benchmark_use_case": {
+      "benchmark_use_case": "ad_hoc",
+      "total_runs": 3,
+      "total_candidates": 6,
+      "success_rate": 1.0,
+      "avg_latency_s": 1.81,
+      "avg_format_adherence": 1.0,
+      "avg_output_chars": 957.667,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    }
+  },
+  "highlights": {
+    "top_provider": {
+      "provider": "ollama",
+      "total_candidates": 9,
+      "success_rate": 1.0,
+      "avg_latency_s": 3.861,
+      "avg_format_adherence": 1.0,
+      "avg_output_chars": 870.667,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_model": {
+      "model": "nemotron-3-super:cloud",
+      "total_candidates": 3,
+      "success_rate": 1.0,
+      "avg_latency_s": 1.356,
+      "avg_format_adherence": 1.0,
+      "avg_output_chars": 876.667,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_format": {
+      "response_format": "plain_text",
+      "total_candidates": 2,
+      "success_rate": 1.0,
+      "avg_latency_s": 3.162,
+      "avg_format_adherence": 1.0,
+      "avg_output_chars": 1203.0,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_runtime_bucket": {
+      "runtime_bucket": "cloud",
+      "total_candidates": 12,
+      "success_rate": 1.0,
+      "avg_latency_s": 4.023,
+      "avg_format_adherence": 0.983,
+      "avg_output_chars": 958.583,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_quantization_family": {
+      "quantization_family": "cloud_managed",
+      "total_candidates": 12,
+      "success_rate": 1.0,
+      "avg_latency_s": 4.023,
+      "avg_format_adherence": 0.983,
+      "avg_output_chars": 958.583,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_retrieval_strategy": {
+      "retrieval_strategy": "manual_hybrid",
+      "total_runs": 5,
+      "total_candidates": 12,
+      "success_rate": 1.0,
+      "avg_latency_s": 4.022,
+      "avg_format_adherence": 0.983,
+      "avg_output_chars": 958.583,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_embedding_provider": {
+      "embedding_provider": "ollama",
+      "total_runs": 2,
+      "total_candidates": 6,
+      "success_rate": 1.0,
+      "avg_latency_s": 6.235,
+      "avg_format_adherence": 0.966,
+      "avg_output_chars": 959.5,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_embedding_model": {
+      "embedding_model": "embeddinggemma:300m",
+      "total_runs": 2,
+      "total_candidates": 6,
+      "success_rate": 1.0,
+      "avg_latency_s": 6.235,
+      "avg_format_adherence": 0.966,
+      "avg_output_chars": 959.5,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_prompt_profile": {
+      "prompt_profile": "neutro",
+      "total_runs": 5,
+      "total_candidates": 12,
+      "success_rate": 1.0,
+      "avg_latency_s": 4.022,
+      "avg_format_adherence": 0.983,
+      "avg_output_chars": 958.583,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "top_benchmark_use_case": {
+      "benchmark_use_case": "ad_hoc",
+      "total_runs": 3,
+      "total_candidates": 6,
+      "success_rate": 1.0,
+      "avg_latency_s": 1.81,
+      "avg_format_adherence": 1.0,
+      "avg_output_chars": 957.667,
+      "avg_groundedness_score": 0.0,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 0.0
+    },
+    "avg_groundedness_score": 0.0,
+    "avg_schema_adherence": 0.0,
+    "avg_use_case_fit_score": 0.0
+  },
+  "leaderboards": {
+    "providers": [
+      {
+        "provider": "ollama",
+        "total_candidates": 9,
+        "success_rate": 1.0,
+        "avg_latency_s": 3.861,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 870.667,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "provider": "huggingface_inference",
+        "total_candidates": 3,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.508,
+        "avg_format_adherence": 0.932,
+        "avg_output_chars": 1222.333,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "models": [
+      {
+        "model": "nemotron-3-super:cloud",
+        "total_candidates": 3,
+        "success_rate": 1.0,
+        "avg_latency_s": 1.356,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 876.667,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "nemotron-3-nano:30b-cloud",
+        "total_candidates": 4,
+        "success_rate": 1.0,
+        "avg_latency_s": 2.167,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 1018.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "qwen3.5:397b-cloud",
+        "total_candidates": 1,
+        "success_rate": 1.0,
+        "avg_latency_s": 7.301,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 307.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "deepseek-v3.1:671b-cloud",
+        "total_candidates": 1,
+        "success_rate": 1.0,
+        "avg_latency_s": 14.708,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 827.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "deepseek-ai/DeepSeek-R1",
+        "total_candidates": 1,
+        "success_rate": 1.0,
+        "avg_latency_s": 12.186,
+        "avg_format_adherence": 0.933,
+        "avg_output_chars": 1150.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "model": "meta-llama/Llama-3.1-8B-Instruct",
+        "total_candidates": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 0.669,
+        "avg_format_adherence": 0.931,
+        "avg_output_chars": 1258.5,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "formats": [
+      {
+        "response_format": "plain_text",
+        "total_candidates": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 3.162,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 1203.0,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "response_format": "bullet_list",
+        "total_candidates": 10,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.195,
+        "avg_format_adherence": 0.98,
+        "avg_output_chars": 909.7,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "runtime_buckets": [
+      {
+        "runtime_bucket": "cloud",
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.023,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "quantization_families": [
+      {
+        "quantization_family": "cloud_managed",
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.023,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "retrieval_strategies": [
+      {
+        "retrieval_strategy": "manual_hybrid",
+        "total_runs": 5,
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.022,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "embedding_providers": [
+      {
+        "embedding_provider": "ollama",
+        "total_runs": 2,
+        "total_candidates": 6,
+        "success_rate": 1.0,
+        "avg_latency_s": 6.235,
+        "avg_format_adherence": 0.966,
+        "avg_output_chars": 959.5,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "embedding_models": [
+      {
+        "embedding_model": "embeddinggemma:300m",
+        "total_runs": 2,
+        "total_candidates": 6,
+        "success_rate": 1.0,
+        "avg_latency_s": 6.235,
+        "avg_format_adherence": 0.966,
+        "avg_output_chars": 959.5,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "prompt_profiles": [
+      {
+        "prompt_profile": "neutro",
+        "total_runs": 5,
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.022,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "document_usage": [
+      {
+        "document_usage": "with_documents",
+        "total_runs": 5,
+        "total_candidates": 12,
+        "success_rate": 1.0,
+        "avg_latency_s": 4.022,
+        "avg_format_adherence": 0.983,
+        "avg_output_chars": 958.583,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ],
+    "benchmark_use_cases": [
+      {
+        "benchmark_use_case": "ad_hoc",
+        "total_runs": 3,
+        "total_candidates": 6,
+        "success_rate": 1.0,
+        "avg_latency_s": 1.81,
+        "avg_format_adherence": 1.0,
+        "avg_output_chars": 957.667,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      },
+      {
+        "benchmark_use_case": "executive_summary",
+        "total_runs": 2,
+        "total_candidates": 6,
+        "success_rate": 1.0,
+        "avg_latency_s": 6.235,
+        "avg_format_adherence": 0.966,
+        "avg_output_chars": 959.5,
+        "avg_groundedness_score": 0.0,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 0.0
+      }
+    ]
+  },
+  "strategy_benchmarks": {
+    "retrieval_shadow": {
+      "total_runs": 3,
+      "avg_overlap_ratio": 1.0,
+      "same_top_1_rate": 1.0,
+      "same_top_3_rate": 1.0,
+      "strategy_pairs": {
+        "langchain_chroma -> manual_hybrid": 3
+      },
+      "alternate_fallbacks": {}
+    },
+    "langgraph_shadow": {
+      "total_runs": 2,
+      "same_success_rate": 1.0,
+      "avg_latency_delta_s": 5.24,
+      "avg_quality_delta": 0.0,
+      "alternate_better_quality_count": 0,
+      "primary_better_quality_count": 0,
+      "alternate_faster_count": 0,
+      "primary_faster_count": 2,
+      "alternate_avoided_review_count": 0,
+      "strategy_pairs": {
+        "langgraph_context_retry -> direct": 1,
+        "direct -> langgraph_context_retry": 1
+      },
+      "alternate_fallbacks": {}
+    }
+  },
+  "recent_runs": [
+    {
+      "timestamp": "2026-03-28 22:47:44",
+      "prompt_text": "Resuma os principais pontos, riscos e próximos passos em linguagem executiva e objetiva.",
+      "benchmark_use_case": "executive_summary",
+      "prompt_profile": "neutro",
+      "response_format": "bullet_list",
+      "retrieval_strategy": "manual_hybrid",
+      "embedding_provider": "ollama",
+      "embedding_model": "embeddinggemma:300m",
+      "embedding_context_window": 512,
+      "context_window_mode": "auto",
+      "context_window_resolved": 49152,
+      "use_documents": true,
+      "document_ids": [
+        "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e"
+      ],
+      "candidate_results": [
+        {
+          "provider_requested": "huggingface_inference",
+          "provider_effective": "huggingface_inference",
+          "provider_label": "Hugging Face Inference",
+          "model_requested": "deepseek-ai/DeepSeek-R1",
+          "model_effective": "deepseek-ai/DeepSeek-R1",
+          "runtime_bucket": "cloud",
+          "quantization_family": "cloud_managed",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 12.1863,
+          "output_chars": 1150,
+          "output_words": 159,
+          "format_adherence": 0.933,
+          "response_text": "Com base no documento fornecido:\n\n**Principais pontos:**\n- NASA implementa Enterprise Risk Management (ERM) conforme exigido pelo OMB Circular A-123.\n- Gestão de riscos é parte integrante da cultura organizacional da NASA.\n- Escritório de Segurança e Garantia de Missão (OSMA) supervisiona funções de risco, com um Oficial Chefe de Risco (ARMO) como responsável por políticas e práticas.\n- Missões Artemis (retorno à Lua) representam prioridade estratégica, com foco inigualável em segurança.\n\n**Riscos destacados:**\n- Exploração espacial envolve riscos extremos, especialmente em missões tripuladas como Artemis.\n- Complexidade das missões exige superação de desafios técnicos e operacionais significativos.\n\n**Próximos passos/mitigações:**\n- Manter sistemas com múltiplas camadas de redundância para aumentar segurança.\n- Incorporar revisões contínuas de segurança em todas as fases de desenvolvimento das missões.\n- Priorizar a sobrevivência dos astronautas acima de todos os outros objetivos.\n- Continuar aprendendo com falhas e maximizando sucessos para superar desafios.\n- Fortalecer a prestação de contas com parceiros externos e fornecedores.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4599
+        },
+        {
+          "provider_requested": "huggingface_inference",
+          "provider_effective": "huggingface_inference",
+          "provider_label": "Hugging Face Inference",
+          "model_requested": "meta-llama/Llama-3.1-8B-Instruct",
+          "model_effective": "meta-llama/Llama-3.1-8B-Instruct",
+          "runtime_bucket": "cloud",
+          "quantization_family": "cloud_managed",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 0.5457,
+          "output_chars": 1639,
+          "output_words": 242,
+          "format_adherence": 0.929,
+          "response_text": "Aqui estão os principais pontos, riscos e próximos passos da NASA:\n\n**Principais Pontos:**\n\n- **Missão**: A NASA está comprometida em explorar o espaço e melhorar a vida da humanidade.\n- **Cultura de Risco**: A agência tem uma cultura de gestão de riscos, com princípios e práticas integrados em suas operações diárias.\n- **Estrutura Organizacional**: A NASA tem uma estrutura organizacional forte, com o Office of Safety and Mission Assurance (OSMA) liderando as funções de gestão de risco.\n\n**Riscos:**\n\n- **Risco de Segurança**: A NASA enfrenta riscos significativos de segurança em suas missões espaciais, incluindo a possibilidade de acidentes e lesões a astronautas.\n- **Risco de Falha**: A agência também enfrenta riscos de falha em suas missões, incluindo a possibilidade de não alcançar seus objetivos.\n- **Risco de Orçamento**: A NASA enfrenta riscos de orçamento, incluindo a possibilidade de não ter recursos suficientes para financiar suas missões.\n\n**Próximos Passos:**\n\n- **Implementação de ERM**: A NASA está implementando um programa de Gestão de Riscos de Empresa (ERM) para melhorar sua capacidade de gerenciar riscos.\n- **Desenvolvimento de Sistemas de Segurança**: A agência está desenvolvendo sistemas de segurança mais robustos para proteger seus astronautas e missões.\n- **Melhoria da Eficiência**: A NASA está trabalhando para melhorar sua eficiência e reduzir custos, incluindo a implementação de práticas de gestão de riscos mais eficazes.\n- **Colaboração com Parceiros**: A agência está colaborando com parceiros externos para compartilhar conhecimentos e recursos e melhorar sua capacidade de gerenciar riscos.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4599
+        }
+      ],
+      "aggregate": {
+        "total_candidates": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 6.366,
+        "avg_output_chars": 1394.5,
+        "avg_output_words": 200.5,
+        "avg_format_adherence": 0.931,
+        "best_latency_candidate": {
+          "provider": "huggingface_inference",
+          "model": "meta-llama/Llama-3.1-8B-Instruct",
+          "latency_s": 0.5457
+        },
+        "best_format_candidate": {
+          "provider": "huggingface_inference",
+          "model": "deepseek-ai/DeepSeek-R1",
+          "format_adherence": 0.933
+        },
+        "best_overall_candidate": {
+          "provider": "huggingface_inference",
+          "model": "meta-llama/Llama-3.1-8B-Instruct",
+          "runtime_bucket": "cloud",
+          "quantization_family": "cloud_managed",
+          "success": true,
+          "latency_s": 0.5457,
+          "format_adherence": 0.929,
+          "output_chars": 1639,
+          "output_words": 242,
+          "used_chunks": 4,
+          "comparison_score": 0.975
+        },
+        "candidate_ranking": [
+          {
+            "provider": "huggingface_inference",
+            "model": "meta-llama/Llama-3.1-8B-Instruct",
+            "runtime_bucket": "cloud",
+            "quantization_family": "cloud_managed",
+            "success": true,
+            "latency_s": 0.5457,
+            "format_adherence": 0.929,
+            "output_chars": 1639,
+            "output_words": 242,
+            "used_chunks": 4,
+            "comparison_score": 0.975
+          },
+          {
+            "provider": "huggingface_inference",
+            "model": "deepseek-ai/DeepSeek-R1",
+            "runtime_bucket": "cloud",
+            "quantization_family": "cloud_managed",
+            "success": true,
+            "latency_s": 12.1863,
+            "format_adherence": 0.933,
+            "output_chars": 1150,
+            "output_words": 159,
+            "used_chunks": 4,
+            "comparison_score": 0.786
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-03-28 22:44:49",
+      "prompt_text": "Resuma os principais pontos, riscos e próximos passos em linguagem executiva e objetiva.",
+      "benchmark_use_case": "executive_summary",
+      "prompt_profile": "neutro",
+      "response_format": "bullet_list",
+      "retrieval_strategy": "manual_hybrid",
+      "embedding_provider": "ollama",
+      "embedding_model": "embeddinggemma:300m",
+      "embedding_context_window": 512,
+      "context_window_mode": "auto",
+      "context_window_resolved": 49152,
+      "use_documents": true,
+      "document_ids": [
+        "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e"
+      ],
+      "candidate_results": [
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "nemotron-3-nano:30b-cloud",
+          "model_effective": "nemotron-3-nano:30b-cloud",
+          "runtime_bucket": "cloud",
+          "quantization_family": "cloud_managed",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 1.8777,
+          "output_chars": 956,
+          "output_words": 143,
+          "format_adherence": 1.0,
+          "response_text": "- NASA destaca que a Gestão de Riscos Enterprise (ERM) está enraizada na cultura da agência, guiada pelo ARMO e alinhada à OMB Circular A‑123.  \n- Os principais desafios de gestão e desempenho incluem: retorno à Lua (Artemis), desenvolvimento de sistemas com redundância e segurança, e mitigação de riscos de missão.  \n- A agência reforça a importância da segurança dos astronautas e da transparência fiscal, adotando controles robustos e auditorias independentes.  \n- Próximos passos: continuar a implementar camadas de redundância, expandir revisões de segurança em todas as fases de desenvolvimento e aprimorar relatórios de risco e controles internos.  \n- NASA busca melhorar a eficiência dos processos de aquisição e a responsabilidade nas parcerias externas para sustentar suas missões de alto risco.  \n- O foco será na entrega de resultados confiáveis, precisos e transparentes, garantindo a prestação de contas aos contribuintes e aos stakeholders.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4599
+        },
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "qwen3.5:397b-cloud",
+          "model_effective": "qwen3.5:397b-cloud",
+          "runtime_bucket": "cloud",
+          "quantization_family": "cloud_managed",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 7.3005,
+          "output_chars": 307,
+          "output_words": 47,
+          "format_adherence": 1.0,
+          "response_text": "- Não foi fornecido conteúdo base para análise e sumarização.\n- Impossível identificar pontos principais, riscos ou próximos passos sem dados de entrada.\n- Necessário enviar o documento, ata ou contexto do projeto para processamento.\n- Pronto para executar a tarefa assim que o material for disponibilizado.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4599
+        },
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "deepseek-v3.1:671b-cloud",
+          "model_effective": "deepseek-v3.1:671b-cloud",
+          "runtime_bucket": "cloud",
+          "quantization_family": "cloud_managed",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 14.7084,
+          "output_chars": 827,
+          "output_words": 121,
+          "format_adherence": 1.0,
+          "response_text": "- **Principais Pontos:** NASA implementa gestão de riscos corporativos (ERM) conforme exigido pelo OMB Circular A-123.\n- **Principais Pontos:** O Oficial de Gestão de Riscos da Agência (ARMO) é o principal responsável pela política de riscos.\n- **Principais Pontos:** A gestão de riscos está embutida na cultura e operações diárias da NASA.\n- **Riscos:** As missões, como o programa Artemis para retornar à Lua, carregam riscos extremos inerentes à exploração espacial.\n- **Riscos:** Superar desafios de gestão e desempenho identificados pelo Inspector Geral é uma prioridade.\n- **Próximos Passos:** A NASA está comprometida com esforços contínuos de mitigação e remediação para seus principais desafios.\n- **Próximos Passos:** A Agência prioriza a segurança com sistemas redundantes e revisões contínuas para gerenciar riscos.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4599
+        },
+        {
+          "provider_requested": "huggingface_inference",
+          "provider_effective": "huggingface_inference",
+          "provider_label": "Hugging Face Inference",
+          "model_requested": "meta-llama/Llama-3.1-8B-Instruct",
+          "model_effective": "meta-llama/Llama-3.1-8B-Instruct",
+          "runtime_bucket": "cloud",
+          "quantization_family": "cloud_managed",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 0.7933,
+          "output_chars": 878,
+          "output_words": 137,
+          "format_adherence": 0.933,
+          "response_text": "Aqui estão os principais pontos, riscos e próximos passos da NASA:\n\n**Principais Pontos:**\n\n- A NASA está comprometida em entregar informações financeiras transparentes e precisas.\n- O Programa de Gestão de Riscos da NASA é fundamental para garantir a segurança e a eficácia das missões.\n- A Agência está trabalhando para superar os desafios e melhorar a gestão de riscos.\n\n**Riscos:**\n\n- Risco de segurança em missões espaciais.\n- Risco de falha em sistemas críticos.\n- Risco de não cumprimento de objetivos estratégicos.\n\n**Próximos Passos:**\n\n- Implementar melhorias no Programa de Gestão de Riscos.\n- Aumentar a transparência e a responsabilidade em todas as operações.\n- Continuar a trabalhar em missões espaciais inovadoras e desafiadoras.\n- Fortalecer a colaboração com parceiros e fornecedores externos.\n- Aumentar a eficiência e a eficácia em todas as áreas da Agência.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4599
+        }
+      ],
+      "aggregate": {
+        "total_candidates": 4,
+        "success_rate": 1.0,
+        "avg_latency_s": 6.17,
+        "avg_output_chars": 742.0,
+        "avg_output_words": 112.0,
+        "avg_format_adherence": 0.983,
+        "best_latency_candidate": {
+          "provider": "huggingface_inference",
+          "model": "meta-llama/Llama-3.1-8B-Instruct",
+          "latency_s": 0.7933
+        },
+        "best_format_candidate": {
+          "provider": "ollama",
+          "model": "nemotron-3-nano:30b-cloud",
+          "format_adherence": 1.0
+        },
+        "best_overall_candidate": {
+          "provider": "huggingface_inference",
+          "model": "meta-llama/Llama-3.1-8B-Instruct",
+          "runtime_bucket": "cloud",
+          "quantization_family": "cloud_managed",
+          "success": true,
+          "latency_s": 0.7933,
+          "format_adherence": 0.933,
+          "output_chars": 878,
+          "output_words": 137,
+          "used_chunks": 4,
+          "comparison_score": 0.977
+        },
+        "candidate_ranking": [
+          {
+            "provider": "huggingface_inference",
+            "model": "meta-llama/Llama-3.1-8B-Instruct",
+            "runtime_bucket": "cloud",
+            "quantization_family": "cloud_managed",
+            "success": true,
+            "latency_s": 0.7933,
+            "format_adherence": 0.933,
+            "output_chars": 878,
+            "output_words": 137,
+            "used_chunks": 4,
+            "comparison_score": 0.977
+          },
+          {
+            "provider": "ollama",
+            "model": "nemotron-3-nano:30b-cloud",
+            "runtime_bucket": "cloud",
+            "quantization_family": "cloud_managed",
+            "success": true,
+            "latency_s": 1.8777,
+            "format_adherence": 1.0,
+            "output_chars": 956,
+            "output_words": 143,
+            "used_chunks": 4,
+            "comparison_score": 0.884
+          },
+          {
+            "provider": "ollama",
+            "model": "qwen3.5:397b-cloud",
+            "runtime_bucket": "cloud",
+            "quantization_family": "cloud_managed",
+            "success": true,
+            "latency_s": 7.3005,
+            "format_adherence": 1.0,
+            "output_chars": 307,
+            "output_words": 47,
+            "used_chunks": 4,
+            "comparison_score": 0.822
+          },
+          {
+            "provider": "ollama",
+            "model": "deepseek-v3.1:671b-cloud",
+            "runtime_bucket": "cloud",
+            "quantization_family": "cloud_managed",
+            "success": true,
+            "latency_s": 14.7084,
+            "format_adherence": 1.0,
+            "output_chars": 827,
+            "output_words": 121,
+            "used_chunks": 4,
+            "comparison_score": 0.811
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-03-28 16:56:19",
+      "prompt_text": "Quero um resumo completo.",
+      "prompt_profile": "neutro",
+      "response_format": "bullet_list",
+      "retrieval_strategy": "manual_hybrid",
+      "use_documents": true,
+      "document_ids": [
+        "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e"
+      ],
+      "candidate_results": [
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "nemotron-3-nano:30b-cloud",
+          "model_effective": "nemotron-3-nano:30b-cloud",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 1.6325,
+          "output_chars": 818,
+          "output_words": 111,
+          "format_adherence": 1.0,
+          "response_text": "- Relatório Financeiro da NASA FY 2025 apresentado pelo Administrador  \n- Cumprimento dos princípios de contabilidade geralmente aceitos (GAAP)  \n- Declaração de transparência no uso dos recursos públicos  \n- Estrutura de controle interno descrita no documento  \n- Identificação de material weaknesses em controles financeiros  \n- Opinião de auditoria sem ressalvas (unmodified)  \n- Conformidade com a Seção 803(a) da FFMIA  \n- Resumo das declarações financeiras consolidadas  \n- Principais indicadores de desempenho (KPIs) apresentados  \n- Limitações das informações financeiras descritas  \n- Premiação de Excelência em Relatórios de Responsabilidade  \n- Detalhamento das fontes de financiamento utilizadas  \n- Análise de risco e gestão de controles internos  \n- Resumo das auditorias realizadas e garantias de gestão",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4875
+        },
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "nemotron-3-super:cloud",
+          "model_effective": "nemotron-3-super:cloud",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 0.9032,
+          "output_chars": 1109,
+          "output_words": 143,
+          "format_adherence": 1.0,
+          "response_text": "- NASA’s FY 2025 Agency Financial Report provides key financial and performance information, demonstrating commitment to transparency in the use of taxpayer dollars.  \n- The report follows high-quality financial reporting practices with appropriate controls for efficient and effective operations.  \n- Consolidated financial statements include the Balance Sheet, Statement of Changes in Net Position, Statement of Net Cost, and Combined Statement of Budgetary Resources.  \n- Oversight controls and management assurances were evaluated, with no material weaknesses identified in financial reporting or management systems.  \n- The Agency complied with Federal Financial Management Improvement Act (FFMIA) requirements, federal accounting standards, and USSGL at transaction level.  \n- No instances of non-compliance were noted in financial management systems, accounting standards, or transaction-level reporting.  \n- The report supports NASA’s mission by ensuring reliable, accurate, transparent, and comprehensive financial data for fiscal operations and adherence to Generally Accepted Accounting Principles.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4875
+        }
+      ],
+      "aggregate": {
+        "total_candidates": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 1.268,
+        "avg_output_chars": 963.5,
+        "avg_output_words": 127.0,
+        "avg_format_adherence": 1.0,
+        "best_latency_candidate": {
+          "provider": "ollama",
+          "model": "nemotron-3-super:cloud",
+          "latency_s": 0.9032
+        },
+        "best_format_candidate": {
+          "provider": "ollama",
+          "model": "nemotron-3-nano:30b-cloud",
+          "format_adherence": 1.0
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-28 16:54:48",
+      "prompt_text": "O que o documento mostra de bom ?",
+      "prompt_profile": "neutro",
+      "response_format": "bullet_list",
+      "retrieval_strategy": "manual_hybrid",
+      "use_documents": true,
+      "document_ids": [
+        "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e"
+      ],
+      "candidate_results": [
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "nemotron-3-nano:30b-cloud",
+          "model_effective": "nemotron-3-nano:30b-cloud",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 1.2817,
+          "output_chars": 797,
+          "output_words": 114,
+          "format_adherence": 1.0,
+          "response_text": "- NASA recebeu o prestigiado CEAR Award e o Best‑In‑Class Award, reconhecendo 11 anos consecutivos de excelência em relatórios financeiros.  \n- O relatório destaca análise clara e insightful das finanças, com gráficos e tabelas que facilitam a compreensão.  \n- Apresenta controle robusto de conformidade com a FFMIA, sem apontar falta de conformidade substancial em nenhum ponto auditado.  \n- O auditor emitiu opinião sem ressalvas (unmodified) e não identificou material weaknesses significativas.  \n- O documento inclui um resumo abrangente das controles de auditoria e das garantias de gestão, demonstrando transparência e responsabilidade.  \n- A estrutura do relatório segue padrões de boas práticas de relato financeiro, facilitando a análise por metas estratégicas e fontes de financiamento.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4881
+        },
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "nemotron-3-super:cloud",
+          "model_effective": "nemotron-3-super:cloud",
+          "response_format": "bullet_list",
+          "success": true,
+          "latency_s": 0.717,
+          "output_chars": 616,
+          "output_words": 85,
+          "format_adherence": 1.0,
+          "response_text": "- AGA awarded NASA its prestigious CEAR Award and Best-In-Class Award, marking the 11th year NASA has been recognized for its excellence in financial reporting.  \n- The agency presents an easy-to-understand analysis of its financial statements with informative graphs and charts.  \n- NASA demonstrates commitment to transparency in the use of American taxpayers’ dollars.  \n- The report provides key financial and performance information in accordance with Generally Accepted Accounting Principles.  \n- NASA follows high-quality financial reporting practices with appropriate controls for reliable and accurate data.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4881
+        }
+      ],
+      "aggregate": {
+        "total_candidates": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 0.999,
+        "avg_output_chars": 706.5,
+        "avg_output_words": 99.5,
+        "avg_format_adherence": 1.0,
+        "best_latency_candidate": {
+          "provider": "ollama",
+          "model": "nemotron-3-super:cloud",
+          "latency_s": 0.717
+        },
+        "best_format_candidate": {
+          "provider": "ollama",
+          "model": "nemotron-3-nano:30b-cloud",
+          "format_adherence": 1.0
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-28 16:54:20",
+      "prompt_text": "O que o documento mostra de bom ?",
+      "prompt_profile": "neutro",
+      "response_format": "plain_text",
+      "retrieval_strategy": "manual_hybrid",
+      "use_documents": true,
+      "document_ids": [
+        "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e"
+      ],
+      "candidate_results": [
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "nemotron-3-nano:30b-cloud",
+          "model_effective": "nemotron-3-nano:30b-cloud",
+          "response_format": "plain_text",
+          "success": true,
+          "latency_s": 3.8753,
+          "output_chars": 1501,
+          "output_words": 207,
+          "format_adherence": 1.0,
+          "response_text": "O documento destaca vários pontos positivos:\n\n- **Reconhecimento de excelência financeira**: A NASA recebeu da AGA (Agency for Global Affairs) o **Certificate of Excellence in Accountability Reporting** e o **Best‑In‑Class Award** pela clareza e profundidade da sua análise financeira, marcando o 11º ano consecutivo de reconhecimento.\n\n- **Transparência e clareza**: O relatório apresenta gráficos e tabelas que facilitam a compreensão da distribuição de custos por metas estratégicas, além de incluir uma análise detalhada das fontes de financiamento.\n\n- **Conformidade com normas federais**: Não foram identificadas falhas substanciais nas avaliações de conformidade com a **Federal Financial Management Improvement Act (FFMIA)**, indicando que a agência está em conformidade com os requisitos de relatórios financeiros federais.\n\n- **Boa governança e controles internos**: Não foram apontadas material weaknesses (déficits significativos) nos controles de auditoria e nas garantias de gestão, refletindo a eficácia dos processos de controle interno da NASA.\n\n- **Comunicação institucional**: O relatório contém mensagens do Administrador, resumos de desafios de desempenho e respostas a relatórios de auditoria externa, demonstrando um esforço de comunicação aberta e responsiva.\n\nEm resumo, o documento evidencia que a NASA mantém um alto padrão de relatórios financeiros, transparência e conformidade, reforçando a confiança do público e dos órgãos de supervisão na gestão dos recursos públicos.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4881
+        },
+        {
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "provider_label": "Ollama (local)",
+          "model_requested": "nemotron-3-super:cloud",
+          "model_effective": "nemotron-3-super:cloud",
+          "response_format": "plain_text",
+          "success": true,
+          "latency_s": 2.4488,
+          "output_chars": 905,
+          "output_words": 127,
+          "format_adherence": 1.0,
+          "response_text": "O documento destaca que a NASA recebeu o prêmio CEAR (Certificate of Excellence in Accountability Reporting) e o prêmio Best-In-Class Award da AGA (Association of Government Accountants), marcando o 11º ano consecutivo em que a agência é reconhecida por sua excelência em relatórios financeiros. Esses prêmios refletem a qualidade, clareza e transparência dos relatórios financeiros da NASA, incluindo análises fáceis de entender, uso de gráficos e gráficos informativos, análise das fontes de financiamento e alinhamento dos custos brutos com metas estratégicas para fornecer insights adicionais sobre as operações da agência. Isso demonstra o compromisso da NASA com práticas de alta qualidade em relatórios financeiros, controle interno eficaz e conformidade com os Princípios Geralmente Aceitos de Contabilidade (GAAP), reforçando sua responsabilidade no uso dos recursos dos contribuintes americanos.",
+          "error": null,
+          "context_injected": true,
+          "used_chunks": 4,
+          "dropped_chunks": 0,
+          "context_preview_chars": 4881
+        }
+      ],
+      "aggregate": {
+        "total_candidates": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 3.162,
+        "avg_output_chars": 1203.0,
+        "avg_output_words": 167.0,
+        "avg_format_adherence": 1.0,
+        "best_latency_candidate": {
+          "provider": "ollama",
+          "model": "nemotron-3-super:cloud",
+          "latency_s": 2.4488
+        },
+        "best_format_candidate": {
+          "provider": "ollama",
+          "model": "nemotron-3-nano:30b-cloud",
+          "format_adherence": 1.0
+        }
+      }
+    }
+  ]
+}

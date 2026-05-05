@@ -1,0 +1,94 @@
+{
+  "run_id": "phase8-5-matrix-86c4a39861",
+  "output_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/group_runs/01_generation_phase8-5-matrix-86c4a39861",
+  "selected_groups": [
+    "generation"
+  ],
+  "smoke": false,
+  "provider_filter": null,
+  "model_filter": null,
+  "resume_requested": true,
+  "planned_case_count": 32,
+  "resume_success_case_count": 0,
+  "groups": {
+    "generation": {
+      "planned_cases": 32,
+      "skipped_candidates": [
+        {
+          "group": "generation",
+          "provider": "huggingface_local",
+          "model": "Qwen3.5-4B-MLX-4bit",
+          "requested_model": "Qwen3.5-4B-MLX-4bit",
+          "reason": "provider_unavailable_or_no_chat_support"
+        },
+        {
+          "group": "generation",
+          "provider": "huggingface_local",
+          "model": "Phi-4-mini-instruct",
+          "requested_model": "Phi-4-mini-instruct",
+          "reason": "provider_unavailable_or_no_chat_support"
+        },
+        {
+          "group": "generation",
+          "provider": "huggingface_local",
+          "model": "Qwen2.5-Coder-7B-Instruct-4bit",
+          "requested_model": "Qwen2.5-Coder-7B-Instruct-4bit",
+          "reason": "provider_unavailable_or_no_chat_support"
+        }
+      ],
+      "sample_case_ids": [
+        "case_885e1539d5d21b4c",
+        "case_85442b0f8efb2654",
+        "case_e9203d1597ec9ca2",
+        "case_3c28b02df79a1213",
+        "case_8b7de550c9682c82"
+      ]
+    },
+    "embeddings": {
+      "planned_cases": 6,
+      "skipped_candidates": [
+        {
+          "group": "embeddings",
+          "provider": "huggingface_local",
+          "model": "jina-embeddings-v5-text-small-retrieval-mlx",
+          "requested_model": "jina-embeddings-v5-text-small-retrieval-mlx",
+          "reason": "provider_unavailable_or_no_embedding_support"
+        },
+        {
+          "group": "embeddings",
+          "provider": "huggingface_local",
+          "model": "jina-code-embeddings-0.5b-mlx",
+          "requested_model": "jina-code-embeddings-0.5b-mlx",
+          "reason": "provider_unavailable_or_no_embedding_support"
+        }
+      ],
+      "sample_case_ids": [
+        "case_14b8511fa7c7b3b8",
+        "case_721751b68a63b919",
+        "case_b02fdd68269dbb0a",
+        "case_3e56a0a96d9a555f",
+        "case_225c99667173bde1"
+      ]
+    },
+    "rerankers": {
+      "planned_cases": 4,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_67cbdc91648f61a7",
+        "case_b23598bb105f0d85",
+        "case_705ef41f96526721",
+        "case_78ebd22e25d82530"
+      ]
+    },
+    "ocr_vlm": {
+      "planned_cases": 4,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_85bde34a52093a17",
+        "case_914efbbf35cd8589",
+        "case_0697651c773537a2",
+        "case_2f1d860f92799763"
+      ]
+    }
+  }
+}

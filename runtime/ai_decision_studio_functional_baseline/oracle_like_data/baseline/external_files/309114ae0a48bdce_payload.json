@@ -1,0 +1,210 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Document Review",
+      "subtitle": "Executive review of the latest grounded document analysis",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Export kind: document_review_deck. Deck family: review. Sources: structured_result, document_agent."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "Q1 2024 Northwind vendor-control review evidence log: 2 risk(s), 5 gap(s) and 2 mitigation action(s) identified. Top risk: Missing evidence blocks control closure Main evidence gap: No explicit effective date is provided for the control period beyond Q1 2024",
+      "bullets": [
+        "Missing evidence blocks control closure",
+        "In-progress evidence may not be verified in time",
+        "No explicit effective date is provided for the control period beyond Q1 2024"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "cards": [],
+      "metrics": [
+        {
+          "value": "2",
+          "label": "Source count"
+        },
+        {
+          "value": "7",
+          "label": "Findings"
+        },
+        {
+          "value": "2",
+          "label": "Actions"
+        },
+        {
+          "value": "No",
+          "label": "Needs review"
+        }
+      ],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Top findings",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Type",
+        "Finding",
+        "Evidence",
+        "Owner"
+      ],
+      "table_rows": [
+        [
+          "risk",
+          "Missing evidence blocks control closure",
+          "Missing or in-progress items block control closure…",
+          "-"
+        ],
+        [
+          "risk",
+          "In-progress evidence may not be verified in t…",
+          "EV-002 is satisfied by the attached email-export ar…",
+          "-"
+        ],
+        [
+          "gap",
+          "No explicit effective date is provided for th…",
+          "-",
+          "-"
+        ],
+        [
+          "gap",
+          "No governing law or jurisdiction is mentioned",
+          "-",
+          "-"
+        ],
+        [
+          "gap",
+          "No formal notice period is specified",
+          "-",
+          "-"
+        ],
+        [
+          "gap",
+          "No indemnification or confidentiality clauses…",
+          "-",
+          "-"
+        ],
+        [
+          "gap",
+          "No counterparties are listed for any agreement",
+          "-",
+          "-"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Findings grounded in the structured/document-agent payload."
+    },
+    {
+      "type": "table",
+      "title": "Action plan",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "table_rows": [
+        [
+          "Archive email-export artifact for EV-002",
+          "IT Operations",
+          "-",
+          "pending"
+        ],
+        [
+          "Verify provenance of missing evidence",
+          "Compliance Operations",
+          "-",
+          "pending"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "two_column",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Archive email-export artifact for EV-002",
+          "bullets": [
+            "Archive email-export artifact for EV-002",
+            "Verify provenance of missing evidence"
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "No explicit effective date is provided for the control period beyond q1 2024",
+          "bullets": [
+            "No governing law or jurisdiction is mentioned",
+            "No formal notice period is specified"
+          ]
+        }
+      ],
+      "speaker_notes": "Decision framing for the grounded document review."
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Archive email-export artifact for EV-002",
+        "Verify provenance of missing evidence",
+        "Open the cited source excerpts to confirm the interpretation before acting."
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Hiring Scorecard - Sarah Chen.pdf",
+  "file_type": "pdf",
+  "file_hash": "9a4a36d3a9b23bb1c1acfa2b83bdabda717d2a4afd351e5a358064e16c81f464",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nHR-003  Hiring Scorecard\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nHiring Scorecard — Sarah Chen\nStructured evaluation sheet for the Senior ML Engineer hiring workflow.\nDocument ID\nHR-003\nOwner\nTalent Acquisition\nCandidate\nSarah Chen\nRole\nSenior ML Engineer\nReview Date\n2024-03-15\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nScore Summary\nDimension\nWeigh\nt\nRating\nWeighted\nScore\nEvidence\nLLM / transformer expertise\n20\n5 / 5\n20\nHands-on transformer work, model\noptimization, and conference publications.\nProduction ML systems at scale\n20\n5 / 5\n20\nDesigned high-throughput inference systems\nand MLOps automation.\nTechnical leadership\n15\n4 / 5\n12\nLed a five-person ML pod and mentored\njunior engineers.\nRAG / retrieval depth\n15\n3 / 5\n9\nStrong adjacent skills; direct retrieval-system\nevidence limited in CV.\nCompliance / governance awareness\n10\n2 / 5\n4\nNo direct SOC2 / HIPAA ownership shown.\nEdge / on-prem deployment\n10\n2 / 5\n4\nMostly cloud-native deployments.\nCross-functional collaboration\n10\n4 / 5\n8\nRepeated evidence of product and research\ncollaboration.\nOverall recommendation: 87 / 100 — Strong Hire. Advance to final technical interview with emphasis on\nRAG architecture and regulated-workload instincts.\nDecision Signals\n●\nMeets all three must-have areas already evidenced in the CV: LLM expertise, large-scale production ML, and\ntechnical/team leadership.\n●\nPrimary gaps are specific to retrieval architecture and regulated workload exposure, both considered trainable if\nfundamentals are strong.\n●\nNo blocking risk was found in communication, ownership, or seniority signals.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 1823,
+    "final_text_chars": 1823,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1834,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 39,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 4653,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nHR-003  Hiring Scorecard\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nHiring Scorecard — Sarah Chen\nStructured evaluation sheet for the Senior ML Engineer hiring workflow.\nDocument ID\nHR-003\nOwner\nTalent Acquisition\nCandidate\nSarah Chen\nRole\nSenior ML Engineer\nReview Date\n2024-03-15\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nScore Summary\nDimension\nWeigh\nt\nRating\nWeighted\nScore\nEvidence\nLLM / transformer expertise\n20\n5 / 5\n20\nHands-on transformer work, model\noptimization, and conference publications.\nProduction ML systems at scale\n20\n5 / 5\n20\nDesigned high-throughput inference systems\nand MLOps automation.\nTechnical leadership\n15\n4 / 5\n12\nLed a five-person ML pod and mentored\njunior engineers.\nRAG / retrieval depth\n15\n3 / 5\n9\nStrong adjacent skills; direct retrieval-system\nevidence limited in CV.\nCompliance / governance awareness\n10\n2 / 5\n4\nNo direct SOC2 / HIPAA ownership shown.\nEdge / on-prem deployment\n10\n2 / 5\n4\nMostly cloud-native deployments.\nCross-functional collaboration\n10\n4 / 5\n8\nRepeated evidence of product and research\ncollaboration.\nOverall recommendation: 87 / 100 — Strong Hire. Advance to final technical interview with emphasis on\nRAG architecture and regulated-workload instincts.\nDecision Signals\n●\nMeets all three must-have areas already evidenced in the CV: LLM expertise, large-scale production ML, and\ntechnical/team leadership.\n●\nPrimary gaps are specific to retrieval architecture and regulated workload exposure, both considered trainable if\nfundamentals are strong.\n●\nNo blocking risk was found in communication, ownership, or seniority signals.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic scorecard is text/vector content; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "hiring/Hiring Scorecard - Sarah Chen.pdf",
+    "nextcloud_relative_path": "hiring/Hiring Scorecard - Sarah Chen.pdf",
+    "source_relative_path": "hiring/Hiring Scorecard - Sarah Chen.pdf",
+    "filename": "Hiring Scorecard - Sarah Chen.pdf",
+    "title": "Hiring Scorecard - Sarah Chen",
+    "category": "hiring",
+    "preindex": {
+      "relative_path": "hiring/Hiring Scorecard - Sarah Chen.pdf",
+      "filename": "Hiring Scorecard - Sarah Chen.pdf",
+      "title": "Hiring Scorecard - Sarah Chen",
+      "category": "hiring",
+      "document_id": "hiring/Hiring Scorecard - Sarah Chen.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:11"
+}

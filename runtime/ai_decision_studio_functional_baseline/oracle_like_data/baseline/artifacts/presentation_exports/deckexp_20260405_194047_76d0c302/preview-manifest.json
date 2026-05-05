@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "benchmark_eval_executive_deck",
+  "output_dir": "baseline://outputs/ai_workbench_export_previews/deckexp_20260405_194047_76d0c302",
+  "presentation_title": "benchmark_eval_executive_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/7c7c4e8f10eae4a0_benchmark_eval_executive_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "benchmark_eval_executive_deck-01.png",
+      "path": "baseline://external_files/524dc75738d658f5_benchmark_eval_executive_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "benchmark_eval_executive_deck-02.png",
+      "path": "baseline://external_files/dcd156718764e9e7_benchmark_eval_executive_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "benchmark_eval_executive_deck-03.png",
+      "path": "baseline://external_files/0dbe83de1fcb9cb7_benchmark_eval_executive_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "benchmark_eval_executive_deck-04.png",
+      "path": "baseline://external_files/8a0e485e3612a928_benchmark_eval_executive_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "benchmark_eval_executive_deck-05.png",
+      "path": "baseline://external_files/9a989d0d58b889aa_benchmark_eval_executive_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "benchmark_eval_executive_deck-06.png",
+      "path": "baseline://external_files/b7f83bb07386ff10_benchmark_eval_executive_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "benchmark_eval_executive_deck-07.png",
+      "path": "baseline://external_files/dfdbf38684c363dc_benchmark_eval_executive_deck-07.png"
+    }
+  ]
+}

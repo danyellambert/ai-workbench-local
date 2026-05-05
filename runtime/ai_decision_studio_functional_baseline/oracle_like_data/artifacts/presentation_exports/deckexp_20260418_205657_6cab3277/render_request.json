@@ -1,0 +1,190 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "author": "AI Workbench Local",
+      "date": "2026-04-18",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Comparison Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "subtitle": "Executive comparison review of grounded document differences",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Executive Comparison:  \nThe Access Review Evidence Log addresses gaps in control closure by requiring verification of incomplete evidence items, while the Privileged Account Approval Email mandates ongoing governance through scoped access, continuous logging, and quarterly vendor recertification to sustain compliance.\n\n- Access Review Evidence Log requires verification of missing or unverified evidence items to close controls.  \n- Privileged Account Approval Email requires quarterly vendor confirmation and recertification of access.  \n- Evidence Log focuses on artifact provenance and status tracking; Approval Email emphasizes usage scoping and logging compliance.  \n- Evidence Log applies to vendor oversight controls; Approval Email governs privileged access for specific administrators.  \n- Evidence Log closure depends on resolving incomplete items; Approval Email requires periodic vendor validation to maintain access.  \n- Evidence Log is a control register; Approval Email is a governance directive with enforceable conditions.",
+        "bullets": [
+          "The Access Review Evidence Log addresses gaps in control closure by requiri…",
+          "Access Review Evidence Log requires verification of missing or unverified e…",
+          "Privileged Account Approval Email requires quarterly vendor confirmation an…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Compared docs"
+          },
+          {
+            "value": "8",
+            "label": "Findings"
+          },
+          {
+            "value": "4",
+            "label": "Sources"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Comparison findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Documents",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "document_summary",
+            "Summary of Access Review Evidence Log.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf)",
+            "Control closure depends on verification of missing or in-progress evidence items. | Artifact provenance must be confirm…"
+          ],
+          [
+            "document_summary",
+            "Summary of Privileged Account Approval Email.pdf (pdf)",
+            "Privileged Account Approval Email.pdf (pdf)",
+            "Access is conditional on strict task scoping and logging compliance | Governance requires periodic vendor validation an…"
+          ],
+          [
+            "approval_change",
+            "The Access Review Evidence Log addresses gaps in…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+          ],
+          [
+            "auditability_delta",
+            "Access Review Evidence Log requires verification of missing…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+          ],
+          [
+            "approval_change",
+            "Privileged Account Approval Email requires quarterly vendor confirmation…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+          ],
+          [
+            "approval_change",
+            "Evidence Log focuses on artifact provenance and status…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): Artifact provenance must be confirmed before evidence can satisfy control require…"
+          ],
+          [
+            "approval_change",
+            "Evidence Log applies to vendor oversight controls; Approval…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+          ],
+          [
+            "approval_change",
+            "Evidence Log closure depends on resolving incomplete items;…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic control register for Q1 2024 vendor…"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Open the cited source excerpts to confirm the interpretation before acting.",
+            "bullets": [
+              "Open the cited source excerpts to confirm the interpretation before act…",
+              "Validate critical differences directly in the compared documents before…"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "No critical watchouts recorded for this slice.",
+            "bullets": []
+          }
+        ],
+        "speaker_notes": "Executive decision framing for this slice."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Open the cited source excerpts to confirm the interpretation before acting.",
+          "Validate critical differences directly in the compared documents before consoli…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_205657_6cab3277/policy_contract_comparison_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_205657_6cab3277",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

@@ -1,0 +1,20 @@
+{
+  "document_review": {
+    "artifact_dir": "baseline://artifacts/presentation_exports/targeted_slide_beautification_v1/deckexp_20260406_003428_83900a11",
+    "pptx_path": "baseline://external_files/eda0d440d7518680_document_review_deck.pptx",
+    "thumbnail_sheet": "baseline://external_files/f60253b07172501d_document_review_deck-thumbnails.png",
+    "review_path": "baseline://external_files/d5d78edc76e723fb_review.json",
+    "status": "completed"
+  },
+  "policy_contract_comparison": {
+    "artifact_dir": "baseline://artifacts/presentation_exports/targeted_slide_beautification_v1/deckexp_20260406_003433_4ad3a1da",
+    "pptx_path": "baseline://external_files/d910a5dc9a325d63_policy_contract_comparison_deck.pptx",
+    "thumbnail_sheet": "baseline://external_files/8e04412cbed53c6a_policy_contract_comparison_deck-thumbnails.png",
+    "review_path": "baseline://external_files/38cbbaf5eecf9bed_review.json",
+    "status": "completed"
+  },
+  "comparisons": {
+    "Screenshot 2026-04-06 at 00.23.52.png": "baseline://external_files/d37a151747e27f49_Screenshot_2026-04-06_at_00.23.52_comparison.png",
+    "Screenshot 2026-04-06 at 00.24.00.png": "baseline://external_files/413184cd6dad1f1d_Screenshot_2026-04-06_at_00.24.00_comparison.png"
+  }
+}

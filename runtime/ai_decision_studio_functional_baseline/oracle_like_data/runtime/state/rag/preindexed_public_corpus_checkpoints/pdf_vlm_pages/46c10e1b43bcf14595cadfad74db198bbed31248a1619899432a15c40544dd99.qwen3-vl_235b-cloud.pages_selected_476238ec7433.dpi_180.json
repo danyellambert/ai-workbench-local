@@ -1,0 +1,27 @@
+{
+  "kind": "evidenceops_preindex_pdf_vlm_page_cache.v2",
+  "file_hash": "46c10e1b43bcf14595cadfad74db198bbed31248a1619899432a15c40544dd99",
+  "filename": "Technical Architecture Brief.pdf",
+  "model": "qwen3-vl:235b-cloud",
+  "dpi": 180,
+  "scope": "pages_selected_476238ec7433",
+  "updated_at": "2026-04-26 22:51:21",
+  "pages": [
+    {
+      "page": 12,
+      "content": "### Visual extraction\n- **Important visible text and headings**  \n  - \"Appendix A — topology capture\"  \n  - Subheading: \"Appendix capture — imported from engineering working papers\"  \n  - Section title: \"Reference topology snapshot\"  \n  - Numbered notes:  \n    - \"01. Northwind retrieval nodes and Meridian gateway dependency map.\"  \n    - \"02. Note handwritten arrows showing fallback path and manual failover conditions.\"  \n    - \"03. Included to test OCR routing and diagram handling.\"  \n\n- **Tables/checklists/forms**  \n  - Numbered list (01–03) defining diagram context, handwritten annotations, and OCR testing purpose.  \n\n- **Diagrams/charts/logos/stamps/signatures**  \n  - Flow diagram with four labeled components:  \n    - \"User traffic (API + SSO)\" → \"Ingress / WAF\" → \"Northwind managed retrieval cluster\"  \n    - \"Meridian policy services\" connected below \"Ingress / WAF\"  \n  - Note 02 references handwritten arrows (in diagram) indicating fallback path and manual failover conditions.  \n\n- **Key facts**  \n  - Dependency map between Northwind retrieval nodes and Meridian gateway.  \n  - Diagram used to test OCR handling of routing and visual structure.  \n  - Footer: \"Imported scan-heavy appendix page\", \"Page 12\"."
+    },
+    {
+      "page": 13,
+      "content": "### Visual extraction\n- **Headings**: \"Appendix B — control mapping snapshot\", \"Appendix capture — imported from engineering working papers\"  \n- **Checklist/notes**:  \n  - `01.` Annotated list of control IDs against platform components.  \n  - `02.` Contains mixed handwritten and typed notes copied from workshop materials.  \n  - `03.` Text density is intentionally uneven.  \n- **Footer text**: \"Imported scan-heavy appendix page\", \"Page 13\"  \n- **Key facts**: Appendix is a snapshot imported from engineering working papers; contains mixed handwritten/typed notes; text density is uneven by design; focuses on control IDs mapped to platform components."
+    },
+    {
+      "page": 14,
+      "content": "### Visual extraction  \n- **Important visible text and headings**  \n  - Main heading: `Appendix C — whiteboard incident flow`  \n  - Subheading: `Appendix capture — imported from engineering working papers`  \n  - Section label: `Reference topology snapshot`  \n  - Footer: `Imported scan-heavy appendix page | Page 14`  \n\n- **Tables/checklists/forms**  \n  - Numbered list (01–03) under diagram:  \n    - `01. Escalation path from service alert to security and legal review.`  \n    - `02. Critical timings under discussion: 24h, 48h, and vendor 72h counterproposal.`  \n    - `03. Used to simulate OCR-hard engineering notes.`  \n\n- **Diagrams/charts**  \n  - `Reference topology snapshot` diagram with labeled components and directional connections:  \n    - `User traffic (API + SSO)` → `Ingress / WAF` → `Northwind managed retrieval cluster`  \n    - `Ingress / WAF` → `Meridian policy services` (downward connection)  \n\n- **Key facts for search/QA**  \n  - Critical timing thresholds: `24h`, `48h`, `vendor 72h counterproposal`.  \n  - Incident flow stages: `service alert`, `security and legal review`.  \n  - Simulation purpose: `OCR-hard engineering notes`.  \n  - Component names: `Ingress / WAF`, `Meridian policy services`, `Northwind managed retrieval cluster`, `User traffic (API + SSO)`."
+    },
+    {
+      "page": 15,
+      "content": "### Visual extraction  \n- **Headings**:  \n  - \"Appendix D — deployment checklist capture\"  \n  - \"Appendix capture — imported from engineering working papers\"  \n\n- **Checklist items**:  \n  - `01.` Pilot launch readiness notes, owner initials, and references to evidence artifacts.  \n  - `02.` Contains small-font line items and embedded identifiers.  \n  - `03.` Image-only page for parser stress testing.  \n\n- **Footer**:  \n  - \"Imported scan-heavy appendix page\" (left-aligned)  \n  - \"Page 15\" (right-aligned)  \n\n- **Key facts**:  \n  - Page is explicitly labeled as \"image-only\" for parser stress testing.  \n  - References \"engineering working papers\" as the source of the appendix.  \n  - Mentions \"small-font line items\" and \"embedded identifiers\" as content features."
+    }
+  ]
+}

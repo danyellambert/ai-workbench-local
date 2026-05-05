@@ -1,0 +1,125 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-16",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Information Security Policy v3.1.pdf (pdf)",
+      "Information Security Policy v3.2.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "**Executive Comparison:**  \nMeridian Holdings' Information Security Policy evolved from v3.1 to v3.2 with significant enhancements in incident response, access controls, and log retention. While v3.1 established foundational controls, it left critical customer-data incident notification timing undefined, creating compliance and response risks. v3.2 addresses this gap by introducing specific, time-bound requirements—including 24-hour escalation for customer data incidents, universal MFA, and quarterly privileged access reviews—reflecting a shift toward proactive, audit-ready governance aligned with regulatory expectations.\n\n- v3.1 lacked a defined timeframe for notifying stakeholders about critical customer-data incidents; v3.2 mandates 24-hour escalation for such events.  \n- v3.1 required MFA and ticket-based access but did not enforce MFA universally; v3.2 extends mandatory MFA to all workforce accounts.  \n- v3.1 did not specify frequency for privileged access reviews; v3.2 introduces quarterly reviews to tighten access governance.  \n- v3.1 referenced log retention and vendor evidence requirements without specifying duration; v3.2 mandates 12-month tamper-evident log retention.  \n- v3.1 noted ongoing governance maturity through annual updates; v3.2 demonstrates proactive risk mitigation in response to evolving threats and regulations.  \n- The absence of explicit enforcement mechanisms in v3.1 persists as a limitation, though v3.2 strengthens accountability through defined timelines and controls.  \n\n**Recommendation:** Adopt and enforce v3.2 immediately to close critical response gaps, improve regulatory compliance, and strengthen defense against identity-based and supply chain threats. Prioritize training on the 24-hour incident escalation process and quarterly access reviews to ensure operational effectiveness. Monitor enforcement mechanisms in future updates to close remaining governance gaps.",
+  "key_highlights": [
+    "Meridian Holdings' Information Security Policy evolved from v3.1 to v3.2 with significant enhancements in incident response, access controls, and log retention. While v3.1 established foundational controls, it left critical customer-data incident notification timing undefined, creating compliance and response risks. v3.2 addresses this gap by introducing specific, time-bound requirements—including 24-hour escalation for customer data incidents, universal MFA, and quarterly privileged access reviews—reflecting a shift toward proactive, audit-ready governance aligned with regulatory expectations.",
+    "v3.1 lacked a defined timeframe for notifying stakeholders about critical customer-data incidents; v3.2 mandates 24-hour escalation for such events.",
+    "v3.1 required MFA and ticket-based access but did not enforce MFA universally; v3.2 extends mandatory MFA to all workforce accounts.",
+    "v3.1 did not specify frequency for privileged access reviews; v3.2 introduces quarterly reviews to tighten access governance.",
+    "v3.1 referenced log retention and vendor evidence requirements without specifying duration; v3.2 mandates 12-month tamper-evident log retention.",
+    "v3.1 noted ongoing governance maturity through annual updates; v3.2 demonstrates proactive risk mitigation in response to evolving threats and regulations."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Information Security Policy v3.1.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf)",
+          "The policy enforces strong technical controls (MFA, ticket-based access) but leaves incident response timing ambiguous…"
+        ],
+        [
+          "document_summary",
+          "Summary of Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.2.pdf (pdf)",
+          "The policy moves from reactive to preventive controls by enforcing MFA universally and shortening privileged access val…"
+        ],
+        [
+          "approval_change",
+          "Meridian Holdings' Information Security Policy evolved from v3.1…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+        ],
+        [
+          "incident_response_delta",
+          "v3.1 lacked a defined timeframe for notifying stakeholders…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+        ],
+        [
+          "identity_control_delta",
+          "v3.1 required MFA and ticket-based access but did…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The policy enforces strong technical controls (MFA, ticket-based access) bu…"
+        ],
+        [
+          "approval_change",
+          "v3.1 did not specify frequency for privileged access…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "v3.1 referenced log retention and vendor evidence requirements…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+        ],
+        [
+          "cross_document_observation",
+          "v3.1 noted ongoing governance maturity through annual updates;…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [
+    "Retrieval backend note: Retrieval served by local fallback from the canonical JSON.."
+  ],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

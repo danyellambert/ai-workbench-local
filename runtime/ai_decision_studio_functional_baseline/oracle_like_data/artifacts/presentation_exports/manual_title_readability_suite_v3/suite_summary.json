@@ -1,0 +1,110 @@
+{
+  "generated_at": "2026-04-05T22:19:17.500473",
+  "suite_dir": "baseline://artifacts/presentation_exports/manual_title_readability_suite_v3",
+  "cases": {
+    "02_long_title_split_panel_v3": {
+      "pptx_path": "baseline://external_files/8c51826e1181de47_02_long_title_split_panel_v3.pptx",
+      "status": "ok",
+      "average_score": 93,
+      "top_risk_slides": [
+        {
+          "slide_number": 1,
+          "title": "AI Workbench Local — Benchmark & Eval Review for Executive Stakeholders with Extended Context on Evidence, Quality and Model Selection Trade-offs",
+          "risk_level": "low",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0
+        }
+      ],
+      "thumbnail_sheet": "baseline://external_files/6cee0c6719019de8_02_long_title_split_panel_v3-thumbnails.png",
+      "first_preview": "baseline://external_files/c1e460aa6362acdd_02_long_title_split_panel_v3-01.png",
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "body_edge_contact_count": 0
+    },
+    "03_very_long_title_hero_cover_v3": {
+      "pptx_path": "baseline://external_files/cbd64f3fa4f4126b_03_very_long_title_hero_cover_v3.pptx",
+      "status": "ok",
+      "average_score": 93,
+      "top_risk_slides": [
+        {
+          "slide_number": 1,
+          "title": "AI Workbench Local — Operational Review of Benchmarks, Evaluations, Evidence Quality, Human Review Gates and Production Readiness Signals",
+          "risk_level": "low",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0
+        }
+      ],
+      "thumbnail_sheet": "baseline://external_files/d5a1edfda330f236_03_very_long_title_hero_cover_v3-thumbnails.png",
+      "first_preview": "baseline://external_files/4a2c5cfcf64b00ec_03_very_long_title_hero_cover_v3-01.png",
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "body_edge_contact_count": 0
+    },
+    "05_extreme_title_collision_check_v3": {
+      "pptx_path": "baseline://external_files/18a1420777b03390_05_extreme_title_collision_check_v3.pptx",
+      "status": "ok",
+      "average_score": 93,
+      "top_risk_slides": [
+        {
+          "slide_number": 1,
+          "title": "AI Workbench Local — Executive Deck for Benchmark, Evaluation, Evidence Quality, Governance, Production Readiness, Human Review and Decision Support",
+          "risk_level": "low",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0
+        }
+      ],
+      "thumbnail_sheet": "baseline://external_files/1e09939a825f032f_05_extreme_title_collision_check_v3-thumbnails.png",
+      "first_preview": "baseline://external_files/50eb6011d0d88362_05_extreme_title_collision_check_v3-01.png",
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "body_edge_contact_count": 0
+    }
+  },
+  "benchmark_full_deck": {
+    "source_payload": "baseline://external_files/0dc626324270b5b9_payload.json",
+    "pptx_path": "baseline://external_files/080241541fc90b30_06_benchmark_full_deck_collision_audit.pptx",
+    "status": "ok",
+    "average_score": 99,
+    "issue_count": 1,
+    "top_risk_slides": [
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.2
+      }
+    ],
+    "slides_with_collision_or_overflow": [
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "collision_risk_count": 1,
+        "overflow_risk_count": 0,
+        "risk_level": "medium"
+      }
+    ],
+    "thumbnail_sheet": "baseline://external_files/6f0defbcdca02dc2_06_benchmark_full_deck_collision_audit-thumbnails.png",
+    "preview_backend": "office",
+    "edge_contact_count": 0,
+    "safe_margin_warning_count": 0,
+    "body_edge_contact_count": 7
+  },
+  "comparisons": {
+    "02_long_title_split_panel": "baseline://external_files/86fb2062c3d2d1f7_02_long_title_split_panel_vs_02_long_title_split_panel_v3.png",
+    "03_very_long_title_hero_cover": "baseline://external_files/5fedc760ad181d38_03_very_long_title_hero_cover_vs_03_very_long_title_hero_cover_v3.png",
+    "05_extreme_title_collision_check": "baseline://external_files/98f2843c563e0e7a_05_extreme_title_collision_check_vs_05_extreme_title_collision_check_v3.png"
+  }
+}

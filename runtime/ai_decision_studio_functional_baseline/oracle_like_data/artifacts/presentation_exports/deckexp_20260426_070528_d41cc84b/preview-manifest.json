@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "document_review_deck",
+  "output_dir": "/work/outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b",
+  "presentation_title": "document_review_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/usr/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "/work/outputs/ai_workbench_exports/deckexp_20260426_070528_d41cc84b/document_review_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "document_review_deck-01.png",
+      "path": "/work/outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "document_review_deck-02.png",
+      "path": "/work/outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "document_review_deck-03.png",
+      "path": "/work/outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "document_review_deck-04.png",
+      "path": "/work/outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "document_review_deck-05.png",
+      "path": "/work/outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "document_review_deck-06.png",
+      "path": "/work/outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "document_review_deck-07.png",
+      "path": "/work/outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-07.png"
+    }
+  ]
+}

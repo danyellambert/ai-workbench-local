@@ -1,0 +1,43 @@
+{
+  "evaluated_pairs": 60,
+  "missing_pairs": [],
+  "status_counts": {
+    "PASS": 48,
+    "WARN": 7,
+    "FAIL": 4,
+    "OCR_REQUIRED": 1
+  },
+  "layout_status_counts": {
+    "classic_one_column": {
+      "PASS": 12,
+      "WARN": 0,
+      "FAIL": 0,
+      "OCR_REQUIRED": 0
+    },
+    "modern_two_column": {
+      "PASS": 12,
+      "WARN": 0,
+      "FAIL": 0,
+      "OCR_REQUIRED": 0
+    },
+    "compact_sidebar": {
+      "PASS": 12,
+      "WARN": 0,
+      "FAIL": 0,
+      "OCR_REQUIRED": 0
+    },
+    "dense_executive": {
+      "PASS": 12,
+      "WARN": 0,
+      "FAIL": 0,
+      "OCR_REQUIRED": 0
+    },
+    "scan_like_image_pdf": {
+      "PASS": 0,
+      "WARN": 7,
+      "FAIL": 4,
+      "OCR_REQUIRED": 1
+    }
+  },
+  "avg_overall_score": 0.8108
+}

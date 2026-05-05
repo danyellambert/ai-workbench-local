@@ -1,0 +1,43 @@
+{
+  "total_cases": 4,
+  "successful_cases": 4,
+  "failed_cases": 0,
+  "variant_ranking": [
+    {
+      "variant": "evidence_with_vl",
+      "case_count": 4,
+      "avg_latency_s": 2.4093,
+      "avg_f1": 0.75,
+      "helped_cases": 4
+    },
+    {
+      "variant": "evidence_no_vl",
+      "case_count": 4,
+      "avg_latency_s": 2.4303,
+      "avg_f1": 0.75,
+      "helped_cases": 4
+    },
+    {
+      "variant": "legacy_pdf",
+      "case_count": 4,
+      "avg_latency_s": 0.0303,
+      "avg_f1": 0.25,
+      "helped_cases": 0
+    }
+  ],
+  "best_ocr_tradeoff": {
+    "variant": "evidence_no_vl",
+    "case_count": 4,
+    "avg_latency_s": 2.4303,
+    "avg_f1": 0.75,
+    "helped_cases": 4
+  },
+  "best_vlm_tradeoff": {
+    "variant": "evidence_with_vl",
+    "case_count": 4,
+    "avg_latency_s": 2.4093,
+    "avg_f1": 0.75,
+    "helped_cases": 4
+  },
+  "support_level": "partially_supported"
+}

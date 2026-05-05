@@ -1,0 +1,247 @@
+[
+  {
+    "session_id": "session_af969a6c5354",
+    "title": "what must third party personnel do if they identify a security incident?",
+    "created_at": "2026-05-04T22:57:59.538483+00:00",
+    "updated_at": "2026-05-04T23:01:12.327069+00:00",
+    "status": "completed",
+    "document_ids": [
+      "7ecfe260bb0c381b51a3f5c30dc9460164b344856203153fa9d2e66e0dd30424"
+    ],
+    "messages": [
+      {
+        "id": "msg_92680aa3de7b",
+        "role": "user",
+        "content": "what must third party personnel do if they identify a security incident?",
+        "timestamp": "2026-05-04T22:58:02.999805+00:00"
+      },
+      {
+        "id": "msg_2ae2d817988c",
+        "role": "assistant",
+        "content": "Third‑party personnel must:\n\n- Report the security incident **directly to their assigned point of contact**.  \n- Provide **immediate notification to the campus** whenever the incident involves a breach of sensitive data or services that could affect the University.  \n\nThese actions are required by the Third Party & Vendor Management Policy.",
+        "timestamp": "2026-05-04T22:58:08.507416+00:00",
+        "sources": [
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Policy\nThird party access to Grambling State University’s network and system resources must comply\nwith all University’s applicable rules, policies, standards, and agreements.\nGrambling State University will provide a point of contact for…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.1945,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "[Page 1]\nThird Party & Vendor Management Policy\nGrambling State University Information Technology\nJay Ellis, Chief Information Officer\nRevision History:\nVersion Number Revision Date\n1.0\nIntroduction\nThird party entities play an important r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.1555,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "contractors with\nwhom it is authorized to share the data, to share only the minimum information necessary, to\nsecurely return or destroy the data upon expiration of the contract, and to provide immediate\nnotification to the campus, wheneve…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.1555,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Grambling State University’s password procedures and policies.\n6. Upon termination of a contract or at the request of Grambling State University, the third\nparty must surrender all equipment and supplies immediately.\n7. Third parties are r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.1555,
+            "score_label": "Relevance"
+          }
+        ],
+        "diagnostics": {
+          "workflow_id": "lab_document_qa",
+          "workflow_label": "Grounded Document Q&A",
+          "provider": "ollama_hosted",
+          "model": "nemotron-3-super:cloud",
+          "context_strategy": "retrieval",
+          "structured_execution_id": "fad2ff9f-f14b-42dc-a842-909c5c805a04",
+          "tool_used": "consult_documents",
+          "answer_mode": "friendly",
+          "confidence": 0.84,
+          "source_count": 4,
+          "latency_s": 5.504
+        }
+      },
+      {
+        "id": "msg_1baefc70ea28",
+        "role": "user",
+        "content": "Turn the findings into next actions with owners and due dates.",
+        "timestamp": "2026-05-04T22:58:34.460368+00:00"
+      },
+      {
+        "id": "msg_031236b0f5fe",
+        "role": "assistant",
+        "content": "- Action: Verify that third‑party personnel are cleared to handle sensitive information before granting access  \n  Owner role: Proposed owner role (IT/Security Department)  \n  Timing/due date: Proposed timing (Prior to onboarding/access grant)  \n  Evidence: Page 2 – “Each third party user with access to Grambling State University sensitive information must be cleared to handle that information.”  \n  Priority: High  \n\n- Action: Conduct an annual security review of existing third‑party providers  \n  Owner role: Proposed owner role (IT/Security Department)  \n  Timing/due date: Proposed timing (Once per year)  \n  Evidence: Page 2 – “Existing providers will undergo an annual review to continually monitor their security program and controls.”  \n  Priority: High  \n\n- Action: Ensure immediate surrender of all equipment and supplies upon contract termination or university request  \n  Owner role: Proposed owner role (Contract Management/Procurement)  \n  Timing/due date: Proposed timing (Immediately at termination/request)  \n  Evidence: Page 1 – “Upon termination of a contract or at the request of Grambling State University, the third party must surrender all equipment and supplies immediately.”  \n  Priority: High  \n\n- Action: Assign a point of contact for each third party/vendor during the onboarding process  \n  Owner role: Proposed owner role (IT/Security Department)  \n  Timing/due date: Proposed timing (As part of onboarding)  \n  Evidence: Page 2 – “Grambling State University will provide a point of contact for each third party or vendor as part of the onboarding process.”  \n  Priority: Medium",
+        "timestamp": "2026-05-04T22:58:51.947931+00:00",
+        "sources": [
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "[Page 1]\nThird Party & Vendor Management Policy\nGrambling State University Information Technology\nJay Ellis, Chief Information Officer\nRevision History:\nVersion Number Revision Date\n1.0\nIntroduction\nThird party entities play an important r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.05,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Grambling State University’s password procedures and policies.\n6. Upon termination of a contract or at the request of Grambling State University, the third\nparty must surrender all equipment and supplies immediately.\n7. Third parties are r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.05,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "contractors with\nwhom it is authorized to share the data, to share only the minimum information necessary, to\nsecurely return or destroy the data upon expiration of the contract, and to provide immediate\nnotification to the campus, wheneve…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0416,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Policy\nThird party access to Grambling State University’s network and system resources must comply\nwith all University’s applicable rules, policies, standards, and agreements.\nGrambling State University will provide a point of contact for…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0416,
+            "score_label": "Relevance"
+          }
+        ],
+        "diagnostics": {
+          "workflow_id": "lab_document_qa",
+          "workflow_label": "Grounded Document Q&A",
+          "provider": "ollama_hosted",
+          "model": "nemotron-3-super:cloud",
+          "context_strategy": "retrieval",
+          "structured_execution_id": "31cda352-7250-409c-8b03-f2dbbe282c12",
+          "tool_used": "consult_documents",
+          "answer_mode": "friendly",
+          "confidence": 0.84,
+          "source_count": 4,
+          "latency_s": 17.484
+        }
+      },
+      {
+        "id": "msg_65ea92a2bb55",
+        "role": "user",
+        "content": "Summarize the main control gaps in the selected evidence.",
+        "timestamp": "2026-05-04T22:59:30.730702+00:00"
+      },
+      {
+        "id": "msg_35ea86dce965",
+        "role": "assistant",
+        "content": "- Control gap: Lack of continuous/real‑time monitoring of third‑party security posture between scheduled reviews (Inference)  \n  Evidence: Policy states “Existing providers will undergo an annual review” and “Periodically assessing service providers based on the risk they present” but does not specify ongoing monitoring.  \n  Risk/impact: Undetected control degradation or emerging vulnerabilities could lead to data breaches between reviews.  \n  Suggested mitigation: Add continuous monitoring requirements (e.g., quarterly vulnerability scans, real‑time access logs, and status reporting) to vendor contracts.\n\n- Control gap: No explicit encryption mandate for data shared with third parties (Inference)  \n  Evidence: Requires sharing “only the minimum information necessary” and “securely return or destroy the data” but does not prescribe encryption at rest or in transit.  \n  Risk/impact: Sensitive data could be intercepted or accessed if storage/media are compromised.  \n  Suggested mitigation: Enforce encryption standards (e.g., AES‑256 at rest, TLS 1.2+ in transit) in all third‑party agreements and verify compliance.\n\n- Control gap: Insufficient detail on subcontractor oversight and flow‑down of obligations (Inference)  \n  Evidence: Mentions “any subcontractors with whom it is authorized to share the data” but does not require subcontractors to inherit the same security controls or be subject to reviews.  \n  Risk/impact: Subcontractors could become a weak link, exposing university data to uncontrolled risk.  \n  Suggested mitigation: Require prime vendors to enforce identical security obligations on subcontractors and provide evidence of subcontractor compliance (e.g., attestations, audit rights).\n\n- Control gap: Absence of defined sanctions or consequences for non‑compliance (Inference)  \n  Evidence: Policy outlines numerous requirements but contains no mention of penalties, termination rights, or remediation steps for violations.  \n  Risk/impact: Reduced incentive for vendors to adhere to controls, increasing likelihood of unaddressed deficiencies.  \n  Suggested mitigation: Include contractual remedies (e.g., audit rights, cure periods, financial penalties, termination for material breach) and an escalation process for non‑compliance.",
+        "timestamp": "2026-05-04T22:59:59.728548+00:00",
+        "sources": [
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "contractors with\nwhom it is authorized to share the data, to share only the minimum information necessary, to\nsecurely return or destroy the data upon expiration of the contract, and to provide immediate\nnotification to the campus, wheneve…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0742,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "[Page 1]\nThird Party & Vendor Management Policy\nGrambling State University Information Technology\nJay Ellis, Chief Information Officer\nRevision History:\nVersion Number Revision Date\n1.0\nIntroduction\nThird party entities play an important r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.053,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Grambling State University’s password procedures and policies.\n6. Upon termination of a contract or at the request of Grambling State University, the third\nparty must surrender all equipment and supplies immediately.\n7. Third parties are r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.053,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Policy\nThird party access to Grambling State University’s network and system resources must comply\nwith all University’s applicable rules, policies, standards, and agreements.\nGrambling State University will provide a point of contact for…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0424,
+            "score_label": "Relevance"
+          }
+        ],
+        "diagnostics": {
+          "workflow_id": "lab_document_qa",
+          "workflow_label": "Grounded Document Q&A",
+          "provider": "ollama_hosted",
+          "model": "nemotron-3-super:cloud",
+          "context_strategy": "retrieval",
+          "structured_execution_id": "67cb2a8c-a1d1-46e6-b0a5-52150d57f94d",
+          "tool_used": "consult_documents",
+          "answer_mode": "friendly",
+          "confidence": 0.84,
+          "source_count": 4,
+          "latency_s": 28.993
+        }
+      },
+      {
+        "id": "msg_68331f943d9a",
+        "role": "user",
+        "content": "What appears risky, unsupported or contradictory in these documents?",
+        "timestamp": "2026-05-04T23:00:46.858436+00:00"
+      },
+      {
+        "id": "msg_eae2c2efee3e",
+        "role": "assistant",
+        "content": "**Risky**  \n- Immediate surrender of all equipment and supplies upon contract termination or university request is required; failure to enforce this could leave university data or assets exposed. [Source: grambling_third_party_vendor_management_policy.pdf]  \n\n**Unsupported**  \n- The policy states that a point of contact will “make certain that [the third party] is in compliance with these rules,” but no evidence is provided on how compliance will be verified or monitored. [Source: grambling_third_party_vendor_management_policy.pdf]  \n\n**Contradictory**  \n- No explicit contradictions are present in the excerpts supplied.  \n\n**Verify next**  \n- Confirm the exact content of Grambling State University’s password procedures and policies that third parties must follow. [Source: grambling_third_party_vendor_management_policy.pdf]  \n- Verify the specific auditing requirements referenced for third‑party compliance. [Source: grambling_third_party_vendor_management_policy.pdf]  \n- Check the detailed list of applicable regulations (PCI, FERPA, HIPPA, GLBA, etc.) that third‑party personnel must adhere to. [Source: grambling_third_party_vendor_management_policy.pdf]",
+        "timestamp": "2026-05-04T23:01:12.326238+00:00",
+        "sources": [
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Grambling State University’s password procedures and policies.\n6. Upon termination of a contract or at the request of Grambling State University, the third\nparty must surrender all equipment and supplies immediately.\n7. Third parties are r…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0848,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "contractors with\nwhom it is authorized to share the data, to share only the minimum information necessary, to\nsecurely return or destroy the data upon expiration of the contract, and to provide immediate\nnotification to the campus, wheneve…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0742,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Policy\nThird party access to Grambling State University’s network and system resources must comply\nwith all University’s applicable rules, policies, standards, and agreements.\nGrambling State University will provide a point of contact for…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0742,
+            "score_label": "Relevance"
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "tor their security\nprogram and controls.\n[Page 3]\n5. Documentation reviewed may consist of contracts, hecvats, vpats, soc reports, etc., and\nwill be stored and maintained throughout the lifecycle of the partnership.\nEnforcement\nViolation o…",
+            "score_kind": "retrieval_relevance",
+            "score": 0.0636,
+            "score_label": "Relevance"
+          }
+        ],
+        "diagnostics": {
+          "workflow_id": "lab_document_qa",
+          "workflow_label": "Grounded Document Q&A",
+          "provider": "ollama_hosted",
+          "model": "nemotron-3-super:cloud",
+          "context_strategy": "retrieval",
+          "structured_execution_id": "c3d49563-53b0-4fa4-9860-91f3301e4e86",
+          "tool_used": "consult_documents",
+          "answer_mode": "friendly",
+          "confidence": 0.84,
+          "source_count": 4,
+          "latency_s": 25.465
+        }
+      }
+    ],
+    "runtime": {
+      "provider": "ollama_hosted",
+      "model": "nemotron-3-super:cloud",
+      "workflow_id": "lab_document_qa",
+      "avg_latency_s": 25.465,
+      "total_tokens": 0.0,
+      "warning_count": 1,
+      "context_chars": 0,
+      "source_count": 4,
+      "grounded_documents": [
+        "7ecfe260bb0c381b51a3f5c30dc9460164b344856203153fa9d2e66e0dd30424"
+      ]
+    }
+  }
+]

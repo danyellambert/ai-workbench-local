@@ -1,0 +1,98 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Third-Party Supplier Code of Conduct.pdf",
+  "file_type": "pdf",
+  "file_hash": "e2abc1eb9fe1fc9f9fde95adba2ca46148bd4e7491557834da8e6cb0c57e5418",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-034  Supplier Code of Conduct\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nThird-Party Supplier Code of Conduct\nMeridian’s minimum control expectations for strategic vendors and subprocessors.\nDocument ID\nPOL-034\nOwner\nVP, Procurement\nVersion\n1.1\nEffective Date\n2024-01-09\nAudience\nCritical suppliers and subprocessors\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nSupplier Obligations\n●\nSUP-SEC-01. Maintain least-privilege access, MFA for privileged users, and documented approvals for production\nsupport access.\n●\nSUP-IR-02. Notify Meridian of any material incident involving Meridian data or Meridian-operated workflows within 24\nhours of confirmation.\n●\nSUP-DPA-03. Provide current subprocessor lists and advance notice of material changes.\n●\nSUP-EVD-04. Retain and furnish reasonable evidence needed for annual review, audit follow-up, and remediation\nverification.\n●\nSUP-BCP-05. Maintain business continuity, backup, and recoverability processes proportionate to the service criticality.\nAlignment Purpose\nThis code is referenced by Procurement, Security, and Legal when reviewing vendor contracts and when converting\ncontract findings into operational follow-up actions.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 1414,
+    "final_text_chars": 1414,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1405,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 16,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 3533,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-034  Supplier Code of Conduct\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nThird-Party Supplier Code of Conduct\nMeridian’s minimum control expectations for strategic vendors and subprocessors.\nDocument ID\nPOL-034\nOwner\nVP, Procurement\nVersion\n1.1\nEffective Date\n2024-01-09\nAudience\nCritical suppliers and subprocessors\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nSupplier Obligations\n●\nSUP-SEC-01. Maintain least-privilege access, MFA for privileged users, and documented approvals for production\nsupport access.\n●\nSUP-IR-02. Notify Meridian of any material incident involving Meridian data or Meridian-operated workflows within 24\nhours of confirmation.\n●\nSUP-DPA-03. Provide current subprocessor lists and advance notice of material changes.\n●\nSUP-EVD-04. Retain and furnish reasonable evidence needed for annual review, audit follow-up, and remediation\nverification.\n●\nSUP-BCP-05. Maintain business continuity, backup, and recoverability processes proportionate to the service criticality.\nAlignment Purpose\nThis code is referenced by Procurement, Security, and Legal when reviewing vendor contracts and when converting\ncontract findings into operational follow-up actions.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic supplier code is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "policies/Third-Party Supplier Code of Conduct.pdf",
+    "nextcloud_relative_path": "policies/Third-Party Supplier Code of Conduct.pdf",
+    "source_relative_path": "policies/Third-Party Supplier Code of Conduct.pdf",
+    "filename": "Third-Party Supplier Code of Conduct.pdf",
+    "title": "Third-Party Supplier Code of Conduct",
+    "category": "policies",
+    "preindex": {
+      "relative_path": "policies/Third-Party Supplier Code of Conduct.pdf",
+      "filename": "Third-Party Supplier Code of Conduct.pdf",
+      "title": "Third-Party Supplier Code of Conduct",
+      "category": "policies",
+      "document_id": "policies/Third-Party Supplier Code of Conduct.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:39"
+}

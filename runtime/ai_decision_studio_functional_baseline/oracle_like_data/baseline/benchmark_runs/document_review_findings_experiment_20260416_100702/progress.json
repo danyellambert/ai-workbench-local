@@ -1,0 +1,1390 @@
+{
+  "generated_at": "2026-04-16T10:15:51.671239",
+  "status": "running",
+  "documents": [
+    "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+    "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-004_Data_Processing_Addendum.pdf"
+  ],
+  "configs": [
+    {
+      "key": "heuristic_baseline",
+      "label": "Heuristic baseline",
+      "base_model": "qwen2.5:7b",
+      "findings_model": null,
+      "prompt_style": null,
+      "synthesis_enabled": false
+    },
+    {
+      "key": "qwen2.5_7b_hybrid",
+      "label": "qwen2.5:7b hybrid",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "qwen2.5:7b",
+      "prompt_style": "hybrid",
+      "synthesis_enabled": true
+    },
+    {
+      "key": "nemotron_extractive",
+      "label": "nemotron-3-super:cloud extractive",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "extractive",
+      "synthesis_enabled": true
+    },
+    {
+      "key": "nemotron_executive",
+      "label": "nemotron-3-super:cloud executive",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "executive",
+      "synthesis_enabled": true
+    },
+    {
+      "key": "nemotron_hybrid",
+      "label": "nemotron-3-super:cloud hybrid",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "hybrid",
+      "synthesis_enabled": true
+    }
+  ],
+  "completed_runs": 8,
+  "total_runs": 10,
+  "runs": [
+    {
+      "document": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "config": {
+        "key": "heuristic_baseline",
+        "label": "Heuristic baseline",
+        "base_model": "qwen2.5:7b",
+        "findings_model": null,
+        "prompt_style": null,
+        "synthesis_enabled": false
+      },
+      "duration_s": 68.286,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Master Services Agreement - Vendor Draft: 1 actionable task(s), 2 deadline(s) and 2 operational risk(s) identified.",
+      "warnings": [
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": null,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 1.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 2,
+        "top_blocker_count": 2,
+        "total_score": 1.0
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Renegotiate",
+          "status": "Requires Legal Review",
+          "summary": "Master Services Agreement - Vendor Draft: 1 actionable task(s), 2 deadline(s) and 2 operational risk(s) identified.",
+          "severity_counts": {
+            "critical": 1,
+            "high": 1,
+            "medium": 0,
+            "low": 0
+          },
+          "next_owner": "Platform team",
+          "due_date": "Friday"
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Finalize integration plan before Friday",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "top_blockers": [
+          {
+            "title": "Customer audit rights are missing, which could lead to compliance issues.",
+            "severity": "critical",
+            "recommendation": "Finalize integration plan before Friday"
+          },
+          {
+            "title": "Subprocessors can be updated without approval, which could introduce security risks.",
+            "severity": "high",
+            "recommendation": "Finalize integration plan before Friday"
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Compliance",
+            "detail": "Potential non-compliance with regulatory requirements"
+          },
+          {
+            "label": "Security",
+            "detail": "Increased risk of unauthorized access or data breaches"
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "critical",
+            "category": "Compliance",
+            "title": "Customer audit rights are missing, which could lead to compliance issues.",
+            "description": "Potential non-compliance with regulatory requirements",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.98,
+            "recommendation": "Finalize integration plan before Friday",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "category": "Security",
+            "title": "Subprocessors can be updated without approval, which could introduce security risks.",
+            "description": "Increased risk of unauthorized access or data breaches",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Finalize integration plan before Friday",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "critical",
+            "title": "Customer audit rights are missing, which could lead to compliance issues.",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "title": "Subprocessors can be updated without approval, which could introduce security risks.",
+            "chunkId": "chunk_2",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nMaster Services Agreement - Vendor Draft\nCounterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing\nprotections.\nNotic"
+          ],
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "2",
+            "-",
+            "mercially reasonable efforts to delete Customer Data following termination.\nNo deletion deadline is stated.\nUse of data\nProvider may use de-identified service data for product development and model improvement.\nLiability"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "document": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "config": {
+        "key": "qwen2.5_7b_hybrid",
+        "label": "qwen2.5:7b hybrid",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "qwen2.5:7b",
+        "prompt_style": "hybrid",
+        "synthesis_enabled": true
+      },
+      "duration_s": 60.169,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Master Services Agreement - Vendor Draft: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+      "warnings": [
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": null,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 1.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 2,
+        "top_blocker_count": 2,
+        "total_score": 1.0
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Renegotiate",
+          "status": "Requires Legal Review",
+          "summary": "Master Services Agreement - Vendor Draft: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+          "severity_counts": {
+            "critical": 0,
+            "high": 2,
+            "medium": 0,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": null
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Ensure compliance with audit rights",
+          "Review and update subprocessor list management process",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "top_blockers": [
+          {
+            "title": "Customer audit rights are not provided, only summary letters or certifications may...",
+            "severity": "high",
+            "recommendation": "Ensure compliance with audit rights"
+          },
+          {
+            "title": "Subprocessors can be updated without approval and notice is given only upon request,...",
+            "severity": "high",
+            "recommendation": "Review and update subprocessor list management process"
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Grounded Finding",
+            "detail": "Customer audit rights are not provided, only summary letters or certifications may be shared at the provider's discretion."
+          },
+          {
+            "label": "Security",
+            "detail": "Subprocessors can be updated without approval and notice is given only upon request, which could lead to potential security risks."
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "category": "Grounded Finding",
+            "title": "Customer audit rights are not provided, only summary letters or certifications may...",
+            "description": "Customer audit rights are not provided, only summary letters or certifications may be shared at the provider's discretion.",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Ensure compliance with audit rights",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "category": "Security",
+            "title": "Subprocessors can be updated without approval and notice is given only upon request,...",
+            "description": "Subprocessors can be updated without approval and notice is given only upon request, which could lead to potential security risks.",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.95,
+            "recommendation": "Review and update subprocessor list management process",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "title": "Customer audit rights are not provided, only summary letters or certifications may...",
+            "chunkId": "chunk_2",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "title": "Subprocessors can be updated without approval and notice is given only upon request,...",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nMaster Services Agreement - Vendor Draft\nCounterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing\nprotections.\nNotic"
+          ],
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "2",
+            "-",
+            "mercially reasonable efforts to delete Customer Data following termination.\nNo deletion deadline is stated.\nUse of data\nProvider may use de-identified service data for product development and model improvement.\nLiability"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "document": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "config": {
+        "key": "nemotron_extractive",
+        "label": "nemotron-3-super:cloud extractive",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "nemotron-3-super:cloud",
+        "prompt_style": "extractive",
+        "synthesis_enabled": true
+      },
+      "duration_s": 58.846,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Master Services Agreement - Vendor Draft: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+      "warnings": [
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": null,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 1.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 2,
+        "top_blocker_count": 2,
+        "total_score": 1.0
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Renegotiate",
+          "status": "Requires Legal Review",
+          "summary": "Master Services Agreement - Vendor Draft: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+          "severity_counts": {
+            "critical": 0,
+            "high": 2,
+            "medium": 0,
+            "low": 0
+          },
+          "next_owner": "Legal / Procurement",
+          "due_date": null
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Review and finalize subprocessor list",
+          "Establish clear audit rights for customer",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "top_blockers": [
+          {
+            "title": "Potential delay in service due to provider's discretion on audit rights",
+            "severity": "high",
+            "recommendation": "Review and finalize subprocessor list"
+          },
+          {
+            "title": "Risk of data misuse due to lack of strict subprocessor control",
+            "severity": "high",
+            "recommendation": "Establish clear audit rights for customer"
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Compliance",
+            "detail": "Audit process may be delayed, impacting compliance checks"
+          },
+          {
+            "label": "Security",
+            "detail": "Data security could be compromised if third parties are not properly vetted"
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "category": "Compliance",
+            "title": "Potential delay in service due to provider's discretion on audit rights",
+            "description": "Audit process may be delayed, impacting compliance checks",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Review and finalize subprocessor list",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "category": "Security",
+            "title": "Risk of data misuse due to lack of strict subprocessor control",
+            "description": "Data security could be compromised if third parties are not properly vetted",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.95,
+            "recommendation": "Establish clear audit rights for customer",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "title": "Potential delay in service due to provider's discretion on audit rights",
+            "chunkId": "chunk_2",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "title": "Risk of data misuse due to lack of strict subprocessor control",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nMaster Services Agreement - Vendor Draft\nCounterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing\nprotections.\nNotic"
+          ],
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "2",
+            "-",
+            "mercially reasonable efforts to delete Customer Data following termination.\nNo deletion deadline is stated.\nUse of data\nProvider may use de-identified service data for product development and model improvement.\nLiability"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "document": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "config": {
+        "key": "nemotron_executive",
+        "label": "nemotron-3-super:cloud executive",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "nemotron-3-super:cloud",
+        "prompt_style": "executive",
+        "synthesis_enabled": true
+      },
+      "duration_s": 47.334,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Master Services Agreement - Vendor Draft: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+      "warnings": [
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": null,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 1.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 2,
+        "top_blocker_count": 1,
+        "total_score": 1.0
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Approve with changes",
+          "status": "Requires Review",
+          "summary": "Master Services Agreement - Vendor Draft: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+          "severity_counts": {
+            "critical": 0,
+            "high": 1,
+            "medium": 1,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": null
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Ensure compliance with audit rights",
+          "Review and update subprocessor list process",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "top_blockers": [
+          {
+            "title": "Customer audit rights are not provided.",
+            "severity": "high",
+            "recommendation": "Ensure compliance with audit rights"
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Grounded Finding",
+            "detail": "Customer audit rights are not provided."
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "category": "Grounded Finding",
+            "title": "Customer audit rights are not provided.",
+            "description": "Customer audit rights are not provided.",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Ensure compliance with audit rights",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "medium",
+            "category": "Grounded Finding",
+            "title": "Subprocessors can be updated without approval, only notified upon request.",
+            "description": "Subprocessors can be updated without approval, only notified upon request.",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.9,
+            "recommendation": "Review and update subprocessor list process",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "title": "Customer audit rights are not provided.",
+            "chunkId": "chunk_2",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "medium",
+            "title": "Subprocessors can be updated without approval, only notified upon request.",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nMaster Services Agreement - Vendor Draft\nCounterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing\nprotections.\nNotic"
+          ],
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "2",
+            "-",
+            "mercially reasonable efforts to delete Customer Data following termination.\nNo deletion deadline is stated.\nUse of data\nProvider may use de-identified service data for product development and model improvement.\nLiability"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "document": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "config": {
+        "key": "nemotron_hybrid",
+        "label": "nemotron-3-super:cloud hybrid",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "nemotron-3-super:cloud",
+        "prompt_style": "hybrid",
+        "synthesis_enabled": true
+      },
+      "duration_s": 170.277,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Master Services Agreement - Vendor Draft: 1 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+      "warnings": [
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": null,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 0.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 2,
+        "top_blocker_count": 2,
+        "total_score": 0.9
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Approve with changes",
+          "status": "Requires Review",
+          "summary": "Master Services Agreement - Vendor Draft: 1 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+          "severity_counts": {
+            "critical": 0,
+            "high": 0,
+            "medium": 2,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": null
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Review and address gaps in the draft",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "top_blockers": [
+          {
+            "title": "Customer audit rights are not provided",
+            "severity": "medium",
+            "recommendation": "Review and address gaps in the draft"
+          },
+          {
+            "title": "Subprocessors can be updated without approval",
+            "severity": "medium",
+            "recommendation": "Review and address gaps in the draft"
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Grounded Finding",
+            "detail": "Customer audit rights are not provided"
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "medium",
+            "category": "Grounded Finding",
+            "title": "Customer audit rights are not provided",
+            "description": "Customer audit rights are not provided",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.9,
+            "recommendation": "Review and address gaps in the draft",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "medium",
+            "category": "Grounded Finding",
+            "title": "Subprocessors can be updated without approval",
+            "description": "Subprocessors can be updated without approval",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.9,
+            "recommendation": "Review and address gaps in the draft",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "medium",
+            "title": "Customer audit rights are not provided",
+            "chunkId": "chunk_2",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "medium",
+            "title": "Subprocessors can be updated without approval",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nMaster Services Agreement - Vendor Draft\nCounterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing\nprotections.\nNotic"
+          ],
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "2",
+            "-",
+            "mercially reasonable efforts to delete Customer Data following termination.\nNo deletion deadline is stated.\nUse of data\nProvider may use de-identified service data for product development and model improvement.\nLiability"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "document": "CTR-004_Data_Processing_Addendum.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-004_Data_Processing_Addendum.pdf",
+      "config": {
+        "key": "heuristic_baseline",
+        "label": "Heuristic baseline",
+        "base_model": "qwen2.5:7b",
+        "findings_model": null,
+        "prompt_style": null,
+        "synthesis_enabled": false
+      },
+      "duration_s": 51.656,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Data Processing Addendum: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+      "warnings": [
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": null,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 0.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 2,
+        "top_blocker_count": 2,
+        "total_score": 0.9
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Approve with changes",
+          "status": "Requires Review",
+          "summary": "Data Processing Addendum: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+          "severity_counts": {
+            "critical": 0,
+            "high": 0,
+            "medium": 2,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": null
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Processor shall process personal data only on documented instructions and only for the contracted services.",
+          "Processor personnel with access to personal data must be bound by confidentiality obligations.",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "top_blockers": [
+          {
+            "title": "Processor personnel with access to personal data must be bound by confidentiality...",
+            "severity": "medium",
+            "recommendation": "Processor shall process personal data only on documented instructions and only for the contracted services."
+          },
+          {
+            "title": "Incident response: Notice to HarborView within 48 hours after confirmation of a...",
+            "severity": "medium",
+            "recommendation": "Processor personnel with access to personal data must be bound by confidentiality obligations."
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Grounded Finding",
+            "detail": "Processor personnel with access to personal data must be bound by confidentiality obligations."
+          },
+          {
+            "label": "Security",
+            "detail": "Incident response: Notice to HarborView within 48 hours after confirmation of a personal-data incident."
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "medium",
+            "category": "Grounded Finding",
+            "title": "Processor personnel with access to personal data must be bound by confidentiality...",
+            "description": "Processor personnel with access to personal data must be bound by confidentiality obligations.",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.9,
+            "recommendation": "Processor shall process personal data only on documented instructions and only for the contracted services.",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Data Processing Addendum Version 1.0 - personal-data obligations that align with HarborView security and retention requirements. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-004 Owner Privacy Counsel Version 1.0 Effective Date 2025-08-12 Counterparty BluePe"
+          },
+          {
+            "id": "finding-2",
+            "severity": "medium",
+            "category": "Security",
+            "title": "Incident response: Notice to HarborView within 48 hours after confirmation of a...",
+            "description": "Incident response: Notice to HarborView within 48 hours after confirmation of a personal-data incident.",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.9,
+            "recommendation": "Processor personnel with access to personal data must be bound by confidentiality obligations.",
+            "snippet": "ckups. Monitoring Logging for privileged actions and security events retained for at least 12 months. Incident response Notice to HarborView within 48 hours after confirmation of a personal-data incident. Subprocessors Written subprocessor list and prior notice for material changes. Deletion / return Return or delete customer personal data within 30 days of termination unless retention is legally"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "medium",
+            "title": "Processor personnel with access to personal data must be bound by confidentiality...",
+            "chunkId": "chunk_1",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Data Processing Addendum Version 1.0 - personal-data obligations that align with HarborView security and retention requirements. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-004 Owner Privacy Counsel Version 1.0 Effective Date 2025-08-12 Counterparty BluePe"
+          },
+          {
+            "id": "finding-2",
+            "severity": "medium",
+            "title": "Incident response: Notice to HarborView within 48 hours after confirmation of a...",
+            "chunkId": "chunk_2",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "snippet": "ckups. Monitoring Logging for privileged actions and security events retained for at least 12 months. Incident response Notice to HarborView within 48 hours after confirmation of a personal-data incident. Subprocessors Written subprocessor list and prior notice for material changes. Deletion / return Return or delete customer personal data within 30 days of termination unless retention is legally"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-004_Data_Processing_Addendum.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nData Processing Addendum\nVersion 1.0 - personal-data obligations that align with HarborView security and retention requirements.\nNotice: Synthetic business do"
+          ],
+          [
+            "CTR-004_Data_Processing_Addendum.pdf",
+            "2",
+            "-",
+            "ckups.\nMonitoring\nLogging for privileged actions and security events retained for at least 12 months.\nIncident response\nNotice to HarborView within 48 hours after confirmation of a personal-data incident.\nSubprocessors\nW"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "document": "CTR-004_Data_Processing_Addendum.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-004_Data_Processing_Addendum.pdf",
+      "config": {
+        "key": "qwen2.5_7b_hybrid",
+        "label": "qwen2.5:7b hybrid",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "qwen2.5:7b",
+        "prompt_style": "hybrid",
+        "synthesis_enabled": true
+      },
+      "duration_s": 35.895,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Data Processing Addendum: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+      "warnings": [
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": null,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 1.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 2,
+        "top_blocker_count": 1,
+        "total_score": 1.0
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Approve with changes",
+          "status": "Requires Review",
+          "summary": "Data Processing Addendum: 2 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+          "severity_counts": {
+            "critical": 0,
+            "high": 1,
+            "medium": 1,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": "at least 12 months"
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Processor shall process personal data only on documented instructions and only for the contracted services.",
+          "Processor personnel with access to personal data must be bound by confidentiality obligations.",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "top_blockers": [
+          {
+            "title": "Logging for privileged actions and security events retained for at least 12 months.",
+            "severity": "high",
+            "recommendation": "Processor personnel with access to personal data must be bound by confidentiality obligations."
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Grounded Finding",
+            "detail": "Processor personnel with access to personal data must be bound by confidentiality obligations."
+          },
+          {
+            "label": "Security",
+            "detail": "Logging for privileged actions and security events retained for at least 12 months."
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "medium",
+            "category": "Grounded Finding",
+            "title": "Processor personnel with access to personal data must be bound by confidentiality...",
+            "description": "Processor personnel with access to personal data must be bound by confidentiality obligations.",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.9,
+            "recommendation": "Processor shall process personal data only on documented instructions and only for the contracted services.",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Data Processing Addendum Version 1.0 - personal-data obligations that align with HarborView security and retention requirements. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-004 Owner Privacy Counsel Version 1.0 Effective Date 2025-08-12 Counterparty BluePe"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "category": "Security",
+            "title": "Logging for privileged actions and security events retained for at least 12 months.",
+            "description": "Logging for privileged actions and security events retained for at least 12 months.",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Processor personnel with access to personal data must be bound by confidentiality obligations.",
+            "snippet": "ckups. Monitoring Logging for privileged actions and security events retained for at least 12 months. Incident response Notice to HarborView within 48 hours after confirmation of a personal-data incident. Subprocessors Written subprocessor list and prior notice for material changes. Deletion / return Return or delete customer personal data within 30 days of termination unless retention is legally"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "medium",
+            "title": "Processor personnel with access to personal data must be bound by confidentiality...",
+            "chunkId": "chunk_1",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Data Processing Addendum Version 1.0 - personal-data obligations that align with HarborView security and retention requirements. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-004 Owner Privacy Counsel Version 1.0 Effective Date 2025-08-12 Counterparty BluePe"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "title": "Logging for privileged actions and security events retained for at least 12 months.",
+            "chunkId": "chunk_2",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "snippet": "ckups. Monitoring Logging for privileged actions and security events retained for at least 12 months. Incident response Notice to HarborView within 48 hours after confirmation of a personal-data incident. Subprocessors Written subprocessor list and prior notice for material changes. Deletion / return Return or delete customer personal data within 30 days of termination unless retention is legally"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-004_Data_Processing_Addendum.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nData Processing Addendum\nVersion 1.0 - personal-data obligations that align with HarborView security and retention requirements.\nNotice: Synthetic business do"
+          ],
+          [
+            "CTR-004_Data_Processing_Addendum.pdf",
+            "2",
+            "-",
+            "ckups.\nMonitoring\nLogging for privileged actions and security events retained for at least 12 months.\nIncident response\nNotice to HarborView within 48 hours after confirmation of a personal-data incident.\nSubprocessors\nW"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "document": "CTR-004_Data_Processing_Addendum.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-004_Data_Processing_Addendum.pdf",
+      "config": {
+        "key": "nemotron_extractive",
+        "label": "nemotron-3-super:cloud extractive",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "nemotron-3-super:cloud",
+        "prompt_style": "extractive",
+        "synthesis_enabled": true
+      },
+      "duration_s": 34.841,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Data Processing Addendum: 1 actionable task(s), 2 deadline(s) and 1 operational risk(s) identified.",
+      "warnings": [
+        "No specific owner is mentioned for the logging requirement",
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": null,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 1.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 1,
+        "top_blocker_count": 1,
+        "total_score": 1.0
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Approve with changes",
+          "status": "Requires Review",
+          "summary": "Data Processing Addendum: 1 actionable task(s), 2 deadline(s) and 1 operational risk(s) identified.",
+          "severity_counts": {
+            "critical": 0,
+            "high": 1,
+            "medium": 0,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": "at least 12 months"
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "No specific owner is mentioned for the logging requirement",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Implement logging for privileged actions and security events",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "top_blockers": [
+          {
+            "title": "Potential data breach due to inadequate security measures",
+            "severity": "high",
+            "recommendation": "Implement logging for privileged actions and security events"
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Legal Risk",
+            "detail": "Risk of data exposure and legal consequences"
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "category": "Legal Risk",
+            "title": "Potential data breach due to inadequate security measures",
+            "description": "Risk of data exposure and legal consequences",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Implement logging for privileged actions and security events",
+            "snippet": "ckups. Monitoring Logging for privileged actions and security events retained for at least 12 months. Incident response Notice to HarborView within 48 hours after confirmation of a personal-data incident. Subprocessors Written subprocessor list and prior notice for material changes. Deletion / return Return or delete customer personal data within 30 days of termination unless retention is legally"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "title": "Potential data breach due to inadequate security measures",
+            "chunkId": "chunk_2",
+            "source": "CTR-004_Data_Processing_Addendum.pdf",
+            "snippet": "ckups. Monitoring Logging for privileged actions and security events retained for at least 12 months. Incident response Notice to HarborView within 48 hours after confirmation of a personal-data incident. Subprocessors Written subprocessor list and prior notice for material changes. Deletion / return Return or delete customer personal data within 30 days of termination unless retention is legally"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-004_Data_Processing_Addendum.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nData Processing Addendum\nVersion 1.0 - personal-data obligations that align with HarborView security and retention requirements.\nNotice: Synthetic business do"
+          ],
+          [
+            "CTR-004_Data_Processing_Addendum.pdf",
+            "2",
+            "-",
+            "ckups.\nMonitoring\nLogging for privileged actions and security events retained for at least 12 months.\nIncident response\nNotice to HarborView within 48 hours after confirmation of a personal-data incident.\nSubprocessors\nW"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

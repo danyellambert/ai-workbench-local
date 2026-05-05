@@ -1,0 +1,33 @@
+STDOUT
+======
+
+=== [retrieval_tuning] baseline ===
+settings: embedding=bge-m3:latest embed_ctx=2048 chunk=1200/200 top_k=4 rerank_pool=8
+[done] baseline | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.9102s Indexing=161.7391s
+
+=== [retrieval_tuning] smaller_chunks ===
+settings: embedding=bge-m3:latest embed_ctx=2048 chunk=800/120 top_k=4 rerank_pool=8
+[done] smaller_chunks | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=1.2441s Indexing=171.9046s
+
+=== [retrieval_tuning] larger_chunks ===
+settings: embedding=bge-m3:latest embed_ctx=2048 chunk=1600/240 top_k=4 rerank_pool=8
+[done] larger_chunks | Hit@1=0.8750 Hit@K=0.8750 MRR=0.8750 Avg retrieval=0.7131s Indexing=155.4393s
+
+=== [retrieval_tuning] higher_top_k ===
+settings: embedding=bge-m3:latest embed_ctx=2048 chunk=1200/200 top_k=6 rerank_pool=12
+[done] higher_top_k | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.9178s Indexing=161.4864s
+
+=== [retrieval_tuning] lower_overlap ===
+settings: embedding=bge-m3:latest embed_ctx=2048 chunk=1200/80 top_k=4 rerank_pool=8
+[done] lower_overlap | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.8449s Indexing=143.9368s
+
+=== [retrieval_tuning] lighter_rerank_pool ===
+settings: embedding=bge-m3:latest embed_ctx=2048 chunk=1200/200 top_k=4 rerank_pool=4
+[done] lighter_rerank_pool | Hit@1=0.8750 Hit@K=1.0000 MRR=0.9167 Avg retrieval=0.8986s Indexing=162.3795s
+
+Suite summary written to: /Users/danyellambert/Downloads/Aula 4 - Criacao de Chatbot com IA em Tempo Real/benchmark_runs/20260315_011241_phase_4_5_all/04_retrieval_tuning/summary.json
+Human-readable report: /Users/danyellambert/Downloads/Aula 4 - Criacao de Chatbot com IA em Tempo Real/benchmark_runs/20260315_011241_phase_4_5_all/04_retrieval_tuning/README.md
+
+
+STDERR
+======

@@ -1,0 +1,9 @@
+{
+  "total_cases": 0,
+  "successful_cases": 0,
+  "failed_cases": 0,
+  "variant_ranking": [],
+  "best_ocr_tradeoff": null,
+  "best_vlm_tradeoff": null,
+  "support_level": "scaffolded_only"
+}

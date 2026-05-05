@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe documents address distinct control domains—evidence management for vendor oversight versus privileged access governance—with no overlapping operational scope or shared requirements.\n\n- EV-002, EV-003, and EV-005 require resolution to close the Q1 2024 vendor-control review.  \n- Access is restricted to ticketed support and break-fix tasks only.  \n- Vendor confirmation of personnel is required quarterly.  \n- Evidence repository paths and status designations are critical for tracking provenance.  \n- Standing privileged access is approved conditionally for two administrators.  \n- Control closure depends on completing outstanding evidence items.",
+  "key_highlights": [
+    "The documents address distinct control domains—evidence management for vendor oversight versus privileged access governance—with no overlapping operational scope or shared requirements.",
+    "EV-002, EV-003, and EV-005 require resolution to close the Q1 2024 vendor-control review.",
+    "Access is restricted to ticketed support and break-fix tasks only.",
+    "Vendor confirmation of personnel is required quarterly.",
+    "Evidence repository paths and status designations are critical for tracking provenance.",
+    "Standing privileged access is approved conditionally for two administrators."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Critical evidence items (EV-002, EV-003, EV-005) require resolution before control closure. | Repository paths and stat…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on being limited to ticketed support and break-fix tasks only. | Vendor must confirm the personne…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "The documents address distinct control domains—evidence management for…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The evidence register (EVD-101) documents five items supporting the Q1 2024 North…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "EV-002, EV-003, and EV-005 require resolution to close…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The evidence register (EVD-101) documents five items supporting the Q1 2024 North…"
+        ],
+        [
+          "cross_document_observation",
+          "Access is restricted to ticketed support and break-fix…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The evidence register (EVD-101) documents five items supporting the Q1 2024 North…"
+        ],
+        [
+          "approval_change",
+          "Vendor confirmation of personnel is required quarterly",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The evidence register (EVD-101) documents five items supporting the Q1 2024 North…"
+        ],
+        [
+          "auditability_delta",
+          "Evidence repository paths and status designations are critical…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): Repository paths and status designations are essential for tracking evidence prov…"
+        ],
+        [
+          "identity_control_delta",
+          "Standing privileged access is approved conditionally for two…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The evidence register (EVD-101) documents five items supporting the Q1 2024 North…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-16",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Information Security Policy v3.1.pdf (pdf)",
+      "Information Security Policy v3.2.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:\nDocument v3.2 builds upon v3.1 by expanding security measures, particularly in workforce account authentication and vendor oversight.\n\n- Mandatory MFA for all accounts in v3.2 vs. only privileged access in v3.1.\n- Quarterly reviews of privileged access in v3.2 vs. annual reviews in v3.1.\n- More rigorous vendor oversight introduced in v3.2.\n- Stricter incident response protocols added in v3.2.\n- Both versions emphasize multi-factor authentication and regular review cycles.\n- Enhanced security controls across the entire organization in v3.2.",
+  "key_highlights": [
+    "Document v3.2 builds upon v3.1 by expanding security measures, particularly in workforce account authentication and vendor oversight.",
+    "Mandatory MFA for all accounts in v3.2 vs. only privileged access in v3.1.",
+    "Quarterly reviews of privileged access in v3.2 vs. annual reviews in v3.1.",
+    "More rigorous vendor oversight introduced in v3.2.",
+    "Stricter incident response protocols added in v3.2.",
+    "Both versions emphasize multi-factor authentication and regular review cycles."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Information Security Policy v3.1.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf)",
+          "Annual review cycle ensures policy relevance | Multi-factor authentication strengthens administrative access security"
+        ],
+        [
+          "document_summary",
+          "Summary of Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.2.pdf (pdf)",
+          "Increased security controls across the organization | Enhanced monitoring and review cycles"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Document v3.2 builds upon v3.1 by expanding security…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 outlines key security requirements, in…"
+        ],
+        [
+          "identity_control_delta",
+          "Mandatory MFA for all accounts in v3.2 vs.…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 outlines key security requirements, in…"
+        ],
+        [
+          "approval_change",
+          "Quarterly reviews of privileged access in v3.2 vs.…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 outlines key security requirements, in…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "More rigorous vendor oversight introduced in v3.2",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 outlines key security requirements, in…"
+        ],
+        [
+          "incident_response_delta",
+          "Stricter incident response protocols added in v3.2",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 outlines key security requirements, in…"
+        ],
+        [
+          "identity_control_delta",
+          "Both versions emphasize multi-factor authentication and regular review…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 outlines key security requirements, in…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

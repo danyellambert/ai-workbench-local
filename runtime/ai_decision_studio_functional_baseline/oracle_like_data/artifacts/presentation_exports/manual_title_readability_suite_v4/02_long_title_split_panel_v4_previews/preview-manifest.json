@@ -1,0 +1,23 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "02_long_title_split_panel_v4",
+  "output_dir": "baseline://artifacts/presentation_exports/manual_title_readability_suite_v4/02_long_title_split_panel_v4_previews",
+  "presentation_title": "02_long_title_split_panel_v4",
+  "theme": "executive_premium_minimal",
+  "preview_count": 1,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "direct_png",
+  "input_pptx": "baseline://external_files/f8c8bad2bf7b34d6_02_long_title_split_panel_v4.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "02_long_title_split_panel_v4-01.png",
+      "path": "baseline://external_files/3a1bcc9c359b13f5_02_long_title_split_panel_v4-01.png"
+    }
+  ]
+}

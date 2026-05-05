@@ -1,0 +1,15 @@
+{
+  "kind": "evidenceops_preindex_pdf_vlm_page_cache.v2",
+  "file_hash": "982f0ce6b869564bfa89c128fc32e6f4c2b6f15ce70d201c6d227cc18b578297",
+  "filename": "palm_beach_county_contract_review_checklist.pdf",
+  "model": "qwen3-vl:235b-cloud",
+  "dpi": 180,
+  "scope": "pages_selected_6fd4348df0b1",
+  "updated_at": "2026-04-26 22:18:02",
+  "pages": [
+    {
+      "page": 1,
+      "content": "### Visual extraction  \n- **Title**: \"CONTRACT REVIEW CHECKLIST – Rev. 6/3/25\"  \n- **Structure**: 36-row table with columns: *Number*, *DESCRIPTION*, *YES*, *NO*, *N/A*. Descriptions contain contract review criteria; checkboxes for responses.  \n- **Key visible terms**:  \n  - \"Palm Beach County Board of County Commissioners, NOT the Department\" (Row 2).  \n  - \"SunBiz\" (Rows 2, 6).  \n  - Statute references: \"FS 287.133(2)(a)\" (Row 30), \"FS 287.0570\" (Row 34), \"Statute 119.0701\" (Row 31).  \n  - Dates: \"6/3/25\" (revision date, Row 22), \"7/1/23\" (Row 34), \"7/1/24\" (Rows 35–36).  \n  - Specific clauses: \"Equal Business Opportunity (EBO) Ordinance\" (Row 22), \"Public Entity Crime Statute FS 287.133(2)(a)\" (Row 30), \"County Living Wage clause\" (Row 36).  \n- **Checklist details**:  \n  - Row 19/20: Blanked fields for daily liquidated damages/bonus amounts (`$________/day`).  \n  - Row 29: Exemption note: \"(N/A for sealed bid, publicly traded companies, non-profits, or government agencies)\".  \n  - Row 15: \"(N/A for construction)\".  \n- **Key facts**:  \n  - 36 numbered review items covering legal compliance, financial terms, clauses, and certifications.  \n  - References to \"Risk Management\" (Rows 17, 18), \"Budget Division\" (Row 11), and \"BCC\" (Board of County Commissioners).  \n  - Mandatory verification steps (e.g., \"Must use vendor’s correct, exact legal name as shown in SunBiz\" in Row 2)."
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Q1 2024 Board Memo.pdf",
+  "file_type": "pdf",
+  "file_hash": "7ec727dea85afa50627f8de57a66e730242520aead0428cc195e7b0f994ab381",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nBRD-001  Q1 2024 Board Memo\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nQ1 2024 Board Memo\nExecutive memo summarising vendor risk posture and readiness for the board risk committee.\nDocument ID\nBRD-001\nPrepared By\nCorporate Strategy Office\nPrepared Date\n2024-03-29\nAudience\nBoard Risk and Audit Committee\nStatus\nPending library sync\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nExecutive Summary\nMeridian’s AI search and knowledge-operations initiative remains on schedule for a controlled Q2 launch. The Northwind\nvendor package is not yet fully contract-ready; however, targeted remediation is underway and management has isolated\nthe only temporary waiver to service availability for the pilot phase.\nOpen Matters Requiring Oversight\nArea\nCurrent Position\nManagement Plan\nLiability\nMSA draft retains uncapped liability.\nHold execution until baseline cap is accepted or alternate\nstructure approved.\nPrivacy / Transfers\nSCC appendix not yet executed.\nPrivacy Counsel to complete appendix and supplemental\nmeasures memo.\nAvailability\nSLA currently at 99.5%.\nPilot-phase risk acceptance approved through 2024-06-30\nonly.\nEvidence / Controls\nAccess approval artifact was late to\narchive.\nIssue closed with remediation note and updated evidence\nchecklist.\nDecision Request\nManagement requests acknowledgement that (1) launch remains conditional on closure of liability and transfer issues, and\n(2) the temporary availability waiver is acceptable for the pilot only, subject to monthly reporting.\nBoard Reporting Metrics\n●\nContract execution readiness: Amber\n●\nPrivacy transfer readiness: Amber\n●\nOperational control remediation: Green\n●\nPilot availability exception: Amber",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 1904,
+    "final_text_chars": 1904,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1900,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "table"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 36,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 4262,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nBRD-001  Q1 2024 Board Memo\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nQ1 2024 Board Memo\nExecutive memo summarising vendor risk posture and readiness for the board risk committee.\nDocument ID\nBRD-001\nPrepared By\nCorporate Strategy Office\nPrepared Date\n2024-03-29\nAudience\nBoard Risk and Audit Committee\nStatus\nPending library sync\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nExecutive Summary\nMeridian’s AI search and knowledge-operations initiative remains on schedule for a controlled Q2 launch. The Northwind\nvendor package is not yet fully contract-ready; however, targeted remediation is underway and management has isolated\nthe only temporary waiver to service availability for the pilot phase.\nOpen Matters Requiring Oversight\nArea\nCurrent Position\nManagement Plan\nLiability\nMSA draft retains uncapped liability.\nHold execution until baseline cap is accepted or alternate\nstructure approved.\nPrivacy / Transfers\nSCC appendix not yet executed.\nPrivacy Counsel to complete appendix and supplemental\nmeasures memo.\nAvailability\nSLA currently at 99.5%.\nPilot-phase risk acceptance approved through 2024-06-30\nonly.\nEvidence / Controls\nAccess approval artifact was late to\narchive.\nIssue closed with remediation note and updated evidence\nchecklist.\nDecision Request\nManagement requests acknowledgement that (1) launch remains conditional on closure of liability and transfer issues, and\n(2) the temporary availability waiver is acceptable for the pilot only, subject to monthly reporting.\nBoard Reporting Metrics\n●\nContract execution readiness: Amber\n●\nPrivacy transfer readiness: Amber\n●\nOperational control remediation: Green\n●\nPilot availability exception: Amber",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic board memo is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "governance/Q1 2024 Board Memo.pdf",
+    "nextcloud_relative_path": "governance/Q1 2024 Board Memo.pdf",
+    "source_relative_path": "governance/Q1 2024 Board Memo.pdf",
+    "filename": "Q1 2024 Board Memo.pdf",
+    "title": "Q1 2024 Board Memo",
+    "category": "governance",
+    "preindex": {
+      "relative_path": "governance/Q1 2024 Board Memo.pdf",
+      "filename": "Q1 2024 Board Memo.pdf",
+      "title": "Q1 2024 Board Memo",
+      "category": "governance",
+      "document_id": "governance/Q1 2024 Board Memo.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:09"
+}

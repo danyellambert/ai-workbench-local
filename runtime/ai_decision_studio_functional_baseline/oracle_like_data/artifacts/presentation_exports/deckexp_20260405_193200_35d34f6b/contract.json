@@ -1,0 +1,93 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "candidate_review_deck",
+  "deck_family": "candidate_review",
+  "presentation": {
+    "title": "AI Workbench Local — Candidate Review · Jane Doe",
+    "subtitle": "Executive hiring summary grounded in cv_analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Candidate Review"
+  },
+  "context": {
+    "task_type": "cv_analysis",
+    "candidate_name": "Jane Doe",
+    "location": "São Paulo"
+  },
+  "executive_summary": "Jane Doe (São Paulo) apresenta 3.5 ano(s) de experiência estimada, 3 skill(s) mapeadas e 1 experiência(s) estruturada(s).",
+  "key_highlights": [
+    "Strong applied AI execution",
+    "Good product + engineering bridge",
+    "Python",
+    "RAG",
+    "Structured outputs"
+  ],
+  "key_metrics": [
+    {
+      "label": "Experience years",
+      "value": "3.5"
+    },
+    {
+      "label": "Skills",
+      "value": "3"
+    },
+    {
+      "label": "Languages",
+      "value": "2"
+    },
+    {
+      "label": "Experience entries",
+      "value": "1"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Experience highlights",
+      "columns": [
+        "Role",
+        "Organization",
+        "Date",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "Applied AI Engineer",
+          "Acme",
+          "2022-2025",
+          "Built RAG pipelines | Shipped eval-driven AI features"
+        ]
+      ]
+    },
+    {
+      "title": "Education snapshot",
+      "columns": [
+        "Degree",
+        "Institution",
+        "Date",
+        "Location"
+      ],
+      "rows": [
+        [
+          "BSc Computer Science",
+          "USP",
+          "2018-2022",
+          "São Paulo"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Advance to the next stage with focused validation of leadership, scope and business ownership.",
+  "watchouts": [
+    "Validate scale/production depth"
+  ],
+  "next_steps": [
+    "Agendar entrevista técnica focada em product thinking e delivery.",
+    "Validar senioridade, liderança e ownership em cenários reais.",
+    "Validate scale/production depth"
+  ],
+  "data_sources": [
+    "structured_result",
+    "cv_analysis"
+  ]
+}

@@ -1,0 +1,317 @@
+{
+  "mode": "review",
+  "presentation_title": "AI Workbench Local — Action Plan",
+  "theme": "executive_premium_minimal",
+  "slide_count": 6,
+  "slides": [
+    {
+      "slide_number": 1,
+      "slide_type": "title",
+      "title": "AI Workbench Local — Action Plan",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 1.8,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 2,
+      "slide_type": "summary",
+      "title": "Executive summary",
+      "score": 86,
+      "status": "review",
+      "content_weight": 2.77,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 1.42,
+      "risk_level": "high",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [
+        "summary:panel_width_pressure"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "summary:panel_width_pressure",
+          "density": 5.624,
+          "threshold": 4.2,
+          "severity": "high",
+          "message": "summary takeaways are dense enough to overwhelm the side panel width"
+        }
+      ],
+      "severity_counts": {
+        "high": 1,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "high",
+          "message": "summary takeaways are dense enough to overwhelm the side panel width"
+        }
+      ]
+    },
+    {
+      "slide_number": 3,
+      "slide_type": "metrics",
+      "title": "Executive snapshot",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.14,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 4,
+      "slide_type": "table",
+      "title": "Action backlog",
+      "score": 30,
+      "status": "attention",
+      "content_weight": 6.84,
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 4,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 18.27,
+      "risk_level": "high",
+      "likely_overflow_regions": [
+        "table"
+      ],
+      "likely_collision_regions": [
+        "table:column_2",
+        "table:r1c2",
+        "table:r2c2",
+        "table:r3c2"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "table:column_2",
+          "density": 7.485,
+          "threshold": 2.8,
+          "severity": "high",
+          "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+        },
+        {
+          "region": "table:r1c2",
+          "density": 13.265,
+          "threshold": 8.0,
+          "severity": "high",
+          "message": "table cell r1c2 is dense enough to risk clipping"
+        },
+        {
+          "region": "table:r2c2",
+          "density": 12.16,
+          "threshold": 8.0,
+          "severity": "high",
+          "message": "table cell r2c2 is dense enough to risk clipping"
+        },
+        {
+          "region": "table:r3c2",
+          "density": 12.16,
+          "threshold": 8.0,
+          "severity": "high",
+          "message": "table cell r3c2 is dense enough to risk clipping"
+        }
+      ],
+      "severity_counts": {
+        "high": 4,
+        "medium": 2,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "table has many columns for executive readability"
+        },
+        {
+          "severity": "medium",
+          "message": "some table cells are likely too long"
+        },
+        {
+          "severity": "high",
+          "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+        },
+        {
+          "severity": "high",
+          "message": "table cell r1c2 is dense enough to risk clipping"
+        },
+        {
+          "severity": "high",
+          "message": "table cell r2c2 is dense enough to risk clipping"
+        },
+        {
+          "severity": "high",
+          "message": "table cell r3c2 is dense enough to risk clipping"
+        }
+      ]
+    },
+    {
+      "slide_number": 5,
+      "slide_type": "comparison",
+      "title": "Recommendation vs watchouts",
+      "score": 86,
+      "status": "review",
+      "content_weight": 5.31,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 2,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.4,
+      "risk_level": "high",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [
+        "comparison:column_1:bullets",
+        "comparison:split_imbalance"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "comparison:column_1:bullets",
+          "density": 4.181,
+          "threshold": 4.0,
+          "severity": "medium",
+          "message": "comparison column 1 bullets are dense enough to collide vertically"
+        },
+        {
+          "region": "comparison:split_imbalance",
+          "density": 1.502,
+          "threshold": 1.28,
+          "severity": "medium",
+          "message": "comparison columns are materially imbalanced and may compete for panel space"
+        }
+      ],
+      "severity_counts": {
+        "high": 0,
+        "medium": 2,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "comparison column 1 bullets are dense enough to collide vertically"
+        },
+        {
+          "severity": "medium",
+          "message": "comparison columns are materially imbalanced and may compete for panel space"
+        }
+      ]
+    },
+    {
+      "slide_number": 6,
+      "slide_type": "bullets",
+      "title": "Next steps",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 1.89,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    }
+  ],
+  "missing_assets": [],
+  "average_score": 83,
+  "status": "review",
+  "issue_count": 9,
+  "warning_count": 9,
+  "severity_counts": {
+    "high": 5,
+    "medium": 4,
+    "low": 0
+  },
+  "overflow_risk_count": 1,
+  "clipping_risk_count": 1,
+  "collision_risk_count": 7,
+  "balance_warning_count": 0,
+  "top_risk_slides": [
+    {
+      "slide_number": 4,
+      "title": "Action backlog",
+      "risk_level": "high",
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 4,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 18.27
+    },
+    {
+      "slide_number": 5,
+      "title": "Recommendation vs watchouts",
+      "risk_level": "high",
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 2,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.4
+    },
+    {
+      "slide_number": 2,
+      "title": "Executive summary",
+      "risk_level": "high",
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 1.42
+    }
+  ],
+  "issues": [
+    "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+    "slide 04 (Action backlog): table has many columns for executive readability",
+    "slide 04 (Action backlog): some table cells are likely too long",
+    "slide 04 (Action backlog): table column 2 is dense enough to risk cramped cells across multiple rows",
+    "slide 04 (Action backlog): table cell r1c2 is dense enough to risk clipping",
+    "slide 04 (Action backlog): table cell r2c2 is dense enough to risk clipping",
+    "slide 04 (Action backlog): table cell r3c2 is dense enough to risk clipping",
+    "slide 05 (Recommendation vs watchouts): comparison column 1 bullets are dense enough to collide vertically",
+    "slide 05 (Recommendation vs watchouts): comparison columns are materially imbalanced and may compete for panel space"
+  ],
+  "warnings": [
+    "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+    "slide 04 (Action backlog): table has many columns for executive readability",
+    "slide 04 (Action backlog): some table cells are likely too long",
+    "slide 04 (Action backlog): table column 2 is dense enough to risk cramped cells across multiple rows",
+    "slide 04 (Action backlog): table cell r1c2 is dense enough to risk clipping",
+    "slide 04 (Action backlog): table cell r2c2 is dense enough to risk clipping",
+    "slide 04 (Action backlog): table cell r3c2 is dense enough to risk clipping",
+    "slide 05 (Recommendation vs watchouts): comparison column 1 bullets are dense enough to collide vertically",
+    "slide 05 (Recommendation vs watchouts): comparison columns are materially imbalanced and may compete for panel space"
+  ]
+}

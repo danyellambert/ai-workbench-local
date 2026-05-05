@@ -1,0 +1,45 @@
+{
+  "run_id": "phase8-5-matrix-2f56deefd1",
+  "output_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/04_ocr_vlm_phase8-5-matrix-2f56deefd1",
+  "selected_groups": [
+    "ocr_vlm"
+  ],
+  "smoke": true,
+  "provider_filter": null,
+  "model_filter": null,
+  "resume_requested": true,
+  "planned_case_count": 1,
+  "resume_success_case_count": 0,
+  "groups": {
+    "generation": {
+      "planned_cases": 2,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_885e1539d5d21b4c",
+        "case_e9203d1597ec9ca2"
+      ]
+    },
+    "embeddings": {
+      "planned_cases": 2,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_14b8511fa7c7b3b8",
+        "case_721751b68a63b919"
+      ]
+    },
+    "rerankers": {
+      "planned_cases": 1,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_67cbdc91648f61a7"
+      ]
+    },
+    "ocr_vlm": {
+      "planned_cases": 1,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_85bde34a52093a17"
+      ]
+    }
+  }
+}

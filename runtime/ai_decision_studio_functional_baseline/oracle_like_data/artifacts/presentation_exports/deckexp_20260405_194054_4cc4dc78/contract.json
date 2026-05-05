@@ -1,0 +1,106 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "document_review_deck",
+  "deck_family": "review",
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "source_documents": [
+      "policy_2026"
+    ],
+    "tool_used": "policy_compliance",
+    "review_type": "policy_compliance",
+    "document_ids": [
+      "policy_2026"
+    ]
+  },
+  "executive_summary": "A política revisada introduz novas obrigações operacionais e ainda pede validação jurídica final.",
+  "key_highlights": [
+    "Aprovação formal agora é mandatória.",
+    "Ainda falta owner explícito do controle anual."
+  ],
+  "key_metrics": [
+    {
+      "label": "Source count",
+      "value": "1"
+    },
+    {
+      "label": "Findings",
+      "value": "2"
+    },
+    {
+      "label": "Actions",
+      "value": "1"
+    },
+    {
+      "label": "Needs review",
+      "value": "Yes"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Top findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Owner",
+        "Due",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "risk",
+          "Owner não definido para o controle anual",
+          "Compliance",
+          "2026-04-10",
+          "Policy 2026 / page 12"
+        ],
+        [
+          "gap",
+          "Legal sign-off still missing",
+          "-",
+          "-",
+          "-"
+        ]
+      ],
+      "speaker_notes": "Findings grounded no payload estruturado/document agent."
+    },
+    {
+      "title": "Action plan",
+      "columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Definir owner do controle anual",
+          "Compliance",
+          "2026-04-10",
+          "open"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Definir owner do controle anual.",
+  "watchouts": [
+    "legal_signoff_missing",
+    "Validação jurídica final ainda pendente."
+  ],
+  "next_steps": [
+    "Definir owner do controle anual.",
+    "Revisar cláusulas críticas com jurídico."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent"
+  ]
+}

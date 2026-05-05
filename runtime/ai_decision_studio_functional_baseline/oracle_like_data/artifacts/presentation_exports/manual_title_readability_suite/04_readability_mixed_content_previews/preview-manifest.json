@@ -1,0 +1,38 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "04_readability_mixed_content",
+  "output_dir": "baseline://artifacts/presentation_exports/manual_title_readability_suite/04_readability_mixed_content_previews",
+  "presentation_title": "04_readability_mixed_content",
+  "theme": "executive_premium_minimal",
+  "preview_count": 4,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/638adf256a2b3030_04_readability_mixed_content.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "04_readability_mixed_content-01.png",
+      "path": "baseline://external_files/b1e310f2c2a55e90_04_readability_mixed_content-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "04_readability_mixed_content-02.png",
+      "path": "baseline://external_files/6f02ec49814576e2_04_readability_mixed_content-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "04_readability_mixed_content-03.png",
+      "path": "baseline://external_files/519ccee3064279c9_04_readability_mixed_content-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "04_readability_mixed_content-04.png",
+      "path": "baseline://external_files/d48c6707e157faf7_04_readability_mixed_content-04.png"
+    }
+  ]
+}

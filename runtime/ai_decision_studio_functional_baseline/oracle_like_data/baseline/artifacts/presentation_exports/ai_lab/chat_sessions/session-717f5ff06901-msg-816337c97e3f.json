@@ -1,0 +1,284 @@
+{
+  "session": {
+    "session_id": "session_717f5ff06901",
+    "title": "AI Lab chat session",
+    "created_at": "2026-04-18T17:29:00.433199+00:00",
+    "updated_at": "2026-04-19T01:13:54.168767+00:00",
+    "status": "active",
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+      "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+    ],
+    "messages": [
+      {
+        "id": "msg_9d9ebb603589",
+        "role": "user",
+        "content": "What should I validate in this AI Lab page?",
+        "timestamp": "2026-04-18T17:29:00.507902+00:00"
+      },
+      {
+        "id": "msg_0f0c0f6b7e46",
+        "role": "user",
+        "content": "Para que serve o documento de Governance Committee ?",
+        "timestamp": "2026-04-18T19:51:57.144837+00:00"
+      },
+      {
+        "id": "msg_1b6b53366f92",
+        "role": "user",
+        "content": "What should I validate in this AI Lab page?",
+        "timestamp": "2026-04-18T22:05:50.829077+00:00"
+      },
+      {
+        "id": "msg_e54c9b5cf19b",
+        "role": "user",
+        "content": "What should I validate in this AI Lab page?",
+        "timestamp": "2026-04-18T22:42:53.368934+00:00"
+      },
+      {
+        "id": "msg_b0bc46a10cb9",
+        "role": "user",
+        "content": "Para que serve o documento de Governance Committee ?",
+        "timestamp": "2026-04-18T22:47:54.685841+00:00"
+      },
+      {
+        "id": "msg_28759fa1e3fb",
+        "role": "user",
+        "content": "Summarize the most important operational risks in Access Review Evidence Log.pdf.",
+        "timestamp": "2026-04-18T22:56:34.571485+00:00"
+      },
+      {
+        "id": "msg_f05b362f5eb1",
+        "role": "user",
+        "content": "Please summarize the main grounded signals shown on this AI LAB chat page.",
+        "timestamp": "2026-04-19T00:13:12.244313+00:00"
+      },
+      {
+        "id": "msg_730fc470da60",
+        "role": "user",
+        "content": "Please summarize the main grounded signals shown on this AI LAB chat page.",
+        "timestamp": "2026-04-19T00:55:40.014271+00:00"
+      },
+      {
+        "id": "msg_7bad7452e614",
+        "role": "user",
+        "content": "Please summarize the main grounded signals shown on this AI LAB chat page.",
+        "timestamp": "2026-04-19T01:13:37.533540+00:00"
+      },
+      {
+        "id": "msg_816337c97e3f",
+        "role": "assistant",
+        "content": "Based on the retrieved evidence, the main grounded signals shown on the AI LAB chat page are:\n\n1. **Governance Committee oversight of access review remediation** – The committee opened NCR‑2024‑011 and required correction of the access‑review evidence gap before the launch can be closed out【Source 1】.  \n2. **Action items tied to evidence reconstruction** – A remediation task (“Reconstruct access‑review evidence and obtain system‑owner sign‑off”) is assigned to Priya Nair with a due date of 2024‑03‑18 and is currently “In progress”【Source 2】.  \n3. **Temporary risk acceptance with reporting** – The committee permitted Procurement to accept a temporary uptime risk for the pilot phase, subject to compensating controls and monthly reporting【Source 1】.  \n4. **Linkage of non‑conformance to committee agenda** – The non‑conformance report on the vendor access review was opened and linked to the Governance Committee agenda, indicating that the issue will be reviewed by the committee【Source 2】.  \n\nThese signals reflect ongoing governance actions, remediation deadlines, and risk‑acceptance conditions related to access‑review evidence and vendor‑access controls. No additional signals are evident from the provided documents.",
+        "timestamp": "2026-04-19T01:13:54.167177+00:00",
+        "sources": [
+          {
+            "label": "Governance Committee Minutes and Action Items.pdf",
+            "detail": "nsfer mechanism, and\nincident-notification language are strengthened.\n●\nThe committee accepted opening NCR-2024-011 and required correction of the access-review evidence gap before",
+            "score": 0.29
+          },
+          {
+            "label": "Nonconformance Report - Vendor Access Review.pdf",
+            "detail": "and owner\napproval.\n●\nRequested export of last activity and approval history from IT Operations and the vendor support lead.\n●\nOpened a remediation item in the Vendor Risk workspac",
+            "score": 0.256
+          },
+          {
+            "label": "Governance Committee Minutes and Action Items.pdf",
+            "detail": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nMIN-101  Governance Committee Minutes\nControlled synthetic enterprise document — for retrieval, review, and workflow tes",
+            "score": 0.254
+          },
+          {
+            "label": "Access Review Evidence Log.pdf",
+            "detail": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-101  Access Review Evidence Log\nControlled synthetic enterprise document — for retrieval, review, and workflow testi",
+            "score": 0.253
+          }
+        ],
+        "diagnostics": {
+          "provider": "ollama_hosted",
+          "model": "nemotron-3-nano:30b-cloud",
+          "latency_s": 16.4801,
+          "avg_latency_s": 16.4801,
+          "retrieval_latency_s": 0.443,
+          "prompt_build_latency_s": 0.0,
+          "generation_latency_s": 16.0371,
+          "retrieved_chunks_count": 4,
+          "retrieval_strategy_requested": "manual_hybrid",
+          "retrieval_strategy_used": "manual_hybrid",
+          "retrieval_backend_used": "chroma",
+          "rag_top_k": 4,
+          "top_k_effective": 4,
+          "total_tokens": 973,
+          "prompt_tokens": 690,
+          "completion_tokens": 283,
+          "context_chars": 1600,
+          "context_budget_chars": 0,
+          "context_pressure_ratio": 0.0,
+          "usage_source": "ollama_native_usage",
+          "cost_usd": null,
+          "cost_source": "pricing_not_configured",
+          "source_document_ids": [
+            "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+            "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+            "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+            "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+          ],
+          "retrieval_fallback_reason": null
+        }
+      }
+    ],
+    "runtime": {
+      "provider": "ollama_hosted",
+      "model": "nemotron-3-nano:30b-cloud",
+      "latency_s": 16.4801,
+      "avg_latency_s": 16.4801,
+      "retrieval_latency_s": 0.443,
+      "prompt_build_latency_s": 0.0,
+      "generation_latency_s": 16.0371,
+      "retrieved_chunks_count": 4,
+      "retrieval_strategy_requested": "manual_hybrid",
+      "retrieval_strategy_used": "manual_hybrid",
+      "retrieval_backend_used": "chroma",
+      "rag_top_k": 4,
+      "top_k_effective": 4,
+      "total_tokens": 973,
+      "prompt_tokens": 690,
+      "completion_tokens": 283,
+      "context_chars": 1600,
+      "context_budget_chars": 0,
+      "context_pressure_ratio": 0.0,
+      "usage_source": "ollama_native_usage",
+      "cost_usd": null,
+      "cost_source": "pricing_not_configured",
+      "source_document_ids": [
+        "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+        "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+        "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+        "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+      ],
+      "retrieval_fallback_reason": null
+    }
+  },
+  "request": {
+    "content": "Please summarize the main grounded signals shown on this AI LAB chat page.",
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+      "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+    ]
+  },
+  "response": {
+    "assistant_message": {
+      "id": "msg_816337c97e3f",
+      "role": "assistant",
+      "content": "Based on the retrieved evidence, the main grounded signals shown on the AI LAB chat page are:\n\n1. **Governance Committee oversight of access review remediation** – The committee opened NCR‑2024‑011 and required correction of the access‑review evidence gap before the launch can be closed out【Source 1】.  \n2. **Action items tied to evidence reconstruction** – A remediation task (“Reconstruct access‑review evidence and obtain system‑owner sign‑off”) is assigned to Priya Nair with a due date of 2024‑03‑18 and is currently “In progress”【Source 2】.  \n3. **Temporary risk acceptance with reporting** – The committee permitted Procurement to accept a temporary uptime risk for the pilot phase, subject to compensating controls and monthly reporting【Source 1】.  \n4. **Linkage of non‑conformance to committee agenda** – The non‑conformance report on the vendor access review was opened and linked to the Governance Committee agenda, indicating that the issue will be reviewed by the committee【Source 2】.  \n\nThese signals reflect ongoing governance actions, remediation deadlines, and risk‑acceptance conditions related to access‑review evidence and vendor‑access controls. No additional signals are evident from the provided documents.",
+      "timestamp": "2026-04-19T01:13:54.167177+00:00",
+      "sources": [
+        {
+          "label": "Governance Committee Minutes and Action Items.pdf",
+          "detail": "nsfer mechanism, and\nincident-notification language are strengthened.\n●\nThe committee accepted opening NCR-2024-011 and required correction of the access-review evidence gap before",
+          "score": 0.29
+        },
+        {
+          "label": "Nonconformance Report - Vendor Access Review.pdf",
+          "detail": "and owner\napproval.\n●\nRequested export of last activity and approval history from IT Operations and the vendor support lead.\n●\nOpened a remediation item in the Vendor Risk workspac",
+          "score": 0.256
+        },
+        {
+          "label": "Governance Committee Minutes and Action Items.pdf",
+          "detail": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nMIN-101  Governance Committee Minutes\nControlled synthetic enterprise document — for retrieval, review, and workflow tes",
+          "score": 0.254
+        },
+        {
+          "label": "Access Review Evidence Log.pdf",
+          "detail": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-101  Access Review Evidence Log\nControlled synthetic enterprise document — for retrieval, review, and workflow testi",
+          "score": 0.253
+        }
+      ],
+      "diagnostics": {
+        "provider": "ollama_hosted",
+        "model": "nemotron-3-nano:30b-cloud",
+        "latency_s": 16.4801,
+        "avg_latency_s": 16.4801,
+        "retrieval_latency_s": 0.443,
+        "prompt_build_latency_s": 0.0,
+        "generation_latency_s": 16.0371,
+        "retrieved_chunks_count": 4,
+        "retrieval_strategy_requested": "manual_hybrid",
+        "retrieval_strategy_used": "manual_hybrid",
+        "retrieval_backend_used": "chroma",
+        "rag_top_k": 4,
+        "top_k_effective": 4,
+        "total_tokens": 973,
+        "prompt_tokens": 690,
+        "completion_tokens": 283,
+        "context_chars": 1600,
+        "context_budget_chars": 0,
+        "context_pressure_ratio": 0.0,
+        "usage_source": "ollama_native_usage",
+        "cost_usd": null,
+        "cost_source": "pricing_not_configured",
+        "source_document_ids": [
+          "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+          "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+          "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+          "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+        ],
+        "retrieval_fallback_reason": null
+      }
+    },
+    "sources": [
+      {
+        "label": "Governance Committee Minutes and Action Items.pdf",
+        "detail": "nsfer mechanism, and\nincident-notification language are strengthened.\n●\nThe committee accepted opening NCR-2024-011 and required correction of the access-review evidence gap before",
+        "score": 0.29
+      },
+      {
+        "label": "Nonconformance Report - Vendor Access Review.pdf",
+        "detail": "and owner\napproval.\n●\nRequested export of last activity and approval history from IT Operations and the vendor support lead.\n●\nOpened a remediation item in the Vendor Risk workspac",
+        "score": 0.256
+      },
+      {
+        "label": "Governance Committee Minutes and Action Items.pdf",
+        "detail": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nMIN-101  Governance Committee Minutes\nControlled synthetic enterprise document — for retrieval, review, and workflow tes",
+        "score": 0.254
+      },
+      {
+        "label": "Access Review Evidence Log.pdf",
+        "detail": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-101  Access Review Evidence Log\nControlled synthetic enterprise document — for retrieval, review, and workflow testi",
+        "score": 0.253
+      }
+    ]
+  },
+  "runtime": {
+    "provider": "ollama_hosted",
+    "model": "nemotron-3-nano:30b-cloud",
+    "latency_s": 16.4801,
+    "avg_latency_s": 16.4801,
+    "retrieval_latency_s": 0.443,
+    "prompt_build_latency_s": 0.0,
+    "generation_latency_s": 16.0371,
+    "retrieved_chunks_count": 4,
+    "retrieval_strategy_requested": "manual_hybrid",
+    "retrieval_strategy_used": "manual_hybrid",
+    "retrieval_backend_used": "chroma",
+    "rag_top_k": 4,
+    "top_k_effective": 4,
+    "total_tokens": 973,
+    "prompt_tokens": 690,
+    "completion_tokens": 283,
+    "context_chars": 1600,
+    "context_budget_chars": 0,
+    "context_pressure_ratio": 0.0,
+    "usage_source": "ollama_native_usage",
+    "cost_usd": null,
+    "cost_source": "pricing_not_configured",
+    "source_document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+      "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+    ],
+    "retrieval_fallback_reason": null
+  }
+}

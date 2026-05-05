@@ -1,0 +1,108 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Nonconformance Report - Vendor Access Review.pdf",
+  "file_type": "pdf",
+  "file_hash": "e80ee34037ab7670ec614609e61a5d979ae2ae238feab9fb859ea6dce204b838",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nAUD-102  NCR Vendor Access Review\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nNonconformance Report — Vendor Access Review\nFormal record of an evidence and control-gap issue raised during the Q1 2024 review.\nDocument ID\nAUD-102\nOwner\nCompliance\nOpened Date\n2024-03-14\nNCR ID\nNCR-2024-011\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Issue Summary\nField\nValue\nSource\nQ1 internal audit checklist (AUD-101)\nDescription\nTwo privileged vendor accounts in the Northwind production support tenant were not included in\nthe current evidence pack with complete owner approval.\nSeverity\nModerate\nDetected On\n2024-03-14\nControl Reference\nPOL-031 REQ-IDM-03; CTR-013 Access Management obligations; supplier code evidence\nrequirement.\n2. Immediate Containment\n●\nRestricted elevated rights for the two identified vendor accounts pending confirmation of business purpose and owner\napproval.\n●\nRequested export of last activity and approval history from IT Operations and the vendor support lead.\n●\nOpened a remediation item in the Vendor Risk workspace and linked the issue to the Governance Committee agenda.\n3. Corrective Actions\nAction\nOwner\nDue Date\nStatus\nReconstruct access-review evidence and obtain system-owner\nsign-off\nPriya Nair\n2024-03-18\nIn progress\nNegotiate liability cap with vendor legal\nMaria Santos\n2024-03-22\nIn progress\nDraft SCC Appendix C and transfer rationale memo\nJames Park\n2024-03-25\nOpen\nDefine explicit incident response SLOs in policy and contract\npackage\nAlex Rivera\n2024-03-28\nOpen\n4. Closure Criteria\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nAUD-102  NCR Vendor Access Review\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nThe NCR may be closed when corrected evidence is archived, the approval artifact is linked in the evidence log, the\ngovernance committee accepts remediation, and the access-review workflow is updated to prevent recurrence.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 2196,
+    "final_text_chars": 2196,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1793,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 402,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 11,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 5595,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nAUD-102  NCR Vendor Access Review\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nNonconformance Report — Vendor Access Review\nFormal record of an evidence and control-gap issue raised during the Q1 2024 review.\nDocument ID\nAUD-102\nOwner\nCompliance\nOpened Date\n2024-03-14\nNCR ID\nNCR-2024-011\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Issue Summary\nField\nValue\nSource\nQ1 internal audit checklist (AUD-101)\nDescription\nTwo privileged vendor accounts in the Northwind production support tenant were not included in\nthe current evidence pack with complete owner approval.\nSeverity\nModerate\nDetected On\n2024-03-14\nControl Reference\nPOL-031 REQ-IDM-03; CTR-013 Access Management obligations; supplier code evidence\nrequirement.\n2. Immediate Containment\n●\nRestricted elevated rights for the two identified vendor accounts pending confirmation of business purpose and owner\napproval.\n●\nRequested export of last activity and approval history from IT Operations and the vendor support lead.\n●\nOpened a remediation item in the Vendor Risk workspace and linked the issue to the Governance Committee agenda.\n3. Corrective Actions\nAction\nOwner\nDue Date\nStatus\nReconstruct access-review evidence and obtain system-owner\nsign-off\nPriya Nair\n2024-03-18\nIn progress\nNegotiate liability cap with vendor legal\nMaria Santos\n2024-03-22\nIn progress\nDraft SCC Appendix C and transfer rationale memo\nJames Park\n2024-03-25\nOpen\nDefine explicit incident response SLOs in policy and contract\npackage\nAlex Rivera\n2024-03-28\nOpen\n4. Closure Criteria\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nAUD-102  NCR Vendor Access Review\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nThe NCR may be closed when corrected evidence is archived, the approval artifact is linked in the evidence log, the\ngovernance committee accepts remediation, and the access-review workflow is updated to prevent recurrence.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic text-first report; Docling/text extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "audit/Nonconformance Report - Vendor Access Review.pdf",
+    "nextcloud_relative_path": "audit/Nonconformance Report - Vendor Access Review.pdf",
+    "source_relative_path": "audit/Nonconformance Report - Vendor Access Review.pdf",
+    "filename": "Nonconformance Report - Vendor Access Review.pdf",
+    "title": "Nonconformance Report - Vendor Access Review",
+    "category": "audit",
+    "preindex": {
+      "relative_path": "audit/Nonconformance Report - Vendor Access Review.pdf",
+      "filename": "Nonconformance Report - Vendor Access Review.pdf",
+      "title": "Nonconformance Report - Vendor Access Review",
+      "category": "audit",
+      "document_id": "audit/Nonconformance Report - Vendor Access Review.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:48:44"
+}

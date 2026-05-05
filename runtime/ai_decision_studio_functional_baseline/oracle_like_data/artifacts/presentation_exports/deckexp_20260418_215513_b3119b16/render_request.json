@@ -1,0 +1,190 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "author": "AI Workbench Local",
+      "date": "2026-04-18",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Comparison Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "subtitle": "Executive comparison review of grounded document differences",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Executive Comparison:  \nThe Access Review Evidence Log establishes a formal, time-bound control closure requirement for Q1 2024 vendor reviews, mandating complete evidence archiving with strict ownership and linkage to control periods, while the Privileged Account Approval Email governs conditional, time-bound access for specific personnel with quarterly revalidation obligations tied to vendor accountability.\n\n- Access Review Evidence Log requires permanent archival of evidence in an approved repository to close controls; Privileged Account Approval is time-bound and requires quarterly revalidation.  \n- Access Review Evidence Log mandates explicit linkage of evidence to control periods and ownership; Privileged Account Approval ties access to specific personnel and operational scope.  \n- Access Review Evidence Log prohibits final control closure if evidence is missing or pending; Privileged Account Approval requires revalidation upon personnel changes.  \n- Access Review Evidence Log is a formal evidence register for control validation; Privileged Account Approval is an operational email with conditional governance terms.  \n- Access Review Evidence Log applies to vendor-control reviews broadly; Privileged Account Approval targets specific administrator access within a pilot program.  \n- Access Review Evidence Log is synthetic and for testing; Privileged Account Approval is an actual governance action with compliance conditions.",
+        "bullets": [
+          "The Access Review Evidence Log establishes a formal, time-bound control clo…",
+          "Access Review Evidence Log requires permanent archival of evidence in an ap…",
+          "Access Review Evidence Log mandates explicit linkage of evidence to control…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Compared docs"
+          },
+          {
+            "value": "8",
+            "label": "Findings"
+          },
+          {
+            "value": "4",
+            "label": "Sources"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Comparison findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Documents",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "document_summary",
+            "Summary of Access Review Evidence Log.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf)",
+            "Critical evidence items such as EV-002 must be archived in the approved repository to satisfy the control. | The synthe…"
+          ],
+          [
+            "document_summary",
+            "Summary of Privileged Account Approval Email.pdf (pdf)",
+            "Privileged Account Approval Email.pdf (pdf)",
+            "Approval is conditional and time-bound, tied to specific operational and compliance requirements. | Governance relies o…"
+          ],
+          [
+            "approval_change",
+            "The Access Review Evidence Log establishes a formal,…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "Access Review Evidence Log requires permanent archival of…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "Access Review Evidence Log mandates explicit linkage of…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "Access Review Evidence Log prohibits final control closure…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "Access Review Evidence Log is a formal evidence…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents the evidence register for the…"
+          ],
+          [
+            "approval_change",
+            "Access Review Evidence Log applies to vendor-control reviews…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents the evidence register for the…"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Open the cited source excerpts to confirm the interpretation before acting.",
+            "bullets": [
+              "Open the cited source excerpts to confirm the interpretation before act…",
+              "Validate critical differences directly in the compared documents before…"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "No critical watchouts recorded for this slice.",
+            "bullets": []
+          }
+        ],
+        "speaker_notes": "Executive decision framing for this slice."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Open the cited source excerpts to confirm the interpretation before acting.",
+          "Validate critical differences directly in the compared documents before consoli…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_215513_b3119b16/policy_contract_comparison_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_215513_b3119b16",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

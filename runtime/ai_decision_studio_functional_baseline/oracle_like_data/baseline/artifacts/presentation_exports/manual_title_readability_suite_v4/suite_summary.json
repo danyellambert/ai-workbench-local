@@ -1,0 +1,77 @@
+{
+  "generated_at": "2026-04-05T22:30:38.786336",
+  "suite_dir": "baseline://artifacts/presentation_exports/manual_title_readability_suite_v4",
+  "cases": {
+    "02_long_title_split_panel_v4": {
+      "pptx_path": "baseline://external_files/f8c8bad2bf7b34d6_02_long_title_split_panel_v4.pptx",
+      "status": "ok",
+      "average_score": 93,
+      "top_risk_slides": [
+        {
+          "slide_number": 1,
+          "title": "AI Workbench Local — Benchmark & Eval Review for Executive Stakeholders with Extended Context on Evidence, Quality and Model Selection Trade-offs",
+          "risk_level": "low",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0
+        }
+      ],
+      "thumbnail_sheet": "baseline://external_files/deb9284ad6df607e_02_long_title_split_panel_v4-thumbnails.png",
+      "first_preview": "baseline://external_files/3a1bcc9c359b13f5_02_long_title_split_panel_v4-01.png",
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "body_edge_contact_count": 0
+    },
+    "03_very_long_title_hero_cover_v4": {
+      "pptx_path": "baseline://external_files/c82d98f0a27e49e8_03_very_long_title_hero_cover_v4.pptx",
+      "status": "ok",
+      "average_score": 93,
+      "top_risk_slides": [
+        {
+          "slide_number": 1,
+          "title": "AI Workbench Local — Operational Review of Benchmarks, Evaluations, Evidence Quality, Human Review Gates and Production Readiness Signals",
+          "risk_level": "low",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0
+        }
+      ],
+      "thumbnail_sheet": "baseline://external_files/f4d162226269a6f0_03_very_long_title_hero_cover_v4-thumbnails.png",
+      "first_preview": "baseline://external_files/45eb449c3504d0ab_03_very_long_title_hero_cover_v4-01.png",
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "body_edge_contact_count": 0
+    },
+    "05_extreme_title_collision_check_v4": {
+      "pptx_path": "baseline://external_files/65b4b39609b8d61d_05_extreme_title_collision_check_v4.pptx",
+      "status": "ok",
+      "average_score": 93,
+      "top_risk_slides": [
+        {
+          "slide_number": 1,
+          "title": "AI Workbench Local — Executive Deck for Benchmark, Evaluation, Evidence Quality, Governance, Production Readiness, Human Review and Decision Support",
+          "risk_level": "low",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0
+        }
+      ],
+      "thumbnail_sheet": "baseline://external_files/95ba845c6afad6a4_05_extreme_title_collision_check_v4-thumbnails.png",
+      "first_preview": "baseline://external_files/5b6caa56423610ca_05_extreme_title_collision_check_v4-01.png",
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "body_edge_contact_count": 0
+    }
+  },
+  "comparisons": {
+    "02_long_title_split_panel_v3": "baseline://external_files/b4394a54c6d1ff20_02_long_title_split_panel_v3_vs_02_long_title_split_panel_v4.png",
+    "03_very_long_title_hero_cover_v3": "baseline://external_files/e9c366c6aed549ed_03_very_long_title_hero_cover_v3_vs_03_very_long_title_hero_cover_v4.png",
+    "05_extreme_title_collision_check_v3": "baseline://external_files/ea361e1180eef033_05_extreme_title_collision_check_v3_vs_05_extreme_title_collision_check_v4.png"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "03_very_long_title_hero_cover",
+  "output_dir": "baseline://artifacts/presentation_exports/manual_title_readability_suite/03_very_long_title_hero_cover_previews",
+  "presentation_title": "03_very_long_title_hero_cover",
+  "theme": "executive_premium_minimal",
+  "preview_count": 1,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "direct_png",
+  "input_pptx": "baseline://external_files/c05d18bdaa64ceab_03_very_long_title_hero_cover.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "03_very_long_title_hero_cover-01.png",
+      "path": "baseline://external_files/17c1d780bf14aac1_03_very_long_title_hero_cover-01.png"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "generated_at": "2026-03-29T17:09:23.429810",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "code_analysis",
+      "mode": "indexed_document",
+      "status": "FAIL",
+      "score": 0,
+      "max_score": 14,
+      "reasons": [
+        "gold:snippet summary did not match the expected grounded purpose",
+        "gold:main purpose did not match the expected normalization/averaging behavior",
+        "gold:expected issue coverage too low: 0",
+        "gold:refactor-plan coverage too low: 0",
+        "gold:test-suggestion coverage too low: 0"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218",
+        "name": "demo_code_analysis.py",
+        "file_type": "py",
+        "chunk_count": 1
+      },
+      "gold_fixture_path": "baseline://external_files/3f5fd09ed6527416_07_code_analysis_demo_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "FAIL",
+        "score": 0,
+        "max_score": 14,
+        "reasons": [
+          "snippet summary did not match the expected grounded purpose",
+          "main purpose did not match the expected normalization/averaging behavior",
+          "expected issue coverage too low: 0",
+          "refactor-plan coverage too low: 0",
+          "test-suggestion coverage too low: 0"
+        ],
+        "metrics": {
+          "snippet_summary_hit": 0,
+          "main_purpose_hit": 0,
+          "issue_hits": 0,
+          "refactor_hits": 0,
+          "test_hits": 0,
+          "maintainability_hits": 0,
+          "risk_hits": 0
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "code_analysis",
+        "schema_version": "1.0",
+        "snippet_summary": "A função `normalize_scores` normaliza os valores de 'score' em um conjunto de itens, garantindo que eles estejam entre 0 e 100. A função `process` processa esses itens para calcular a média dos scores.",
+        "main_purpose": "Normalizar e calcular a média dos scores de uma lista de itens.",
+        "detected_issues": [
+          {
+            "severity": "medium",
+            "category": "maintainability",
+            "title": "Lógica duplicada",
+            "description": "Uma mesma regra aparece repetida em mais de um ponto do código.",
+            "evidence": "Repeated conditional branches in two methods.",
+            "recommendation": "Extraia a lógica comum para uma função auxiliar."
+          }
+        ],
+        "readability_improvements": [
+          "Renomear variáveis pouco claras"
+        ],
+        "maintainability_improvements": [
+          "Extrair lógica compartilhada"
+        ],
+        "refactor_plan": [
+          "Crie uma função auxiliar `normalize_score` para normalizar o score.",
+          "Atualize as funções `normalize_scores` e `process` para usar essa nova função."
+        ],
+        "test_suggestions": [
+          "Adicionar teste unitário específico para a lógica de normalização do score"
+        ],
+        "risk_notes": [
+          "A duplicação da lógica pode levar a erros se a regra for alterada em um lugar e não no outro."
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Information Security Policy v3.1.pdf",
+  "file_type": "pdf",
+  "file_hash": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.1\nApproved internal policy in force during the March 2024 vendor review cycle.\nDocument ID\nPOL-031\nOwner\nChief Information Security Officer\nVersion\n3.1\nEffective Date\n2024-01-05\nReview Cycle\nAnnual\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Purpose and Scope\nThis policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and\ncritical third parties that access Meridian data, systems, or production support environments.\n2. Governance Roles\nRole\nCore Responsibilities\nChief Information Security\nOfficer\nMaintains the security program, approves exceptions, and reports material risks to executive\nleadership.\nSystem Owners\nEnsure systems meet baseline controls and remediate findings in a timely manner.\nManagers\nApprove access based on business need and review privileged access at least every six\nmonths.\nWorkforce Members\nComplete required training and report suspicious activity promptly.\n3. Control Requirements\n●\nREQ-IDM-03. Privileged access requires manager approval and ticket-based provisioning.\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for administrative access and remote access to production\nsystems.\n●\nREQ-LOG-02. Production security logs must be retained for at least 180 days and reviewed for anomalous activity.\n●\nREQ-VND-04. Critical service providers must provide annual security evidence and notify Meridian of material control\nchanges.\n4. Incident Management\nREQ-IR-07. The Security Team will use reasonable efforts to notify affected executive stakeholders, control owners, and\nlegal counsel in a timely manner once material facts are confirmed. External notification timing will be determined based on\nfacts, contractual commitments, and business impact.\nThe policy requires incidents to be documented, triaged, and preserved in the case-management system. The policy does\nnot define an explicit notification window for critical customer-data incidents.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nReview signal: REQ-IR-07 is intentionally vague and lacks a defined number of hours. This supports the\n“weak incident response timeframe” finding in the frontend.\nApproval and Revision History\nRole\nName\nStatus / Date\nChief Information Security Officer\nElena Petrov\nApproved — 2024-01-05\nGeneral Counsel\nDaniel Brooks\nReviewed — 2024-01-04\nVersion\nDate\nOwner\nSummary\n3.0\n2023-06-01\nSecurity\nProgram refresh for identity, logging, and vendor-risk coverage.\n3.1\n2024-01-05\nSecurity\nClarified annual evidence expectations and log-retention language.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 3072,
+    "final_text_chars": 3072,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2324,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 745,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 35,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 6506,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.1\nApproved internal policy in force during the March 2024 vendor review cycle.\nDocument ID\nPOL-031\nOwner\nChief Information Security Officer\nVersion\n3.1\nEffective Date\n2024-01-05\nReview Cycle\nAnnual\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Purpose and Scope\nThis policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and\ncritical third parties that access Meridian data, systems, or production support environments.\n2. Governance Roles\nRole\nCore Responsibilities\nChief Information Security\nOfficer\nMaintains the security program, approves exceptions, and reports material risks to executive\nleadership.\nSystem Owners\nEnsure systems meet baseline controls and remediate findings in a timely manner.\nManagers\nApprove access based on business need and review privileged access at least every six\nmonths.\nWorkforce Members\nComplete required training and report suspicious activity promptly.\n3. Control Requirements\n●\nREQ-IDM-03. Privileged access requires manager approval and ticket-based provisioning.\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for administrative access and remote access to production\nsystems.\n●\nREQ-LOG-02. Production security logs must be retained for at least 180 days and reviewed for anomalous activity.\n●\nREQ-VND-04. Critical service providers must provide annual security evidence and notify Meridian of material control\nchanges.\n4. Incident Management\nREQ-IR-07. The Security Team will use reasonable efforts to notify affected executive stakeholders, control owners, and\nlegal counsel in a timely manner once material facts are confirmed. External notification timing will be determined based on\nfacts, contractual commitments, and business impact.\nThe policy requires incidents to be documented, triaged, and preserved in the case-management system. The policy does\nnot define an explicit notification window for critical customer-data incidents.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nReview signal: REQ-IR-07 is intentionally vague and lacks a defined number of hours. This supports the\n“weak incident response timeframe” finding in the frontend.\nApproval and Revision History\nRole\nName\nStatus / Date\nChief Information Security Officer\nElena Petrov\nApproved — 2024-01-05\nGeneral Counsel\nDaniel Brooks\nReviewed — 2024-01-04\nVersion\nDate\nOwner\nSummary\n3.0\n2023-06-01\nSecurity\nProgram refresh for identity, logging, and vendor-risk coverage.\n3.1\n2024-01-05\nSecurity\nClarified annual evidence expectations and log-retention language.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic policy is text-first; Docling/text extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "policies/Information Security Policy v3.1.pdf",
+    "nextcloud_relative_path": "policies/Information Security Policy v3.1.pdf",
+    "source_relative_path": "policies/Information Security Policy v3.1.pdf",
+    "filename": "Information Security Policy v3.1.pdf",
+    "title": "Information Security Policy v3.1",
+    "category": "policies",
+    "preindex": {
+      "relative_path": "policies/Information Security Policy v3.1.pdf",
+      "filename": "Information Security Policy v3.1.pdf",
+      "title": "Information Security Policy v3.1",
+      "category": "policies",
+      "document_id": "policies/Information Security Policy v3.1.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:35"
+}

@@ -1,0 +1,48 @@
+{
+  "manifest_version": 1,
+  "mode": "preview",
+  "basename": "policy_contract_comparison_deck",
+  "output_dir": "baseline://external/Users_danyellambert_ppt_creator_app_outputs_ai_workbench_export_previews/deckexp_20260418_163909_cf6bcb4e",
+  "presentation_title": "AI Workbench Local — Policy / Contract Comparison",
+  "theme": "executive_premium_minimal",
+  "preview_count": 6,
+  "preview_source": "spec",
+  "real_preview": false,
+  "backend_requested": "synthetic",
+  "backend_used": "synthetic",
+  "office_runtime": null,
+  "office_conversion_strategy": null,
+  "input_pptx": null,
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "policy_contract_comparison_deck-01.png",
+      "path": "baseline://external_files/b4d6e17d51e2f5c9_policy_contract_comparison_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "policy_contract_comparison_deck-02.png",
+      "path": "baseline://external_files/dc17a2676d916647_policy_contract_comparison_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "policy_contract_comparison_deck-03.png",
+      "path": "baseline://external_files/05a9e5f1d95a40b9_policy_contract_comparison_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "policy_contract_comparison_deck-04.png",
+      "path": "baseline://external_files/caafac7ada0dece0_policy_contract_comparison_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "policy_contract_comparison_deck-05.png",
+      "path": "baseline://external_files/909cbfa2282610ab_policy_contract_comparison_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "policy_contract_comparison_deck-06.png",
+      "path": "baseline://external_files/230426f03ad2a69e_policy_contract_comparison_deck-06.png"
+    }
+  ]
+}

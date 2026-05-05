@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "The documents address complementary aspects of access governance: one outlines the evidentiary requirements and gaps in Q1 vendor access reviews, while the other specifies the conditions and oversight mechanisms for privileged account approvals. Together, they reflect a structured but incomplete control environment where procedural compliance must be validated against actual evidence.\n\n- Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-control evidence and identifies gaps requiring resolution.  \n- Missing EV-002 approval email must be recovered to close the control.  \n- Privileged access is granted conditionally, with defined scope, logging, and quarterly review requirements.  \n- Governance mandates vendor confirmation and archival of evidence for audit readiness.  \n- Evidence collection is synthetically modeled, limiting direct operational applicability.  \n- Control effectiveness depends on reconciling procedural design with actual documented proof.",
+  "key_highlights": [
+    "The documents address complementary aspects of access governance: one outlines the evidentiary requirements and gaps in Q1 vendor access reviews, while the other specifies the conditions and oversight mechanisms for privileged account approvals. Together, they reflect a structured but incomplete control environment where procedural compliance must be validated against actual evidence.",
+    "Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-control evidence and identifies gaps requiring resolution.",
+    "Missing EV-002 approval email must be recovered to close the control.",
+    "Privileged access is granted conditionally, with defined scope, logging, and quarterly review requirements.",
+    "Governance mandates vendor confirmation and archival of evidence for audit readiness.",
+    "Evidence collection is synthetically modeled, limiting direct operational applicability."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Control closure depends on verifying provenance of missing or incomplete evidence. | Synthetic nature of the document m…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on limited scope and ongoing oversight | Governance requires periodic review and vendor validatio…"
+        ],
+        [
+          "approval_change",
+          "The documents address complementary aspects of access governance:…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-control evidenc…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Access Review Evidence Log (EVD-101) documents Q1 2024…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-control evidenc…"
+        ],
+        [
+          "approval_change",
+          "Missing EV-002 approval email must be recovered to…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-control evidenc…"
+        ],
+        [
+          "approval_change",
+          "Privileged access is granted conditionally, with defined scope,…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-control evidenc…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Governance mandates vendor confirmation and archival of evidence…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-control evidenc…"
+        ],
+        [
+          "auditability_delta",
+          "Evidence collection is synthetically modeled, limiting direct operational…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): Synthetic nature of the document means all parties and events are fictional, limi…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Cloud Infrastructure SLA.pdf",
+  "file_type": "pdf",
+  "file_hash": "689dce108c42732f2e0748991373e9edd58a74b1e1a0a1c553c365ef0d31cbf7",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-012  Cloud Infrastructure SLA\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nCloud Infrastructure SLA\nOperational uptime and support commitments attached to the Northwind managed-service engagement.\nDocument ID\nCTR-012\nOwner\nVendor Management Office\nVersion\n1.3\nEffective Date\n2024-01-15\nCustomer\nMeridian Holdings Ltd.\nCounterparty\nNorthwind Cloud Systems LLC\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Service Commitments\nMetric\nCommitment\nMeasurement Window\nPlatform Availability\n99.5% monthly uptime\nCalendar month\nPriority 1 Initial Response\n15 minutes, 24×7\nPer incident\nPriority 2 Initial Response\n1 hour, 24×7\nPer incident\nPriority 3 Initial Response\n4 business hours\nPer incident\nService Restoration Objective\nBest efforts; target based on severity and\navailable workaround\nPer incident\n2. Severity Definitions and Update Cadence\nSeverity\nDefinition\nUpdate Cadence\nP1\nComplete production outage or material compromise of the managed retrieval service.\nEvery 60 minutes\nP2\nMajor degradation affecting critical workflows with no practical workaround.\nEvery 4 hours\nP3\nMaterial issue with available workaround or limited business effect.\nDaily until stabilization\n3. Service Credits\n●\nIf monthly availability falls below 99.5% but remains at or above 99.0%, Customer receives a 5% service credit for the\naffected month.\n●\nIf monthly availability falls below 99.0% but remains at or above 98.5%, Customer receives a 10% service credit for the\naffected month.\n●\nIf monthly availability falls below 98.5%, Customer receives a 20% service credit. Service credits are the sole and\nexclusive remedy for availability failures under this SLA.\n4. Remedies and Liability\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-012  Cloud Infrastructure SLA\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nClause 4.2 — Liability Cap. Provider’s aggregate liability arising out of or related to this SLA shall not exceed the fees paid\nby Customer for the affected services during the twelve (12) months preceding the event giving rise to the claim.\nClause 4.3 — No Renewal Mechanics. This SLA does not modify contract term, renewal, or non-renewal rights\nestablished in the Master Service Agreement.\nClause 4.5 — Reporting. Provider shall deliver a monthly service report that includes availability calculations, incident\ncounts by severity, open corrective actions, and scheduled maintenance windows.\nPrimary review signal: 99.5% monthly uptime is materially below Meridian’s target 99.95% enterprise\nbaseline. This document also provides a capped-liability comparator against the unlimited MSA draft.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 2892,
+    "final_text_chars": 2892,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1913,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 975,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 80,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 6026,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-012  Cloud Infrastructure SLA\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nCloud Infrastructure SLA\nOperational uptime and support commitments attached to the Northwind managed-service engagement.\nDocument ID\nCTR-012\nOwner\nVendor Management Office\nVersion\n1.3\nEffective Date\n2024-01-15\nCustomer\nMeridian Holdings Ltd.\nCounterparty\nNorthwind Cloud Systems LLC\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Service Commitments\nMetric\nCommitment\nMeasurement Window\nPlatform Availability\n99.5% monthly uptime\nCalendar month\nPriority 1 Initial Response\n15 minutes, 24×7\nPer incident\nPriority 2 Initial Response\n1 hour, 24×7\nPer incident\nPriority 3 Initial Response\n4 business hours\nPer incident\nService Restoration Objective\nBest efforts; target based on severity and\navailable workaround\nPer incident\n2. Severity Definitions and Update Cadence\nSeverity\nDefinition\nUpdate Cadence\nP1\nComplete production outage or material compromise of the managed retrieval service.\nEvery 60 minutes\nP2\nMajor degradation affecting critical workflows with no practical workaround.\nEvery 4 hours\nP3\nMaterial issue with available workaround or limited business effect.\nDaily until stabilization\n3. Service Credits\n●\nIf monthly availability falls below 99.5% but remains at or above 99.0%, Customer receives a 5% service credit for the\naffected month.\n●\nIf monthly availability falls below 99.0% but remains at or above 98.5%, Customer receives a 10% service credit for the\naffected month.\n●\nIf monthly availability falls below 98.5%, Customer receives a 20% service credit. Service credits are the sole and\nexclusive remedy for availability failures under this SLA.\n4. Remedies and Liability\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-012  Cloud Infrastructure SLA\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nClause 4.2 — Liability Cap. Provider’s aggregate liability arising out of or related to this SLA shall not exceed the fees paid\nby Customer for the affected services during the twelve (12) months preceding the event giving rise to the claim.\nClause 4.3 — No Renewal Mechanics. This SLA does not modify contract term, renewal, or non-renewal rights\nestablished in the Master Service Agreement.\nClause 4.5 — Reporting. Provider shall deliver a monthly service report that includes availability calculations, incident\ncounts by severity, open corrective actions, and scheduled maintenance windows.\nPrimary review signal: 99.5% monthly uptime is materially below Meridian’s target 99.95% enterprise\nbaseline. This document also provides a capped-liability comparator against the unlimited MSA draft.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic contract/SLA is text-first; Docling/text extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "contracts/Cloud Infrastructure SLA.pdf",
+    "nextcloud_relative_path": "contracts/Cloud Infrastructure SLA.pdf",
+    "source_relative_path": "contracts/Cloud Infrastructure SLA.pdf",
+    "filename": "Cloud Infrastructure SLA.pdf",
+    "title": "Cloud Infrastructure SLA",
+    "category": "contracts",
+    "preindex": {
+      "relative_path": "contracts/Cloud Infrastructure SLA.pdf",
+      "filename": "Cloud Infrastructure SLA.pdf",
+      "title": "Cloud Infrastructure SLA",
+      "category": "contracts",
+      "document_id": "contracts/Cloud Infrastructure SLA.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:48:48"
+}

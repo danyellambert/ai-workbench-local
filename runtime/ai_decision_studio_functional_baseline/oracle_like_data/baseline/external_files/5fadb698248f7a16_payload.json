@@ -1,0 +1,161 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Evidence Pack Review",
+    "subtitle": "Audit / compliance executive handoff grounded in EvidenceOps",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Evidence Pack"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Evidence Pack Review",
+      "subtitle": "Audit / compliance executive handoff grounded in EvidenceOps",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "speaker_notes": "Export kind: evidence_pack_deck. Deck family: evidence_audit. Sources: evidenceops_worklog, evidenceops_action_store."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "Lucas de Souza Ferreira CV: 0 risco(s), 1 lacuna(s) e 0 ação(ões) de mitigação identificada(s).",
+      "bullets": [
+        "No owner is named for the migration task",
+        "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+        "Encaminhe o resultado para revisão humana antes de tomar uma decisão final."
+      ],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "speaker_notes": "Resumo executivo consolidado a partir dos sinais grounded do produto."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "metrics": [
+        {
+          "value": "1",
+          "label": "Findings"
+        },
+        {
+          "value": "0",
+          "label": "Action items"
+        },
+        {
+          "value": "3",
+          "label": "Open actions"
+        },
+        {
+          "value": "10",
+          "label": "Unique docs"
+        }
+      ],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Findings",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [
+        "Type",
+        "Title",
+        "Description",
+        "Evidence"
+      ],
+      "table_rows": [
+        [
+          "gap",
+          "No owner is named for the migration task",
+          "No owner is named for the migration task",
+          "-"
+        ]
+      ],
+      "comparison_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Action status",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [
+        "Type",
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "table_rows": [
+        [
+          "recommended_action",
+          "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+          "-",
+          "-",
+          "recommended"
+        ],
+        [
+          "recommended_action",
+          "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+          "-",
+          "-",
+          "recommended"
+        ],
+        [
+          "recommended_action",
+          "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+          "-",
+          "-",
+          "recommended"
+        ]
+      ],
+      "comparison_columns": []
+    },
+    {
+      "type": "comparison",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+          "bullets": [
+            "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+            "Encaminhe o resultado para revisão humana antes de tomar uma decisão final."
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "Há ações abertas sem owner definido no action store.",
+          "bullets": [
+            "No owner is named for the migration task",
+            "Perguntas abertas podem exigir leitura humana adicional quando o documento tiver ambiguidade contextual.",
+            "A resposta foi marcada para revisão humana antes de uso decisório."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+        "Encaminhe o resultado para revisão humana antes de tomar uma decisão final."
+      ],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": []
+    }
+  ]
+}

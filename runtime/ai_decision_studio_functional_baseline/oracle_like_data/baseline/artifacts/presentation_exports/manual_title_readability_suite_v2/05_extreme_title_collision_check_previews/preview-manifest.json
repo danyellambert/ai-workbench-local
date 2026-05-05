@@ -1,0 +1,23 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "05_extreme_title_collision_check",
+  "output_dir": "baseline://artifacts/presentation_exports/manual_title_readability_suite_v2/05_extreme_title_collision_check_previews",
+  "presentation_title": "05_extreme_title_collision_check",
+  "theme": "executive_premium_minimal",
+  "preview_count": 1,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "direct_png",
+  "input_pptx": "baseline://external_files/6220f545db9496f8_05_extreme_title_collision_check.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "05_extreme_title_collision_check-01.png",
+      "path": "baseline://external_files/af5423438bf4ddf8_05_extreme_title_collision_check-01.png"
+    }
+  ]
+}

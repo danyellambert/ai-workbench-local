@@ -1,0 +1,448 @@
+[
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-55ad0ae59e",
+    "case_id": "case_14b8511fa7c7b3b8",
+    "status": "success",
+    "group": "embeddings",
+    "started_at": 1775421304.580846,
+    "provider_requested": "ollama",
+    "provider_effective": "ollama",
+    "model_requested": "embeddinggemma:300m",
+    "model_effective": "embeddinggemma:300m",
+    "requested_runtime_family": "ollama_local",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "embeddinggemma:300m"
+    ],
+    "provider_label": "Ollama (local)",
+    "candidate_id": "ollama_embeddinggemma_300m",
+    "candidate_role": "baseline_general_retrieval",
+    "dataset_id": "phase8_5_embedding_pdf_corpus",
+    "subset_id": "general_retrieval",
+    "subset_label": "General document retrieval",
+    "subset_kind": "general",
+    "question_set_id": "embedding_benchmark_questions.example",
+    "question_set_path": "baseline://external_files/e782925e68594614_embedding_benchmark_questions.example.json",
+    "document_count": 2,
+    "question_count": 2,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "repetition": 1,
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "api_route": "http://localhost:11434/api/embed",
+      "requested_num_ctx": 512,
+      "model": "embeddinggemma:300m",
+      "truncate": true,
+      "show_available": true,
+      "declared_context_length": 2048,
+      "model_modified_at": "2026-03-14T12:51:40.469083155-03:00",
+      "validation_summary": "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+    },
+    "error": null,
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "embeddinggemma:300m",
+    "backend_equivalence_key": "ollama::embeddinggemma:300m",
+    "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+    "path_overhead_expected": false,
+    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+    "resolved_runtime_family": "ollama_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "indexing_seconds": 141.2311,
+    "sync_status": {
+      "ok": true,
+      "backend": "chroma",
+      "chunks_in_json": 1469,
+      "chunks_in_chroma": 1469,
+      "persist_dir_exists": true,
+      "message": "Chroma sincronizado com 1469 chunk(s)."
+    },
+    "aggregate_metrics": {
+      "question_count": 2,
+      "hit_at_1": 0.5,
+      "hit_at_k": 0.5,
+      "mrr": 0.5,
+      "average_retrieval_seconds": 0.6989,
+      "median_retrieval_seconds": 0.6989,
+      "max_retrieval_seconds": 0.7378
+    },
+    "per_question_results": [
+      {
+        "question": "Which document discusses OCR for text inside natural scene images using a hierarchical centroid shape descriptor and reports 97.87% accuracy with SVM?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.7378,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 11,
+            "score": 0.4748,
+            "vector_score": 0.542,
+            "lexical_score": 0.35,
+            "snippet": "performance of classification on LIBSVM tool is\nmeasured by considering two types of SVM namely, C -SVC\nand nu-SVC and three types of kernels namely, Gaussian RBF\n(Radial Basis Function) kernel, Linear Kernel and Polynomial\nkernel.\nTable 1: Classification results using different "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 12,
+            "score": 0.4737,
+            "vector_score": 0.5673,
+            "lexical_score": 0.3,
+            "snippet": "he obtained feature vector is\nthen learned for classification using Support Vector Machine\non the dataset created using different ty pe of font sizes and\ntypes.\nThe performance is analyzed using different combinations of\nSVM type and its kernels on 10 -fold cross validation\nproce"
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 3,
+            "score": 0.4646,
+            "vector_score": 0.5263,
+            "lexical_score": 0.35,
+            "snippet": "formation. Diagonal and transition features were calculated\non the bitmap images of the characters and then Euclidean\ndistance between the testing point and reference point is\ncalculated in o rder to find k -nearest neighbors. The dataset\nused in the study consist of 3500 images "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 4,
+            "score": 0.4499,
+            "vector_score": 0.5306,
+            "lexical_score": 0.3,
+            "snippet": "collected from 20 writers of different age groups. In\npreprocessing stage, an image was converted to b inary by\nusing Otsu’s method. The median filter and morphological\noperation was also applied on raw image as part of\npreprocessing. Iterative approach was used for the\nsegmentat"
+          }
+        ]
+      },
+      {
+        "question": "Which document presents a method for extracting virtual baselines from scene text using curvilinear projection and emphasizes robustness to blur, noise, and non-text objects?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": false,
+        "hit_at_k": false,
+        "reciprocal_rank": 0.0,
+        "first_relevant_rank": null,
+        "retrieval_seconds": 0.6599,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 13,
+            "score": 0.4481,
+            "vector_score": 0.5356,
+            "lexical_score": 0.2857,
+            "snippet": "cognit., vol. 19, no. 6, pp.\n425–430, 1986.\n[5] V. K. Govindan and A. P. Shivaprasad, “Character\nrecognition - A survey,” Pattern Recognit., vol. 23, pp.\n671–683, 1990.\n[6] B. Al -Badr and S. a. Mahmoud, “Survey and\nbibliography of Arabic optical text recognition,” Signal\nProcess"
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 11,
+            "score": 0.403,
+            "vector_score": 0.4662,
+            "lexical_score": 0.2857,
+            "snippet": "performance of classification on LIBSVM tool is\nmeasured by considering two types of SVM namely, C -SVC\nand nu-SVC and three types of kernels namely, Gaussian RBF\n(Radial Basis Function) kernel, Linear Kernel and Polynomial\nkernel.\nTable 1: Classification results using different "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 4,
+            "score": 0.3991,
+            "vector_score": 0.4602,
+            "lexical_score": 0.2857,
+            "snippet": "collected from 20 writers of different age groups. In\npreprocessing stage, an image was converted to b inary by\nusing Otsu’s method. The median filter and morphological\noperation was also applied on raw image as part of\npreprocessing. Iterative approach was used for the\nsegmentat"
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 1,
+            "score": 0.3964,
+            "vector_score": 0.456,
+            "lexical_score": 0.2857,
+            "snippet": "[Página 2]\nInternational Journal of Computer Applications (0975 – 8887)\nVolume 149 – No.3, September 2016\n25\nrecognition. Some of these studies are briefly reviewed as\nfollows:\nThe zoning mechanism is used for the feature extraction\nwhich is used to train support vecto r machine "
+          }
+        ]
+      }
+    ],
+    "hit_at_1": 0.5,
+    "hit_at_k": 0.5,
+    "mrr": 0.5,
+    "average_retrieval_seconds": 0.6989,
+    "median_retrieval_seconds": 0.6989,
+    "max_retrieval_seconds": 0.7378,
+    "total_wall_time_s": 142.6294,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 142.6294,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 315.1719,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak",
+    "finished_at": 1775421447.210494
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-55ad0ae59e",
+    "case_id": "case_721751b68a63b919",
+    "status": "success",
+    "group": "embeddings",
+    "started_at": 1775421447.2961211,
+    "provider_requested": "ollama",
+    "provider_effective": "ollama",
+    "model_requested": "embeddinggemma:300m",
+    "model_effective": "embeddinggemma:300m",
+    "requested_runtime_family": "ollama_local",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "embeddinggemma:300m"
+    ],
+    "provider_label": "Ollama (local)",
+    "candidate_id": "ollama_embeddinggemma_300m",
+    "candidate_role": "baseline_general_retrieval",
+    "dataset_id": "phase8_5_embedding_pdf_corpus",
+    "subset_id": "code_retrieval",
+    "subset_label": "Code retrieval subset",
+    "subset_kind": "code",
+    "question_set_id": "phase8_5_code_embedding_questions",
+    "question_set_path": "baseline://external_files/a37c416f711682a9_phase8_5_code_embedding_questions.json",
+    "document_count": 2,
+    "question_count": 2,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "repetition": 1,
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "api_route": "http://localhost:11434/api/embed",
+      "requested_num_ctx": 512,
+      "model": "embeddinggemma:300m",
+      "truncate": true,
+      "show_available": true,
+      "declared_context_length": 2048,
+      "model_modified_at": "2026-03-14T12:51:40.469083155-03:00",
+      "validation_summary": "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+    },
+    "error": null,
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "embeddinggemma:300m",
+    "backend_equivalence_key": "ollama::embeddinggemma:300m",
+    "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+    "path_overhead_expected": false,
+    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+    "resolved_runtime_family": "ollama_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "indexing_seconds": 2.493,
+    "sync_status": {
+      "ok": true,
+      "backend": "chroma",
+      "chunks_in_json": 21,
+      "chunks_in_chroma": 21,
+      "persist_dir_exists": true,
+      "message": "Chroma sincronizado com 21 chunk(s)."
+    },
+    "aggregate_metrics": {
+      "question_count": 2,
+      "hit_at_1": 0.5,
+      "hit_at_k": 0.5,
+      "mrr": 0.5,
+      "average_retrieval_seconds": 0.1586,
+      "median_retrieval_seconds": 0.1586,
+      "max_retrieval_seconds": 0.1683
+    },
+    "per_question_results": [
+      {
+        "question": "Which file defines the function `hybrid_rerank_chunks` and calculates a combined rerank score using vector and lexical weights?",
+        "expected_document_names": [
+          "reranking.py"
+        ],
+        "retrieved_names": [
+          "model_comparison.py",
+          "model_comparison.py",
+          "model_comparison.py",
+          "model_comparison.py"
+        ],
+        "hit_at_1": false,
+        "hit_at_k": false,
+        "reciprocal_rank": 0.0,
+        "first_relevant_rank": null,
+        "retrieval_seconds": 0.1683,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 3,
+            "score": 0.2696,
+            "vector_score": 0.343,
+            "lexical_score": 0.1333,
+            "snippet": "KET_LABELS = {\n\"local\": \"Local\",\n\"cloud\": \"Cloud\",\n\"experimental_local\": \"Experimental local\",\n}\nMODEL_COMPARISON_QUANTIZATION_LABELS = {\n\"cloud_managed\": \"Cloud managed\",\n\"q2\": \"Q2\",\n\"q3\": \"Q3\",\n\"q4\": \"Q4\",\n\"q5\": \"Q5\",\n\"q6\": \"Q6\",\n\"q8\": \"Q8\",\n\"int4\": \"INT4\",\n\"int8\": \"INT8\",\n\"fp1"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 9,
+            "score": 0.2372,
+            "vector_score": 0.3649,
+            "lexical_score": 0.0,
+            "snippet": ".get(\"model_requested\"),\n\"runtime_bucket\": item.get(\"runtime_bucket\"),\n\"quantization_family\": item.get(\"quantization_family\"),\n\"success\": success,\n\"latency_s\": latency,\n\"format_adherence\": adherence,\n\"groundedness_score\": item.get(\"groundedness_score\"),\n\"schema_adherence\": item.g"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 1,
+            "score": 0.2205,
+            "vector_score": 0.3393,
+            "lexical_score": 0.0,
+            "snippet": "from __future__ import annotations\nimport json\nimport re\nimport time\nfrom typing import Any\nfrom ..config import RagSettings\nfrom ..prompt_profiles import build_prompt_messages\nfrom ..providers.registry import resolve_provider_runtime_profile\nfrom ..rag.prompting import inject_ra"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 6,
+            "score": 0.2197,
+            "vector_score": 0.338,
+            "lexical_score": 0.0,
+            "snippet": ")]\nbullet_lines = sum(\n1\nfor line in lines\nif line.startswith((\"-\", \"•\", \"*\")) or re.match(r\"^\\d+[.)]\\s+\", line)\n)\nbullet_coverage = min(bullet_lines / 4, 1.0) if bullet_lines else 0.0\nreturn round((float(format_adherence) * 0.4) + (bullet_coverage * 0.6), 3)\nif response_format ="
+          }
+        ]
+      },
+      {
+        "question": "Which file defines `run_model_comparison_candidate` and the `MODEL_COMPARISON_USE_CASE_PRESETS` constants for benchmark generation use cases?",
+        "expected_document_names": [
+          "model_comparison.py"
+        ],
+        "retrieved_names": [
+          "model_comparison.py",
+          "model_comparison.py",
+          "model_comparison.py",
+          "model_comparison.py"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.149,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 3,
+            "score": 0.3635,
+            "vector_score": 0.435,
+            "lexical_score": 0.2308,
+            "snippet": "KET_LABELS = {\n\"local\": \"Local\",\n\"cloud\": \"Cloud\",\n\"experimental_local\": \"Experimental local\",\n}\nMODEL_COMPARISON_QUANTIZATION_LABELS = {\n\"cloud_managed\": \"Cloud managed\",\n\"q2\": \"Q2\",\n\"q3\": \"Q3\",\n\"q4\": \"Q4\",\n\"q5\": \"Q5\",\n\"q6\": \"Q6\",\n\"q8\": \"Q8\",\n\"int4\": \"INT4\",\n\"int8\": \"INT8\",\n\"fp1"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 10,
+            "score": 0.3401,
+            "vector_score": 0.3989,
+            "lexical_score": 0.2308,
+            "snippet": "ndo com '-'.\",\n\"json\": \"Responda somente com JSON válido, sem markdown e sem texto adicional.\",\n}\nextra_instruction = format_instructions.get(response_format, format_instructions[\"plain_text\"])\nreturn f\"{cleaned}\\n\\nFormato desejado: {extra_instruction}\".strip()\ndef estimate_resp"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 2,
+            "score": 0.3114,
+            "vector_score": 0.479,
+            "lexical_score": 0.0,
+            "snippet": "riscos, controles existentes, lacunas e próximos passos recomendados.\",\n\"response_format\": \"bullet_list\",\n\"prompt_profile\": \"neutro\",\n},\n\"policy_compliance\": {\n\"label\": \"Policy / compliance\",\n\"description\": \"Comparar análise documental com foco em obrigações, restrições e necessi"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 1,
+            "score": 0.3073,
+            "vector_score": 0.4313,
+            "lexical_score": 0.0769,
+            "snippet": "from __future__ import annotations\nimport json\nimport re\nimport time\nfrom typing import Any\nfrom ..config import RagSettings\nfrom ..prompt_profiles import build_prompt_messages\nfrom ..providers.registry import resolve_provider_runtime_profile\nfrom ..rag.prompting import inject_ra"
+          }
+        ]
+      }
+    ],
+    "hit_at_1": 0.5,
+    "hit_at_k": 0.5,
+    "mrr": 0.5,
+    "average_retrieval_seconds": 0.1586,
+    "median_retrieval_seconds": 0.1586,
+    "max_retrieval_seconds": 0.1683,
+    "total_wall_time_s": 2.8107,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 2.8107,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 315.1719,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak",
+    "finished_at": 1775421450.106827
+  }
+]

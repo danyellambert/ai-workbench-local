@@ -1,0 +1,147 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "document_review_deck",
+  "deck_family": "review",
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-20",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "source_documents": [
+      "c71584605ee4df5c9faa827416203cb90c7431da3d77c2e0063b3bae3748cde5"
+    ],
+    "tool_used": "review_document_risks",
+    "review_type": "risk_gap_review",
+    "document_ids": [
+      "c71584605ee4df5c9faa827416203cb90c7431da3d77c2e0063b3bae3748cde5"
+    ]
+  },
+  "executive_summary": "Internal Audit Checklist for Northwind Cloud Systems LLC: 1 risk(s), 2 gap(s) and 5 mitigation action(s) identified. Top risk: Control design partially adequate with evidence quality and contract alignment gaps Main evidence gap: No explicit owner assigned to remediation due dates",
+  "key_highlights": [
+    "Control design partially adequate with evidence quality and contract alignment gaps",
+    "No explicit owner assigned to remediation due dates",
+    "No specific due dates provided for corrective actions",
+    "Remediate missing Appendix C (SCCs) attachment",
+    "Provide privileged access approval evidence for standing vendor admin accounts"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Source count",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "3"
+    },
+    {
+      "label": "Actions",
+      "value": "5"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Top findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Owner",
+        "Due",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "risk",
+          "Control design partially adequate with evidence quality and contract alignment gaps",
+          "-",
+          "-",
+          "Conclusion control design is partially adequate, but evidence quality and contract alignment gaps require remediation b…"
+        ],
+        [
+          "gap",
+          "No explicit owner assigned to remediation due dates",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "gap",
+          "No specific due dates provided for corrective actions",
+          "-",
+          "-",
+          "-"
+        ]
+      ],
+      "speaker_notes": "Findings grounded in the structured/document-agent payload."
+    },
+    {
+      "title": "Action plan",
+      "columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Remediate missing Appendix C (SCCs) attachment",
+          "Internal Audit",
+          "-",
+          "pending"
+        ],
+        [
+          "Provide privileged access approval evidence for standing vendor admin accounts",
+          "Internal Audit",
+          "-",
+          "pending"
+        ],
+        [
+          "Supply incident‑notification evidence meeting explicit 24‑hour or 48‑hour clause",
+          "Internal Audit",
+          "-",
+          "pending"
+        ],
+        [
+          "Deliver formal notice package for subprocessor change",
+          "Internal Audit",
+          "-",
+          "pending"
+        ],
+        [
+          "Update SLA to meet 99.95% target or obtain approved exception",
+          "Internal Audit",
+          "-",
+          "pending"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Remediate missing Appendix C (SCCs) attachment",
+  "watchouts": [
+    "No explicit owner assigned to remediation due dates",
+    "No specific due dates provided for corrective actions",
+    "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+  ],
+  "next_steps": [
+    "Remediate missing Appendix C (SCCs) attachment",
+    "Provide privileged access approval evidence for standing vendor admin accounts",
+    "Supply incident‑notification evidence meeting explicit 24‑hour or 48‑hour clause",
+    "Deliver formal notice package for subprocessor change",
+    "Open the cited source excerpts to confirm the interpretation before acting."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent"
+  ]
+}

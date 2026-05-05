@@ -1,0 +1,117 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "document_review_deck",
+  "deck_family": "review",
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "source_documents": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "tool_used": "review_document_risks",
+    "review_type": "risk_gap_review",
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ]
+  },
+  "executive_summary": "Q1 2024 Northwind vendor-control review: 2 risk(s), 0 gap(s) and 2 mitigation action(s) identified. Top risk: Missing evidence blocks control closure",
+  "key_highlights": [
+    "Missing evidence blocks control closure",
+    "In-progress items require verification",
+    "Archive EV-002 artifact in approved repository",
+    "Verify provenance of missing evidence"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Source count",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "2"
+    },
+    {
+      "label": "Actions",
+      "value": "2"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Top findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Owner",
+        "Due",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "risk",
+          "Missing evidence blocks control closure",
+          "-",
+          "-",
+          "Missing or in-progress items block control closure until provenance is verified"
+        ],
+        [
+          "risk",
+          "In-progress items require verification",
+          "-",
+          "-",
+          "Missing or in-progress items block control closure until provenance is verified"
+        ]
+      ],
+      "speaker_notes": "Findings grounded in the structured/document-agent payload."
+    },
+    {
+      "title": "Action plan",
+      "columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Archive EV-002 artifact in approved repository",
+          "IT Operations",
+          "-",
+          "pending"
+        ],
+        [
+          "Verify provenance of missing evidence",
+          "Compliance Operations",
+          "-",
+          "pending"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Archive EV-002 artifact in approved repository",
+  "watchouts": [
+    "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+  ],
+  "next_steps": [
+    "Archive EV-002 artifact in approved repository",
+    "Verify provenance of missing evidence",
+    "Open the cited source excerpts to confirm the interpretation before acting."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent"
+  ]
+}

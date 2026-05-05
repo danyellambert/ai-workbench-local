@@ -1,0 +1,971 @@
+{
+  "captured_at": "2026-04-23T02:39:56.171584+00:00",
+  "repository_root": "baseline://data/corpus_revisado",
+  "documents": [
+    {
+      "document_id": null,
+      "title": "build summary",
+      "category": "_build_logs",
+      "relative_path": "_build_logs/build_summary.json",
+      "suffix": ".json",
+      "size_bytes": 1754,
+      "modified_at": 1775388114,
+      "fingerprint": "3816510d053a4820a15227a855576689c62f46b435e3d7ffc558d1b91206a4bf"
+    },
+    {
+      "document_id": null,
+      "title": "file inventory",
+      "category": "_build_logs",
+      "relative_path": "_build_logs/file_inventory.csv",
+      "suffix": ".csv",
+      "size_bytes": 15690,
+      "modified_at": 1775388114,
+      "fingerprint": "d26646c75464db2999cbc6a02127601ca1d79fa4e5c8a079ee231dc71a7b9af7"
+    },
+    {
+      "document_id": null,
+      "title": "file inventory",
+      "category": "_build_logs",
+      "relative_path": "_build_logs/file_inventory.json",
+      "suffix": ".json",
+      "size_bytes": 24720,
+      "modified_at": 1775388114,
+      "fingerprint": "2194124044075eccb1f7165d676261fb852dfce87e74bd1d455a5c476a851705"
+    },
+    {
+      "document_id": null,
+      "title": "evidenceops corpora review",
+      "category": "root",
+      "relative_path": "evidenceops_corpora_review.md",
+      "suffix": ".md",
+      "size_bytes": 1080,
+      "modified_at": 1775388114,
+      "fingerprint": "d2134cefa59cbebf32701db5967fae98bbc309f56b04c9e032335b771b899e2d"
+    },
+    {
+      "document_id": null,
+      "title": "README generated",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/README_generated.md",
+      "suffix": ".md",
+      "size_bytes": 3996,
+      "modified_at": 1776306776,
+      "fingerprint": "b0c7814260e20754f910d753c93517df4f3066a654ba24724757eb06f937cf7d"
+    },
+    {
+      "document_id": null,
+      "title": "Access Review Evidence Log",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/audit/Access Review Evidence Log.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4223,
+      "modified_at": 1776306776,
+      "fingerprint": "3223d269cb1aa5b9d8972bce71fb7f6ace31114d2051ae95e434782522c6ca49"
+    },
+    {
+      "document_id": null,
+      "title": "Governance Committee Minutes and Action Items",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/audit/Governance Committee Minutes and Action Items.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 6253,
+      "modified_at": 1776306776,
+      "fingerprint": "4eb9debaec4658cf445149762ee8416e2f678048a72c9f2a8b391b5c0d03be0b"
+    },
+    {
+      "document_id": null,
+      "title": "Internal Audit Checklist - Vendor Controls",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/audit/Internal Audit Checklist - Vendor Controls.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4164,
+      "modified_at": 1776306776,
+      "fingerprint": "c71584605ee4df5c9faa827416203cb90c7431da3d77c2e0063b3bae3748cde5"
+    },
+    {
+      "document_id": null,
+      "title": "Nonconformance Report - Vendor Access Review",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/audit/Nonconformance Report - Vendor Access Review.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 5595,
+      "modified_at": 1776306776,
+      "fingerprint": "e80ee34037ab7670ec614609e61a5d979ae2ae238feab9fb859ea6dce204b838"
+    },
+    {
+      "document_id": null,
+      "title": "Remediation Closure Note - Vendor Access Review",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/audit/Remediation Closure Note - Vendor Access Review.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 3801,
+      "modified_at": 1776306776,
+      "fingerprint": "00ee7878700a87122124028c3dd4b97fbffa94d8710d4aa7a66d3e6a3f556347"
+    },
+    {
+      "document_id": null,
+      "title": "Cloud Infrastructure SLA",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/contracts/Cloud Infrastructure SLA.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 6026,
+      "modified_at": 1776306776,
+      "fingerprint": "689dce108c42732f2e0748991373e9edd58a74b1e1a0a1c553c365ef0d31cbf7"
+    },
+    {
+      "document_id": null,
+      "title": "Data Processing Addendum 2024",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/contracts/Data Processing Addendum 2024.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 6615,
+      "modified_at": 1776306776,
+      "fingerprint": "616bfa2a5c203bb0f3673477d4ca7e5f8ede26c705a48b491edd3f0159415fd9"
+    },
+    {
+      "document_id": null,
+      "title": "MSA Negotiation Baseline - Approved Position",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/contracts/MSA Negotiation Baseline - Approved Position.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4591,
+      "modified_at": 1776306776,
+      "fingerprint": "3c22d3911e394aa802d18a8e19cfc68877b9996df970a69fa9bd7bdcc4459569"
+    },
+    {
+      "document_id": null,
+      "title": "Master Service Agreement v4.2",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/contracts/Master Service Agreement v4.2.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 10281,
+      "modified_at": 1776306776,
+      "fingerprint": "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+    },
+    {
+      "document_id": null,
+      "title": "corpus gap report",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/corpus_gap_report.md",
+      "suffix": ".md",
+      "size_bytes": 2154,
+      "modified_at": 1776306776,
+      "fingerprint": "b96d7d7570f15d1f24b1f7555b4df287fe5b0afa89e20952436204328c8bfca7"
+    },
+    {
+      "document_id": null,
+      "title": "corpus manifest",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/corpus_manifest.csv",
+      "suffix": ".csv",
+      "size_bytes": 13299,
+      "modified_at": 1776306776,
+      "fingerprint": "e5e2f82ecfa0324b2e5e3278c988962a9676ecc3351e10a88f8c527a580028bd"
+    },
+    {
+      "document_id": null,
+      "title": "corpus manifest",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/corpus_manifest.json",
+      "suffix": ".json",
+      "size_bytes": 21748,
+      "modified_at": 1776306776,
+      "fingerprint": "fb95f9bd4650793392884bbc817ad566cf7d7ead0df0b92a4b6b6a3a4b85d3cd"
+    },
+    {
+      "document_id": null,
+      "title": "Privileged Account Approval Email",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/evidence/Privileged Account Approval Email.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4077,
+      "modified_at": 1776306776,
+      "fingerprint": "116488c0b192bd36036673cde91da47657e0b6b847fefe93a44c08b8c26836ef"
+    },
+    {
+      "document_id": null,
+      "title": "frontend mock coverage map",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/frontend_mock_coverage_map.json",
+      "suffix": ".json",
+      "size_bytes": 6748,
+      "modified_at": 1776306776,
+      "fingerprint": "4414d7d26bdea1645593ba8dd38cc3a3d8080bc423fb8f7b3dd32d3a582dfe2b"
+    },
+    {
+      "document_id": null,
+      "title": "frontend mock coverage map",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/frontend_mock_coverage_map.md",
+      "suffix": ".md",
+      "size_bytes": 3242,
+      "modified_at": 1776306776,
+      "fingerprint": "35b434aec66924091fed2cefce855cec76d645fd8a64e5b3267d811a0edbe9e0"
+    },
+    {
+      "document_id": null,
+      "title": "GDPR Compliance Checklist",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/governance/GDPR Compliance Checklist.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4356,
+      "modified_at": 1776306776,
+      "fingerprint": "6557a0c6828e817f095b5ea194394824a2132934fb5aa3a0e503047aa7cb6d15"
+    },
+    {
+      "document_id": null,
+      "title": "Q1 2024 Board Memo",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/governance/Q1 2024 Board Memo.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4262,
+      "modified_at": 1776306776,
+      "fingerprint": "7ec727dea85afa50627f8de57a66e730242520aead0428cc195e7b0f994ab381"
+    },
+    {
+      "document_id": null,
+      "title": "Hiring Scorecard - Sarah Chen",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/hiring/Hiring Scorecard - Sarah Chen.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4653,
+      "modified_at": 1776306776,
+      "fingerprint": "9a4a36d3a9b23bb1c1acfa2b83bdabda717d2a4afd351e5a358064e16c81f464"
+    },
+    {
+      "document_id": null,
+      "title": "Interview Feedback Memo - Sarah Chen",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/hiring/Interview Feedback Memo - Sarah Chen.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 3773,
+      "modified_at": 1776306776,
+      "fingerprint": "86af195b6f8f736bf64b7ba0f8826511f912aae05e91ea7476c81d2fa38c5701"
+    },
+    {
+      "document_id": null,
+      "title": "Sarah Chen - Senior ML Engineer CV",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/hiring/Sarah Chen - Senior ML Engineer CV.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 3772,
+      "modified_at": 1776306776,
+      "fingerprint": "6827d5298bede81ca3b5ef928b1e18e5af9988300286bec6aa53850189adacc3"
+    },
+    {
+      "document_id": null,
+      "title": "Senior ML Engineer Role Brief",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/hiring/Senior ML Engineer Role Brief.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4283,
+      "modified_at": 1776306776,
+      "fingerprint": "0c3a863ccf25bf9a57835e1e1f8e01cefa4028c65a7347c8019ce2a28b3123e8"
+    },
+    {
+      "document_id": "Legal Redline Summary - MSA v4.2",
+      "title": "Legal Redline Summary - MSA v4.2",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/legal/Legal Redline Summary - MSA v4.2.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 5987,
+      "modified_at": 1776306776,
+      "fingerprint": "c6c15479efc2c02160a3a6f2d70970baeb1d1927f6e37bc664ba0a0298a00411"
+    },
+    {
+      "document_id": null,
+      "title": "Employee Handbook 2024",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/operations/Employee Handbook 2024.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 5520,
+      "modified_at": 1776306776,
+      "fingerprint": "59fc633b674459d01b1714168ee331512e26e4ba95b12d968cdb0bffab203d99"
+    },
+    {
+      "document_id": null,
+      "title": "Data Retention Policy",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/policies/Data Retention Policy.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4033,
+      "modified_at": 1776306776,
+      "fingerprint": "3a7530a4e279e164911bac5c56c29a937ee22db4298c601a032c6581bec96948"
+    },
+    {
+      "document_id": null,
+      "title": "Information Security Policy v3.1",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/policies/Information Security Policy v3.1.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 6506,
+      "modified_at": 1776306776,
+      "fingerprint": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61"
+    },
+    {
+      "document_id": null,
+      "title": "Information Security Policy v3.2",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/policies/Information Security Policy v3.2.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4458,
+      "modified_at": 1776306776,
+      "fingerprint": "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+    },
+    {
+      "document_id": null,
+      "title": "Third-Party Supplier Code of Conduct",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/policies/Third-Party Supplier Code of Conduct.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 3533,
+      "modified_at": 1776306776,
+      "fingerprint": "e2abc1eb9fe1fc9f9fde95adba2ca46148bd4e7491557834da8e6cb0c57e5418"
+    },
+    {
+      "document_id": null,
+      "title": "Subprocessor Change Notice",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/privacy/Subprocessor Change Notice.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 3820,
+      "modified_at": 1776306776,
+      "fingerprint": "0c2c4fbaa230d50bd0cc36263d08b6ad2e6e9ae9d3b9079fa35679692a770dba"
+    },
+    {
+      "document_id": null,
+      "title": "Temporary Risk Acceptance Request - SLA Uptime",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/risk/Temporary Risk Acceptance Request - SLA Uptime.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4370,
+      "modified_at": 1776306776,
+      "fingerprint": "8dd5e4d0a88bb82fc7bccc47ce4dd4db54d34d3bbe83adb6d3e5a1c89dacee18"
+    },
+    {
+      "document_id": null,
+      "title": "Vendor Risk Assessment Template",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/risk/Vendor Risk Assessment Template.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 5739,
+      "modified_at": 1776306776,
+      "fingerprint": "0cbc2315b4fe8707528f79a87c3f5f817039497453e8665ad69e1fd8ce105a10"
+    },
+    {
+      "document_id": null,
+      "title": "Technical Architecture Brief",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/technical/Technical Architecture Brief.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 542313,
+      "modified_at": 1776306776,
+      "fingerprint": "46c10e1b43bcf14595cadfad74db198bbed31248a1619899432a15c40544dd99"
+    },
+    {
+      "document_id": null,
+      "title": "option a current review",
+      "category": "root",
+      "relative_path": "option_a_current_review.csv",
+      "suffix": ".csv",
+      "size_bytes": 6891,
+      "modified_at": 1775388114,
+      "fingerprint": "2f180ee423db8c7d6bcfe8fad165a168229e0ae4fbc3c670c9677795dfbd974d"
+    },
+    {
+      "document_id": null,
+      "title": "README generated",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/README_generated.md",
+      "suffix": ".md",
+      "size_bytes": 566,
+      "modified_at": 1775388114,
+      "fingerprint": "217b0decc90b608320dc90542be21ea7b285b7272adcc72be134379460db19e0"
+    },
+    {
+      "document_id": null,
+      "title": "cms internal monitoring auditing checklists",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/audit_and_monitoring/cms_internal_monitoring_auditing_checklists.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 2864199,
+      "modified_at": 1775388114,
+      "fingerprint": "7d4af2136be8a24d434a5c3084edcfb68adba241f2f13395bfbbf2a5ce1045f0"
+    },
+    {
+      "document_id": null,
+      "title": "osha safety and health program audit tool",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/audit_and_monitoring/osha_safety_and_health_program_audit_tool.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 321772,
+      "modified_at": 1775388114,
+      "fingerprint": "cbb0494154b880a4b209adfc97a6fbe32baff8e4440779cf854abe1e5044a186"
+    },
+    {
+      "document_id": null,
+      "title": "common paper csa",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/contracts_and_procurement/common_paper_csa.md",
+      "suffix": ".md",
+      "size_bytes": 44742,
+      "modified_at": 1775388114,
+      "fingerprint": "ff8abae90e99e465bfc89ad5e8da63a52299f9aa40034905afca62b7f8c481a0"
+    },
+    {
+      "document_id": null,
+      "title": "common paper dpa",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/contracts_and_procurement/common_paper_dpa.md",
+      "suffix": ".md",
+      "size_bytes": 27069,
+      "modified_at": 1775388114,
+      "fingerprint": "b4aa93c94bcb4da763fc2338406d3aec2ac1f0a6e32612f114121d609dece05a"
+    },
+    {
+      "document_id": null,
+      "title": "common paper psa",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/contracts_and_procurement/common_paper_psa.md",
+      "suffix": ".md",
+      "size_bytes": 36400,
+      "modified_at": 1775388114,
+      "fingerprint": "cc11a7dd556e0c1512aed33516dd9d283e5db276e55123a142706ef3ec7f0f1e"
+    },
+    {
+      "document_id": null,
+      "title": "common paper sla",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/contracts_and_procurement/common_paper_sla.md",
+      "suffix": ".md",
+      "size_bytes": 8796,
+      "modified_at": 1775388114,
+      "fingerprint": "6dd783192c644bdc1f00849d27e294578af11cd06148c7b566805ebef38f026a"
+    },
+    {
+      "document_id": null,
+      "title": "palm beach county contract review checklist",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/contracts_and_procurement/palm_beach_county_contract_review_checklist.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 137276,
+      "modified_at": 1775388114,
+      "fingerprint": "982f0ce6b869564bfa89c128fc32e6f4c2b6f15ce70d201c6d227cc18b578297"
+    },
+    {
+      "document_id": null,
+      "title": "world bank spd rfp consulting services",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/contracts_and_procurement/world_bank_spd_rfp_consulting_services.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 1683494,
+      "modified_at": 1775388114,
+      "fingerprint": "9f8288031fc99c0205ebe0f67fe80578d63478c225004981b333aa66c91b7415"
+    },
+    {
+      "document_id": "cbiac-september-10-2025-meeting-summary-and-action-items",
+      "title": "cbiac-september-10-2025-meeting-summary-and-action-items",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/incident_and_action_tracking/cbiac-september-10-2025-meeting-summary-and-action-items.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 196126,
+      "modified_at": 1775388114,
+      "fingerprint": "f6e8235ca9072405918f362706b627ae1d2500de5b7b216048e74ebf23b4e31f"
+    },
+    {
+      "document_id": null,
+      "title": "lanl subcontractor nonconformance report",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/incident_and_action_tracking/lanl_subcontractor_nonconformance_report.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 824646,
+      "modified_at": 1775388114,
+      "fingerprint": "a633f12b7e60c2fe7405f36375a206c094a2ad9f7be7d8638ad86c0c6d1d2a2b"
+    },
+    {
+      "document_id": null,
+      "title": "osha near miss incident report form",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/incident_and_action_tracking/osha_near_miss_incident_report_form.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 117139,
+      "modified_at": 1775388114,
+      "fingerprint": "7a3be632a577e4229a2ef65797fa83edd4b011fffa50b1766bcbf2fd87f1619d"
+    },
+    {
+      "document_id": null,
+      "title": "corpus manifest",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/metadata/corpus_manifest.csv",
+      "suffix": ".csv",
+      "size_bytes": 11714,
+      "modified_at": 1775388115,
+      "fingerprint": "cc356beea9820b6b13d0252bce09dd868ceafe6826e78bfe91ac51444cf4e2a8"
+    },
+    {
+      "document_id": null,
+      "title": "corpus manifest",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/metadata/corpus_manifest.json",
+      "suffix": ".json",
+      "size_bytes": 19326,
+      "modified_at": 1775388115,
+      "fingerprint": "08ad48ea4b8e3c2636e7d727296e3f80d1f25940590702c1873e67e1566900c2"
+    },
+    {
+      "document_id": null,
+      "title": "option a current review",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/metadata/option_a_current_review.csv",
+      "suffix": ".csv",
+      "size_bytes": 6891,
+      "modified_at": 1775388115,
+      "fingerprint": "2f180ee423db8c7d6bcfe8fad165a168229e0ae4fbc3c670c9677795dfbd974d"
+    },
+    {
+      "document_id": null,
+      "title": "option a v2 canonical manifest",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/metadata/option_a_v2_canonical_manifest.csv",
+      "suffix": ".csv",
+      "size_bytes": 9635,
+      "modified_at": 1775388115,
+      "fingerprint": "8380e97b5ffe5de2c3973396bb78e9980bda0cc85d9f16ef4cbf514846142a35"
+    },
+    {
+      "document_id": null,
+      "title": "source verification log",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/metadata/source_verification_log.csv",
+      "suffix": ".csv",
+      "size_bytes": 8180,
+      "modified_at": 1775388115,
+      "fingerprint": "1c40d83c273d171b8d271ec87d2b997d149617e92621492dcec5270b4f13d73f"
+    },
+    {
+      "document_id": null,
+      "title": "source verification log",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/metadata/source_verification_log.json",
+      "suffix": ".json",
+      "size_bytes": 11663,
+      "modified_at": 1775388115,
+      "fingerprint": "7171b2daeaa41d73185f4178cde1da85c4301c2bfa70b1cec6318b3f6359cfde"
+    },
+    {
+      "document_id": null,
+      "title": "cornell retention of university records",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/policy_and_governance/cornell_retention_of_university_records.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 568180,
+      "modified_at": 1775388115,
+      "fingerprint": "ff8d71157452374ba105e6946cb20eb351547d07f3974e29c10397237ad2c82c"
+    },
+    {
+      "document_id": null,
+      "title": "grambling third party vendor management policy",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/policy_and_governance/grambling_third_party_vendor_management_policy.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 105557,
+      "modified_at": 1775388115,
+      "fingerprint": "7ecfe260bb0c381b51a3f5c30dc9460164b344856203153fa9d2e66e0dd30424"
+    },
+    {
+      "document_id": null,
+      "title": "northeastern supplier code of conduct",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/policy_and_governance/northeastern_supplier_code_of_conduct.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 179723,
+      "modified_at": 1775388115,
+      "fingerprint": "0c9a07b91ff08c657592ca46995b3c1287ac8b4cc16cbcbefd987e9b796135f8"
+    },
+    {
+      "document_id": null,
+      "title": "northwestern information security policy",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/policy_and_governance/northwestern_information_security_policy.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 300088,
+      "modified_at": 1775388115,
+      "fingerprint": "86d505ba45f5e60374c56ed318c5bf465f7740ac03e0e49e655ce4c34d22d0a2"
+    },
+    {
+      "document_id": null,
+      "title": "nih ibc meeting minutes template",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/reference_frameworks/nih_ibc_meeting_minutes_template.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 398827,
+      "modified_at": 1775388115,
+      "fingerprint": "a2cfa67f8877944c3c4d89009729f7ba44a30a0f3f19084762444b069ea0b704"
+    },
+    {
+      "document_id": null,
+      "title": "nist csf 2 0",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/reference_frameworks/nist_csf_2_0.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 1518858,
+      "modified_at": 1775388115,
+      "fingerprint": "3c31f46fee98cac0c4323453e5109291a213b4de7fef8c058af9bf67f717433c"
+    },
+    {
+      "document_id": null,
+      "title": "nist csf v1 1",
+      "category": "option_a_public_corpus_v2",
+      "relative_path": "option_a_public_corpus_v2/reference_frameworks/nist_csf_v1_1.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 1062822,
+      "modified_at": 1775388115,
+      "fingerprint": "0f3ca796610ab024cbc3484cbd6799e19b4d9159d3634972a2a76af83f15fb92"
+    },
+    {
+      "document_id": null,
+      "title": "option a v2 canonical manifest",
+      "category": "root",
+      "relative_path": "option_a_v2_canonical_manifest.csv",
+      "suffix": ".csv",
+      "size_bytes": 9635,
+      "modified_at": 1775388115,
+      "fingerprint": "8380e97b5ffe5de2c3973396bb78e9980bda0cc85d9f16ef4cbf514846142a35"
+    },
+    {
+      "document_id": null,
+      "title": "option a v2 canonical manifest",
+      "category": "root",
+      "relative_path": "option_a_v2_canonical_manifest.json",
+      "suffix": ".json",
+      "size_bytes": 15823,
+      "modified_at": 1775388115,
+      "fingerprint": "98b77bf94805061f3503a365c2b70ac724c78e0f12e0bcfb5532ef6857699d59"
+    },
+    {
+      "document_id": null,
+      "title": "option b storylines",
+      "category": "root",
+      "relative_path": "option_b_storylines.csv",
+      "suffix": ".csv",
+      "size_bytes": 4480,
+      "modified_at": 1775388115,
+      "fingerprint": "f0ee27e73f1944934c821771cb717c8eada07de6b69ef2645fdbb2592f3f4ed5"
+    },
+    {
+      "document_id": null,
+      "title": "option b storylines",
+      "category": "root",
+      "relative_path": "option_b_storylines.json",
+      "suffix": ".json",
+      "size_bytes": 5944,
+      "modified_at": 1775388115,
+      "fingerprint": "f29973c6a7eab6b89fa9b847da6eed98e9d566c0499484c3835e7148242224cf"
+    },
+    {
+      "document_id": null,
+      "title": "README",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/README.txt",
+      "suffix": ".txt",
+      "size_bytes": 503,
+      "modified_at": 1775388115,
+      "fingerprint": "2f701ce45ba1c4d53a55d634b1fffbf580c8c40928cbc8972e66f3d920c31f0d"
+    },
+    {
+      "document_id": null,
+      "title": "README generated",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/README_generated.md",
+      "suffix": ".md",
+      "size_bytes": 303,
+      "modified_at": 1775388115,
+      "fingerprint": "e2453d63ab21ad8170728fe12a1b68d8449ef62bbc21cac90d1801e3b1312dcb"
+    },
+    {
+      "document_id": null,
+      "title": "README plus metadata",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/README_plus_metadata.txt",
+      "suffix": ".txt",
+      "size_bytes": 325,
+      "modified_at": 1775388115,
+      "fingerprint": "c7e17ccf84313f43839d07200ffd610ee5efc0fd15695f6bea48ecaec2d66da0"
+    },
+    {
+      "document_id": "AUD-001",
+      "title": "Internal Audit Checklist Vendor Controls",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/audit/AUD-001_Internal_Audit_Checklist_Vendor_Controls.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4047,
+      "modified_at": 1775388115,
+      "fingerprint": "5a5a7a39734ac094f297b1cb105014943fab220a8fb6f7a246c2dc9654fa7c22"
+    },
+    {
+      "document_id": "AUD-002",
+      "title": "Nonconformance Report Vendor Access Review",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/audit/AUD-002_Nonconformance_Report_Vendor_Access_Review.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 5178,
+      "modified_at": 1775388115,
+      "fingerprint": "494fa47ec7d597dddfc7754cf5e56353d5b531af2f7c15e2ce8f8fbbf0167309"
+    },
+    {
+      "document_id": "EVD-001",
+      "title": "Access Review Evidence Log",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/audit/EVD-001_Access_Review_Evidence_Log.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 3909,
+      "modified_at": 1775388115,
+      "fingerprint": "a710ef6a3e5242312b42ffa8e15ddfd66f8e64e9a7c4d1218bffbf17329a0ef0"
+    },
+    {
+      "document_id": "MIN-001",
+      "title": "Governance Committee Minutes Action Items",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/audit/MIN-001_Governance_Committee_Minutes_Action_Items.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4350,
+      "modified_at": 1775388115,
+      "fingerprint": "836d725084046bb7dea326c35b88b8773c2fc899a5c8b4d6e8e65ad7cdef47be"
+    },
+    {
+      "document_id": "CTR-001",
+      "title": "Master Services Agreement Approved Baseline",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/contracts/CTR-001_Master_Services_Agreement_Approved_Baseline.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4620,
+      "modified_at": 1775388115,
+      "fingerprint": "849a8d80c12f35d57c8e4486dc26f8719a18f10224f5bc87824ae65efc142dec"
+    },
+    {
+      "document_id": "CTR-002",
+      "title": "Master Services Agreement Vendor Draft",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4290,
+      "modified_at": 1775388115,
+      "fingerprint": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+    },
+    {
+      "document_id": "CTR-003",
+      "title": "Service Level Agreement",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/contracts/CTR-003_Service_Level_Agreement.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4164,
+      "modified_at": 1775388115,
+      "fingerprint": "8f3af9a3294f6ec1ae241fe718646cc0aeb763e0cd309735c5fdb987fca9a59a"
+    },
+    {
+      "document_id": "CTR-004",
+      "title": "Data Processing Addendum",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/contracts/CTR-004_Data_Processing_Addendum.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4043,
+      "modified_at": 1775388115,
+      "fingerprint": "aacb22bf7d0a33f3557583d87d708d45ce82ee1f594eedfbfc464f2747eaa24f"
+    },
+    {
+      "document_id": null,
+      "title": "file inventory",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/metadata/file_inventory.csv",
+      "suffix": ".csv",
+      "size_bytes": 2745,
+      "modified_at": 1775388115,
+      "fingerprint": "52de5e64a52b6b251f7fd36aecb6be2c3dbcc6ec7d7b2358eaac7d940c3b3be1"
+    },
+    {
+      "document_id": null,
+      "title": "file inventory",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/metadata/file_inventory.json",
+      "suffix": ".json",
+      "size_bytes": 4233,
+      "modified_at": 1775388115,
+      "fingerprint": "6ef97664f09fd829c3418261733a56ba1092a723bb5772809f1df5583dd4f11f"
+    },
+    {
+      "document_id": null,
+      "title": "option b storylines",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/metadata/option_b_storylines.csv",
+      "suffix": ".csv",
+      "size_bytes": 4480,
+      "modified_at": 1775388115,
+      "fingerprint": "f0ee27e73f1944934c821771cb717c8eada07de6b69ef2645fdbb2592f3f4ed5"
+    },
+    {
+      "document_id": null,
+      "title": "option b storylines",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/metadata/option_b_storylines.json",
+      "suffix": ".json",
+      "size_bytes": 5944,
+      "modified_at": 1775388115,
+      "fingerprint": "f29973c6a7eab6b89fa9b847da6eed98e9d566c0499484c3835e7148242224cf"
+    },
+    {
+      "document_id": null,
+      "title": "option b upgrade backlog",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/metadata/option_b_upgrade_backlog.md",
+      "suffix": ".md",
+      "size_bytes": 1895,
+      "modified_at": 1775388115,
+      "fingerprint": "cc210771e65c4ed33097770d704e968c583f67eb0183239bcab04886c987290f"
+    },
+    {
+      "document_id": null,
+      "title": "option b v2 relational manifest",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/metadata/option_b_v2_relational_manifest.csv",
+      "suffix": ".csv",
+      "size_bytes": 8849,
+      "modified_at": 1775388115,
+      "fingerprint": "bab2fef7e4ccff6f2bc103e94e81119f5bd14dbc38d0e3b1d1aacdb2c1781fe1"
+    },
+    {
+      "document_id": null,
+      "title": "option b v2 relational manifest",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/metadata/option_b_v2_relational_manifest.json",
+      "suffix": ".json",
+      "size_bytes": 13911,
+      "modified_at": 1775388115,
+      "fingerprint": "53b86b815a98ea06a8bc9e99a1f13efeb4eb12b6c68879453b8ff6d98f3fe201"
+    },
+    {
+      "document_id": "POL-001",
+      "title": "Information Security Policy v1",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/policies/POL-001_Information_Security_Policy_v1.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 5906,
+      "modified_at": 1775388115,
+      "fingerprint": "89438893528ab9cea3b9ff4502a8ddc232eb805a72b28c1894a39183464a0996"
+    },
+    {
+      "document_id": "POL-002",
+      "title": "Information Security Policy v2",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/policies/POL-002_Information_Security_Policy_v2.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 6177,
+      "modified_at": 1775388115,
+      "fingerprint": "0c862af1e2c6437ad50d5ea0c0035e235ca8851dc85a633beab48c488e25ff06"
+    },
+    {
+      "document_id": "POL-003",
+      "title": "Data Retention Policy",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/policies/POL-003_Data_Retention_Policy.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4370,
+      "modified_at": 1775388115,
+      "fingerprint": "8587e35bfcef162f38ebd1f601a40069f53a0240c17adca9a5e665af41121e9c"
+    },
+    {
+      "document_id": "POL-004",
+      "title": "Third Party Supplier Code of Conduct",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/policies/POL-004_Third_Party_Supplier_Code_of_Conduct.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4180,
+      "modified_at": 1775388115,
+      "fingerprint": "040197a94b72c9e4aba080c938cb731ed79280dccb9f8b1d5c64badde77fa1b3"
+    },
+    {
+      "document_id": "TPL-001",
+      "title": "Approved Policy Template",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/templates/TPL-001_Approved_Policy_Template.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 3844,
+      "modified_at": 1775388115,
+      "fingerprint": "4be4a14a3dbce44956d2681a7f03f7416affd8caf561e6ca967fbdba72729f81"
+    },
+    {
+      "document_id": "TPL-002",
+      "title": "Approved Contract Review Template",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/templates/TPL-002_Approved_Contract_Review_Template.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 3953,
+      "modified_at": 1775388115,
+      "fingerprint": "7749be6a08842bd56314c658dc706822d054d32f5577aa52262579e7107d6349"
+    },
+    {
+      "document_id": "TPL-003",
+      "title": "Evidence Pack Template",
+      "category": "option_b_synthetic_premium",
+      "relative_path": "option_b_synthetic_premium/templates/TPL-003_Evidence_Pack_Template.pdf",
+      "suffix": ".pdf",
+      "size_bytes": 4108,
+      "modified_at": 1775388115,
+      "fingerprint": "7ed7ee45776785a2fada6bcea7b336a2504ae0aae145d68d9a0c319792b31fb6"
+    },
+    {
+      "document_id": null,
+      "title": "option b upgrade backlog",
+      "category": "root",
+      "relative_path": "option_b_upgrade_backlog.md",
+      "suffix": ".md",
+      "size_bytes": 1895,
+      "modified_at": 1775388115,
+      "fingerprint": "cc210771e65c4ed33097770d704e968c583f67eb0183239bcab04886c987290f"
+    },
+    {
+      "document_id": null,
+      "title": "option b v2 relational manifest",
+      "category": "root",
+      "relative_path": "option_b_v2_relational_manifest.csv",
+      "suffix": ".csv",
+      "size_bytes": 8849,
+      "modified_at": 1775388115,
+      "fingerprint": "bab2fef7e4ccff6f2bc103e94e81119f5bd14dbc38d0e3b1d1aacdb2c1781fe1"
+    },
+    {
+      "document_id": null,
+      "title": "option b v2 relational manifest",
+      "category": "root",
+      "relative_path": "option_b_v2_relational_manifest.json",
+      "suffix": ".json",
+      "size_bytes": 13911,
+      "modified_at": 1775388115,
+      "fingerprint": "53b86b815a98ea06a8bc9e99a1f13efeb4eb12b6c68879453b8ff6d98f3fe201"
+    }
+  ],
+  "summary": {
+    "total_documents": 94,
+    "total_categories": 5,
+    "total_size_bytes": 11402879,
+    "category_counts": {
+      "_build_logs": 3,
+      "root": 9,
+      "frontend_demo_grounded_v1": 32,
+      "option_a_public_corpus_v2": 25,
+      "option_b_synthetic_premium": 25
+    },
+    "suffix_counts": {
+      ".json": 12,
+      ".csv": 13,
+      ".md": 12,
+      ".pdf": 55,
+      ".txt": 2
+    },
+    "latest_document": {
+      "document_id": null,
+      "title": "Technical Architecture Brief",
+      "category": "frontend_demo_grounded_v1",
+      "relative_path": "frontend_demo_grounded_v1/technical/Technical Architecture Brief.pdf"
+    }
+  }
+}

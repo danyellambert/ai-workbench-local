@@ -1,0 +1,657 @@
+{
+  "mode": "render",
+  "rendered": true,
+  "dry_run": false,
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck.pptx",
+  "presentation_title": "AI Workbench Local — Benchmark & Eval Review",
+  "theme": "executive_premium_minimal",
+  "slide_count": 7,
+  "missing_asset_count": 0,
+  "missing_assets": [],
+  "quality_review": {
+    "mode": "review",
+    "presentation_title": "AI Workbench Local — Benchmark & Eval Review",
+    "theme": "executive_premium_minimal",
+    "slide_count": 7,
+    "slides": [
+      {
+        "slide_number": 1,
+        "slide_type": "title",
+        "title": "AI Workbench Local — Benchmark & Eval Review",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 1.8,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 2,
+        "slide_type": "summary",
+        "title": "Executive summary",
+        "score": 2,
+        "status": "attention",
+        "content_weight": 4.49,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 8,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 12.97,
+        "risk_level": "high",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [
+          "summary:panel_width_pressure",
+          "summary:takeaway_1",
+          "summary:takeaway_2",
+          "summary:takeaway_3",
+          "summary:takeaway_4",
+          "summary:takeaway_5",
+          "summary:takeaway_6",
+          "summary:takeaways"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "summary:takeaways",
+            "density": 4.394,
+            "threshold": 3.8,
+            "severity": "medium",
+            "message": "summary takeaways panel is dense enough to risk clipping"
+          },
+          {
+            "region": "summary:panel_width_pressure",
+            "density": 7.99,
+            "threshold": 4.2,
+            "severity": "high",
+            "message": "summary takeaways are dense enough to overwhelm the side panel width"
+          },
+          {
+            "region": "summary:takeaway_1",
+            "density": 5.144,
+            "threshold": 4.5,
+            "severity": "medium",
+            "message": "summary takeaway row 1 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "region": "summary:takeaway_2",
+            "density": 5.941,
+            "threshold": 4.5,
+            "severity": "high",
+            "message": "summary takeaway row 2 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "region": "summary:takeaway_3",
+            "density": 6.68,
+            "threshold": 4.5,
+            "severity": "high",
+            "message": "summary takeaway row 3 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "region": "summary:takeaway_4",
+            "density": 5.941,
+            "threshold": 4.5,
+            "severity": "high",
+            "message": "summary takeaway row 4 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "region": "summary:takeaway_5",
+            "density": 5.941,
+            "threshold": 4.5,
+            "severity": "high",
+            "message": "summary takeaway row 5 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "region": "summary:takeaway_6",
+            "density": 5.941,
+            "threshold": 4.5,
+            "severity": "high",
+            "message": "summary takeaway row 6 is dense enough to risk clipping inside the panel"
+          }
+        ],
+        "severity_counts": {
+          "high": 6,
+          "medium": 2,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "summary takeaways panel is dense enough to risk clipping"
+          },
+          {
+            "severity": "high",
+            "message": "summary takeaways are dense enough to overwhelm the side panel width"
+          },
+          {
+            "severity": "medium",
+            "message": "summary takeaway row 1 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "severity": "high",
+            "message": "summary takeaway row 2 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "severity": "high",
+            "message": "summary takeaway row 3 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "severity": "high",
+            "message": "summary takeaway row 4 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "severity": "high",
+            "message": "summary takeaway row 5 is dense enough to risk clipping inside the panel"
+          },
+          {
+            "severity": "high",
+            "message": "summary takeaway row 6 is dense enough to risk clipping inside the panel"
+          }
+        ]
+      },
+      {
+        "slide_number": 3,
+        "slide_type": "metrics",
+        "title": "Benchmark and eval snapshot",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 7.52,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 4,
+        "slide_type": "table",
+        "title": "Model leaderboard",
+        "score": 93,
+        "status": "ok",
+        "content_weight": 7.67,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 1,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "table has many columns for executive readability"
+          }
+        ]
+      },
+      {
+        "slide_number": 5,
+        "slide_type": "table",
+        "title": "Eval suite leaderboard",
+        "score": 93,
+        "status": "ok",
+        "content_weight": 7.82,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 1,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "table has many columns for executive readability"
+          }
+        ]
+      },
+      {
+        "slide_number": 6,
+        "slide_type": "comparison",
+        "title": "Recommendation vs watchouts",
+        "score": 79,
+        "status": "review",
+        "content_weight": 5.76,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 1,
+        "layout_pressure_score": 0.5,
+        "risk_level": "high",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [
+          "comparison:split_imbalance"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "comparison:split_imbalance",
+            "density": 1.78,
+            "threshold": 1.28,
+            "severity": "high",
+            "message": "comparison columns are materially imbalanced and may compete for panel space"
+          }
+        ],
+        "severity_counts": {
+          "high": 1,
+          "medium": 1,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "comparison-like columns are imbalanced and may compete for space"
+          },
+          {
+            "severity": "high",
+            "message": "comparison columns are materially imbalanced and may compete for panel space"
+          }
+        ]
+      },
+      {
+        "slide_number": 7,
+        "slide_type": "bullets",
+        "title": "Next steps",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 2.49,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      }
+    ],
+    "missing_assets": [],
+    "average_score": 81,
+    "status": "review",
+    "issue_count": 12,
+    "warning_count": 12,
+    "severity_counts": {
+      "high": 7,
+      "medium": 5,
+      "low": 0
+    },
+    "overflow_risk_count": 0,
+    "clipping_risk_count": 0,
+    "collision_risk_count": 9,
+    "balance_warning_count": 1,
+    "top_risk_slides": [
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "high",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 8,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 12.97
+      },
+      {
+        "slide_number": 6,
+        "title": "Recommendation vs watchouts",
+        "risk_level": "high",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 1,
+        "layout_pressure_score": 0.5
+      },
+      {
+        "slide_number": 4,
+        "title": "Model leaderboard",
+        "risk_level": "low",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0
+      },
+      {
+        "slide_number": 5,
+        "title": "Eval suite leaderboard",
+        "risk_level": "low",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0
+      }
+    ],
+    "issues": [
+      "slide 02 (Executive summary): summary takeaways panel is dense enough to risk clipping",
+      "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+      "slide 02 (Executive summary): summary takeaway row 1 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 2 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 3 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 4 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 5 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 6 is dense enough to risk clipping inside the panel",
+      "slide 04 (Model leaderboard): table has many columns for executive readability",
+      "slide 05 (Eval suite leaderboard): table has many columns for executive readability",
+      "slide 06 (Recommendation vs watchouts): comparison-like columns are imbalanced and may compete for space",
+      "slide 06 (Recommendation vs watchouts): comparison columns are materially imbalanced and may compete for panel space"
+    ],
+    "warnings": [
+      "slide 02 (Executive summary): summary takeaways panel is dense enough to risk clipping",
+      "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+      "slide 02 (Executive summary): summary takeaway row 1 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 2 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 3 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 4 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 5 is dense enough to risk clipping inside the panel",
+      "slide 02 (Executive summary): summary takeaway row 6 is dense enough to risk clipping inside the panel",
+      "slide 04 (Model leaderboard): table has many columns for executive readability",
+      "slide 05 (Eval suite leaderboard): table has many columns for executive readability",
+      "slide 06 (Recommendation vs watchouts): comparison-like columns are imbalanced and may compete for space",
+      "slide 06 (Recommendation vs watchouts): comparison columns are materially imbalanced and may compete for panel space"
+    ]
+  },
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86",
+  "preview_source": "rendered_pptx",
+  "preview_result": {
+    "mode": "preview-pptx",
+    "input_pptx": "baseline://external_files/8c7c671fcef09b0f_benchmark_eval_executive_deck.pptx",
+    "output_dir": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86",
+    "preview_count": 7,
+    "previews": [
+      "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-01.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-02.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-03.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-04.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-05.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-06.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-07.png"
+    ],
+    "thumbnail_sheet": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-thumbnails.png",
+    "quality_review": null,
+    "preview_artifact_review": {
+      "status": "review",
+      "preview_count": 7,
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "edge_density_warning_count": 0,
+      "body_edge_contact_count": 7,
+      "safe_area_intrusion_count": 7,
+      "footer_intrusion_count": 7,
+      "corner_density_warning_count": 7,
+      "slides": [
+        {
+          "slide_number": 1,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-01.png",
+          "foreground_bbox": {
+            "left": 129,
+            "top": 113,
+            "right": 2001,
+            "bottom": 1127
+          },
+          "body_foreground_bbox": {
+            "left": 129,
+            "top": 113,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.278481,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 2,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-02.png",
+          "foreground_bbox": {
+            "left": 136,
+            "top": 180,
+            "right": 2001,
+            "bottom": 1127
+          },
+          "body_foreground_bbox": {
+            "left": 138,
+            "top": 180,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.33849,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 3,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-03.png",
+          "foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 1127
+          },
+          "body_foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.842475,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 4,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-04.png",
+          "foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 1127
+          },
+          "body_foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.873359,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 5,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-05.png",
+          "foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 1127
+          },
+          "body_foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.873681,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 6,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-06.png",
+          "foreground_bbox": {
+            "left": 127,
+            "top": 126,
+            "right": 1992,
+            "bottom": 1127
+          },
+          "body_foreground_bbox": {
+            "left": 127,
+            "top": 126,
+            "right": 1853,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.793249,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 7,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/benchmark_eval_executive_deck-07.png",
+          "foreground_bbox": {
+            "left": 136,
+            "top": 165,
+            "right": 2001,
+            "bottom": 1127
+          },
+          "body_foreground_bbox": {
+            "left": 137,
+            "top": 165,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.337553,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        }
+      ]
+    },
+    "visual_regression": null,
+    "preview_source": "input_pptx",
+    "real_preview": true,
+    "preview_manifest": "outputs/ai_workbench_export_previews/deckexp_20260405_183210_8ce9ca86/preview-manifest.json",
+    "backend_requested": "office",
+    "backend_used": "office",
+    "backend_fallback_reason": null,
+    "office_runtime": "/opt/homebrew/bin/soffice",
+    "office_conversion_strategy": "pdf_via_ghostscript"
+  }
+}

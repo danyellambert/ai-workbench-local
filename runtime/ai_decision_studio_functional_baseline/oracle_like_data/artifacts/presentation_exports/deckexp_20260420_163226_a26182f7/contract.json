@@ -1,0 +1,107 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "action_plan_deck",
+  "deck_family": "action_plan",
+  "presentation": {
+    "title": "AI Workbench Local — Action Plan",
+    "subtitle": "Operational action plan grounded in current action backlog",
+    "author": "AI Workbench Local",
+    "date": "2026-04-20",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Action Plan"
+  },
+  "context": {
+    "review_type_counts": {
+      "action_plan_evidence_review": 4
+    }
+  },
+  "executive_summary": "The current run identified 4 tracked action(s), with 4 still open, 4 overdue and 0 requiring formal approval follow-up.",
+  "key_highlights": [
+    "Draft SCC Appendix for data residency",
+    "Define incident response SLOs"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Total actions",
+      "value": "4"
+    },
+    {
+      "label": "Open",
+      "value": "4"
+    },
+    {
+      "label": "Overdue",
+      "value": "4"
+    },
+    {
+      "label": "Approval required",
+      "value": "0"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Action backlog",
+      "columns": [
+        "Ref",
+        "Action",
+        "Owner",
+        "Due",
+        "Status",
+        "Source",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "A01",
+          "Negotiate liability cap with vendor legal",
+          "Maria Santos",
+          "2024-03-22",
+          "in_progress",
+          "Privileged Account Approval Email.pdf",
+          "Negotiate liability cap with vendor legal"
+        ],
+        [
+          "GOVERNANCE",
+          "Draft SCC Appendix for data residency",
+          "James Park",
+          "2024-03-25",
+          "open",
+          "Governance Committee Minutes and Action Items.pdf",
+          "Draft SCC Appendix for data residency"
+        ],
+        [
+          "GOVERNANCE",
+          "Define incident response SLOs",
+          "Alex Rivera",
+          "2024-03-28",
+          "open",
+          "Governance Committee Minutes and Action Items.pdf",
+          "Define incident response SLOs"
+        ],
+        [
+          "GOVERNANCE",
+          "Set up auto-renewal calendar alerts",
+          "Operations",
+          "2024-03-18",
+          "in_progress",
+          "Governance Committee Minutes and Action Items.pdf",
+          "Set up auto-renewal calendar alerts"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Draft SCC Appendix for data residency",
+  "watchouts": [
+    "There are overdue actions that require immediate reprioritization."
+  ],
+  "next_steps": [
+    "Draft SCC Appendix for data residency",
+    "Define incident response SLOs"
+  ],
+  "data_sources": [
+    "action_plan_run_current"
+  ]
+}

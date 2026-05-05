@@ -1,0 +1,135 @@
+{
+  "total_cases": 1,
+  "successful_cases": 1,
+  "failed_cases": 0,
+  "runtime_path_breakdown": [
+    {
+      "runtime_path": "unknown_runtime_path",
+      "runtime_path_label": "unknown_runtime_path",
+      "case_count": 1,
+      "successful_cases": 1,
+      "failed_cases": 0,
+      "candidate_count": 1,
+      "path_overhead_expected": false,
+      "backend_examples": []
+    }
+  ],
+  "model_resolution_summary": {
+    "counts": {
+      "exact": 1
+    },
+    "substitutions": []
+  },
+  "runtime_family_resolution_summary": {
+    "counts": {
+      "unreported": 1
+    },
+    "substitutions": []
+  },
+  "generation": {
+    "total_cases": 0,
+    "successful_cases": 0,
+    "failed_cases": 0,
+    "runtime_path_breakdown": [],
+    "candidate_ranking": [],
+    "top_candidate": null
+  },
+  "embeddings": {
+    "total_cases": 0,
+    "successful_cases": 0,
+    "failed_cases": 0,
+    "runtime_path_breakdown": [],
+    "candidate_ranking": [],
+    "subset_rankings": [],
+    "subset_notes": [],
+    "top_candidate": null
+  },
+  "rerankers": {
+    "total_cases": 0,
+    "successful_cases": 0,
+    "failed_cases": 0,
+    "candidate_ranking": [],
+    "best_tradeoff": null,
+    "support_level": "scaffolded_only"
+  },
+  "ocr_vlm": {
+    "total_cases": 1,
+    "successful_cases": 1,
+    "failed_cases": 0,
+    "variant_ranking": [
+      {
+        "variant": "evidence_with_vl",
+        "requested_runtime_family": "ollama_vl_local",
+        "resolved_runtime_family": "ollama_local",
+        "case_count": 1,
+        "avg_latency_s": 0.5099,
+        "avg_f1": 1.0,
+        "helped_cases": 1
+      },
+      {
+        "variant": "evidence_no_vl_docling_disabled",
+        "requested_runtime_family": "ocr_local_pipeline",
+        "resolved_runtime_family": "huggingface_local",
+        "case_count": 1,
+        "avg_latency_s": 0.5351,
+        "avg_f1": 1.0,
+        "helped_cases": 1
+      },
+      {
+        "variant": "evidence_no_vl",
+        "requested_runtime_family": "evidence_pipeline_local",
+        "resolved_runtime_family": "huggingface_local",
+        "case_count": 1,
+        "avg_latency_s": 1.358,
+        "avg_f1": 1.0,
+        "helped_cases": 1
+      },
+      {
+        "variant": "legacy_pdf",
+        "requested_runtime_family": "legacy_pdf_text_extraction",
+        "resolved_runtime_family": "legacy_pdf_text_extraction",
+        "case_count": 1,
+        "avg_latency_s": 0.038,
+        "avg_f1": 0.25,
+        "helped_cases": 0
+      },
+      {
+        "variant": "pdf_hybrid",
+        "requested_runtime_family": "pdf_hybrid_local",
+        "resolved_runtime_family": "pdf_hybrid_local",
+        "case_count": 1,
+        "avg_latency_s": 0.0391,
+        "avg_f1": 0.25,
+        "helped_cases": 0
+      },
+      {
+        "variant": "pdf_complete",
+        "requested_runtime_family": "pdf_complete_local",
+        "resolved_runtime_family": "pdf_complete_local",
+        "case_count": 1,
+        "avg_latency_s": 14.2009,
+        "avg_f1": 0.25,
+        "helped_cases": 0
+      }
+    ],
+    "best_ocr_tradeoff": {
+      "variant": "evidence_no_vl",
+      "requested_runtime_family": "evidence_pipeline_local",
+      "resolved_runtime_family": "huggingface_local",
+      "case_count": 1,
+      "avg_latency_s": 1.358,
+      "avg_f1": 1.0,
+      "helped_cases": 1
+    },
+    "best_vlm_tradeoff": {
+      "variant": "evidence_with_vl",
+      "requested_runtime_family": "ollama_vl_local",
+      "resolved_runtime_family": "ollama_local",
+      "case_count": 1,
+      "avg_latency_s": 0.5099,
+      "avg_f1": 1.0,
+      "helped_cases": 1
+    },
+    "support_level": "partially_supported"
+  }
+}

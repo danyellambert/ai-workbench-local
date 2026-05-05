@@ -1,0 +1,69 @@
+{
+  "benchmark_validation": {
+    "export_id": "deckexp_20260405_204254_df8827e4",
+    "service_status": "failed",
+    "rendered": true,
+    "average_score": 99,
+    "status": "ok",
+    "top_risk_slides": [
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.2
+      }
+    ],
+    "output_path": "baseline://external_files/893f4a3898bc0ebe_benchmark_post_fix_validation.pptx"
+  },
+  "long_title_validation": {
+    "rendered": true,
+    "average_score": 93,
+    "status": "ok",
+    "preview_backend": "office",
+    "preview_artifact_review": {
+      "status": "ok",
+      "preview_count": 1,
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "edge_density_warning_count": 0,
+      "body_edge_contact_count": 0,
+      "safe_area_intrusion_count": 0,
+      "footer_intrusion_count": 0,
+      "corner_density_warning_count": 0,
+      "slides": [
+        {
+          "slide_number": 1,
+          "preview_path": "baseline://external_files/d02de4d384b04bd7_long_title_validation-01.png",
+          "foreground_bbox": {
+            "left": 77,
+            "top": 67,
+            "right": 1200,
+            "bottom": 681
+          },
+          "body_foreground_bbox": {
+            "left": 77,
+            "top": 67,
+            "right": 1200,
+            "bottom": 555
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        }
+      ]
+    },
+    "output_path": "baseline://external_files/47fd8efe1dc36bb8_long_title_validation.pptx"
+  }
+}

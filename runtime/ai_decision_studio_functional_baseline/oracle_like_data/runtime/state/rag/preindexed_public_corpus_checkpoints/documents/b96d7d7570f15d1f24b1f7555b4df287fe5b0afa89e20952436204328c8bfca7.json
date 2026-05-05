@@ -1,0 +1,30 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "corpus_gap_report.md",
+  "file_type": "md",
+  "file_hash": "b96d7d7570f15d1f24b1f7555b4df287fe5b0afa89e20952436204328c8bfca7",
+  "text": "# Corpus gap report\n\n## Audit conclusion\n`data/corpus_revisado/option_b_synthetic_premium` was strong enough to reuse as the official base narrative, but it did not cover the frontend demo 1:1.\nThe main gaps were:\n- March 2024 timeline mismatch\n- no candidate-review pack\n- no approval-email artifact\n- no hard ambiguity redline summary\n- no formal risk acceptance / waiver\n- no subprocessor change notice\n- no spreadsheet-export PDF in the main demo storyline\n- no OCR-hard technical brief aligned to the frontend warning\n- no explicit frontend mock → evidence mapping\n\n## Architecture decision\nBest option: create a derived corpus rather than overwrite Option B.\n\nChosen path:\n- keep Option B as the official audited base\n- derive a clean, traceable corpus at `data/corpus_revisado/frontend_demo_grounded_v1`\n- preserve Option A as public reference only\n\n## What was reused\nReused structurally from Option B:\n- contract / policy / audit / evidence storylines\n- metadata conventions\n- narrative pattern linking findings → actions → evidence → closure\n\n## What was altered / rewritten\nRewritten derivatives of Option B counterparts:\n- MSA, SLA, DPA\n- Information Security Policy v3.1 / v3.2\n- Data Retention Policy\n- Supplier Code of Conduct\n- audit checklist, NCR, evidence log, committee minutes\n\n## What was created from scratch\nCreated to close explicit frontend and realism gaps:\n- candidate pack (CV, role brief, scorecard, interview memo)\n- approval email artifact\n- legal redline summary hard case\n- temporary risk acceptance request\n- subprocessor change notice\n- remediation closure note\n- spreadsheet-export vendor risk assessment PDF\n- OCR-hard technical architecture brief\n- board memo\n- handbook\n- coverage map and manifest files\n\n## Out of scope / still partial\n- Exact frontend operational metadata such as chunk counts, char counts, indexing timestamps, and workflow durations remain UI or system-state data, not document content.\n- Candidate experience signals are grounded, but exact employer / institution names in the mock UI were intentionally not reproduced because the corpus uses fictionalized career history for safety.",
+  "metadata": {
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 2154,
+    "grounding_text_excerpt": "# Corpus gap report\n\n## Audit conclusion\n`data/corpus_revisado/option_b_synthetic_premium` was strong enough to reuse as the official base narrative, but it did not cover the frontend demo 1:1.\nThe main gaps were:\n- March 2024 timeline mismatch\n- no candidate-review pack\n- no approval-email artifact\n- no hard ambiguity redline summary\n- no formal risk acceptance / waiver\n- no subprocessor change notice\n- no spreadsheet-export PDF in the main demo storyline\n- no OCR-hard technical brief aligned to the frontend warning\n- no explicit frontend mock → evidence mapping\n\n## Architecture decision\nBest option: create a derived corpus rather than overwrite Option B.\n\nChosen path:\n- keep Option B as the official audited base\n- derive a clean, traceable corpus at `data/corpus_revisado/frontend_demo_grounded_v1`\n- preserve Option A as public reference only\n\n## What was reused\nReused structurally from Option B:\n- contract / policy / audit / evidence storylines\n- metadata conventions\n- narrative pattern linking findings → actions → evidence → closure\n\n## What was altered / rewritten\nRewritten derivatives of Option B counterparts:\n- MSA, SLA, DPA\n- Information Security Policy v3.1 / v3.2\n- Data Retention Policy\n- Supplier Code of Conduct\n- audit checklist, NCR, evidence log, committee minutes\n\n## What was created from scratch\nCreated to close explicit frontend and realism gaps:\n- candidate pack (CV, role brief, scorecard, interview memo)\n- approval email artifact\n- legal redline summary hard case\n- temporary risk acceptance request\n- subprocessor change notice\n- remediation closure note\n- spreadsheet-export vendor risk assessment PDF\n- OCR-hard technical architecture brief\n- board memo\n- handbook\n- coverage map and manifest files\n\n## Out of scope / still partial\n- Exact frontend operational metadata such as chunk counts, char counts, indexing timestamps, and workflow durations remain UI or system-state data, not document content.\n- Candidate experience signals are grounded, but exact employer / institution names in the mock UI were intentionally not reproduced because the corpus uses fictionalized career history for safety.",
+    "source_type": "nextcloud",
+    "relative_path": "corpus_gap_report.md",
+    "nextcloud_relative_path": "corpus_gap_report.md",
+    "source_relative_path": "corpus_gap_report.md",
+    "filename": "corpus_gap_report.md",
+    "title": "corpus gap report",
+    "category": "root",
+    "preindex": {
+      "relative_path": "corpus_gap_report.md",
+      "filename": "corpus_gap_report.md",
+      "title": "corpus gap report",
+      "category": "root",
+      "document_id": "corpus_gap_report.md",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:48:57"
+}

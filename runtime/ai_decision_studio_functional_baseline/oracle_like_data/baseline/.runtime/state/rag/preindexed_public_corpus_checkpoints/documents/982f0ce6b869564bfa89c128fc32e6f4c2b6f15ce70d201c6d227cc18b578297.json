@@ -1,0 +1,111 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "palm_beach_county_contract_review_checklist.pdf",
+  "file_type": "pdf",
+  "file_hash": "982f0ce6b869564bfa89c128fc32e6f4c2b6f15ce70d201c6d227cc18b578297",
+  "text": "[Page 1]\nCONTRACT REVIEW CHECKLIST – Rev. 6/3/25\nDESCRIPTION YES NO N/A\n1 Is Agenda Item Summary (AIS) information correct and complete?\n2 Are parties correctly identified? Must use vendor’s correct, exact legal name as shown in SunBiz; all\ncontracts are with Palm Beach County Board of County Commissioners, NOT the Department.\n3 Is vendor on County’s suspended/debarred list?         Or on the State’s convicted vendor list?\n4 Has the other party signed?      If not, why?             (Board policy requires other party’s signature prior to\nBoard approval, unless it is a higher governmental entity).\n5 Are titles of signing parties and signature lines completed?\n6 Is there a certificate/affidavit from vendor indicating who has the authority to execute the contract for the\nvendor OR signature authority verified in SunBiz?\n7 Has the Terms & Conditions signature block been signed by the Department Director?\n8 Are all attachments to the AIS and exhibits to the contract included and labeled?\n9 Do individual amounts in the contract exhibits match the totals in the contract and AIS?\n10 Is there a cap on the total amount of the contract?       Reimbursable costs identified and capped?\n11 Has the Budget Division indicated sufficient budget availability?\n12 Federally funded?   Y / N                                 State funded?   Y / N\n13 Are the payment provisions acceptable? (Be sure there are no advance payments)\n14 Beginning and ending dates correct/specified?    Schedule of events and milestones for completion?\n15 If contract is for more than 1 year and ad valorem funds are involved, is there an Annual Appropriation\nclause? (N/A for construction)\n16 Does the Termination clause allow for termination at the convenience of the County?\n17 Indemnification clause included? (For non-standard contracts verify with Risk Management)\n18 Are insurance requirements adequate?           (This should be verified with Risk Management)\nIs proof of insurance attached?        Palm Beach County named as additional insured?\n19 If liquidated damages clause included, what is the daily assessment? $ /day.\n20 If early completion bonus/incentive included, what is the daily amount $ /day\n21 Is performance/payment bond required/included?        Is surety verified against U.S. Treasury listing?\nIs bond sealed?        Does Bond match Contract amount?        Bond #\nPower of Attorney (POA) for Surety’s agent attached?           Any limitations in the POA?\n22 Does the item comply with the Equal Business Opportunity (EBO) Ordinance, as revised by the BCC on\n6/3/25?\n23 Is there an Access and Audit clause?                  Inspector General clause?\n24 Is there a Notices provision with identifying addresses?\n25 Criminal History Records Check clause?\n26 Compliance with All Laws/Ordinances/Regulations clause?\n27 Non-Discrimination clauses as revised by the BCC on 6/3/25?\n28 No Third Party Beneficiaries clause?          Law and Venue clause?\n29 If contract in excess of $200,000, is Disclosure of Ownership Interests attached? (N/A for sealed bid,\npublicly traded companies, non-profits, or government agencies)\n30 Clause addressing the Public Entity Crime Statute FS 287.133(2)(a)?\n31 Clause addressing Public Records Statute 119.0701?\n32 Scrutinized Companies provision?              E-verify clause?\n33 Disclosure of Foreign Gifts and Contracts clause?\n34 Do bid documents/RFPs contain a clause addressing FS 287.0570: Prohibition against Considering\nSocial, Political or Ideological Interests in Government Contracting? (Effective 7/1/23)\n35 Non-Governmental Entity Human Trafficking Affidavit for contracts, renewals or extensions approved on\nor after 7/1/24?\n36 For construction, no County Living Wage clause for construction contracts approved on or after 7/1/24?\n\n[PDF VISUAL ENRICHMENT - OLLAMA VLM]\nModel: qwen3-vl:235b-cloud\nRenderer: pypdfium2\nRoute source: manifest\nPages described: 1\n\nRoute reason: Single-page checklist with dense table/form structure; cloud VLM helps preserve visual row/field meaning.\n\n\n## Page 1 visual notes\n### Visual extraction  \n- **Title**: \"CONTRACT REVIEW CHECKLIST – Rev. 6/3/25\"  \n- **Structure**: 36-row table with columns: *Number*, *DESCRIPTION*, *YES*, *NO*, *N/A*. Descriptions contain contract review criteria; checkboxes for responses.  \n- **Key visible terms**:  \n  - \"Palm Beach County Board of County Commissioners, NOT the Department\" (Row 2).  \n  - \"SunBiz\" (Rows 2, 6).  \n  - Statute references: \"FS 287.133(2)(a)\" (Row 30), \"FS 287.0570\" (Row 34), \"Statute 119.0701\" (Row 31).  \n  - Dates: \"6/3/25\" (revision date, Row 22), \"7/1/23\" (Row 34), \"7/1/24\" (Rows 35–36).  \n  - Specific clauses: \"Equal Business Opportunity (EBO) Ordinance\" (Row 22), \"Public Entity Crime Statute FS 287.133(2)(a)\" (Row 30), \"County Living Wage clause\" (Row 36).  \n- **Checklist details**:  \n  - Row 19/20: Blanked fields for daily liquidated damages/bonus amounts (`$________/day`).  \n  - Row 29: Exemption note: \"(N/A for sealed bid, publicly traded companies, non-profits, or government agencies)\".  \n  - Row 15: \"(N/A for construction)\".  \n- **Key facts**:  \n  - 36 numbered review items covering legal compliance, financial terms, clauses, and certifications.  \n  - References to \"Risk Management\" (Rows 17, 18), \"Budget Division\" (Row 11), and \"BCC\" (Board of County Commissioners).  \n  - Mandatory verification steps (e.g., \"Must use vendor’s correct, exact legal name as shown in SunBiz\" in Row 2).",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 3773,
+    "final_text_chars": 3773,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 3936,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "table"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 32,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 137276,
+    "grounding_text_excerpt": "[Page 1]\nCONTRACT REVIEW CHECKLIST – Rev. 6/3/25\nDESCRIPTION YES NO N/A\n1 Is Agenda Item Summary (AIS) information correct and complete?\n2 Are parties correctly identified? Must use vendor’s correct, exact legal name as shown in SunBiz; all\ncontracts are with Palm Beach County Board of County Commissioners, NOT the Department.\n3 Is vendor on County’s suspended/debarred list?         Or on the State’s convicted vendor list?\n4 Has the other party signed?      If not, why?             (Board policy requires other party’s signature prior to\nBoard approval, unless it is a higher governmental entity).\n5 Are titles of signing parties and signature lines completed?\n6 Is there a certificate/affidavit from vendor indicating who has the authority to execute the contract for the\nvendor OR signature authority verified in SunBiz?\n7 Has the Terms & Conditions signature block been signed by the Department Director?\n8 Are all attachments to the AIS and exhibits to the contract included and labeled?\n9 Do individual amounts in the contract exhibits match the totals in the contract and AIS?\n10 Is there a cap on the total amount of the contract?       Reimbursable costs identified and capped?\n11 Has the Budget Division indicated sufficient budget availability?\n12 Federally funded?   Y / N                                 State funded?   Y / N\n13 Are the payment provisions acceptable? (Be sure there are no advance payments)\n14 Beginning and ending dates correct/specified?    Schedule of events and milestones for completion?\n15 If contract is for more than 1 year and ad valorem funds are involved, is there an Annual Appropriation\nclause? (N/A for construction)\n16 Does the Termination clause allow for termination at the convenience of the County?\n17 Indemnification clause included? (For non-standard contracts verify with Risk Management)\n18 Are insurance requirements adequate?           (This should be verified with Risk Management)\nIs proof of insurance attached?        Palm Beach County named as additional insured?\n19 If liquidated damages clause included, what is the daily assessment? $ /day.\n20 If early completion bonus/incentive included, what is the daily amount $ /day\n21 Is performance/payment bond required/included?        Is surety verified against U.S. Treasury listing?\nIs bond sealed?        Does Bond match Contract amount?        Bond #\nPower of Attorney (POA) for Surety’s agent attached?           Any limitations in the POA?\n22 Does the item comply with the Equal Business Opportunity (EBO) Ordinance, as revised by the BCC on\n6/3/25?\n23 Is there an Access and Audit clause?                  Inspector General clause?\n24 Is there a Notices provision with identifying addresses?\n25 Criminal History Records Check clause?\n26 Compliance with All Laws/Ordinances/Regulations clause?\n27 Non-Discrimination clauses as revised by the BCC on 6/3/25?\n28 No Third Party Beneficiaries clause?          Law and Venue clause?\n29 If contract in excess of $200,000, is Disclosure of Ownership Interests attached? (N/A for sealed bid,\npublicly traded companies, non-profits, or government agencies)\n30 Clause addressing the Public Entity Crime Statute FS 287.133(2)(a)?\n31 Clause addressing Public Records Statute 119.0701?\n32 Scrutinized Companies provision?              E-verify clause?\n33 Disclosure of Foreign Gifts and Contracts clause?\n34 Do bid documents/RFPs contain a clause addressing FS 287.0570: Prohibition against Considering\nSocial, Political or Ideological Interests in Government Contracting? (Effective 7/1/23)\n35 Non-Governmental Entity Human Trafficking Affidavit for contracts, renewals or extensions approved on\nor after 7/1/24?\n36 For construction, no County Living Wage clause for construction contracts approved on or after 7/1/24?",
+    "preindex_pdf_vlm": {
+      "enabled": true,
+      "provider": "ollama",
+      "model": "qwen3-vl:235b-cloud",
+      "base_url": "http://localhost:11434",
+      "renderer": "pypdfium2",
+      "route_source": "manifest",
+      "route_reason": "Single-page checklist with dense table/form structure; cloud VLM helps preserve visual row/field meaning.",
+      "page_count": 1,
+      "pages_described": [
+        1
+      ],
+      "page_count_described": 1,
+      "max_pages_fallback": 20,
+      "dpi": 180,
+      "summary_chars": 1397
+    },
+    "source_type": "nextcloud",
+    "relative_path": "contracts and procurement/palm_beach_county_contract_review_checklist.pdf",
+    "nextcloud_relative_path": "contracts and procurement/palm_beach_county_contract_review_checklist.pdf",
+    "source_relative_path": "contracts and procurement/palm_beach_county_contract_review_checklist.pdf",
+    "filename": "palm_beach_county_contract_review_checklist.pdf",
+    "title": "palm beach county contract review checklist",
+    "category": "contracts and procurement",
+    "preindex": {
+      "relative_path": "contracts and procurement/palm_beach_county_contract_review_checklist.pdf",
+      "filename": "palm_beach_county_contract_review_checklist.pdf",
+      "title": "palm beach county contract review checklist",
+      "category": "contracts and procurement",
+      "document_id": "contracts and procurement/palm_beach_county_contract_review_checklist.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:18:02"
+}

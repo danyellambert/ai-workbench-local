@@ -1,0 +1,191 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Action Plan",
+      "subtitle": "Operational action plan grounded in current action backlog",
+      "author": "AI Workbench Local",
+      "date": "2026-04-05",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Action Plan"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Action Plan",
+        "subtitle": "Operational action plan grounded in current action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: action_plan_deck. Deck family: action_plan. Sources: evidenceops_action_store."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "2 open action(s) remain in the backlog and require owner assignment plus execution sequencing before closure.",
+        "bullets": [
+          "2 total actions are tracked in this backlog",
+          "Human review remains the final decision gate"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Short executive framing for the backlog state and required execution posture."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Total actions"
+          },
+          {
+            "value": "2",
+            "label": "Open"
+          },
+          {
+            "value": "0",
+            "label": "Overdue"
+          },
+          {
+            "value": "0",
+            "label": "Approval required"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "cards",
+        "title": "Priority workstreams",
+        "bullets": [],
+        "cards": [
+          {
+            "title": "Priority 1",
+            "body": "Assign owners to the 2 open action(s)",
+            "footer": "Open"
+          },
+          {
+            "title": "Priority 2",
+            "body": "Validate cited evidence before acting on the backlog",
+            "footer": "Open"
+          },
+          {
+            "title": "Execution posture",
+            "body": "Backlog requires owners and sequencing before execution.",
+            "footer": "Risk signal"
+          }
+        ],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Priority actions grouped as execution workstreams."
+      },
+      {
+        "type": "table",
+        "title": "Action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Action",
+          "Owner",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "Definir owner do controle anual",
+            "Compliance",
+            "Open"
+          ],
+          [
+            "Validar sign-off jurídico",
+            "Legal",
+            "In_Progress"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "timeline",
+        "title": "Execution timeline",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [
+          {
+            "title": "Step 1",
+            "body": "Assign owners to the 2 open action(s)",
+            "tag": "P1"
+          },
+          {
+            "title": "Step 2",
+            "body": "Validate cited evidence before acting on the backlog",
+            "tag": "P2"
+          },
+          {
+            "title": "Step 3",
+            "body": "Close the human-review gate before final decision",
+            "tag": "P3"
+          }
+        ],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Condensed execution sequence."
+      },
+      {
+        "type": "two_column",
+        "title": "Blockers vs mitigations",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Blockers",
+            "body": "No major blocker flagged in the backlog.",
+            "bullets": []
+          },
+          {
+            "title": "Mitigations",
+            "body": "Assign owners, validate evidence and close the human-review gate before execution.",
+            "bullets": [
+              "Assign owners to the 2 open action(s)"
+            ]
+          }
+        ],
+        "speaker_notes": "Execution blockers versus mitigation actions."
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_export_smoke_suite/deckexp_20260405_234912_8043b7b7/action_plan_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_smoke_suite_previews/deckexp_20260405_234912_8043b7b7",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

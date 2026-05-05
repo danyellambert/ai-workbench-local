@@ -1,0 +1,161 @@
+{
+  "benchmark_eval": {
+    "export_id": "deckexp_20260405_194047_76d0c302",
+    "average_score": 99,
+    "status": "ok",
+    "issue_count": 1,
+    "warning_count": 1,
+    "top_risk_slides": [
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.07
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_194047_76d0c302"
+  },
+  "document_review": {
+    "export_id": "deckexp_20260405_194054_4cc4dc78",
+    "average_score": 98,
+    "status": "ok",
+    "issue_count": 2,
+    "warning_count": 2,
+    "top_risk_slides": [
+      {
+        "slide_number": 4,
+        "title": "Top findings",
+        "risk_level": "medium",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.03
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_194054_4cc4dc78"
+  },
+  "policy_contract_comparison": {
+    "export_id": "deckexp_20260405_194059_b0311ac0",
+    "average_score": 100,
+    "status": "ok",
+    "issue_count": 0,
+    "warning_count": 0,
+    "top_risk_slides": [],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_194059_b0311ac0"
+  },
+  "action_plan": {
+    "export_id": "deckexp_20260405_194103_41254890",
+    "average_score": 98,
+    "status": "ok",
+    "issue_count": 2,
+    "warning_count": 2,
+    "top_risk_slides": [
+      {
+        "slide_number": 5,
+        "title": "Action backlog",
+        "risk_level": "medium",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0
+      },
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.03
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_194103_41254890"
+  },
+  "candidate_review": {
+    "export_id": "deckexp_20260405_194108_1a93c96a",
+    "average_score": 96,
+    "status": "ok",
+    "issue_count": 4,
+    "warning_count": 4,
+    "top_risk_slides": [
+      {
+        "slide_number": 5,
+        "title": "Experience highlights",
+        "risk_level": "medium",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.79
+      },
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.03
+      },
+      {
+        "slide_number": 6,
+        "title": "Gaps vs hiring thesis",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 1,
+        "layout_pressure_score": 0
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_194108_1a93c96a"
+  },
+  "evidence_pack": {
+    "export_id": "deckexp_20260405_194113_414864dd",
+    "average_score": 97,
+    "status": "ok",
+    "issue_count": 3,
+    "warning_count": 3,
+    "top_risk_slides": [
+      {
+        "slide_number": 4,
+        "title": "Findings",
+        "risk_level": "medium",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0
+      },
+      {
+        "slide_number": 5,
+        "title": "Action status",
+        "risk_level": "medium",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0
+      },
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.1
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_194113_414864dd"
+  }
+}

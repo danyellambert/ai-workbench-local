@@ -1,0 +1,182 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "The Access Review Evidence Log and the Privileged Account Approval Email address distinct control objectives: the former documents evidence collection for a vendor control review with a focus on provenance verification to close the control, while the latter establishes conditional, scoped privileged access for specific administrators subject to strict logging, quarterly recertification, and revalidation upon personnel changes. The evidence log emphasizes completion of evidence items to achieve control closure, whereas the email mandates ongoing compliance through periodic review and vendor confirmation to sustain access.\n\n- Evidence log requires verification of all evidence items for control closure; email mandates quarterly recertification and revalidation on personnel changes.  \n- Evidence log notes missing/incomplete items blocking closure; email requires strict task scoping and logging compliance for access.  \n- Evidence log is synthetic/test-only; email is an operational approval with vendor confirmation requirements.  \n- Evidence log tracks statuses (received, missing, in progress); email specifies standing access for named administrators.  \n- Evidence log references repository locations; email mandates logging and vendor confirmation for access maintenance.  \n- Evidence log closure depends on provenance; email requires quarterly review to maintain access.",
+      "bullets": [
+        "The Access Review Evidence Log and the Privileged Account Approval Email ad…",
+        "Evidence log requires verification of all evidence items for control closur…",
+        "Evidence log notes missing/incomplete items blocking closure; email require…"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "cards": [],
+      "metrics": [
+        {
+          "value": "2",
+          "label": "Compared docs"
+        },
+        {
+          "value": "8",
+          "label": "Findings"
+        },
+        {
+          "value": "4",
+          "label": "Sources"
+        },
+        {
+          "value": "No",
+          "label": "Needs review"
+        }
+      ],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Comparison findings",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "table_rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Control closure depends on verifying provenance for all evidence items. | The synthetic nature of the document indicate…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on strict task scoping and logging compliance | Quarterly recertification and vendor confirmation…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log and the Privileged…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) catalogs five evidence items for the Q1…"
+        ],
+        [
+          "approval_change",
+          "Evidence log requires verification of all evidence items…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) catalogs five evidence items for the Q1…"
+        ],
+        [
+          "auditability_delta",
+          "Evidence log notes missing/incomplete items blocking closure; email…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) catalogs five evidence items for the Q1…"
+        ],
+        [
+          "approval_change",
+          "Evidence log is synthetic/test-only; email is an operational…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) catalogs five evidence items for the Q1…"
+        ],
+        [
+          "auditability_delta",
+          "Evidence log tracks statuses (received, missing, in progress);…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) catalogs five evidence items for the Q1…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Evidence log references repository locations; email mandates logging…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) catalogs five evidence items for the Q1…"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    },
+    {
+      "type": "two_column",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Open the cited source excerpts to confirm the interpretation before acting.",
+          "bullets": [
+            "Open the cited source excerpts to confirm the interpretation before act…",
+            "Validate critical differences directly in the compared documents before…"
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "No critical watchouts recorded for this slice.",
+          "bullets": []
+        }
+      ],
+      "speaker_notes": "Executive decision framing for this slice."
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Open the cited source excerpts to confirm the interpretation before acting.",
+        "Validate critical differences directly in the compared documents before consoli…"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    }
+  ]
+}

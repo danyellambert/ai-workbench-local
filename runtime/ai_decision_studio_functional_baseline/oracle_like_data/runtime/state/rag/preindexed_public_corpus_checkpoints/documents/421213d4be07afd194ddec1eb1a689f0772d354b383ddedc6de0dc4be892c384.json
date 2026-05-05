@@ -1,0 +1,115 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "jd_scientist_ii_preclinical_rd_medical_devices.pdf",
+  "file_type": "pdf",
+  "file_hash": "421213d4be07afd194ddec1eb1a689f0772d354b383ddedc6de0dc4be892c384",
+  "text": "[Page 1]\nScientist II, Preclinical R&D - Medical Devices\nJob Description | Full-time | Hybrid - Cincinnati, OH | Preclinical Research and Device Innovation\nCompany\nConfidential MedTech R&D\nOrganization\nReports to\nDirector, Preclinical Research\nLevel\nScientist II / Senior Associate Scientist\nWork model\nHybrid lab/office; on-site work required\nfor studies\nTravel\nUp to 10% for study sites and vendor\nlabs\nCompensation\n$82,000 - $112,000 base, depending on\nexperience\nROLE SUMMARY\nThe Scientist II, Preclinical R&D will support the design, execution, documentation, and interpretation of preclinical and bench\nstudies for new medical devices. This role partners with project leaders, R&D engineers, regulatory, quality, and external\nresearch facilities to generate reliable evidence for device feasibility, risk assessment, design inputs, and verification planning.\nThe ideal candidate has hands-on experience in preclinical research environments, medical device testing, surgical or\nprocedural support, laboratory documentation, and cross-functional communication.\nKEY RESPONSIBILITIES\n-\nSupport project leaders during GLP and non-GLP preclinical studies, including protocol development, study setup, execution,\nobservation capture, and issue escalation.\n-\nProvide hands-on laboratory and procedural support for animate and inanimate models used in medical device research and\ndevelopment.\n-\nExecute bench, feasibility, and preclinical tests to assess device performance, usability, biocompatibility considerations, and\nearly safety signals.\n-\nDocument test methods, observations, deviations, and conclusions in accordance with good documentation practices and\ninternal SOPs.\n-\nPrepare concise study summaries, data tables, risk notes, and recommendations for design reviews and project team\ndecisions.\n-\nCoordinate with R&D engineering, quality, regulatory affairs, veterinary staff, and external research organizations to keep\nstudies on schedule.\n-\nMaintain laboratory readiness, equipment logs, inventory, sample handling records, and safety compliance for preclinical\nworkstreams.\n-\nTranslate study observations into practical next steps, including additional testing, model refinement, root-cause investigation,\nor design feedback.\n-\nContribute to continuous improvement of study templates, laboratory workflows, training materials, and evidence tracking\npractices.\nREQUIRED QUALIFICATIONS\n-\nBachelor of Science in Biochemistry, Biology, Chemistry, Biomedical Engineering, or a closely related scientific field.\n-\n3+ years of experience in preclinical research, medical device R&D, pharmaceutical R&D, translational research, or a regulated\nlaboratory environment.\n-\nExperience supporting medical device testing, feasibility studies, animal or tissue models, bench models, or procedural\nsimulations.\n-\nStrong laboratory discipline, attention to detail, and ability to produce clear written documentation for technical and\nnon-technical stakeholders.\n-\nComfort working in a fast-moving, team-oriented environment with shifting project priorities and study timelines.\n-\nAbility to communicate findings, risks, tradeoffs, and open questions to scientists, engineers, quality partners, and program\nleads.\nScientist II, Preclinical R&D - Medical Devices\nPage 1 of 2\n\n[Page 2]\nScientist II, Preclinical R&D - Medical Devices\nJob Description Continuation\nPREFERRED QUALIFICATIONS\n-\nExperience with surgical support, sterile technique, anatomical models, animal research facilities, or preclinical contract\nresearch organizations.\n-\nFamiliarity with good documentation practices, GLP concepts, IACUC expectations, ISO 10993, ISO 13485, design controls, or\nmedical device risk management.\n-\nWorking knowledge of Excel, GraphPad Prism, JMP, R, Python, electronic laboratory notebooks, or statistical tools for study\ndata review.\n-\nEvidence of mentoring, teaching, training, or leading small groups in an academic, laboratory, athletic, or professional setting.\n-\nExperience operating during constrained timelines, unexpected study changes, or high-pressure project environments.\nCORE COMPETENCIES\n-\nPreclinical study execution: can help plan, run, observe, document, and summarize studies in a research facility or lab.\n-\nMedical device mindset: understands how early evidence informs device performance, risk, usability, and design decisions.\n-\nScientific communication: turns complex observations into concise written updates, decision notes, and recommendations.\n-\nCross-functional collaboration: works effectively with scientists, engineers, quality, regulatory, clinical, and vendor teams.\n-\nData integrity and compliance: maintains organized records, follows SOPs, and escalates deviations or study limitations\npromptly.\nINTERVIEW FOCUS AREAS\n-\nWalk through a preclinical or laboratory study the candidate supported from setup through final documentation.\n-\nProbe how they handled incomplete data, protocol changes, unexpected observations, or timeline pressure.\n-\nEvaluate whether they can explain how a study result would affect device design, risk assessment, or the next test plan.\n-\nAssess communication style with engineers, quality reviewers, investigators, and project leaders.\n-\nExplore examples of leadership, mentoring, training, conflict mediation, or team accountability.\nSUCCESS MEASURES IN THE FIRST 6 MONTHS\n-\nIndependently supports assigned study workstreams with accurate records, timely updates, and well-organized evidence\npackages.\n-\nBuilds trust with R&D project leads by identifying risks early and converting observations into actionable recommendations.\n-\nImproves at least one laboratory or study documentation workflow, template, checklist, or evidence tracking process.\n-\nDemonstrates strong ownership of safety, compliance, and data integrity in bench and preclinical activities.\nEQUAL OPPORTUNITY STATEMENT\nThe organization is committed to equal employment opportunity. Employment decisions are made without regard to race, color,\nreligion, sex, national origin, age, disability, veteran status, sexual orientation, gender identity, or any other protected status under\napplicable law.\nDocument purpose: realistic job description PDF for Candidate Review testing with a resume focused on biochemistry, preclinical research\nsupport, medical device testing, teaching, and leadership.\nScientist II, Preclinical R&D - Medical Devices\nPage 2 of 2",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 6372,
+    "final_text_chars": 6372,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 3257,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "table"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 3095,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "graph"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 91,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 7545,
+    "grounding_text_excerpt": "[Page 1]\nScientist II, Preclinical R&D - Medical Devices\nJob Description | Full-time | Hybrid - Cincinnati, OH | Preclinical Research and Device Innovation\nCompany\nConfidential MedTech R&D\nOrganization\nReports to\nDirector, Preclinical Research\nLevel\nScientist II / Senior Associate Scientist\nWork model\nHybrid lab/office; on-site work required\nfor studies\nTravel\nUp to 10% for study sites and vendor\nlabs\nCompensation\n$82,000 - $112,000 base, depending on\nexperience\nROLE SUMMARY\nThe Scientist II, Preclinical R&D will support the design, execution, documentation, and interpretation of preclinical and bench\nstudies for new medical devices. This role partners with project leaders, R&D engineers, regulatory, quality, and external\nresearch facilities to generate reliable evidence for device feasibility, risk assessment, design inputs, and verification planning.\nThe ideal candidate has hands-on experience in preclinical research environments, medical device testing, surgical or\nprocedural support, laboratory documentation, and cross-functional communication.\nKEY RESPONSIBILITIES\n-\nSupport project leaders during GLP and non-GLP preclinical studies, including protocol development, study setup, execution,\nobservation capture, and issue escalation.\n-\nProvide hands-on laboratory and procedural support for animate and inanimate models used in medical device research and\ndevelopment.\n-\nExecute bench, feasibility, and preclinical tests to assess device performance, usability, biocompatibility considerations, and\nearly safety signals.\n-\nDocument test methods, observations, deviations, and conclusions in accordance with good documentation practices and\ninternal SOPs.\n-\nPrepare concise study summaries, data tables, risk notes, and recommendations for design reviews and project team\ndecisions.\n-\nCoordinate with R&D engineering, quality, regulatory affairs, veterinary staff, and external research organizations to keep\nstudies on schedule.\n-\nMaintain laboratory readiness, equipment logs, inventory, sample handling records, and safety compliance for preclinical\nworkstreams.\n-\nTranslate study observations into practical next steps, including additional testing, model refinement, root-cause investigation,\nor design feedback.\n-\nContribute to continuous improvement of study templates, laboratory workflows, training materials, and evidence tracking\npractices.\nREQUIRED QUALIFICATIONS\n-\nBachelor of Science in Biochemistry, Biology, Chemistry, Biomedical Engineering, or a closely related scientific field.\n-\n3+ years of experience in preclinical research, medical device R&D, pharmaceutical R&D, translational research, or a regulated\nlaboratory environment.\n-\nExperience supporting medical device testing, feasibility studies, animal or tissue models, bench models, or procedural\nsimulations.\n-\nStrong laboratory discipline, attention to detail, and ability to produce clear written documentation for technical and\nnon-technical stakeholders.\n-\nComfort working in a fast-moving, team-oriented environment with shifting project priorities and study timelines.\n-\nAbility to communicate findings, risks, tradeoffs, and open questions to scientists, engineers, quality partners, and program\nleads.\nScientist II, Preclinical R&D - Medical Devices\nPage 1 of 2\n\n[Page 2]\nScientist II, Preclinical R&D - Medical Devices\nJob Description Continuation\nPREFERRED QUALIFICATIONS\n-\nExperience with surgical support, sterile technique, anatomical models, animal research facilities, or preclinical contract\nresearch organizations.\n-\nFamiliarity with good documentation practices, GLP concepts, IACUC expectations, ISO 10993, ISO 13485, design controls, or\nmedical device risk management.\n-\nWorking knowledge of Excel, GraphPad Prism, JMP, R, Python, electronic laboratory notebooks, or statistical tools for study\ndata review.\n-\nEvidence of mentoring, teaching, training, or leading small groups in an academic, laboratory, athletic, or professional setting.\n-\nExperience operating during constrained timelines, unexpected study changes, or high-pressure project environments.\nCORE COMPETENCIES\n-\nPreclinical study execution: can help plan, run, observe, document, and summarize studies in a research facility or lab.\n-\nMedical device mindset: understands how early evidence informs device performance, risk, usability, and design decisions.\n-\nScientific communication: turns complex observations into concise written updates, decision notes, and recommendations.\n-\nCross-functional collaboration: works effectively with scientists, engineers, quality, regulatory, clinical, and vendor teams.\n-\nData integrity and compliance: maintains organized records, follows SOPs, and escalates deviations or study limitations\npromptly.\nINTERVIEW FOCUS AREAS\n-\nWalk through a preclinical or laboratory study the candidate supported from setup through final documentation.\n-\nProbe how they handled incomplete data, protocol changes, unexpected observations, or timeline pressure.\n-\nEvaluate whether they can explain how a study result would affect device design, risk assessment, or the next test plan.\n-\nAssess communication style with engineers, quality reviewers, investigators, and project leaders.\n-\nExplore examples of leadership, mentoring, training, conflict mediation, or team accountability.\nSUCCESS MEASURES IN THE FIRST 6 MONTHS\n-\nIndependently supports assigned study workstreams with accurate records, timely updates, and well-organized evidence\npackages.\n-\nBuilds trust with R&D project leads by identifying risks early and converting observations into actionable recommendations.\n-\nImproves at least one laboratory or study documentation workflow, template, checklist, or evidence tracking process.\n-\nDemonstrates strong ownership of safety, compliance, and data integrity in bench and preclinical activities.\nEQUAL OPPORTUNITY STATEMENT\nThe organization is committed to equal employment opportunity. Employment decisions are made without regard to race, color,\nreligion, sex, national origin, age, disability, veteran status, sexual orientation, gender identity, or any other protected status under\napplicable law.\nDocument purpose: realistic job description PDF for Candidate Review testing with a resume focused on biochemistry, preclinical research\nsupport, medical device testing, teaching, and leadership.\nScientist II, Preclinical R&D - Medical Devices\nPage 2 of 2",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Text-based job description; Docling extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "human resources/jd_scientist_ii_preclinical_rd_medical_devices.pdf",
+    "nextcloud_relative_path": "human resources/jd_scientist_ii_preclinical_rd_medical_devices.pdf",
+    "source_relative_path": "human resources/jd_scientist_ii_preclinical_rd_medical_devices.pdf",
+    "filename": "jd_scientist_ii_preclinical_rd_medical_devices.pdf",
+    "title": "jd scientist ii preclinical rd medical devices",
+    "category": "human resources",
+    "preindex": {
+      "relative_path": "human resources/jd_scientist_ii_preclinical_rd_medical_devices.pdf",
+      "filename": "jd_scientist_ii_preclinical_rd_medical_devices.pdf",
+      "title": "jd scientist ii preclinical rd medical devices",
+      "category": "human resources",
+      "document_id": "human resources/jd_scientist_ii_preclinical_rd_medical_devices.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:18:51"
+}

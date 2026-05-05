@@ -1,0 +1,15 @@
+{
+  "kind": "evidenceops_preindex_pdf_vlm_page_cache.v2",
+  "file_hash": "9f8288031fc99c0205ebe0f67fe80578d63478c225004981b333aa66c91b7415",
+  "filename": "world_bank_spd_rfp_consulting_services.pdf",
+  "model": "qwen3-vl:235b-cloud",
+  "dpi": 180,
+  "scope": "pages_selected_6fd4348df0b1",
+  "updated_at": "2026-04-26 22:18:18",
+  "pages": [
+    {
+      "page": 1,
+      "content": "### Visual extraction  \n- **Headings**:  \n  - Blue banner: \"STANDARD PROCUREMENT DOCUMENT\"  \n  - Main title: \"Request for Proposals Consulting Services\"  \n  - Red conditional text: \"For Projects with Project Concept Notes (PCN) Decision Notes on or before October 1, 2018\"  \n\n- **Logos/Branding**:  \n  - Bottom left: World Bank logo with \"THE WORLD BANK\" and \"IBRD • IDA\" beneath it  \n\n- **Key facts**:  \n  - Document type: Standard Procurement Document for Consulting Services RFP  \n  - Applicability: Projects with PCN Decision Notes dated on or before October 1, 2018  \n  - Issuance date: \"December 2019\" (bottom right)  \n\n- **Visual details**:  \n  - Red text highlights a critical eligibility condition for proposals  \n  - No tables, charts, signatures, or checklists visible on this page"
+    }
+  ]
+}

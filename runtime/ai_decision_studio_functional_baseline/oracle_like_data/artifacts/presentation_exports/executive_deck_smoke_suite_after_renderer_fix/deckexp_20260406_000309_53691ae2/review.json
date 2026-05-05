@@ -1,0 +1,309 @@
+{
+  "mode": "review",
+  "presentation_title": "AI Workbench Local — Candidate Review · Jane Doe",
+  "theme": "executive_premium_minimal",
+  "slide_count": 8,
+  "slides": [
+    {
+      "slide_number": 1,
+      "slide_type": "title",
+      "title": "AI Workbench Local — Candidate Review · Jane Doe",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 1.8,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 2,
+      "slide_type": "summary",
+      "title": "Executive summary",
+      "score": 79,
+      "status": "review",
+      "content_weight": 3.34,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.01,
+      "risk_level": "high",
+      "likely_overflow_regions": [
+        "body"
+      ],
+      "likely_collision_regions": [
+        "summary:split_imbalance"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "summary:split_imbalance",
+          "density": 0.91,
+          "threshold": 0.9,
+          "severity": "medium",
+          "message": "summary narrative and takeaway panel are imbalanced enough to compete for space"
+        }
+      ],
+      "severity_counts": {
+        "high": 1,
+        "medium": 1,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "high",
+          "message": "body text is dense for a single executive slide"
+        },
+        {
+          "severity": "medium",
+          "message": "summary narrative and takeaway panel are imbalanced enough to compete for space"
+        }
+      ]
+    },
+    {
+      "slide_number": 3,
+      "slide_type": "metrics",
+      "title": "Executive snapshot",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.14,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 4,
+      "slide_type": "cards",
+      "title": "Strengths snapshot",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.59,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 5,
+      "slide_type": "table",
+      "title": "Evidence highlights",
+      "score": 93,
+      "status": "ok",
+      "content_weight": 6.73,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.12,
+      "risk_level": "medium",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [
+        "table:row_imbalance"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "table:row_imbalance",
+          "density": 1.173913043478261,
+          "threshold": 1.05,
+          "severity": "medium",
+          "message": "table rows vary significantly in density and may create visual imbalance"
+        }
+      ],
+      "severity_counts": {
+        "high": 0,
+        "medium": 1,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "table rows vary significantly in density and may create visual imbalance"
+        }
+      ]
+    },
+    {
+      "slide_number": 6,
+      "slide_type": "table",
+      "title": "Experience highlights",
+      "score": 86,
+      "status": "review",
+      "content_weight": 3.01,
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.65,
+      "risk_level": "medium",
+      "likely_overflow_regions": [
+        "table"
+      ],
+      "likely_collision_regions": [
+        "table:column_4"
+      ],
+      "layout_pressure_signals": [
+        {
+          "region": "table:column_4",
+          "density": 3.445,
+          "threshold": 2.8,
+          "severity": "medium",
+          "message": "table column 4 is dense enough to risk cramped cells across multiple rows"
+        }
+      ],
+      "severity_counts": {
+        "high": 0,
+        "medium": 2,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "some table cells are likely too long"
+        },
+        {
+          "severity": "medium",
+          "message": "table column 4 is dense enough to risk cramped cells across multiple rows"
+        }
+      ]
+    },
+    {
+      "slide_number": 7,
+      "slide_type": "two_column",
+      "title": "Gaps vs hiring thesis",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.04,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 8,
+      "slide_type": "bullets",
+      "title": "Next steps",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 2.4,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    }
+  ],
+  "missing_assets": [],
+  "average_score": 94,
+  "status": "ok",
+  "issue_count": 5,
+  "warning_count": 5,
+  "severity_counts": {
+    "high": 1,
+    "medium": 4,
+    "low": 0
+  },
+  "overflow_risk_count": 1,
+  "clipping_risk_count": 2,
+  "collision_risk_count": 3,
+  "balance_warning_count": 0,
+  "top_risk_slides": [
+    {
+      "slide_number": 6,
+      "title": "Experience highlights",
+      "risk_level": "medium",
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.65
+    },
+    {
+      "slide_number": 2,
+      "title": "Executive summary",
+      "risk_level": "high",
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.01
+    },
+    {
+      "slide_number": 5,
+      "title": "Evidence highlights",
+      "risk_level": "medium",
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 1,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0.12
+    }
+  ],
+  "issues": [
+    "slide 02 (Executive summary): body text is dense for a single executive slide",
+    "slide 02 (Executive summary): summary narrative and takeaway panel are imbalanced enough to compete for space",
+    "slide 05 (Evidence highlights): table rows vary significantly in density and may create visual imbalance",
+    "slide 06 (Experience highlights): some table cells are likely too long",
+    "slide 06 (Experience highlights): table column 4 is dense enough to risk cramped cells across multiple rows"
+  ],
+  "warnings": [
+    "slide 02 (Executive summary): body text is dense for a single executive slide",
+    "slide 02 (Executive summary): summary narrative and takeaway panel are imbalanced enough to compete for space",
+    "slide 05 (Evidence highlights): table rows vary significantly in density and may create visual imbalance",
+    "slide 06 (Experience highlights): some table cells are likely too long",
+    "slide 06 (Experience highlights): table column 4 is dense enough to risk cramped cells across multiple rows"
+  ]
+}

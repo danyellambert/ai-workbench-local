@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-16",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Information Security Policy v3.1.pdf (pdf)",
+      "Information Security Policy v3.2.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:\nDocument v3.2 significantly expands on v3.1's updates, focusing on enhanced security controls and oversight.\n\n- Introduces mandatory multi-factor authentication for all accounts.\n- Increases privileged access review frequency to quarterly.\n- Includes pre-onboarding vendor security reviews.\n- Emphasizes immediate escalation for critical incidents.\n- Maintains annual policy reviews but adds more detailed protocols.\n- Enhances identity management through stronger controls.",
+  "key_highlights": [
+    "Document v3.2 significantly expands on v3.1's updates, focusing on enhanced security controls and oversight.",
+    "Introduces mandatory multi-factor authentication for all accounts.",
+    "Increases privileged access review frequency to quarterly.",
+    "Includes pre-onboarding vendor security reviews.",
+    "Emphasizes immediate escalation for critical incidents.",
+    "Maintains annual policy reviews but adds more detailed protocols."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Information Security Policy v3.1.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf)",
+          "Updated policy reflects current best practices | Annual reviews ensure compliance"
+        ],
+        [
+          "document_summary",
+          "Summary of Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.2.pdf (pdf)",
+          "Enhanced security measures across the workforce | Increased frequency of privileged access reviews"
+        ],
+        [
+          "cross_document_observation",
+          "Document v3.2 significantly expands on v3.1's updates, focusing…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Information Security Policy v3.1 updates include refined security requireme…"
+        ],
+        [
+          "identity_control_delta",
+          "Introduces mandatory multi-factor authentication for all accounts",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Information Security Policy v3.1 updates include refined security requireme…"
+        ],
+        [
+          "approval_change",
+          "Increases privileged access review frequency to quarterly",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Information Security Policy v3.1 updates include refined security requireme…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Includes pre-onboarding vendor security reviews",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Information Security Policy v3.1 updates include refined security requireme…"
+        ],
+        [
+          "incident_response_delta",
+          "Emphasizes immediate escalation for critical incidents",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Information Security Policy v3.1 updates include refined security requireme…"
+        ],
+        [
+          "cross_document_observation",
+          "Maintains annual policy reviews but adds more detailed…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Information Security Policy v3.1 updates include refined security requireme…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

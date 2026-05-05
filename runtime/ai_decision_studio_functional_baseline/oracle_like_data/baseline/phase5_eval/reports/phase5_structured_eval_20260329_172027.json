@@ -1,0 +1,132 @@
+{
+  "generated_at": "2026-03-29T17:20:27.236646",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "summary",
+      "mode": "indexed_document",
+      "status": "FAIL",
+      "score": 4,
+      "max_score": 31,
+      "reasons": [
+        "gold:topic coverage too low: 2",
+        "gold:required fact coverage too low: 0",
+        "gold:key insight coverage too low: 0",
+        "gold:executive summary is too weak against expected report signals: 1"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e",
+        "name": "fy25-afr-final-tagged.pdf",
+        "file_type": "pdf",
+        "chunk_count": 208
+      },
+      "gold_fixture_path": "baseline://external_files/59b08f4e22a2b3b3_10_summary_fy25_afr_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "FAIL",
+        "score": 4,
+        "max_score": 31,
+        "reasons": [
+          "topic coverage too low: 2",
+          "required fact coverage too low: 0",
+          "key insight coverage too low: 0",
+          "executive summary is too weak against expected report signals: 1"
+        ],
+        "metrics": {
+          "topic_hits": 2,
+          "fact_hits": 0,
+          "exec_signal_hits": 1,
+          "key_insight_hits": 0,
+          "number_hits": 1
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "Mission Performance and Key Goals",
+            "key_points": [
+              "Artemis II test flight preparation",
+              "Green ratings for key performance goals"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "All six Explore key performance goals were rated Green at the time of publication.",
+              "NASA achieved mission success with OSIRIS-Rex and Parker Solar Probe"
+            ]
+          },
+          {
+            "title": "Financial Performance and Compliance",
+            "key_points": [
+              "Unmodified 'clean' audit opinion for 15 consecutive years",
+              "Effective ERM program led by ARMO"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "NASA received an unmodified 'clean' audit opinion on its 2025 financial statements for the 15th consecutive year.",
+              "The ARMO leads the Agency’s ERM effort in collaboration with the Quality Assurance Division within OCFO."
+            ]
+          },
+          {
+            "title": "Organizational Structure and Financial Reporting",
+            "key_points": [
+              "Five mission directorates and nine centers",
+              "Financial reports follow FASAB standards"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "The Agency is organized into five Mission Directorates supported by one Mission Support Directorate.",
+              "These consolidated financial statements are prepared in accordance with FASAB standards in the format prescribed by OMB Circular A-136."
+            ]
+          },
+          {
+            "title": "Public-Private Partnerships and Leases",
+            "key_points": [
+              "Enhanced Use Leases (EUL) and National Historic Preservation Act (NHPA) programs",
+              "Revenue generation from lease agreements"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "NASA’s EUL and NHPA programs allow NASA to lease real property under NASA’s control or jurisdiction to other public and private entities on a long-term basis in return for cash consideration at fair market value.",
+              "NASA has identified a limited number of leases where development by the tenant could impact Center infrastructure and operations."
+            ]
+          },
+          {
+            "title": "Cybersecurity and Infrastructure Modernization",
+            "key_points": [
+              "Zero Trust architecture implementation",
+              "Modernizing infrastructure to support mission needs"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "NASA has issued generative AI guidance encouraging responsible AI use and published a list of approved AI tools.",
+              "NASA’s move to Zero Trust is a necessity for strengthening cybersecurity against motivated adversaries."
+            ]
+          }
+        ],
+        "executive_summary": "This report provides an overview of NASA's mission performance, financial health, compliance posture, and operational highlights. Key achievements include the preparation for Artemis II and green ratings on key performance goals. Financially, NASA received a clean audit opinion for 15 consecutive years and has an effective Enterprise Risk Management program. The agency is organized into five directorates with robust financial reporting aligned to FASAB standards. Public-private partnerships through EUL and NHPA programs generate revenue, while cybersecurity efforts focus on Zero Trust architecture implementation.",
+        "key_insights": [
+          "NASA's mission success with OSIRIS-Rex and Parker Solar Probe",
+          "Continuous improvement in risk management and financial oversight",
+          "Significant lease arrangements under SFFAS 54 impacting budgetary resources",
+          "Implementation of AI guidance and Zero Trust architecture for enhanced cybersecurity"
+        ],
+        "reading_time_minutes": 2,
+        "completeness_score": 0.93
+      }
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe Access Review Evidence Log serves as a test artifact documenting Q1 2024 vendor-control review progress, with control closure dependent on completing missing provenance and archiving tasks, while the Privileged Account Approval Email establishes a conditional, pilot-level standing privilege for named administrators contingent on strict scoping, logging, quarterly reviews, and ongoing vendor revalidation. The former focuses on retrospective evidence completion for control closure, whereas the latter defines proactive, governed access parameters requiring continuous oversight and personnel change revalidation.\n\n- Control closure hinges on completing missing provenance and archiving requirements for evidence items.  \n- Access is granted as a pilot with strict scoping, logging, and quarterly review mandates.  \n- Governance requires ongoing vendor confirmation and revalidation if personnel change.  \n- The evidence log is a test artifact, not a production record.  \n- Standing privilege is conditional on operational controls and recertification.  \n- Material difference: retrospective evidence completion vs. proactive, ongoing access governance.",
+  "key_highlights": [
+    "The Access Review Evidence Log serves as a test artifact documenting Q1 2024 vendor-control review progress, with control closure dependent on completing missing provenance and archiving tasks, while the Privileged Account Approval Email establishes a conditional, pilot-level standing privilege for named administrators contingent on strict scoping, logging, quarterly reviews, and ongoing vendor revalidation. The former focuses on retrospective evidence completion for control closure, whereas the latter defines proactive, governed access parameters requiring continuous oversight and personnel change revalidation.",
+    "Control closure hinges on completing missing provenance and archiving requirements for evidence items.",
+    "Access is granted as a pilot with strict scoping, logging, and quarterly review mandates.",
+    "Governance requires ongoing vendor confirmation and revalidation if personnel change.",
+    "The evidence log is a test artifact, not a production record.",
+    "Standing privilege is conditional on operational controls and recertification."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Control closure is contingent on verifying missing or in-progress evidence items. | The document serves as a test artif…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is tightly scoped and contingent on operational controls | Governance requires ongoing vendor and recertificatio…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log serves as a…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "auditability_delta",
+          "Control closure hinges on completing missing provenance and…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "approval_change",
+          "Access is granted as a pilot with strict…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "approval_change",
+          "Governance requires ongoing vendor confirmation and revalidation if…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "auditability_delta",
+          "The evidence log is a test artifact, not…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The document serves as a test artifact rather than a production record. | Privile…"
+        ],
+        [
+          "cross_document_observation",
+          "Standing privilege is conditional on operational controls and…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

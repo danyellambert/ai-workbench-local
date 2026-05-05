@@ -1,0 +1,23 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "long_title_validation",
+  "output_dir": "baseline://artifacts/presentation_exports/long_title_validation_previews",
+  "presentation_title": "long_title_validation",
+  "theme": "executive_premium_minimal",
+  "preview_count": 1,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "direct_png",
+  "input_pptx": "baseline://external_files/47fd8efe1dc36bb8_long_title_validation.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "long_title_validation-01.png",
+      "path": "baseline://external_files/d02de4d384b04bd7_long_title_validation-01.png"
+    }
+  ]
+}

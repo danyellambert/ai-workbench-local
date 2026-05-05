@@ -1,0 +1,243 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Candidate Review · Sarah Chen",
+      "subtitle": "Executive hiring summary grounded in cv_analysis",
+      "author": "AI Workbench Local",
+      "date": "2026-04-19",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Candidate Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Candidate Review · Sarah Chen",
+        "subtitle": "Executive hiring summary grounded in cv_analysis",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: candidate_review_deck. Deck family: candidate_review. Sources: structured_result, cv_analysis."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Sarah Chen presents as a hiring profile centered on Senior ML Engineer · Transformer architectures, Instruction tuning from San Francisco, CA. Grounded evidence suggests about 5.0 year(s) of experience across 6 structured role(s). Top strengths: Strong record in transformer-based workloads, large-scale inference, and technical leadership; Technical leadership for small ML teams, mentorship, and cross-functional delivery. Primary watchout: No explicit mention of specific product thinking or scope in current roles..",
+        "bullets": [
+          "Strong record in transformer-based workloads, large-scale inference, and te…",
+          "Technical leadership for small ML teams, mentorship, and cross-functional d…",
+          "Experience with production ML systems serving over 10M daily predictions"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "5.0",
+            "label": "Experience years"
+          },
+          {
+            "value": "11",
+            "label": "Skills"
+          },
+          {
+            "value": "0",
+            "label": "Languages"
+          },
+          {
+            "value": "6",
+            "label": "Experience entries"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "cards",
+        "title": "Strengths snapshot",
+        "bullets": [],
+        "cards": [
+          {
+            "title": "Strength 1",
+            "body": "Strong record in transformer-based workloads, large-scale inference,…",
+            "footer": "Positive signal"
+          },
+          {
+            "title": "Strength 2",
+            "body": "Technical leadership for small ML teams, mentorship, and cross-functi…",
+            "footer": "Positive signal"
+          },
+          {
+            "title": "Strength 3",
+            "body": "Experience with production ML systems serving over 10M daily predicti…",
+            "footer": "Positive signal"
+          }
+        ],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Top candidate strengths."
+      },
+      {
+        "type": "table",
+        "title": "Evidence highlights",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Signal",
+          "Value",
+          "Detail"
+        ],
+        "table_rows": [
+          [
+            "Experience",
+            "5.0 years",
+            "6 structured role(s)"
+          ],
+          [
+            "Core skills",
+            "Transformer architectures, Instruction tuning, Evaluation design",
+            "11 mapped skill(s)"
+          ],
+          [
+            "Recent anchor",
+            "Senior ML Engineer",
+            "Aurora AI Systems"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Grounded evidence highlights supporting the candidate review."
+      },
+      {
+        "type": "table",
+        "title": "Experience highlights",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Role",
+          "Organization",
+          "Date",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "Senior ML Engineer",
+            "Aurora AI Systems",
+            "2022 — Present",
+            "Led RLHF and evaluation pipeline improvements for enterprise language-assistance products; reduced training and evaluat…"
+          ],
+          [
+            "ML Engineer",
+            "Atlas Data Robotics",
+            "2020 — 2022",
+            "Built data quality scoring and annotation automation for large-scale ML workflows; supported high-throughput inference…"
+          ],
+          [
+            "Research Engineer",
+            "Northstar Research Labs",
+            "2018 — 2020",
+            "Contributed to transformer-model experiments, published two peer-reviewed papers on attention mechanisms, and mentored…"
+          ],
+          [
+            "-",
+            "-",
+            "2022 — Present",
+            "2022 — Present"
+          ],
+          [
+            "-",
+            "-",
+            "2020 — 2022",
+            "2020 — 2022"
+          ],
+          [
+            "-",
+            "-",
+            "2018 — 2020",
+            "2018 — 2020"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "two_column",
+        "title": "Gaps vs hiring thesis",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Gaps / risks",
+            "body": "No explicit mention of specific product thinking or scope in current roles.",
+            "bullets": [
+              "Limited details on personal projects or contributions outside professio…"
+            ]
+          },
+          {
+            "title": "Hiring thesis",
+            "body": "Advance to the next stage with focused validation of leadership, scope and business impact.",
+            "bullets": [
+              "Validate no explicit mention of specific product thinking or scope in c…",
+              "Validate limited details on personal projects or contributions outside…"
+            ]
+          }
+        ],
+        "speaker_notes": "Candidate gaps versus hiring thesis."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Validate no explicit mention of specific product thinking or scope in current r…",
+          "Validate limited details on personal projects or contributions outside professi…",
+          "Probe measurable scope, business impact and cross-functional ownership in inter…",
+          "Validate delivery depth with concrete examples of architecture, execution and b…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260419_081722_653c2095/candidate_review_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260419_081722_653c2095",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

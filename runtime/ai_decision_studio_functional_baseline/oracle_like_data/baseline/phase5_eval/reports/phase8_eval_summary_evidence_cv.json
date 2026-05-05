@@ -1,0 +1,20 @@
+{
+  "db_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "suite_filter": "evidence_cv_gold_eval",
+  "task_filter": null,
+  "aggregate": {
+    "total_runs": 0,
+    "status_counts": {},
+    "suite_counts": {},
+    "task_counts": {},
+    "pass_rate": 0.0,
+    "warn_rate": 0.0,
+    "fail_rate": 0.0,
+    "avg_score_ratio": 0.0,
+    "avg_latency_s": 0.0,
+    "needs_review_rate": 0.0,
+    "suite_leaderboard": [],
+    "task_leaderboard": []
+  },
+  "recent_runs": []
+}

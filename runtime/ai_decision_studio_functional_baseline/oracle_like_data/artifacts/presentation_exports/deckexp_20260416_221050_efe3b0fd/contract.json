@@ -1,0 +1,113 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "document_review_deck",
+  "deck_family": "review",
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-16",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "source_documents": [
+      "9c300067213ed40a4ab4a8a78a1e2b3698835611a28034c91da8fef042a12982"
+    ],
+    "tool_used": "review_document_risks",
+    "review_type": "risk_gap_review",
+    "document_ids": [
+      "9c300067213ed40a4ab4a8a78a1e2b3698835611a28034c91da8fef042a12982"
+    ]
+  },
+  "executive_summary": "Risks, gaps, and red flags in selected documents: 1 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Potential rollout delay due to vendor dependency Main evidence gap: No owner is named for the migration task",
+  "key_highlights": [
+    "Potential rollout delay due to vendor dependency",
+    "No owner is named for the migration task",
+    "Finalize integration plan"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Source count",
+      "value": "0"
+    },
+    {
+      "label": "Findings",
+      "value": "2"
+    },
+    {
+      "label": "Actions",
+      "value": "1"
+    },
+    {
+      "label": "Needs review",
+      "value": "Yes"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Top findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Owner",
+        "Due",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "risk",
+          "Potential rollout delay due to vendor dependency",
+          "-",
+          "-",
+          "vendor dependency may delay rollout"
+        ],
+        [
+          "gap",
+          "No owner is named for the migration task",
+          "-",
+          "-",
+          "-"
+        ]
+      ],
+      "speaker_notes": "Findings grounded in the structured/document-agent payload."
+    },
+    {
+      "title": "Action plan",
+      "columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Finalize integration plan",
+          "Platform team",
+          "Friday",
+          "pending"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Finalize integration plan",
+  "watchouts": [
+    "no_grounded_sources_available",
+    "No owner is named for the migration task",
+    "Not enough sources were found to fully support the response.",
+    "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+  ],
+  "next_steps": [
+    "Finalize integration plan",
+    "Manually review the selected documents before using this response in an operational decision.",
+    "Forward the result for human review before making a final decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent"
+  ]
+}

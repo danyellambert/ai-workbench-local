@@ -1,0 +1,108 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Governance Committee Minutes and Action Items.pdf",
+  "file_type": "pdf",
+  "file_hash": "4eb9debaec4658cf445149762ee8416e2f678048a72c9f2a8b391b5c0d03be0b",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nMIN-101  Governance Committee Minutes\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nGovernance Committee Minutes and Action Items\nCommittee minutes connecting contract review, audit findings, and remediation tasks.\nDocument ID\nMIN-101\nOwner\nCorporate Secretary\nMeeting Date\n2024-03-15\nCommittee\nThird-Party Risk Governance Committee\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nMeeting Summary\nField\nValue\nChair\nMaria Santos, VP Procurement\nAttendees\nElena Petrov (CISO); James Park (Privacy Counsel); Alex Rivera (Security Engineering); Priya Nair (IT\nOperations); Olivia Grant (Vendor Management); Hannah Cole (Corporate Secretary)\nPurpose\nReview Northwind contract posture, audit findings, and remediation requirements before production\nlaunch approval.\nDecisions Recorded\n●\nThe committee agreed that the MSA package cannot be approved unless liability, transfer mechanism, and\nincident-notification language are strengthened.\n●\nThe committee accepted opening NCR-2024-011 and required correction of the access-review evidence gap before\nlaunch close-out.\n●\nThe committee allowed Procurement to pursue a temporary uptime risk acceptance for the pilot phase only, subject to\ncompensating controls and monthly reporting.\nAction Register\nAction Item\nOwner\nDue Date\nStatus\nEvidence / Source\nNegotiate liability cap with vendor legal\nMaria Santos\n2024-03-22\nIn progress\nCTR-010 Section 7.3\nunlimited liability\nclause\nDraft SCC Appendix for data residency\nJames Park\n2024-03-25\nOpen\nCTR-013 transfer\nmechanism gap /\nGOV-001\nRequest revised SLA with 99.95% target\nMaria Santos\n2024-03-20\nDone\nCTR-012 current SLA\nat 99.5%\nDefine incident response SLOs\nAlex Rivera\n2024-03-28\nOpen\nPOL-031 REQ-IR-07\n“reasonable efforts”\nlanguage\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nMIN-101  Governance Committee Minutes\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nAction Item\nOwner\nDue Date\nStatus\nEvidence / Source\nSet up auto-renewal calendar alerts\nOperations\n2024-03-18\nIn progress\nCTR-010 Section 8.2\n90-day notice risk\nNext committee checkpoint scheduled for 2024-03-27 to confirm status of the contract redlines, DPA appendix, and\nevidence-pack completeness.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 2479,
+    "final_text_chars": 2479,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1992,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 492,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 90,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 6253,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nMIN-101  Governance Committee Minutes\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nGovernance Committee Minutes and Action Items\nCommittee minutes connecting contract review, audit findings, and remediation tasks.\nDocument ID\nMIN-101\nOwner\nCorporate Secretary\nMeeting Date\n2024-03-15\nCommittee\nThird-Party Risk Governance Committee\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nMeeting Summary\nField\nValue\nChair\nMaria Santos, VP Procurement\nAttendees\nElena Petrov (CISO); James Park (Privacy Counsel); Alex Rivera (Security Engineering); Priya Nair (IT\nOperations); Olivia Grant (Vendor Management); Hannah Cole (Corporate Secretary)\nPurpose\nReview Northwind contract posture, audit findings, and remediation requirements before production\nlaunch approval.\nDecisions Recorded\n●\nThe committee agreed that the MSA package cannot be approved unless liability, transfer mechanism, and\nincident-notification language are strengthened.\n●\nThe committee accepted opening NCR-2024-011 and required correction of the access-review evidence gap before\nlaunch close-out.\n●\nThe committee allowed Procurement to pursue a temporary uptime risk acceptance for the pilot phase only, subject to\ncompensating controls and monthly reporting.\nAction Register\nAction Item\nOwner\nDue Date\nStatus\nEvidence / Source\nNegotiate liability cap with vendor legal\nMaria Santos\n2024-03-22\nIn progress\nCTR-010 Section 7.3\nunlimited liability\nclause\nDraft SCC Appendix for data residency\nJames Park\n2024-03-25\nOpen\nCTR-013 transfer\nmechanism gap /\nGOV-001\nRequest revised SLA with 99.95% target\nMaria Santos\n2024-03-20\nDone\nCTR-012 current SLA\nat 99.5%\nDefine incident response SLOs\nAlex Rivera\n2024-03-28\nOpen\nPOL-031 REQ-IR-07\n“reasonable efforts”\nlanguage\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nMIN-101  Governance Committee Minutes\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nAction Item\nOwner\nDue Date\nStatus\nEvidence / Source\nSet up auto-renewal calendar alerts\nOperations\n2024-03-18\nIn progress\nCTR-010 Section 8.2\n90-day notice risk\nNext committee checkpoint scheduled for 2024-03-27 to confirm status of the contract redlines, DPA appendix, and\nevidence-pack completeness.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic text-first meeting/action-items PDF; Docling/text extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "audit/Governance Committee Minutes and Action Items.pdf",
+    "nextcloud_relative_path": "audit/Governance Committee Minutes and Action Items.pdf",
+    "source_relative_path": "audit/Governance Committee Minutes and Action Items.pdf",
+    "filename": "Governance Committee Minutes and Action Items.pdf",
+    "title": "Governance Committee Minutes and Action Items",
+    "category": "audit",
+    "preindex": {
+      "relative_path": "audit/Governance Committee Minutes and Action Items.pdf",
+      "filename": "Governance Committee Minutes and Action Items.pdf",
+      "title": "Governance Committee Minutes and Action Items",
+      "category": "audit",
+      "document_id": "audit/Governance Committee Minutes and Action Items.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:48:38"
+}

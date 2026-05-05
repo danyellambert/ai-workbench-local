@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-03-28T23:13:33.192732",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "summary",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "Phase 5 Progress Update",
+            "key_points": [
+              "structured outputs foundation implemented",
+              "UI panel added for Streamlit app",
+              "prompt quality uneven",
+              "priority on improving grounding and output quality"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "The structured outputs foundation has been implemented with task schemas, a registry, JSON parsing, and validation.",
+              "A first UI panel was added to the Streamlit app so users can run extraction, summary, checklist, and CV analysis."
+            ]
+          }
+        ],
+        "executive_summary": "Phase 5 of the project has seen the implementation of a structured outputs foundation with task schemas and a UI panel for the Streamlit app. However, prompt quality remains uneven, necessitating improvements in grounding and output quality.",
+        "key_insights": [
+          "current focus on enhancing foundational aspects",
+          "priority on real document handling"
+        ],
+        "reading_time_minutes": 1,
+        "completeness_score": 0.64
+      }
+    }
+  ]
+}

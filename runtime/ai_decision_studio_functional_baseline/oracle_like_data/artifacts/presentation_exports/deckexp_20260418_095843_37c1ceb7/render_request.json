@@ -1,0 +1,190 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "author": "AI Workbench Local",
+      "date": "2026-04-18",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Comparison Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "subtitle": "Executive comparison review of grounded document differences",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Executive Comparison:  \nThe Access Review Evidence Log highlights critical gaps in vendor access control documentation, specifically incomplete evidence (EV-002) that blocks control closure and risks audit non-compliance, while the Privileged Account Approval Email confirms conditional, governed access for specific administrators with strict usage and oversight requirements. Both documents emphasize control integrity, but the former exposes a deficiency requiring remediation, whereas the latter reflects an approved, governed access model under active oversight.\n\n- Access Review Evidence Log identifies missing evidence (EV-002) blocking control closure; Privileged Account Approval Email confirms approved access with conditions.  \n- Evidence gaps in the log require remediation; Privileged Account Approval Email reflects active governance with vendor verification and quarterly reviews.  \n- Control closure depends on resolving incomplete evidence; Privileged access is maintained under strict usage and logging requirements.  \n- The log focuses on audit readiness through documentation completeness; the email emphasizes ongoing oversight and conditional approval.  \n- Missing evidence (EV-002) directly impacts compliance validation; Privileged access is governed by scope, logging, and vendor confirmation.  \n- Both require documented processes, but the log addresses deficiencies, while the email confirms approved, monitored access.",
+        "bullets": [
+          "The Access Review Evidence Log highlights critical gaps in vendor access co…",
+          "Access Review Evidence Log identifies missing evidence (EV-002) blocking co…",
+          "Evidence gaps in the log require remediation; Privileged Account Approval E…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Compared docs"
+          },
+          {
+            "value": "8",
+            "label": "Findings"
+          },
+          {
+            "value": "4",
+            "label": "Sources"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Comparison findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Documents",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "document_summary",
+            "Summary of Access Review Evidence Log.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf)",
+            "Critical evidence gaps, particularly EV-002, directly impact control closure and require documented remediation. | Clea…"
+          ],
+          [
+            "document_summary",
+            "Summary of Privileged Account Approval Email.pdf (pdf)",
+            "Privileged Account Approval Email.pdf (pdf)",
+            "Approval is conditional on strict usage scope and ongoing oversight to mitigate risk. | Governance requires vendor conf…"
+          ],
+          [
+            "approval_change",
+            "The Access Review Evidence Log highlights critical gaps…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) is a synthetic record used to evaluate Q…"
+          ],
+          [
+            "approval_change",
+            "Access Review Evidence Log identifies missing evidence (EV-002)…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) is a synthetic record used to evaluate Q…"
+          ],
+          [
+            "approval_change",
+            "Evidence gaps in the log require remediation; Privileged…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): Critical evidence gaps, particularly EV-002, directly impact control closure and…"
+          ],
+          [
+            "identity_control_delta",
+            "Control closure depends on resolving incomplete evidence; Privileged…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) is a synthetic record used to evaluate Q…"
+          ],
+          [
+            "approval_change",
+            "The log focuses on audit readiness through documentation…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): Clear ownership and status tracking are essential to ensure audit readiness and c…"
+          ],
+          [
+            "vendor_oversight_delta",
+            "Missing evidence (EV-002) directly impacts compliance validation; Privileged…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) is a synthetic record used to evaluate Q…"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Open the cited source excerpts to confirm the interpretation before acting.",
+            "bullets": [
+              "Open the cited source excerpts to confirm the interpretation before act…",
+              "Validate critical differences directly in the compared documents before…"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "No critical watchouts recorded for this slice.",
+            "bullets": []
+          }
+        ],
+        "speaker_notes": "Executive decision framing for this slice."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Open the cited source excerpts to confirm the interpretation before acting.",
+          "Validate critical differences directly in the compared documents before consoli…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_095843_37c1ceb7/policy_contract_comparison_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_095843_37c1ceb7",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

@@ -1,0 +1,58 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "candidate_review_deck_local_fallback",
+  "output_dir": "baseline://artifacts/presentation_exports/executive_deck_smoke_suite/deckexp_20260405_234922_797c2e5f/local_fallback_previews",
+  "presentation_title": "candidate_review_deck_local_fallback",
+  "theme": "executive_premium_minimal",
+  "preview_count": 8,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/3ff9cdf1adfb3f76_candidate_review_deck_local_fallback.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "candidate_review_deck_local_fallback-01.png",
+      "path": "baseline://external_files/f4f51296d7d892b8_candidate_review_deck_local_fallback-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "candidate_review_deck_local_fallback-02.png",
+      "path": "baseline://external_files/a80b252ff86d2c92_candidate_review_deck_local_fallback-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "candidate_review_deck_local_fallback-03.png",
+      "path": "baseline://external_files/c92468e30e94512c_candidate_review_deck_local_fallback-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "candidate_review_deck_local_fallback-04.png",
+      "path": "baseline://external_files/d9a42535a2766bf7_candidate_review_deck_local_fallback-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "candidate_review_deck_local_fallback-05.png",
+      "path": "baseline://external_files/2021fca9edd95d4d_candidate_review_deck_local_fallback-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "candidate_review_deck_local_fallback-06.png",
+      "path": "baseline://external_files/8ce35a74aa5d72bc_candidate_review_deck_local_fallback-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "candidate_review_deck_local_fallback-07.png",
+      "path": "baseline://external_files/acac4d73cc8c2527_candidate_review_deck_local_fallback-07.png"
+    },
+    {
+      "slide_number": 8,
+      "filename": "candidate_review_deck_local_fallback-08.png",
+      "path": "baseline://external_files/4cb1af0da3d25630_candidate_review_deck_local_fallback-08.png"
+    }
+  ]
+}

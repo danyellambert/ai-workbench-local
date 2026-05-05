@@ -1,0 +1,125 @@
+STDOUT
+======
+
+=== [embedding_context_window] bge-m3_latest_ctx_256 ===
+settings: embedding=bge-m3:latest embed_ctx=256 chunk=1200/200 top_k=4 rerank_pool=8
+[done] bge-m3_latest_ctx_256 | Hit@1=0.8750 Hit@K=1.0000 MRR=0.9167 Avg retrieval=0.9062s Indexing=136.1007s
+
+=== [embedding_context_window] bge-m3_latest_ctx_512 ===
+settings: embedding=bge-m3:latest embed_ctx=512 chunk=1200/200 top_k=4 rerank_pool=8
+[done] bge-m3_latest_ctx_512 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.8969s Indexing=161.8452s
+
+=== [embedding_context_window] bge-m3_latest_ctx_1024 ===
+settings: embedding=bge-m3:latest embed_ctx=1024 chunk=1200/200 top_k=4 rerank_pool=8
+[done] bge-m3_latest_ctx_1024 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.8905s Indexing=162.4890s
+
+=== [embedding_context_window] bge-m3_latest_ctx_2048 ===
+settings: embedding=bge-m3:latest embed_ctx=2048 chunk=1200/200 top_k=4 rerank_pool=8
+[done] bge-m3_latest_ctx_2048 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.9038s Indexing=162.8838s
+
+=== [embedding_context_window] bge-m3_latest_ctx_4096 ===
+settings: embedding=bge-m3:latest embed_ctx=4096 chunk=1200/200 top_k=4 rerank_pool=8
+[done] bge-m3_latest_ctx_4096 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.8937s Indexing=163.9726s
+
+=== [embedding_context_window] bge-m3_latest_ctx_8192 ===
+settings: embedding=bge-m3:latest embed_ctx=8192 chunk=1200/200 top_k=4 rerank_pool=8
+[done] bge-m3_latest_ctx_8192 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.9058s Indexing=163.5754s
+
+=== [embedding_context_window] embeddinggemma_300m_ctx_256 ===
+settings: embedding=embeddinggemma:300m embed_ctx=256 chunk=1200/200 top_k=4 rerank_pool=8
+[done] embeddinggemma_300m_ctx_256 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.7000s Indexing=201.6232s
+
+=== [embedding_context_window] embeddinggemma_300m_ctx_512 ===
+settings: embedding=embeddinggemma:300m embed_ctx=512 chunk=1200/200 top_k=4 rerank_pool=8
+[done] embeddinggemma_300m_ctx_512 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.6932s Indexing=166.8564s
+
+=== [embedding_context_window] embeddinggemma_300m_ctx_1024 ===
+settings: embedding=embeddinggemma:300m embed_ctx=1024 chunk=1200/200 top_k=4 rerank_pool=8
+[done] embeddinggemma_300m_ctx_1024 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.7046s Indexing=160.0498s
+
+=== [embedding_context_window] embeddinggemma_300m_ctx_2048 ===
+settings: embedding=embeddinggemma:300m embed_ctx=2048 chunk=1200/200 top_k=4 rerank_pool=8
+[done] embeddinggemma_300m_ctx_2048 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.7152s Indexing=159.5007s
+
+=== [embedding_context_window] qwen3-embedding_0.6b_ctx_256 ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=256 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b_ctx_256 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.8917s Indexing=197.8514s
+
+=== [embedding_context_window] qwen3-embedding_0.6b_ctx_512 ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=512 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b_ctx_512 | Hit@1=0.7500 Hit@K=0.8750 MRR=0.8125 Avg retrieval=0.8859s Indexing=261.8311s
+
+=== [embedding_context_window] qwen3-embedding_0.6b_ctx_1024 ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=1024 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b_ctx_1024 | Hit@1=0.7500 Hit@K=0.8750 MRR=0.8125 Avg retrieval=0.8753s Indexing=269.5232s
+
+=== [embedding_context_window] qwen3-embedding_0.6b_ctx_2048 ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=2048 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b_ctx_2048 | Hit@1=0.7500 Hit@K=0.8750 MRR=0.8125 Avg retrieval=0.8694s Indexing=269.7263s
+
+=== [embedding_context_window] qwen3-embedding_0.6b_ctx_4096 ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=4096 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b_ctx_4096 | Hit@1=0.7500 Hit@K=0.8750 MRR=0.8125 Avg retrieval=0.8660s Indexing=270.1654s
+
+=== [embedding_context_window] qwen3-embedding_0.6b_ctx_8192 ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=8192 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b_ctx_8192 | Hit@1=0.7500 Hit@K=0.8750 MRR=0.8125 Avg retrieval=0.8799s Indexing=270.5267s
+
+=== [embedding_context_window] qwen3-embedding_0.6b_ctx_16384 ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=16384 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b_ctx_16384 | Hit@1=0.7500 Hit@K=0.8750 MRR=0.8125 Avg retrieval=0.8781s Indexing=270.9730s
+
+=== [embedding_context_window] qwen3-embedding_0.6b_ctx_32768 ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=32768 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b_ctx_32768 | Hit@1=0.7500 Hit@K=0.8750 MRR=0.8125 Avg retrieval=0.8934s Indexing=276.3618s
+
+=== [embedding_context_window] nomic-embed-text-v2-moe_latest_ctx_256 ===
+settings: embedding=nomic-embed-text-v2-moe:latest embed_ctx=256 chunk=1200/200 top_k=4 rerank_pool=8
+[done] nomic-embed-text-v2-moe_latest_ctx_256 | Hit@1=0.8750 Hit@K=0.8750 MRR=0.8750 Avg retrieval=0.7420s Indexing=67.5698s
+
+=== [embedding_context_window] nomic-embed-text-v2-moe_latest_ctx_512 ===
+settings: embedding=nomic-embed-text-v2-moe:latest embed_ctx=512 chunk=1200/200 top_k=4 rerank_pool=8
+[done] nomic-embed-text-v2-moe_latest_ctx_512 | Hit@1=0.8750 Hit@K=1.0000 MRR=0.9167 Avg retrieval=0.7393s Indexing=77.6256s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_256 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=256 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_256 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.0502s Indexing=1315.3573s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_512 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=512 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_512 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.0711s Indexing=1712.4682s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_1024 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=1024 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_1024 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.0239s Indexing=1758.5361s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_2048 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=2048 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_2048 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.1500s Indexing=1755.2170s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_4096 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=4096 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_4096 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.1393s Indexing=1755.0379s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_8192 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=8192 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_8192 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.3119s Indexing=1759.4577s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_16384 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=16384 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_16384 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.1671s Indexing=1766.5443s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_32768 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=32768 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_32768 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.8760s Indexing=1815.6931s
+
+=== [embedding_context_window] qwen3-embedding_4b_ctx_40960 ===
+settings: embedding=qwen3-embedding:4b embed_ctx=40960 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b_ctx_40960 | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=6.6912s Indexing=2336.1724s
+
+Suite summary written to: /Users/danyellambert/Downloads/Aula 4 - Criacao de Chatbot com IA em Tempo Real/benchmark_runs/20260315_011241_phase_4_5_all/03_embedding_context_windows/summary.json
+Human-readable report: /Users/danyellambert/Downloads/Aula 4 - Criacao de Chatbot com IA em Tempo Real/benchmark_runs/20260315_011241_phase_4_5_all/03_embedding_context_windows/README.md
+
+
+STDERR
+======

@@ -1,0 +1,139 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "document_review_deck",
+  "deck_family": "review",
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-26",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "source_documents": [
+      "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+    ],
+    "tool_used": "review_document_risks",
+    "review_type": "risk_gap_review",
+    "document_ids": [
+      "82841d8c1bde5322d6899d3a30394d74963c92c7158bea7f2941fba36c918237"
+    ]
+  },
+  "executive_summary": "Master Service Agreement v4.2 risk and obligation analysis: 3 risk(s), 0 gap(s) and 4 mitigation action(s) identified. Top risk: Uncapped financial exposure for general commercial claims",
+  "key_highlights": [
+    "Uncapped financial exposure for general commercial claims",
+    "Shortened claim window to 12 months",
+    "Automatic renewal without explicit consent",
+    "Review and negotiate liability cap",
+    "Extend claim limitation period to 24 months"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Source count",
+      "value": "6"
+    },
+    {
+      "label": "Findings",
+      "value": "3"
+    },
+    {
+      "label": "Actions",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Top findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Owner",
+        "Due",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "risk",
+          "Uncapped financial exposure for general commercial claims",
+          "-",
+          "-",
+          "Section 7.3 creates uncapped financial exposure because it contains no liability ceiling for general commercial claims"
+        ],
+        [
+          "risk",
+          "Shortened claim window to 12 months",
+          "-",
+          "Shortened claim window to 12 months",
+          "Section 7.8 shortens the claim window to 12 months, which is tighter than Meridian’s approved 24-month fallback for str…"
+        ],
+        [
+          "risk",
+          "Automatic renewal without explicit consent",
+          "-",
+          "-",
+          "Automatic 12-month renewals unless notice is delivered 90 days before the renewal date"
+        ]
+      ],
+      "speaker_notes": "Findings grounded in the structured/document-agent payload."
+    },
+    {
+      "title": "Action plan",
+      "columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Review and negotiate liability cap",
+          "Legal",
+          "-",
+          "pending"
+        ],
+        [
+          "Extend claim limitation period to 24 months",
+          "Legal",
+          "Extend claim limitation period to 24 months",
+          "pending"
+        ],
+        [
+          "Confirm renewal notice procedure",
+          "Procurement",
+          "-",
+          "pending"
+        ],
+        [
+          "Validate joint IP ownership terms",
+          "Legal",
+          "-",
+          "pending"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Review and negotiate liability cap",
+  "watchouts": [
+    "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+  ],
+  "next_steps": [
+    "Review and negotiate liability cap",
+    "Extend claim limitation period to 24 months",
+    "Confirm renewal notice procedure",
+    "Validate joint IP ownership terms",
+    "Open the cited source excerpts to confirm the interpretation before acting."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent"
+  ]
+}

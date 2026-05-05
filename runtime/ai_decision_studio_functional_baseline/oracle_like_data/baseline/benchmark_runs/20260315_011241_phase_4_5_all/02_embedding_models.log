@@ -1,0 +1,29 @@
+STDOUT
+======
+
+=== [embedding_models] bge-m3_latest ===
+settings: embedding=bge-m3:latest embed_ctx=8192 chunk=1200/200 top_k=4 rerank_pool=8
+[done] bge-m3_latest | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.8975s Indexing=163.7095s
+
+=== [embedding_models] embeddinggemma_300m ===
+settings: embedding=embeddinggemma:300m embed_ctx=8192 chunk=1200/200 top_k=4 rerank_pool=8
+[done] embeddinggemma_300m | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=0.7259s Indexing=161.3099s
+
+=== [embedding_models] qwen3-embedding_0.6b ===
+settings: embedding=qwen3-embedding:0.6b embed_ctx=8192 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_0.6b | Hit@1=0.7500 Hit@K=0.8750 MRR=0.8125 Avg retrieval=0.8700s Indexing=270.8905s
+
+=== [embedding_models] nomic-embed-text-v2-moe_latest ===
+settings: embedding=nomic-embed-text-v2-moe:latest embed_ctx=8192 chunk=1200/200 top_k=4 rerank_pool=8
+[done] nomic-embed-text-v2-moe_latest | Hit@1=0.8750 Hit@K=1.0000 MRR=0.9167 Avg retrieval=0.7265s Indexing=77.1035s
+
+=== [embedding_models] qwen3-embedding_4b ===
+settings: embedding=qwen3-embedding:4b embed_ctx=8192 chunk=1200/200 top_k=4 rerank_pool=8
+[done] qwen3-embedding_4b | Hit@1=1.0000 Hit@K=1.0000 MRR=1.0000 Avg retrieval=2.1876s Indexing=1767.7592s
+
+Suite summary written to: /Users/danyellambert/Downloads/Aula 4 - Criacao de Chatbot com IA em Tempo Real/benchmark_runs/20260315_011241_phase_4_5_all/02_embedding_models/summary.json
+Human-readable report: /Users/danyellambert/Downloads/Aula 4 - Criacao de Chatbot com IA em Tempo Real/benchmark_runs/20260315_011241_phase_4_5_all/02_embedding_models/README.md
+
+
+STDERR
+======

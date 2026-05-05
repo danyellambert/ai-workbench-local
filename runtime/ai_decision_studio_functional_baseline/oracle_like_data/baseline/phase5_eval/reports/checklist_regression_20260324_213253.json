@@ -1,0 +1,520 @@
+{
+  "generated_at": "2026-03-24T21:32:53.579900",
+  "fixture": "baseline://external_files/f42f51b38f96b8e3_06_checklist_who_surgical_gold.json",
+  "provider": "ollama",
+  "model": null,
+  "context_strategy": "document_scan",
+  "resolved_document": {
+    "document_id": "2e0548b2429cec5206c6f5e21c69a3ef0c426b8318bdb8c6c88be3c80d92d77d",
+    "name": "9789241598590_eng.pdf",
+    "file_type": "pdf",
+    "chunk_count": 39
+  },
+  "success": true,
+  "validation_error": null,
+  "parsing_error": null,
+  "execution_metadata": {
+    "checklist_mode": "full_document_map_reduce",
+    "checklist_profile": "generic",
+    "full_document_chars": 46233,
+    "sanitized_document_chars": 40710,
+    "checklist_question_count": 35,
+    "checklist_line_count": 843,
+    "context_chars_sent": 6160,
+    "context_note": "Checklist gerado a partir do documento inteiro em múltiplas partes, seguido de consolidação final.",
+    "stages": [
+      {
+        "stage_type": "map",
+        "label": "Checklist part 1 of 2",
+        "chars_sent": 28000,
+        "context_preview": "WHO Surgical Safety Checklist 2009\n1.Surgical procedures, Operative - standards. 2.Surgical\nwound infection - prevention and control. 3.Patient care\n- standards. 4.Safety management. 5.Medical errors -\nprevention and control. 6.Cross infection - prevention\nand control.7.Quality assurance, Health care - standards.\n8.Surgery department, Hospital - organization and\nHealth Organization.\nOrganization can be obtained from WHO Press, World\nHealth Organization, 20 Avenue Appia, 1211 Geneva 27,\nSwitzerland (tel.: +41 22 791 3264; fax: +41 22 791 4857;\ne-mail: bookorders@\n7,\nreproduce or translate WHO publications – whether for sale\nor for noncommercial distribution – should be addressed to\nWHO Press, at the above address (fax: +41 22 791 4806;\ne-mail: permissions@who.int).\nThe designations employed and the presentation of the\nmaterial in this publication do not imply the expression of\nany opinion whatsoever on the part of the World Health\nOrganization concerning the legal status of any country,\nterritory, city or area or of its authorities, or concerning the\ndelimitation of its frontiers or boundaries. Dotted lines on\nmaps represent approximate border lines for which there\nmay not yet be full agreement.\nThe mention of specific companies or of certain\nmanufacturers’ products does not imply that they\nare endorsed or recommended by the World Health\nOrganization in preference to others of a similar nature that\nare not mentioned. Errors and omissions excepted, the\nnames of proprietary products are distinguished by initial\ncapital letters.\nAll reasonable precautions have been taken by the World\nHealth Organization to verify the information co\nns have been taken by the World\nHealth Organization to verify the information contained in\nthis publication. However, the published material is being\ndistributed without warranty of any kind, either expressed or\nimplied. The responsibility for the interpretation and use of\nthe material lies with the reader. In no event shall the World\nHealth Organization be liable for damages arising from its\nuse.\nHow to run the Checklist (in brief) 6\nHow to run the Checklist (in detail) 7\nBefore induction of anaesthesia 7\nBefore skin incision 9\nBefore patient leaves operating room 11\nOrganization’s efforts to reduce the number of surgical\ndeaths across the globe. The aim of the programme is to\nharness political comm\nl\nharness political commitment and clinical will to address\nimportant safety issues, including inadequate anaesthetic\nsafety practices, avoidable surgical infection and poor\ncommunication among team members. These have proved\nto be common, deadly and preventable problems in all\ncountries and settings.\nTo assist operating teams in reducing the number of these\nanaesthetists, nurses, patient safety experts and patients\naround the world—has identified ten essential objectives for\nsafe surgery. These were compiled into the WHO Surgical\nSafety Checklist. The aim of this Checklist (available at\nwww.who.int/safesurgery) is to reinforce accepted safety\npractices and foster better communication and teamwork\nbetween clinical disciplines. The Checklist is intended as a\ntool for use by clinicians interested in improving the safety\nof their operations and reducing unnecessary surgical\ndeaths and complications. Its use has been demonstrably\nassociated with significant reductions in complication and\ndeath rates in diverse hospitals and settings, and with\nimprovements in compliance to b\nates in diverse hospitals and settings, and with\nimprovements in compliance to basic standards of care\n1.\nSurgical Safety Checklist\nHas the patient confirmed his/her identity,\nsite, procedure, and consent?\nYes\nIs the site marked?\nNot applicable\nIs the anaesthesia machine and medication\ncheck complete?\nIs the pulse oximeter on the patient and\nfunctioning?\nDoes the patient have a:\nKnown allergy?\nNo\nDifficult airway or aspiration risk?\nYes, and equipment/assistance available\nRisk of >500ml blood loss (7ml/kg in children)?\nYes, and two IVs/central access and fluids\nplanned\nConfirm all team members have\nintroduced themselves by name and role.\nConfirm the patient’s name, procedure,\nand where the incision will be made.\nHas antibiotic prophylaxis been given within\nthe last 60 minutes?\nAnticipated Critical Events\nTo Surgeon:\nWhat are the critical or non-routine steps?\nHow long will the case take?\nWhat is the anticipated blood loss?\nTo Anaesthetist:\nAre there any patient-specific concerns?\nTo Nursing Team:\nHas sterility (including indicator results)\nbeen confirmed?\nAre there equipment issues or any concerns?\nIs essential imaging displayed\nrmed?\nIs essential imaging displayed?\nNurse Verbally Confirms:\nThe name of the procedure\nCompletion of instrument, sponge and needle\ncounts\nSpecimen labelling (read specimen labels aloud,\nincluding patient name)\nWhether there are any equipment problems to be\naddressed\nTo Surgeon, Anaesthetist and Nurse:\nWhat are the key concerns for recovery and\nmanagement of this patient?\nThis checklist is not intended to be comprehensive. Additions and modifications to fit local practice are encouraged. Revised 1 / 2009 – © WHO, 2009\n(with at least nurse and anaesthetist) (with nurse, anaesthetist and surgeon) (with nurse, anaesthetist and surgeon)\nBefore induction of anaesthesia Before skin incision Before patient leaves operating room\nter on the patient and\nmanagement\n, Anaesthetist and Nurse:\n1 Haynes AB, et al. A Surgical Safety Checklist to Reduce Morbidity and Mortality in a Global Population. New England Journal of Medicine, 2009; 360:491-9.\nIn this manual, the “operating team” is understood to\ncomprise the surgeons, anaesthetists, nurses, technicians\nand other operating room personnel involved in surgery.\nMuch as an airplane pilot must rely on the ground crew,\nflight personnel and air traffic controllers for a safe and\nsuccessful flight, a surgeon is an essential but not solitary\nmember of a team responsible for patient care. All members\nof the operating team play a role in ensuring t",
+        "prompt_preview": "\nYou are a checklist generator.\nYou are extracting checklist items from PART 1 of 2 of a larger document.\nReturn only valid JSON.\nUse only the content in this part.\nDo not invent steps.\nFocus on operational actions, phase boundaries, and explicit checklist questions/instructions.\nIgnore editorial/manual/front-matter text when operational content is present.\n- Keep checklist items atomic: one explicit instruction/question = one item.\n- Never merge adjacent checklist questions into a single item.\n- If a line or paragraph contains multiple explicit checklist questions/instructions, split them into separate items.\n- Preserve the source order of checklist items exactly as they appear in this part.\n- Do not skip explicit checklist questions just because they are followed by explanatory paragraphs.\n- When the source uses short prefixes like roles, teams, or sections before a colon, keep that prefix available via `category` when it helps preserve structure.\n\nUser intent / task:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nDocument part:\nWHO Surgical Safety Checklist 2009\n1.Surgical procedures, Operative - standards. 2.Surgical\nwound infection - prevention and control. 3.Patient care\n- standards. 4.Safety management. 5.Medical errors -\nprevention and control. 6.Cross infection - prevention\nand control.7.Quality assurance, Health care - standards.\n8.Surgery department, Hospital - organization and\nHealth Organization.\nOrganization can be obtained from WHO Press, World\nHealth Organization, 20 Avenue Appia, 1211 Geneva 27,\nSwitzerland (tel.: +41 22 791 3264; fax: +41 22 791 4857;\ne-mail: bookorders@\n7,\nreproduce or translate WHO publications – whether for sale\nor for noncommercial distribution – should be addressed to\nWHO Press, at the above address (fax: +41 22 791 4806;\ne-mail: permissions@who.int).\nThe designations employed and the presentation of the\nmaterial in this publication do not imply the expression of\nany opinion whatsoever on the part of the World Health\nOrganization concerning the legal status of any country,\nterritory, city or area or of its authorities, or concerning the\ndelimitation of its frontiers or boundaries. Dotted lines on\nmaps represent approximate border lines for which there\nmay not yet be full agreement.\nThe mention of specific companies or of certain\nmanufacturers’ products does not imply that they\nare endorsed or recommended by the World Health\nOrganization in preference to others of a similar nature that\nare not mentioned. Errors and omissions excepted, the\nnames of proprietary products are distinguished by initial\ncapital letters.\nAll reasonable precautions have been taken by the World\nHealth Organization to verify the information co\nns have been taken by the World\nHealth Organization to verify the information contained in\nthis publication. However, the published material is being\ndistributed without warranty of any kind, either expressed or\nimplied. The responsibility for the interpretation and use of\nthe material lies with the reader. In no event shall the World\nHealth Organization be liable for damages arising from its\nuse.\nHow to run the Checklist (in brief) 6\nHow to run the Checklist (in detail) 7\nBefore induction of anaesthesia 7\nBefore skin incision 9\nBefore patient leaves operating room 11\nOrganization’s efforts to reduce the number of surgical\ndeaths across the globe. The aim of the programme is to\nharness political comm\nl\nharness political commitment and clinical will to address\nimportant safety issues, including inadequate anaesthetic\nsafety practices, avoidable surgical infection and poor\ncommunication among team members. These have proved\nto be common, deadly and preventable problems in all\ncountries and settings.\nTo assist operating teams in reducing the number of these\nanaesthetists, nurses, patient safety experts and patients\naround the world—has identified ten essential objectives for\nsafe surgery. These were compiled into the WHO Surgical\nSafety Checklist. The aim of this Checklist (available at\nwww.who.int/safesurgery) is to reinforce accepted safety\npractices and foster better communication and teamwork\nbetween clinical disciplines. The Checklist is intended as a\ntool for use by clinicians interested in improving the safety\nof their operations and reducing unnecessary surgical\ndeaths and complications. Its use has been demonstrably\nassociated with significant reductions in complication and\ndeath rates in diverse hospitals and settings, and with\nimprovements in compliance to b\nates in diverse hospitals and settings, and with\nimprovements in compliance to basic standards of care\n1.\nSurgical Safety Checklist\nHas the patient confirmed his/her identity,\nsite, procedure, and consent?\nYes\nIs the site marked?\nNot applicable\nIs the anaesthesia machine and medication\ncheck complete?\nIs the pulse oximeter on the patient and\nfunctioning?\nDoes the patient have a:\nKnown allergy?\nNo\nDifficult airway or aspiration risk?\nYes, and equipment/assistance available\nRisk of >500ml blood loss (7ml/kg in children)?\nYes, and two IVs/central access and fluids\nplanned\nConfirm all team members have\nintroduced themselves by name and role.\nConfirm the patient’s name, procedure,\nand where the incision will be made.\nHas antibiotic prophylaxis been given within\nthe last 60 minutes?\nAnticipated Critical Events\nTo Surgeon:\nWhat are the critical or non-routine steps?\nHow long will the case take?\nWhat is the anticipated blood loss?\nTo Anaesthetist:\nAre there any patient-specific concerns?\nTo Nursing Team:\nHas sterility (including indicator results)\nbeen confirmed?\nAre there equipment issues or any concerns?\nIs essential imaging displayed\nrmed?\nIs essential imaging displayed?\nNurse Verbally Confirms:\nThe name of the procedure\nCompletion of instrument, sponge and needle\ncounts\nSpecimen labelling (read specimen labels aloud,\n",
+        "success": true
+      },
+      {
+        "stage_type": "map",
+        "label": "Checklist part 2 of 2",
+        "chars_sent": 13110,
+        "context_preview": "lems to be addressed\nEquipment problems are universal in operating rooms.\nAccurately identifying the sources of failure and instruments\nor equipment that have malfu\nidentifying the sources of failure and instruments\nor equipment that have malfunctioned is important in\npreventing devices from being recycled back into the room\nbefore the problem has been addressed. The coordinator\nshould ensure that equipment problems arising during a\ncase are identified by the team.\nSurgeon, anaesthetist and nurse review the key concerns for recovery and\nmanagement of this patient\nThe surgeon, anaesthetist and nurse should review the\npost-operative recovery and management plan, focusing in\nparticular on intraoperative or anaesthetic issues that might\naffect the patient. Events that present a specific risk to the\npatient during recovery and that may not be evident to all\ninvolved are especially pertinent. The aim of this step is the\nefficient and appropriate transfer of critical information to the\nentire team.\nWith this final step, the WHO Checklist is completed. If\ndesired, the Checklist can be placed in the patient record or\nretained for quality assurance review.\nThe Checklist should be modified to account for differences\namong facilities with respect to the\nould be modified to account for differences\namong facilities with respect to their processes, the culture\nof their operating rooms and the degree of familiarity each\nteam member has with each other. However, removing\nsafety steps because they cannot be accomplished in\nthe existing environment or circumstances is strongly\ndiscouraged. The safety steps should inspire effective\nchange that will bring an operating team to comply with\neach and every element of the Checklist.\nModification of the Checklist should be undertaken with a\ncritical eye. Surgeons, anaesthetists, and nurses should\nbe involved in the modification process, and the resulting\nChecklist trialled in simulated and real-life situations in\norder to ensure its functionality. Additionally, many of the\nprinciples used in the development of the Checklist can also\nbe applied to its modification.\nFocused The Checklist should strive to be\nconcise, addressing those issues that\nare most critical and not adequately\nchecked by other safety mechanisms.\nFive to nine items in each Checklist\nsection are ideal.\nBrief The Checklist should take no more\nthan a minute for each section to be\ncompleted. While it may be tempting\nto try to creat\ninute for each section to be\nto try to create a more exhaustive\nChecklist, the needs of fitting the\nChecklist into the flow of care must be\nbalanced with this impulse.\nActionable Every item on the Checklist must be\nlinked to a specific, unambiguous action.\nItems without a directly associated\naction will result in confusion among\nteam members regarding what they are\nexpected to do.\nVerbal The function of the Checklist is to\npromote and guide a verbal interaction\namong team members. Performing this\nteam Checklist is critical to its success—\nit will likely be far less effective if used\nsolely as a written instrument.\nCollaborative Any effort to modify the Checklist should\nbe in collaboration with representatives\nfrom groups who might be involved\nin using it. Actively seeking input from\nnurses, anaesthetists, surgeons and\nothers is important not only in helping\nto make appropriate modifications\nbut also in creating the feeling of\n“ownership” that is central to adoption\nand permanent practice change.\nTested Prior to any rollout of a modified\nChecklist, it should be tested in a\nlimited setting. The real-time feedback\nof clinicians is essential to succe\nin a\nof clinicians is essential to successful\ndevelopment of a Checklist and its\nintegration into the processes of care.\nTesting through a “simulation” as simple\nas running through the Checklist with\nteam members sitting around a table is\nimportant. We also suggest using the\nChecklist for a single day by a single\noperating team and collecting feedback.\nModify the Checklist or the way that it\nis incorporated into care accordingly\nand then try the Checklist again in a\nsingle operating room. Continue this\nprocess until you are comfortable that\nthe Checklist you have created works\nin your environment. Then consider a\nwider implementation program.\nAdditional notes\nPromoting a safety culture\nIntegrated Many institutions already have strategies\nto insure the reliable performance of\nmany of the processes that are part\nof the WHO Checklist. Integrating\nnew safety checks into the processes\nis challenging but possible in nearly\nall settings. The major additions to\nexisting routines involve the integration\nof team communication, brief\nitions to\nof team communication, briefings, and\ndebriefings. These items are of critical\nimportance and should not be removed\nfrom the Checklist.\nIn order to ensure brevity, the WHO Surgical Safety\nChecklist was not intended to be comprehensive. Teams\nmay consider adding other safety checks for specific\nprocedures, particularly if they are part of a routine process\nestablished in the facility. Each phase should be used\nas an opportunity to verify that critical safety steps are\nconsistently completed. Additional steps might include\nconfirmation of venous thromboembolism prophylaxis by\nmechanical means (such as sequential compression boots\nand stockings) and/or medical means (such as heparin\nor warfarin) when indicated, the availability of essential\nimplants (such as mesh or a prosthetic), other equipment\nneeds or critical preoperative biopsy results, laboratory\nresults or blood type. Each locale is encouraged to\nreformat, reorder or revise the Checklist to accommodate\nlocal practice while ensuring completion of the critical safety\nsteps in an efficient manner. As noted above facilities and\nindividuals are cautioned against making the Checkli\nnoted above facilities and\nindividuals are cautioned against making the Checklist\nunmanageably complex.\nIt will take practice for teams to learn to use the Checklist\neffectiv",
+        "prompt_preview": "\nYou are a checklist generator.\nYou are extracting checklist items from PART 2 of 2 of a larger document.\nReturn only valid JSON.\nUse only the content in this part.\nDo not invent steps.\nFocus on operational actions, phase boundaries, and explicit checklist questions/instructions.\nIgnore editorial/manual/front-matter text when operational content is present.\n- Keep checklist items atomic: one explicit instruction/question = one item.\n- Never merge adjacent checklist questions into a single item.\n- If a line or paragraph contains multiple explicit checklist questions/instructions, split them into separate items.\n- Preserve the source order of checklist items exactly as they appear in this part.\n- Do not skip explicit checklist questions just because they are followed by explanatory paragraphs.\n- When the source uses short prefixes like roles, teams, or sections before a colon, keep that prefix available via `category` when it helps preserve structure.\n\nUser intent / task:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nDocument part:\nlems to be addressed\nEquipment problems are universal in operating rooms.\nAccurately identifying the sources of failure and instruments\nor equipment that have malfu\nidentifying the sources of failure and instruments\nor equipment that have malfunctioned is important in\npreventing devices from being recycled back into the room\nbefore the problem has been addressed. The coordinator\nshould ensure that equipment problems arising during a\ncase are identified by the team.\nSurgeon, anaesthetist and nurse review the key concerns for recovery and\nmanagement of this patient\nThe surgeon, anaesthetist and nurse should review the\npost-operative recovery and management plan, focusing in\nparticular on intraoperative or anaesthetic issues that might\naffect the patient. Events that present a specific risk to the\npatient during recovery and that may not be evident to all\ninvolved are especially pertinent. The aim of this step is the\nefficient and appropriate transfer of critical information to the\nentire team.\nWith this final step, the WHO Checklist is completed. If\ndesired, the Checklist can be placed in the patient record or\nretained for quality assurance review.\nThe Checklist should be modified to account for differences\namong facilities with respect to the\nould be modified to account for differences\namong facilities with respect to their processes, the culture\nof their operating rooms and the degree of familiarity each\nteam member has with each other. However, removing\nsafety steps because they cannot be accomplished in\nthe existing environment or circumstances is strongly\ndiscouraged. The safety steps should inspire effective\nchange that will bring an operating team to comply with\neach and every element of the Checklist.\nModification of the Checklist should be undertaken with a\ncritical eye. Surgeons, anaesthetists, and nurses should\nbe involved in the modification process, and the resulting\nChecklist trialled in simulated and real-life situations in\norder to ensure its functionality. Additionally, many of the\nprinciples used in the development of the Checklist can also\nbe applied to its modification.\nFocused The Checklist should strive to be\nconcise, addressing those issues that\nare most critical and not adequately\nchecked by other safety mechanisms.\nFive to nine items in each Checklist\nsection are ideal.\nBrief The Checklist should take no more\nthan a minute for each section to be\ncompleted. While it may be tempting\nto try to creat\ninute for each section to be\nto try to create a more exhaustive\nChecklist, the needs of fitting the\nChecklist into the flow of care must be\nbalanced with this impulse.\nActionable Every item on the Checklist must be\nlinked to a specific, unambiguous action.\nItems without a directly associated\naction will result in confusion among\nteam members regarding what they are\nexpected to do.\nVerbal The function of the Checklist is to\npromote and guide a verbal interaction\namong team members. Performing this\nteam Checklist is critical to its success—\nit will likely be far less effective if used\nsolely as a written instrument.\nCollaborative Any effort to modify the Checklist should\nbe in collaboration with representatives\nfrom groups who might be involved\nin using it. Actively seeking input from\nnurses, anaesthetists, surgeons and\nothers is important not only in helping\nto make appropriate modifications\nbut also in creating the feeling of\n“ownership” that is central to adoption\nand permanent practice change.\nTested Prior to any rollout of a modified\nChecklist, it should be tested in a\nlimited setting. The real-time feedback\nof clinicians is essential to succe\nin a\nof clinicians is essential to successful\ndevelopment of a Checklist and its\nintegration into the processes of care.\nTesting through a “simulation” as simple\nas running through the Checklist with\nteam members sitting around a table is\nimportant. We also suggest using the\nChecklist for a single day by a single\noperating team and collecting feedback.\nModify the Checklist or the way that it\nis incorporated into care accordingly\nand then try the Checklist again in a\nsingle operating room. Continue this\nprocess until you are comfortable that\nthe Checklist you have created works\nin your environment. Then consider a\nwider implementation program.\nAdditional notes\nPromoting a safety culture\nIntegrated Many institutions already have strategies\nto insure the reliable performance of\nmany of the processes that are part\nof the WHO Checklist. Integrating\nnew safety checks into the processes\nis challenging but possible in nearly\nall settings. The major additions to\nexisting routines involve the integration\nof team communication, brief\nitions to\nof team communication, briefings, and\ndebriefings. These items are of critical\nimportance and should not be rem",
+        "success": true
+      },
+      {
+        "stage_type": "reduce",
+        "label": "Final checklist synthesis",
+        "chars_sent": 6160,
+        "context_preview": "\nYou are a checklist generator.\nReturn only valid JSON.\nYou are receiving partial checklist extractions from different parts of the same document.\nMerge them into one final checklist.\nDo not invent steps.\nDeduplicate semantically repeated items.\nPreserve document phases/categories when grounded.\nDo not collapse the final output to a single phase if multiple phases are present.\n- Keep checklist items atomic during consolidation.\n- Never merge two distinct checklist questions/instructions into one output item just because they are adjacent in the source.\n- If partial extractions contain combined questions, split them into separate final items.\n- Preserve the original document order from the first checklist item to the last.\n- Do not drop explicit checklist questions during consolidation.\n- If two items are different questions, keep both even if they are topically related.\n\nUser intent / task:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nPartial checklists:\n[PARTIAL CHECKLIST 1]\nTitle: WHO Surgical Safety Checklist 2009 - Part 1 of 2\nDescription: Operational actions and phase boundaries for the WHO Surgical Safety Checklist.\nItems:\n- Confirm patient identity, site, procedure, and consent before induction of anaesthesia | category=Before induction of anaesthesia | description=Ensure that the patient's identity, surgical site, planned procedure, and consent have been confirmed.\n- Mark the surgical site if applicable before induction of anaesthesia | category=Before induction of anaesthesia | description=Verify that the surgeon has marked the surgical site with a permanent marker.\n- Complete an anaesthesia machine and medication check before induction of anaesthesia | category=Before induction of anaesthesia | description=Ensure that the anaesthesia machine and medications have been checked for safety.\n- Ensure pulse oximeter is on and functioning before induction of anaesthesia | category=Before induction of anaesthesia | description=Verify that a pulse oximeter is placed on the patient and functioning correctly.\n- Check for known allergies before induction of anaesthesia | category=Before induction of anaesthesia | description=Determine if the patient has any known allergies.\n- Evaluate airway risk before induction of anaesthesia | category=Before induction of anaesthesia | description=Assess the patient's airway and prepare for potential difficulties.\n- Assess blood loss risk before induction of anaesthesia | category=Before induction of anaesthesia | description=Determine the patient's risk of significant blood loss during surgery.\n- Confirm team members have introduced themselves by name and role before skin incision | category=Before skin incision | description=Ensure all team members introduce themselves by name and role.\n- Verify patient's identity, procedure, and surgical site before skin incision | category=Before skin incision | description=Confirm the patient’s name, surgery to be performed, and where the incision will be made.\n- Ensure antibiotic prophylaxis has been given within the last 60 minutes before skin incision | category=Before skin incision | description=Verify that prophylactic antibiotics have been administered within the previous 60 minutes.\n- Discuss critical or non-routine steps with the surgeon before skin incision | category=Before skin incision | description=Ask the surgeon about any critical or non-routine steps that may be involved in the procedure.\n- Discuss patient-specific concerns with the anaesthetist before skin incision | category=Before skin incision | description=Ask the anaesthetist about any specific concerns related to the patient’s condition.\n- Confirm sterility of instruments and equipment before skin incision | category=Before skin incision | description=Verify that all instruments and equipment are sterile.\n- Check for equipment issues or concerns before skin incision | category=Before skin incision | description=Identify any potential equipment issues that may arise during the procedure.\n- Ensure essential imaging is displayed before skin incision | category=Before skin incision | description=Confirm that all necessary imaging is available and prominently displayed.\n- Confirm sponge and needle counts before patient leaves operating room | category=Before patient leaves operating room | description=Ensure that the final sponge and needle counts are complete.\n- Label specimens with the correct patient name before patient leaves operating room | category=Before patient leaves operating room | description=Verify that all pathological specimens are correctly labelled.\n- Check for any equipment problems before patient leaves operating room | category=Before patient leaves operating room | description=Identify and address any equipment issues that may have arisen during the procedure.\n\n[PARTIAL CHECKLIST 2]\nTitle: Post-Operative Recovery and Management Review\nDescription: Review of post-operative recovery and management plan by surgeon, anaesthetist, and nurse.\nItems:\n- Surgeon, anaesthetist and nurse review the key concerns for recovery and management of this patient. | category=- | description=Ensure that critical information is efficiently transferred to the entire team regarding intraoperative or anaesthetic issues affecting the patient.\n\nReturn this JSON structure:\n{\n  \"task_type\": \"checklist\",\n  \"title\": \"Checklist title based on the full document\",\n  \"description\": \"Checklist purpose based on the full document\",\n  \"items\": [\n    {\n      \"id\": \"item-1\",\n      \"title\": \"Operational action item\",\n      \"description\": \"Specific action derived from the full document\",\n      \"source_text\": \"Closest literal source line supporting this item\",\n      \"evidence\": \"Short quoted snippet from the document\",\n      \"category\": \"phase/section if grounded\",\n      \"priority\": null,\n      \"status\": ",
+        "prompt_preview": "\nYou are a checklist generator.\nReturn only valid JSON.\nYou are receiving partial checklist extractions from different parts of the same document.\nMerge them into one final checklist.\nDo not invent steps.\nDeduplicate semantically repeated items.\nPreserve document phases/categories when grounded.\nDo not collapse the final output to a single phase if multiple phases are present.\n- Keep checklist items atomic during consolidation.\n- Never merge two distinct checklist questions/instructions into one output item just because they are adjacent in the source.\n- If partial extractions contain combined questions, split them into separate final items.\n- Preserve the original document order from the first checklist item to the last.\n- Do not drop explicit checklist questions during consolidation.\n- If two items are different questions, keep both even if they are topically related.\n\nUser intent / task:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nPartial checklists:\n[PARTIAL CHECKLIST 1]\nTitle: WHO Surgical Safety Checklist 2009 - Part 1 of 2\nDescription: Operational actions and phase boundaries for the WHO Surgical Safety Checklist.\nItems:\n- Confirm patient identity, site, procedure, and consent before induction of anaesthesia | category=Before induction of anaesthesia | description=Ensure that the patient's identity, surgical site, planned procedure, and consent have been confirmed.\n- Mark the surgical site if applicable before induction of anaesthesia | category=Before induction of anaesthesia | description=Verify that the surgeon has marked the surgical site with a permanent marker.\n- Complete an anaesthesia machine and medication check before induction of anaesthesia | category=Before induction of anaesthesia | description=Ensure that the anaesthesia machine and medications have been checked for safety.\n- Ensure pulse oximeter is on and functioning before induction of anaesthesia | category=Before induction of anaesthesia | description=Verify that a pulse oximeter is placed on the patient and functioning correctly.\n- Check for known allergies before induction of anaesthesia | category=Before induction of anaesthesia | description=Determine if the patient has any known allergies.\n- Evaluate airway risk before induction of anaesthesia | category=Before induction of anaesthesia | description=Assess the patient's airway and prepare for potential difficulties.\n- Assess blood loss risk before induction of anaesthesia | category=Before induction of anaesthesia | description=Determine the patient's risk of significant blood loss during surgery.\n- Confirm team members have introduced themselves by name and role before skin incision | category=Before skin incision | description=Ensure all team members introduce themselves by name and role.\n- Verify patient's identity, procedure, and surgical site before skin incision | category=Before skin incision | description=Confirm the patient’s name, surgery to be performed, and where the incision will be made.\n- Ensure antibiotic prophylaxis has been given within the last 60 minutes before skin incision | category=Before skin incision | description=Verify that prophylactic antibiotics have been administered within the previous 60 minutes.\n- Discuss critical or non-routine steps with the surgeon before skin incision | category=Before skin incision | description=Ask the surgeon about any critical or non-routine steps that may be involved in the procedure.\n- Discuss patient-specific concerns with the anaesthetist before skin incision | category=Before skin incision | description=Ask the anaesthetist about any specific concerns related to the patient’s condition.\n- Confirm sterility of instruments and equipment before skin incision | category=Before skin incision | description=Verify that all instruments and equipment are sterile.\n- Check for equipment issues or concerns before skin incision | category=Before skin incision | description=Identify any potential equipment issues that may arise during the procedure.\n- Ensure essential imaging is displayed before skin incision | category=Before skin incision | description=Confirm that all necessary imaging is available and prominently displayed.\n- Confirm sponge and needle counts before patient leaves operating room | category=Before patient leaves operating room | description=Ensure that the final sponge and needle counts are complete.\n- Label specimens with the correct patient name before patient leaves operating room | category=Before patient leaves operating room | description=Verify that all pathological specimens are correctly labelled.\n- Check for any equipment problems before patient leaves operating room | category=Before patient leaves operating room | description=Identify and address any equipment issues that may have arisen during the procedure.\n\n[PARTIAL CHECKLIST 2]\nTitle: Post-Operative Recovery and Management Review\nDescription: Review of post-operative recovery and management plan by surgeon, anaesthetist, and nurse.\nItems:\n- Surgeon, anaesthetist and nurse review the key concerns for recovery and management of this patient. | category=- | description=Ensure that critical information is efficiently transferred to the entire team regarding intraoperative or anaesthetic issues affecting the patient.\n\nReturn this JSON structure:\n{\n  \"task_type\": \"checklist\",\n  \"title\": \"Checklist title based on the full document\",\n  \"description\": \"Checklist purpose based on the full document\",\n  \"items\": [\n    {\n      \"id\": \"item-1\",\n      \"title\": \"Operational action item\",\n      \"description\": \"Specific action derived from the full document\",\n      \"source_text\": \"Closest literal source line supporting this item\",\n      \"evidence\": \"Short quoted snippet from the document\",\n      \"category\": \"phase/section if grounded\",\n      \"priority\": null,\n      \"status\": "
+      }
+    ],
+    "resolved_context_window": 24576,
+    "context_window_cap": 8192,
+    "document_chars_estimate": 46157
+  },
+  "payload": {
+    "task_type": "checklist",
+    "schema_version": "1.0",
+    "title": "Operational Checklist for Surgical Safety and Post-Operative Management",
+    "description": "A comprehensive checklist covering pre-operative, intra-operative, and post-operative phases to ensure patient safety and effective recovery management.",
+    "items": [
+      {
+        "id": "item-1",
+        "title": "- Confirm patient identity, site, procedure, and consent before induction of anaesthesia",
+        "description": "- Confirm patient identity, site, procedure, and consent before induction of anaesthesia",
+        "source_text": "- Confirm patient identity, site, procedure, and consent before induction of anaesthesia",
+        "evidence": "- Confirm patient identity, site, procedure, and consent before induction of anaesthesia",
+        "category": "Before induction of anaesthesia",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-1",
+        "title": "category=Before induction of anaesthesia",
+        "description": "category=Before induction of anaesthesia",
+        "source_text": "category=Before induction of anaesthesia",
+        "evidence": "category=Before induction of anaesthesia",
+        "category": "Before induction of anaesthesia",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-2",
+        "title": "- Mark the surgical site if applicable before induction of anaesthesia",
+        "description": "- Mark the surgical site if applicable before induction of anaesthesia",
+        "source_text": "- Mark the surgical site if applicable before induction of anaesthesia",
+        "evidence": "- Mark the surgical site if applicable before induction of anaesthesia",
+        "category": "Before induction of anaesthesia",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-3",
+        "title": "- Complete an anaesthesia machine and medication check before induction of anaesthesia",
+        "description": "- Complete an anaesthesia machine and medication check before induction of anaesthesia",
+        "source_text": "- Complete an anaesthesia machine and medication check before induction of anaesthesia",
+        "evidence": "- Complete an anaesthesia machine and medication check before induction of anaesthesia",
+        "category": "Before induction of anaesthesia",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-4",
+        "title": "- Ensure pulse oximeter is on and functioning before induction of anaesthesia",
+        "description": "- Ensure pulse oximeter is on and functioning before induction of anaesthesia",
+        "source_text": "- Ensure pulse oximeter is on and functioning before induction of anaesthesia",
+        "evidence": "- Ensure pulse oximeter is on and functioning before induction of anaesthesia",
+        "category": "Before induction of anaesthesia",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-5",
+        "title": "- Check for known allergies before induction of anaesthesia",
+        "description": "- Check for known allergies before induction of anaesthesia",
+        "source_text": "- Check for known allergies before induction of anaesthesia",
+        "evidence": "- Check for known allergies before induction of anaesthesia",
+        "category": "Before induction of anaesthesia",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-6",
+        "title": "- Evaluate airway risk before induction of anaesthesia",
+        "description": "- Evaluate airway risk before induction of anaesthesia",
+        "source_text": "- Evaluate airway risk before induction of anaesthesia",
+        "evidence": "- Evaluate airway risk before induction of anaesthesia",
+        "category": "Before induction of anaesthesia",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-7",
+        "title": "- Assess blood loss risk before induction of anaesthesia",
+        "description": "- Assess blood loss risk before induction of anaesthesia",
+        "source_text": "- Assess blood loss risk before induction of anaesthesia",
+        "evidence": "- Assess blood loss risk before induction of anaesthesia",
+        "category": "Before induction of anaesthesia",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-8",
+        "title": "- Confirm team members have introduced themselves by name and role before skin incision",
+        "description": "- Confirm team members have introduced themselves by name and role before skin incision",
+        "source_text": "- Confirm team members have introduced themselves by name and role before skin incision",
+        "evidence": "- Confirm team members have introduced themselves by name and role before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-8",
+        "title": "category=Before skin incision",
+        "description": "category=Before skin incision",
+        "source_text": "category=Before skin incision",
+        "evidence": "category=Before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-9",
+        "title": "- Verify patient's identity, procedure, and surgical site before skin incision",
+        "description": "- Verify patient's identity, procedure, and surgical site before skin incision",
+        "source_text": "- Verify patient's identity, procedure, and surgical site before skin incision",
+        "evidence": "- Verify patient's identity, procedure, and surgical site before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-10",
+        "title": "- Ensure antibiotic prophylaxis has been given within the last 60 minutes before skin incision",
+        "description": "- Ensure antibiotic prophylaxis has been given within the last 60 minutes before skin incision",
+        "source_text": "- Ensure antibiotic prophylaxis has been given within the last 60 minutes before skin incision",
+        "evidence": "- Ensure antibiotic prophylaxis has been given within the last 60 minutes before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-11",
+        "title": "- Discuss critical or non-routine steps with the surgeon before skin incision",
+        "description": "- Discuss critical or non-routine steps with the surgeon before skin incision",
+        "source_text": "- Discuss critical or non-routine steps with the surgeon before skin incision",
+        "evidence": "- Discuss critical or non-routine steps with the surgeon before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-12",
+        "title": "- Discuss patient-specific concerns with the anaesthetist before skin incision",
+        "description": "- Discuss patient-specific concerns with the anaesthetist before skin incision",
+        "source_text": "- Discuss patient-specific concerns with the anaesthetist before skin incision",
+        "evidence": "- Discuss patient-specific concerns with the anaesthetist before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-13",
+        "title": "- Confirm sterility of instruments and equipment before skin incision",
+        "description": "- Confirm sterility of instruments and equipment before skin incision",
+        "source_text": "- Confirm sterility of instruments and equipment before skin incision",
+        "evidence": "- Confirm sterility of instruments and equipment before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-14",
+        "title": "- Check for equipment issues or concerns before skin incision",
+        "description": "- Check for equipment issues or concerns before skin incision",
+        "source_text": "- Check for equipment issues or concerns before skin incision",
+        "evidence": "- Check for equipment issues or concerns before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-15",
+        "title": "- Ensure essential imaging is displayed before skin incision",
+        "description": "- Ensure essential imaging is displayed before skin incision",
+        "source_text": "- Ensure essential imaging is displayed before skin incision",
+        "evidence": "- Ensure essential imaging is displayed before skin incision",
+        "category": "Before skin incision",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-16",
+        "title": "- Confirm sponge and needle counts before patient leaves operating room",
+        "description": "- Confirm sponge and needle counts before patient leaves operating room",
+        "source_text": "- Confirm sponge and needle counts before patient leaves operating room",
+        "evidence": "- Confirm sponge and needle counts before patient leaves operating room",
+        "category": "Before patient leaves operating room",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-16",
+        "title": "category=Before patient leaves operating room",
+        "description": "category=Before patient leaves operating room",
+        "source_text": "category=Before patient leaves operating room",
+        "evidence": "category=Before patient leaves operating room",
+        "category": "Before patient leaves operating room",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-17",
+        "title": "- Label specimens with the correct patient name before patient leaves operating room",
+        "description": "- Label specimens with the correct patient name before patient leaves operating room",
+        "source_text": "- Label specimens with the correct patient name before patient leaves operating room",
+        "evidence": "- Label specimens with the correct patient name before patient leaves operating room",
+        "category": "Before patient leaves operating room",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-18",
+        "title": "- Check for any equipment problems before patient leaves operating room",
+        "description": "- Check for any equipment problems before patient leaves operating room",
+        "source_text": "- Check for any equipment problems before patient leaves operating room",
+        "evidence": "- Check for any equipment problems before patient leaves operating room",
+        "category": "Before patient leaves operating room",
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-19",
+        "title": "- Surgeon, anaesthetist and nurse review the key concerns for recovery and management of this patient",
+        "description": "- Surgeon, anaesthetist and nurse review the key concerns for recovery and management of this patient.",
+        "source_text": "- Surgeon, anaesthetist and nurse review the key concerns for recovery and management of this patient.",
+        "evidence": "- Surgeon, anaesthetist and nurse review the key concerns for recovery and management of this patient.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-19",
+        "title": "category=-",
+        "description": "category=-",
+        "source_text": "category=-",
+        "evidence": "category=-",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      }
+    ],
+    "total_items": 23,
+    "completed_items": 0,
+    "progress_percentage": 0.0
+  },
+  "evaluation": {
+    "status": "FAIL",
+    "coverage": 0.6364,
+    "expected_items": 22,
+    "matched_items": 14,
+    "missing_items": [
+      "known_allergy",
+      "difficult_airway_aspiration_risk",
+      "confirm_name_procedure_incision_site",
+      "surgeon_case_duration",
+      "surgeon_anticipated_blood_loss",
+      "procedure_name_confirmed",
+      "instrument_sponge_needle_counts",
+      "equipment_problems_to_be_addressed"
+    ],
+    "matched": [
+      {
+        "expected_id": "identity_site_procedure_consent",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 0,
+        "matched_title": "- Confirm patient identity, site, procedure, and consent before induction of anaesthesia"
+      },
+      {
+        "expected_id": "site_marked",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 2,
+        "matched_title": "- Mark the surgical site if applicable before induction of anaesthesia"
+      },
+      {
+        "expected_id": "anaesthesia_machine_medication_check",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 3,
+        "matched_title": "- Complete an anaesthesia machine and medication check before induction of anaesthesia"
+      },
+      {
+        "expected_id": "pulse_oximeter_functioning",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 4,
+        "matched_title": "- Ensure pulse oximeter is on and functioning before induction of anaesthesia"
+      },
+      {
+        "expected_id": "blood_loss_risk_preop",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 7,
+        "matched_title": "- Assess blood loss risk before induction of anaesthesia"
+      },
+      {
+        "expected_id": "team_introductions",
+        "phase": "Before skin incision",
+        "matched_item_index": 8,
+        "matched_title": "- Confirm team members have introduced themselves by name and role before skin incision"
+      },
+      {
+        "expected_id": "antibiotic_prophylaxis",
+        "phase": "Before skin incision",
+        "matched_item_index": 11,
+        "matched_title": "- Ensure antibiotic prophylaxis has been given within the last 60 minutes before skin incision"
+      },
+      {
+        "expected_id": "surgeon_critical_steps",
+        "phase": "Before skin incision",
+        "matched_item_index": 12,
+        "matched_title": "- Discuss critical or non-routine steps with the surgeon before skin incision"
+      },
+      {
+        "expected_id": "anaesthetist_patient_specific_concerns",
+        "phase": "Before skin incision",
+        "matched_item_index": 13,
+        "matched_title": "- Discuss patient-specific concerns with the anaesthetist before skin incision"
+      },
+      {
+        "expected_id": "sterility_confirmed",
+        "phase": "Before skin incision",
+        "matched_item_index": 14,
+        "matched_title": "- Confirm sterility of instruments and equipment before skin incision"
+      },
+      {
+        "expected_id": "equipment_issues_or_concerns",
+        "phase": "Before skin incision",
+        "matched_item_index": 15,
+        "matched_title": "- Check for equipment issues or concerns before skin incision"
+      },
+      {
+        "expected_id": "essential_imaging_displayed",
+        "phase": "Before skin incision",
+        "matched_item_index": 16,
+        "matched_title": "- Ensure essential imaging is displayed before skin incision"
+      },
+      {
+        "expected_id": "specimen_labelling",
+        "phase": "Before patient leaves operating room",
+        "matched_item_index": 19,
+        "matched_title": "- Label specimens with the correct patient name before patient leaves operating room"
+      },
+      {
+        "expected_id": "recovery_management_concerns",
+        "phase": "Before patient leaves operating room",
+        "matched_item_index": 21,
+        "matched_title": "- Surgeon, anaesthetist and nurse review the key concerns for recovery and management of this patient"
+      }
+    ],
+    "duplicate_ids": [
+      "item-1",
+      "item-16",
+      "item-19",
+      "item-8"
+    ],
+    "artifact_items": [
+      1,
+      9,
+      18,
+      22
+    ],
+    "style_issue_items": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      19,
+      20,
+      21
+    ],
+    "order_breaks": [],
+    "collapsed_items": [
+      {
+        "item_index": 21,
+        "title": "- Surgeon, anaesthetist and nurse review the key concerns for recovery and management of this patient",
+        "matched_expected_ids": [
+          "anaesthetist_patient_specific_concerns",
+          "recovery_management_concerns"
+        ]
+      }
+    ],
+    "unexpected_items": [
+      {
+        "item_index": 5,
+        "title": "- Check for known allergies before induction of anaesthesia",
+        "category": "Before induction of anaesthesia"
+      },
+      {
+        "item_index": 6,
+        "title": "- Evaluate airway risk before induction of anaesthesia",
+        "category": "Before induction of anaesthesia"
+      },
+      {
+        "item_index": 10,
+        "title": "- Verify patient's identity, procedure, and surgical site before skin incision",
+        "category": "Before skin incision"
+      },
+      {
+        "item_index": 17,
+        "title": "- Confirm sponge and needle counts before patient leaves operating room",
+        "category": "Before patient leaves operating room"
+      },
+      {
+        "item_index": 20,
+        "title": "- Check for any equipment problems before patient leaves operating room",
+        "category": "Before patient leaves operating room"
+      }
+    ],
+    "reasons": [
+      "duplicate item ids detected: ['item-1', 'item-16', 'item-19', 'item-8']",
+      "artifact items detected at indexes: [1, 9, 18, 22]",
+      "collapsed items detected: 1",
+      "coverage too low: 63.64%"
+    ]
+  }
+}

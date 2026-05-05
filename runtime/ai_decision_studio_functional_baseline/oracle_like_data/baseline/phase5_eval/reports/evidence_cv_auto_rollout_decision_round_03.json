@@ -1,0 +1,860 @@
+{
+  "env_path": "baseline://workspace/.env",
+  "files_analyzed": [
+    "baseline://external_files/b3863ffdfb4a16e8_0020_hard_classic_one_column_isabela.carvalho.nascimento.pdf",
+    "baseline://external_files/e37802a03526f7bf_0021_simple_modern_two_column_felipe.lima.pereira.pdf",
+    "baseline://external_files/29bd63a97500af2e_0022_medium_compact_sidebar_pedro.souza.martins.pdf",
+    "baseline://external_files/b47b5d264ebd1899_0023_hard_dense_executive_larissa.silva.nascimento.pdf",
+    "baseline://external_files/d72b39fa930ecac9_0024_simple_scan_like_image_pdf_camila.oliveira.oliveira.pdf",
+    "baseline://external_files/66e564debeea7377_0025_medium_classic_one_column_larissa.oliveira.rodrigues.pdf",
+    "baseline://external_files/852f9e3d83533219_0026_hard_modern_two_column_thiago.barbosa.martins.pdf",
+    "baseline://external_files/54b7c37e8e2b01c9_0027_simple_compact_sidebar_larissa.almeida.lima.pdf",
+    "baseline://external_files/45ac9442a04f7100_0028_medium_dense_executive_larissa.silva.costa.pdf",
+    "baseline://external_files/2f565b191ae598b7_0029_hard_scan_like_image_pdf_isabela.araujo.carvalho.pdf"
+  ],
+  "aggregate": {
+    "files": 10,
+    "files_failed": 0,
+    "rollout_selected": 5,
+    "rollout_filtered": 5,
+    "routed_to_evidence": 10,
+    "agreements": 2,
+    "email_complements": 10,
+    "phone_complements": 8,
+    "email_conflicts": 0,
+    "phone_conflicts": 0,
+    "vl_timeouts": 0,
+    "vl_regions_failed": 0
+  },
+  "decision": {
+    "action": "promote",
+    "current_percentage": 50,
+    "next_percentage": 100,
+    "reasons": [
+      "guardrails_passed"
+    ],
+    "applied": true
+  },
+  "per_file": [
+    {
+      "file": "baseline://external_files/b3863ffdfb4a16e8_0020_hard_classic_one_column_isabela.carvalho.nascimento.pdf",
+      "source_type": "digital_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": true,
+        "cv_like_reasons": [
+          "top_contact_profile_structure",
+          "cv_like_sections_detected",
+          "sufficient_resume_like_content"
+        ],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 33,
+        "rollout_selected": true,
+        "decision": "evidence_path",
+        "reason": "cv_like_match"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "9e17aef846940fd3ac139d3140898f554c883ec178f94e307ca59cdc3a75d7e4",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "not_found",
+          "name_value": "Isabela Carvalho Nascimento",
+          "location_value": null,
+          "emails": [
+            "isabela.carvalho.nascimento@example.com"
+          ],
+          "phones": [
+            "+55 11 94297-8749"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "isabela.carvalho.nascimento@example.com"
+        ],
+        "phones": [
+          "+55 11 94297-8749"
+        ],
+        "name": "Isabela Carvalho Nascimento",
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/e37802a03526f7bf_0021_simple_modern_two_column_felipe.lima.pereira.pdf",
+      "source_type": "digital_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": true,
+        "cv_like_reasons": [
+          "top_contact_profile_structure",
+          "cv_like_sections_detected",
+          "sufficient_resume_like_content"
+        ],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 43,
+        "rollout_selected": true,
+        "decision": "evidence_path",
+        "reason": "cv_like_match"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "ec12d30ffa58d0c4f706dc9670386def021dd8deb4b79255bfb027b31c07c774",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "not_found",
+          "name_value": "Felipe Lima Pereira",
+          "location_value": null,
+          "emails": [
+            "felipe.lima.pereira@example.com"
+          ],
+          "phones": [
+            "+55 11 98602-1378"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "felipe.lima.pereira@example.com"
+        ],
+        "phones": [
+          "+55 11 98602-1378"
+        ],
+        "name": "Felipe Lima Pereira",
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/29bd63a97500af2e_0022_medium_compact_sidebar_pedro.souza.martins.pdf",
+      "source_type": "digital_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": false,
+        "cv_like_reasons": [],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 89,
+        "rollout_selected": false,
+        "decision": "evidence_path",
+        "reason": "rollout_percentage_filtered"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "78a3a50809117f011a6e9dffb6f8a613adef06e7add2593f2cf95934ea1e998c",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "not_found",
+          "name_value": "Pedro Souza Martins",
+          "location_value": null,
+          "emails": [
+            "pedro.souza.martins@example.com"
+          ],
+          "phones": [
+            "+55 11 93043-1153"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "pedro.souza.martins@example.com"
+        ],
+        "phones": [
+          "+55 11 93043-1153"
+        ],
+        "name": "Pedro Souza Martins",
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/b47b5d264ebd1899_0023_hard_dense_executive_larissa.silva.nascimento.pdf",
+      "source_type": "digital_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": false,
+        "cv_like_reasons": [],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 73,
+        "rollout_selected": false,
+        "decision": "evidence_path",
+        "reason": "rollout_percentage_filtered"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "18094d05f9af969d014c439f88561269bbf13c60d28186a222decd2b805b918c",
+          "source_type": "digital_pdf",
+          "warnings": [
+            "No confirmed phone found"
+          ],
+          "emails_found": 1,
+          "phones_found": 0,
+          "name_status": "confirmed",
+          "location_status": "not_found",
+          "name_value": "Larissa Silva Nascimento",
+          "location_value": null,
+          "emails": [
+            "larissa.silva.nascimento@example.com"
+          ],
+          "phones": []
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "larissa.silva.nascimento@example.com"
+        ],
+        "phones": [],
+        "name": "Larissa Silva Nascimento",
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 0,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 1,
+        "email_complements": 1,
+        "phone_complements": 0,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/d72b39fa930ecac9_0024_simple_scan_like_image_pdf_camila.oliveira.oliveira.pdf",
+      "source_type": "scanned_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": false,
+        "cv_like_reasons": [],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 67,
+        "rollout_selected": false,
+        "decision": "evidence_path",
+        "reason": "rollout_percentage_filtered"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "0841a85490484e1f3acde2d9d245e8a3251bedeaad97ee830f4331b07464d1b1",
+          "source_type": "scanned_pdf",
+          "warnings": [
+            "VL selective added visual candidates that still need review"
+          ],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "visual_candidate",
+          "location_status": "confirmed",
+          "name_value": "Camila Oliveira Oliveira",
+          "location_value": "Grenoble, France",
+          "emails": [
+            "camilaolivetaoliveira@example.com"
+          ],
+          "phones": [
+            "+55 11 98525-3845"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 4,
+          "regions_succeeded": 4,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "camilaolivetaoliveira@example.com"
+        ],
+        "phones": [
+          "+55 11 98525-3845"
+        ],
+        "name": null,
+        "location": "Grenoble, France",
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/66e564debeea7377_0025_medium_classic_one_column_larissa.oliveira.rodrigues.pdf",
+      "source_type": "digital_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": false,
+        "cv_like_reasons": [],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 66,
+        "rollout_selected": false,
+        "decision": "evidence_path",
+        "reason": "rollout_percentage_filtered"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "55e36c9e98fef07c17bcbd472ae7c0eea67f8cf3338346ee530f7419d9e34df8",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "not_found",
+          "name_value": "Larissa Oliveira Rodrigues",
+          "location_value": null,
+          "emails": [
+            "larissa.oliveira.rodrigues@example.com"
+          ],
+          "phones": [
+            "+55 11 99500-6375"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "larissa.oliveira.rodrigues@example.com"
+        ],
+        "phones": [
+          "+55 11 99500-6375"
+        ],
+        "name": "Larissa Oliveira Rodrigues",
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/852f9e3d83533219_0026_hard_modern_two_column_thiago.barbosa.martins.pdf",
+      "source_type": "digital_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": true,
+        "cv_like_reasons": [
+          "top_contact_profile_structure",
+          "cv_like_sections_detected",
+          "sufficient_resume_like_content"
+        ],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 29,
+        "rollout_selected": true,
+        "decision": "evidence_path",
+        "reason": "cv_like_match"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "9d801c5d76ecf76620bbf65ba871362ec08fa51d2f93c2e5f5f9c2ae8cc21721",
+          "source_type": "digital_pdf",
+          "warnings": [
+            "No confirmed phone found"
+          ],
+          "emails_found": 1,
+          "phones_found": 0,
+          "name_status": "confirmed",
+          "location_status": "not_found",
+          "name_value": "Thiago Barbosa Martins",
+          "location_value": null,
+          "emails": [
+            "thiago.barbosa.martins@example.com"
+          ],
+          "phones": []
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "thiago.barbosa.martins@example.com"
+        ],
+        "phones": [],
+        "name": "Thiago Barbosa Martins",
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 0,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 1,
+        "email_complements": 1,
+        "phone_complements": 0,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/54b7c37e8e2b01c9_0027_simple_compact_sidebar_larissa.almeida.lima.pdf",
+      "source_type": "digital_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": true,
+        "cv_like_reasons": [
+          "top_contact_profile_structure",
+          "cv_like_sections_detected",
+          "sufficient_resume_like_content"
+        ],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 25,
+        "rollout_selected": true,
+        "decision": "evidence_path",
+        "reason": "cv_like_match"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "434c830ffa031b11c7a6296a631e73912537fcf0c66d990bc532afd4deeacf99",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "not_found",
+          "name_value": "Larissa Almeida Lima",
+          "location_value": null,
+          "emails": [
+            "larissa.almeida.lima@example.com"
+          ],
+          "phones": [
+            "+55 11 97180-1419"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "larissa.almeida.lima@example.com"
+        ],
+        "phones": [
+          "+55 11 97180-1419"
+        ],
+        "name": "Larissa Almeida Lima",
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/45ac9442a04f7100_0028_medium_dense_executive_larissa.silva.costa.pdf",
+      "source_type": "digital_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": false,
+        "cv_like_reasons": [],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 98,
+        "rollout_selected": false,
+        "decision": "evidence_path",
+        "reason": "rollout_percentage_filtered"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "366880d0227596d8285e734e4d4085945ef2af0193c3ef24fbdc453dafff2094",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "not_found",
+          "name_value": "Larissa Silva Costa",
+          "location_value": null,
+          "emails": [
+            "larissa.silva.costa@example.com"
+          ],
+          "phones": [
+            "+55 11 91826-4035"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "larissa.silva.costa@example.com"
+        ],
+        "phones": [
+          "+55 11 91826-4035"
+        ],
+        "name": "Larissa Silva Costa",
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "baseline://external_files/2f565b191ae598b7_0029_hard_scan_like_image_pdf_isabela.araujo.carvalho.pdf",
+      "source_type": "scanned_pdf",
+      "routing_diagnostics": {
+        "feature_flag_enabled": true,
+        "filename_hint": false,
+        "cv_like_content_detected": true,
+        "cv_like_reasons": [
+          "top_contact_profile_structure",
+          "cv_like_sections_detected",
+          "sufficient_resume_like_content"
+        ],
+        "strong_scan_like": false,
+        "rollout_percentage": 50,
+        "rollout_bucket": 34,
+        "rollout_selected": true,
+        "decision": "evidence_path",
+        "reason": "cv_like_match"
+      },
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "f80d3e73deda518db24b1542a2f8be7800fb734a77220246a3135b2834f7d618",
+          "source_type": "scanned_pdf",
+          "warnings": [
+            "VL selective added visual candidates that still need review"
+          ],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "visual_candidate",
+          "location_status": "confirmed",
+          "name_value": "Isabela Araujo Carvalho",
+          "location_value": "Lille, France",
+          "emails": [
+            "sabelaraujacarvalho@example.com"
+          ],
+          "phones": [
+            "+55 11 98380-8507"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 4,
+          "regions_succeeded": 4,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "sabelaraujacarvalho@example.com"
+        ],
+        "phones": [
+          "+55 11 98380-8507"
+        ],
+        "name": null,
+        "location": "Lille, France",
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    }
+  ]
+}

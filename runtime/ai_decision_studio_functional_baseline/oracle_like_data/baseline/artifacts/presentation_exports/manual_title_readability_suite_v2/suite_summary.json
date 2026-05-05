@@ -1,0 +1,59 @@
+{
+  "02_long_title_split_panel": {
+    "status": "ok",
+    "average_score": 93,
+    "top_risk_slides": [
+      {
+        "slide_number": 1,
+        "title": "AI Workbench Local — Benchmark & Eval Review for Executive Stakeholders with Extended Context on Evidence, Quality and Model Selection Trade-offs",
+        "risk_level": "low",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0
+      }
+    ],
+    "pptx_path": "baseline://external_files/6cffde96cc89a416_02_long_title_split_panel.pptx",
+    "thumbnail_sheet": "baseline://external_files/cb59757a53799419_02_long_title_split_panel-thumbnails.png",
+    "first_preview": "baseline://external_files/d28ad0491114896e_02_long_title_split_panel-01.png"
+  },
+  "03_very_long_title_hero_cover": {
+    "status": "ok",
+    "average_score": 93,
+    "top_risk_slides": [
+      {
+        "slide_number": 1,
+        "title": "AI Workbench Local — Operational Review of Benchmarks, Evaluations, Evidence Quality, Human Review Gates and Production Readiness Signals",
+        "risk_level": "low",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0
+      }
+    ],
+    "pptx_path": "baseline://external_files/5513081c1bece22a_03_very_long_title_hero_cover.pptx",
+    "thumbnail_sheet": "baseline://external_files/c92033624d37bc6b_03_very_long_title_hero_cover-thumbnails.png",
+    "first_preview": "baseline://external_files/022011828765b970_03_very_long_title_hero_cover-01.png"
+  },
+  "05_extreme_title_collision_check": {
+    "status": "ok",
+    "average_score": 93,
+    "top_risk_slides": [
+      {
+        "slide_number": 1,
+        "title": "AI Workbench Local — Executive Deck for Benchmark, Evaluation, Evidence Quality, Governance, Production Readiness, Human Review and Decision Support",
+        "risk_level": "low",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0
+      }
+    ],
+    "pptx_path": "baseline://external_files/6220f545db9496f8_05_extreme_title_collision_check.pptx",
+    "thumbnail_sheet": "baseline://external_files/aa8f43f4a466915b_05_extreme_title_collision_check-thumbnails.png",
+    "first_preview": "baseline://external_files/af5423438bf4ddf8_05_extreme_title_collision_check-01.png"
+  }
+}

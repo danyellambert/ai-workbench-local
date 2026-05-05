@@ -1,0 +1,98 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Privileged Account Approval Email.pdf",
+  "file_type": "pdf",
+  "file_hash": "116488c0b192bd36036673cde91da47657e0b6b847fefe93a44c08b8c26836ef",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-102  Approval Email\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nPrivileged Account Approval Email\nPDF export of the approval artifact referenced as missing evidence during the audit.\nDocument ID\nEVD-102\nFormat\nEmail export to PDF\nExport Date\n2024-03-16\nRelated Evidence\nEV-002\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nEmail Header\nFrom\nPriya Nair <priya.nair@meridian.example>\nTo\nnorthwind-ops@northwind.example; alex.rivera@meridian.example\nCC\nmaria.santos@meridian.example; grc-archive@meridian.example\nDate\n2024-01-22 08:42 PST\nSubject\nApproval — standing privileged access for Northwind support accounts\nHi team,\nApproved for the two named Northwind production-support administrators to retain standing privileged access during the\npilot period, provided that:\n●\naccess remains scoped to ticketed support and break-fix tasks only;\n●\nall privileged activity continues to feed the Meridian logging pipeline;\n●\nthe accounts are reviewed again at the next quarterly access recertification;\n●\nthe vendor confirms the named personnel list before each quarter begins.\nPlease archive this approval with the Q1 access-review evidence pack. If either named administrator changes, this approval\nmust be revalidated before access is retained.\nThanks,\nPriya\nQuoted Thread Excerpt\nFrom: Alex Rivera <alex.rivera@meridian.example>\nSent: 2024-01-21 17:06 PST\nSubject: Need owner approval for standing vendor admin accounts before onboarding completes\nRequesting approval for two named Northwind support administrators to maintain standing access during\nthe pilot to meet the contracted response targets.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 1861,
+    "final_text_chars": 1861,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1852,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 4,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 4077,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-102  Approval Email\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nPrivileged Account Approval Email\nPDF export of the approval artifact referenced as missing evidence during the audit.\nDocument ID\nEVD-102\nFormat\nEmail export to PDF\nExport Date\n2024-03-16\nRelated Evidence\nEV-002\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nEmail Header\nFrom\nPriya Nair <priya.nair@meridian.example>\nTo\nnorthwind-ops@northwind.example; alex.rivera@meridian.example\nCC\nmaria.santos@meridian.example; grc-archive@meridian.example\nDate\n2024-01-22 08:42 PST\nSubject\nApproval — standing privileged access for Northwind support accounts\nHi team,\nApproved for the two named Northwind production-support administrators to retain standing privileged access during the\npilot period, provided that:\n●\naccess remains scoped to ticketed support and break-fix tasks only;\n●\nall privileged activity continues to feed the Meridian logging pipeline;\n●\nthe accounts are reviewed again at the next quarterly access recertification;\n●\nthe vendor confirms the named personnel list before each quarter begins.\nPlease archive this approval with the Q1 access-review evidence pack. If either named administrator changes, this approval\nmust be revalidated before access is retained.\nThanks,\nPriya\nQuoted Thread Excerpt\nFrom: Alex Rivera <alex.rivera@meridian.example>\nSent: 2024-01-21 17:06 PST\nSubject: Need owner approval for standing vendor admin accounts before onboarding completes\nRequesting approval for two named Northwind support administrators to maintain standing access during\nthe pilot to meet the contracted response targets.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic email evidence is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "evidence/Privileged Account Approval Email.pdf",
+    "nextcloud_relative_path": "evidence/Privileged Account Approval Email.pdf",
+    "source_relative_path": "evidence/Privileged Account Approval Email.pdf",
+    "filename": "Privileged Account Approval Email.pdf",
+    "title": "Privileged Account Approval Email",
+    "category": "evidence",
+    "preindex": {
+      "relative_path": "evidence/Privileged Account Approval Email.pdf",
+      "filename": "Privileged Account Approval Email.pdf",
+      "title": "Privileged Account Approval Email",
+      "category": "evidence",
+      "document_id": "evidence/Privileged Account Approval Email.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:02"
+}

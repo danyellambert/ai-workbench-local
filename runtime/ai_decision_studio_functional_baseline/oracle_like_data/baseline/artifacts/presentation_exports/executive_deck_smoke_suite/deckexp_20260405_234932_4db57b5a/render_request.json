@@ -1,0 +1,173 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Evidence Pack Review",
+      "subtitle": "Audit / compliance executive handoff grounded in EvidenceOps",
+      "author": "AI Workbench Local",
+      "date": "2026-04-05",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Evidence Pack"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Evidence Pack Review",
+        "subtitle": "Audit / compliance executive handoff grounded in EvidenceOps",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: evidence_pack_deck. Deck family: evidence_audit. Sources: evidenceops_worklog, evidenceops_action_store."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Risk gap review surfaced 1 key finding(s), 2 open action(s) and a live human-review requirement for this audit slice.",
+        "bullets": [
+          "1 grounded finding(s) in the current review",
+          "2 open follow-up action(s) remain"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Reframed summary for audit / evidence executive handoff."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "1",
+            "label": "Findings"
+          },
+          {
+            "value": "1",
+            "label": "Action items"
+          },
+          {
+            "value": "2",
+            "label": "Open actions"
+          },
+          {
+            "value": "0",
+            "label": "Unique docs"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "risk",
+            "Missing annual control evidence",
+            "Doc A / page 4"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Action status",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Action",
+          "Owner",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "Definir owner do controle anual",
+            "Compliance",
+            "Open"
+          ],
+          [
+            "Validar sign-off jurídico",
+            "Legal",
+            "In_Progress"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "two_column",
+        "title": "Risks vs mitigations",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Risks / watchouts",
+            "body": "Missing annual control evidence",
+            "bullets": [
+              "Uma evidência ainda depende de validação manual"
+            ]
+          },
+          {
+            "title": "Mitigations / actions",
+            "body": "Assign an owner, validate evidence and confirm human sign-off before externalizing the pack.",
+            "bullets": [
+              "Assign an owner to the missing migration task"
+            ]
+          }
+        ],
+        "speaker_notes": "Risk versus mitigation framing for the evidence pack handoff."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Assign an owner to the missing migration task",
+          "Validate source snippets before external handoff",
+          "Keep human review active until evidence closure"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_export_smoke_suite/deckexp_20260405_234932_4db57b5a/evidence_pack_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_smoke_suite_previews/deckexp_20260405_234932_4db57b5a",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

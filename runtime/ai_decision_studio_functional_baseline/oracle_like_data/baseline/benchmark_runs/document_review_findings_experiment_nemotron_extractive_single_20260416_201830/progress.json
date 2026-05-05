@@ -1,0 +1,289 @@
+{
+  "generated_at": "2026-04-16T20:20:06.279192",
+  "documents": [
+    "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf"
+  ],
+  "configs": [
+    {
+      "key": "nemotron_extractive",
+      "label": "nemotron-3-super:cloud extractive",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "extractive",
+      "synthesis_enabled": true
+    }
+  ],
+  "ranking": [
+    {
+      "config_key": "nemotron_extractive",
+      "avg_total_score": 0.7708,
+      "runs": 1
+    }
+  ],
+  "promotion_ranking": [
+    {
+      "config_key": "nemotron_extractive",
+      "avg_promotion_score": 0.7708,
+      "runs": 1
+    }
+  ],
+  "synthesis_ranking": [
+    {
+      "config_key": "nemotron_extractive",
+      "avg_promotion_score": 0.7708,
+      "runs": 1
+    }
+  ],
+  "winner": {
+    "config_key": "nemotron_extractive",
+    "avg_promotion_score": 0.7708,
+    "runs": 1
+  },
+  "runs": [
+    {
+      "document": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "config": {
+        "key": "nemotron_extractive",
+        "label": "nemotron-3-super:cloud extractive",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "nemotron-3-super:cloud",
+        "prompt_style": "extractive",
+        "synthesis_enabled": true
+      },
+      "duration_s": 93.77,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Master Services Agreement - Vendor Draft: 6 risk(s), 1 gap(s) and 6 mitigation action(s) identified. Top risk: Potential delay in security incident notification Main evidence gap: No specific owner is mentioned for any action items",
+      "warnings": [
+        "No specific owner is mentioned for any action items",
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": {
+        "success": true,
+        "model": "nemotron-3-super:cloud",
+        "prompt_style": "extractive",
+        "finding_count": 4,
+        "attempts": 1
+      },
+      "synthesis_success": true,
+      "promotion_score": 0.7708,
+      "scores": {
+        "risk_coverage": 0.7083,
+        "action_coverage": 0.7222,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 0.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 4,
+        "top_blocker_count": 4,
+        "total_score": 0.7708
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Approve with changes",
+          "status": "Requires Review",
+          "summary": "Multiple high-risk gaps identified in security incident notification, audit rights, subprocessor control, and data deletion; requires contractual strengthening before approval.",
+          "severity_counts": {
+            "critical": 0,
+            "high": 4,
+            "medium": 0,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": "within 10 business days after determining that a material incident occurred"
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "No specific owner is mentioned for any action items",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Ensure security incident notification compliance",
+          "Implement customer audit rights",
+          "Control subprocessor updates",
+          "Establish data deletion deadlines"
+        ],
+        "top_blockers": [
+          {
+            "title": "Missing owner for action items",
+            "severity": null,
+            "recommendation": null
+          },
+          {
+            "title": "No audit rights",
+            "severity": null,
+            "recommendation": null
+          },
+          {
+            "title": "Uncontrolled subprocessors",
+            "severity": null,
+            "recommendation": null
+          },
+          {
+            "title": "No data deletion deadline",
+            "severity": null,
+            "recommendation": null
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Impact 1",
+            "detail": "Increased regulatory and operational risk"
+          },
+          {
+            "label": "Impact 2",
+            "detail": "Reduced customer trust and control"
+          },
+          {
+            "label": "Impact 3",
+            "detail": "Potential data privacy violations"
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "category": "Security",
+            "title": "Potential delay in security incident notification",
+            "description": "Provider will notify Customer within 10 business days after determining that a material incident occurred.",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.85,
+            "recommendation": "Ensure security incident notification compliance",
+            "snippet": "Provider will notify Customer within 10 business days after determining that a material incident occurred.",
+            "source_document_id": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "category": "Compliance",
+            "title": "Lack of customer audit rights",
+            "description": "No customer audit right. Provider may instead share a summary letter or certification at its discretion.",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.88,
+            "recommendation": "Implement customer audit rights",
+            "snippet": "No customer audit right. Provider may instead share a summary letter or certification at its discretion.",
+            "source_document_id": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+          },
+          {
+            "id": "finding-3",
+            "severity": "high",
+            "category": "Operational Risk",
+            "title": "Uncontrolled updates to subprocessor list",
+            "description": "Provider may update its subprocessor list from time to time without approval; notice is provided only upon request.",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.82,
+            "recommendation": "Control subprocessor updates",
+            "snippet": "Provider may update its subprocessor list from time to time without approval; notice is provided only upon request.",
+            "source_document_id": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+          },
+          {
+            "id": "finding-4",
+            "severity": "high",
+            "category": "Commercial",
+            "title": "No stated deadline for data deletion",
+            "description": "No commercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated.",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.81,
+            "recommendation": "Establish data deletion deadlines",
+            "snippet": "No commercially reasonable efforts to delete Customer Data following termination.",
+            "source_document_id": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "title": "Potential delay in security incident notification",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "Provider will notify Customer within 10 business days after determining that a material incident occurred."
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "title": "Lack of customer audit rights",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "No customer audit right. Provider may instead share a summary letter or certification at its discretion."
+          },
+          {
+            "id": "finding-3",
+            "severity": "high",
+            "title": "Uncontrolled updates to subprocessor list",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "Provider may update its subprocessor list from time to time without approval; notice is provided only upon request."
+          },
+          {
+            "id": "finding-4",
+            "severity": "high",
+            "title": "No stated deadline for data deletion",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "No commercially reasonable efforts to delete Customer Data following termination."
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nMaster Services Agreement - Vendor Draft\nCounterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing\nprotections.\nNotic"
+          ],
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "2",
+            "-",
+            "mercially reasonable efforts to delete Customer Data following termination.\nNo deletion deadline is stated.\nUse of data\nProvider may use de-identified service data for product development and model improvement.\nLiability"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "status": "completed",
+  "completed_runs": 1,
+  "total_runs": 1
+}

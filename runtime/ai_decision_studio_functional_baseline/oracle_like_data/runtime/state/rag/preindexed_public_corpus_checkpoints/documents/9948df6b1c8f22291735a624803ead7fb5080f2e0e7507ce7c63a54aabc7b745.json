@@ -1,0 +1,98 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Information Security Policy v3.2.pdf",
+  "file_type": "pdf",
+  "file_hash": "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-032  Information Security Policy v3.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.2\nRevised policy introducing explicit incident timing and stronger identity controls.\nDocument ID\nPOL-032\nOwner\nChief Information Security Officer\nVersion\n3.2\nEffective Date\n2024-04-01\nSupersedes\nPOL-031 v3.1\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nRevision Summary\nArea\nVersion 3.1\nVersion 3.2\nMFA\nAdmins and remote access only\nAll workforce accounts and all privileged actions\nPrivileged Reviews\nEvery six months\nQuarterly for privileged users; semiannual for standard\nusers\nVendor Oversight\nAnnual evidence expectation\nPre-onboarding review plus annual reassessment for\ncritical vendors\nIncident Notice\nReasonable efforts / no hours defined\nCritical customer-data incidents escalated within 24 hours\nof confirmation\nLog Retention\n180 days\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or\non-premises.\n●\nREQ-IDM-08. Privileged access to production systems must be revalidated quarterly by the system owner and Security.\n●\nREQ-VND-07. Critical vendors must complete a security review before onboarding and after any material control\nchange.\n●\nREQ-IR-09. Suspected incidents involving customer data, privileged misuse, or unauthorized third-party access must be\nescalated immediately and in no event later than 24 hours after confirmation.\n●\nREQ-LOG-05. Production and security telemetry must be retained for at least 12 months in tamper-evident storage.\nTransition Requirement\nManagers must complete revalidation of all standing privileged access and close any open vendor-evidence gaps within\nthirty (30) days of the effective date of this version.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 2064,
+    "final_text_chars": 2064,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2062,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 16,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 4458,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-032  Information Security Policy v3.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.2\nRevised policy introducing explicit incident timing and stronger identity controls.\nDocument ID\nPOL-032\nOwner\nChief Information Security Officer\nVersion\n3.2\nEffective Date\n2024-04-01\nSupersedes\nPOL-031 v3.1\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nRevision Summary\nArea\nVersion 3.1\nVersion 3.2\nMFA\nAdmins and remote access only\nAll workforce accounts and all privileged actions\nPrivileged Reviews\nEvery six months\nQuarterly for privileged users; semiannual for standard\nusers\nVendor Oversight\nAnnual evidence expectation\nPre-onboarding review plus annual reassessment for\ncritical vendors\nIncident Notice\nReasonable efforts / no hours defined\nCritical customer-data incidents escalated within 24 hours\nof confirmation\nLog Retention\n180 days\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or\non-premises.\n●\nREQ-IDM-08. Privileged access to production systems must be revalidated quarterly by the system owner and Security.\n●\nREQ-VND-07. Critical vendors must complete a security review before onboarding and after any material control\nchange.\n●\nREQ-IR-09. Suspected incidents involving customer data, privileged misuse, or unauthorized third-party access must be\nescalated immediately and in no event later than 24 hours after confirmation.\n●\nREQ-LOG-05. Production and security telemetry must be retained for at least 12 months in tamper-evident storage.\nTransition Requirement\nManagers must complete revalidation of all standing privileged access and close any open vendor-evidence gaps within\nthirty (30) days of the effective date of this version.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic policy is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "policies/Information Security Policy v3.2.pdf",
+    "nextcloud_relative_path": "policies/Information Security Policy v3.2.pdf",
+    "source_relative_path": "policies/Information Security Policy v3.2.pdf",
+    "filename": "Information Security Policy v3.2.pdf",
+    "title": "Information Security Policy v3.2",
+    "category": "policies",
+    "preindex": {
+      "relative_path": "policies/Information Security Policy v3.2.pdf",
+      "filename": "Information Security Policy v3.2.pdf",
+      "title": "Information Security Policy v3.2",
+      "category": "policies",
+      "document_id": "policies/Information Security Policy v3.2.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:37"
+}

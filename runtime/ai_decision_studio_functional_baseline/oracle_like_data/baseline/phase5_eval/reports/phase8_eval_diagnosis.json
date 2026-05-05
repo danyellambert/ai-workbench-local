@@ -1,0 +1,565 @@
+{
+  "db_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "suite_filter": null,
+  "task_filter": null,
+  "aggregate": {
+    "total_runs": 82,
+    "status_counts": {
+      "PASS": 61,
+      "FAIL": 18,
+      "WARN": 3
+    },
+    "suite_counts": {
+      "langgraph_workflow_eval": 8,
+      "document_agent_routing_eval": 9,
+      "structured_smoke_eval": 49,
+      "checklist_regression": 4,
+      "evidence_cv_gold_eval": 12
+    },
+    "task_counts": {
+      "langgraph_guardrails": 8,
+      "document_agent_routing": 9,
+      "summary": 10,
+      "checklist": 12,
+      "cv_contacts": 12,
+      "code_analysis": 7,
+      "cv_analysis": 16,
+      "extraction": 8
+    },
+    "pass_rate": 0.744,
+    "warn_rate": 0.037,
+    "fail_rate": 0.22,
+    "avg_score_ratio": 0.814,
+    "avg_latency_s": 1.261,
+    "needs_review_rate": 0.037,
+    "suite_leaderboard": [
+      {
+        "suite_name": "langgraph_workflow_eval",
+        "total_runs": 8,
+        "pass_rate": 1.0,
+        "warn_rate": 0.0,
+        "fail_rate": 0.0,
+        "avg_score_ratio": 1.0,
+        "avg_latency_s": 0.0
+      },
+      {
+        "suite_name": "document_agent_routing_eval",
+        "total_runs": 9,
+        "pass_rate": 1.0,
+        "warn_rate": 0.0,
+        "fail_rate": 0.0,
+        "avg_score_ratio": 1.0,
+        "avg_latency_s": 0.0
+      },
+      {
+        "suite_name": "structured_smoke_eval",
+        "total_runs": 49,
+        "pass_rate": 0.755,
+        "warn_rate": 0.02,
+        "fail_rate": 0.224,
+        "avg_score_ratio": 0.773,
+        "avg_latency_s": 22.703
+      },
+      {
+        "suite_name": "evidence_cv_gold_eval",
+        "total_runs": 12,
+        "pass_rate": 0.583,
+        "warn_rate": 0.167,
+        "fail_rate": 0.25,
+        "avg_score_ratio": 0.743,
+        "avg_latency_s": 0.0
+      },
+      {
+        "suite_name": "checklist_regression",
+        "total_runs": 4,
+        "pass_rate": 0.0,
+        "warn_rate": 0.0,
+        "fail_rate": 1.0,
+        "avg_score_ratio": 0.739,
+        "avg_latency_s": 0.0
+      }
+    ],
+    "task_leaderboard": [
+      {
+        "task_type": "langgraph_guardrails",
+        "total_runs": 8,
+        "pass_rate": 1.0,
+        "warn_rate": 0.0,
+        "fail_rate": 0.0,
+        "avg_score_ratio": 1.0,
+        "avg_latency_s": 0.0
+      },
+      {
+        "task_type": "document_agent_routing",
+        "total_runs": 9,
+        "pass_rate": 1.0,
+        "warn_rate": 0.0,
+        "fail_rate": 0.0,
+        "avg_score_ratio": 1.0,
+        "avg_latency_s": 0.0
+      },
+      {
+        "task_type": "cv_analysis",
+        "total_runs": 16,
+        "pass_rate": 0.875,
+        "warn_rate": 0.0,
+        "fail_rate": 0.125,
+        "avg_score_ratio": 0.893,
+        "avg_latency_s": 0.0
+      },
+      {
+        "task_type": "summary",
+        "total_runs": 10,
+        "pass_rate": 0.8,
+        "warn_rate": 0.0,
+        "fail_rate": 0.2,
+        "avg_score_ratio": 0.8,
+        "avg_latency_s": 22.703
+      },
+      {
+        "task_type": "code_analysis",
+        "total_runs": 7,
+        "pass_rate": 0.714,
+        "warn_rate": 0.0,
+        "fail_rate": 0.286,
+        "avg_score_ratio": 0.714,
+        "avg_latency_s": 0.0
+      },
+      {
+        "task_type": "cv_contacts",
+        "total_runs": 12,
+        "pass_rate": 0.583,
+        "warn_rate": 0.167,
+        "fail_rate": 0.25,
+        "avg_score_ratio": 0.743,
+        "avg_latency_s": 0.0
+      },
+      {
+        "task_type": "checklist",
+        "total_runs": 12,
+        "pass_rate": 0.5,
+        "warn_rate": 0.0,
+        "fail_rate": 0.5,
+        "avg_score_ratio": 0.746,
+        "avg_latency_s": 0.0
+      },
+      {
+        "task_type": "extraction",
+        "total_runs": 8,
+        "pass_rate": 0.5,
+        "warn_rate": 0.125,
+        "fail_rate": 0.375,
+        "avg_score_ratio": 0.575,
+        "avg_latency_s": 0.0
+      }
+    ]
+  },
+  "diagnosis": {
+    "total_runs": 82,
+    "top_failure_reasons": [
+      {
+        "reason": "task execution did not succeed",
+        "count": 11
+      },
+      {
+        "reason": "location_match_incomplete:0.000",
+        "count": 4
+      },
+      {
+        "reason": "collapsed items detected: 2",
+        "count": 3
+      },
+      {
+        "reason": "phone_f1_below_target:0.000",
+        "count": 3
+      },
+      {
+        "reason": "name_match_incomplete:0.000",
+        "count": 3
+      },
+      {
+        "reason": "email_f1_below_target:0.000",
+        "count": 2
+      },
+      {
+        "reason": "coverage too low: 50.00%",
+        "count": 1
+      },
+      {
+        "reason": "duplicate item ids detected: ['item-1', 'item-16', 'item-19', 'item-8']",
+        "count": 1
+      },
+      {
+        "reason": "artifact items detected at indexes: [1, 9, 18, 22]",
+        "count": 1
+      },
+      {
+        "reason": "collapsed items detected: 1",
+        "count": 1
+      }
+    ],
+    "task_diagnosis": [
+      {
+        "task_type": "checklist",
+        "total_runs": 12,
+        "pass_rate": 0.5,
+        "warn_rate": 0.0,
+        "fail_rate": 0.5,
+        "recent_fail_rate": 0.6,
+        "avg_score_ratio": 0.746,
+        "health_label": "needs_iteration",
+        "adaptation_priority": null,
+        "recommended_action": "improve_checklist_decomposition_and_source_alignment",
+        "top_reasons": [
+          {
+            "reason": "collapsed items detected: 2",
+            "count": 3
+          },
+          {
+            "reason": "task execution did not succeed",
+            "count": 2
+          },
+          {
+            "reason": "duplicate item ids detected: ['item-1', 'item-16', 'item-19', 'item-8']",
+            "count": 1
+          },
+          {
+            "reason": "coverage too low: 63.64%",
+            "count": 1
+          },
+          {
+            "reason": "coverage too low: 50.00%",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "task_type": "extraction",
+        "total_runs": 8,
+        "pass_rate": 0.5,
+        "warn_rate": 0.125,
+        "fail_rate": 0.375,
+        "recent_fail_rate": 0.375,
+        "avg_score_ratio": 0.575,
+        "health_label": "needs_iteration",
+        "adaptation_priority": "medium",
+        "recommended_action": "expand_eval_cases_and_iterate_prompt_rag_schema",
+        "top_reasons": [
+          {
+            "reason": "task execution did not succeed",
+            "count": 3
+          },
+          {
+            "reason": "extraction returned too little structured content",
+            "count": 1
+          },
+          {
+            "reason": "extraction missing useful secondary structure",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "task_type": "code_analysis",
+        "total_runs": 7,
+        "pass_rate": 0.714,
+        "warn_rate": 0.0,
+        "fail_rate": 0.286,
+        "recent_fail_rate": 0.286,
+        "avg_score_ratio": 0.714,
+        "health_label": "monitor",
+        "adaptation_priority": null,
+        "recommended_action": "continue_prompt_grounding_and_schema_iteration",
+        "top_reasons": [
+          {
+            "reason": "task execution did not succeed",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "task_type": "cv_contacts",
+        "total_runs": 12,
+        "pass_rate": 0.583,
+        "warn_rate": 0.167,
+        "fail_rate": 0.25,
+        "recent_fail_rate": 0.3,
+        "avg_score_ratio": 0.743,
+        "health_label": "needs_iteration",
+        "adaptation_priority": null,
+        "recommended_action": "improve_ocr_router_contact_postprocessing_before_model_adaptation",
+        "top_reasons": [
+          {
+            "reason": "location_match_incomplete:0.000",
+            "count": 4
+          },
+          {
+            "reason": "phone_f1_below_target:0.000",
+            "count": 3
+          },
+          {
+            "reason": "name_match_incomplete:0.000",
+            "count": 3
+          },
+          {
+            "reason": "email_f1_below_target:0.000",
+            "count": 2
+          },
+          {
+            "reason": "email_f1_below_target:0.667",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "task_type": "summary",
+        "total_runs": 10,
+        "pass_rate": 0.8,
+        "warn_rate": 0.0,
+        "fail_rate": 0.2,
+        "recent_fail_rate": 0.2,
+        "avg_score_ratio": 0.8,
+        "health_label": "monitor",
+        "adaptation_priority": null,
+        "recommended_action": "continue_prompt_grounding_and_schema_iteration",
+        "top_reasons": [
+          {
+            "reason": "task execution did not succeed",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "task_type": "cv_analysis",
+        "total_runs": 16,
+        "pass_rate": 0.875,
+        "warn_rate": 0.0,
+        "fail_rate": 0.125,
+        "recent_fail_rate": 0.0,
+        "avg_score_ratio": 0.893,
+        "health_label": "healthy",
+        "adaptation_priority": null,
+        "recommended_action": "prompt_rag_stack_currently_sufficient",
+        "top_reasons": [
+          {
+            "reason": "task execution did not succeed",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "task_type": "document_agent_routing",
+        "total_runs": 9,
+        "pass_rate": 1.0,
+        "warn_rate": 0.0,
+        "fail_rate": 0.0,
+        "recent_fail_rate": 0.0,
+        "avg_score_ratio": 1.0,
+        "health_label": "healthy",
+        "adaptation_priority": null,
+        "recommended_action": "prompt_rag_stack_currently_sufficient",
+        "top_reasons": []
+      },
+      {
+        "task_type": "langgraph_guardrails",
+        "total_runs": 8,
+        "pass_rate": 1.0,
+        "warn_rate": 0.0,
+        "fail_rate": 0.0,
+        "recent_fail_rate": 0.0,
+        "avg_score_ratio": 1.0,
+        "health_label": "healthy",
+        "adaptation_priority": null,
+        "recommended_action": "prompt_rag_stack_currently_sufficient",
+        "top_reasons": []
+      }
+    ],
+    "persistent_failure_tasks": [
+      {
+        "task_type": "checklist",
+        "total_runs": 12,
+        "pass_rate": 0.5,
+        "warn_rate": 0.0,
+        "fail_rate": 0.5,
+        "recent_fail_rate": 0.6,
+        "avg_score_ratio": 0.746,
+        "health_label": "needs_iteration",
+        "adaptation_priority": null,
+        "recommended_action": "improve_checklist_decomposition_and_source_alignment",
+        "top_reasons": [
+          {
+            "reason": "collapsed items detected: 2",
+            "count": 3
+          },
+          {
+            "reason": "task execution did not succeed",
+            "count": 2
+          },
+          {
+            "reason": "duplicate item ids detected: ['item-1', 'item-16', 'item-19', 'item-8']",
+            "count": 1
+          },
+          {
+            "reason": "coverage too low: 63.64%",
+            "count": 1
+          },
+          {
+            "reason": "coverage too low: 50.00%",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "task_type": "extraction",
+        "total_runs": 8,
+        "pass_rate": 0.5,
+        "warn_rate": 0.125,
+        "fail_rate": 0.375,
+        "recent_fail_rate": 0.375,
+        "avg_score_ratio": 0.575,
+        "health_label": "needs_iteration",
+        "adaptation_priority": "medium",
+        "recommended_action": "expand_eval_cases_and_iterate_prompt_rag_schema",
+        "top_reasons": [
+          {
+            "reason": "task execution did not succeed",
+            "count": 3
+          },
+          {
+            "reason": "extraction returned too little structured content",
+            "count": 1
+          },
+          {
+            "reason": "extraction missing useful secondary structure",
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "adaptation_candidates": [
+      {
+        "task_type": "extraction",
+        "total_runs": 8,
+        "pass_rate": 0.5,
+        "warn_rate": 0.125,
+        "fail_rate": 0.375,
+        "recent_fail_rate": 0.375,
+        "avg_score_ratio": 0.575,
+        "health_label": "needs_iteration",
+        "adaptation_priority": "medium",
+        "recommended_action": "expand_eval_cases_and_iterate_prompt_rag_schema",
+        "top_reasons": [
+          {
+            "reason": "task execution did not succeed",
+            "count": 3
+          },
+          {
+            "reason": "extraction returned too little structured content",
+            "count": 1
+          },
+          {
+            "reason": "extraction missing useful secondary structure",
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "healthy_tasks": [
+      {
+        "task_type": "langgraph_guardrails",
+        "total_runs": 8,
+        "pass_rate": 1.0,
+        "warn_rate": 0.0,
+        "fail_rate": 0.0,
+        "recent_fail_rate": 0.0,
+        "avg_score_ratio": 1.0,
+        "health_label": "healthy",
+        "adaptation_priority": null,
+        "recommended_action": "prompt_rag_stack_currently_sufficient",
+        "top_reasons": []
+      },
+      {
+        "task_type": "document_agent_routing",
+        "total_runs": 9,
+        "pass_rate": 1.0,
+        "warn_rate": 0.0,
+        "fail_rate": 0.0,
+        "recent_fail_rate": 0.0,
+        "avg_score_ratio": 1.0,
+        "health_label": "healthy",
+        "adaptation_priority": null,
+        "recommended_action": "prompt_rag_stack_currently_sufficient",
+        "top_reasons": []
+      },
+      {
+        "task_type": "cv_analysis",
+        "total_runs": 16,
+        "pass_rate": 0.875,
+        "warn_rate": 0.0,
+        "fail_rate": 0.125,
+        "recent_fail_rate": 0.0,
+        "avg_score_ratio": 0.893,
+        "health_label": "healthy",
+        "adaptation_priority": null,
+        "recommended_action": "prompt_rag_stack_currently_sufficient",
+        "top_reasons": [
+          {
+            "reason": "task execution did not succeed",
+            "count": 2
+          }
+        ]
+      }
+    ],
+    "decision_summary": {
+      "global_recommendation": "consider_targeted_adaptation_only_for_specific_tasks",
+      "prompt_rag_sufficient_tasks": [
+        {
+          "task_type": "langgraph_guardrails",
+          "pass_rate": 1.0,
+          "avg_score_ratio": 1.0
+        },
+        {
+          "task_type": "document_agent_routing",
+          "pass_rate": 1.0,
+          "avg_score_ratio": 1.0
+        },
+        {
+          "task_type": "cv_analysis",
+          "pass_rate": 0.875,
+          "avg_score_ratio": 0.893
+        }
+      ],
+      "iteration_before_adaptation_tasks": [
+        {
+          "task_type": "checklist",
+          "recommended_action": "improve_checklist_decomposition_and_source_alignment",
+          "fail_rate": 0.5,
+          "avg_score_ratio": 0.746
+        }
+      ],
+      "adaptation_candidate_tasks": [
+        {
+          "task_type": "extraction",
+          "adaptation_priority": "medium",
+          "fail_rate": 0.375,
+          "avg_score_ratio": 0.575,
+          "recommended_action": "expand_eval_cases_and_iterate_prompt_rag_schema"
+        }
+      ],
+      "next_eval_priorities": [
+        {
+          "task_type": "checklist",
+          "fail_rate": 0.5,
+          "recent_fail_rate": 0.6,
+          "recommended_action": "improve_checklist_decomposition_and_source_alignment"
+        },
+        {
+          "task_type": "extraction",
+          "fail_rate": 0.375,
+          "recent_fail_rate": 0.375,
+          "recommended_action": "expand_eval_cases_and_iterate_prompt_rag_schema"
+        }
+      ]
+    }
+  }
+}

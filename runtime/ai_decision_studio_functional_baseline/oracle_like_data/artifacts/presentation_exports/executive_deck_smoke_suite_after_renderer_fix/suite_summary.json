@@ -1,0 +1,1648 @@
+{
+  "generated_at": "2026-04-06T00:02:21.257011",
+  "output_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix",
+  "renderer_base_url": "http://127.0.0.1:8787",
+  "cases": [
+    {
+      "export_kind": "benchmark_eval_executive_deck",
+      "status": "ok",
+      "artifact_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91",
+      "contract_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/contract.json",
+      "payload_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/payload.json",
+      "pptx_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/benchmark_eval_executive_deck.pptx",
+      "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/benchmark_eval_executive_deck-thumbnails.png",
+      "preview_manifest_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/preview-manifest.json",
+      "warnings": [],
+      "error_message": null,
+      "average_score": 97,
+      "issue_count": 3,
+      "top_risk_slides": [
+        {
+          "slide_number": 6,
+          "title": "Recommendation vs watchouts",
+          "risk_level": "high",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 2,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.15
+        },
+        {
+          "slide_number": 2,
+          "title": "Executive summary",
+          "risk_level": "medium",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.2
+        }
+      ],
+      "local_preview_artifacts": {
+        "preview_output_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews",
+        "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-thumbnails.png",
+        "preview_count": 7,
+        "first_preview": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-01.png",
+        "preview_artifact_review": {
+          "status": "review",
+          "preview_count": 7,
+          "edge_contact_count": 0,
+          "safe_margin_warning_count": 0,
+          "edge_density_warning_count": 0,
+          "body_edge_contact_count": 7,
+          "safe_area_intrusion_count": 7,
+          "footer_intrusion_count": 7,
+          "corner_density_warning_count": 7,
+          "slides": [
+            {
+              "slide_number": 1,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-01.png",
+              "foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.278481,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 2,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-02.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 137,
+                "top": 180,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.323957,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 3,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-03.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.842475,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 4,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-04.png",
+              "foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.874648,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 5,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-05.png",
+              "foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.873535,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 6,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-06.png",
+              "foreground_bbox": {
+                "left": 129,
+                "top": 126,
+                "right": 2000,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 129,
+                "top": 126,
+                "right": 2000,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.859822,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 7,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000221_ad349a91/local_previews/benchmark_eval_executive_deck-07.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 165,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 138,
+                "top": 165,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.337553,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            }
+          ]
+        }
+      },
+      "local_fallback_render": {}
+    },
+    {
+      "export_kind": "document_review_deck",
+      "status": "ok",
+      "artifact_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339",
+      "contract_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/contract.json",
+      "payload_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/payload.json",
+      "pptx_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/document_review_deck.pptx",
+      "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/document_review_deck-thumbnails.png",
+      "preview_manifest_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/preview-manifest.json",
+      "warnings": [],
+      "error_message": null,
+      "average_score": 98,
+      "issue_count": 2,
+      "top_risk_slides": [
+        {
+          "slide_number": 4,
+          "title": "Top findings",
+          "risk_level": "medium",
+          "overflow_risk_count": 1,
+          "clipping_risk_count": 1,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.11
+        }
+      ],
+      "local_preview_artifacts": {
+        "preview_output_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews",
+        "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-thumbnails.png",
+        "preview_count": 7,
+        "first_preview": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-01.png",
+        "preview_artifact_review": {
+          "status": "review",
+          "preview_count": 7,
+          "edge_contact_count": 0,
+          "safe_margin_warning_count": 0,
+          "edge_density_warning_count": 0,
+          "body_edge_contact_count": 6,
+          "safe_area_intrusion_count": 7,
+          "footer_intrusion_count": 6,
+          "corner_density_warning_count": 6,
+          "slides": [
+            {
+              "slide_number": 1,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-01.png",
+              "foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.278481,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 2,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-02.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.329114,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 3,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-03.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.842944,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 4,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-04.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.873974,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 5,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-05.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 548
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": false,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": false,
+              "corner_density_warning": false,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.0,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content appears to intrude into an unsafe margin region"
+              ]
+            },
+            {
+              "slide_number": 6,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-06.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.860759,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 7,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000235_f54da339/local_previews/document_review_deck-07.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 165,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 138,
+                "top": 165,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.337553,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            }
+          ]
+        }
+      },
+      "local_fallback_render": {}
+    },
+    {
+      "export_kind": "policy_contract_comparison_deck",
+      "status": "ok",
+      "artifact_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624",
+      "contract_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/contract.json",
+      "payload_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/payload.json",
+      "pptx_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/policy_contract_comparison_deck.pptx",
+      "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/policy_contract_comparison_deck-thumbnails.png",
+      "preview_manifest_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/preview-manifest.json",
+      "warnings": [],
+      "error_message": null,
+      "average_score": 98,
+      "issue_count": 1,
+      "top_risk_slides": [
+        {
+          "slide_number": 4,
+          "title": "Comparison findings",
+          "risk_level": "medium",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.12
+        }
+      ],
+      "local_preview_artifacts": {
+        "preview_output_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews",
+        "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews/policy_contract_comparison_deck-thumbnails.png",
+        "preview_count": 6,
+        "first_preview": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews/policy_contract_comparison_deck-01.png",
+        "preview_artifact_review": {
+          "status": "review",
+          "preview_count": 6,
+          "edge_contact_count": 0,
+          "safe_margin_warning_count": 0,
+          "edge_density_warning_count": 0,
+          "body_edge_contact_count": 5,
+          "safe_area_intrusion_count": 6,
+          "footer_intrusion_count": 5,
+          "corner_density_warning_count": 5,
+          "slides": [
+            {
+              "slide_number": 1,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews/policy_contract_comparison_deck-01.png",
+              "foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 1133
+              },
+              "body_foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.278481,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 2,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews/policy_contract_comparison_deck-02.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 1133
+              },
+              "body_foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.33474,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 3,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews/policy_contract_comparison_deck-03.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1133
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.842944,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 4,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews/policy_contract_comparison_deck-04.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1133
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 548
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": false,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": false,
+              "corner_density_warning": false,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.0,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content appears to intrude into an unsafe margin region"
+              ]
+            },
+            {
+              "slide_number": 5,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews/policy_contract_comparison_deck-05.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2000,
+                "bottom": 1133
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2000,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.860291,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 6,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews/policy_contract_comparison_deck-06.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 165,
+                "right": 2001,
+                "bottom": 1133
+              },
+              "body_foreground_bbox": {
+                "left": 138,
+                "top": 165,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.337553,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            }
+          ]
+        }
+      },
+      "local_fallback_render": {}
+    },
+    {
+      "export_kind": "action_plan_deck",
+      "status": "ok",
+      "artifact_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a",
+      "contract_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/contract.json",
+      "payload_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/payload.json",
+      "pptx_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/action_plan_deck.pptx",
+      "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/action_plan_deck-thumbnails.png",
+      "preview_manifest_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/preview-manifest.json",
+      "warnings": [],
+      "error_message": null,
+      "average_score": 99,
+      "issue_count": 1,
+      "top_risk_slides": [
+        {
+          "slide_number": 5,
+          "title": "Action backlog",
+          "risk_level": "medium",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.04
+        }
+      ],
+      "local_preview_artifacts": {
+        "preview_output_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews",
+        "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-thumbnails.png",
+        "preview_count": 7,
+        "first_preview": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-01.png",
+        "preview_artifact_review": {
+          "status": "review",
+          "preview_count": 7,
+          "edge_contact_count": 0,
+          "safe_margin_warning_count": 0,
+          "edge_density_warning_count": 0,
+          "body_edge_contact_count": 7,
+          "safe_area_intrusion_count": 7,
+          "footer_intrusion_count": 7,
+          "corner_density_warning_count": 7,
+          "slides": [
+            {
+              "slide_number": 1,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-01.png",
+              "foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.278481,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 2,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-02.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 137,
+                "top": 180,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.325363,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 3,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-03.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.842944,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 4,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-04.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 180,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 180,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.841069,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 5,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-05.png",
+              "foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.878575,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 6,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-06.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 180,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 180,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.857478,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 7,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000259_c79bfd2a/local_previews/action_plan_deck-07.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.860291,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            }
+          ]
+        }
+      },
+      "local_fallback_render": {}
+    },
+    {
+      "export_kind": "candidate_review_deck",
+      "status": "ok",
+      "artifact_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2",
+      "contract_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/contract.json",
+      "payload_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/payload.json",
+      "pptx_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/candidate_review_deck.pptx",
+      "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/candidate_review_deck-thumbnails.png",
+      "preview_manifest_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/preview-manifest.json",
+      "warnings": [],
+      "error_message": null,
+      "average_score": 94,
+      "issue_count": 5,
+      "top_risk_slides": [
+        {
+          "slide_number": 6,
+          "title": "Experience highlights",
+          "risk_level": "medium",
+          "overflow_risk_count": 1,
+          "clipping_risk_count": 1,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.65
+        },
+        {
+          "slide_number": 2,
+          "title": "Executive summary",
+          "risk_level": "high",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 1,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.01
+        },
+        {
+          "slide_number": 5,
+          "title": "Evidence highlights",
+          "risk_level": "medium",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.12
+        }
+      ],
+      "local_preview_artifacts": {
+        "preview_output_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews",
+        "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-thumbnails.png",
+        "preview_count": 8,
+        "first_preview": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-01.png",
+        "preview_artifact_review": {
+          "status": "review",
+          "preview_count": 8,
+          "edge_contact_count": 0,
+          "safe_margin_warning_count": 0,
+          "edge_density_warning_count": 0,
+          "body_edge_contact_count": 7,
+          "safe_area_intrusion_count": 8,
+          "footer_intrusion_count": 7,
+          "corner_density_warning_count": 7,
+          "slides": [
+            {
+              "slide_number": 1,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-01.png",
+              "foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.278481,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 2,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-02.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.319737,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 3,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-03.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.842944,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 4,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-04.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 179,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 179,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.8406,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 5,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-05.png",
+              "foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.875,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 6,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-06.png",
+              "foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 548
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": false,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": false,
+              "corner_density_warning": false,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.0,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content appears to intrude into an unsafe margin region"
+              ]
+            },
+            {
+              "slide_number": 7,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-07.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.860759,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 8,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews/candidate_review_deck-08.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 165,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 137,
+                "top": 165,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.337553,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            }
+          ]
+        }
+      },
+      "local_fallback_render": {}
+    },
+    {
+      "export_kind": "evidence_pack_deck",
+      "status": "ok",
+      "artifact_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532",
+      "contract_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/contract.json",
+      "payload_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/payload.json",
+      "pptx_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/evidence_pack_deck.pptx",
+      "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/evidence_pack_deck-thumbnails.png",
+      "preview_manifest_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/preview-manifest.json",
+      "warnings": [],
+      "error_message": null,
+      "average_score": 99,
+      "issue_count": 1,
+      "top_risk_slides": [
+        {
+          "slide_number": 5,
+          "title": "Action status",
+          "risk_level": "medium",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.04
+        }
+      ],
+      "local_preview_artifacts": {
+        "preview_output_dir": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews",
+        "thumbnail_sheet": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-thumbnails.png",
+        "preview_count": 7,
+        "first_preview": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-01.png",
+        "preview_artifact_review": {
+          "status": "review",
+          "preview_count": 7,
+          "edge_contact_count": 0,
+          "safe_margin_warning_count": 0,
+          "edge_density_warning_count": 0,
+          "body_edge_contact_count": 7,
+          "safe_area_intrusion_count": 7,
+          "footer_intrusion_count": 7,
+          "corner_density_warning_count": 7,
+          "slides": [
+            {
+              "slide_number": 1,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-01.png",
+              "foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 129,
+                "top": 113,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.278481,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 2,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-02.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 180,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 138,
+                "top": 180,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.323019,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 3,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-03.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.842007,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 4,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-04.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.878106,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 5,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-05.png",
+              "foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 127,
+                "top": 126,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.878575,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 6,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-06.png",
+              "foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2000,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 128,
+                "top": 126,
+                "right": 2000,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.860291,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            },
+            {
+              "slide_number": 7,
+              "preview_path": "artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000322_fae6f532/local_previews/evidence_pack_deck-07.png",
+              "foreground_bbox": {
+                "left": 136,
+                "top": 165,
+                "right": 2001,
+                "bottom": 1129
+              },
+              "body_foreground_bbox": {
+                "left": 138,
+                "top": 165,
+                "right": 2001,
+                "bottom": 658
+              },
+              "edge_contact": false,
+              "safe_margin_warning": false,
+              "edge_density_warning": false,
+              "body_edge_contact": true,
+              "safe_area_intrusion": true,
+              "footer_intrusion_warning": true,
+              "corner_density_warning": true,
+              "max_edge_ratio": 0.0,
+              "body_max_edge_ratio": 0.337553,
+              "max_corner_ratio": 0.0,
+              "issues": [
+                "body content touches a slide boundary before the footer region",
+                "body content appears to intrude into an unsafe margin region",
+                "body content approaches the footer boundary and may clip or collide",
+                "corner density suggests content is packed into unsafe corners"
+              ]
+            }
+          ]
+        }
+      },
+      "local_fallback_render": {}
+    }
+  ]
+}

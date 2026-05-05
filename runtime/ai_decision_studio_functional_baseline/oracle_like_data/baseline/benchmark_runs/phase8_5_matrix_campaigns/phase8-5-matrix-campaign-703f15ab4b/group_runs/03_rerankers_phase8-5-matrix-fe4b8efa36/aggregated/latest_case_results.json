@@ -1,0 +1,802 @@
+[
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-fe4b8efa36",
+    "case_id": "case_67cbdc91648f61a7",
+    "status": "success",
+    "group": "rerankers",
+    "started_at": 1775423668.459844,
+    "provider_requested": "ollama",
+    "provider_effective": "ollama",
+    "embedding_provider_requested": "ollama",
+    "embedding_provider_effective": "ollama",
+    "embedding_model_requested": "embeddinggemma:300m",
+    "embedding_model_effective": "embeddinggemma:300m",
+    "model_requested": "embeddinggemma:300m",
+    "model_effective": "embeddinggemma:300m",
+    "requested_runtime_family": "ollama_local",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "embeddinggemma:300m"
+    ],
+    "candidate_id": "vector_only_local_baseline",
+    "candidate_label": "Vector-only baseline (lexical weight 0)",
+    "candidate_role": "baseline",
+    "dataset_id": "phase8_5_reranker_pdf_corpus",
+    "question_set_id": "phase8_5_reranker_questions_v1",
+    "document_count": 4,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "repetition": 1,
+    "retrieval_strategy": "manual_hybrid",
+    "rerank_pool_size": 4,
+    "rerank_lexical_weight": 0.0,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "support_status": "fully_supported",
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "api_route": "http://localhost:11434/api/embed",
+      "requested_num_ctx": 512,
+      "model": "embeddinggemma:300m",
+      "truncate": true,
+      "show_available": true,
+      "declared_context_length": 2048,
+      "model_modified_at": "2026-03-14T12:51:40.469083155-03:00",
+      "validation_summary": "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+    },
+    "error": null,
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "embeddinggemma:300m",
+    "backend_equivalence_key": "ollama::embeddinggemma:300m",
+    "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+    "path_overhead_expected": false,
+    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+    "resolved_runtime_family": "ollama_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "finished_at": 1775423845.056244,
+    "indexing_seconds": 170.4797,
+    "sync_status": {
+      "ok": true,
+      "backend": "chroma",
+      "chunks_in_json": 1747,
+      "chunks_in_chroma": 1747,
+      "persist_dir_exists": true,
+      "message": "Chroma sincronizado com 1747 chunk(s)."
+    },
+    "aggregate_metrics": {
+      "question_count": 8,
+      "hit_at_1": 0.75,
+      "hit_at_k": 0.875,
+      "mrr": 0.8125,
+      "average_retrieval_seconds": 0.7643,
+      "median_retrieval_seconds": 0.7115,
+      "avg_groundedness_proxy": 0.8438
+    },
+    "per_question_results": [
+      {
+        "question": "Which document discusses OCR for text inside natural scene images using a hierarchical centroid shape descriptor and reports 97.87% accuracy with SVM?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": false,
+        "hit_at_k": false,
+        "reciprocal_rank": 0.0,
+        "first_relevant_rank": null,
+        "retrieval_seconds": 1.0499,
+        "backend_used": "chroma",
+        "candidate_pool_size": 4,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.0,
+          "candidate_pool_size": 4
+        },
+        "groundedness_proxy": 0.0
+      },
+      {
+        "question": "Which document presents a method for extracting virtual baselines from scene text using curvilinear projection and emphasizes robustness to blur, noise, and non-text objects?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.764,
+        "backend_used": "chroma",
+        "candidate_pool_size": 4,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.0,
+          "candidate_pool_size": 4
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "Which document explains the distinction between retroactive and nonretroactive requirements for weighing and measuring devices?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8172,
+        "backend_used": "chroma",
+        "candidate_pool_size": 4,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.0,
+          "candidate_pool_size": 4
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "Which document includes instructions about battery handling, USB base connection, and proper disposal precautions for a handheld scanner?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.7272,
+        "backend_used": "chroma",
+        "candidate_pool_size": 4,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.0,
+          "candidate_pool_size": 4
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "In which document would you find discussion of Support Vector Machine and K-Nearest Neighbor as classifiers used after OCR feature extraction?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": false,
+        "hit_at_k": true,
+        "reciprocal_rank": 0.5,
+        "first_relevant_rank": 2,
+        "retrieval_seconds": 0.6844,
+        "backend_used": "chroma",
+        "candidate_pool_size": 4,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.0,
+          "candidate_pool_size": 4
+        },
+        "groundedness_proxy": 0.75
+      },
+      {
+        "question": "In which document would you find discussion of curved text detection and the relationship between text boundaries and text center lines?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6958,
+        "backend_used": "chroma",
+        "candidate_pool_size": 4,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.0,
+          "candidate_pool_size": 4
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "Which document would you consult for requirements covering commercial weighing and measuring equipment used in regulation or trade?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6844,
+        "backend_used": "chroma",
+        "candidate_pool_size": 4,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.0,
+          "candidate_pool_size": 4
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "Which document should be used to check safety instructions before charging, using, or discarding the scanner battery?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6916,
+        "backend_used": "chroma",
+        "candidate_pool_size": 4,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.0,
+          "candidate_pool_size": 4
+        },
+        "groundedness_proxy": 1.0
+      }
+    ],
+    "question_count": 8,
+    "hit_at_1": 0.75,
+    "hit_at_k": 0.875,
+    "mrr": 0.8125,
+    "average_retrieval_seconds": 0.7643,
+    "median_retrieval_seconds": 0.7115,
+    "avg_groundedness_proxy": 0.8438,
+    "total_wall_time_s": 176.5958,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 176.5958,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 480.75,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak"
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-fe4b8efa36",
+    "case_id": "case_b23598bb105f0d85",
+    "status": "success",
+    "group": "rerankers",
+    "started_at": 1775423845.156002,
+    "provider_requested": "ollama",
+    "provider_effective": "ollama",
+    "embedding_provider_requested": "ollama",
+    "embedding_provider_effective": "ollama",
+    "embedding_model_requested": "embeddinggemma:300m",
+    "embedding_model_effective": "embeddinggemma:300m",
+    "model_requested": "embeddinggemma:300m",
+    "model_effective": "embeddinggemma:300m",
+    "requested_runtime_family": "ollama_local",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "embeddinggemma:300m"
+    ],
+    "candidate_id": "hybrid_rerank_current_default",
+    "candidate_label": "Hybrid vector + lexical rerank",
+    "candidate_role": "current_default",
+    "dataset_id": "phase8_5_reranker_pdf_corpus",
+    "question_set_id": "phase8_5_reranker_questions_v1",
+    "document_count": 4,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "repetition": 1,
+    "retrieval_strategy": "manual_hybrid",
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "support_status": "fully_supported",
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "api_route": "http://localhost:11434/api/embed",
+      "requested_num_ctx": 512,
+      "model": "embeddinggemma:300m",
+      "truncate": true,
+      "show_available": true,
+      "declared_context_length": 2048,
+      "model_modified_at": "2026-03-14T12:51:40.469083155-03:00",
+      "validation_summary": "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+    },
+    "error": null,
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "embeddinggemma:300m",
+    "backend_equivalence_key": "ollama::embeddinggemma:300m",
+    "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+    "path_overhead_expected": false,
+    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+    "resolved_runtime_family": "ollama_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "finished_at": 1775424024.638453,
+    "indexing_seconds": 173.9503,
+    "sync_status": {
+      "ok": true,
+      "backend": "chroma",
+      "chunks_in_json": 1747,
+      "chunks_in_chroma": 1747,
+      "persist_dir_exists": true,
+      "message": "Chroma sincronizado com 1747 chunk(s)."
+    },
+    "aggregate_metrics": {
+      "question_count": 8,
+      "hit_at_1": 0.875,
+      "hit_at_k": 1.0,
+      "mrr": 0.9062,
+      "average_retrieval_seconds": 0.6913,
+      "median_retrieval_seconds": 0.6932,
+      "avg_groundedness_proxy": 0.9062
+    },
+    "per_question_results": [
+      {
+        "question": "Which document discusses OCR for text inside natural scene images using a hierarchical centroid shape descriptor and reports 97.87% accuracy with SVM?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": false,
+        "hit_at_k": true,
+        "reciprocal_rank": 0.25,
+        "first_relevant_rank": 4,
+        "retrieval_seconds": 0.7118,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.35,
+          "candidate_pool_size": 8
+        },
+        "groundedness_proxy": 0.25
+      },
+      {
+        "question": "Which document presents a method for extracting virtual baselines from scene text using curvilinear projection and emphasizes robustness to blur, noise, and non-text objects?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6994,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.35,
+          "candidate_pool_size": 8
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "Which document explains the distinction between retroactive and nonretroactive requirements for weighing and measuring devices?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6972,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.35,
+          "candidate_pool_size": 8
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "Which document includes instructions about battery handling, USB base connection, and proper disposal precautions for a handheld scanner?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6892,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.35,
+          "candidate_pool_size": 8
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "In which document would you find discussion of Support Vector Machine and K-Nearest Neighbor as classifiers used after OCR feature extraction?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6762,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.35,
+          "candidate_pool_size": 8
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "In which document would you find discussion of curved text detection and the relationship between text boundaries and text center lines?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.7007,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.35,
+          "candidate_pool_size": 8
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "Which document would you consult for requirements covering commercial weighing and measuring equipment used in regulation or trade?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6793,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.35,
+          "candidate_pool_size": 8
+        },
+        "groundedness_proxy": 1.0
+      },
+      {
+        "question": "Which document should be used to check safety instructions before charging, using, or discarding the scanner battery?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6768,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "retrieval_strategy_used": "manual_hybrid",
+        "rerank_strategy": {
+          "type": "hybrid_vector_lexical",
+          "lexical_weight": 0.35,
+          "candidate_pool_size": 8
+        },
+        "groundedness_proxy": 1.0
+      }
+    ],
+    "question_count": 8,
+    "hit_at_1": 0.875,
+    "hit_at_k": 1.0,
+    "mrr": 0.9062,
+    "average_retrieval_seconds": 0.6913,
+    "median_retrieval_seconds": 0.6932,
+    "avg_groundedness_proxy": 0.9062,
+    "total_wall_time_s": 179.4819,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 179.4819,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 480.75,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak"
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-fe4b8efa36",
+    "case_id": "case_705ef41f96526721",
+    "status": "skipped",
+    "group": "rerankers",
+    "started_at": 1775424024.647221,
+    "provider_requested": "huggingface_local",
+    "provider_effective": "huggingface_local",
+    "embedding_provider_requested": "ollama",
+    "embedding_provider_effective": "ollama",
+    "embedding_model_requested": "embeddinggemma:300m",
+    "embedding_model_effective": "embeddinggemma:300m",
+    "model_requested": "bge-reranker-v2-m3",
+    "model_effective": "bge-reranker-v2-m3",
+    "requested_runtime_family": "hf_local_or_mlx",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "manifest_assumption_without_inventory",
+    "requested_model_candidates": [
+      "bge-reranker-v2-m3",
+      "Qwen3-Reranker-0.6B",
+      "mxbai-rerank-large-v1"
+    ],
+    "candidate_id": "neural_rerank_bge_v2_m3",
+    "candidate_label": "Neural reranker via local HF runtime (BGE v2 m3)",
+    "candidate_role": "challenger_neural",
+    "dataset_id": "phase8_5_reranker_pdf_corpus",
+    "question_set_id": "phase8_5_reranker_questions_v1",
+    "document_count": 4,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "repetition": 1,
+    "retrieval_strategy": "manual_hybrid",
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.0,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "support_status": "conditional_local_runtime",
+    "runtime_bucket": "experimental_local",
+    "quantization_family": "unspecified_experimental",
+    "runtime_artifact": {},
+    "error": "neural_reranker_runtime_unavailable",
+    "runtime_path": "local_native_runtime",
+    "runtime_path_label": "Local native runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "huggingface_local",
+    "backend_model_ref_resolved": "bge-reranker-v2-m3",
+    "backend_equivalence_key": "huggingface_local::bge-reranker-v2-m3",
+    "equivalent_direct_runtime_key": null,
+    "path_overhead_expected": false,
+    "path_comparison_note": "Local native runtime path outside Ollama; backend semantics may differ from Ollama-native execution.",
+    "resolved_runtime_family": "huggingface_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": "requested_runtime_family=hf_local_or_mlx resolved_runtime_family=huggingface_local",
+    "finished_at": 1775424024.647382,
+    "total_wall_time_s": 0.0002,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 0.0002,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 480.75,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak"
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-fe4b8efa36",
+    "case_id": "case_78ebd22e25d82530",
+    "status": "skipped",
+    "group": "rerankers",
+    "started_at": 1775424024.647528,
+    "provider_requested": "huggingface_local",
+    "provider_effective": "huggingface_local",
+    "embedding_provider_requested": "ollama",
+    "embedding_provider_effective": "ollama",
+    "embedding_model_requested": "embeddinggemma:300m",
+    "embedding_model_effective": "embeddinggemma:300m",
+    "model_requested": "jina-reranker-v3-mlx",
+    "model_effective": "jina-reranker-v3-mlx",
+    "requested_runtime_family": "hf_local_or_mlx",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "manifest_assumption_without_inventory",
+    "requested_model_candidates": [
+      "jina-reranker-v3-mlx",
+      "bge-reranker-v2-m3",
+      "Qwen3-Reranker-0.6B"
+    ],
+    "candidate_id": "neural_rerank_jina_v3_mlx",
+    "candidate_label": "Neural reranker via local HF/MLX runtime (Jina v3)",
+    "candidate_role": "challenger_neural",
+    "dataset_id": "phase8_5_reranker_pdf_corpus",
+    "question_set_id": "phase8_5_reranker_questions_v1",
+    "document_count": 4,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "repetition": 1,
+    "retrieval_strategy": "manual_hybrid",
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.0,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "support_status": "conditional_local_runtime",
+    "runtime_bucket": "experimental_local",
+    "quantization_family": "unspecified_experimental",
+    "runtime_artifact": {},
+    "error": "neural_reranker_runtime_unavailable",
+    "runtime_path": "local_native_runtime",
+    "runtime_path_label": "Local native runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "huggingface_local",
+    "backend_model_ref_resolved": "jina-reranker-v3-mlx",
+    "backend_equivalence_key": "huggingface_local::jina-reranker-v3-mlx",
+    "equivalent_direct_runtime_key": null,
+    "path_overhead_expected": false,
+    "path_comparison_note": "Local native runtime path outside Ollama; backend semantics may differ from Ollama-native execution.",
+    "resolved_runtime_family": "mlx_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": "requested_runtime_family=hf_local_or_mlx resolved_runtime_family=mlx_local",
+    "finished_at": 1775424024.6475751,
+    "total_wall_time_s": 0.0,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 0.0,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 480.75,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak"
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "debug_title_only",
+  "output_dir": "baseline://artifacts/presentation_exports/debug_title_only_previews",
+  "presentation_title": "debug_title_only",
+  "theme": "executive_premium_minimal",
+  "preview_count": 1,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "direct_png",
+  "input_pptx": "baseline://external_files/a04e883586040e21_debug_title_only.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "debug_title_only-01.png",
+      "path": "baseline://external_files/242b371a91225174_debug_title_only-01.png"
+    }
+  ]
+}

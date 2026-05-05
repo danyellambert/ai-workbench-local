@@ -1,0 +1,112 @@
+{
+  "files": [
+    {
+      "file": "data/synthetic/resumes_ui_test/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "document_visible_contacts": {
+        "emails": ["gabriel.gomes.almeida@example.com"],
+        "phones": ["+55 11 92878-8327"]
+      },
+      "gold_set_contacts": {
+        "emails": ["gabriel.almeida@example.com"],
+        "phones": ["+55 11 99888-1111"]
+      },
+      "legacy_predicted": {
+        "emails": ["gabriel.gomes.almeida@example.com"],
+        "phones": ["5511928788327"]
+      },
+      "evidence_no_vl_predicted": {
+        "emails": ["gabriel.gomes.almeida@example.com"],
+        "phones": ["5511928788327"]
+      },
+      "evidence_with_vl_predicted": {
+        "emails": ["gabriel.gomes.almeida@example.com"],
+        "phones": ["5511928788327"]
+      },
+      "root_cause": {
+        "email": "gold_set_incorrect",
+        "phone": "gold_set_incorrect"
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0002_hard_compact_sidebar_marina.gomes.ribeiro.pdf",
+      "document_visible_contacts": {
+        "emails": ["marina.gomes.ribeiro@example.com"],
+        "phones": ["+55 11 92891-2991"]
+      },
+      "gold_set_contacts": {
+        "emails": ["marina.ribeiro@example.com"],
+        "phones": ["+55 21 97777-2222"]
+      },
+      "legacy_predicted": {
+        "emails": ["marina.gomes.ribeiro@example.com"],
+        "phones": ["5511928912991"]
+      },
+      "evidence_no_vl_predicted": {
+        "emails": ["marina.gomes.ribeiro@example.com"],
+        "phones": ["5511928912991"]
+      },
+      "evidence_with_vl_predicted": {
+        "emails": ["marina.gomes.ribeiro@example.com"],
+        "phones": ["5511928912991"]
+      },
+      "root_cause": {
+        "email": "gold_set_incorrect",
+        "phone": "gold_set_incorrect"
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "document_visible_contacts": {
+        "emails": ["barbosa.martins@example.com"],
+        "phones": ["+55 11 98242-5650"]
+      },
+      "gold_set_contacts": {
+        "emails": ["beatriz.martins@example.com"],
+        "phones": ["+55 31 96666-3333"]
+      },
+      "legacy_predicted": {
+        "emails": ["barbosa.martins@example.com"],
+        "phones": ["5511982425650"]
+      },
+      "evidence_no_vl_predicted": {
+        "emails": ["barbosa.martins@example.com"],
+        "phones": ["5511982425650"]
+      },
+      "evidence_with_vl_predicted": {
+        "emails": ["barbosa.martins@example.com", "beatriz.barbosa.martins@example.com"],
+        "phones": ["5511682425650", "5511982425650"]
+      },
+      "root_cause": {
+        "email": "gold_set_incorrect",
+        "phone": "gold_set_incorrect"
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+      "document_visible_contacts": {
+        "emails": [],
+        "phones": []
+      },
+      "gold_set_contacts": {
+        "emails": [],
+        "phones": []
+      },
+      "legacy_predicted": {
+        "emails": [],
+        "phones": []
+      },
+      "evidence_no_vl_predicted": {
+        "emails": [],
+        "phones": []
+      },
+      "evidence_with_vl_predicted": {
+        "emails": ["matheus.araujo.carvalho@example.com", "matheususaraujo.carvalho@example.com"],
+        "phones": ["5511994896568", "5511994898586"]
+      },
+      "root_cause": {
+        "email": "pipeline_false_positive",
+        "phone": "pipeline_false_positive"
+      }
+    }
+  ]
+}

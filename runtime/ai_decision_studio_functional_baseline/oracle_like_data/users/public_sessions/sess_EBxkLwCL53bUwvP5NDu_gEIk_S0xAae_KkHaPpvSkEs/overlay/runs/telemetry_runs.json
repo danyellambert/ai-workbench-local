@@ -1,0 +1,329 @@
+[
+  {
+    "trace_id": "trace_policy_contract_comparison_3cfe1b64da52",
+    "run_id": "run_policy_contract_comparison_fbe9460dc7a0",
+    "workflow_id": "policy_contract_comparison",
+    "workflow_label": "Policy / Contract Comparison",
+    "surface": "product_api_public_overlay",
+    "status": "warning",
+    "started_at": "2026-05-03T21:14:35.174231+00:00",
+    "completed_at": "2026-05-03T21:15:32.882855+00:00",
+    "needs_review": true,
+    "review_reason": "Retrieval backend note: Retrieval served by local fallback from the canonical JSON..",
+    "request": {
+      "workflow_id": "policy_contract_comparison",
+      "document_ids": [
+        "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+        "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+      ],
+      "input_text": "Compare these documents for approval risks, differences, watchouts, must-fix issues, negotiation priorities, and business impact.",
+      "provider": "ollama_hosted",
+      "model": "nemotron-3-nano:30b-cloud",
+      "prompt_profile": "neutro",
+      "temperature": 0.2,
+      "top_p": 0.95,
+      "max_tokens": 4352,
+      "context_window_mode": "auto",
+      "context_window": null,
+      "use_document_context": true,
+      "context_strategy": "document_scan"
+    },
+    "summary": {
+      "title": "Policy / Contract Comparison",
+      "status": "warning",
+      "summary": "**Executive Comparison**  \nBoth policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.\n\n- v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.  \n- v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.  \n- v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.  \n- v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.  \n- The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.  \n- Negotiation priorities should address defining the incident‑notification timeframe in v3.1 and allocating resources for the new MFA and revalidation processes to mitigate approval and operational risks.",
+      "highlights": [
+        "Both policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.",
+        "v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.",
+        "v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.",
+        "v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.",
+        "v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.",
+        "The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties."
+      ],
+      "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "warnings": [
+        "Retrieval backend note: Retrieval served by local fallback from the canonical JSON.."
+      ],
+      "grounding_preview": {
+        "strategy": "document_scan",
+        "document_ids": [
+          "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+          "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+        ],
+        "context_chars": 5593,
+        "source_block_count": 5,
+        "preview_text": "[Source: Information Security Policy v3.2.pdf]\n[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-032  Information Security Policy v3.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.2\nRevised policy introducing explicit incident timing and stronger identity controls.\nDocument ID\nPOL-032\nOwner\nChief Information Security Officer\nVersion\n3.2\nEffective Date\n2024-04-01\nSupersedes\nPOL-031 v3.1\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nRevision Summary\nArea\nVersion 3.1\nVersion 3.2\nMFA\nAdmins and remote access only\nAll workforce accounts and all privileged actions\nPrivileged Reviews\nEvery six months\nQuarterly for privileged users; semiannual for standard\nusers\nVendor Oversight\nAnnual evidence expectation\nPre-onboarding review plus annual reassessment for\ncritical vendors\nIncident Notice\nReasonable efforts / no hours defined\nCritical customer-data incidents escalated within 24 hours\nof confirmation\nLog Retention\n180 days\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05\n\n[Source: Information Security Policy v3.2.pdf]\ndays\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or\non-premises.\nREQ-IDM-08. Privileged access to production systems must be revalidated quarterly by the system owner and Security.\nREQ-VND-07. Critical vendors must complete a security review before onboarding and after any material control\nchange.\nREQ-IR-09. Suspected incidents involving customer data, privileged misuse, or unauthorized third-party access must be\nescalated immediately and in no event later than 24 hours after confirmation.\nREQ-LOG-05. Production and security telemetry must be retained for at least 12 months in tamper-evident storage.\nTransition Requirement\nManagers must complete revalidation of all standing privileged access and close any open vendor-evidence gaps within\nthirty (30) days of the effective date of this version.\n\n[Source: Information Security Policy v3.1.pdf]\n[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.1\nApproved internal policy in force during the March 2024 vendor review cycle.\nDocument ID\nPOL-031\nOwner\nChief Information Security Officer\nVersion\n3.1\nEffective Date\n2024-01-05\nReview Cycle\nAnnual\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Purpose and Scope\nThis policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and\ncritical third parties that access Meridian data, systems, or production support environments.\n2. Governance Roles\nRole\nCore Responsibilities\nChief Information Security\nOfficer\nMaintains the security program, approves exceptions, and reports material risks to executive\nleadership.\nSystem Owners\nEnsure systems meet baseline controls and remediate findings in a timely manner.\nManagers\nApprove access based on business need and review\n\n[Source: Information Security Policy v3.1.pdf]\ns in a timely manner.\nManagers\nApprove access based on business need and review privileged access at least every six\nmonths.\nWorkforce Members\nComplete required training and report suspicious activity promptly.\n3. Control Requirements\n●\nREQ-IDM-03. Privileged access requires manager approval and ticket-based provisioning.\nREQ-IDM-05. Multi-factor authentication is mandatory for administrative access and remote access to production\nsystems.\nREQ-LOG-02. Production security logs must be retained for at least 180 days and reviewed for anomalous activity.\nREQ-VND-04. Critical service providers must provide annual security evidence and notify Meridian of material control\nchanges.\n4. Incident Management\nREQ-IR-07. The Security Team will use reasonable efforts to notify affected executive stakeholders, control owners, and\nlegal counsel in a timely manner once material facts are confirmed. External notification timing will be determined based on\nfacts, contractual commitments, and business impact.\nThe policy requires incidents to be documented, triaged, and preserved in the case-management system. The policy does\nnot define an explicit notification window for critical customer-data in\n\n[Source: Information Security Policy v3.1.pdf]\ncy does\nnot define an explicit notification window for critical customer-data incidents.\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nReview signal: REQ-IR-07 is intentionally vague and lacks a defined number of hours. This supports the\n“weak incident response timeframe” finding in the frontend.\nApproval and Revision History\nRole\nName\nStatus / Date\nChief Information Security Officer\nElena Petrov\nApproved — 2024-01-05\nGeneral Counsel\nDaniel Brooks\nReviewed — 2024-01-04\nVersion\nDate\nOwner\nSummary\n3.0\n2023-06-01\nSecurity\nProgram refresh for identity, logging, and vendor-risk coverage.\n3.1\n2024-01-05\nClarified annual evidence expectations and log-retention language.",
+        "warnings": []
+      }
+    },
+    "routing": {
+      "execution_strategy_requested": "langgraph_context_retry",
+      "execution_strategy_used": "langgraph_context_retry",
+      "workflow_route_decision": "comparison_prefers_retrieval_when_document_count_is_small",
+      "workflow_guardrail_decision": "finish_ok",
+      "workflow_context_strategies": [
+        "retrieval"
+      ],
+      "context_strategy": "document_scan"
+    },
+    "runtime": {
+      "timestamp": "2026-05-03T21:15:32.877053+00:00",
+      "trace_id": "trace_policy_contract_comparison_3cfe1b64da52",
+      "run_id": "run_policy_contract_comparison_fbe9460dc7a0",
+      "workflow_id": "policy_contract_comparison",
+      "flow_type": "product_workflow",
+      "task_type": "document_agent",
+      "provider": "ollama_hosted",
+      "provider_requested": "ollama_hosted",
+      "provider_effective": "ollama_hosted",
+      "model": "nemotron-3-nano:30b-cloud",
+      "latency_s": 57.7026,
+      "retrieval_latency_s": 0.1462,
+      "generation_latency_s": 49.7136,
+      "prompt_build_latency_s": 0.2939,
+      "parsing_latency_s": 10.5815,
+      "success": true,
+      "error_message": null,
+      "needs_review": true,
+      "needs_review_reason": "Retrieval backend note: Retrieval served by local fallback from the canonical JSON..",
+      "source_document_ids": [
+        "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+        "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+      ],
+      "selected_documents": 2,
+      "retrieved_chunks_count": 5,
+      "context_chars": 5593,
+      "context_budget_chars": 5373,
+      "context_pressure_ratio": 1.0,
+      "prompt_chars": 16846,
+      "output_chars": 1688,
+      "prompt_tokens": 4198,
+      "completion_tokens": 7755,
+      "total_tokens": 11953,
+      "cost_usd": null,
+      "usage_source": "ollama_native_usage",
+      "cost_source": "provider_native_usage_unpriced",
+      "context_window_mode": "auto",
+      "context_window": null,
+      "resolved_context_window": 8192,
+      "context_window_cap": 8192,
+      "temperature": 0.2,
+      "top_p": 0.95,
+      "max_tokens": 4352,
+      "prompt_profile": "neutro",
+      "execution_strategy_requested": "langgraph_context_retry",
+      "execution_strategy_used": "langgraph_context_retry",
+      "workflow_route_decision": "comparison_prefers_retrieval_when_document_count_is_small",
+      "workflow_guardrail_decision": "finish_ok",
+      "workflow_attempts": 1,
+      "workflow_context_strategies": [
+        "retrieval"
+      ],
+      "agent_intent": "document_comparison",
+      "agent_tool": "compare_documents",
+      "agent_answer_mode": "comparison_structured",
+      "retrieval_backend_used": "local_fallback",
+      "retrieval_strategy_requested": "manual_hybrid",
+      "retrieval_strategy_used": "manual_hybrid",
+      "top_k_effective": 5,
+      "provider_calls": [
+        {
+          "stage": "summary_single_pass",
+          "provider": "ollama_hosted",
+          "provider_requested": "ollama_hosted",
+          "model": "nemotron-3-nano:30b-cloud",
+          "duration_s": 19.7702,
+          "prompt_chars": 4699,
+          "context_window": 8192,
+          "temperature": 0.2,
+          "top_p": 0.95,
+          "max_tokens": 4352,
+          "prompt_profile": "neutro",
+          "success": true,
+          "native_usage": {
+            "usage_source": "ollama_native_usage",
+            "cost_source": "provider_native_usage_unpriced",
+            "prompt_tokens": 1132,
+            "completion_tokens": 2907,
+            "total_tokens": 4039
+          }
+        },
+        {
+          "stage": "summary_single_pass",
+          "provider": "ollama_hosted",
+          "provider_requested": "ollama_hosted",
+          "model": "nemotron-3-nano:30b-cloud",
+          "duration_s": 14.4176,
+          "prompt_chars": 3570,
+          "context_window": 8192,
+          "temperature": 0.2,
+          "top_p": 0.95,
+          "max_tokens": 4352,
+          "prompt_profile": "neutro",
+          "success": true,
+          "native_usage": {
+            "usage_source": "ollama_native_usage",
+            "cost_source": "provider_native_usage_unpriced",
+            "prompt_tokens": 896,
+            "completion_tokens": 2345,
+            "total_tokens": 3241
+          }
+        },
+        {
+          "stage": "summary_single_pass_repair_json",
+          "provider": "ollama_hosted",
+          "provider_requested": "ollama_hosted",
+          "model": "nemotron-3-nano:30b-cloud",
+          "duration_s": 10.5738,
+          "prompt_chars": 6750,
+          "context_window": 8192,
+          "temperature": 0.2,
+          "top_p": 0.95,
+          "max_tokens": 4352,
+          "prompt_profile": "neutro",
+          "success": true,
+          "native_usage": {
+            "usage_source": "ollama_native_usage",
+            "cost_source": "provider_native_usage_unpriced",
+            "prompt_tokens": 1761,
+            "completion_tokens": 1644,
+            "total_tokens": 3405
+          }
+        },
+        {
+          "stage": "document_agent_compare_documents",
+          "provider": "ollama_hosted",
+          "provider_requested": "ollama_hosted",
+          "model": "nemotron-3-nano:30b-cloud",
+          "duration_s": 4.952,
+          "prompt_chars": 1827,
+          "context_window": 8192,
+          "temperature": 0.2,
+          "top_p": 0.95,
+          "max_tokens": 4352,
+          "prompt_profile": "neutro",
+          "success": true,
+          "native_usage": {
+            "usage_source": "ollama_native_usage",
+            "cost_source": "provider_native_usage_unpriced",
+            "prompt_tokens": 409,
+            "completion_tokens": 859,
+            "total_tokens": 1268
+          }
+        }
+      ],
+      "surface": "product_api_public_overlay"
+    },
+    "spans": [
+      {
+        "span_id": "span_select_a6833e0f",
+        "name": "select_documents",
+        "stage": "select_documents",
+        "status": "completed",
+        "detail": "2 document(s) selected",
+        "duration_ms": 0
+      },
+      {
+        "span_id": "span_context_82ad60ca",
+        "name": "build_context",
+        "stage": "build_context",
+        "status": "completed",
+        "detail": "Strategy: document_scan",
+        "duration_ms": 294
+      },
+      {
+        "span_id": "span_generate_c4fb2740",
+        "name": "generate_structured_output",
+        "stage": "generate",
+        "status": "completed",
+        "detail": "langgraph_context_retry",
+        "duration_ms": 49714
+      },
+      {
+        "span_id": "span_parse_808e6aa7",
+        "name": "parse_and_validate",
+        "stage": "parse_validate",
+        "status": "completed",
+        "detail": "Structured payload parsing and validation",
+        "duration_ms": 10582
+      },
+      {
+        "span_id": "span_trace_0_65570d",
+        "name": "prepare_agent_request",
+        "stage": "workflow_trace",
+        "status": "completed",
+        "detail": "Preparing initial request for the document agent",
+        "duration_ms": null,
+        "attempt": 1,
+        "context_strategy": "document_scan"
+      },
+      {
+        "span_id": "span_trace_1_df0dce",
+        "name": "classify_intent",
+        "stage": "workflow_trace",
+        "status": "completed",
+        "detail": "Using explicit agent intent from telemetry: product_workflow_default:policy_contract_comparison",
+        "duration_ms": null,
+        "attempt": 1,
+        "context_strategy": "document_scan"
+      },
+      {
+        "span_id": "span_trace_2_9722c3",
+        "name": "select_tool",
+        "stage": "workflow_trace",
+        "status": "completed",
+        "detail": "Using explicit agent tool from telemetry: product_workflow_default:policy_contract_comparison",
+        "duration_ms": null,
+        "attempt": 1,
+        "context_strategy": "document_scan"
+      },
+      {
+        "span_id": "span_trace_3_bbb1f6",
+        "name": "route_agent_context_strategy",
+        "stage": "workflow_trace",
+        "status": "completed",
+        "detail": "Selecting agent context strategy: comparison_prefers_retrieval_when_document_count_is_small",
+        "duration_ms": null,
+        "attempt": 1,
+        "context_strategy": "retrieval"
+      },
+      {
+        "span_id": "span_trace_4_f96d19",
+        "name": "execute_task",
+        "stage": "workflow_trace",
+        "status": "completed",
+        "detail": "Executing structured_service within the LangGraph workflow",
+        "duration_ms": null,
+        "attempt": 1,
+        "context_strategy": "retrieval"
+      },
+      {
+        "span_id": "span_trace_5_363cfb",
+        "name": "evaluate_agent_guardrails",
+        "stage": "workflow_trace",
+        "status": "completed",
+        "detail": "Agent response accepted with no additional guardrail",
+        "duration_ms": null,
+        "attempt": 1,
+        "context_strategy": "retrieval"
+      },
+      {
+        "span_id": "span_total_ccc37acf",
+        "name": "complete_run",
+        "stage": "total",
+        "status": "completed",
+        "detail": "End-to-end product workflow run",
+        "duration_ms": 57703
+      }
+    ],
+    "lineage": {
+      "history_entry_id": "run_policy_contract_comparison_fbe9460dc7a0",
+      "artifacts": [],
+      "deliveries": [],
+      "evidenceops_actions": []
+    },
+    "reran_from_run_id": null,
+    "error_message": null,
+    "digest": "702fd3862578a8ab"
+  }
+]

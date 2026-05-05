@@ -1,0 +1,232 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Benchmark & Eval Review",
+      "subtitle": "Resumo executivo da rodada atual",
+      "author": "AI Workbench Local",
+      "date": "2026-04-05",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Benchmark & Eval Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Benchmark & Eval Review",
+        "subtitle": "Resumo executivo da rodada atual",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: benchmark_eval_executive_deck. Sources: phase7_model_comparison_log, phase8_eval_store."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "17 candidatos foram consolidados no benchmark, com success rate médio de 100% e liderança atual de nemotron-3-super:cloud. A camada de eval registrou 168 runs, com PASS rate de 57.1% e needs review de 1.8%.",
+        "bullets": [
+          "Top benchmark candidate atual: nemotron-3-super:cloud.",
+          "Benchmark success rate agregado em 100%.",
+          "Use-case fit médio de benchmark em 99.7%."
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Resumo executivo consolidado a partir dos agregados de benchmark/eval."
+      },
+      {
+        "type": "metrics",
+        "title": "Benchmark and eval snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "17",
+            "label": "Benchmark candidates",
+            "detail": "Top model: nemotron-3-super:cloud"
+          },
+          {
+            "value": "100%",
+            "label": "Benchmark success",
+            "detail": "Avg latency: 3.99s"
+          },
+          {
+            "value": "168",
+            "label": "Eval runs",
+            "detail": "Top suite: langgraph_workflow_eval"
+          },
+          {
+            "value": "57.1%",
+            "label": "Eval PASS rate",
+            "detail": "Avg score: 74.6%"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Métricas executivas consolidadas para leitura rápida."
+      },
+      {
+        "type": "table",
+        "title": "Model leaderboard",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Model",
+          "Signal",
+          "Latency (s)",
+          "Fit"
+        ],
+        "table_rows": [
+          [
+            "nemotron-3-super:cloud",
+            "1.000",
+            "1.57",
+            "100%"
+          ],
+          [
+            "nemotron-3-nano:30b-cloud",
+            "1.000",
+            "1.85",
+            "100%"
+          ],
+          [
+            "qwen3.5:397b-cloud",
+            "0.000",
+            "7.30",
+            "0%"
+          ],
+          [
+            "deepseek-v3.1:671b-cloud",
+            "0.000",
+            "14.71",
+            "0%"
+          ],
+          [
+            "minimax-m2.7:cloud",
+            "0.983",
+            "13.32",
+            "98.3%"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Leaderboard agregado de modelos para o slice benchmark/eval."
+      },
+      {
+        "type": "table",
+        "title": "Eval suite leaderboard",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Suite",
+          "Pass rate",
+          "Avg score",
+          "Latency (s)"
+        ],
+        "table_rows": [
+          [
+            "langgraph_workflow_eval",
+            "100%",
+            "100%",
+            "0.00"
+          ],
+          [
+            "document_agent_routing_eval",
+            "100%",
+            "100%",
+            "0.00"
+          ],
+          [
+            "structured_smoke_eval",
+            "76%",
+            "77.8%",
+            "32.81"
+          ],
+          [
+            "structured_real_document_eval",
+            "53.1%",
+            "59.7%",
+            "89.73"
+          ],
+          [
+            "evidence_cv_gold_eval",
+            "35%",
+            "70.7%",
+            "0.00"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Suites de eval ordenadas por qualidade agregada."
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Promover nemotron-3-super:cloud como candidato principal da próxima rodada controlada, mantendo o quality gate apoiado no PASS rate atual de 57.1%.",
+            "bullets": [
+              "Promover nemotron-3-super:cloud para uma rodada shadow/controlada como…",
+              "Revisar suites em FAIL/WARN e transformar os achados em gates repetívei…"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "Ainda existem runs em FAIL (27.4%).",
+            "bullets": [
+              "Fail rate: 27.4%",
+              "Avg eval latency: 64.78s"
+            ]
+          }
+        ],
+        "speaker_notes": "Comparação entre decisão recomendada e pontos de atenção operacionais."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Promover nemotron-3-super:cloud para uma rodada shadow/controlada como candidat…",
+          "Revisar suites em FAIL/WARN e transformar os achados em gates repetíveis.",
+          "Reduzir backlog de needs_review antes de ampliar o escopo da rodada seguinte.",
+          "Serializar este contrato e chamar o `ppt_creator_app` por API HTTP no próximo s…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Próximos passos sugeridos para o próximo slice da integração."
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260405_203042_c8fd1f7d/benchmark_eval_executive_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260405_203042_c8fd1f7d",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

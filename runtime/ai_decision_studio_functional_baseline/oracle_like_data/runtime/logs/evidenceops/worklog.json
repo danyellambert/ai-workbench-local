@@ -1,0 +1,1610 @@
+[
+  {
+    "timestamp": "2026-04-18T14:16:03.989788+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Derive a grounded action plan from the selected evidence for action plan extraction, including owners, deadlines and missing evidence.",
+    "confidence": 0.67,
+    "needs_review": true,
+    "needs_review_reason": "operational_extraction_without_grounded_actions",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": [
+      "Open the cited source excerpts to confirm the interpretation before acting.",
+      "Forward the result for human review before making a final decision."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T14:30:02.695734+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact in approved repository"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Complete remediation for EV-005"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 email-export artifact in approved repository",
+      "Verify provenance of missing evidence",
+      "Complete remediation for EV-005",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T14:51:12.064902+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.63,
+    "needs_review": true,
+    "needs_review_reason": "operational_extraction_without_grounded_actions",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": [
+      "Open the cited source excerpts to confirm the interpretation before acting.",
+      "Forward the result for human review before making a final decision."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T15:06:21.848372+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.63,
+    "needs_review": true,
+    "needs_review_reason": "operational_extraction_without_grounded_actions",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": [
+      "Open the cited source excerpts to confirm the interpretation before acting.",
+      "Forward the result for human review before making a final decision."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T15:27:02.317185+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 in approved repository"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "2024-Q1"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 in approved repository",
+      "Verify provenance of missing evidence",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T15:49:27.637959+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Complete verification of all evidence items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 email-export artifact",
+      "Verify provenance of missing evidence",
+      "Complete verification of all evidence items",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T16:44:43.768127+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.63,
+    "needs_review": true,
+    "needs_review_reason": "operational_extraction_without_grounded_actions",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": [
+      "Open the cited source excerpts to confirm the interpretation before acting.",
+      "Forward the result for human review before making a final decision."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T17:05:07.218746+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.63,
+    "needs_review": true,
+    "needs_review_reason": "operational_extraction_without_grounded_actions",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": [
+      "Open the cited source excerpts to confirm the interpretation before acting.",
+      "Forward the result for human review before making a final decision."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T17:29:07.456504+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Complete verification of in-progress items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 email-export artifact",
+      "Verify provenance of missing evidence",
+      "Complete verification of in-progress items",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T19:41:40.677949+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Complete verification of all evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 email-export artifact",
+      "Verify provenance of missing items",
+      "Complete verification of all evidence",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T20:40:41.680160+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact in approved repository"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 email-export artifact in approved repository",
+      "Verify provenance of missing evidence",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T21:06:42.573940+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 artifact in approved repository"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "2024-Q1"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 artifact in approved repository",
+      "Verify provenance of missing evidence",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T22:06:00.289232+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact in approved repository"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence (EV-002)"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Confirm receipt of EV-003 vendor attestation"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Confirm receipt of EV-004 privileged activity log"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 email-export artifact in approved repository",
+      "Verify provenance of missing evidence (EV-002)",
+      "Confirm receipt of EV-003 vendor attestation",
+      "Confirm receipt of EV-004 privileged activity log",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T22:43:06.920364+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Complete verification of in-progress items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Verify provenance of missing evidence",
+      "Archive EV-002 email-export artifact",
+      "Complete verification of in-progress items",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T23:12:09.142361+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Execute the selected workflow and surface the most material risk or blocker.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 artifact in approved repository"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Complete review of all evidence items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 artifact in approved repository",
+      "Verify provenance of missing evidence",
+      "Complete review of all evidence items",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-18T23:57:28.636632+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Execute the selected workflow and surface the most material risk or blocker.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive email-export artifact for EV-002"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive email-export artifact for EV-002",
+      "Verify provenance of missing evidence",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-19T00:13:17.443936+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Execute the selected workflow and surface the most material risk or blocker.",
+    "confidence": 0.67,
+    "needs_review": true,
+    "needs_review_reason": "operational_extraction_without_grounded_actions",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": [
+      "Open the cited source excerpts to confirm the interpretation before acting.",
+      "Forward the result for human review before making a final decision."
+    ]
+  },
+  {
+    "timestamp": "2026-04-19T00:55:55.084648+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Execute the selected workflow and surface the most material risk or blocker.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Provide missing evidence for EV-002"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of in-progress items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 email-export artifact",
+      "Provide missing evidence for EV-002",
+      "Verify provenance of in-progress items",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-19T01:13:54.173925+00:00",
+    "task_type": "consult_documents",
+    "review_type": "document_chat",
+    "tool_used": "chat_rag",
+    "query": "Please summarize the main grounded signals shown on this AI LAB chat page.",
+    "confidence": 1.0,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 4,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+      "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+    ],
+    "workflow_id": "document_review",
+    "execution_strategy_used": "manual_hybrid",
+    "findings": [
+      {
+        "finding_type": "assistant_response",
+        "detail": "Based on the retrieved evidence, the main grounded signals shown on the AI LAB chat page are:\n\n1. **Governance Committee oversight of access review remediation** – The committee opened NCR‑2024‑011 and required correction of the access‑review evidence gap before the launch can be"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-19T01:14:22.013131+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Execute the selected workflow and surface the most material risk or blocker.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 artifact in approved repository"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Q1 2024"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 artifact in approved repository",
+      "Verify provenance of missing evidence",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-19T01:27:21.377464+00:00",
+    "task_type": "consult_documents",
+    "review_type": "document_chat",
+    "tool_used": "chat_rag",
+    "query": "Please summarize the main grounded signals shown on this AI LAB chat page.",
+    "confidence": 1.0,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 4,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+      "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+    ],
+    "workflow_id": "document_review",
+    "execution_strategy_used": "manual_hybrid",
+    "findings": [
+      {
+        "finding_type": "assistant_response",
+        "detail": "**Grounded signals observed on the AI LAB chat page**\n\n| Signal | Source | What it indicates |\n|--------|--------|-------------------|\n| **Opening of a non‑conformance (NCR‑2024‑011) and requirement to fix the access‑review evidence gap** | Governance Committee Minutes and Action"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-19T01:27:25.991109+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Execute the selected workflow and surface the most material risk or blocker.",
+    "confidence": 0.75,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 in approved repository"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure until provenance is verified"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 in approved repository",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-19T02:08:16.789327+00:00",
+    "task_type": "consult_documents",
+    "review_type": "document_chat",
+    "tool_used": "chat_rag",
+    "query": "Para que serve o documento de Governance Committee ?",
+    "confidence": 1.0,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 4,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+      "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+    ],
+    "workflow_id": "document_review",
+    "execution_strategy_used": "manual_hybrid",
+    "findings": [
+      {
+        "finding_type": "assistant_response",
+        "detail": "O documento de Governance Committee, conforme os trechos extraídos, serve para registrar e coordenar decisões estratégicas, ações corretivas e acompanhamento de riscos relacionados a governança de acesso e processos críticos. Ele inclui:\n\n- **Registro de decisões**: Aprovação de "
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-19T02:08:20.492565+00:00",
+    "task_type": "consult_documents",
+    "review_type": "document_chat",
+    "tool_used": "chat_rag",
+    "query": "Please summarize the main grounded signals shown on this AI LAB chat page.",
+    "confidence": 1.0,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 4,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+      "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+    ],
+    "workflow_id": "document_review",
+    "execution_strategy_used": "manual_hybrid",
+    "findings": [
+      {
+        "finding_type": "assistant_response",
+        "detail": "Based on the provided evidence, the main grounded signals from the AI LAB chat page are:\n\n1. **Governance Committee's role in oversight and remediation**:  \n   - The Committee approved the opening of **NCR-2024-011** (a nonconformance report) and mandated correction of an access-"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-19T02:08:30.886931+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Execute the selected workflow and surface the most material risk or blocker.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive email-export artifact for Evidence ID EV-002"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing or in-progress items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "2024-Q1"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive email-export artifact for Evidence ID EV-002",
+      "Verify provenance of missing or in-progress items",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-20T02:09:26.270254+00:00",
+    "task_type": "consult_documents",
+    "review_type": "document_chat",
+    "tool_used": "chat_rag",
+    "query": "Please summarize the main grounded signals shown on this AI LAB chat page.",
+    "confidence": 1.0,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 4,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52",
+      "73227e6f920843a8596e736db1eb18114e8f0f4977932594a9d2aec527f84def"
+    ],
+    "workflow_id": "document_review",
+    "execution_strategy_used": "manual_hybrid",
+    "findings": [
+      {
+        "finding_type": "assistant_response",
+        "detail": "Based on the provided evidence, the main grounded signals from the AI LAB chat page are:\n\n1. **Governance Committee oversight of remediation actions**:  \n   - Approved opening of **NCR-2024-011** (a nonconformance report) and required correction of an access-review evidence gap b"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-20T02:09:41.670728+00:00",
+    "task_type": "extract_operational_tasks",
+    "review_type": "document_agent",
+    "tool_used": "action_plan_evidence_review",
+    "query": "Execute the selected workflow and surface the most material risk or blocker.",
+    "confidence": 0.9,
+    "needs_review": false,
+    "needs_review_reason": null,
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "workflow_id": "action_plan_evidence_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Archive EV-002 email-export artifact"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Verify provenance of missing evidence"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Complete provenance verification for in-progress items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "2024-Q1"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Missing evidence blocks control closure"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive EV-002 email-export artifact",
+      "Verify provenance of missing evidence",
+      "Complete provenance verification for in-progress items",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-20T17:00:20.795583+00:00",
+    "task_type": "draft_business_response",
+    "review_type": "document_agent",
+    "tool_used": "document_review",
+    "query": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "confidence": 0.66,
+    "needs_review": true,
+    "needs_review_reason": "document_agent_confidence_below_review_threshold:0.660",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "workflow_id": "document_review",
+    "execution_strategy_used": "langgraph_context_retry",
+    "findings": [
+      {
+        "finding_type": "highlight",
+        "detail": "Access must be revalidated if named administrator changes"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "No explicit owner assigned for archival or revalidation action items"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Archive approval with Q1 access-review evidence pack"
+      },
+      {
+        "finding_type": "highlight",
+        "detail": "Revalidate approval if named administrator changes"
+      }
+    ],
+    "action_items": [],
+    "recommended_actions": [
+      "Archive approval with Q1 access-review evidence pack",
+      "Revalidate approval if named administrator changes",
+      "Open the cited source excerpts to confirm the interpretation before acting."
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T15:27:06.627229+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 0 document(s).",
+    "detail": "new=[{'document_id': None, 'title': 'build summary', 'category': '_build_logs', 'relative_path': '_build_logs/build_summary.json', 'suffix': '.json', 'size_bytes': 1754, 'modified_at': 1775388114}, {'document_id': None, 'title': 'file inventory', 'category': '_build_logs', 'relative_path': '_build_logs/file_inventory.csv', 'suffix': '.csv', 'size_bytes': 15690, 'modified_at': 1775388114}, {'document_id': None, 'title': 'file inventory', 'category': '_build_logs', 'relative_path': '_build_logs/file_inventory.json', 'suffix': '.json', 'size_bytes': 24720, 'modified_at': 1775388114}, {'document_id': None, 'title': 'evidenceops corpora review', 'category': 'root', 'relative_path': 'evidenceops_corpora_review.md', 'suffix': '.md', 'size_bytes': 1080, 'modified_at': 1775388114}, {'document_id': None, 'title': 'README generated', 'category': 'frontend_demo_grounded_v1', 'relative_path': 'frontend_demo_grounded_v1/README_generated.md', 'suffix': '.md', 'size_bytes': 3996, 'modified_at': 1776306776}, {'document_id': None, 'title': 'Access Review Evidence Log', 'category': 'frontend_demo_grounded_v1', 'relative_path': 'frontend_demo_grounded_v1/audit/Access Review Evidence Log.pdf', 'suffix': '.pdf', 'size_bytes': 4223, 'modified_at': 1776306776}, {'document_id': None, 'title': 'Governance Committee Minutes and Action Items', 'category': 'frontend_demo_grounded_v1', 'relative_path': 'frontend_demo_grounded_v1/audit/Governance Committee Minutes and Action Items.pdf', 'suffix': '.pdf', 'size_bytes': 6253, 'modified_at': 1776306776}, {'document_id': None, 'title': 'Internal Audit Checklist - Vendor Controls', 'category': 'frontend_demo_grounded_v1', 'relative_path': 'frontend_demo_grounded_v1/audit/Internal Audit Checklist - Vendor Controls.pdf', 'suffix': '.pdf', 'size_bytes': 4164, 'modified_at': 1776306776}, {'document_id': None, 'title': 'Nonconformance Report - Vendor Access Review', 'category': 'frontend_demo_grounded_v1', 'relative_path': 'frontend_demo_grounded_v1/audit/Nonconformance Report - Vendor Access Review.pdf', 'suffix': '.pdf', 'size_bytes': 5595, 'modified_at': 1776306776}, {'document_id': None, 'title': 'Remediation Closure Note - Vendor Access Review', 'category': 'frontend_demo_grounded_v1', 'relative_path': 'frontend_demo_grounded_v1/audit/Remediation Closure Note - Vendor Access Review.pdf', 'suffix': '.pdf', 'size_bytes': 3801, 'modified_at': 1776306776}] changed=[] removed=[]",
+    "source_count": 0,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-21T15:27:08.835908+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 0 document(s).",
+    "detail": "new=[] changed=[] removed=[]",
+    "source_count": 0,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-21T15:28:24.743639+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 75 updated to in_progress",
+    "detail": "Open the cited source excerpts to confirm the interpretation before acting.",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-21T15:28:28.997026+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 75 updated to in_progress",
+    "detail": "Open the cited source excerpts to confirm the interpretation before acting.",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-21T15:28:32.640998+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 74 updated to recommended",
+    "detail": "Revalidate approval if named administrator changes",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-21T15:31:02.413078+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 0 document(s).",
+    "detail": "new=[] changed=[] removed=[]",
+    "source_count": 0,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T10:03:28.973214+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T14:11:32.157526+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T14:12:03.608581+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 74 updated to in_progress",
+    "detail": "Revalidate approval if named administrator changes",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T14:12:06.783298+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 74 updated to in_progress",
+    "detail": "Revalidate approval if named administrator changes",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T14:12:17.358622+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 73 updated to recommended",
+    "detail": "Archive approval with Q1 access-review evidence pack",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T14:12:19.243161+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 73 updated to in_progress",
+    "detail": "Archive approval with Q1 access-review evidence pack",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T14:15:01.087471+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 72 updated to recommended",
+    "detail": "Open the cited source excerpts to confirm the interpretation before acting.",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T18:07:55.515572+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 75 updated to in_progress",
+    "detail": "Open the cited source excerpts to confirm the interpretation before acting.",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T18:07:57.991262+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 72 updated to in_progress",
+    "detail": "Open the cited source excerpts to confirm the interpretation before acting.",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T18:08:06.049105+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 71 updated to recommended",
+    "detail": "Complete provenance verification for in-progress items",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T18:13:01.639599+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T18:20:24.543207+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T18:21:30.133476+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-22T21:32:13.998372+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 75 updated to in_progress",
+    "detail": "Open the cited source excerpts to confirm the interpretation before acting.",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T00:43:02.355897+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T00:43:05.013313+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T00:43:06.579155+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T00:43:08.843664+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T00:43:32.458773+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 71 updated to in_progress",
+    "detail": "Complete provenance verification for in-progress items",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T00:43:34.214969+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 71 updated to in_progress",
+    "detail": "Complete provenance verification for in-progress items",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T02:39:56.173011+00:00",
+    "operation": "repository_sync",
+    "tool_used": "local_repository_scan",
+    "status": "success",
+    "latency_s": 0.02,
+    "summary": "Repository sync captured 94 document(s).",
+    "detail": "new=0 changed=0 removed=0",
+    "source_count": 94,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T22:20:39.801453+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 71 updated to closed",
+    "detail": "Complete provenance verification for in-progress items",
+    "source_count": 1,
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T22:20:54.038990+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 1 updated to recommended",
+    "detail": "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+    "source_count": 6,
+    "document_ids": [
+      "01055dd735831b1395021195082d017d683178573e27843945cdb9b5c73755d1",
+      "07438dc5ba1875770a839cf2f808d313db62778b08325340547622e809806f9b",
+      "10c1c1e3e384b1d7dea5e0bef9ae647b763dd273ff5b892b80926719bf0c6fb2",
+      "2d12ecdea955007b22a13e1edcfdcf113a058f7388f835c66c84e4e09ccc45f6",
+      "2e0548b2429cec5206c6f5e21c69a3ef0c426b8318bdb8c6c88be3c80d92d77d",
+      "4c51cb2dca6ff04e013db136a4ebde95ac5fe9326a4e8a5bec4cd601efa72cfa",
+      "566ac85b61bdd056f7b784f3ede220451608ca811550035a6e53747fd0d93e86",
+      "6b803f710c778a89ca4c85d451377c5ef4663716c81c85261200e88a203f90d7",
+      "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e",
+      "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T22:20:59.546173+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 1 updated to in_progress",
+    "detail": "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+    "source_count": 6,
+    "document_ids": [
+      "01055dd735831b1395021195082d017d683178573e27843945cdb9b5c73755d1",
+      "07438dc5ba1875770a839cf2f808d313db62778b08325340547622e809806f9b",
+      "10c1c1e3e384b1d7dea5e0bef9ae647b763dd273ff5b892b80926719bf0c6fb2",
+      "2d12ecdea955007b22a13e1edcfdcf113a058f7388f835c66c84e4e09ccc45f6",
+      "2e0548b2429cec5206c6f5e21c69a3ef0c426b8318bdb8c6c88be3c80d92d77d",
+      "4c51cb2dca6ff04e013db136a4ebde95ac5fe9326a4e8a5bec4cd601efa72cfa",
+      "566ac85b61bdd056f7b784f3ede220451608ca811550035a6e53747fd0d93e86",
+      "6b803f710c778a89ca4c85d451377c5ef4663716c81c85261200e88a203f90d7",
+      "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e",
+      "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T22:21:21.785378+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 74 updated to in_progress",
+    "detail": "Revalidate approval if named administrator changes",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-23T22:21:24.685116+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 74 updated to closed",
+    "detail": "Revalidate approval if named administrator changes",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-26T09:49:28.574100+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 75 updated to closed",
+    "detail": "Open the cited source excerpts to confirm the interpretation before acting.",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-27T12:07:54.542345+00:00",
+    "operation": "action_update",
+    "tool_used": "action_store",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Action 73 updated to in_progress",
+    "detail": "Archive approval with Q1 access-review evidence pack",
+    "source_count": 1,
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-27T15:06:07.719189+00:00",
+    "operation": "repository_search",
+    "tool_used": "local_repository_scan",
+    "query": "vendor",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Repository search returned 8 result(s).",
+    "source_count": 8,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-27T15:06:07.725245+00:00",
+    "operation": "repository_search",
+    "tool_used": "local_repository_scan",
+    "query": "runtime",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Repository search returned 0 result(s).",
+    "source_count": 0,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-27T15:06:07.730748+00:00",
+    "operation": "repository_search",
+    "tool_used": "local_repository_scan",
+    "query": "artifact",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Repository search returned 0 result(s).",
+    "source_count": 0,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-27T15:09:56.812399+00:00",
+    "operation": "repository_search",
+    "tool_used": "local_repository_scan",
+    "query": "vendor",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Repository search returned 8 result(s).",
+    "source_count": 8,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-27T15:09:56.825681+00:00",
+    "operation": "repository_search",
+    "tool_used": "local_repository_scan",
+    "query": "runtime",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Repository search returned 0 result(s).",
+    "source_count": 0,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  },
+  {
+    "timestamp": "2026-04-27T15:09:56.836053+00:00",
+    "operation": "repository_search",
+    "tool_used": "local_repository_scan",
+    "query": "artifact",
+    "status": "success",
+    "latency_s": 0.01,
+    "summary": "Repository search returned 0 result(s).",
+    "source_count": 0,
+    "document_ids": [],
+    "findings": [],
+    "action_items": [],
+    "recommended_actions": []
+  }
+]

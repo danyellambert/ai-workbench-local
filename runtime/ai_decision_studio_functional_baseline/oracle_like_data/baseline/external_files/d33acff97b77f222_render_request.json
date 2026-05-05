@@ -1,0 +1,292 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Action Plan",
+      "subtitle": "Operational action plan grounded in current action backlog",
+      "author": "AI Workbench Local",
+      "date": "2026-04-17",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Action Plan"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Action Plan",
+        "subtitle": "Operational action plan grounded in current action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Grounded in the current Action Plan run and cited document evidence."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "4 open action(s) remain in the current plan and now require explicit owner follow-through, evidence closure and sequencing into the next operating review.",
+        "bullets": [
+          "5 total actions are tracked in the current plan",
+          "There are overdue actions that require immediate reprioritization.",
+          "5 action(s) include owner, due date or status context"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Concise executive framing for the grounded action plan and execution posture."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "5",
+            "label": "Total actions"
+          },
+          {
+            "value": "4",
+            "label": "Open"
+          },
+          {
+            "value": "4",
+            "label": "Overdue"
+          },
+          {
+            "value": "0",
+            "label": "Approval required"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "cards",
+        "title": "Priority workstreams",
+        "bullets": [],
+        "cards": [
+          {
+            "title": "Priority 1",
+            "body": "Negotiate liability cap with vendor legal",
+            "footer": "Maria Santos • 2024-03-22 • In Progress"
+          },
+          {
+            "title": "Priority 2",
+            "body": "Draft SCC Appendix for data residency",
+            "footer": "James Park • 2024-03-25 • Open"
+          },
+          {
+            "title": "Evidence posture",
+            "body": "There are overdue actions that require immediate reprioritization.",
+            "footer": "Grounded review signal"
+          }
+        ],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Priority actions grouped from the current grounded run."
+      },
+      {
+        "type": "table",
+        "title": "Action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Ref",
+          "Owner",
+          "Due",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "A01",
+            "Maria Santos",
+            "2024-03-22",
+            "In Progress"
+          ],
+          [
+            "GOVERNANCE",
+            "James Park",
+            "2024-03-25",
+            "Open"
+          ],
+          [
+            "A03",
+            "Maria Santos",
+            "2024-03-20",
+            "Done"
+          ],
+          [
+            "GOVERNANCE",
+            "Alex Rivera",
+            "2024-03-28",
+            "Open"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Use the paired action-detail slide for full task wording and source references."
+      },
+      {
+        "type": "table",
+        "title": "Action backlog (2)",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Ref",
+          "Owner",
+          "Due",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "GOVERNANCE",
+            "Operations",
+            "2024-03-18",
+            "In Progress"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Use the paired action-detail slide for full task wording and source references."
+      },
+      {
+        "type": "bullets",
+        "title": "Action details appendix",
+        "body": "Full task wording, accountable owner, due date and source traceability.",
+        "bullets": [
+          "A01 — Negotiate liability cap with vendor legal",
+          "Owner: Maria Santos • Due: 2024-03-22 • Status: In Progress • Source: Privileged Account Approval Email",
+          "GOVERNANCE — Draft SCC Appendix for data residency",
+          "Owner: James Park • Due: 2024-03-25 • Status: Open • Source: Governance Committee Minutes and Action Items"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "[A01] Source: Privileged Account Approval Email.pdf | Evidence: Negotiate liability cap with vendor legal\n[GOVERNANCE] Source: Governance Committee Minutes and Action Items.pdf | Evidence: Draft SCC Appendix for data residency"
+      },
+      {
+        "type": "bullets",
+        "title": "Action details appendix (2)",
+        "body": "Full task wording, accountable owner, due date and source traceability.",
+        "bullets": [
+          "A03 — Request revised SLA with 99.95% target",
+          "Owner: Maria Santos • Due: 2024-03-20 • Status: Done • Source: Privileged Account Approval Email",
+          "GOVERNANCE — Define incident response SLOs",
+          "Owner: Alex Rivera • Due: 2024-03-28 • Status: Open • Source: Governance Committee Minutes and Action Items"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "[A03] Source: Privileged Account Approval Email.pdf | Evidence: Request revised SLA with 99.95% target\n[GOVERNANCE] Source: Governance Committee Minutes and Action Items.pdf | Evidence: Define incident response SLOs"
+      },
+      {
+        "type": "bullets",
+        "title": "Action details appendix (3)",
+        "body": "Full task wording, accountable owner, due date and source traceability.",
+        "bullets": [
+          "GOVERNANCE — Set up auto-renewal calendar alerts",
+          "Owner: Operations • Due: 2024-03-18 • Status: In Progress • Source: Governance Committee Minutes and Action Items"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "[GOVERNANCE] Source: Governance Committee Minutes and Action Items.pdf | Evidence: Set up auto-renewal calendar alerts"
+      },
+      {
+        "type": "timeline",
+        "title": "Execution timeline",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [
+          {
+            "title": "Step 1",
+            "body": "A01 · Negotiate liability cap with vendor legal",
+            "tag": "P1"
+          },
+          {
+            "title": "Step 2",
+            "body": "GOVERNANCE · Draft SCC Appendix for data residency",
+            "tag": "P2"
+          },
+          {
+            "title": "Step 3",
+            "body": "A03 · Request revised SLA with 99.95% target",
+            "tag": "P3"
+          }
+        ],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Execution sequence derived from the current action plan items."
+      },
+      {
+        "type": "two_column",
+        "title": "Blockers vs mitigations",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Blockers",
+            "body": "There are overdue actions that require immediate reprioritization.",
+            "bullets": [
+              "GOVERNANCE — Draft SCC Appendix for data residency",
+              "GOVERNANCE — Define incident response SLOs"
+            ]
+          },
+          {
+            "title": "Mitigations",
+            "body": "Execute the named actions in order, close cited evidence gaps and confirm approval dependencies before closure.",
+            "bullets": [
+              "A01 — Negotiate liability cap with vendor legal",
+              "GOVERNANCE — Draft SCC Appendix for data residency"
+            ]
+          }
+        ],
+        "speaker_notes": "Execution blockers and concrete mitigation actions from the current run."
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260417_202913_694c7e4a/action_plan_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260417_202913_694c7e4a",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

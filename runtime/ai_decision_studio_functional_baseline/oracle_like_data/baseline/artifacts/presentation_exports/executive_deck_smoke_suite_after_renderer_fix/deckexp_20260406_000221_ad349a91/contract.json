@@ -1,0 +1,112 @@
+{
+  "contract_version": "presentation_export.v1",
+  "export_kind": "benchmark_eval_executive_deck",
+  "presentation": {
+    "title": "AI Workbench Local — Benchmark & Eval Review",
+    "subtitle": "Resumo executivo da rodada atual",
+    "author": "AI Workbench Local",
+    "date": "2026-04-06",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Benchmark & Eval Review"
+  },
+  "model_comparison_snapshot": {
+    "total_runs": 1,
+    "total_candidates": 2,
+    "success_rate": 1.0,
+    "avg_latency_s": 0.95,
+    "avg_format_adherence": 0.95,
+    "avg_use_case_fit_score": 0.89,
+    "top_model": "qwen2.5:7b",
+    "top_runtime_bucket": "local"
+  },
+  "eval_snapshot": {
+    "total_runs": 2,
+    "pass_rate": 0.5,
+    "warn_rate": 0.5,
+    "fail_rate": 0.0,
+    "avg_score_ratio": 0.9,
+    "avg_latency_s": 1.8,
+    "needs_review_rate": 0.5,
+    "top_suite_name": "structured_smoke_eval"
+  },
+  "executive_summary": "2 candidatos foram consolidados no benchmark, com success rate médio de 100% e liderança atual de qwen2.5:7b. A camada de eval registrou 2 runs, com PASS rate de 50% e needs review de 50%.",
+  "key_highlights": [
+    "Top benchmark candidate atual: qwen2.5:7b.",
+    "Benchmark success rate agregado em 100%.",
+    "Use-case fit médio de benchmark em 89%.",
+    "Suite líder de eval atual: structured_smoke_eval.",
+    "PASS rate de eval em 50%.",
+    "Needs review rate atual em 50%."
+  ],
+  "key_metrics": [
+    {
+      "label": "Benchmark candidates",
+      "value": "2",
+      "detail": "Top model: qwen2.5:7b"
+    },
+    {
+      "label": "Benchmark success",
+      "value": "100%",
+      "detail": "Avg latency: 0.95s"
+    },
+    {
+      "label": "Eval runs",
+      "value": "2",
+      "detail": "Top suite: structured_smoke_eval"
+    },
+    {
+      "label": "Eval PASS rate",
+      "value": "50%",
+      "detail": "Avg score: 90%"
+    }
+  ],
+  "model_leaderboard": [
+    {
+      "rank": 1,
+      "model": "qwen2.5:7b",
+      "avg_latency_s": 1.1,
+      "format_adherence": 1.0,
+      "use_case_fit_score": 0.9,
+      "success_rate": 1.0
+    },
+    {
+      "rank": 2,
+      "model": "gpt-4o-mini",
+      "avg_latency_s": 0.8,
+      "format_adherence": 0.9,
+      "use_case_fit_score": 0.88,
+      "success_rate": 1.0
+    }
+  ],
+  "eval_suite_leaderboard": [
+    {
+      "rank": 1,
+      "suite_name": "structured_smoke_eval",
+      "pass_rate": 1.0,
+      "avg_score_ratio": 1.0,
+      "avg_latency_s": 1.2,
+      "total_runs": 1
+    },
+    {
+      "rank": 2,
+      "suite_name": "checklist_regression",
+      "pass_rate": 0.0,
+      "avg_score_ratio": 0.8,
+      "avg_latency_s": 2.4,
+      "total_runs": 1
+    }
+  ],
+  "recommendation": "Promover qwen2.5:7b como candidato principal da próxima rodada controlada, mantendo o quality gate apoiado no PASS rate atual de 50%.",
+  "watchouts": [
+    "Needs review rate acima do conforto operacional (50%)."
+  ],
+  "next_steps": [
+    "Promover qwen2.5:7b para uma rodada shadow/controlada como candidato default.",
+    "Reduzir backlog de needs_review antes de ampliar o escopo da rodada seguinte.",
+    "Serializar este contrato e chamar o `ppt_creator_app` por API HTTP no próximo slice."
+  ],
+  "data_sources": [
+    "phase7_model_comparison_log",
+    "phase8_eval_store"
+  ]
+}
