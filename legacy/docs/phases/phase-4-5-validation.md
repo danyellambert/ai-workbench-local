@@ -110,11 +110,11 @@ RAG_PDF_EXTRACTION_MODE=hybrid
 
 Executive visuals:
 
-![Winner matrix](assets/phase_4_5/21_phase_4_5_winner_matrix.png)
+![Winner matrix](../../../docs/assets/phase_4_5/21_phase_4_5_winner_matrix.png)
 
-![Final config card](assets/phase_4_5/22_phase_4_5_final_config_card.png)
+![Final config card](../../../docs/assets/phase_4_5/22_phase_4_5_final_config_card.png)
 
-![Cost/quality decision summary](assets/phase_4_5/23_phase_4_5_cost_quality_summary.png)
+![Cost/quality decision summary](../../../docs/assets/phase_4_5/23_phase_4_5_cost_quality_summary.png)
 
 ---
 

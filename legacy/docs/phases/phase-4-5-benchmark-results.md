@@ -81,15 +81,15 @@ RAG_PDF_EXTRACTION_MODE=hybrid
 
 ### Winner matrix
 
-![Phase 4.5 winner matrix](assets/phase_4_5/21_phase_4_5_winner_matrix.png)
+![Phase 4.5 winner matrix](../../../docs/assets/phase_4_5/21_phase_4_5_winner_matrix.png)
 
 ### Final recommended configuration
 
-![Phase 4.5 final configuration](assets/phase_4_5/22_phase_4_5_final_config_card.png)
+![Phase 4.5 final configuration](../../../docs/assets/phase_4_5/22_phase_4_5_final_config_card.png)
 
 ### Cost/quality decision summary
 
-![Phase 4.5 cost quality summary](assets/phase_4_5/23_phase_4_5_cost_quality_summary.png)
+![Phase 4.5 cost quality summary](../../../docs/assets/phase_4_5/23_phase_4_5_cost_quality_summary.png)
 
 ---
 
@@ -111,13 +111,13 @@ RAG_PDF_EXTRACTION_MODE=hybrid
 
 ### Visuals
 
-![Average manual score by extraction mode](assets/phase_4_5/01_pdf_extraction_aggregate_manual_score.png)
+![Average manual score by extraction mode](../../../docs/assets/phase_4_5/01_pdf_extraction_aggregate_manual_score.png)
 
-![Quality vs extraction cost](assets/phase_4_5/02_pdf_extraction_aggregate_quality_vs_cost.png)
+![Quality vs extraction cost](../../../docs/assets/phase_4_5/02_pdf_extraction_aggregate_quality_vs_cost.png)
 
-![Average indexing time by extraction mode](assets/phase_4_5/03_pdf_extraction_aggregate_indexing_time.png)
+![Average indexing time by extraction mode](../../../docs/assets/phase_4_5/03_pdf_extraction_aggregate_indexing_time.png)
 
-![Manual-review coverage by extraction mode](assets/phase_4_5/04_pdf_extraction_aggregate_review_coverage.png)
+![Manual-review coverage by extraction mode](../../../docs/assets/phase_4_5/04_pdf_extraction_aggregate_review_coverage.png)
 
 ### Document-level results
 
@@ -128,13 +128,13 @@ RAG_PDF_EXTRACTION_MODE=hybrid
 | `Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf` | 1.1250 | 0.9375 | 1.2500 | `complete` |
 | `c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf` | 1.1250 | 1.1875 | 1.2500 | `complete` |
 
-![Manual score by document and mode](assets/phase_4_5/05_pdf_extraction_doc_level_manual_score.png)
+![Manual score by document and mode](../../../docs/assets/phase_4_5/05_pdf_extraction_doc_level_manual_score.png)
 
-![Extraction time by document and mode](assets/phase_4_5/06_pdf_extraction_doc_level_extraction_time.png)
+![Extraction time by document and mode](../../../docs/assets/phase_4_5/06_pdf_extraction_doc_level_extraction_time.png)
 
-![Character count by document and mode](assets/phase_4_5/07_pdf_extraction_doc_level_char_count.png)
+![Character count by document and mode](../../../docs/assets/phase_4_5/07_pdf_extraction_doc_level_char_count.png)
 
-![Chunk count by document and mode](assets/phase_4_5/08_pdf_extraction_doc_level_chunk_count.png)
+![Chunk count by document and mode](../../../docs/assets/phase_4_5/08_pdf_extraction_doc_level_chunk_count.png)
 
 ### Interpretation
 
@@ -165,13 +165,13 @@ RAG_PDF_EXTRACTION_MODE=hybrid
 
 ### Visuals
 
-![Embedding quality vs latency](assets/phase_4_5/09_embedding_models_quality_vs_latency.png)
+![Embedding quality vs latency](../../../docs/assets/phase_4_5/09_embedding_models_quality_vs_latency.png)
 
-![Embedding indexing time](assets/phase_4_5/10_embedding_models_indexing_time.png)
+![Embedding indexing time](../../../docs/assets/phase_4_5/10_embedding_models_indexing_time.png)
 
-![Embedding quality metrics](assets/phase_4_5/11_embedding_models_quality_metrics.png)
+![Embedding quality metrics](../../../docs/assets/phase_4_5/11_embedding_models_quality_metrics.png)
 
-![Embedding latency metrics](assets/phase_4_5/12_embedding_models_latency.png)
+![Embedding latency metrics](../../../docs/assets/phase_4_5/12_embedding_models_latency.png)
 
 ### Interpretation
 
@@ -206,13 +206,13 @@ Use `embeddinggemma:300m` as the default embedding model.
 
 ### Visuals
 
-![embeddinggemma retrieval latency vs context](assets/phase_4_5/13_embedding_ctx_retrieval_vs_window.png)
+![embeddinggemma retrieval latency vs context](../../../docs/assets/phase_4_5/13_embedding_ctx_retrieval_vs_window.png)
 
-![embeddinggemma indexing time vs context](assets/phase_4_5/14_embedding_ctx_indexing_vs_window.png)
+![embeddinggemma indexing time vs context](../../../docs/assets/phase_4_5/14_embedding_ctx_indexing_vs_window.png)
 
-![Cross-model selected comparison](assets/phase_4_5/15_embedding_ctx_cross_model_scatter.png)
+![Cross-model selected comparison](../../../docs/assets/phase_4_5/15_embedding_ctx_cross_model_scatter.png)
 
-![Extreme-context cautionary example](assets/phase_4_5/16_embedding_ctx_extreme_context_warning.png)
+![Extreme-context cautionary example](../../../docs/assets/phase_4_5/16_embedding_ctx_extreme_context_warning.png)
 
 ### Interpretation
 
@@ -242,13 +242,13 @@ Use `embedding_context_window = 512` as the default for `embeddinggemma:300m`.
 
 ### Visuals
 
-![Retrieval tuning quality vs latency](assets/phase_4_5/17_retrieval_tuning_quality_vs_latency.png)
+![Retrieval tuning quality vs latency](../../../docs/assets/phase_4_5/17_retrieval_tuning_quality_vs_latency.png)
 
-![Retrieval tuning indexing time](assets/phase_4_5/18_retrieval_tuning_indexing_time.png)
+![Retrieval tuning indexing time](../../../docs/assets/phase_4_5/18_retrieval_tuning_indexing_time.png)
 
-![Retrieval tuning latency](assets/phase_4_5/19_retrieval_tuning_latency.png)
+![Retrieval tuning latency](../../../docs/assets/phase_4_5/19_retrieval_tuning_latency.png)
 
-![Retrieval tuning quality metrics](assets/phase_4_5/20_retrieval_tuning_quality_metrics.png)
+![Retrieval tuning quality metrics](../../../docs/assets/phase_4_5/20_retrieval_tuning_quality_metrics.png)
 
 ### Interpretation
 

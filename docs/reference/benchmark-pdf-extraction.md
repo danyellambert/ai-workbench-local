@@ -86,13 +86,13 @@ The final consolidation used:
 
 ### Aggregate visuals
 
-![Average manual score by extraction mode](assets/phase_4_5/01_pdf_extraction_aggregate_manual_score.png)
+![Average manual score by extraction mode](../assets/phase_4_5/01_pdf_extraction_aggregate_manual_score.png)
 
-![Quality vs extraction cost](assets/phase_4_5/02_pdf_extraction_aggregate_quality_vs_cost.png)
+![Quality vs extraction cost](../assets/phase_4_5/02_pdf_extraction_aggregate_quality_vs_cost.png)
 
-![Average indexing time by extraction mode](assets/phase_4_5/03_pdf_extraction_aggregate_indexing_time.png)
+![Average indexing time by extraction mode](../assets/phase_4_5/03_pdf_extraction_aggregate_indexing_time.png)
 
-![Manual-review coverage by extraction mode](assets/phase_4_5/04_pdf_extraction_aggregate_review_coverage.png)
+![Manual-review coverage by extraction mode](../assets/phase_4_5/04_pdf_extraction_aggregate_review_coverage.png)
 
 ### Aggregate interpretation
 
@@ -118,13 +118,13 @@ This means the benchmark should not be read as “complete is best”; it should
 
 ### Document-level visuals
 
-![Manual score by document and mode](assets/phase_4_5/05_pdf_extraction_doc_level_manual_score.png)
+![Manual score by document and mode](../assets/phase_4_5/05_pdf_extraction_doc_level_manual_score.png)
 
-![Extraction time by document and mode](assets/phase_4_5/06_pdf_extraction_doc_level_extraction_time.png)
+![Extraction time by document and mode](../assets/phase_4_5/06_pdf_extraction_doc_level_extraction_time.png)
 
-![Character count by document and mode](assets/phase_4_5/07_pdf_extraction_doc_level_char_count.png)
+![Character count by document and mode](../assets/phase_4_5/07_pdf_extraction_doc_level_char_count.png)
 
-![Chunk count by document and mode](assets/phase_4_5/08_pdf_extraction_doc_level_chunk_count.png)
+![Chunk count by document and mode](../assets/phase_4_5/08_pdf_extraction_doc_level_chunk_count.png)
 
 ### Document-level interpretation
 
