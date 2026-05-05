@@ -49,12 +49,11 @@ echo "==> Frontend port: $FRONTEND_DEV_PORT"
 kill_port_if_busy "$PRODUCT_API_SERVER_PORT"
 kill_port_if_busy "$FRONTEND_DEV_PORT"
 
-cd "$FRONTEND_DIR"
 echo "==> Ensuring Playwright Chromium is installed..."
-npx playwright install chromium >/dev/null
+npm --prefix "$FRONTEND_DIR" exec playwright install chromium >/dev/null
 
 echo "==> Starting frontend + product-api..."
-npm run dev >"$OUT_DIR/dev.log" 2>&1 &
+npm --prefix "$FRONTEND_DIR" run dev >"$OUT_DIR/dev.log" 2>&1 &
 DEV_PID=$!
 
 echo "==> Waiting for frontend on exact port..."

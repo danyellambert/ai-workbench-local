@@ -44,13 +44,12 @@ Local dev is running:
 
 ---
 
-## Why this is not the same as `cd frontend && npm run dev`
+## Why this is not the same as frontend-only Vite
 
 This command:
 
 ~~~bash
-cd frontend
-npm run dev
+npm --prefix frontend run dev:frontend
 ~~~
 
 starts only the Vite/React frontend.
@@ -68,7 +67,7 @@ The full local runner does more:
 7. Aligns frontend and backend for same-origin `/api` behavior.
 8. Avoids accidentally running the backend with global Python.
 
-Use `npm run dev` only for frontend-only visual work. For product-level validation, use:
+Use `npm --prefix frontend run dev:frontend` only for frontend-only visual work. For product-level validation, use:
 
 ~~~bash
 ENV_FILE=.env.local scripts/run_local_dev.sh

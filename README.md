@@ -343,12 +343,11 @@ python main_product_api.py
 ### 5. Optional: run only the web product frontend
 
 ```bash
-cd frontend
-npm install
-npm run dev
+npm --prefix frontend install
+npm --prefix frontend run dev:frontend
 ```
 
-For product-level validation, prefer `scripts/run_local_dev.sh` so the frontend and backend use the same local contract.
+This is for frontend-only visual work. For product-level validation, prefer `scripts/run_local_dev.sh` so the frontend and backend use the same local contract.
 
 ### 6. Optional: run the containerized product baseline
 
