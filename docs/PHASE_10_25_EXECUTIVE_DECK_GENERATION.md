@@ -494,7 +494,7 @@ This capability will be well defined when the roadmap makes clear:
 - `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ROUTING.md`
 - `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_VERSIONING.md`
-- `docs/EXECUTIVE_DECK_GENERATION_SERVICE_ARCHITECTURE.md`
+- `legacy/docs/archive/executive-deck-generation-service-architecture.md`
 - `docs/EXECUTIVE_DECK_GENERATION_API_CONTRACT.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ARTIFACT_LIFECYCLE.md`
 - `docs/EXECUTIVE_DECK_GENERATION_SLIDE_RECIPES.md`

@@ -172,7 +172,7 @@ Evidence file:
 
 The project already includes an explicit guide for screenshots:
 
-- `docs/PHASE_5_UI_EXAMPLES_GUIDE.md`
+- `legacy/docs/phases/recommended-examples-for-ui-screenshots.md`
 
 It also includes a selected example manifest:
 
@@ -226,7 +226,7 @@ The strongest compact package for this phase is:
 ### D. Curated screenshot inputs
 
 - `phase5_eval/ui_examples_manifest.json`
-- `docs/PHASE_5_UI_EXAMPLES_GUIDE.md`
+- `legacy/docs/phases/recommended-examples-for-ui-screenshots.md`
 
 ---
 
@@ -259,7 +259,7 @@ code phase5_eval/reports/phase5_structured_eval_20260319_082813.json
 Open the screenshot guide:
 
 ```bash
-code docs/PHASE_5_UI_EXAMPLES_GUIDE.md
+code legacy/docs/phases/recommended-examples-for-ui-screenshots.md
 ```
 
 ---

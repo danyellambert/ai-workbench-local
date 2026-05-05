@@ -181,5 +181,5 @@ This is not because `hybrid` had the highest aggregate manual score. It did not.
 
 For the broader benchmark context, see:
 
-- `docs/PHASE_4_5_BENCHMARK_RESULTS.md`
-- `docs/PHASE_4_5_VALIDATION.md`
+- `legacy/docs/phases/phase-4-5-benchmark-results.md`
+- `legacy/docs/phases/phase-4-5-validation.md`

@@ -61,11 +61,11 @@ The phase also accumulated:
 
 ## Recommended supporting documents
 
-- `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md`
-- `docs/PHASE_5_STRUCTURED_OUTPUTS_USAGE.md`
-- `docs/PHASE_5_EVIDENCE_PACK.md`
-- `docs/PHASE_5_EVIDENCE_EVAL_REPORT.md`
-- `docs/PHASE_5_OCR_FIRST_VL_ON_DEMAND_PRODUCTION_READINESS.md`
+- `legacy/docs/phases/phase-5-structured-output-foundation.md`
+- `legacy/docs/phases/phase-5-structured-outputs-usage-guide.md`
+- `legacy/docs/phases/phase-5-evidence-pack.md`
+- `legacy/docs/phases/phase-5-evidence-cv-evaluation-report.md`
+- `legacy/docs/phases/ocr-first-vl-on-demand-production-readiness-for-cv-parsing.md`
 - `docs/EVIDENCE_CV_PIPELINE.md`
 
 ## Why this phase mattered

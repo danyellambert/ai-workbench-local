@@ -81,7 +81,7 @@ This document exists to answer, in operational terms, four questions:
 ## 3. Architecture and integration
 
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION_PRODUCTIZATION.md`
-- `docs/EXECUTIVE_DECK_GENERATION_SERVICE_ARCHITECTURE.md`
+- `legacy/docs/archive/executive-deck-generation-service-architecture.md`
 - `docs/EXECUTIVE_DECK_GENERATION_API_CONTRACT.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ARTIFACT_LIFECYCLE.md`
 - `docs/EXECUTIVE_DECK_GENERATION_RENDERER_MAPPING.md`

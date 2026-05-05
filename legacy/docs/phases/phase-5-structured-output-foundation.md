@@ -76,7 +76,7 @@ Why this was chosen:
 - `src/providers/registry.py`
 
 ### Documentation added
-- `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md`
+- `legacy/docs/phases/phase-5-structured-output-foundation.md`
 
 ## What was corrected from the initial draft
 

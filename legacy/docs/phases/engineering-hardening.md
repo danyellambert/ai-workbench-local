@@ -72,7 +72,7 @@ In addition to absolute latency averages, the app can highlight which stage most
 
 - Streamlit smoke tests in `tests/test_streamlit_app_smoke_unittest.py`
 - runtime observability in `src/storage/runtime_execution_log.py` and `src/ui/sidebar.py`
-- this phase document in `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`
+- this phase document in `legacy/docs/phases/engineering-hardening.md`
 
 ## Result
 

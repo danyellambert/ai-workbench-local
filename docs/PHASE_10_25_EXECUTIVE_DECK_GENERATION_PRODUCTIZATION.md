@@ -26,7 +26,7 @@ Important complementary documents for fully implementing the capability:
 
 - `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
 - `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
-- `docs/EXECUTIVE_DECK_GENERATION_SERVICE_ARCHITECTURE.md`
+- `legacy/docs/archive/executive-deck-generation-service-architecture.md`
 - `docs/EXECUTIVE_DECK_GENERATION_API_CONTRACT.md`
 - `docs/EXECUTIVE_DECK_GENERATION_ARTIFACT_LIFECYCLE.md`
 - `docs/EXECUTIVE_DECK_GENERATION_UX_SPEC.md`

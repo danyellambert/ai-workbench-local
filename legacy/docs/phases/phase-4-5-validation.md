@@ -34,7 +34,7 @@ Key outcome:
 
 Reference docs:
 - `docs/BENCHMARK_PDF_EXTRACTION_EN.md`
-- `docs/PHASE_4_5_BENCHMARK_RESULTS.md`
+- `legacy/docs/phases/phase-4-5-benchmark-results.md`
 
 Key visuals:
 - `docs/assets/phase_4_5/02_pdf_extraction_aggregate_quality_vs_cost.png`

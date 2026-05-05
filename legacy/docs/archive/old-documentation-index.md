@@ -24,40 +24,40 @@ This file is the main entry point for the repository documentation.
 | Phase | Summary document | Focus |
 | --- | --- | --- |
 | 0 | `docs/PHASE_0_PUBLICATION_AND_POSITIONING.md` | Safe publication baseline |
-| 0.5 | `docs/PHASE_0_5_REPOSITORY_GOVERNANCE.md` | Repository governance |
-| 1 | `docs/PHASE_1_PRODUCT_FOUNDATION.md` | Product and UX baseline |
-| 2 | `docs/PHASE_2_MODULAR_ARCHITECTURE.md` | Modular architecture |
-| 3 | `docs/PHASE_3_MULTI_PROVIDER_FOUNDATION.md` | Multi-provider foundation |
-| 4 | `docs/PHASE_4_DOCUMENT_RAG_FOUNDATION.md` | Document-grounded RAG |
-| 4.5 | `docs/PHASE_4_5_VALIDATION.md` | Benchmarked RAG validation |
-| 5 | `docs/PHASE_5_SUMMARY.md` | Structured outputs and evidence-grounded CV extraction |
-| 5.5 | `docs/PHASE_5_5_FRAMEWORK_EVOLUTION.md` | LangChain and LangGraph evolution |
-| 6 | `docs/PHASE_6_DOCUMENT_OPERATIONS_COPILOT.md` | Document Operations Copilot |
-| 7 | `docs/PHASE_7_MODEL_COMPARISON.md` | Model comparison and benchmarking |
+| 0.5 | `legacy/docs/phases/repository-governance.md` | Repository governance |
+| 1 | `legacy/docs/phases/product-foundation.md` | Product and UX baseline |
+| 2 | `legacy/docs/phases/modular-architecture.md` | Modular architecture |
+| 3 | `legacy/docs/phases/multi-provider-foundation.md` | Multi-provider foundation |
+| 4 | `legacy/docs/phases/document-grounded-rag-foundation.md` | Document-grounded RAG |
+| 4.5 | `legacy/docs/phases/phase-4-5-validation.md` | Benchmarked RAG validation |
+| 5 | `legacy/docs/phases/structured-outputs-and-evidence-grounded-cv-extraction.md` | Structured outputs and evidence-grounded CV extraction |
+| 5.5 | `legacy/docs/phases/framework-evolution-with-langchain-and-langgraph.md` | LangChain and LangGraph evolution |
+| 6 | `legacy/docs/phases/document-operations-copilot.md` | Document Operations Copilot |
+| 7 | `legacy/docs/phases/phase-7-model-comparison.md` | Model comparison and benchmarking |
 
 ## Technical appendices by phase
 
 ### Phase 4.5
 
-- `docs/PHASE_4_5_BENCHMARK_RESULTS.md`
+- `legacy/docs/phases/phase-4-5-benchmark-results.md`
 - `docs/BENCHMARK_PDF_EXTRACTION_EN.md`
 - `docs/assets/phase_4_5/`
 - `docs/data/phase_4_5_benchmark_data.json`
 
 ### Phase 5
 
-- `docs/PHASE_5_STRUCTURED_OUTPUT_FOUNDATION.md`
-- `docs/PHASE_5_STRUCTURED_OUTPUTS_USAGE.md`
-- `docs/PHASE_5_EVIDENCE_PACK.md`
-- `docs/PHASE_5_EVIDENCE_EVAL_REPORT.md`
-- `docs/PHASE_5_OCR_FIRST_VL_ON_DEMAND_PRODUCTION_READINESS.md`
-- `docs/PHASE_5_OCR_FALLBACK_UPDATE_FINAL.md`
-- `docs/PHASE_5_EVALS_AND_SYNTHETIC_BENCHMARKS.md`
+- `legacy/docs/phases/phase-5-structured-output-foundation.md`
+- `legacy/docs/phases/phase-5-structured-outputs-usage-guide.md`
+- `legacy/docs/phases/phase-5-evidence-pack.md`
+- `legacy/docs/phases/phase-5-evidence-cv-evaluation-report.md`
+- `legacy/docs/phases/ocr-first-vl-on-demand-production-readiness-for-cv-parsing.md`
+- `legacy/docs/phases/ocr-fallback-and-synthetic-cv-benchmark.md`
+- `legacy/docs/phases/evaluations-and-synthetic-cv-benchmark.md`
 - `docs/EVIDENCE_CV_PIPELINE.md`
 
 ### Phase 5.5
 
-- `docs/PHASE_5_5_FRAMEWORK_EVOLUTION.md`
+- `legacy/docs/phases/framework-evolution-with-langchain-and-langgraph.md`
 
 ### Phase 6
 
@@ -85,13 +85,13 @@ This file is the main entry point for the repository documentation.
 
 The files below remain valuable technical references, but they are not part of the canonical completed-phase summary path yet:
 
-- `docs/PHASE_8_EVAL_FOUNDATION.md`
+- `legacy/docs/phases/eval-foundation.md`
 - `docs/PHASE_8_EVAL_OPERATING_RHYTHM.md`
 - `docs/PHASE_8_5_DECISION_GATE.md`
 - `docs/PHASE_8_5_CLOSURE.md`
-- `docs/PHASE_9_25_RUNTIME_ECONOMICS_AND_EVIDENCEOPS_LOCAL.md`
-- `docs/PHASE_9_5_EVIDENCEOPS_MCP_LOCAL_SERVER.md`
-- `docs/PHASE_10_ENGINEERING_PROFESSIONAL.md`
+- `legacy/docs/phases/runtime-economics-and-evidenceops-foundation.md`
+- `legacy/docs/phases/local-evidenceops-mcp-server.md`
+- `legacy/docs/phases/engineering-hardening.md`
 - `docs/PHASE_10_25_PRODUCT_SPLIT_GRADIO_AI_LAB.md`
 - `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
 
@@ -101,7 +101,7 @@ Legacy transition files now live under `old/docs/`.
 
 Reference map:
 
-- `old/docs/PHASE_3_NOTES.md` -> `docs/PHASE_3_MULTI_PROVIDER_FOUNDATION.md`
-- `old/docs/PHASE_4_NOTES.md` -> `docs/PHASE_4_DOCUMENT_RAG_FOUNDATION.md`
+- `old/docs/PHASE_3_NOTES.md` -> `legacy/docs/phases/multi-provider-foundation.md`
+- `old/docs/PHASE_4_NOTES.md` -> `legacy/docs/phases/document-grounded-rag-foundation.md`
 - `old/docs/README_evidence_cv_pipeline.md` -> `docs/EVIDENCE_CV_PIPELINE.md`
-- `old/docs/PHASE_5_5_LANGCHAIN_EVOLUTION.md` -> `docs/PHASE_5_5_FRAMEWORK_EVOLUTION.md`
+- `old/docs/PHASE_5_5_LANGCHAIN_EVOLUTION.md` -> `legacy/docs/phases/framework-evolution-with-langchain-and-langgraph.md`

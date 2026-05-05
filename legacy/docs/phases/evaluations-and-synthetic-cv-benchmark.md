@@ -133,10 +133,10 @@ At the time this appendix was first written, Phase 5 still required:
 
 Those later steps were completed through the broader Phase 5 package, especially through:
 
-- `docs/PHASE_5_SUMMARY.md`
-- `docs/PHASE_5_EVIDENCE_PACK.md`
-- `docs/PHASE_5_EVIDENCE_EVAL_REPORT.md`
-- `docs/PHASE_5_OCR_FIRST_VL_ON_DEMAND_PRODUCTION_READINESS.md`
+- `legacy/docs/phases/structured-outputs-and-evidence-grounded-cv-extraction.md`
+- `legacy/docs/phases/phase-5-evidence-pack.md`
+- `legacy/docs/phases/phase-5-evidence-cv-evaluation-report.md`
+- `legacy/docs/phases/ocr-first-vl-on-demand-production-readiness-for-cv-parsing.md`
 
 So this document should now be read as an intermediate engineering checkpoint that captured the first meaningful eval and benchmark layer inside the completed phase.
 

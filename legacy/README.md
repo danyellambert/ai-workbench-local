@@ -17,3 +17,9 @@ Legacy assets moved in this cleanup:
 - legacy/scripts/smoke_docker_public_demo.sh
 - legacy/docs/architecture/DOCKER_FRONTEND_PUBLIC_DEMO_SMOKE.md
 - legacy/docker/Dockerfile.legacy-streamlit
+
+
+Legacy docs moved in the docs cleanup:
+
+- legacy/docs/phases/ — historical phase notes and implementation history.
+- legacy/docs/archive/ — superseded indexes/runbooks or old subsystem documents.
