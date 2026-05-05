@@ -53,7 +53,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pdfs", nargs="+", required=True, help="PDF files to index and benchmark.")
     parser.add_argument(
         "--questions",
-        default="docs/embedding_benchmark_questions.example.json",
+        default="docs/data/examples/embedding-benchmark-questions.example.json",
         help="JSON file containing benchmark questions and expected target documents.",
     )
     parser.add_argument(

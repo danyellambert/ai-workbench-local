@@ -560,7 +560,7 @@ Reference: `ROADMAP.md`
 
 - `ROADMAP.md` — project chronology and direction
 - `legacy/docs/archive/old-documentation-index.md` — organized documentation map
-- `docs/POSITIONING_PROJECT_TWO_TRACKS.md` — official workflow-vs-lab framing
+- `docs/product/two-track-positioning.md` — official workflow-vs-lab framing
 - `legacy/docs/phases/engineering-hardening.md` — engineering maturity direction
 - `docs/architecture/executive-deck-generation/product-capability.md` — executive artifact capability direction
 - `legacy/docs/phases/product-split-gradio-ai-lab.md` — rationale for the surface split

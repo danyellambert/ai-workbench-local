@@ -42,7 +42,7 @@ TEMPLATE = {
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a local template for practical Phase 4.5 comparison.")
-    parser.add_argument("--output", default="docs/phase_4_5_eval_template.json", help="Path to the JSON template.")
+    parser.add_argument("--output", default="docs/data/examples/phase-4-5-eval-template.json", help="Path to the JSON template.")
     args = parser.parse_args()
 
     output_path = Path(args.output)

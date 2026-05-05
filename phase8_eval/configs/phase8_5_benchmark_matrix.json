@@ -216,7 +216,7 @@
               "benchmark_pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
               "benchmark_pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
             ],
-            "question_set_path": "docs/embedding_benchmark_questions.example.json"
+            "question_set_path": "docs/data/examples/embedding-benchmark-questions.example.json"
           },
           {
             "subset_id": "code_retrieval",
@@ -236,7 +236,7 @@
           "benchmark_pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
           "benchmark_pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
         ],
-        "question_set_path": "docs/embedding_benchmark_questions.example.json",
+        "question_set_path": "docs/data/examples/embedding-benchmark-questions.example.json",
         "pdf_extraction_mode": "basic",
         "pdf_docling_enabled": false,
         "pdf_ocr_fallback_enabled": false,
@@ -340,7 +340,7 @@
           "benchmark_pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
           "benchmark_pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
         ],
-        "question_set_path": "docs/embedding_benchmark_questions.example.json",
+        "question_set_path": "docs/data/examples/embedding-benchmark-questions.example.json",
         "chunk_size": 1200,
         "chunk_overlap": 80,
         "embedding_context_window": 512,

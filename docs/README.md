@@ -12,6 +12,9 @@ Start here if you are new to the repository:
 - operations/backup-and-restore.md — operational backup and restore notes for local/AWS data roots.
 - guides/ — task-oriented supporting workflow guides.
 - reference/ — reference material for benchmarks and evidence/CV workflows.
+- product/two-track-positioning.md — official product-vs-lab framing.
+- operations/preindexed-nextcloud-import.md — operational guide for the preindexed Nextcloud import path.
+- data/examples/ — small JSON examples used by benchmark/eval scripts.
 
 Current official runtime paths:
 
