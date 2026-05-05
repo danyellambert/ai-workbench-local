@@ -23,7 +23,7 @@ Define the v1 contract for the **Policy / Contract Comparison Deck**, focused on
 
 ---
 
-## Typical AI Workbench sources
+## Typical AI Decision Studio sources
 
 - structured document comparison
 - difference findings
@@ -42,10 +42,10 @@ Define the v1 contract for the **Policy / Contract Comparison Deck**, focused on
   "presentation": {
     "title": "Policy Comparison Review",
     "subtitle": "Version A vs Version B",
-    "author": "AI Workbench Local",
+    "author": "AI Decision Studio",
     "date": "2026-04-05",
     "theme": "executive_premium_minimal",
-    "footer_text": "AI Workbench Local • Comparison Review"
+    "footer_text": "AI Decision Studio • Comparison Review"
   },
   "comparison_context": {
     "left_document": "Policy 2025",

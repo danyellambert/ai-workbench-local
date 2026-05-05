@@ -8,7 +8,7 @@ Describe how the **Executive Deck Generation** capability should be implemented 
 
 ## Architectural principle
 
-### AI Workbench Local
+### AI Decision Studio
 
 Responsible for:
 
@@ -29,7 +29,7 @@ Responsible for:
 
 ---
 
-## Main components in AI Workbench
+## Main components in AI Decision Studio
 
 ### 1. Contract builders
 
@@ -81,13 +81,13 @@ Layer that exposes the capability to:
 ## Recommended synchronous flow for P1
 
 1. the user triggers deck generation
-2. AI Workbench resolves `export_kind`
+2. AI Decision Studio resolves `export_kind`
 3. the builder generates the contract
 4. the adapter generates the renderer payload
 5. `presentation_export_service` calls `GET /health`
 6. `presentation_export_service` calls `POST /render`
-7. AI Workbench downloads the `.pptx` via `GET /artifact`
-8. AI Workbench persists local artifacts
+7. AI Decision Studio downloads the `.pptx` via `GET /artifact`
+8. AI Decision Studio persists local artifacts
 9. the UI receives structured results and downloads
 
 ---
@@ -116,7 +116,7 @@ Layer that exposes the capability to:
 
 ## Recommended code boundary
 
-### AI Workbench
+### AI Decision Studio
 
 Target files/areas:
 
@@ -133,7 +133,7 @@ Reuse the existing endpoints. Avoid moving domain logic into the renderer.
 
 ## What not to do
 
-- copy the renderer into AI Workbench
+- copy the renderer into AI Decision Studio
 - mix deck logic directly into the UI
 - couple the domain to the raw renderer schema too early
 - use an LLM in the last P1 step when the path can be deterministic

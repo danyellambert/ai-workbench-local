@@ -14,7 +14,7 @@ Define the v1 contract for the **Evidence Pack / Audit Deck**, focused on execut
 
 ---
 
-## Typical AI Workbench sources
+## Typical AI Decision Studio sources
 
 - EvidenceOps
 - evidence packs
@@ -35,10 +35,10 @@ Define the v1 contract for the **Evidence Pack / Audit Deck**, focused on execut
   "presentation": {
     "title": "Evidence Pack Review",
     "subtitle": "Audit / compliance executive handoff",
-    "author": "AI Workbench Local",
+    "author": "AI Decision Studio",
     "date": "2026-04-05",
     "theme": "executive_premium_minimal",
-    "footer_text": "AI Workbench Local • Evidence Review"
+    "footer_text": "AI Decision Studio • Evidence Review"
   },
   "executive_summary": "Executive summary of the evidence pack, findings, and required actions.",
   "evidence_snapshot": {

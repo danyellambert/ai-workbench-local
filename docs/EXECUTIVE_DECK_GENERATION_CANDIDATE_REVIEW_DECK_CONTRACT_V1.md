@@ -14,7 +14,7 @@ Define the v1 contract for the **Candidate Review Deck**, using the `cv_analysis
 
 ---
 
-## Typical AI Workbench sources
+## Typical AI Decision Studio sources
 
 - `cv_analysis`
 - `evidence_cv`
@@ -33,10 +33,10 @@ Define the v1 contract for the **Candidate Review Deck**, using the `cv_analysis
   "presentation": {
     "title": "Candidate Review",
     "subtitle": "Executive profile summary",
-    "author": "AI Workbench Local",
+    "author": "AI Decision Studio",
     "date": "2026-04-05",
     "theme": "executive_premium_minimal",
-    "footer_text": "AI Workbench Local • Candidate Review"
+    "footer_text": "AI Decision Studio • Candidate Review"
   },
   "candidate_profile": {
     "name": "Candidate Name",

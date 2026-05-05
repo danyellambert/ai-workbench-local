@@ -438,7 +438,7 @@ Each later phase builds on explicit evidence and infrastructure from the previou
 
 ## 10. Summary
 
-At this stage, the repository should be read as a local-first applied-AI workbench with two explicit surfaces:
+At this stage, the repository should be read as a local-first applied-AI product system with two explicit surfaces:
 
 - a product-facing workflow layer for document-grounded decisions
 - an engineering-facing lab layer for benchmarking, evaluation, observability, and controlled system evolution

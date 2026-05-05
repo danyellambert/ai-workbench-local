@@ -14,7 +14,7 @@ Define the v1 contract for the **Action Plan Deck**, focused on owners, prioriti
 
 ---
 
-## Typical AI Workbench sources
+## Typical AI Decision Studio sources
 
 - checklist
 - action items
@@ -34,10 +34,10 @@ Define the v1 contract for the **Action Plan Deck**, focused on owners, prioriti
   "presentation": {
     "title": "Action Plan",
     "subtitle": "Operational execution plan",
-    "author": "AI Workbench Local",
+    "author": "AI Decision Studio",
     "date": "2026-04-05",
     "theme": "executive_premium_minimal",
-    "footer_text": "AI Workbench Local • Action Plan"
+    "footer_text": "AI Decision Studio • Action Plan"
   },
   "executive_summary": "Executive action plan derived from findings and structured checklists.",
   "priority_snapshot": {

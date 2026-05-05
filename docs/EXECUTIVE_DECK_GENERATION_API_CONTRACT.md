@@ -4,7 +4,7 @@
 
 Define the integration contract between:
 
-- AI Workbench Local
+- AI Decision Studio
 - `ppt_creator_app`
 
 and anticipate the capability's future internal contract in the product backend.
@@ -19,7 +19,7 @@ Usage:
 
 - verify service availability before rendering
 
-Minimum expectation for AI Workbench:
+Minimum expectation for AI Decision Studio:
 
 - HTTP 200 when the service is healthy
 - a clear failure when the service is unavailable
@@ -70,7 +70,7 @@ Future/optional usage:
 
 ---
 
-## Future internal AI Workbench contract
+## Future internal AI Decision Studio contract
 
 ### Recommended endpoint
 

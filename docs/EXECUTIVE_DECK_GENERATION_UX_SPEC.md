@@ -8,7 +8,7 @@ Define how the capability should appear to the user in the product.
 
 ## UX principle
 
-In the interface, this should appear as an AI Workbench capability, not as a separate project.
+In the interface, this should appear as an AI Decision Studio capability, not as a separate project.
 
 Recommended naming:
 

@@ -8,7 +8,7 @@ Define the minimum quality and governance policies for the capability.
 
 ## Main rule
 
-Decks executivos do AI Workbench devem ser **grounded first**.
+Decks executivos do AI Decision Studio devem ser **grounded first**.
 
 That means:
 

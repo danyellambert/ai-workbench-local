@@ -4,7 +4,7 @@
 
 Document and begin implementation of the first technical slice of the **Executive Deck Generation** capability between:
 
-- **AI Workbench Local**
+- **AI Decision Studio**
 - **`ppt_creator_app`**
 
 > For the complete product reading, deck catalog, and capability roadmap, also see: `docs/PHASE_10_25_EXECUTIVE_DECK_GENERATION.md`
@@ -53,7 +53,7 @@ These points are left for the next slice, when the contract is already stable.
 
 At this stage, the separation is as follows:
 
-- **AI Workbench Local**
+- **AI Decision Studio**
   - remains the source of truth for benchmarks/evals
   - consolidates the domain aggregates
   - generates the intermediate presentation contract
@@ -79,12 +79,12 @@ In other words: **the foundation lands in the domain first and only later moves 
   "contract_version": "presentation_export.v1",
   "export_kind": "benchmark_eval_executive_deck",
   "presentation": {
-    "title": "AI Workbench Local — Benchmark & Eval Review",
+    "title": "AI Decision Studio — Benchmark & Eval Review",
     "subtitle": "Executive summary of the current round",
-    "author": "AI Workbench Local",
+    "author": "AI Decision Studio",
     "date": "2026-04-04",
     "theme": "executive_premium_minimal",
-    "footer_text": "AI Workbench Local • Benchmark & Eval Review"
+    "footer_text": "AI Decision Studio • Benchmark & Eval Review"
   },
   "model_comparison_snapshot": {
     "total_runs": 4,
@@ -172,7 +172,7 @@ The adapter for this round will transform the contract above into a presentation
 
 This format is strong because:
 
-- it preserves a clear domain contract in AI Workbench
+- it preserves a clear domain contract in AI Decision Studio
 - it avoids coupling the project too early to the raw `ppt_creator` schema
 - it already leaves the payload close enough to the final renderer
 - it makes the next HTTP API integration stage easier
@@ -191,7 +191,7 @@ After this contract is stable and covered by tests, the recommended next step is
 
 This document remains intentionally focused on the **first technical slice** (`benchmark/eval -> contract -> payload compatible with the renderer`).
 
-For the complete capability process inside AI Workbench Local, including:
+For the complete capability process inside AI Decision Studio, including:
 
 - product positioning
 - deck family catalog
