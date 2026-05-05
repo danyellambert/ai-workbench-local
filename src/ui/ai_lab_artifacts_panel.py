@@ -174,8 +174,7 @@ def _discover_artifact_groups(workspace_root: Path) -> dict[str, list[Path]]:
     _collect(
         "Documentação da Fase 10.25",
         [
-            "docs/PHASE_10_25*.md",
-            "docs/EXECUTIVE_DECK_GENERATION_*.md",
+            "docs/architecture/executive-deck-generation/*.md",
         ],
         limit=30,
     )

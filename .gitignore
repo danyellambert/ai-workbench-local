@@ -28,6 +28,7 @@ benchmark_runs/*
 !benchmark_runs/.gitkeep
 benchmark_pdfs/*
 !benchmark_pdfs/.gitkeep
+old/
 
 phase5_eval/reports/
 phase5_eval/resume_benchmark_quick/

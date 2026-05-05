@@ -2,7 +2,7 @@
 
 Current documentation for the Executive Deck Generation product capability.
 
-This directory replaces the former top-level `docs/EXECUTIVE_DECK_GENERATION_*` files.
+This directory replaces the former top-level Executive Deck Generation documentation files.
 
 - [product-capability.md](product-capability.md) — Capability overview.
 - [productization.md](productization.md) — Technical productization of the first slice.

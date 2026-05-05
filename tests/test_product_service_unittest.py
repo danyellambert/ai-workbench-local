@@ -77,7 +77,7 @@ class ProductServiceTests(unittest.TestCase):
         self.assertEqual(workflows["document_review"]["preferred_context_strategy"], "retrieval")
         self.assertTrue(workflows["policy_contract_comparison"]["example_prompts"])
         self.assertTrue(workflows["action_plan_evidence_review"]["expected_outputs"])
-        self.assertEqual(workflows["candidate_review"]["workflow_contract"], "docs/EXECUTIVE_DECK_GENERATION_CANDIDATE_REVIEW_DECK_CONTRACT_V1.md")
+        self.assertEqual(workflows["candidate_review"]["workflow_contract"], "docs/architecture/executive-deck-generation/candidate-review-deck-contract-v1.md")
 
     def test_build_grounding_preview_returns_context_metadata(self) -> None:
         with patch("src.product.service.build_structured_document_context", return_value="[Source: doc]\nhello world"):
@@ -156,7 +156,7 @@ class ProductServiceTests(unittest.TestCase):
         self.assertEqual(execution_request.telemetry["agent_tool"], "review_document_risks")
         self.assertTrue(execution_request.telemetry["document_review_findings_synthesis_enabled"])
         self.assertEqual(execution_request.telemetry["document_review_findings_prompt_style"], "hybrid")
-        self.assertEqual(result.debug_metadata["workflow_contract"], "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md")
+        self.assertEqual(result.debug_metadata["workflow_contract"], "docs/architecture/executive-deck-generation/document-review-deck-contract-v1.md")
         self.assertIn("Document Review deck artifact", result.debug_metadata["expected_outputs"])
 
     def test_run_product_workflow_policy_comparison_uses_two_docs_and_comparison_deck(self) -> None:

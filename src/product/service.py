@@ -47,10 +47,10 @@ DEFAULT_WORKFLOW_QUERIES: dict[ProductWorkflowId, str] = {
 }
 
 WORKFLOW_CONTRACT_DOCS: dict[ProductWorkflowId, str] = {
-    "document_review": "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md",
-    "policy_contract_comparison": "docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md",
-    "action_plan_evidence_review": "docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md",
-    "candidate_review": "docs/EXECUTIVE_DECK_GENERATION_CANDIDATE_REVIEW_DECK_CONTRACT_V1.md",
+    "document_review": "docs/architecture/executive-deck-generation/document-review-deck-contract-v1.md",
+    "policy_contract_comparison": "docs/architecture/executive-deck-generation/policy-contract-comparison-deck-contract-v1.md",
+    "action_plan_evidence_review": "docs/architecture/executive-deck-generation/action-plan-deck-contract-v1.md",
+    "candidate_review": "docs/architecture/executive-deck-generation/candidate-review-deck-contract-v1.md",
 }
 
 DOCUMENT_AGENT_WORKFLOW_DEFAULTS: dict[ProductWorkflowId, dict[str, object]] = {
