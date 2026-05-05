@@ -10,6 +10,8 @@ Start here if you are new to the repository:
 - deployment/local-docker-compose.md — how to run the current product locally with Docker Compose.
 - deployment/aws-slim-deploy.md — how the AWS slim deployment is structured.
 - operations/backup-and-restore.md — operational backup and restore notes for local/AWS data roots.
+- guides/ — task-oriented supporting workflow guides.
+- reference/ — reference material for benchmarks and evidence/CV workflows.
 
 Current official runtime paths:
 
