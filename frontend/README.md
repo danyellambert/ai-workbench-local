@@ -154,15 +154,4 @@ That combination is exactly what makes the overall project much stronger.
 
 ---
 
-## Honesty note for reviewers and recruiters
 
-If you are reviewing this repository, the correct reading is:
-
-- this frontend already defines the intended product UX and workflow architecture
-- the platform underneath already contains many of the core service foundations
-- the remaining work is largely about **wiring the product surface to the platform more completely**
-
-That is a much stronger and more credible story than either:
-
-- pretending everything is already fully integrated
-- or hiding the frontend and underselling the actual product ambition

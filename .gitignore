@@ -26,8 +26,10 @@ materials_local/
 old/auxiliar.py
 benchmark_runs/*
 !benchmark_runs/.gitkeep
+!benchmark_runs/README.md
 benchmark_pdfs/*
 !benchmark_pdfs/.gitkeep
+!benchmark_pdfs/README.md
 old/
 diagnostics/
 
@@ -160,8 +162,10 @@ runtime-state-diagnosis*.txt
 # Keep tracked fixtures/.gitkeep/public demo assets only.
 benchmark_pdfs/*
 !benchmark_pdfs/.gitkeep
+!benchmark_pdfs/README.md
 benchmark_runs/*
 !benchmark_runs/.gitkeep
+!benchmark_runs/README.md
 phase5_eval/reports/
 phase5_eval/resume_benchmark*/
 phase8_eval/.DS_Store
