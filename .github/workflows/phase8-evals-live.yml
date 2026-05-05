@@ -1,4 +1,7 @@
-name: phase8-evals-live
+name: historical-phase8-live-evals
+
+# Historical live eval workflow for self-hosted/manual environments.
+# This does not run on push/pull_request and should not define the main product CI contract.
 
 on:
   workflow_dispatch:
