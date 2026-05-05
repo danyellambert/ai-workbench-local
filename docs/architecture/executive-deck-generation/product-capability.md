@@ -337,7 +337,7 @@ Main files:
 
 - `src/services/presentation_export.py`
 - `tests/test_presentation_export_unittest.py`
-- `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/architecture/executive-deck-generation/benchmark-eval-executive-review-contract-v1.md`
 - `docs/architecture/executive-deck-generation/productization.md`
 
 ### Still missing
@@ -488,29 +488,29 @@ This capability will be well defined when the roadmap makes clear:
 ## Related documents
 
 - `ROADMAP.md`
-- `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/architecture/executive-deck-generation/benchmark-eval-executive-review-contract-v1.md`
 - `docs/architecture/executive-deck-generation/productization.md`
-- `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
-- `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
-- `docs/EXECUTIVE_DECK_GENERATION_ROUTING.md`
-- `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_VERSIONING.md`
+- `docs/architecture/executive-deck-generation/complete-documentation-plan.md`
+- `docs/architecture/executive-deck-generation/official-catalog-of-deck-types-and-contracts.md`
+- `docs/architecture/executive-deck-generation/routing-and-deck-type-selection.md`
+- `docs/architecture/executive-deck-generation/contract-versioning-and-naming.md`
 - `legacy/docs/archive/executive-deck-generation-service-architecture.md`
-- `docs/EXECUTIVE_DECK_GENERATION_API_CONTRACT.md`
-- `docs/EXECUTIVE_DECK_GENERATION_ARTIFACT_LIFECYCLE.md`
-- `docs/EXECUTIVE_DECK_GENERATION_SLIDE_RECIPES.md`
-- `docs/EXECUTIVE_DECK_GENERATION_RENDERER_MAPPING.md`
-- `docs/EXECUTIVE_DECK_GENERATION_BRANDING_POLICY.md`
-- `docs/EXECUTIVE_DECK_GENERATION_FAILURE_MODES.md`
-- `docs/EXECUTIVE_DECK_GENERATION_UX_SPEC.md`
-- `docs/EXECUTIVE_DECK_GENERATION_UI_EVOLUTION.md`
-- `docs/EXECUTIVE_DECK_GENERATION_USER_JOURNEYS.md`
-- `docs/EXECUTIVE_DECK_GENERATION_TEST_STRATEGY.md`
-- `docs/EXECUTIVE_DECK_GENERATION_QUALITY_AND_GOVERNANCE.md`
-- `docs/EXECUTIVE_DECK_GENERATION_OBSERVABILITY.md`
-- `docs/EXECUTIVE_DECK_GENERATION_SECURITY_AND_PII.md`
-- `docs/EXECUTIVE_DECK_GENERATION_ROLLOUT_AND_GOVERNANCE.md`
-- `docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md`
-- `docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md`
-- `docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md`
-- `docs/EXECUTIVE_DECK_GENERATION_CANDIDATE_REVIEW_DECK_CONTRACT_V1.md`
-- `docs/EXECUTIVE_DECK_GENERATION_EVIDENCE_PACK_DECK_CONTRACT_V1.md`
+- `docs/architecture/executive-deck-generation/api-contract.md`
+- `docs/architecture/executive-deck-generation/artifact-lifecycle.md`
+- `docs/architecture/executive-deck-generation/slide-recipes-by-deck-type.md`
+- `docs/architecture/executive-deck-generation/mapping-contract-renderer-payload.md`
+- `docs/architecture/executive-deck-generation/branding-and-visual-policy.md`
+- `docs/architecture/executive-deck-generation/failure-modes-and-fallback-strategy.md`
+- `docs/architecture/executive-deck-generation/ux-spec.md`
+- `docs/architecture/executive-deck-generation/ui-evolution.md`
+- `docs/architecture/executive-deck-generation/user-journeys.md`
+- `docs/architecture/executive-deck-generation/test-strategy.md`
+- `docs/architecture/executive-deck-generation/quality-grounding-and-governance.md`
+- `docs/architecture/executive-deck-generation/observability.md`
+- `docs/architecture/executive-deck-generation/security-and-pii.md`
+- `docs/architecture/executive-deck-generation/rollout-and-governance.md`
+- `docs/architecture/executive-deck-generation/document-review-deck-contract-v1.md`
+- `docs/architecture/executive-deck-generation/policy-contract-comparison-deck-contract-v1.md`
+- `docs/architecture/executive-deck-generation/action-plan-deck-contract-v1.md`
+- `docs/architecture/executive-deck-generation/candidate-review-deck-contract-v1.md`
+- `docs/architecture/executive-deck-generation/evidence-pack-deck-contract-v1.md`

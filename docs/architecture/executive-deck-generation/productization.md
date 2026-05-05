@@ -24,14 +24,14 @@ At this moment, the prioritized technical slice remains:
 
 Important complementary documents for fully implementing the capability:
 
-- `docs/EXECUTIVE_DECK_GENERATION_DOCUMENTATION_PLAN.md`
-- `docs/EXECUTIVE_DECK_GENERATION_CONTRACT_CATALOG.md`
+- `docs/architecture/executive-deck-generation/complete-documentation-plan.md`
+- `docs/architecture/executive-deck-generation/official-catalog-of-deck-types-and-contracts.md`
 - `legacy/docs/archive/executive-deck-generation-service-architecture.md`
-- `docs/EXECUTIVE_DECK_GENERATION_API_CONTRACT.md`
-- `docs/EXECUTIVE_DECK_GENERATION_ARTIFACT_LIFECYCLE.md`
-- `docs/EXECUTIVE_DECK_GENERATION_UX_SPEC.md`
-- `docs/EXECUTIVE_DECK_GENERATION_TEST_STRATEGY.md`
-- `docs/EXECUTIVE_DECK_GENERATION_QUALITY_AND_GOVERNANCE.md`
+- `docs/architecture/executive-deck-generation/api-contract.md`
+- `docs/architecture/executive-deck-generation/artifact-lifecycle.md`
+- `docs/architecture/executive-deck-generation/ux-spec.md`
+- `docs/architecture/executive-deck-generation/test-strategy.md`
+- `docs/architecture/executive-deck-generation/quality-grounding-and-governance.md`
 
 ---
 
@@ -148,7 +148,7 @@ There is already a concrete foundation for the first slice.
 
 #### Base document for the current technical slice
 
-- `docs/EXECUTIVE_DECK_GENERATION_BENCHMARK_EVAL_CONTRACT_V1.md`
+- `docs/architecture/executive-deck-generation/benchmark-eval-executive-review-contract-v1.md`
 - `docs/architecture/executive-deck-generation/product-capability.md`
 
 #### Contract and adapter service already implemented
