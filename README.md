@@ -1,5 +1,28 @@
 # AI Decision Studio
 
+## Reviewer quick path
+
+For a short technical review, start here:
+
+1. Read [`docs/REVIEWER_GUIDE.md`](docs/REVIEWER_GUIDE.md).
+2. Run the current green validation path:
+
+```bash
+npm --prefix frontend run test
+npm --prefix frontend run build
+scripts/run_current_test_gate.sh
+scripts/readiness_multi_environment_contract_check.sh
+```
+
+Current expected status:
+
+- Frontend tests: 10 files / 23 tests pass.
+- Frontend build: passes, with a known large-bundle warning.
+- Python current gate: 71 tests pass.
+- Multi-environment readiness: local/Docker/AWS contract passes.
+
+The full Python `unittest discover` inventory is intentionally not the presentation gate today. It mixes current, live/provider, legacy UI, EvidenceOps/MCP, and eval/benchmark tests. See [`tests/README.md`](tests/README.md).
+
 ## Deployment status
 
 The current validated deployment target is the **AWS slim Docker deployment**.

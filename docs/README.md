@@ -28,3 +28,10 @@ Current official runtime paths:
 - Versioned deploy payload: runtime/ai_decision_studio_functional_baseline/oracle_like_data.
 
 Historical or secondary flows are kept under legacy/.
+
+## Start here
+
+- [`REVIEWER_GUIDE.md`](REVIEWER_GUIDE.md) — short review path for recruiters/interviewers.
+- [`deployment/README.md`](deployment/README.md) — deployment documentation index.
+- [`../tests/README.md`](../tests/README.md) — current Python test status and green gate.
+- [`../scripts/README.md`](../scripts/README.md) — operational script catalog.
