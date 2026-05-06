@@ -20,7 +20,7 @@ Start here if you are new to the repository:
 Current official runtime paths:
 
 - Local Docker: docker-compose.local.yml with .env.docker.
-- AWS slim: docker-compose.local.yml plus docker-compose.aws-slim.yml with .env.aws.
+- AWS slim: docker-compose.aws-slim.yml with .env.aws.
 - Product API entrypoint: main_product_api.py.
 - Frontend Dockerfile: Dockerfile.frontend.
 - Local product API Dockerfile: Dockerfile.product-api.local.

@@ -43,7 +43,7 @@ AWS uses:
 - real env file: `.env.aws`
 - safe template: `.env.aws.example`
 - compose base: `docker-compose.local.yml`
-- AWS override: `docker-compose.aws-slim.yml`
+- AWS slim compose: `docker-compose.aws-slim.yml`
 - product API image: `ai-decision-studio-product-api:aws-slim`
 - frontend image: `ai-decision-studio-frontend:local`
 

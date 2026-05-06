@@ -35,7 +35,7 @@ def main() -> int:
     parser.add_argument(
         "--compose",
         action="append",
-        default=["docker-compose.local.yml", "docker-compose.aws-slim.yml"],
+        default=["docker-compose.aws-slim.yml"],
         help="compose file to inspect for ${VAR} references; may be passed multiple times",
     )
     parser.add_argument(
