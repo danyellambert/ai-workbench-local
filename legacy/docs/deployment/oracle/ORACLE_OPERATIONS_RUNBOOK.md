@@ -87,7 +87,7 @@ Expected result:
 On the server:
 
 cd /opt/ai-decision-studio/app
-cp .env.oracle.example .env.oracle
+cp legacy/deploy/oracle/.env.oracle.example .env.oracle
 chmod 600 .env.oracle
 
 Minimum local-smoke style config:

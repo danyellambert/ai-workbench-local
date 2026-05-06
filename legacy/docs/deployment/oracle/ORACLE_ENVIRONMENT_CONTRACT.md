@@ -13,7 +13,7 @@ Objetivo: impedir que o deploy volte com problemas já resolvidos localmente:
 ## 1. Arquivos de ambiente
 
 Pode ir para Git:
-- .env.oracle.example
+- legacy/deploy/oracle/.env.oracle.example
 
 Não pode ir para Git:
 - .env.oracle

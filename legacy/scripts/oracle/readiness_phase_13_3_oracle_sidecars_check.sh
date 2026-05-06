@@ -12,7 +12,7 @@ import subprocess
 from pathlib import Path
 
 compose_path = Path("docker-compose.oracle-like.yml")
-env_path = Path(".env.oracle.example")
+env_path = Path("legacy/deploy/oracle/.env.oracle.example")
 bundle_script_path = Path("scripts/build_oracle_deployment_bundle.sh")
 ppt_root = Path("services/ppt_creator_app")
 

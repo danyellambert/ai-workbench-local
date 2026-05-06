@@ -450,7 +450,7 @@ PRESENTATION_EXPORT_FAIL_ON_REGRESSION=false
 ### Where this goes
 
 - `src/config.py`
-- environment-specific env examples: `.env.local.example`, `.env.docker.example`, `.env.aws.example`, `.env.oracle.example`
+- environment-specific env examples: `.env.local.example`, `.env.docker.example`, `.env.aws.example`, `legacy/deploy/oracle/.env.oracle.example`
 
 ### Why this matters
 

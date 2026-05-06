@@ -5,7 +5,7 @@ ENV_FILE="${1:-.env.oracle}"
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "ERROR: env file not found: $ENV_FILE" >&2
-  echo "Create .env.oracle from .env.oracle.example and fill deployment secrets outside Git." >&2
+  echo "Create .env.oracle from legacy/deploy/oracle/.env.oracle.example and fill deployment secrets outside Git." >&2
   exit 1
 fi
 

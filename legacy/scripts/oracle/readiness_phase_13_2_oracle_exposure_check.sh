@@ -12,7 +12,7 @@ import subprocess
 from pathlib import Path
 
 compose_path = Path("docker-compose.oracle-like.yml")
-env_example_path = Path(".env.oracle.example")
+env_example_path = Path("legacy/deploy/oracle/.env.oracle.example")
 caddy_path = Path("legacy/deploy/oracle/Caddyfile.example")
 checklist_path = Path("legacy/docs/deployment/oracle/ORACLE_ALWAYS_FREE_SECURITY_EXPOSURE_CHECKLIST.md")
 

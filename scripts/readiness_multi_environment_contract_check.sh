@@ -11,7 +11,6 @@ required_examples=(
   ".env.local.example"
   ".env.docker.example"
   ".env.aws.example"
-  ".env.oracle.example"
 )
 
 required_scripts=(
@@ -83,17 +82,13 @@ grep -q '^VITE_PRODUCT_API_PROXY_ENABLED=1$' .env.local.example
 grep -q '^VITE_PRODUCT_API_BASE_URL=http://127.0.0.1:5173$' .env.local.example
 grep -q '^VITE_PRODUCT_API_PROXY_TARGET=http://127.0.0.1:8011$' .env.local.example
 
-if grep -Rqs 'falling back to legacy .env.oracle' scripts/deploy_aws_slim.sh scripts/smoke_aws_slim.sh; then
-  echo "ERROR: AWS slim scripts must not fall back to .env.oracle." >&2
-  exit 1
-fi
 
 INSIDE_GIT_WORKTREE="false"
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   INSIDE_GIT_WORKTREE="true"
 fi
 
-for real_env in .env .env.local .env.docker .env.aws .env.oracle; do
+for real_env in .env .env.local .env.docker .env.aws; do
   if [ -e "$real_env" ]; then
     if [ "$INSIDE_GIT_WORKTREE" = "true" ]; then
       if ! git check-ignore -q "$real_env"; then

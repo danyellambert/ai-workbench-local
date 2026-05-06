@@ -43,7 +43,7 @@ Files:
     src/product/access_control.py
     src/product/api.py
     docker-compose.oracle-like.yml
-    .env.oracle.example
+    legacy/deploy/oracle/.env.oracle.example
 
 Policy:
 

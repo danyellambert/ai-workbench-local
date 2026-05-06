@@ -12,7 +12,7 @@ local Docker, AWS, and Oracle can coexist without rewriting paths or URLs.
 | Local Docker | .env.docker | .env.docker.example | scripts/run_local_docker.sh |
 | Local Docker config check | `.env.docker` | `.env.docker.example` | `ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only` |
 | AWS slim VM | .env.aws | .env.aws.example | scripts/deploy_aws_slim.sh |
-| Oracle VM | .env.oracle | .env.oracle.example | existing Oracle runbooks/scripts |
+| Oracle VM | .env.oracle | legacy/deploy/oracle/.env.oracle.example | existing Oracle runbooks/scripts |
 
 Real env files are ignored by Git. Only *.example files are versioned.
 
@@ -59,7 +59,7 @@ AWS disk rule:
 Oracle keeps the original contract:
 
 - .env.oracle
-- .env.oracle.example
+- legacy/deploy/oracle/.env.oracle.example
 - docker-compose.oracle-like.yml
 - scripts/readiness_oracle_*.sh
 

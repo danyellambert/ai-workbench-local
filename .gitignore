@@ -90,7 +90,6 @@ ai_lab_golden_state/
 !.env.local.example
 !.env.docker.example
 !.env.aws.example
-!.env.oracle.example
 
 # Local host/dev runtime state
 runtime/
@@ -227,3 +226,4 @@ evals/benchmark-runs/*
 !evals/benchmark-runs/.gitkeep
 
 evals/**/.DS_Store
+!legacy/deploy/oracle/.env.oracle.example
