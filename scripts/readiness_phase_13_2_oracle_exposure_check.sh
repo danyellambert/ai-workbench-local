@@ -13,8 +13,8 @@ from pathlib import Path
 
 compose_path = Path("docker-compose.oracle-like.yml")
 env_example_path = Path(".env.oracle.example")
-caddy_path = Path("deploy/oracle/Caddyfile.example")
-checklist_path = Path("docs/deployment/ORACLE_ALWAYS_FREE_SECURITY_EXPOSURE_CHECKLIST.md")
+caddy_path = Path("legacy/deploy/oracle/Caddyfile.example")
+checklist_path = Path("legacy/docs/deployment/oracle/ORACLE_ALWAYS_FREE_SECURITY_EXPOSURE_CHECKLIST.md")
 
 checks: dict[str, bool] = {}
 evidence: dict[str, object] = {}

@@ -54,7 +54,6 @@ copy_path() {
 }
 
 copy_path "docker-compose.oracle-like.yml"
-copy_path ".env.oracle.example"
 copy_path ".env.aws.example"
 copy_path ".env.docker.example"
 copy_path ".env.local.example"
@@ -71,7 +70,6 @@ copy_path "src"
 copy_path "frontend"
 
 copy_path "docs/deployment"
-copy_path "deploy/oracle"
 copy_path "services/ppt_creator_app"
 
 copy_path "scripts/prepare_oracle_data_root.sh"
@@ -204,7 +202,6 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
     # leaked secrets. Only inspect deploy/config files where literal secret values
     # are likely to be accidentally committed.
     inspect_names = {
-        ".env.oracle.example",
     ".env.aws.example",
     ".env.docker.example",
     ".env.local.example",
@@ -271,7 +268,6 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
 
 required_paths = [
     "docker-compose.oracle-like.yml",
-    ".env.oracle.example",
     ".env.aws.example",
     ".env.docker.example",
     ".env.local.example",
@@ -281,9 +277,6 @@ required_paths = [
     "main_product_api.py",
     "src",
     "frontend",
-    "docs/deployment/ORACLE_OPERATIONS_RUNBOOK.md",
-    "docs/deployment/oracle-hardening-handoff.md",
-    "deploy/oracle/Caddyfile.example",
     "services/ppt_creator_app/Dockerfile",
     "services/ppt_creator_app/pyproject.toml",
     "services/ppt_creator_app/bin/run_ppt_creator_api_container.sh",
