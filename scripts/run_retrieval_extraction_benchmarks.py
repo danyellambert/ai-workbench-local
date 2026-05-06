@@ -356,7 +356,7 @@ def main() -> None:
 
     embeddings_cmd = [
         sys.executable,
-        "scripts/run_phase_4_5_benchmark_suite.py",
+        "scripts/run_retrieval_extraction_benchmark_suite.py",
         "--pdfs",
         *[str(path) for path in pdf_paths],
         "--suite-config",
@@ -369,7 +369,7 @@ def main() -> None:
 
     context_cmd = [
         sys.executable,
-        "scripts/run_phase_4_5_benchmark_suite.py",
+        "scripts/run_retrieval_extraction_benchmark_suite.py",
         "--pdfs",
         *[str(path) for path in pdf_paths],
         "--suite-config",
@@ -382,7 +382,7 @@ def main() -> None:
 
     tuning_cmd = [
         sys.executable,
-        "scripts/run_phase_4_5_benchmark_suite.py",
+        "scripts/run_retrieval_extraction_benchmark_suite.py",
         "--pdfs",
         *[str(path) for path in pdf_paths],
         "--suite-config",

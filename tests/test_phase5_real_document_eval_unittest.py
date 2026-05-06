@@ -12,7 +12,7 @@ from src.structured.tasks import CVAnalysisTaskHandler, ExtractionTaskHandler, C
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_PATH = PROJECT_ROOT / "scripts" / "run_phase5_structured_eval.py"
+SCRIPT_PATH = PROJECT_ROOT / "scripts" / "run_structured_output_eval.py"
 GOLD_CODE_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "07_code_analysis_demo_gold.json"
 GOLD_SUMMARY_ASAP_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "12_summary_asap_2025_annual_report_gold.json"
 GOLD_EXTRACTION_EX10_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "13_extraction_exhibit10_3_gold.json"

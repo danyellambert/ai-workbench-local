@@ -298,7 +298,7 @@ def build_live_eval_commands(
         for item in runnable_structured:
             argv = [
                 sys.executable,
-                str(ROOT_DIR / "scripts" / "run_phase5_structured_eval.py"),
+                str(ROOT_DIR / "scripts" / "run_structured_output_eval.py"),
                 "--task",
                 str(item.get("task_type") or ""),
                 "--provider",

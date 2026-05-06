@@ -43,7 +43,7 @@ jobs:
 
       - name: Preflight live eval environment
         run: |
-          CMD=(python scripts/run_phase8_live_evals.py
+          CMD=(python scripts/run_live_evals.py
             --provider "${{ inputs.provider }}"
             --context-strategy "${{ inputs.context_strategy }}"
             --limit-structured-docs "${{ inputs.limit_structured_docs }}"
@@ -57,7 +57,7 @@ jobs:
 
       - name: Run live evals against prepared local environment
         run: |
-          CMD=(python scripts/run_phase8_live_evals.py
+          CMD=(python scripts/run_live_evals.py
             --provider "${{ inputs.provider }}"
             --context-strategy "${{ inputs.context_strategy }}"
             --limit-structured-docs "${{ inputs.limit_structured_docs }}"
@@ -70,7 +70,7 @@ jobs:
 
       - name: Generate SQLite summary after live evals
         run: |
-          python scripts/report_phase8_eval_store.py --limit 50 --out phase5_eval/reports/phase8_eval_summary_live_ci.json
+          python scripts/report_eval_store_summary.py --limit 50 --out phase5_eval/reports/phase8_eval_summary_live_ci.json
           python scripts/report_phase8_eval_diagnosis.py --out phase5_eval/reports/phase8_eval_diagnosis_live_ci.json
 
       - name: Upload live eval artifacts

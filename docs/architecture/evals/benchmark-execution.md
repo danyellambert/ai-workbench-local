@@ -85,7 +85,7 @@ Primary files:
 Before relying on any specific run as the final evidence bundle, generate the repository audit for Phase 8.5:
 
 ```bash
-python scripts/report_phase8_5_audit.py
+python scripts/report_benchmark_audit.py
 ```
 
 This produces a concise view of:
@@ -300,7 +300,7 @@ This Round 3 layer is intentionally conservative:
 To generate the final closure artifact for the whole phase:
 
 ```bash
-python scripts/report_phase8_5_closure.py
+python scripts/report_benchmark_closure.py
 ```
 
 This closure bundle combines:

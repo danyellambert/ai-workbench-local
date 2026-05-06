@@ -32,7 +32,7 @@ The repo now has three closure-oriented report commands:
 ### Round 0 audit
 
 ```bash
-python scripts/report_phase8_5_audit.py
+python scripts/report_benchmark_audit.py
 ```
 
 ### Round 3 decision gate
@@ -44,7 +44,7 @@ python scripts/report_phase8_5_decision_gate.py
 ### Final closure bundle
 
 ```bash
-python scripts/report_phase8_5_closure.py
+python scripts/report_benchmark_closure.py
 ```
 
 The closure bundle writes:

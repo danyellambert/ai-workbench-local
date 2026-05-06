@@ -33,7 +33,7 @@ docs/data/phase_4_5_benchmark_data.json
 ### Render charts
 
 ```bash
-python scripts/render_phase_4_5_charts.py
+python scripts/render_retrieval_benchmark_charts.py
 ```
 
 Generated assets are written to:

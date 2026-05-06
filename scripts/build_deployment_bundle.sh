@@ -102,7 +102,7 @@ copy_path "scripts/run_local_docker.sh"
 copy_path "scripts/run_local_dev.sh"
 copy_path "scripts/restore_ai_lab_golden_state.sh"
 
-copy_path "scripts/readiness_phase_13_2_public_session_retention_check.sh"
+copy_path "scripts/readiness_public_session_retention_check.sh"
 
 find "$BUNDLE_ROOT" \( -name ".DS_Store" -o -name "._*" \) -type f -delete
 

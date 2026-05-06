@@ -64,7 +64,7 @@ If they are not defined, the server uses the project's default local paths.
 There is a deterministic demo that starts the server, initializes the MCP client, and calls the main tools:
 
 ```bash
-python scripts/demo_phase95_evidenceops_mcp.py
+python scripts/demo_evidenceops_mcp.py
 ```
 
 It demonstrates:

@@ -513,7 +513,7 @@ For reviewers who want to verify the claims quickly, here are direct pointers in
 | Structured outputs | `src/structured/`, `legacy/docs/phases/phase-5-structured-output-foundation.md` |
 | Document Operations Copilot | `src/structured/document_agent.py`, `legacy/docs/phases/document-operations-copilot.md` |
 | Model comparison | `src/services/model_comparison.py`, `legacy/docs/phases/phase-7-model-comparison.md`, `scripts/report_phase7_model_comparison_log.py` |
-| Eval foundation | `legacy/docs/phases/eval-foundation.md`, `scripts/report_phase8_eval_store.py`, `scripts/run_phase8_live_evals.py` |
+| Eval foundation | `legacy/docs/phases/eval-foundation.md`, `scripts/report_eval_store_summary.py`, `scripts/run_live_evals.py` |
 | EvidenceOps MCP | `src/mcp/evidenceops_server.py`, `scripts/run_evidenceops_mcp_server.py`, `legacy/docs/phases/local-evidenceops-mcp-server.md` |
 | Executive deck generation | `src/services/presentation_export.py`, `docs/architecture/executive-deck-generation/`, `scripts/run_presentation_export_smoke_suite.py` |
 | Deployment and hardening | `Dockerfile.public-demo`, `Dockerfile.aws-slim-product-api`, `Dockerfile.frontend-public-demo`, `docker-compose.oracle-like.yml`, `docker-compose.aws-slim.override.yml`, `docs/deployment/`, smoke/integration tests in `tests/` |

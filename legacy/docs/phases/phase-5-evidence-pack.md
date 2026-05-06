@@ -11,7 +11,7 @@ This document gathers the most useful reproducible evidence for the Phase 5 deli
 Command:
 
 ```bash
-python scripts/run_phase5_structured_eval.py --task all
+python scripts/run_structured_output_eval.py --task all
 ```
 
 Result:
@@ -247,7 +247,7 @@ The strongest compact package for this phase is:
 Run the full smoke evaluation:
 
 ```bash
-python scripts/run_phase5_structured_eval.py --task all
+python scripts/run_structured_output_eval.py --task all
 ```
 
 Open the latest report:

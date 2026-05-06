@@ -5,7 +5,7 @@ This directory stores the versioned visual assets generated for the Phase 4.5 be
 ## Regenerate
 
 ```bash
-python scripts/render_phase_4_5_charts.py
+python scripts/render_retrieval_benchmark_charts.py
 ```
 
 ## Source data

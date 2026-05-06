@@ -14,7 +14,7 @@ echo "compose_project=$COMPOSE_PROJECT_NAME"
 
 echo
 echo "== Syntax checks =="
-bash -n scripts/readiness_phase_13_2_public_session_retention_check.sh
+bash -n scripts/readiness_public_session_retention_check.sh
 bash -n legacy/scripts/oracle/readiness_phase_13_2_backup_restore_check.sh
 bash -n legacy/scripts/oracle/readiness_phase_13_2_oracle_exposure_check.sh
 bash -n legacy/scripts/oracle/readiness_phase_13_2_health_ops_check.sh
@@ -26,7 +26,7 @@ python3 -m py_compile \
 
 echo
 echo "== 13.2 retention/cleanup readiness =="
-bash scripts/readiness_phase_13_2_public_session_retention_check.sh
+bash scripts/readiness_public_session_retention_check.sh
 
 echo
 echo "== 13.2 backup/restore readiness =="

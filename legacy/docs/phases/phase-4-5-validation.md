@@ -129,7 +129,7 @@ docs/data/phase_4_5_benchmark_data.json
 ### Regenerate charts
 
 ```bash
-python scripts/render_phase_4_5_charts.py
+python scripts/render_retrieval_benchmark_charts.py
 ```
 
 ### Validate syntax after documentation changes

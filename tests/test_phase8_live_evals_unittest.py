@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_PATH = PROJECT_ROOT / "scripts" / "run_phase8_live_evals.py"
+SCRIPT_PATH = PROJECT_ROOT / "scripts" / "run_live_evals.py"
 
 
 def _load_module():

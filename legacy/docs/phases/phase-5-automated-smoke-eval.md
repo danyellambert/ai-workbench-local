@@ -11,20 +11,20 @@ It is not a benchmark and it does not replace manual review, but it gives the pr
 Run all structured tasks covered by the smoke eval:
 
 ```bash
-PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task all
+PYTHONPATH=. python scripts/run_structured_output_eval.py --task all
 ```
 
 Run a single task:
 
 ```bash
-PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task extraction
-PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task code_analysis
+PYTHONPATH=. python scripts/run_structured_output_eval.py --task extraction
+PYTHONPATH=. python scripts/run_structured_output_eval.py --task code_analysis
 ```
 
 Use a real PDF for CV analysis:
 
 ```bash
-PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task cv_analysis --cv-pdf "/path/to/cv.pdf"
+PYTHONPATH=. python scripts/run_structured_output_eval.py --task cv_analysis --cv-pdf "/path/to/cv.pdf"
 ```
 
 ## Covered tasks

@@ -14,8 +14,8 @@ Commands:
 
 ```bash
 python -m unittest tests.test_phase8_eval_store_unittest tests.test_phase8_eval_diagnosis_unittest tests.test_phase8_agent_workflow_eval_unittest tests.test_runtime_snapshot_unittest tests.test_phase5_real_document_eval_unittest
-python scripts/run_phase8_agent_workflow_eval.py
-python scripts/report_phase8_eval_store.py --limit 20
+python scripts/run_agent_workflow_eval.py
+python scripts/report_eval_store_summary.py --limit 20
 python scripts/report_phase8_eval_diagnosis.py
 ```
 
@@ -31,21 +31,21 @@ Run when you touch:
 Recommended commands:
 
 ```bash
-python scripts/run_phase5_structured_eval.py --task summary --use-indexed-document --document-name "fy25-afr-final-tagged.pdf"
-python scripts/run_phase5_structured_eval.py --task summary --use-indexed-document --document-name "asap-2025-annual-report-tagged.pdf"
-python scripts/run_phase5_structured_eval.py --task extraction --use-indexed-document --document-name "exhib101.pdf"
-python scripts/run_phase5_structured_eval.py --task extraction --use-indexed-document --document-name "exhibit10-3.pdf"
+python scripts/run_structured_output_eval.py --task summary --use-indexed-document --document-name "fy25-afr-final-tagged.pdf"
+python scripts/run_structured_output_eval.py --task summary --use-indexed-document --document-name "asap-2025-annual-report-tagged.pdf"
+python scripts/run_structured_output_eval.py --task extraction --use-indexed-document --document-name "exhib101.pdf"
+python scripts/run_structured_output_eval.py --task extraction --use-indexed-document --document-name "exhibit10-3.pdf"
 python scripts/evaluate_checklist_regression.py --document-name "9789241598590_eng.pdf"
 python scripts/evaluate_evidence_cv_gold_set.py
-python scripts/report_phase8_eval_store.py --limit 50
+python scripts/report_eval_store_summary.py --limit 50
 python scripts/report_phase8_eval_diagnosis.py
 ```
 
 If the local environment is already prepared with provider + RAG + documents, you can also use the consolidated live runner:
 
 ```bash
-python scripts/run_phase8_live_evals.py --preflight-only
-python scripts/run_phase8_live_evals.py --limit-structured-docs 3
+python scripts/run_live_evals.py --preflight-only
+python scripts/run_live_evals.py --limit-structured-docs 3
 ```
 
 This is the recommended entrypoint for self-hosted/manual CI-like validation of environment-dependent evals.

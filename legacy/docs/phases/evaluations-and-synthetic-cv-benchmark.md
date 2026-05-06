@@ -21,7 +21,7 @@ During this stage, the repository evolved from a structured-output foundation in
 
 Phase 5 introduced a local smoke evaluation through:
 
-- `scripts/run_phase5_structured_eval.py`
+- `scripts/run_structured_output_eval.py`
 
 That consolidated smoke evaluation passed for:
 
@@ -150,7 +150,7 @@ So this document should now be read as an intermediate engineering checkpoint th
 
 ### Evaluations
 
-- `scripts/run_phase5_structured_eval.py`
+- `scripts/run_structured_output_eval.py`
 - `phase5_eval/reports/`
 
 ### Synthetic CV benchmark

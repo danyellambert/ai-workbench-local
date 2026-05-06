@@ -37,8 +37,8 @@ python scripts/download_phase8_public_materials.py --dry-run
 - live/local eval orchestration script for prepared provider + RAG environments:
 
 ```bash
-python scripts/run_phase8_live_evals.py --preflight-only
-python scripts/run_phase8_live_evals.py --limit-structured-docs 3
+python scripts/run_live_evals.py --preflight-only
+python scripts/run_live_evals.py --limit-structured-docs 3
 ```
 - separate GitHub Actions workflow for environment-dependent live evals in `.github/workflows/phase8-evals-live.yml`
 - operating routine document for continuous use in `docs/architecture/evals/operating-rhythm.md`
@@ -46,7 +46,7 @@ python scripts/run_phase8_live_evals.py --limit-structured-docs 3
 - aggregated report script:
 
 ```bash
-python scripts/report_phase8_eval_store.py
+python scripts/report_eval_store_summary.py
 ```
 
 - historical import/backfill script:
@@ -77,7 +77,7 @@ SQLite is currently the best trade-off for:
 ### 1. Structured smoke eval
 
 ```bash
-python scripts/run_phase5_structured_eval.py --task all
+python scripts/run_structured_output_eval.py --task all
 ```
 
 Writes one eval run per task execution.
@@ -115,7 +115,7 @@ Writes one eval run per file and per variant:
 ### 4. Document-agent routing and LangGraph workflow eval
 
 ```bash
-python scripts/run_phase8_agent_workflow_eval.py
+python scripts/run_agent_workflow_eval.py
 ```
 
 This deterministic suite covers:
@@ -131,8 +131,8 @@ This deterministic suite covers:
 ### 5. Live eval orchestration for prepared local environments
 
 ```bash
-python scripts/run_phase8_live_evals.py --preflight-only
-python scripts/run_phase8_live_evals.py --limit-structured-docs 3
+python scripts/run_live_evals.py --preflight-only
+python scripts/run_live_evals.py --limit-structured-docs 3
 ```
 
 This orchestration layer is intended for local/self-hosted environments where the following are already available:
@@ -159,21 +159,21 @@ This imports historical runs from `phase5_eval/reports/` into `.phase8_eval_runs
 Global summary:
 
 ```bash
-python scripts/report_phase8_eval_store.py
+python scripts/report_eval_store_summary.py
 ```
 
 Filtered by suite:
 
 ```bash
-python scripts/report_phase8_eval_store.py --suite structured_smoke_eval
-python scripts/report_phase8_eval_store.py --suite checklist_regression
-python scripts/report_phase8_eval_store.py --suite evidence_cv_gold_eval
+python scripts/report_eval_store_summary.py --suite structured_smoke_eval
+python scripts/report_eval_store_summary.py --suite checklist_regression
+python scripts/report_eval_store_summary.py --suite evidence_cv_gold_eval
 ```
 
 Filtered by task:
 
 ```bash
-python scripts/report_phase8_eval_store.py --task checklist
+python scripts/report_eval_store_summary.py --task checklist
 ```
 
 Diagnostic report:

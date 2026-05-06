@@ -33,8 +33,8 @@ This phase made the architectural evolution explicit. It showed that the reposit
 ## Main supporting artifacts
 
 - `old/docs/PHASE_5_5_LANGCHAIN_EVOLUTION.md`
-- `scripts/report_phase55_langchain_shadow_log.py`
-- `scripts/report_phase55_langgraph_shadow_log.py`
+- `scripts/report_langchain_shadow_log.py`
+- `scripts/report_langgraph_shadow_log.py`
 - `tests/test_langgraph_workflow.py`
 - `tests/test_phase55_langgraph_shadow_log.py`
 

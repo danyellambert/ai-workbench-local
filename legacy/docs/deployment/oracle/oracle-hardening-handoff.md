@@ -26,7 +26,7 @@ af42c3f feat(ops): add Oracle data backup and restore scripts
 Files:
 
     scripts/cleanup_public_session_overlays.py
-    scripts/readiness_phase_13_2_public_session_retention_check.sh
+    scripts/readiness_public_session_retention_check.sh
 
 Behavior:
 

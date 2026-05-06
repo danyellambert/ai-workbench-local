@@ -29,7 +29,7 @@ Introduce a workflow-oriented document agent that uses tools and explicit routin
 - `src/structured/tasks.py`
 - `src/structured/document_agent.py`
 - `src/storage/phase6_document_agent_log.py`
-- `scripts/report_phase6_document_agent_log.py`
+- `scripts/report_document_agent_log.py`
 - `tests/test_document_agent_unittest.py`
 - `tests/test_phase6_document_agent_log.py`
 
