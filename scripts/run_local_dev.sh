@@ -164,6 +164,13 @@ validate_local_dev_paths() {
 
   mkdir -p "$APP_USERS_ROOT/public_sessions"
   echo "users_root=$APP_USERS_ROOT"
+
+# Local host/dev runs from the repository root. The repository may contain a
+# large ignored ./benchmark_runs directory from historical experiments; it must
+# not be merged into the product Lab benchmark surface.
+AI_DECISION_STUDIO_SKIP_WORKSPACE_BENCHMARK_RUNS="${AI_DECISION_STUDIO_SKIP_WORKSPACE_BENCHMARK_RUNS:-1}"
+export AI_DECISION_STUDIO_SKIP_WORKSPACE_BENCHMARK_RUNS
+echo "skip_workspace_benchmark_runs=$AI_DECISION_STUDIO_SKIP_WORKSPACE_BENCHMARK_RUNS"
 }
 
 load_env

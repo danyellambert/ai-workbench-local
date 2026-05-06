@@ -2660,7 +2660,9 @@ def build_lab_benchmarks_payload(workspace_root: Path) -> dict[str, Any]:
             if resolved not in candidates:
                 candidates.append(resolved)
 
-        add(workspace_root / 'benchmark_runs')
+        skip_workspace_benchmark_runs = str(os.getenv('AI_DECISION_STUDIO_SKIP_WORKSPACE_BENCHMARK_RUNS') or '').strip().lower() in {'1', 'true', 'yes', 'on'}
+        if not skip_workspace_benchmark_runs:
+            add(workspace_root / 'benchmark_runs')
 
         baseline_root_raw = str(os.getenv('APP_BASELINE_ROOT') or '').strip()
         if baseline_root_raw:
