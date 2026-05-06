@@ -15,6 +15,7 @@ For reviewers: this is not the main product surface. Start with `../README.md`, 
 | `run_local_dev.sh` | Runs or checks local host development mode outside the AWS target host. |
 | `readiness_multi_environment_contract_check.sh` | Checks the local/Docker/AWS environment contract and protects cross-environment assumptions. |
 | `readiness_final_deploy_check.sh` | Executes the final deployment-readiness gate for the repository. |
+| `run_current_test_gate.sh` | Runs the current green Python test gate documented in `../tests/README.md`. |
 
 `build_oracle_deployment_bundle.sh` remains as a backward-compatible wrapper for the older Oracle-named bundle command. Oracle-only operational material lives under `../legacy/`.
 
@@ -33,6 +34,10 @@ For reviewers: this is not the main product surface. Start with `../README.md`, 
 - Tracked eval fixtures and benchmark workspace documentation live in `../evals/`.
 - Generated reports, local benchmark runs, local PDF corpora, caches, secrets, and `.DS_Store` files should not be committed.
 - Do not move or rename scripts referenced by CI, deployment docs, or local runbooks without adding a compatibility wrapper.
+
+## Testing entry point
+
+`run_current_test_gate.sh` is the short Python validation command for reviewers. It intentionally runs the current green subset, not the full historical/live/provider-heavy test inventory.
 
 ## Complete script catalog
 
@@ -60,6 +65,7 @@ Every top-level tracked script/support file in this directory is listed below.
 | `readiness_candidate_review_contract_check.sh` | Checks the Candidate Review contract between expected inputs, outputs, and UI/backend assumptions. | Use when changing Candidate Review docs, tests, or data contracts. | Reads contract markers and likely sample payload expectations. | Protects a product-facing workflow. |
 | `readiness_evidenceops_ui_cache_check.sh` | Checks EvidenceOps UI/cache assumptions so stale or missing cache state is visible. | Use when changing EvidenceOps UI, cache files, or related runtime expectations. | Reads cache/runtime markers and EvidenceOps references. | Useful before demos or handoff. |
 | `readiness_final_deploy_check.sh` | Executes the final deployment-readiness gate for the repository. | Use as a last check before deploy, handoff, or publication. | Aggregates expected deployment/repo readiness assumptions. | High-signal pre-handoff check. |
+| `run_current_test_gate.sh` | Runs the current green Python test gate documented in `../tests/README.md`. |
 | `readiness_multi_environment_contract_check.sh` | Checks the local/Docker/AWS environment contract and protects cross-environment assumptions. | Use when changing env files, compose files, bundle logic, or deployment docs. | Reads env examples, deployment docs, and script contracts. | Important cross-environment guardrail. |
 | `readiness_nextcloud_golden_baseline_check.sh` | Checks Nextcloud golden-baseline assumptions and expected restore/import references. | Use when changing Nextcloud baseline, restore docs, or related integration material. | Reads baseline paths, docs, and integration markers. | Relevant to integration/demo state. |
 | `readiness_public_session_retention_check.sh` | Checks public session-retention assumptions from the later deployment-hardening work. | Use before changing public session, retention, cleanup, or admin/session policy behavior. | Reads policy/session markers and related runtime expectations. | Kept active because it is public-session related, not Oracle-only. |

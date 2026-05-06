@@ -34,24 +34,25 @@ Interpretation:
 
 Use this as the current presentation/reviewer gate. It is intentionally smaller than the full historical suite and avoids known failing live/provider/legacy UI modules.
 
+Prepare the Python environment with the same interpreter you will use to run the gate:
+
 ```bash
-python3 -m unittest \
-  tests.test_app_bootstrap_smoke_unittest \
-  tests.test_product_presenters_unittest \
-  tests.test_document_context_runtime_unittest \
-  tests.test_runtime_execution_log_unittest \
-  tests.test_document_agent_unittest \
-  tests.test_model_comparison_service_unittest \
-  tests.test_pdf_extraction_unittest \
-  tests.test_structured_service_unittest \
-  tests.test_checklist_and_evidence_eval_unittest \
-  tests.test_lab_chat_unittest \
-  tests.test_lab_evidenceops_payload \
-  tests.test_presentation_export_service_unittest \
-  tests.test_presentation_export_unittest
+python3 -m pip install -r requirements.txt
 ```
 
-This gate is not a replacement for repairing the broader suite. It is the currently documented deterministic/offline-ish subset that a reviewer can run without invoking the known non-current/live/legacy failures.
+Then run:
+
+```bash
+scripts/run_current_test_gate.sh
+```
+
+To force a specific interpreter:
+
+```bash
+PYTHON=python3.11 scripts/run_current_test_gate.sh
+```
+
+This gate is not a replacement for repairing the broader suite. It is the currently documented deterministic/offline-ish subset that a reviewer can run without invoking the known non-current/live/provider/legacy failures.
 
 Run an individual module:
 
@@ -211,9 +212,9 @@ Current behavior/subsystem names include:
 ```text
 test_benchmark_decision_gate_unittest.py
 test_eval_store_diagnosis_unittest.py
-test_model_comparison_log_unittest.py
+test_model_comparison_log.py
 test_evidenceops_mcp_client.py
-test_structured_output_eval_unittest.py
+test_structured_service_unittest.py
 ```
 
 ## Naming policy
@@ -223,10 +224,10 @@ Avoid new test names with historical phase labels. Prefer behavior/subsystem nam
 Preferred names should describe the subsystem or behavior:
 
 ```text
-test_structured_output_eval_unittest.py
+test_structured_service_unittest.py
 test_benchmark_decision_gate_unittest.py
 test_eval_store_diagnosis_unittest.py
-test_model_comparison_log_unittest.py
+test_model_comparison_log.py
 test_evidenceops_mcp_client.py
 ```
 
