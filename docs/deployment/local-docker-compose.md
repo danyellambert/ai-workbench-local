@@ -4,10 +4,10 @@ Use this document when running the current AI Decision Studio product locally th
 
 Official local Docker topology:
 
-- compose file: docker-compose.oracle-like.yml
+- compose file: docker-compose.local.yml
 - env file: .env.docker
-- frontend Dockerfile: Dockerfile.frontend-public-demo
-- local product API Dockerfile: Dockerfile.public-demo
+- frontend Dockerfile: Dockerfile.frontend
+- local product API Dockerfile: Dockerfile.product-api.local
 - product API entrypoint: main_product_api.py
 
 Expected services:
@@ -36,12 +36,12 @@ Basic validation:
 
 Example commands:
 
-- docker compose --env-file .env.docker -f docker-compose.oracle-like.yml config --services
-- docker compose --env-file .env.docker -f docker-compose.oracle-like.yml up -d --build
-- docker compose --env-file .env.docker -f docker-compose.oracle-like.yml ps
+- docker compose --env-file .env.docker -f docker-compose.local.yml config --services
+- docker compose --env-file .env.docker -f docker-compose.local.yml up -d --build
+- docker compose --env-file .env.docker -f docker-compose.local.yml ps
 
 There is also a helper script for local Docker operation:
 
 - scripts/run_local_docker.sh
 
-Do not use legacy/compose/docker-compose.frontend-public-demo.yml for the current product. That file is preserved for historical smoke/readiness context only.
+Do not use legacy/compose/docker-compose.frontend-local.yml for the current product. That file is preserved for historical smoke/readiness context only.

@@ -53,17 +53,17 @@ copy_path() {
   fi
 }
 
-copy_path "docker-compose.oracle-like.yml"
+copy_path "docker-compose.local.yml"
 copy_path ".env.aws.example"
 copy_path ".env.docker.example"
 copy_path ".env.local.example"
 copy_path ".dockerignore"
-copy_path "Dockerfile.public-demo"
-copy_path "Dockerfile.aws-slim-product-api"
-copy_path "requirements-aws-slim.txt"
-copy_path "docker-compose.aws-slim.override.yml"
-copy_path "Dockerfile.frontend-public-demo"
-copy_path "requirements-public-demo.txt"
+copy_path "Dockerfile.product-api.local"
+copy_path "Dockerfile.product-api.aws-slim"
+copy_path "requirements-product-api.aws-slim.txt"
+copy_path "docker-compose.aws-slim.yml"
+copy_path "Dockerfile.frontend"
+copy_path "requirements-product-api.local.txt"
 copy_path "main_product_api.py"
 
 copy_path "src"
@@ -191,7 +191,7 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
     ".env.aws.example",
     ".env.docker.example",
     ".env.local.example",
-        "docker-compose.oracle-like.yml",
+        "docker-compose.local.yml",
         "docker-compose.yml",
         "docker-compose.yaml",
     }
@@ -253,13 +253,13 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
     return findings
 
 required_paths = [
-    "docker-compose.oracle-like.yml",
+    "docker-compose.local.yml",
     ".env.aws.example",
     ".env.docker.example",
     ".env.local.example",
-    "Dockerfile.public-demo",
-    "Dockerfile.frontend-public-demo",
-    "requirements-public-demo.txt",
+    "Dockerfile.product-api.local",
+    "Dockerfile.frontend",
+    "requirements-product-api.local.txt",
     "main_product_api.py",
     "src",
     "frontend",

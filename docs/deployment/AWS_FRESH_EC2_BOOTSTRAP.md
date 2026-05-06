@@ -15,8 +15,8 @@ This runbook assumes the current AWS slim deployment contract:
   - `VITE_PRODUCT_API_PROXY_ENABLED=0`;
   - `VITE_PRODUCT_API_PROXY_TARGET=`;
 - compose files:
-  - `docker-compose.oracle-like.yml`;
-  - `docker-compose.aws-slim.override.yml`;
+  - `docker-compose.local.yml`;
+  - `docker-compose.aws-slim.yml`;
 - deploy command:
 
     ENV_FILE=.env.aws scripts/deploy_aws_slim.sh
@@ -42,12 +42,12 @@ AWS uses:
 
 - real env file: `.env.aws`
 - safe template: `.env.aws.example`
-- compose base: `docker-compose.oracle-like.yml`
-- AWS override: `docker-compose.aws-slim.override.yml`
+- compose base: `docker-compose.local.yml`
+- AWS override: `docker-compose.aws-slim.yml`
 - product API image: `ai-decision-studio-product-api:aws-slim`
-- frontend image: `ai-decision-studio-frontend:oracle-like`
+- frontend image: `ai-decision-studio-frontend:local`
 
-The name `oracle-like` is historical. It describes the Docker topology, not the
+The name `local` is historical. It describes the Docker topology, not the
 AWS environment. Do not rename compose files, images, or container names during a
 fresh EC2 recovery unless there is a separate migration plan.
 
@@ -273,11 +273,11 @@ On the EC2 host:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.oracle-like.yml \
-      -f docker-compose.aws-slim.override.yml \
+      -f docker-compose.local.yml \
+      -f docker-compose.aws-slim.yml \
       config > /tmp/ads_aws_fresh_compose.yml
 
-    grep -q "dockerfile: Dockerfile.aws-slim-product-api" /tmp/ads_aws_fresh_compose.yml
+    grep -q "dockerfile: Dockerfile.product-api.aws-slim" /tmp/ads_aws_fresh_compose.yml
     grep -q "image: ai-decision-studio-product-api:aws-slim" /tmp/ads_aws_fresh_compose.yml
 
     echo "OK: AWS compose uses the slim product-api image"
@@ -299,15 +299,15 @@ On the EC2 host:
     DOCKER_BUILDKIT=1 docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.oracle-like.yml \
-      -f docker-compose.aws-slim.override.yml \
+      -f docker-compose.local.yml \
+      -f docker-compose.aws-slim.yml \
       up -d --build
 
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.oracle-like.yml \
-      -f docker-compose.aws-slim.override.yml \
+      -f docker-compose.local.yml \
+      -f docker-compose.aws-slim.yml \
       ps
 
 Wait for health:
@@ -324,11 +324,11 @@ Wait for health:
         docker compose \
           --env-file .env.aws \
           -p ai-decision-studio \
-          -f docker-compose.oracle-like.yml \
-          -f docker-compose.aws-slim.override.yml \
+          -f docker-compose.local.yml \
+          -f docker-compose.aws-slim.yml \
           ps
-        docker logs ai-decision-studio-product-api-oracle-like --tail 120 || true
-        docker logs ai-decision-studio-frontend-oracle-like --tail 120 || true
+        docker logs ai-decision-studio-product-api-local --tail 120 || true
+        docker logs ai-decision-studio-frontend-local --tail 120 || true
         exit 1
       fi
 
@@ -362,8 +362,8 @@ Then re-check:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.oracle-like.yml \
-      -f docker-compose.aws-slim.override.yml \
+      -f docker-compose.local.yml \
+      -f docker-compose.aws-slim.yml \
       ps
 
 ## Step 10 — Run AWS smoke
@@ -458,12 +458,12 @@ If containers fail after a compose change:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.oracle-like.yml \
-      -f docker-compose.aws-slim.override.yml \
+      -f docker-compose.local.yml \
+      -f docker-compose.aws-slim.yml \
       ps
 
-    docker logs ai-decision-studio-product-api-oracle-like --tail 200
-    docker logs ai-decision-studio-frontend-oracle-like --tail 200
+    docker logs ai-decision-studio-product-api-local --tail 200
+    docker logs ai-decision-studio-frontend-local --tail 200
 
 Keep `.env.oracle` only as a compatibility fallback on migrated hosts. New AWS
 hosts should use `.env.aws` as the real env file.
@@ -488,8 +488,8 @@ After a fresh AWS EC2 bootstrap or controlled rebuild, validate the stack from i
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.oracle-like.yml \
-      -f docker-compose.aws-slim.override.yml \
+      -f docker-compose.local.yml \
+      -f docker-compose.aws-slim.yml \
       ps
 
 Expected results:

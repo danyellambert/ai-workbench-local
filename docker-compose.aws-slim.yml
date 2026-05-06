@@ -1,0 +1,186 @@
+services:
+  product-api:
+    build:
+      context: "."
+      dockerfile: Dockerfile.product-api.aws-slim
+    image: ai-decision-studio-product-api:aws-slim
+    container_name: ai-decision-studio-product-api-aws-slim
+    restart: unless-stopped
+    depends_on:
+      ppt-creator:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+      nextcloud:
+        condition: service_started
+    environment:
+      AI_DECISION_STUDIO_DEPLOYMENT_MODE: ${AI_DECISION_STUDIO_DEPLOYMENT_MODE:-aws_slim}
+      PRODUCT_API_HOST: 0.0.0.0
+      PRODUCT_API_PORT: '8011'
+      AI_DECISION_STUDIO_PRODUCT_API_HOST: 0.0.0.0
+      AI_DECISION_STUDIO_PRODUCT_API_PORT: '8011'
+      AI_DECISION_STUDIO_BASELINE_ROOT: "/app/baseline"
+      APP_BASELINE_ROOT: "/app/baseline"
+      APP_RUNTIME_ROOT: "/app/runtime"
+      APP_ARTIFACT_ROOT: "/app/artifacts"
+      APP_USERS_ROOT: "/app/users"
+      AI_DECISION_STUDIO_PUBLIC_SESSION_MAX_MB: "${AI_DECISION_STUDIO_PUBLIC_SESSION_MAX_MB:-250}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-http://ollama:11434/v1}"
+      OLLAMA_HOSTED_BASE_URL: "${OLLAMA_HOSTED_BASE_URL:-https://ollama.com/api}"
+      HUGGINGFACE_INFERENCE_BASE_URL: "${HUGGINGFACE_INFERENCE_BASE_URL:-https://router.huggingface.co/v1}"
+      OLLAMA_HOSTED_API_KEY: "${OLLAMA_HOSTED_API_KEY:-}"
+      HUGGINGFACE_INFERENCE_API_KEY: "${HUGGINGFACE_INFERENCE_API_KEY:-}"
+      EVIDENCEOPS_REPOSITORY_BACKEND: "${EVIDENCEOPS_REPOSITORY_BACKEND:-nextcloud_webdav}"
+      EVIDENCEOPS_NEXTCLOUD_BASE_URL: "${EVIDENCEOPS_NEXTCLOUD_BASE_URL:-http://nextcloud/remote.php/dav/files/ads_admin}"
+      EVIDENCEOPS_NEXTCLOUD_USERNAME: "${EVIDENCEOPS_NEXTCLOUD_USERNAME:-ads_admin}"
+      EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD: "${EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD:-change-me-oracle-nextcloud-password}"
+      EVIDENCEOPS_NEXTCLOUD_ROOT_PATH: "${EVIDENCEOPS_NEXTCLOUD_ROOT_PATH:-/EvidenceOpsDemo}"
+      EVIDENCEOPS_UI_CACHE_MODE: "${EVIDENCEOPS_UI_CACHE_MODE:-persistent_until_sync}"
+      EVIDENCEOPS_UI_CACHE_PATH: "${EVIDENCEOPS_UI_CACHE_PATH:-/app/runtime/cache/lab/evidenceops_payload.json}"
+      EVIDENCEOPS_TRELLO_API_KEY: "${EVIDENCEOPS_TRELLO_API_KEY:-}"
+      EVIDENCEOPS_TRELLO_TOKEN: "${EVIDENCEOPS_TRELLO_TOKEN:-}"
+      EVIDENCEOPS_TRELLO_BOARD_ID: "${EVIDENCEOPS_TRELLO_BOARD_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_OPEN_ID: "${EVIDENCEOPS_TRELLO_LIST_OPEN_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_REVIEW_ID: "${EVIDENCEOPS_TRELLO_LIST_REVIEW_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_APPROVED_ID: "${EVIDENCEOPS_TRELLO_LIST_APPROVED_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_DONE_ID: "${EVIDENCEOPS_TRELLO_LIST_DONE_ID:-}"
+      EVIDENCEOPS_NOTION_API_KEY: "${EVIDENCEOPS_NOTION_API_KEY:-}"
+      EVIDENCEOPS_NOTION_DATABASE_ID: "${EVIDENCEOPS_NOTION_DATABASE_ID:-}"
+      PRESENTATION_EXPORT_ENABLED: "${PRESENTATION_EXPORT_ENABLED:-true}"
+      PRESENTATION_EXPORT_BASE_URL: "${PRESENTATION_EXPORT_BASE_URL:-http://ppt-creator:8787}"
+      PRESENTATION_EXPORT_TIMEOUT_SECONDS: "${PRESENTATION_EXPORT_TIMEOUT_SECONDS:-120}"
+      AI_DECISION_STUDIO_ADMIN_USERNAME: "${AI_DECISION_STUDIO_ADMIN_USERNAME:-}"
+      AI_DECISION_STUDIO_ADMIN_PASSWORD_HASH: "${AI_DECISION_STUDIO_ADMIN_PASSWORD_HASH:-}"
+      AI_DECISION_STUDIO_SESSION_SECRET: "${AI_DECISION_STUDIO_SESSION_SECRET:-}"
+    volumes:
+    - "${AI_DECISION_STUDIO_BASELINE_ROOT:-/opt/ai-decision-studio/data/baseline}:/app/baseline:ro"
+    - "${AI_DECISION_STUDIO_RUNTIME_ROOT:-/opt/ai-decision-studio/data/runtime}:/app/runtime"
+    - "${AI_DECISION_STUDIO_ARTIFACT_ROOT:-/opt/ai-decision-studio/data/artifacts}:/app/artifacts"
+    - "${AI_DECISION_STUDIO_USERS_ROOT:-/opt/ai-decision-studio/data/users}:/app/users"
+    expose:
+    - '8011'
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - "-fsS"
+      - http://127.0.0.1:8011/health
+      interval: 20s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+    networks:
+    - ai-decision-studio-private
+  frontend:
+    build:
+      context: "."
+      dockerfile: Dockerfile.frontend
+    image: ai-decision-studio-frontend:aws-slim
+    container_name: ai-decision-studio-frontend-aws-slim
+    restart: unless-stopped
+    depends_on:
+      product-api:
+        condition: service_healthy
+    ports:
+    - "${AI_DECISION_STUDIO_FRONTEND_BIND_HOST:-127.0.0.1}:${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8080}:8080"
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - "-qO-"
+      - http://127.0.0.1:8080/
+      interval: 20s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    networks:
+    - ai-decision-studio-private
+  ppt-creator:
+    build:
+      context: "./services/ppt_creator_app"
+      dockerfile: Dockerfile
+    image: ai-decision-studio-ppt-creator:aws-slim
+    container_name: ai-decision-studio-ppt-creator-aws-slim
+    restart: unless-stopped
+    environment:
+      PPT_CREATOR_RUNTIME_MODE: docker_compose_oracle
+      PPT_CREATOR_API_HOST: 0.0.0.0
+      PPT_CREATOR_API_PORT: '8787'
+      PPT_CREATOR_API_ASSET_ROOT: "/app/examples"
+      PPT_CREATOR_AI_SERVICE_URL: "${PPT_CREATOR_AI_SERVICE_URL:-}"
+    working_dir: "/work"
+    volumes:
+    - ppt_creator_workspace:/work
+    expose:
+    - '8787'
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - "-c"
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/health',
+        timeout=5).read()
+      interval: 20s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+    networks:
+    - ai-decision-studio-private
+  ollama:
+    image: ollama/ollama
+    container_name: ai-decision-studio-ollama-aws-slim
+    restart: unless-stopped
+    environment:
+      OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS:-1}"
+      OLLAMA_NUM_PARALLEL: "${OLLAMA_NUM_PARALLEL:-1}"
+      CUDA_VISIBLE_DEVICES: "-1"
+      ROCR_VISIBLE_DEVICES: "-1"
+    volumes:
+    - ollama_data:/root/.ollama
+    expose:
+    - '11434'
+    healthcheck:
+      test:
+      - CMD
+      - ollama
+      - list
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+    cpus: "${OLLAMA_CPUS:-2}"
+    mem_limit: "${OLLAMA_MEM_LIMIT:-12g}"
+    memswap_limit: "${OLLAMA_MEMSWAP_LIMIT:-12g}"
+    networks:
+    - ai-decision-studio-private
+  nextcloud:
+    image: nextcloud:29-apache
+    container_name: ai-decision-studio-nextcloud-aws-slim
+    restart: unless-stopped
+    environment:
+      NEXTCLOUD_ADMIN_USER: "${NEXTCLOUD_ADMIN_USER:-ads_admin}"
+      NEXTCLOUD_ADMIN_PASSWORD: "${NEXTCLOUD_ADMIN_PASSWORD:-change-me-oracle-nextcloud-password}"
+      NEXTCLOUD_TRUSTED_DOMAINS: "${NEXTCLOUD_TRUSTED_DOMAINS:-localhost 127.0.0.1
+        nextcloud}"
+      SQLITE_DATABASE: nextcloud
+    volumes:
+    - nextcloud_app:/var/www/html
+    expose:
+    - '80'
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - test -f /var/www/html/status.php
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    networks:
+    - ai-decision-studio-private
+volumes:
+  ppt_creator_workspace:
+  ollama_data:
+  nextcloud_app:
+networks:
+  ai-decision-studio-private:
+    driver: bridge

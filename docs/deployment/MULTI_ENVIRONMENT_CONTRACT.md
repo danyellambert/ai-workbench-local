@@ -39,8 +39,8 @@ slim override:
 docker compose \
   --env-file .env.aws \
   -p ai-decision-studio \
-  -f docker-compose.oracle-like.yml \
-  -f docker-compose.aws-slim.override.yml \
+  -f docker-compose.local.yml \
+  -f docker-compose.aws-slim.yml \
   up -d --no-deps --build product-api frontend
 
 For backward compatibility, scripts may fall back to .env.oracle if .env.aws
@@ -48,9 +48,9 @@ is not present on an existing AWS host. This is temporary.
 
 AWS disk rule:
 
-- Always use docker-compose.aws-slim.override.yml.
+- Always use docker-compose.aws-slim.yml.
 - product-api image must be ai-decision-studio-product-api:aws-slim.
-- Do not build Dockerfile.public-demo for product-api on the 30GB AWS VM.
+- Do not build Dockerfile.product-api.local for product-api on the 30GB AWS VM.
 - Rebuild only product-api/frontend unless explicitly needed.
 - Check df -h and docker system df before and after deploy.
 
@@ -60,10 +60,10 @@ Oracle keeps the original contract:
 
 - .env.oracle
 - legacy/deploy/oracle/.env.oracle.example
-- docker-compose.oracle-like.yml
+- docker-compose.local.yml
 - scripts/readiness_oracle_*.sh
 
-The term oracle-like also describes the historical Docker topology: baseline,
+The term local also describes the historical Docker topology: baseline,
 runtime, artifacts, users, sidecars, healthchecks, and same-origin frontend/API.
 
 ## Migration note
@@ -88,11 +88,11 @@ Use the repository scripts instead of running raw `docker compose` or ad-hoc API
 | Target | Supported command | Env contract | Why |
 | --- | --- | --- | --- |
 | Local host/dev | `ENV_FILE=.env.local scripts/run_local_dev.sh` | `.env.local` | Starts the host API/frontend with local writable users overlay and skips ignored root-level benchmark artifacts. |
-| Local Docker/oracle-like | `scripts/run_local_docker.sh` | `.env.docker` plus script-resolved local data roots | Renders Docker volumes against the local `runtime/ai_decision_studio_functional_baseline/oracle_like_data` tree instead of falling back to `/opt/...` paths. |
+| Local Docker/local | `scripts/run_local_docker.sh` | `.env.docker` plus script-resolved local data roots | Renders Docker volumes against the local `runtime/ai_decision_studio_functional_baseline/oracle_like_data` tree instead of falling back to `/opt/...` paths. |
 | AWS slim deploy | `scripts/deploy_aws_slim.sh` | `.env.aws` | Uses the AWS deployment contract and avoids local/Oracle defaults. |
 | AWS smoke validation | `scripts/smoke_aws_slim.sh` | `.env.aws` | Validates the deployed AWS surface with the same contract. |
 
-Do not run `docker compose -f docker-compose.oracle-like.yml up ...` directly for local Docker. Without the script-provided environment, Compose can fall back to `/opt/ai-decision-studio/data/...`, which is a Linux/VM deploy layout and not the local Mac data root.
+Do not run `docker compose -f docker-compose.local.yml up ...` directly for local Docker. Without the script-provided environment, Compose can fall back to `/opt/ai-decision-studio/data/...`, which is a Linux/VM deploy layout and not the local Mac data root.
 
 For local Docker, the expected data root is:
 

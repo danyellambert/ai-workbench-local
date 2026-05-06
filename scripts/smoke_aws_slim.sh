@@ -12,8 +12,7 @@ echo "base_url=$BASE_URL"
 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
-  -f docker-compose.oracle-like.yml \
-  -f docker-compose.aws-slim.override.yml \
+  -f docker-compose.aws-slim.yml \
   ps
 
 curl -fsS "$BASE_URL/health"

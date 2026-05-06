@@ -10,9 +10,9 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements-public-demo.txt /app/requirements-public-demo.txt
+COPY requirements-product-api.local.txt /app/requirements-product-api.local.txt
 RUN pip install --upgrade pip \
-    && pip install -r /app/requirements-public-demo.txt
+    && pip install -r /app/requirements-product-api.local.txt
 
 COPY . /app
 

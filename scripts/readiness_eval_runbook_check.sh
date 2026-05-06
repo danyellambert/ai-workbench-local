@@ -92,7 +92,7 @@ def container_env():
             [
                 "docker",
                 "exec",
-                "ai-decision-studio-product-api-frontend-public-demo",
+                "ai-decision-studio-product-api-frontend-local",
                 "python",
                 "-c",
                 (

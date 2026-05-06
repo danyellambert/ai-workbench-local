@@ -4,11 +4,10 @@ Use this document for the current AWS slim deployment shape.
 
 Official AWS slim topology:
 
-- base compose: docker-compose.oracle-like.yml
-- AWS override: docker-compose.aws-slim.override.yml
+- compose: docker-compose.aws-slim.yml
 - env file: .env.aws
-- product API Dockerfile: Dockerfile.aws-slim-product-api
-- frontend Dockerfile: Dockerfile.frontend-public-demo
+- product API Dockerfile: Dockerfile.product-api.aws-slim
+- frontend Dockerfile: Dockerfile.frontend
 
 Expected AWS services:
 
@@ -39,8 +38,8 @@ The local versioned payload can be used as the source for populating the AWS dat
 
 Basic validation:
 
-- docker compose --env-file .env.aws -f docker-compose.oracle-like.yml -f docker-compose.aws-slim.override.yml config --services
-- docker compose --env-file .env.aws -f docker-compose.oracle-like.yml -f docker-compose.aws-slim.override.yml ps
+- docker compose --env-file .env.aws -f docker-compose.aws-slim.yml config --services
+- docker compose --env-file .env.aws -f docker-compose.aws-slim.yml ps
 
 Helper scripts:
 

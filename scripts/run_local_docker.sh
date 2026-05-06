@@ -24,7 +24,7 @@ Optional env:
   SKIP_AI_LAB_GOLDEN_STATE_RESTORE=1
 
 Behavior:
-  - Uses docker-compose.oracle-like.yml as the local Docker topology.
+  - Uses docker-compose.local.yml as the local Docker topology.
   - Does not use AWS slim override.
   - Frontend container serves the app through Nginx.
   - Nginx proxies /api and /health to product-api:8011 inside Docker.
@@ -83,7 +83,7 @@ compose() {
   docker compose \
     --env-file "$ENV_FILE" \
     -p "$PROJECT_NAME" \
-    -f docker-compose.oracle-like.yml \
+    -f docker-compose.local.yml \
     "$@"
 }
 
@@ -320,9 +320,9 @@ CFG="/tmp/ads_local_docker_compose_$(date +%Y%m%d_%H%M%S).yml"
 
 compose config > "$CFG"
 
-grep -q 'image: ai-decision-studio-product-api:oracle-like' "$CFG"
-grep -q 'image: ai-decision-studio-frontend:oracle-like' "$CFG"
-grep -q 'image: ai-decision-studio-ppt-creator:oracle-like' "$CFG"
+grep -q 'image: ai-decision-studio-product-api:local' "$CFG"
+grep -q 'image: ai-decision-studio-frontend:local' "$CFG"
+grep -q 'image: ai-decision-studio-ppt-creator:local' "$CFG"
 grep -q 'image: ollama/ollama' "$CFG"
 grep -q 'image: nextcloud:29-apache' "$CFG"
 grep -q 'APP_USERS_ROOT: /app/users' "$CFG"
@@ -330,7 +330,7 @@ grep -q 'OLLAMA_BASE_URL: http://ollama:11434/v1' "$CFG"
 grep -q 'PRESENTATION_EXPORT_BASE_URL: http://ppt-creator:8787' "$CFG"
 grep -q 'EVIDENCEOPS_NEXTCLOUD_BASE_URL: http://nextcloud/remote.php/dav/files/' "$CFG"
 grep -q 'EVIDENCEOPS_NEXTCLOUD_ROOT_PATH: /EvidenceOpsDemo' "$CFG"
-grep -q 'proxy_pass http://product-api:8011' frontend/nginx.public-demo.conf
+grep -q 'proxy_pass http://product-api:8011' frontend/nginx.docker.conf
 
 if [ "$CONFIG_ONLY" = "true" ]; then
   echo "OK: local Docker compose config rendered: $CFG"
@@ -371,7 +371,7 @@ for i in $(seq 1 120); do
     echo "  Frontend/API: $BASE_URL"
     echo "  Health:       $BASE_URL/health"
     echo "  Logs:"
-    echo "    docker compose --env-file $ENV_FILE -p $PROJECT_NAME -f docker-compose.oracle-like.yml logs -f"
+    echo "    docker compose --env-file $ENV_FILE -p $PROJECT_NAME -f docker-compose.local.yml logs -f"
     exit 0
   fi
 

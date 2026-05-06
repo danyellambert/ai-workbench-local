@@ -19,12 +19,12 @@ Start here if you are new to the repository:
 
 Current official runtime paths:
 
-- Local Docker: docker-compose.oracle-like.yml with .env.docker.
-- AWS slim: docker-compose.oracle-like.yml plus docker-compose.aws-slim.override.yml with .env.aws.
+- Local Docker: docker-compose.local.yml with .env.docker.
+- AWS slim: docker-compose.local.yml plus docker-compose.aws-slim.yml with .env.aws.
 - Product API entrypoint: main_product_api.py.
-- Frontend Dockerfile: Dockerfile.frontend-public-demo.
-- Local product API Dockerfile: Dockerfile.public-demo.
-- AWS product API Dockerfile: Dockerfile.aws-slim-product-api.
+- Frontend Dockerfile: Dockerfile.frontend.
+- Local product API Dockerfile: Dockerfile.product-api.local.
+- AWS product API Dockerfile: Dockerfile.product-api.aws-slim.
 - Versioned deploy payload: runtime/ai_decision_studio_functional_baseline/oracle_like_data.
 
 Historical or secondary flows are kept under legacy/.

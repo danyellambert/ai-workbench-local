@@ -87,7 +87,7 @@ After cleanup, verify:
 
 df -h /
 docker system df
-docker compose --env-file .env.aws -p ai-decision-studio -f docker-compose.oracle-like.yml -f docker-compose.aws-slim.override.yml ps
+docker compose --env-file .env.aws -p ai-decision-studio -f docker-compose.local.yml -f docker-compose.aws-slim.yml ps
 curl -fsS http://127.0.0.1:8071/health
 
 ## Do not run without review

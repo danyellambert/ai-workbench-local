@@ -23,11 +23,10 @@ CFG="/tmp/ads_aws_slim_compose_$(date +%Y%m%d_%H%M%S).yml"
 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
-  -f docker-compose.oracle-like.yml \
-  -f docker-compose.aws-slim.override.yml \
+  -f docker-compose.aws-slim.yml \
   config > "$CFG"
 
-grep -q 'dockerfile: Dockerfile.aws-slim-product-api' "$CFG"
+grep -q 'dockerfile: Dockerfile.product-api.aws-slim' "$CFG"
 grep -q 'image: ai-decision-studio-product-api:aws-slim' "$CFG"
 
 echo "OK: compose config uses AWS slim product-api."
@@ -35,15 +34,13 @@ echo "OK: compose config uses AWS slim product-api."
 DOCKER_BUILDKIT=1 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
-  -f docker-compose.oracle-like.yml \
-  -f docker-compose.aws-slim.override.yml \
+  -f docker-compose.aws-slim.yml \
   up -d --no-deps --build --force-recreate product-api frontend
 
 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
-  -f docker-compose.oracle-like.yml \
-  -f docker-compose.aws-slim.override.yml \
+  -f docker-compose.aws-slim.yml \
   ps
 
 curl -fsS "http://127.0.0.1:${PUBLIC_PORT}/health"

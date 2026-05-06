@@ -539,7 +539,7 @@ For reviewers who want to verify the claims quickly, here are direct pointers in
 | Eval foundation | `legacy/docs/phases/eval-foundation.md`, `scripts/report_eval_store_summary.py`, `scripts/run_live_evals.py` |
 | EvidenceOps MCP | `src/mcp/evidenceops_server.py`, `scripts/run_evidenceops_mcp_server.py`, `legacy/docs/phases/local-evidenceops-mcp-server.md` |
 | Executive deck generation | `src/services/presentation_export.py`, `docs/architecture/executive-deck-generation/`, `scripts/run_presentation_export_smoke_suite.py` |
-| Deployment and hardening | `Dockerfile.public-demo`, `Dockerfile.aws-slim-product-api`, `Dockerfile.frontend-public-demo`, `docker-compose.oracle-like.yml`, `docker-compose.aws-slim.override.yml`, `docs/deployment/`, smoke/integration tests in `tests/` |
+| Deployment and hardening | `Dockerfile.product-api.local`, `Dockerfile.product-api.aws-slim`, `Dockerfile.frontend`, `docker-compose.local.yml`, `docker-compose.aws-slim.yml`, `docs/deployment/`, smoke/integration tests in `tests/` |
 
 This section exists for a simple reason: the README should make the current product architecture easy to verify line by line.
 

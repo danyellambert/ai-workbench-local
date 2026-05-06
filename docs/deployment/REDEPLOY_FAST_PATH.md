@@ -2,7 +2,7 @@
 
 This is the short redeploy path for the shared Oracle-like Docker topology.
 
-The topology name `oracle-like` is historical. It describes the Docker shape:
+The topology name `local` is historical. It describes the Docker shape:
 frontend, product-api, Nextcloud, Ollama, PPT creator, baseline/runtime/artifact
 mounts, and same-origin API routing.
 
@@ -10,9 +10,9 @@ Use the correct real env file for the target host:
 
 | Target | Env file | Compose files |
 | --- | --- | --- |
-| AWS slim VM | `.env.aws` | `docker-compose.oracle-like.yml` + `docker-compose.aws-slim.override.yml` |
-| Oracle VM | `.env.oracle` | `docker-compose.oracle-like.yml` |
-| Local Docker | `.env.docker` | `docker-compose.oracle-like.yml` |
+| AWS slim VM | `.env.aws` | `docker-compose.local.yml` + `docker-compose.aws-slim.yml` |
+| Oracle VM | `.env.oracle` | `docker-compose.local.yml` |
+| Local Docker | `.env.docker` | `docker-compose.local.yml` |
 
 ## Inputs that must exist outside Git
 
@@ -52,8 +52,8 @@ Manual equivalent:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.oracle-like.yml \
-      -f docker-compose.aws-slim.override.yml \
+      -f docker-compose.local.yml \
+      -f docker-compose.aws-slim.yml \
       up -d --no-deps --build --force-recreate product-api frontend
 
 Required AWS final check:
@@ -97,7 +97,7 @@ Then rebuild/recreate:
     docker compose \
       --env-file .env.oracle \
       -p ai-decision-studio \
-      -f docker-compose.oracle-like.yml \
+      -f docker-compose.local.yml \
       up -d --build
 
 Finally:

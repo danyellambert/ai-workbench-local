@@ -12,14 +12,14 @@ Primary services:
 
 Primary compose files:
 
-- docker-compose.oracle-like.yml
-- docker-compose.aws-slim.override.yml
+- docker-compose.local.yml
+- docker-compose.aws-slim.yml
 
 Primary Dockerfiles:
 
-- Dockerfile.public-demo for local product-api image.
-- Dockerfile.aws-slim-product-api for AWS slim product-api image.
-- Dockerfile.frontend-public-demo for the current frontend image.
+- Dockerfile.product-api.local for local product-api image.
+- Dockerfile.product-api.aws-slim for AWS slim product-api image.
+- Dockerfile.frontend for the current frontend image.
 
 Current product data contract:
 
@@ -43,4 +43,4 @@ Current product concepts visible in code/data:
 
 Historical surfaces:
 
-The old Streamlit, Gradio, and frontend-public-demo smoke/readiness flows are preserved under legacy/. They are not the official Docker/AWS product path.
+The old Streamlit, Gradio, and frontend-local smoke/readiness flows are preserved under legacy/. They are not the official Docker/AWS product path.

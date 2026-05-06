@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-COMPOSE_FILE="${AI_DECISION_STUDIO_ORACLE_COMPOSE_FILE:-docker-compose.oracle-like.yml}"
+COMPOSE_FILE="${AI_DECISION_STUDIO_ORACLE_COMPOSE_FILE:-docker-compose.local.yml}"
 DATA_ROOT="${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-runtime/ai_decision_studio_functional_baseline/oracle_like_data}"
 FRONTEND_PORT="${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8071}"
 FRONTEND_BASE_URL="http://127.0.0.1:${FRONTEND_PORT}"
@@ -35,8 +35,8 @@ docker compose -f "$COMPOSE_FILE" build
 docker compose -f "$COMPOSE_FILE" up -d
 
 for i in $(seq 1 60); do
-  API_STATUS="$(docker inspect ai-decision-studio-product-api-oracle-like --format '{{.State.Health.Status}}' 2>/dev/null || true)"
-  FE_STATUS="$(docker inspect ai-decision-studio-frontend-oracle-like --format '{{.State.Health.Status}}' 2>/dev/null || true)"
+  API_STATUS="$(docker inspect ai-decision-studio-product-api-local --format '{{.State.Health.Status}}' 2>/dev/null || true)"
+  FE_STATUS="$(docker inspect ai-decision-studio-frontend-local --format '{{.State.Health.Status}}' 2>/dev/null || true)"
   echo "health[$i] api=$API_STATUS frontend=$FE_STATUS"
   if [ "$API_STATUS" = "healthy" ] && [ "$FE_STATUS" = "healthy" ]; then
     break

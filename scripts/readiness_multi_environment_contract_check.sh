@@ -111,21 +111,33 @@ fi
 docker compose \
   --env-file .env.docker.example \
   -p ai-decision-studio-contract-docker \
-  -f docker-compose.oracle-like.yml \
+  -f docker-compose.local.yml \
   config >/tmp/ads_multi_env_docker_config.yml
 
-grep -q 'image: ai-decision-studio-product-api:oracle-like' /tmp/ads_multi_env_docker_config.yml
-grep -q 'image: ai-decision-studio-frontend:oracle-like' /tmp/ads_multi_env_docker_config.yml
+grep -q 'image: ai-decision-studio-product-api:local' /tmp/ads_multi_env_docker_config.yml
+grep -q 'image: ai-decision-studio-frontend:local' /tmp/ads_multi_env_docker_config.yml
 
 docker compose \
   --env-file .env.aws.example \
   -p ai-decision-studio-contract-aws \
-  -f docker-compose.oracle-like.yml \
-  -f docker-compose.aws-slim.override.yml \
+  -f docker-compose.aws-slim.yml \
   config >/tmp/ads_multi_env_aws_config.yml
 
-grep -q 'dockerfile: Dockerfile.aws-slim-product-api' /tmp/ads_multi_env_aws_config.yml
+grep -q 'dockerfile: Dockerfile.product-api.aws-slim' /tmp/ads_multi_env_aws_config.yml
 grep -q 'image: ai-decision-studio-product-api:aws-slim' /tmp/ads_multi_env_aws_config.yml
+
+
+echo
+echo "== AWS compose single-file guardrail =="
+if grep -Rqs 'docker-compose.local.yml' scripts/deploy_aws_slim.sh scripts/smoke_aws_slim.sh; then
+  echo "ERROR: AWS deploy/smoke scripts must not use docker-compose.local.yml." >&2
+  exit 1
+fi
+if grep -nE 'docker-compose\.local\.yml.*docker-compose\.aws-slim\.yml|docker-compose\.aws-slim\.yml.*docker-compose\.local\.yml' scripts/deploy_aws_slim.sh scripts/smoke_aws_slim.sh; then
+  echo "ERROR: AWS scripts still look like a local+AWS layered compose contract." >&2
+  exit 1
+fi
+echo "OK: AWS scripts use docker-compose.aws-slim.yml as a single compose contract"
 
 echo "OK: local Docker and AWS compose contracts render correctly."
 echo "OK: multi-environment contract readiness passed."

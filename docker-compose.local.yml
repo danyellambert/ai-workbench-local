@@ -2,9 +2,9 @@ services:
   product-api:
     build:
       context: .
-      dockerfile: Dockerfile.public-demo
-    image: ai-decision-studio-product-api:oracle-like
-    container_name: ai-decision-studio-product-api-oracle-like
+      dockerfile: Dockerfile.product-api.local
+    image: ai-decision-studio-product-api:local
+    container_name: ai-decision-studio-product-api-local
     restart: unless-stopped
     depends_on:
       ppt-creator:
@@ -92,9 +92,9 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend-public-demo
-    image: ai-decision-studio-frontend:oracle-like
-    container_name: ai-decision-studio-frontend-oracle-like
+      dockerfile: Dockerfile.frontend
+    image: ai-decision-studio-frontend:local
+    container_name: ai-decision-studio-frontend-local
     restart: unless-stopped
     depends_on:
       product-api:
@@ -114,8 +114,8 @@ services:
     build:
       context: ./services/ppt_creator_app
       dockerfile: Dockerfile
-    image: ai-decision-studio-ppt-creator:oracle-like
-    container_name: ai-decision-studio-ppt-creator-oracle-like
+    image: ai-decision-studio-ppt-creator:local
+    container_name: ai-decision-studio-ppt-creator-local
     restart: unless-stopped
     environment:
       PPT_CREATOR_RUNTIME_MODE: docker_compose_oracle
@@ -139,7 +139,7 @@ services:
 
   ollama:
     image: ollama/ollama
-    container_name: ai-decision-studio-ollama-oracle-like
+    container_name: ai-decision-studio-ollama-local
     restart: unless-stopped
     environment:
       OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS:-1}"
@@ -164,7 +164,7 @@ services:
 
   nextcloud:
     image: nextcloud:29-apache
-    container_name: ai-decision-studio-nextcloud-oracle-like
+    container_name: ai-decision-studio-nextcloud-local
     restart: unless-stopped
     environment:
       NEXTCLOUD_ADMIN_USER: "${NEXTCLOUD_ADMIN_USER:-ads_admin}"
