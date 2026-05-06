@@ -103,3 +103,28 @@ npm --prefix frontend run build
 scripts/run_current_test_gate.sh
 scripts/readiness_multi_environment_contract_check.sh
 ```
+
+## Supported run entrypoints
+
+Use the repository scripts instead of running raw `docker compose` or ad-hoc API commands.
+
+| Target | Supported command | Env contract | Why |
+| --- | --- | --- | --- |
+| Local host/dev | `ENV_FILE=.env.local scripts/run_local_dev.sh` | `.env.local` | Starts the host API/frontend with local writable users overlay and skips ignored root-level benchmark artifacts. |
+| Local Docker/oracle-like | `scripts/run_local_docker.sh` | `.env.docker` plus script-resolved local data roots | Renders Docker volumes against the local `runtime/ai_decision_studio_functional_baseline/oracle_like_data` tree instead of falling back to `/opt/...` paths. |
+| AWS slim deploy | `scripts/deploy_aws_slim.sh` | `.env.aws` | Uses the AWS deployment contract and avoids local/Oracle defaults. |
+| AWS smoke validation | `scripts/smoke_aws_slim.sh` | `.env.aws` | Validates the deployed AWS surface with the same contract. |
+
+Do not run `docker compose -f docker-compose.oracle-like.yml up ...` directly for local Docker. Without the script-provided environment, Compose can fall back to `/opt/ai-decision-studio/data/...`, which is a Linux/VM deploy layout and not the local Mac data root.
+
+For local Docker, the expected data root is:
+
+```text
+runtime/ai_decision_studio_functional_baseline/oracle_like_data/
+  baseline/
+  runtime/
+  artifacts/
+  users/
+```
+
+For local host/dev, `scripts/run_local_dev.sh` protects the Lab benchmark surface from ignored root-level experiment artifacts such as `./benchmark_runs`.
