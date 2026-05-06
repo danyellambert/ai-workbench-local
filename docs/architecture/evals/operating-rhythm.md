@@ -13,7 +13,7 @@ Run when you touch:
 Commands:
 
 ```bash
-python -m unittest tests.test_phase8_eval_store_unittest tests.test_phase8_eval_diagnosis_unittest tests.test_phase8_agent_workflow_eval_unittest tests.test_runtime_snapshot_unittest tests.test_phase5_real_document_eval_unittest
+python -m unittest tests.test_eval_store_unittest tests.test_eval_store_diagnosis_unittest tests.test_agent_workflow_eval_unittest tests.test_runtime_snapshot_unittest tests.test_evidence_cv_real_document_eval_unittest
 python scripts/run_agent_workflow_eval.py
 python scripts/report_eval_store_summary.py --limit 20
 python scripts/report_eval_store_diagnosis.py

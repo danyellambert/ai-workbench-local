@@ -31,7 +31,7 @@ Introduce a workflow-oriented document agent that uses tools and explicit routin
 - `src/storage/phase6_document_agent_log.py`
 - `scripts/report_document_agent_log.py`
 - `tests/test_document_agent_unittest.py`
-- `tests/test_phase6_document_agent_log.py`
+- `tests/test_document_agent_log.py`
 
 ## Why this phase mattered
 

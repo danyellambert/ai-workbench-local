@@ -160,9 +160,9 @@ In practice, this closes a first local slice of the **Document Repository + Acti
 Focused tests were updated to cover the changes:
 
 - `tests/test_runtime_execution_log_unittest.py`
-- `tests/test_phase95_evidenceops_worklog.py`
+- `tests/test_evidenceops_worklog.py`
 - `tests/test_runtime_snapshot_unittest.py`
-- `tests/test_phase95_evidenceops_local_ops.py`
+- `tests/test_evidenceops_local_ops.py`
 
 These tests now validate:
 

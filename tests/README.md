@@ -17,7 +17,7 @@ test_modules=56
 PASS=35
 FAIL=21
 TIMEOUT=0
-phase_like_test_files=21
+phase_like_test_files=0
 ```
 
 Interpretation:
@@ -108,7 +108,7 @@ Some live/API tests depend on runtime path configuration and may fail if local `
 
 These validate eval-store behavior, benchmark matrix behavior, closure/decision-gate reports, document-agent logs, and historical evaluation helpers.
 
-Many files in this group still have historical `phase*` names. Those should be renamed in a separate cleanup commit after reference auditing.
+Historical `phase*` filenames were renamed after reference auditing. Some test contents may still mention historical phases when describing legacy/eval provenance.
 
 ### EvidenceOps and MCP tests
 
@@ -141,11 +141,11 @@ The latest audit found 21 non-passing modules:
 - `tests.test_gradio_components_candidate_review_unittest` — **FAIL**, 0.03s. `E ⏎ ====================================================================== ⏎ ERROR: test_gradio_components_candidate_review_unittest (unittest.loader._FailedTest.test_gradio_components_candidate_review_unittest) ⏎ --------------------------...`
 - `tests.test_huggingface_remote_providers_unittest` — **FAIL**, 0.07s. `E ⏎ ====================================================================== ⏎ ERROR: test_huggingface_remote_providers_unittest (unittest.loader._FailedTest.test_huggingface_remote_providers_unittest) ⏎ --------------------------------------...`
 - `tests.test_ollama_provider_service_compat_unittest` — **FAIL**, 0.80s. `..E... ⏎ ====================================================================== ⏎ ERROR: test_ollama_provider_falls_back_to_openai_compat_chat_when_native_route_is_missing (tests.test_ollama_provider_service_compat_unittest.OllamaProviderSe...`
-- `tests.test_phase8_5_campaign_unittest` — **FAIL**, 0.40s. `..F ⏎ ====================================================================== ⏎ FAIL: test_find_latest_phase8_5_run_dir_sees_campaign_runs (tests.test_phase8_5_campaign_unittest.Phase85CampaignTests.test_find_latest_phase8_5_run_dir_sees_cam...`
-- `tests.test_phase95_evidenceops_local_ops` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_phase95_evidenceops_local_ops (unittest.loader._FailedTest.test_phase95_evidenceops_local_ops) ⏎ ------------------------------------------------------...`
-- `tests.test_phase95_evidenceops_mcp_client` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_phase95_evidenceops_mcp_client (unittest.loader._FailedTest.test_phase95_evidenceops_mcp_client) ⏎ ----------------------------------------------------...`
-- `tests.test_phase95_evidenceops_mcp_server` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_phase95_evidenceops_mcp_server (unittest.loader._FailedTest.test_phase95_evidenceops_mcp_server) ⏎ ----------------------------------------------------...`
-- `tests.test_phase95_external_targets_unittest` — **FAIL**, 0.38s. `E ⏎ ====================================================================== ⏎ ERROR: test_phase95_external_targets_unittest (unittest.loader._FailedTest.test_phase95_external_targets_unittest) ⏎ ----------------------------------------------...`
+- `tests.test_benchmark_campaign_unittest` — **FAIL**, 0.40s. `..F ⏎ ====================================================================== ⏎ FAIL: test_find_latest_phase8_5_run_dir_sees_campaign_runs (tests.test_benchmark_campaign_unittest.Phase85CampaignTests.test_find_latest_phase8_5_run_dir_sees_cam...`
+- `tests.test_evidenceops_local_ops` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_evidenceops_local_ops (unittest.loader._FailedTest.test_evidenceops_local_ops) ⏎ ------------------------------------------------------...`
+- `tests.test_evidenceops_mcp_client` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_evidenceops_mcp_client (unittest.loader._FailedTest.test_evidenceops_mcp_client) ⏎ ----------------------------------------------------...`
+- `tests.test_evidenceops_mcp_server` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_evidenceops_mcp_server (unittest.loader._FailedTest.test_evidenceops_mcp_server) ⏎ ----------------------------------------------------...`
+- `tests.test_evidenceops_external_targets_legacy_unittest` — **FAIL**, 0.38s. `E ⏎ ====================================================================== ⏎ ERROR: test_evidenceops_external_targets_legacy_unittest (unittest.loader._FailedTest.test_evidenceops_external_targets_legacy_unittest) ⏎ ----------------------------------------------...`
 - `tests.test_product_api_unittest` — **FAIL**, 9.06s. `127.0.0.1 - - [06/May/2026 08:52:08] "GET /api/product/command-center HTTP/1.1" 200 - ⏎ ---------------------------------------- ⏎ Exception occurred during processing of request from ('127.0.0.1', 57466) ⏎ Traceback (most recent call last)...`
 - `tests.test_product_service_unittest` — **FAIL**, 0.36s. `...E.....F. ⏎ ====================================================================== ⏎ ERROR: test_generate_product_workflow_deck_uses_current_action_plan_items_instead_of_global_action_store (tests.test_product_service_unittest.ProductServ...`
 - `tests.test_product_workflows_front_integration_unittest` — **FAIL**, 0.06s. `E ⏎ ====================================================================== ⏎ ERROR: test_product_workflows_front_integration_unittest (unittest.loader._FailedTest.test_product_workflows_front_integration_unittest) ⏎ ------------------------...`
@@ -157,31 +157,31 @@ The latest audit found 21 non-passing modules:
 
 ## Phase-like test names
 
-The latest audit found 21 test files with historical phase-like names:
+A prior audit found 21 historical phase-like filenames. They have since been renamed to behavior/subsystem names:
 
-- `test_phase55_langgraph_shadow_log.py`
-- `test_phase5_real_document_eval_unittest.py`
-- `test_phase6_document_agent_log.py`
-- `test_phase7_model_comparison_log.py`
-- `test_phase8_5_audit_unittest.py`
-- `test_phase8_5_benchmark_round2_unittest.py`
-- `test_phase8_5_benchmark_unittest.py`
-- `test_phase8_5_campaign_unittest.py`
-- `test_phase8_5_closure_unittest.py`
-- `test_phase8_5_decision_gate_unittest.py`
-- `test_phase8_5_timeout_unittest.py`
-- `test_phase8_agent_workflow_eval_unittest.py`
-- `test_phase8_eval_diagnosis_unittest.py`
-- `test_phase8_eval_store_unittest.py`
-- `test_phase8_live_evals_unittest.py`
-- `test_phase95_evidenceops_local_ops.py`
-- `test_phase95_evidenceops_mcp_client.py`
-- `test_phase95_evidenceops_mcp_server.py`
-- `test_phase95_evidenceops_repository_snapshot.py`
-- `test_phase95_evidenceops_worklog.py`
-- `test_phase95_external_targets_unittest.py`
+- `test_langgraph_shadow_log.py`
+- `test_evidence_cv_real_document_eval_unittest.py`
+- `test_document_agent_log.py`
+- `test_model_comparison_log.py`
+- `test_benchmark_audit_unittest.py`
+- `test_benchmark_matrix_round2_unittest.py`
+- `test_benchmark_matrix_unittest.py`
+- `test_benchmark_campaign_unittest.py`
+- `test_benchmark_closure_unittest.py`
+- `test_benchmark_decision_gate_unittest.py`
+- `test_benchmark_timeout_unittest.py`
+- `test_agent_workflow_eval_unittest.py`
+- `test_eval_store_diagnosis_unittest.py`
+- `test_eval_store_unittest.py`
+- `test_live_evals_unittest.py`
+- `test_evidenceops_local_ops.py`
+- `test_evidenceops_mcp_client.py`
+- `test_evidenceops_mcp_server.py`
+- `test_evidenceops_repository_snapshot.py`
+- `test_evidenceops_worklog.py`
+- `test_evidenceops_external_targets_legacy_unittest.py`
 
-These names should be replaced with behavior/subsystem names, for example:
+Current behavior/subsystem names include:
 
 ```text
 test_benchmark_decision_gate_unittest.py
@@ -227,7 +227,7 @@ Before changing tests:
 
 ## Current recommended next steps
 
-1. Rename phase-like test files after reference audit.
+1. Maintain behavior/subsystem test names; avoid reintroducing phase-like filenames.
 2. Create a green current-product test subset.
 3. Repair or quarantine environment-dependent tests.
 4. Separate legacy Streamlit/Gradio tests from current product tests.

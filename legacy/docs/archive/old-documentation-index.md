@@ -63,7 +63,7 @@ This file is the main entry point for the repository documentation.
 
 - `scripts/report_document_agent_log.py`
 - `tests/test_document_agent_unittest.py`
-- `tests/test_phase6_document_agent_log.py`
+- `tests/test_document_agent_log.py`
 
 ### Phase 7
 

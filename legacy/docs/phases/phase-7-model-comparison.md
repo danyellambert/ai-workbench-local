@@ -114,5 +114,5 @@ python scripts/report_model_comparison_log.py
 Run focused validation:
 
 ```bash
-python -m unittest tests.test_model_comparison_service_unittest tests.test_phase7_model_comparison_log
+python -m unittest tests.test_model_comparison_service_unittest tests.test_model_comparison_log
 ```

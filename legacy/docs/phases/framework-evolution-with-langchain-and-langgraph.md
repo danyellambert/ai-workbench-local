@@ -36,7 +36,7 @@ This phase made the architectural evolution explicit. It showed that the reposit
 - `scripts/report_langchain_shadow_log.py`
 - `scripts/report_langgraph_shadow_log.py`
 - `tests/test_langgraph_workflow.py`
-- `tests/test_phase55_langgraph_shadow_log.py`
+- `tests/test_langgraph_shadow_log.py`
 
 ## Closure
 
