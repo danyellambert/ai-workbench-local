@@ -1,6 +1,7 @@
 # Nextcloud Golden Baseline Restore
 
-This document defines the frozen Nextcloud baseline used by AI Decision Studio AWS/Oracle-like deployments.
+This document defines the frozen Nextcloud baseline used by AI Decision Studio
+AWS and local Docker deployments.
 
 ## Official baseline
 
@@ -28,7 +29,8 @@ EVIDENCEOPS_NEXTCLOUD_BASE_URL=http://nextcloud/remote.php/dav/files/danyel
 EVIDENCEOPS_NEXTCLOUD_USERNAME=danyel
 EVIDENCEOPS_NEXTCLOUD_ROOT_PATH=/EvidenceOpsDemo
 
-EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD must be supplied through .env.oracle or entered during restore.
+EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD must be supplied through the real runtime env
+file, such as `.env.aws`, or entered during restore. It must not be committed.
 
 ## Redeploy rule
 
@@ -39,7 +41,8 @@ For future redeploys:
 3. Upload nextcloud-golden-baseline-v1.tar.gz from the local baseline folder.
 4. Restore the archive into Docker volume ai-decision-studio_nextcloud_app.
 5. Configure trusted_domains for localhost, 127.0.0.1 and nextcloud.
-6. Configure .env.oracle to use WebDAV user danyel.
+6. Configure the real env file to use the same WebDAV user restored in the
+   volume.
 7. Delete the uploaded tar.gz from the VM after restore.
 8. Validate Nextcloud import, EvidenceOps and Overview.
 
@@ -48,3 +51,5 @@ For future redeploys:
 - Do not regenerate this from the current local phase95_nextcloud unless intentionally promoting a new v2 baseline.
 - Do not commit the tar.gz to Git.
 - Do not leave restore archives permanently on the AWS VM.
+- Do not expect the app to access `/EvidenceOpsDemo` without a valid WebDAV
+  username and app-password.

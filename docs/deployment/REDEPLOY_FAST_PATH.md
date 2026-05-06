@@ -52,7 +52,6 @@ Manual equivalent:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.local.yml \
       -f docker-compose.aws-slim.yml \
       up -d --no-deps --build --force-recreate product-api frontend
 

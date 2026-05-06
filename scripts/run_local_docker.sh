@@ -8,6 +8,7 @@ DOWN_ONLY="false"
 NO_BUILD="false"
 SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE="${SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE:-0}"
 SKIP_AI_LAB_GOLDEN_STATE_RESTORE="${SKIP_AI_LAB_GOLDEN_STATE_RESTORE:-0}"
+SKIP_OLLAMA_EMBEDDING_MODEL_PULL="${SKIP_OLLAMA_EMBEDDING_MODEL_PULL:-0}"
 
 usage() {
   cat <<'USAGE'
@@ -22,6 +23,8 @@ Optional env:
   COMPOSE_PROJECT_NAME=ai-decision-studio
   SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE=1
   SKIP_AI_LAB_GOLDEN_STATE_RESTORE=1
+  SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1
+  AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL=embeddinggemma:300m
 
 Behavior:
   - Uses docker-compose.local.yml as the local Docker topology.
@@ -32,6 +35,7 @@ Behavior:
   - Ensures the local Docker Nextcloud volume has the golden baseline:
       data/danyel/files/EvidenceOpsDemo
   - Restores the baseline from an external tarball when the volume is empty/missing it.
+  - Ensures the configured Ollama embedding model is pulled into the Ollama volume.
   - --config-only renders compose config without building or starting containers.
   - --down stops/removes compose containers without removing volumes.
 USAGE
@@ -307,6 +311,42 @@ restore_ai_lab_golden_state() {
   echo "OK: AI Lab golden state restored."
 }
 
+ensure_ollama_embedding_model() {
+  if [ "$SKIP_OLLAMA_EMBEDDING_MODEL_PULL" = "1" ]; then
+    echo "SKIP: Ollama embedding model pull disabled by SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1"
+    return 0
+  fi
+
+  local embedding_model
+  embedding_model="$(get_env_value AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL "embeddinggemma:300m")"
+
+  if [ -z "$embedding_model" ]; then
+    echo "SKIP: no Ollama embedding model configured."
+    return 0
+  fi
+
+  echo
+  echo "== Ensure Ollama embedding model =="
+  echo "model=$embedding_model"
+
+  compose up -d ollama
+
+  for i in $(seq 1 60); do
+    if compose exec -T ollama ollama list >/tmp/ads_local_ollama_list.txt 2>/dev/null; then
+      break
+    fi
+    if [ "$i" = "60" ]; then
+      echo "ERROR: Ollama container did not become ready for model pull." >&2
+      compose logs --tail=120 ollama || true
+      exit 1
+    fi
+    sleep 2
+  done
+
+  compose exec -T ollama ollama pull "$embedding_model"
+  echo "OK: Ollama embedding model is available."
+}
+
 if [ "$DOWN_ONLY" = "true" ]; then
   echo "== Local Docker down =="
   echo "env_file=$ENV_FILE"
@@ -355,6 +395,8 @@ if [ "$NO_BUILD" = "true" ]; then
 else
   compose up -d --build
 fi
+
+ensure_ollama_embedding_model
 
 compose ps
 

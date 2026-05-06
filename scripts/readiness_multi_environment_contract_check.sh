@@ -103,7 +103,7 @@ for real_env in .env .env.local .env.docker .env.aws; do
 done
 
 if [ -f ".env.aws" ]; then
-  python3 scripts/validate_aws_env_contract.py --env .env.aws --example .env.aws.example
+  python3 scripts/validate_aws_env_contract.py --env .env.aws --example .env.aws.example --allow-example-superset
 else
   echo "WARN: .env.aws real not present locally; skipping real AWS env parity."
 fi

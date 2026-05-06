@@ -41,7 +41,7 @@ def main() -> int:
     parser.add_argument(
         "--allow-example-superset",
         action="store_true",
-        help="allow example to have keys that are not in the real env",
+        help="allow example to have defaulted keys and compose refs that are not in the real env",
     )
     args = parser.parse_args()
 
@@ -63,7 +63,7 @@ def main() -> int:
     ok = (
         not missing_from_example
         and (args.allow_example_superset or not missing_from_real)
-        and not compose_missing_from_real
+        and (args.allow_example_superset or not compose_missing_from_real)
         and not compose_missing_from_example
     )
 

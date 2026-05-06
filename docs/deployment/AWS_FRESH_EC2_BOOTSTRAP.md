@@ -14,9 +14,7 @@ This runbook assumes the current AWS slim deployment contract:
 - local/dev-only Vite proxy must be disabled in AWS:
   - `VITE_PRODUCT_API_PROXY_ENABLED=0`;
   - `VITE_PRODUCT_API_PROXY_TARGET=`;
-- compose files:
-  - `docker-compose.local.yml`;
-  - `docker-compose.aws-slim.yml`;
+- compose file: `docker-compose.aws-slim.yml`;
 - deploy command:
 
     ENV_FILE=.env.aws scripts/deploy_aws_slim.sh
@@ -42,14 +40,9 @@ AWS uses:
 
 - real env file: `.env.aws`
 - safe template: `.env.aws.example`
-- compose base: `docker-compose.local.yml`
-- AWS slim compose: `docker-compose.aws-slim.yml`
+- compose file: `docker-compose.aws-slim.yml`
 - product API image: `ai-decision-studio-product-api:aws-slim`
-- frontend image: `ai-decision-studio-frontend:local`
-
-The name `local` is historical. It describes the Docker topology, not the
-AWS environment. Do not rename compose files, images, or container names during a
-fresh EC2 recovery unless there is a separate migration plan.
+- frontend image: `ai-decision-studio-frontend:aws-slim`
 
 Real env files must never be committed to Git or included in public bundles.
 
@@ -77,6 +70,12 @@ On your local machine, you need:
 - the EC2 public IP or DNS name
 - a clean local checkout of this repository
 - the real `.env.aws` file, stored outside Git or ignored by Git
+- private runtime credentials for the integrations you want enabled:
+  - `OLLAMA_HOSTED_API_KEY` for hosted `*-cloud` generation models;
+  - `EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD` and `NEXTCLOUD_ADMIN_PASSWORD` for
+    Nextcloud/WebDAV;
+  - `EVIDENCEOPS_TRELLO_API_KEY` and `EVIDENCEOPS_TRELLO_TOKEN` for Trello;
+  - `EVIDENCEOPS_NOTION_API_KEY` for Notion;
 - optional runtime/state archives:
   - `nextcloud-golden-baseline-v1.tar.gz`
   - `ai-lab-golden-state-v1.tar.gz`
@@ -273,7 +272,6 @@ On the EC2 host:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.local.yml \
       -f docker-compose.aws-slim.yml \
       config > /tmp/ads_aws_fresh_compose.yml
 
@@ -299,16 +297,20 @@ On the EC2 host:
     DOCKER_BUILDKIT=1 docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.local.yml \
       -f docker-compose.aws-slim.yml \
       up -d --build
 
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.local.yml \
       -f docker-compose.aws-slim.yml \
       ps
+
+    docker compose \
+      --env-file .env.aws \
+      -p ai-decision-studio \
+      -f docker-compose.aws-slim.yml \
+      exec -T ollama ollama pull embeddinggemma:300m
 
 Wait for health:
 
@@ -324,11 +326,10 @@ Wait for health:
         docker compose \
           --env-file .env.aws \
           -p ai-decision-studio \
-          -f docker-compose.local.yml \
           -f docker-compose.aws-slim.yml \
           ps
-        docker logs ai-decision-studio-product-api-local --tail 120 || true
-        docker logs ai-decision-studio-frontend-local --tail 120 || true
+        docker logs ai-decision-studio-product-api-aws-slim --tail 120 || true
+        docker logs ai-decision-studio-frontend-aws-slim --tail 120 || true
         exit 1
       fi
 
@@ -362,9 +363,14 @@ Then re-check:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.local.yml \
       -f docker-compose.aws-slim.yml \
       ps
+
+The Nextcloud golden baseline is a Docker volume snapshot stored outside Git.
+It must be uploaded to the AWS host before restore. The WebDAV user in `.env.aws`
+must match the restored Nextcloud user, and
+`EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD` must be a valid password/app-password for
+that user.
 
 ## Step 10 — Run AWS smoke
 
@@ -380,6 +386,13 @@ This smoke should confirm:
 - Preferences endpoint works
 - local Hugging Face server is not exposed
 - Ollama preferred model is `nemotron-3-super:cloud`
+
+During deploy, `scripts/deploy_aws_slim.sh` also ensures the deploy-only
+preloaded Ollama embedding model is available in the Ollama sidecar. The default
+is `embeddinggemma:300m`, configured with
+`AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL`. This does not override Runtime
+Controls selections in the app. Set `SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1` only if
+the Ollama volume is managed separately.
 
 ## Step 11 — Run target readiness checks
 
@@ -458,12 +471,11 @@ If containers fail after a compose change:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.local.yml \
       -f docker-compose.aws-slim.yml \
       ps
 
-    docker logs ai-decision-studio-product-api-local --tail 200
-    docker logs ai-decision-studio-frontend-local --tail 200
+    docker logs ai-decision-studio-product-api-aws-slim --tail 200
+    docker logs ai-decision-studio-frontend-aws-slim --tail 200
 
 Keep `.env.oracle` only as a compatibility fallback on migrated hosts. New AWS
 hosts should use `.env.aws` as the real env file.
@@ -488,7 +500,6 @@ After a fresh AWS EC2 bootstrap or controlled rebuild, validate the stack from i
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.local.yml \
       -f docker-compose.aws-slim.yml \
       ps
 

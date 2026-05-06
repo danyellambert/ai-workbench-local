@@ -44,4 +44,12 @@ There is also a helper script for local Docker operation:
 
 - scripts/run_local_docker.sh
 
+Prefer the helper for local demos. It renders the same compose contract, restores
+the Nextcloud golden baseline when the external archive exists, and pulls the
+deploy-only preloaded Ollama embedding model into the `ollama_data` volume. The
+default is `embeddinggemma:300m`, configured with
+`AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL`; it does not override Runtime
+Controls selections in the app. Set `SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1` only
+when the Ollama volume is managed separately.
+
 Do not use legacy/compose/docker-compose.frontend-local.yml for the current product. That file is preserved for historical smoke/readiness context only.
