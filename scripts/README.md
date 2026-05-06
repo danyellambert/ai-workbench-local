@@ -1,173 +1,195 @@
 # Scripts
 
-This directory contains operational entry points, readiness gates, evaluation runners, reporting utilities, and repository maintenance scripts for AI Decision Studio.
+This directory contains operational commands, readiness checks, evaluation runners, reporting utilities, and maintenance helpers for AI Decision Studio.
 
-Start here instead of browsing individual scripts one by one.
+For reviewers: this is not the main product surface. Start with `../README.md`, `../docs/`, and the current deployment docs first. Use this file when you want to understand how the repository is operated, validated, benchmarked, and packaged.
 
-## Current deployment entry points
+## Most important entry points
 
-These scripts are the most important operational commands and should remain stable:
+These are the scripts most likely to matter for running, packaging, or validating the current project.
 
-| Script | Purpose |
+| Script | Use when |
 | --- | --- |
-| `build_deployment_bundle.sh` | Builds the app deployment bundle used for AWS/local transfer workflows. |
-| `build_oracle_deployment_bundle.sh` | Backward-compatible wrapper for older Oracle-named bundle commands. |
-| `deploy_aws_slim.sh` | Deploys the AWS slim stack on the target host. |
-| `smoke_aws_slim.sh` | Smoke-tests the AWS slim deployment. |
-| `run_local_docker.sh` | Runs the local Docker stack. |
-| `run_local_dev.sh` | Runs/checks local host development mode. |
+| `build_deployment_bundle.sh` | Building the clean app bundle used for AWS/local transfer workflows. |
+| `deploy_aws_slim.sh` | Deploying the current AWS slim stack on the target host. |
+| `smoke_aws_slim.sh` | Smoke-testing the AWS slim deployment. |
+| `run_local_docker.sh` | Running the local Docker stack. |
+| `run_local_dev.sh` | Running/checking local host development mode. |
+| `readiness_multi_environment_contract_check.sh` | Checking the local/Docker/AWS environment contract. |
+| `readiness_final_deploy_check.sh` | Running final deployment readiness checks before publication or handoff. |
 
-## Layout policy
+`build_oracle_deployment_bundle.sh` remains as a backward-compatible wrapper for the older Oracle-named bundle command. Oracle-only scripts and docs live under `../legacy/`.
 
-- Root-level scripts are kept for compatibility with existing docs, CI, and local workflows.
-- Oracle-only historical scripts live under `../legacy/scripts/oracle/`.
-- Evaluation fixtures and benchmark workspace files live under `../evals/`.
-- Generated reports, benchmark outputs, local corpora, caches, and secrets should not be committed.
-- Do not move or rename scripts that are referenced by deployment docs, CI, or local runbooks without adding a compatibility wrapper.
+## How to read this directory
 
-## Script categories
+The script names follow a loose convention:
 
-### Deployment and local runtime
-
-| Script | Notes |
+| Prefix | Meaning |
 | --- | --- |
-| `build_deployment_bundle.sh` | Entry points for local, Docker, AWS, and deployment bundle flows. |
-| `build_oracle_deployment_bundle.sh` | Entry points for local, Docker, AWS, and deployment bundle flows. |
-| `deploy_aws_slim.sh` | Entry points for local, Docker, AWS, and deployment bundle flows. |
-| `run_local_dev.sh` | Entry points for local, Docker, AWS, and deployment bundle flows. |
-| `run_local_docker.sh` | Entry points for local, Docker, AWS, and deployment bundle flows. |
-| `smoke_aws_slim.sh` | Entry points for local, Docker, AWS, and deployment bundle flows. |
+| `run_*` | Starts a workflow, evaluation, benchmark, validation suite, or service-like command. |
+| `readiness_*` | Checks whether a capability, deployment contract, or repo state is ready. |
+| `report_*` | Produces a diagnostic/reporting summary from existing logs or stored outputs. |
+| `evaluate_*` | Runs a focused evaluation against tracked fixtures. |
+| `validate_*` | Validates a contract, payload, index, or sanitized artifact. |
+| `smoke_*` | Runs a small end-to-end check. |
+| `build_*` | Builds a bundle, fixture set, baseline, or generated support artifact. |
+| `restore_*` / `stage_*` / `select_*` | Maintenance and workspace preparation helpers. |
 
-### Readiness and repository gates
+## Boundaries
 
-| Script | Notes |
-| --- | --- |
-| `readiness_admin_session_isolation_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_ai_lab_content_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_ai_lab_golden_state_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_artifacts_compact_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_candidate_review_contract_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_evidenceops_ui_cache_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_final_deploy_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_multi_environment_contract_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_nextcloud_golden_baseline_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_phase_13_2_public_session_retention_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_preferences_evals_surface_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_public_admin_policy_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_public_ai_lab_overlay_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_required_integrations_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_required_providers_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_run_history_compact_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_runbook_phases_8_12_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
-| `readiness_trello_public_visibility_check.sh` | Checks that validate environment contracts, repo state, or deployment readiness. |
+- Active deployment scripts stay at the root of `scripts/` for compatibility with docs, CI, and local workflows.
+- Oracle-only historical scripts live in `../legacy/scripts/oracle/`.
+- Tracked eval fixtures and benchmark workspace documentation live in `../evals/`.
+- Generated reports, local benchmark runs, local PDF corpora, caches, secrets, and `.DS_Store` files should not be committed.
+- Do not move or rename scripts referenced by CI, deployment docs, or local runbooks without adding a compatibility wrapper.
 
-### Evaluation and benchmark runners
+## Deployment and local runtime
 
-| Script | Notes |
-| --- | --- |
-| `backfill_product_runtime_evals.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `benchmark_vl_router_multilayout.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `evaluate_checklist_regression.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `evaluate_evidence_cv_gold_set.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `import_phase8_eval_history.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `report_phase8_eval_diagnosis.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `report_phase8_eval_store.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_all_phase_4_5_benchmarks.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_document_review_findings_experiment.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_embedding_benchmark.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_pdf_extraction_benchmark.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_pdf_extraction_benchmark_en.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_phase5_structured_eval.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_phase8_5_benchmark_matrix.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_phase8_agent_workflow_eval.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_phase8_live_evals.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_phase_4_5_benchmark_suite.py` | Manual/CI-oriented evaluation and benchmark entry points. |
-| `run_synthetic_resume_benchmark.py` | Manual/CI-oriented evaluation and benchmark entry points. |
+Stable operational entry points:
 
-### Reporting and diagnostics
+- `build_deployment_bundle.sh`
+- `build_oracle_deployment_bundle.sh`
+- `deploy_aws_slim.sh`
+- `smoke_aws_slim.sh`
+- `run_local_docker.sh`
+- `run_local_dev.sh`
 
-| Script | Notes |
-| --- | --- |
-| `report_evidence_shadow_rollout.py` | Report generators and diagnostic summaries. |
-| `report_phase55_langchain_shadow_log.py` | Report generators and diagnostic summaries. |
-| `report_phase55_langgraph_shadow_log.py` | Report generators and diagnostic summaries. |
-| `report_phase6_document_agent_log.py` | Report generators and diagnostic summaries. |
-| `report_phase7_model_comparison_log.py` | Report generators and diagnostic summaries. |
-| `report_phase8_5_audit.py` | Report generators and diagnostic summaries. |
-| `report_phase8_5_closure.py` | Report generators and diagnostic summaries. |
-| `report_phase8_5_decision_gate.py` | Report generators and diagnostic summaries. |
-| `report_vl_called_cases.py` | Report generators and diagnostic summaries. |
+These scripts are intentionally kept easy to find. They are the practical path for packaging, local Docker execution, AWS deployment, and AWS smoke validation.
 
-### Validation helpers
+## Readiness gates
 
-| Script | Notes |
-| --- | --- |
-| `validate_aws_env_contract.py` | Payload, index, and contract validators. |
-| `validate_evidence_cv_indexing_payload.py` | Payload, index, and contract validators. |
-| `validate_phase_4_5.py` | Payload, index, and contract validators. |
-| `validate_sanitized_functional_baseline.py` | Payload, index, and contract validators. |
+Readiness scripts are guardrails. They usually fail fast when a repository contract, environment assumption, or deployment expectation is not met.
 
-### Maintenance and workspace utilities
+Current readiness checks include:
 
-| Script | Notes |
-| --- | --- |
-| `auto_rollout_evidence_cv.py` | Repository maintenance, workspace preparation, and support utilities. |
-| `restore_ai_lab_golden_state.sh` | Repository maintenance, workspace preparation, and support utilities. |
-| `restore_nextcloud_golden_baseline.sh` | Repository maintenance, workspace preparation, and support utilities. |
-| `select_phase5_ui_examples.py` | Repository maintenance, workspace preparation, and support utilities. |
-| `stage_functional_baseline_sources.py` | Repository maintenance, workspace preparation, and support utilities. |
+- `readiness_admin_session_isolation_check.sh`
+- `readiness_ai_lab_content_check.sh`
+- `readiness_ai_lab_golden_state_check.sh`
+- `readiness_artifacts_compact_check.sh`
+- `readiness_candidate_review_contract_check.sh`
+- `readiness_evidenceops_ui_cache_check.sh`
+- `readiness_final_deploy_check.sh`
+- `readiness_multi_environment_contract_check.sh`
+- `readiness_nextcloud_golden_baseline_check.sh`
+- `readiness_phase_13_2_public_session_retention_check.sh`
+- `readiness_preferences_evals_surface_check.sh`
+- `readiness_public_admin_policy_check.sh`
+- `readiness_public_ai_lab_overlay_check.sh`
+- `readiness_required_integrations_check.sh`
+- `readiness_required_providers_check.sh`
+- `readiness_run_history_compact_check.sh`
+- `readiness_runbook_phases_8_12_check.sh`
+- `readiness_trello_public_visibility_check.sh`
 
-### Operational runners
+## Evaluation and benchmark runners
 
-| Script | Notes |
-| --- | --- |
-| `run_ai_lab_validation.py` | Manual operational commands and workflow runners. |
-| `run_ai_lab_validation.sh` | Manual operational commands and workflow runners. |
-| `run_candidate_review_validation.py` | Manual operational commands and workflow runners. |
-| `run_evidenceops_mcp_server.py` | Manual operational commands and workflow runners. |
-| `run_frontend_surface_validation.py` | Manual operational commands and workflow runners. |
-| `run_frontend_surface_validation.sh` | Manual operational commands and workflow runners. |
-| `run_mcp_integration_validation.py` | Manual operational commands and workflow runners. |
-| `run_mcp_integration_validation.sh` | Manual operational commands and workflow runners. |
-| `run_ppt_creator_renderer_host.sh` | Manual operational commands and workflow runners. |
-| `run_presentation_export_smoke_suite.py` | Manual operational commands and workflow runners. |
+These scripts are used to run or replay evaluation workflows. They are useful for engineering review, but they are not required for the AWS slim deployment bundle.
 
-### Other utilities
+- `backfill_product_runtime_evals.py`
+- `benchmark_vl_router_multilayout.py`
+- `evaluate_checklist_regression.py`
+- `evaluate_evidence_cv_gold_set.py`
+- `import_phase8_eval_history.py`
+- `run_all_phase_4_5_benchmarks.py`
+- `run_document_review_findings_experiment.py`
+- `run_embedding_benchmark.py`
+- `run_pdf_extraction_benchmark.py`
+- `run_pdf_extraction_benchmark_en.py`
+- `run_phase5_structured_eval.py`
+- `run_phase8_5_benchmark_matrix.py`
+- `run_phase8_agent_workflow_eval.py`
+- `run_phase8_live_evals.py`
+- `run_phase_4_5_benchmark_suite.py`
+- `run_synthetic_resume_benchmark.py`
 
-| Script | Notes |
-| --- | --- |
-| `ai_lab_shell_lib.sh` | Utility scripts that do not yet fit a narrower bucket. |
-| `backfill_evidenceops_history.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `build_resume_component_bank.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `build_sanitized_functional_baseline.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `capture_golden_surface_snapshot.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `cleanup_public_session_overlays.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `compare_pdf_extraction_paths.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `compare_phase_4_5_configs.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `demo_phase95_evidenceops_mcp.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `download_phase8_public_materials.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `generate_admin_password_hash.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `generate_multilayout_resumes.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `generate_synthetic_resumes_with_pdf.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `measure_surface_latency.sh` | Utility scripts that do not yet fit a narrower bucket. |
-| `preindex_public_reference_corpus.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `preindex_public_reference_corpus_page_routes.json` | Utility scripts that do not yet fit a narrower bucket. |
-| `render_phase_4_5_charts.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `resume_dataset_splitter_v2.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `smoke_ai_lab_payloads.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `smoke_docker_policy_comparison_write.sh` | Utility scripts that do not yet fit a narrower bucket. |
-| `smoke_docker_workflow_write.sh` | Utility scripts that do not yet fit a narrower bucket. |
-| `smoke_frontend_docker_workflows_ui.sh` | Utility scripts that do not yet fit a narrower bucket. |
-| `smoke_frontend_surface_payloads.py` | Utility scripts that do not yet fit a narrower bucket. |
-| `smoke_frontend_ui_parity_local_vs_docker.sh` | Utility scripts that do not yet fit a narrower bucket. |
+Tracked fixtures/configuration for these workflows live under `../evals/`.
 
-## Recruiter/readability notes
+## Reporting and diagnostics
 
-For a quick review of the project, the important paths are:
+These scripts summarize stored run history, evaluation logs, model-comparison traces, or operational artifacts.
 
-- `../README.md` for product overview.
-- `../docs/` for current architecture, deployment, and operations documentation.
-- `../evals/` for tracked evaluation fixtures and benchmark workspace documentation.
-- `../legacy/` for historical/deferred materials that are not the active product path.
+- `report_evidence_shadow_rollout.py`
+- `report_phase55_langchain_shadow_log.py`
+- `report_phase55_langgraph_shadow_log.py`
+- `report_phase6_document_agent_log.py`
+- `report_phase7_model_comparison_log.py`
+- `report_phase8_5_audit.py`
+- `report_phase8_5_closure.py`
+- `report_phase8_5_decision_gate.py`
+- `report_phase8_eval_diagnosis.py`
+- `report_phase8_eval_store.py`
+- `report_vl_called_cases.py`
 
-The presence of many scripts reflects the project’s engineering/evaluation history. The active product deployment path is intentionally documented at the top of this file.
+## Validation helpers
+
+Validation scripts check payloads, indexes, contracts, or sanitized artifacts.
+
+- `validate_aws_env_contract.py`
+- `validate_evidence_cv_indexing_payload.py`
+- `validate_phase_4_5.py`
+- `validate_sanitized_functional_baseline.py`
+
+## Maintenance and workspace utilities
+
+These scripts support local workspace preparation, data staging, restore flows, or generated support artifacts.
+
+- `ai_lab_shell_lib.sh`
+- `auto_rollout_evidence_cv.py`
+- `backfill_evidenceops_history.py`
+- `build_resume_component_bank.py`
+- `build_sanitized_functional_baseline.py`
+- `capture_golden_surface_snapshot.py`
+- `cleanup_public_session_overlays.py`
+- `download_phase8_public_materials.py`
+- `generate_admin_password_hash.py`
+- `generate_multilayout_resumes.py`
+- `generate_synthetic_resumes_with_pdf.py`
+- `preindex_public_reference_corpus.py`
+- `preindex_public_reference_corpus_page_routes.json`
+- `restore_ai_lab_golden_state.sh`
+- `restore_nextcloud_golden_baseline.sh`
+- `resume_dataset_splitter_v2.py`
+- `select_phase5_ui_examples.py`
+- `stage_functional_baseline_sources.py`
+
+## Frontend, MCP, and surface validation
+
+These scripts validate application surfaces, payloads, MCP integration, or frontend parity.
+
+- `run_ai_lab_validation.py`
+- `run_ai_lab_validation.sh`
+- `run_candidate_review_validation.py`
+- `run_evidenceops_mcp_server.py`
+- `run_frontend_surface_validation.py`
+- `run_frontend_surface_validation.sh`
+- `run_mcp_integration_validation.py`
+- `run_mcp_integration_validation.sh`
+- `run_ppt_creator_renderer_host.sh`
+- `run_presentation_export_smoke_suite.py`
+- `smoke_ai_lab_payloads.py`
+- `smoke_docker_policy_comparison_write.sh`
+- `smoke_docker_workflow_write.sh`
+- `smoke_frontend_docker_workflows_ui.sh`
+- `smoke_frontend_surface_payloads.py`
+- `smoke_frontend_ui_parity_local_vs_docker.sh`
+
+## Analysis and comparison helpers
+
+These are specialized helpers for comparing extraction paths, benchmark configurations, charts, or latency.
+
+- `compare_pdf_extraction_paths.py`
+- `compare_phase_4_5_configs.py`
+- `measure_surface_latency.sh`
+- `render_phase_4_5_charts.py`
+
+## Reviewer notes
+
+A recruiter or technical reviewer should not need to inspect every script. The important signal is that the project has:
+
+- a stable deployment path;
+- explicit readiness gates;
+- repeatable evaluation and benchmark tooling;
+- reporting utilities for engineering decisions;
+- a clear separation between current product, eval workspace, and legacy/deferred material.
+
+When in doubt, treat `build_deployment_bundle.sh`, `deploy_aws_slim.sh`, `smoke_aws_slim.sh`, and `run_local_docker.sh` as the current operational path.
