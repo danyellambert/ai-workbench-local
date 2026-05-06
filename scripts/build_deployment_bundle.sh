@@ -60,10 +60,9 @@ copy_path ".env.local.example"
 copy_path ".dockerignore"
 copy_path "Dockerfile.product-api.local"
 copy_path "Dockerfile.product-api.aws-slim"
-copy_path "requirements-product-api.aws-slim.txt"
+copy_path "requirements.txt"
 copy_path "docker-compose.aws-slim.yml"
 copy_path "Dockerfile.frontend"
-copy_path "requirements-product-api.local.txt"
 copy_path "main_product_api.py"
 
 copy_path "src"
@@ -259,7 +258,7 @@ required_paths = [
     ".env.local.example",
     "Dockerfile.product-api.local",
     "Dockerfile.frontend",
-    "requirements-product-api.local.txt",
+    "requirements.txt",
     "main_product_api.py",
     "src",
     "frontend",

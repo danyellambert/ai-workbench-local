@@ -11,10 +11,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements-product-api.aws-slim.txt /app/requirements-product-api.aws-slim.txt
+COPY requirements.txt /app/requirements.txt
 
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r /app/requirements-product-api.aws-slim.txt
+    && pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . /app
 

@@ -7,7 +7,6 @@ CONFIG_ONLY="false"
 DOWN_ONLY="false"
 NO_BUILD="false"
 SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE="${SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE:-0}"
-SKIP_AI_LAB_GOLDEN_STATE_RESTORE="${SKIP_AI_LAB_GOLDEN_STATE_RESTORE:-0}"
 SKIP_OLLAMA_EMBEDDING_MODEL_PULL="${SKIP_OLLAMA_EMBEDDING_MODEL_PULL:-0}"
 
 usage() {
@@ -22,7 +21,6 @@ Optional env:
   ENV_FILE=.env.docker
   COMPOSE_PROJECT_NAME=ai-decision-studio
   SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE=1
-  SKIP_AI_LAB_GOLDEN_STATE_RESTORE=1
   SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1
   AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL=embeddinggemma:300m
 
@@ -210,107 +208,6 @@ restore_nextcloud_golden_baseline() {
   echo "OK: Nextcloud golden baseline restored."
 }
 
-ai_lab_golden_state_present() {
-  local data_root="$1"
-
-  test -s "${data_root%/}/baseline/.phase95_evidenceops_actions.sqlite3" &&
-    test -d "${data_root%/}/baseline/benchmark_runs" &&
-    test -s "${data_root%/}/runtime/evals/phase8/phase8_eval_runs.sqlite3" &&
-    test -s "${data_root%/}/runtime/logs/product/workflow_history.json"
-}
-
-write_ai_lab_golden_state_marker() {
-  local marker="$1"
-  local archive="$2"
-  local sha="$3"
-
-  mkdir -p "$(dirname "$marker")"
-  {
-    echo "archive=$archive"
-    echo "sha256=$sha"
-    date -u +"restored_utc=%Y-%m-%dT%H:%M:%SZ"
-  } > "$marker"
-}
-
-restore_ai_lab_golden_state() {
-  if [ "$SKIP_AI_LAB_GOLDEN_STATE_RESTORE" = "1" ]; then
-    echo "SKIP: AI Lab golden state restore disabled by SKIP_AI_LAB_GOLDEN_STATE_RESTORE=1"
-    return 0
-  fi
-
-  local data_root
-  local archive
-  local expected_sha
-  local marker_rel
-  local marker
-  local tmp
-
-  data_root="$(get_env_value AI_DECISION_STUDIO_ORACLE_DATA_ROOT "$(get_env_value AI_DECISION_STUDIO_DATA_ROOT "./runtime/ai_decision_studio_functional_baseline/oracle_like_data")")"
-  archive="$(get_env_value AI_DECISION_STUDIO_AI_LAB_GOLDEN_STATE_ARCHIVE "./runtime/ai_decision_studio_functional_baseline/ai_lab_golden_state/ai-lab-golden-state-v1.tar.gz")"
-  expected_sha="$(get_env_value AI_DECISION_STUDIO_AI_LAB_GOLDEN_STATE_SHA256 "c89628335dd1e6a9b9e177d202ab6492361d8b759bb22b41453ed0bc00253a5c")"
-  marker_rel="$(get_env_value AI_DECISION_STUDIO_AI_LAB_GOLDEN_STATE_MARKER "runtime/cache/lab/.ai_lab_golden_state_v1_restored")"
-  marker="${data_root%/}/${marker_rel}"
-  tmp="/tmp/ads_ai_lab_golden_state_restore_${PROJECT_NAME}_$$"
-
-  echo
-  echo "== AI Lab golden state check =="
-  echo "data_root=$data_root"
-  echo "marker=$marker"
-
-  if [ -f "$marker" ]; then
-    echo "OK: AI Lab golden state marker already present."
-    return 0
-  fi
-
-  if ai_lab_golden_state_present "$data_root"; then
-    echo "OK: AI Lab golden state already present; repairing marker without overlay."
-    write_ai_lab_golden_state_marker "$marker" "$archive" "$expected_sha"
-    return 0
-  fi
-
-  if compose_project_has_running_containers; then
-    echo "WARN: compose project has running containers, stopping before restoring AI Lab golden state."
-    compose down --remove-orphans
-  fi
-
-  if [ ! -f "$archive" ]; then
-    echo "ERROR: AI Lab golden state marker is missing and archive was not found:" >&2
-    echo "  $archive" >&2
-    echo "Expected external runtime artifact, not committed to Git." >&2
-    exit 1
-  fi
-
-  require_command shasum
-  require_command rsync
-
-  local actual_sha
-  actual_sha="$(shasum -a 256 "$archive" | awk '{print $1}')"
-  echo "archive=$archive"
-  echo "actual_sha=$actual_sha"
-
-  if [ "$actual_sha" != "$expected_sha" ]; then
-    echo "ERROR: AI Lab golden state SHA mismatch." >&2
-    echo "expected_sha=$expected_sha" >&2
-    echo "actual_sha=$actual_sha" >&2
-    exit 1
-  fi
-
-  echo "Restoring AI Lab golden state into data root ..."
-
-  rm -rf "$tmp"
-  mkdir -p "$tmp"
-  mkdir -p "$data_root"
-  tar -xzf "$archive" -C "$tmp"
-  rsync -a "$tmp"/ "$data_root"/
-  rm -rf "$tmp"
-
-  rm -f "${data_root%/}/runtime/cache/lab/evidenceops_payload.json" || true
-
-  write_ai_lab_golden_state_marker "$marker" "$archive" "$actual_sha"
-
-  echo "OK: AI Lab golden state restored."
-}
-
 ensure_ollama_embedding_model() {
   if [ "$SKIP_OLLAMA_EMBEDDING_MODEL_PULL" = "1" ]; then
     echo "SKIP: Ollama embedding model pull disabled by SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1"
@@ -378,7 +275,6 @@ if [ "$CONFIG_ONLY" = "true" ]; then
 fi
 
 restore_nextcloud_golden_baseline
-restore_ai_lab_golden_state
 
 FRONTEND_BIND_HOST="$(get_env_value AI_DECISION_STUDIO_FRONTEND_BIND_HOST 127.0.0.1)"
 FRONTEND_PUBLIC_PORT="$(get_env_value AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT 8071)"

@@ -180,10 +180,7 @@ This repository intentionally covers more than “LLM + UI.” It includes produ
 - **LangChain Text Splitters**
 - **LangGraph**
 - **ChromaDB**
-- **sentence-transformers**
-- **transformers**
 - **PyPDF**
-- **docling**
 - **Pillow**
 - **NumPy**
 
@@ -218,12 +215,15 @@ The Python environment currently includes, among others:
 - `langchain-chroma`
 - `langchain-text-splitters`
 - `langgraph`
-- `sentence-transformers`
-- `transformers`
-- `docling`
 - `cryptography`
 - `matplotlib`
 - `reportlab`
+
+Earlier Evidence CV, Docling, local Hugging Face, and neural reranking phases
+used heavier packages such as `docling`, `transformers`, and
+`sentence-transformers`. Those historical dependency sets are preserved under
+`legacy/requirements/`; the current deployable product uses the lean
+`requirements.txt` contract.
 
 ### Frontend dependency snapshot
 

@@ -17,6 +17,7 @@ Deployment runbooks and environment contracts for local Docker, AWS, and Oracle-
 - [ORACLE_ALWAYS_FREE_SECURITY_EXPOSURE_CHECKLIST.md](../../legacy/docs/deployment/oracle/ORACLE_ALWAYS_FREE_SECURITY_EXPOSURE_CHECKLIST.md) — Oracle Always Free — Security Exposure Checklist
 - [ORACLE_ENVIRONMENT_CONTRACT.md](../../legacy/docs/deployment/oracle/ORACLE_ENVIRONMENT_CONTRACT.md) — AI Decision Studio — Oracle Environment Contract
 - [ORACLE_OPERATIONS_RUNBOOK.md](../../legacy/docs/deployment/oracle/ORACLE_OPERATIONS_RUNBOOK.md) — Oracle operations runbook
+- [python-dependencies.md](python-dependencies.md) — Current single-file Python dependency contract
 - [REDEPLOY_FAST_PATH.md](REDEPLOY_FAST_PATH.md) — AI Decision Studio redeploy fast path
 
 ## Legacy / deferred deployment material

@@ -10,6 +10,7 @@ Start here if you are new to the repository:
 - architecture/data-payload.md — the versioned Docker/AWS data payload and the four mounted roots.
 - deployment/local-docker-compose.md — how to run the current product locally with Docker Compose.
 - deployment/aws-slim-deploy.md — how the AWS slim deployment is structured.
+- deployment/python-dependencies.md — current single-file Python dependency contract.
 - operations/backup-and-restore.md — operational backup and restore notes for local/AWS data roots.
 - guides/ — task-oriented supporting workflow guides.
 - reference/ — reference material for benchmarks and evidence/CV workflows.
@@ -25,6 +26,7 @@ Current official runtime paths:
 - Frontend Dockerfile: Dockerfile.frontend.
 - Local product API Dockerfile: Dockerfile.product-api.local.
 - AWS product API Dockerfile: Dockerfile.product-api.aws-slim.
+- Python dependencies: requirements.txt.
 - Versioned deploy payload: runtime/ai_decision_studio_functional_baseline/oracle_like_data.
 
 Historical or secondary flows are kept under legacy/.
