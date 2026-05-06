@@ -38,7 +38,7 @@ python scripts/report_benchmark_audit.py
 ### Round 3 decision gate
 
 ```bash
-python scripts/report_phase8_5_decision_gate.py
+python scripts/report_benchmark_decision_gate.py
 ```
 
 ### Final closure bundle

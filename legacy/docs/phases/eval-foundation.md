@@ -31,7 +31,7 @@ Create a reusable local evaluation layer that persists quality signals over time
 - helper script to reproduce/download selected public materials:
 
 ```bash
-python scripts/download_phase8_public_materials.py --dry-run
+python scripts/download_public_eval_materials.py --dry-run
 ```
 
 - live/local eval orchestration script for prepared provider + RAG environments:
@@ -58,7 +58,7 @@ python scripts/import_eval_history.py
 - diagnostic report script:
 
 ```bash
-python scripts/report_phase8_eval_diagnosis.py
+python scripts/report_eval_store_diagnosis.py
 ```
 
 ## Why SQLite first
@@ -179,8 +179,8 @@ python scripts/report_eval_store_summary.py --task checklist
 Diagnostic report:
 
 ```bash
-python scripts/report_phase8_eval_diagnosis.py
-python scripts/report_phase8_eval_diagnosis.py --suite structured_smoke_eval
+python scripts/report_eval_store_diagnosis.py
+python scripts/report_eval_store_diagnosis.py --suite structured_smoke_eval
 ```
 
 The diagnosis report now highlights:

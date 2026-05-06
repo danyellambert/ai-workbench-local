@@ -78,7 +78,7 @@ Important limitation:
 Primary files:
 
 - manifest: `evals/phase8/configs/phase8_5_benchmark_matrix.json`
-- orchestrator: `scripts/run_phase8_5_benchmark_matrix.py`
+- orchestrator: `scripts/run_benchmark_decision_matrix.py`
 
 ## Round 0 audit / preflight artifact
 
@@ -100,7 +100,7 @@ This produces a concise view of:
 Use this to validate the resolved matrix, output location, provider/model availability, and resume inventory without executing benchmark cases.
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --preflight
+python scripts/run_benchmark_decision_matrix.py --preflight
 ```
 
 ## 2. Smoke run
@@ -108,13 +108,13 @@ python scripts/run_phase8_5_benchmark_matrix.py --preflight
 Use this for the smallest safe execution path. It uses the smoke limits defined in the manifest.
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --smoke
+python scripts/run_benchmark_decision_matrix.py --smoke
 ```
 
 If you want to preview the smoke plan without writing outputs or executing anything:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --smoke --dry-run
+python scripts/run_benchmark_decision_matrix.py --smoke --dry-run
 ```
 
 ## 3. Full benchmark run
@@ -122,13 +122,13 @@ python scripts/run_phase8_5_benchmark_matrix.py --smoke --dry-run
 Run the full local Phase 8.5 matrix:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py
+python scripts/run_benchmark_decision_matrix.py
 ```
 
 If you want the expanded evidence bundle to run in **stable staged group order** and then merge the artifacts into one campaign directory:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --staged-campaign
+python scripts/run_benchmark_decision_matrix.py --staged-campaign
 ```
 
 ## 4. Resume an interrupted run
@@ -136,13 +136,13 @@ python scripts/run_phase8_5_benchmark_matrix.py --staged-campaign
 Resume uses the stable run id derived from the selected matrix and skips cases already recorded as successful in `raw/events.jsonl`.
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --resume
+python scripts/run_benchmark_decision_matrix.py --resume
 ```
 
 Resume a staged campaign:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --staged-campaign --resume
+python scripts/run_benchmark_decision_matrix.py --staged-campaign --resume
 ```
 
 ## 5. Run a single benchmark group
@@ -150,25 +150,25 @@ python scripts/run_phase8_5_benchmark_matrix.py --staged-campaign --resume
 Generation only:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group generation
+python scripts/run_benchmark_decision_matrix.py --group generation
 ```
 
 Embeddings only:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group embeddings
+python scripts/run_benchmark_decision_matrix.py --group embeddings
 ```
 
 Rerankers only:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group rerankers
+python scripts/run_benchmark_decision_matrix.py --group rerankers
 ```
 
 OCR / VLM only:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group ocr_vlm
+python scripts/run_benchmark_decision_matrix.py --group ocr_vlm
 ```
 
 ## 6. Filter to a single provider/model
@@ -176,13 +176,13 @@ python scripts/run_phase8_5_benchmark_matrix.py --group ocr_vlm
 Single provider:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group generation --provider ollama
+python scripts/run_benchmark_decision_matrix.py --group generation --provider ollama
 ```
 
 Single exact provider/model pair:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group generation --provider ollama --model qwen2.5:7b
+python scripts/run_benchmark_decision_matrix.py --group generation --provider ollama --model qwen2.5:7b
 ```
 
 ## Outputs
@@ -230,19 +230,19 @@ Important outputs:
 Preview reranker slice only:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group rerankers --smoke --dry-run
+python scripts/run_benchmark_decision_matrix.py --group rerankers --smoke --dry-run
 ```
 
 Preview OCR / VLM slice only:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group ocr_vlm --smoke --dry-run
+python scripts/run_benchmark_decision_matrix.py --group ocr_vlm --smoke --dry-run
 ```
 
 Run preflight for both Round 2 groups:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --group rerankers --group ocr_vlm --preflight
+python scripts/run_benchmark_decision_matrix.py --group rerankers --group ocr_vlm --preflight
 ```
 
 ## Staged campaign commands
@@ -250,13 +250,13 @@ python scripts/run_phase8_5_benchmark_matrix.py --group rerankers --group ocr_vl
 Preview the merged staged campaign plan:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --staged-campaign --preflight
+python scripts/run_benchmark_decision_matrix.py --staged-campaign --preflight
 ```
 
 Run the smallest safe grouped evidence bundle across all groups:
 
 ```bash
-python scripts/run_phase8_5_benchmark_matrix.py --staged-campaign --smoke --resume
+python scripts/run_benchmark_decision_matrix.py --staged-campaign --smoke --resume
 ```
 
 The current repo already has a corrected staged smoke campaign evidence bundle under:
@@ -272,7 +272,7 @@ The repo also now has a larger non-smoke staged campaign evidence bundle under:
 After at least one benchmark run and after the Phase 8 eval store has data, generate the conservative Phase 8.5 decision summary:
 
 ```bash
-python scripts/report_phase8_5_decision_gate.py --benchmark-run-dir evals/benchmark-runs/phase8_5_matrix/<run-id>
+python scripts/report_benchmark_decision_gate.py --benchmark-run-dir evals/benchmark-runs/phase8_5_matrix/<run-id>
 ```
 
 If you omit `--benchmark-run-dir`, the script tries to use the latest detected run under:
@@ -283,7 +283,7 @@ If you omit `--benchmark-run-dir`, the script tries to use the latest detected r
 To also write explicit artifacts:
 
 ```bash
-python scripts/report_phase8_5_decision_gate.py \
+python scripts/report_benchmark_decision_gate.py \
   --benchmark-run-dir evals/benchmark-runs/phase8_5_matrix/<run-id> \
   --out-json phase5_eval/reports/phase8_5_decision_summary.json \
   --out-md phase5_eval/reports/phase8_5_decision_report.md

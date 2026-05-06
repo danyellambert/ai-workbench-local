@@ -20,7 +20,7 @@ REUSABLE_BENCHMARK_COMPONENTS = [
         "role": "round2 reranker + OCR/VLM slices reusing existing local repo logic",
     },
     {
-        "path": "scripts/run_phase8_5_benchmark_matrix.py",
+        "path": "scripts/run_benchmark_decision_matrix.py",
         "role": "CLI entrypoint for resumable benchmark execution by group",
     },
     {
@@ -58,11 +58,11 @@ REUSABLE_RUNTIME_COMPONENTS = [
         "role": "environment/provider inventory snapshots and benchmark runtime metadata",
     },
     {
-        "path": "scripts/report_phase7_model_comparison_log.py",
+        "path": "scripts/report_model_comparison_log.py",
         "role": "model comparison reporting artifact generation",
     },
     {
-        "path": "scripts/report_phase8_eval_diagnosis.py",
+        "path": "scripts/report_eval_store_diagnosis.py",
         "role": "eval diagnosis report generation from the Phase 8 store",
     },
 ]
@@ -152,7 +152,7 @@ def build_phase8_5_audit(
         round2_missing.append("produce one final evidence bundle containing rerankers + ocr_vlm together")
 
     round3_missing: list[str] = []
-    if not (resolved_root / "scripts" / "report_phase8_5_decision_gate.py").exists():
+    if not (resolved_root / "scripts" / "report_benchmark_decision_gate.py").exists():
         round3_missing.append("decision-gate runner script missing")
     if not eval_entries:
         round3_missing.append("decision gate has no eval evidence to operate on")
@@ -203,7 +203,7 @@ def build_phase8_5_audit(
             "round0": {"implemented": True, "evidence_bundle_complete": round0_ready},
             "round1": {"implemented": {"generation", "embeddings"}.issubset(set(manifest_groups)), "evidence_bundle_complete": round1_ready},
             "round2": {"implemented": {"rerankers", "ocr_vlm"}.issubset(set(manifest_groups)), "evidence_bundle_complete": round2_ready},
-            "round3": {"implemented": (resolved_root / "scripts" / "report_phase8_5_decision_gate.py").exists(), "evidence_bundle_complete": round3_ready},
+            "round3": {"implemented": (resolved_root / "scripts" / "report_benchmark_decision_gate.py").exists(), "evidence_bundle_complete": round3_ready},
         },
         "smallest_extension_to_implement_first": {
             "title": "round0_audit_and_closure_bundle",

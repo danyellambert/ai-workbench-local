@@ -13,7 +13,7 @@
 
 - `src/services/phase8_5_benchmark.py` → round1 benchmark orchestrator, case building, normalization, aggregation, markdown reporting (present)
 - `src/services/phase8_5_benchmark_round2.py` → round2 reranker + OCR/VLM slices reusing existing local repo logic (present)
-- `scripts/run_phase8_5_benchmark_matrix.py` → CLI entrypoint for resumable benchmark execution by group (present)
+- `scripts/run_benchmark_decision_matrix.py` → CLI entrypoint for resumable benchmark execution by group (present)
 - `phase8_eval/configs/phase8_5_benchmark_matrix.json` → manifest for benchmark groups, fairness, output policy and smoke limits (present)
 
 ## Reusable provider/model comparison logic
@@ -27,8 +27,8 @@
 - `src/storage/phase8_eval_store.py` → SQLite-backed eval store reused by diagnosis and decision logic (present)
 - `src/storage/phase8_eval_diagnosis.py` → task health, persistent failure and adaptation candidate diagnosis (present)
 - `src/services/runtime_snapshot.py` → environment/provider inventory snapshots and benchmark runtime metadata (present)
-- `scripts/report_phase7_model_comparison_log.py` → model comparison reporting artifact generation (present)
-- `scripts/report_phase8_eval_diagnosis.py` → eval diagnosis report generation from the Phase 8 store (present)
+- `scripts/report_model_comparison_log.py` → model comparison reporting artifact generation (present)
+- `scripts/report_eval_store_diagnosis.py` → eval diagnosis report generation from the Phase 8 store (present)
 
 ## Missing pieces by round
 

@@ -487,7 +487,7 @@
           "role": "round2 reranker + OCR/VLM slices reusing existing local repo logic"
         },
         {
-          "path": "scripts/run_phase8_5_benchmark_matrix.py",
+          "path": "scripts/run_benchmark_decision_matrix.py",
           "exists": true,
           "role": "CLI entrypoint for resumable benchmark execution by group"
         },
@@ -531,12 +531,12 @@
           "role": "environment/provider inventory snapshots and benchmark runtime metadata"
         },
         {
-          "path": "scripts/report_phase7_model_comparison_log.py",
+          "path": "scripts/report_model_comparison_log.py",
           "exists": true,
           "role": "model comparison reporting artifact generation"
         },
         {
-          "path": "scripts/report_phase8_eval_diagnosis.py",
+          "path": "scripts/report_eval_store_diagnosis.py",
           "exists": true,
           "role": "eval diagnosis report generation from the Phase 8 store"
         }

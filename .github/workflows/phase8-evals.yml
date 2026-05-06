@@ -48,4 +48,4 @@ jobs:
       - name: Generate eval summary and diagnosis
         run: |
           python scripts/report_eval_store_summary.py --limit 10 --out phase5_eval/reports/phase8_eval_summary_ci.json
-          python scripts/report_phase8_eval_diagnosis.py --out phase5_eval/reports/phase8_eval_diagnosis_ci.json
+          python scripts/report_eval_store_diagnosis.py --out phase5_eval/reports/phase8_eval_diagnosis_ci.json

@@ -16,7 +16,7 @@ Commands:
 python -m unittest tests.test_phase8_eval_store_unittest tests.test_phase8_eval_diagnosis_unittest tests.test_phase8_agent_workflow_eval_unittest tests.test_runtime_snapshot_unittest tests.test_phase5_real_document_eval_unittest
 python scripts/run_agent_workflow_eval.py
 python scripts/report_eval_store_summary.py --limit 20
-python scripts/report_phase8_eval_diagnosis.py
+python scripts/report_eval_store_diagnosis.py
 ```
 
 ## 2. Real-document eval cycle after prompt / RAG / schema changes
@@ -38,7 +38,7 @@ python scripts/run_structured_output_eval.py --task extraction --use-indexed-doc
 python scripts/evaluate_checklist_regression.py --document-name "9789241598590_eng.pdf"
 python scripts/evaluate_evidence_cv_gold_set.py
 python scripts/report_eval_store_summary.py --limit 50
-python scripts/report_phase8_eval_diagnosis.py
+python scripts/report_eval_store_diagnosis.py
 ```
 
 If the local environment is already prepared with provider + RAG + documents, you can also use the consolidated live runner:

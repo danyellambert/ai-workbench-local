@@ -64,7 +64,7 @@ class Phase85AuditTests(unittest.TestCase):
             )
             scripts_dir = root / "scripts"
             scripts_dir.mkdir(parents=True, exist_ok=True)
-            (scripts_dir / "report_phase8_5_decision_gate.py").write_text("# stub\n", encoding="utf-8")
+            (scripts_dir / "report_benchmark_decision_gate.py").write_text("# stub\n", encoding="utf-8")
 
             eval_db = root / ".phase8_eval_runs.sqlite3"
             append_eval_run(
@@ -139,7 +139,7 @@ class Phase85AuditTests(unittest.TestCase):
             )
             scripts_dir = root / "scripts"
             scripts_dir.mkdir(parents=True, exist_ok=True)
-            (scripts_dir / "report_phase8_5_decision_gate.py").write_text("# stub\n", encoding="utf-8")
+            (scripts_dir / "report_benchmark_decision_gate.py").write_text("# stub\n", encoding="utf-8")
 
             eval_db = root / ".phase8_eval_runs.sqlite3"
             append_eval_run(

@@ -31,18 +31,18 @@ This directory concentrates local materials that can feed real-document evals an
 Some additional local materials can now be reproduced from a curated public-source map:
 
 - source map: `data/materials_demo/public_material_sources.json`
-- download helper: `scripts/download_phase8_public_materials.py`
+- download helper: `scripts/download_public_eval_materials.py`
 
 Dry run:
 
 ```bash
-python scripts/download_phase8_public_materials.py --dry-run
+python scripts/download_public_eval_materials.py --dry-run
 ```
 
 Download only the additional Harvard Law School sample resumes:
 
 ```bash
-python scripts/download_phase8_public_materials.py --material-id hls_sample_resume_2_1 --material-id hls_sample_resume_3
+python scripts/download_public_eval_materials.py --material-id hls_sample_resume_2_1 --material-id hls_sample_resume_3
 ```
 
 ## How to use these materials

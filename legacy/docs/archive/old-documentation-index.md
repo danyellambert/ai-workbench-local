@@ -67,7 +67,7 @@ This file is the main entry point for the repository documentation.
 
 ### Phase 7
 
-- `scripts/report_phase7_model_comparison_log.py`
+- `scripts/report_model_comparison_log.py`
 
 ## Planning docs
 

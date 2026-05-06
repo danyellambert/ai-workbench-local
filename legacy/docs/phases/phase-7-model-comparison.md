@@ -108,7 +108,7 @@ These items are not blocking the local closure of Phase 7, but remain useful as 
 Generate the Phase 7 report:
 
 ```bash
-python scripts/report_phase7_model_comparison_log.py
+python scripts/report_model_comparison_log.py
 ```
 
 Run focused validation:
