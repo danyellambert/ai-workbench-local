@@ -58,7 +58,7 @@ jobs:
           bash -n scripts/run_local_docker.sh
           bash -n scripts/deploy_aws_slim.sh
           bash -n scripts/smoke_aws_slim.sh
-          bash -n scripts/build_oracle_deployment_bundle.sh
+          bash -n scripts/build_deployment_bundle.sh
 
       - name: Validate Docker and AWS compose contracts without deployment
         env:

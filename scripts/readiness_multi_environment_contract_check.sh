@@ -34,7 +34,7 @@ for script in \
   scripts/run_local_docker.sh \
   scripts/deploy_aws_slim.sh \
   scripts/smoke_aws_slim.sh \
-  scripts/build_oracle_deployment_bundle.sh
+  scripts/build_deployment_bundle.sh
 do
   bash -n "$script"
 done

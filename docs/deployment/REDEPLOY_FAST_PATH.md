@@ -117,10 +117,10 @@ When applying a fresh bundle manually:
     rm -rf /tmp/ads_bundle
     mkdir -p /tmp/ads_bundle
 
-    tar -xzf ~/ads_uploads/ai-decision-studio-oracle-app-bundle.tar.gz -C /tmp/ads_bundle
+    tar -xzf ~/ads_uploads/ai-decision-studio-app-bundle.tar.gz -C /tmp/ads_bundle
 
     rsync -a \
-      /tmp/ads_bundle/ai-decision-studio-oracle-app-bundle/ \
+      /tmp/ads_bundle/ai-decision-studio-app-bundle/ \
       /opt/ai-decision-studio/app/
 
     chmod +x /opt/ai-decision-studio/app/scripts/*.sh 2>/dev/null || true
