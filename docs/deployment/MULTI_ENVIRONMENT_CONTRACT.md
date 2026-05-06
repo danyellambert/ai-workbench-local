@@ -33,18 +33,13 @@ localhost means different things depending on where code runs:
 For a fresh EC2 rebuild, use `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`.
 For code-only redeploys on an existing AWS host, use the slim fast path below.
 
-AWS currently uses the proven Oracle-like compose base plus an AWS-specific
-slim override:
+AWS uses a single AWS slim compose contract:
 
 docker compose \
   --env-file .env.aws \
   -p ai-decision-studio \
-  -f docker-compose.local.yml \
   -f docker-compose.aws-slim.yml \
   up -d --no-deps --build product-api frontend
-
-For backward compatibility, scripts may fall back to .env.oracle if .env.aws
-is not present on an existing AWS host. This is temporary.
 
 AWS disk rule:
 

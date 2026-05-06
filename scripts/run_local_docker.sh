@@ -25,7 +25,7 @@ Optional env:
 
 Behavior:
   - Uses docker-compose.local.yml as the local Docker topology.
-  - Does not use AWS slim override.
+  - Does not use the AWS slim compose file.
   - Frontend container serves the app through Nginx.
   - Nginx proxies /api and /health to product-api:8011 inside Docker.
   - Vite local-dev proxy is not used for Docker.

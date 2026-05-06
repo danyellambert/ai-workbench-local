@@ -10,7 +10,7 @@ Use the correct real env file for the target host:
 
 | Target | Env file | Compose files |
 | --- | --- | --- |
-| AWS slim VM | `.env.aws` | `docker-compose.local.yml` + `docker-compose.aws-slim.yml` |
+| AWS slim VM | `.env.aws` | `docker-compose.aws-slim.yml` |
 | Oracle VM | `.env.oracle` | `docker-compose.local.yml` |
 | Local Docker | `.env.docker` | `docker-compose.local.yml` |
 
