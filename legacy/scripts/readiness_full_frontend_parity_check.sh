@@ -123,7 +123,7 @@ ensure_public_demo_stack
 
 echo
 echo "== Runbook phases 8-12 check =="
-scripts/readiness_runbook_phases_8_12_check.sh
+scripts/readiness_eval_runbook_check.sh
 
 echo
 echo "== Full frontend parity check completed =="

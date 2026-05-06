@@ -52,7 +52,7 @@ python scripts/report_eval_store_summary.py
 - historical import/backfill script:
 
 ```bash
-python scripts/import_phase8_eval_history.py
+python scripts/import_eval_history.py
 ```
 
 - diagnostic report script:
@@ -149,7 +149,7 @@ It can also optionally attempt to index missing manifest documents before execut
 If the SQLite store is still empty, you can import the already existing JSON reports:
 
 ```bash
-python scripts/import_phase8_eval_history.py
+python scripts/import_eval_history.py
 ```
 
 This imports historical runs from `phase5_eval/reports/` into `.phase8_eval_runs.sqlite3` and avoids duplicates through a deterministic `run_key`.
