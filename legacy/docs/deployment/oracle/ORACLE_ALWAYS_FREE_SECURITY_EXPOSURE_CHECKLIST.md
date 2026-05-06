@@ -48,7 +48,7 @@ Must NOT be public:
 - [ ] AI_DECISION_STUDIO_SESSION_SECRET is strong and unique.
 - [ ] AI_DECISION_STUDIO_ADMIN_PASSWORD_HASH is set and quoted if it contains $.
 - [ ] No real provider keys are committed.
-- [ ] scripts/validate_oracle_environment_contract.sh .env.oracle passes.
+- [ ] legacy/scripts/oracle/validate_oracle_environment_contract.sh .env.oracle passes.
 
 ## Public demo guardrails
 

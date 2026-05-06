@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "== Phase 13.2 health ops readiness =="
 
-SCRIPT="scripts/oracle_health_ops_report.py"
+SCRIPT="legacy/scripts/oracle/oracle_health_ops_report.py"
 
 if [[ ! -f "$SCRIPT" ]]; then
   echo "ERROR: missing $SCRIPT" >&2
@@ -22,7 +22,7 @@ import tempfile
 import time
 from pathlib import Path
 
-script = Path("scripts/oracle_health_ops_report.py").resolve()
+script = Path("legacy/scripts/oracle/oracle_health_ops_report.py").resolve()
 
 with tempfile.TemporaryDirectory(prefix="ads_health_ops_") as tmp:
     data_root = Path(tmp) / "data"

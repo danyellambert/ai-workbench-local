@@ -174,7 +174,7 @@ Usar:
 
 Antes de expor publicamente, rodar:
 
-    scripts/validate_oracle_environment_contract.sh .env.oracle
+    legacy/scripts/oracle/validate_oracle_environment_contract.sh .env.oracle
 
 Não expor se:
 - admin/session env estiver vazio;

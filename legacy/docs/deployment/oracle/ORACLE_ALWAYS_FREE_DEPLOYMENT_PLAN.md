@@ -142,4 +142,4 @@ Do not back up raw `.env` into Git. Store secrets separately.
 Required local gates:
 
 - `legacy/scripts/readiness_full_frontend_parity_check.sh`
-- `scripts/readiness_oracle_like_deploy_check.sh`
+- `legacy/scripts/oracle/readiness_oracle_like_deploy_check.sh`

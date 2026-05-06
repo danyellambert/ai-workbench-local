@@ -56,17 +56,17 @@ run_step() {
 FINAL_CODE=0
 
 run_step oracle_like_readiness \
-  scripts/readiness_oracle_like_deploy_check.sh || FINAL_CODE=1
+  legacy/scripts/oracle/readiness_oracle_like_deploy_check.sh || FINAL_CODE=1
 
 if [ "$FINAL_CODE" = "0" ]; then
   export AI_DECISION_STUDIO_ORACLE_DATA_RESET="${AI_DECISION_STUDIO_ORACLE_DATA_RESET:-1}"
   run_step prepare_oracle_data_root \
-    scripts/prepare_oracle_data_root.sh || FINAL_CODE=1
+    legacy/scripts/oracle/prepare_oracle_data_root.sh || FINAL_CODE=1
 fi
 
 if [ "$FINAL_CODE" = "0" ]; then
   run_step smoke_oracle_like_compose \
-    scripts/smoke_oracle_like_compose.sh || FINAL_CODE=1
+    legacy/scripts/oracle/smoke_oracle_like_compose.sh || FINAL_CODE=1
 fi
 
 if [ "$FINAL_CODE" = "0" ]; then

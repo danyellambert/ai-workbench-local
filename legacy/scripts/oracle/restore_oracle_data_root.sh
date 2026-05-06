@@ -6,7 +6,7 @@ DEST_ROOT="${2:-${AI_DECISION_STUDIO_ORACLE_DATA_ROOT:-}}"
 FORCE="${3:-}"
 
 if [[ -z "$ARCHIVE" || -z "$DEST_ROOT" ]]; then
-  echo "Usage: scripts/restore_oracle_data_root.sh <backup.tar.gz> <destination-data-root> [--force]" >&2
+  echo "Usage: legacy/scripts/oracle/restore_oracle_data_root.sh <backup.tar.gz> <destination-data-root> [--force]" >&2
   exit 1
 fi
 

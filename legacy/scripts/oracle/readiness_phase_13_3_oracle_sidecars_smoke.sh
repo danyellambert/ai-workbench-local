@@ -50,7 +50,7 @@ chmod 600 "$SAFE_ENV_FILE"
 
 echo
 echo "== Static sidecar readiness =="
-bash scripts/readiness_phase_13_3_oracle_sidecars_check.sh
+bash legacy/scripts/oracle/readiness_phase_13_3_oracle_sidecars_check.sh
 
 echo
 echo "== Compose up =="

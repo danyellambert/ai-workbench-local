@@ -3,8 +3,8 @@ set -euo pipefail
 
 echo "== Phase 13.2 backup/restore readiness =="
 
-BACKUP_SCRIPT="scripts/backup_oracle_data_root.sh"
-RESTORE_SCRIPT="scripts/restore_oracle_data_root.sh"
+BACKUP_SCRIPT="legacy/scripts/oracle/backup_oracle_data_root.sh"
+RESTORE_SCRIPT="legacy/scripts/oracle/restore_oracle_data_root.sh"
 
 bash -n "$BACKUP_SCRIPT"
 bash -n "$RESTORE_SCRIPT"

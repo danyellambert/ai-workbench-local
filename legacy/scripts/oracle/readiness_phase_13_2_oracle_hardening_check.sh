@@ -15,14 +15,14 @@ echo "compose_project=$COMPOSE_PROJECT_NAME"
 echo
 echo "== Syntax checks =="
 bash -n scripts/readiness_phase_13_2_public_session_retention_check.sh
-bash -n scripts/readiness_phase_13_2_backup_restore_check.sh
-bash -n scripts/readiness_phase_13_2_oracle_exposure_check.sh
-bash -n scripts/readiness_phase_13_2_health_ops_check.sh
-bash -n scripts/readiness_oracle_like_deploy_check.sh
+bash -n legacy/scripts/oracle/readiness_phase_13_2_backup_restore_check.sh
+bash -n legacy/scripts/oracle/readiness_phase_13_2_oracle_exposure_check.sh
+bash -n legacy/scripts/oracle/readiness_phase_13_2_health_ops_check.sh
+bash -n legacy/scripts/oracle/readiness_oracle_like_deploy_check.sh
 
 python3 -m py_compile \
   scripts/cleanup_public_session_overlays.py \
-  scripts/oracle_health_ops_report.py
+  legacy/scripts/oracle/oracle_health_ops_report.py
 
 echo
 echo "== 13.2 retention/cleanup readiness =="
@@ -30,23 +30,23 @@ bash scripts/readiness_phase_13_2_public_session_retention_check.sh
 
 echo
 echo "== 13.2 backup/restore readiness =="
-bash scripts/readiness_phase_13_2_backup_restore_check.sh
+bash legacy/scripts/oracle/readiness_phase_13_2_backup_restore_check.sh
 
 echo
 echo "== 13.2 HTTPS/exposure readiness =="
-bash scripts/readiness_phase_13_2_oracle_exposure_check.sh
+bash legacy/scripts/oracle/readiness_phase_13_2_oracle_exposure_check.sh
 
 echo
 echo "== 13.2 health ops synthetic readiness =="
-bash scripts/readiness_phase_13_2_health_ops_check.sh
+bash legacy/scripts/oracle/readiness_phase_13_2_health_ops_check.sh
 
 echo
 echo "== Oracle-like deploy readiness =="
-bash scripts/readiness_oracle_like_deploy_check.sh
+bash legacy/scripts/oracle/readiness_oracle_like_deploy_check.sh
 
 echo
 echo "== Real local Oracle health ops report =="
-python3 scripts/oracle_health_ops_report.py \
+python3 legacy/scripts/oracle/oracle_health_ops_report.py \
   --data-root "$AI_DECISION_STUDIO_ORACLE_DATA_ROOT" \
   --base-url "$AI_DECISION_STUDIO_READINESS_BASE_URL" \
   --compose-file docker-compose.oracle-like.yml \

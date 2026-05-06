@@ -84,7 +84,7 @@ checks = {
     "env_example_has_no_real_secret_values": not raw_secret_hits,
     "deployment_plan_exists": Path("legacy/docs/deployment/oracle/ORACLE_ALWAYS_FREE_DEPLOYMENT_PLAN.md").exists(),
     "operations_runbook_exists": Path("legacy/docs/deployment/oracle/ORACLE_OPERATIONS_RUNBOOK.md").exists(),
-    "oracle_compose_smoke_exists": Path("scripts/smoke_oracle_like_compose.sh").exists(),
+    "oracle_compose_smoke_exists": Path("legacy/scripts/oracle/smoke_oracle_like_compose.sh").exists(),
     "frontend_dockerfile_exists": Path("Dockerfile.frontend-public-demo").exists(),
     "product_api_dockerfile_exists": Path("Dockerfile.public-demo").exists(),
 }

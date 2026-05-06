@@ -72,15 +72,8 @@ copy_path "frontend"
 copy_path "docs/deployment"
 copy_path "services/ppt_creator_app"
 
-copy_path "scripts/prepare_oracle_data_root.sh"
-copy_path "scripts/smoke_oracle_like_compose.sh"
-copy_path "scripts/readiness_oracle_like_deploy_check.sh"
-copy_path "scripts/validate_oracle_environment_contract.sh"
-copy_path "scripts/readiness_oracle_like_service_topology_check.sh"
 
 copy_path "scripts/cleanup_public_session_overlays.py"
-copy_path "scripts/backup_oracle_data_root.sh"
-copy_path "scripts/restore_oracle_data_root.sh"
 copy_path "docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md"
 copy_path "scripts/readiness_nextcloud_golden_baseline_check.sh"
 copy_path "scripts/restore_nextcloud_golden_baseline.sh"
@@ -108,15 +101,8 @@ copy_path "scripts/readiness_multi_environment_contract_check.sh"
 copy_path "scripts/run_local_docker.sh"
 copy_path "scripts/run_local_dev.sh"
 copy_path "scripts/restore_ai_lab_golden_state.sh"
-copy_path "scripts/oracle_health_ops_report.py"
 
 copy_path "scripts/readiness_phase_13_2_public_session_retention_check.sh"
-copy_path "scripts/readiness_phase_13_2_backup_restore_check.sh"
-copy_path "scripts/readiness_phase_13_2_oracle_exposure_check.sh"
-copy_path "scripts/readiness_phase_13_2_health_ops_check.sh"
-copy_path "scripts/readiness_phase_13_2_oracle_hardening_check.sh"
-copy_path "scripts/readiness_phase_13_3_oracle_sidecars_check.sh"
-copy_path "scripts/readiness_phase_13_3_oracle_sidecars_smoke.sh"
 
 find "$BUNDLE_ROOT" \( -name ".DS_Store" -o -name "._*" \) -type f -delete
 
@@ -280,11 +266,7 @@ required_paths = [
     "services/ppt_creator_app/Dockerfile",
     "services/ppt_creator_app/pyproject.toml",
     "services/ppt_creator_app/bin/run_ppt_creator_api_container.sh",
-    "scripts/smoke_oracle_like_compose.sh",
-    "scripts/validate_oracle_environment_contract.sh",
     "scripts/cleanup_public_session_overlays.py",
-    "scripts/backup_oracle_data_root.sh",
-    "scripts/restore_oracle_data_root.sh",
     "docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md",
     "scripts/readiness_nextcloud_golden_baseline_check.sh",
     "scripts/restore_nextcloud_golden_baseline.sh",
@@ -312,8 +294,6 @@ required_paths = [
     "scripts/run_local_docker.sh",
     "scripts/run_local_dev.sh",
     "scripts/restore_ai_lab_golden_state.sh",
-    "scripts/oracle_health_ops_report.py",
-    "scripts/readiness_phase_13_2_oracle_hardening_check.sh",
 ]
 
 checks = {

@@ -56,9 +56,9 @@ Policy:
 
 Files:
 
-    scripts/backup_oracle_data_root.sh
-    scripts/restore_oracle_data_root.sh
-    scripts/readiness_phase_13_2_backup_restore_check.sh
+    legacy/scripts/oracle/backup_oracle_data_root.sh
+    legacy/scripts/oracle/restore_oracle_data_root.sh
+    legacy/scripts/oracle/readiness_phase_13_2_backup_restore_check.sh
 
 Backup includes:
 
@@ -82,7 +82,7 @@ Files:
 
     deploy/oracle/Caddyfile.example
     docs/deployment/ORACLE_ALWAYS_FREE_SECURITY_EXPOSURE_CHECKLIST.md
-    scripts/readiness_phase_13_2_oracle_exposure_check.sh
+    legacy/scripts/oracle/readiness_phase_13_2_oracle_exposure_check.sh
 
 Exposure model:
 
@@ -95,8 +95,8 @@ Exposure model:
 
 Files:
 
-    scripts/oracle_health_ops_report.py
-    scripts/readiness_phase_13_2_health_ops_check.sh
+    legacy/scripts/oracle/oracle_health_ops_report.py
+    legacy/scripts/oracle/readiness_phase_13_2_health_ops_check.sh
 
 Checks:
 
@@ -112,7 +112,7 @@ Checks:
 
 File:
 
-    scripts/readiness_phase_13_2_oracle_hardening_check.sh
+    legacy/scripts/oracle/readiness_phase_13_2_oracle_hardening_check.sh
 
 Runs:
 
@@ -133,7 +133,7 @@ Run:
     export AI_DECISION_STUDIO_PUBLIC_SESSION_MAX_MB=250
     export AI_DECISION_STUDIO_MAX_BACKUP_AGE_HOURS=48
 
-    bash scripts/readiness_phase_13_2_oracle_hardening_check.sh
+    bash legacy/scripts/oracle/readiness_phase_13_2_oracle_hardening_check.sh
 
 Expected final line:
 
