@@ -26,7 +26,7 @@ class Phase85AuditTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            run_dir = root / "benchmark_runs" / "phase8_5_matrix" / "run-1"
+            run_dir = root / "evals/benchmark-runs" / "phase8_5_matrix" / "run-1"
             (run_dir / "aggregated").mkdir(parents=True, exist_ok=True)
             (run_dir / "aggregated" / "summary.json").write_text(
                 json.dumps({"total_cases": 3, "successful_cases": 3, "failed_cases": 0}),
@@ -108,7 +108,7 @@ class Phase85AuditTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            run_dir = root / "benchmark_runs" / "phase8_5_round1" / "run-combined"
+            run_dir = root / "evals/benchmark-runs" / "phase8_5_round1" / "run-combined"
             (run_dir / "aggregated").mkdir(parents=True, exist_ok=True)
             (run_dir / "aggregated" / "summary.json").write_text(
                 json.dumps({"total_cases": 10, "successful_cases": 9, "failed_cases": 1}),

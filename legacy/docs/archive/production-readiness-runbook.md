@@ -475,8 +475,8 @@ Important local state:
 artifacts/
 outputs/
 .env
-benchmark_runs/
-benchmark_pdfs/
+evals/benchmark-runs/
+evals/benchmark-pdfs/
 data/
 phase5_eval/
 materials_local/

@@ -77,7 +77,7 @@ RETRIEVAL_QUESTIONS = [
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run all Phase 4.5 benchmark groups sequentially with fail-safe execution.")
     parser.add_argument("--pdfs", nargs="*", help="PDF files to benchmark. Defaults to the 4 benchmark PDFs.")
-    parser.add_argument("--output-dir", help="Optional output directory. Defaults to benchmark_runs/<timestamp>_phase_4_5_all.")
+    parser.add_argument("--output-dir", help="Optional output directory. Defaults to evals/benchmark-runs/<timestamp>_phase_4_5_all.")
     parser.add_argument("--test", action="store_true", help="Run a fast smoke test version of all 4 benchmark groups.")
     parser.add_argument("--skip-extraction-generation", action="store_true", help="Skip answer generation in the PDF extraction benchmark.")
     return parser.parse_args()
@@ -335,7 +335,7 @@ def main() -> None:
         pdf_paths = pdf_paths[:2]
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    output_dir = Path(args.output_dir) if args.output_dir else BASE_DIR / "benchmark_runs" / f"{timestamp}_phase_4_5_all"
+    output_dir = Path(args.output_dir) if args.output_dir else BASE_DIR / "evals/benchmark-runs" / f"{timestamp}_phase_4_5_all"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     suite_config_path = build_suite_config(output_dir, pdf_paths, args.test)

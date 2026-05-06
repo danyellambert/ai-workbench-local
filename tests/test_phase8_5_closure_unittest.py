@@ -10,7 +10,7 @@ from src.services.phase8_5_closure import (
 class Phase85ClosureTests(unittest.TestCase):
     def _audit_summary(self) -> dict[str, object]:
         return {
-            "benchmark_run_dir": "benchmark_runs/phase8_5_matrix/run-1",
+            "benchmark_run_dir": "evals/benchmark-runs/phase8_5_matrix/run-1",
             "benchmark_run_id": "run-1",
             "support_status": {
                 "round0": {"implemented": True, "evidence_bundle_complete": True},
@@ -65,7 +65,7 @@ class Phase85ClosureTests(unittest.TestCase):
 
     def _fully_complete_audit_summary(self) -> dict[str, object]:
         return {
-            "benchmark_run_dir": "benchmark_runs/phase8_5_matrix/run-complete",
+            "benchmark_run_dir": "evals/benchmark-runs/phase8_5_matrix/run-complete",
             "benchmark_run_id": "run-complete",
             "support_status": {
                 "round0": {"implemented": True, "evidence_bundle_complete": True},

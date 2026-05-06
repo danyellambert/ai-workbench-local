@@ -92,7 +92,7 @@ It includes:
 The canonical final evidence bundle for Phase 8.5 is now the **completed non-smoke staged campaign**:
 
 - benchmark run dir:
-  - `benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/`
+  - `evals/benchmark-runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/`
 - machine-readable decision summary:
   - `phase5_eval/reports/phase8_5_decision_summary.json`
 - closure summary:

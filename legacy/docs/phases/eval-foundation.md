@@ -104,7 +104,7 @@ python scripts/evaluate_evidence_cv_gold_set.py
 
 Default gold set fixture:
 
-- `phase5_eval/fixtures/evidence_cv_mini_gold_set.json`
+- `evals/phase5/fixtures/evidence_cv_mini_gold_set.json`
 
 Writes one eval run per file and per variant:
 

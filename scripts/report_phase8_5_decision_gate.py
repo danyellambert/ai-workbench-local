@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--benchmark-run-dir",
         default=None,
-        help="Optional Phase 8.5 benchmark run directory. Defaults to the latest detected run under benchmark_runs/phase8_5_matrix or benchmark_runs/phase8_5_round1.",
+        help="Optional Phase 8.5 benchmark run directory. Defaults to the latest detected run under evals/benchmark-runs/phase8_5_matrix or evals/benchmark-runs/phase8_5_round1.",
     )
     parser.add_argument(
         "--eval-db",

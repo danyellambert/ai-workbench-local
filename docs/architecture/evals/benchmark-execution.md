@@ -77,7 +77,7 @@ Important limitation:
 
 Primary files:
 
-- manifest: `phase8_eval/configs/phase8_5_benchmark_matrix.json`
+- manifest: `evals/phase8/configs/phase8_5_benchmark_matrix.json`
 - orchestrator: `scripts/run_phase8_5_benchmark_matrix.py`
 
 ## Round 0 audit / preflight artifact
@@ -190,7 +190,7 @@ python scripts/run_phase8_5_benchmark_matrix.py --group generation --provider ol
 By default, runs are written under:
 
 ```text
-benchmark_runs/phase8_5_matrix/<stable-run-id>/
+evals/benchmark-runs/phase8_5_matrix/<stable-run-id>/
 ```
 
 This root now covers the full manifest matrix, including the original Round 1 slices and the Round 2 reranker / OCR-VLM extensions.
@@ -198,13 +198,13 @@ This root now covers the full manifest matrix, including the original Round 1 sl
 When you use `--staged-campaign`, the merged campaign bundle is written under:
 
 ```text
-benchmark_runs/phase8_5_matrix_campaigns/<campaign-id>/
+evals/benchmark-runs/phase8_5_matrix_campaigns/<campaign-id>/
 ```
 
 and each stage also gets its own per-group run directory under:
 
 ```text
-benchmark_runs/phase8_5_matrix_campaigns/<campaign-id>/group_runs/
+evals/benchmark-runs/phase8_5_matrix_campaigns/<campaign-id>/group_runs/
 ```
 
 Important outputs:
@@ -261,30 +261,30 @@ python scripts/run_phase8_5_benchmark_matrix.py --staged-campaign --smoke --resu
 
 The current repo already has a corrected staged smoke campaign evidence bundle under:
 
-- `benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/`
+- `evals/benchmark-runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/`
 
 The repo also now has a larger non-smoke staged campaign evidence bundle under:
 
-- `benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/`
+- `evals/benchmark-runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/`
 
 ## Round 3 decision-gate command
 
 After at least one benchmark run and after the Phase 8 eval store has data, generate the conservative Phase 8.5 decision summary:
 
 ```bash
-python scripts/report_phase8_5_decision_gate.py --benchmark-run-dir benchmark_runs/phase8_5_matrix/<run-id>
+python scripts/report_phase8_5_decision_gate.py --benchmark-run-dir evals/benchmark-runs/phase8_5_matrix/<run-id>
 ```
 
 If you omit `--benchmark-run-dir`, the script tries to use the latest detected run under:
 
-- `benchmark_runs/phase8_5_matrix/`
-- fallback: `benchmark_runs/phase8_5_round1/`
+- `evals/benchmark-runs/phase8_5_matrix/`
+- fallback: `evals/benchmark-runs/phase8_5_round1/`
 
 To also write explicit artifacts:
 
 ```bash
 python scripts/report_phase8_5_decision_gate.py \
-  --benchmark-run-dir benchmark_runs/phase8_5_matrix/<run-id> \
+  --benchmark-run-dir evals/benchmark-runs/phase8_5_matrix/<run-id> \
   --out-json phase5_eval/reports/phase8_5_decision_summary.json \
   --out-md phase5_eval/reports/phase8_5_decision_report.md
 ```
@@ -323,5 +323,5 @@ This closure bundle combines:
 - The OCR / VLM slice is intentionally **partial but real**: it reuses the existing CV/evidence fallback pipeline and focuses on reusable gold-backed CV/contact evidence rather than inventing a broader document evaluation path.
 - The current `huggingface_server` catalog should only expose aliases that are working end-to-end on that provider path. If a model such as DeepSeek R1 is failing via `huggingface_server`, keep it out of the catalog/benchmark matrix until that runtime path is fixed.
 - In the current environment, the `embeddinggemma` alias exposed via the local hub was reproduced as a **memory-preflight support boundary** for the backend HF-local embedding path, and is documented honestly instead of being treated as a silent benchmark failure.
-- Staged campaigns are now first-class evidence bundles: audit, decision-gate, and closure discovery all recognize merged campaign directories under `benchmark_runs/phase8_5_matrix_campaigns/`.
+- Staged campaigns are now first-class evidence bundles: audit, decision-gate, and closure discovery all recognize merged campaign directories under `evals/benchmark-runs/phase8_5_matrix_campaigns/`.
 - Cold start / warm start / TTFT / full peak-memory benchmarking for every runtime family is still only **partially supported**. This workflow now records measured vs estimated vs not-supported operational metrics honestly instead of pretending universal parity.

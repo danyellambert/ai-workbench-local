@@ -103,7 +103,7 @@ def resolve_run_dir(
     if output_dir_override:
         return resolve_repo_path(output_dir_override)
     output_policy = manifest.get("output_directory_policy") if isinstance(manifest.get("output_directory_policy"), dict) else {}
-    root_dir = resolve_repo_path(str(output_policy.get("root_dir") or "benchmark_runs/phase8_5_matrix"))
+    root_dir = resolve_repo_path(str(output_policy.get("root_dir") or "evals/benchmark-runs/phase8_5_matrix"))
     return root_dir / run_id
 
 

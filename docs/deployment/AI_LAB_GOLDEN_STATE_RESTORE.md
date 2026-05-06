@@ -34,7 +34,7 @@ It includes:
 - Phase 8 eval SQLite database
 - runtime execution log
 - phase6 / phase7 / phase55 logs
-- benchmark_runs summary/result/report files
+- evals/benchmark-runs summary/result/report files
 - phase5_eval and phase8_eval reports
 
 It intentionally excludes:

@@ -278,7 +278,7 @@ def main() -> None:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     label = str(os.getenv("DOCUMENT_REVIEW_FINDINGS_EXPERIMENT_LABEL", "")).strip()
     output_name = f"document_review_findings_experiment_{label}_{timestamp}" if label else f"document_review_findings_experiment_{timestamp}"
-    output_root = PROJECT_ROOT / "benchmark_runs" / output_name
+    output_root = PROJECT_ROOT / "evals/benchmark-runs" / output_name
     output_root.mkdir(parents=True, exist_ok=True)
     _write_json(
         output_root / "progress.json",

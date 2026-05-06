@@ -93,7 +93,7 @@ class Phase85CampaignTests(unittest.TestCase):
     def test_find_latest_phase8_5_run_dir_sees_campaign_runs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
-            campaign_run_dir = root / "benchmark_runs" / "phase8_5_matrix_campaigns" / "campaign-1"
+            campaign_run_dir = root / "evals/benchmark-runs" / "phase8_5_matrix_campaigns" / "campaign-1"
             (campaign_run_dir / "aggregated").mkdir(parents=True, exist_ok=True)
             (campaign_run_dir / "aggregated" / "summary.json").write_text(
                 json.dumps({"total_cases": 4, "successful_cases": 4, "failed_cases": 0}),

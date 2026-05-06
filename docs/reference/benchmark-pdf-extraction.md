@@ -47,10 +47,10 @@ python scripts/run_pdf_extraction_benchmark.py
 ```bash
 python scripts/run_pdf_extraction_benchmark_en.py \
   --pdfs \
-  benchmark_pdfs/2025-HB-44-20250106-Final-508.pdf \
-  benchmark_pdfs/kaur-2016-ijca-911367.pdf \
-  benchmark_pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf \
-  benchmark_pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf
+  evals/benchmark-pdfs/2025-HB-44-20250106-Final-508.pdf \
+  evals/benchmark-pdfs/kaur-2016-ijca-911367.pdf \
+  evals/benchmark-pdfs/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf \
+  evals/benchmark-pdfs/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf
 ```
 
 ### Run without answer generation

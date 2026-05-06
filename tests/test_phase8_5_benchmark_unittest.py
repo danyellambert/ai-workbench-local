@@ -149,7 +149,7 @@ class Phase85BenchmarkTests(unittest.TestCase):
             "model": "qwen2.5:7b",
             "case_name": "ops_update_summary",
             "use_case_id": "ops_update_summary",
-            "input_file": "phase5_eval/fixtures/02_summary_input.txt",
+            "input_file": "evals/phase5/fixtures/02_summary_input.txt",
             "prompt_profile": "neutro",
             "response_format": "bullet_list",
             "temperature": 0.2,

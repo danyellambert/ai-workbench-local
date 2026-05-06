@@ -207,7 +207,7 @@ def _build_eval_run_for_variant(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Evaluate evidence CV extraction against mini gold set")
-    parser.add_argument("--gold-set", default="phase5_eval/fixtures/evidence_cv_mini_gold_set.json")
+    parser.add_argument("--gold-set", default="evals/phase5/fixtures/evidence_cv_mini_gold_set.json")
     parser.add_argument("--out", default="phase5_eval/reports/evidence_cv_eval_metrics.json")
     args = parser.parse_args()
 

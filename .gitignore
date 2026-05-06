@@ -206,3 +206,24 @@ runtime/ai_decision_studio_functional_baseline/oracle_like_data/*
 runtime/ai_decision_studio_functional_baseline/oracle_like_data/**/.DS_Store
 runtime/ai_decision_studio_functional_baseline/oracle_like_data/backups/
 runtime/ai_decision_studio_functional_baseline/oracle_like_data/backups/**
+
+# Local eval and benchmark workspaces kept out of the public repo root
+phase5_eval/
+phase8_eval/
+benchmark_pdfs/
+benchmark_runs/
+
+# Generated eval artifacts
+evals/generated/*
+!evals/generated/README.md
+
+# Local benchmark payloads under evals
+evals/benchmark-pdfs/*
+!evals/benchmark-pdfs/README.md
+!evals/benchmark-pdfs/.gitkeep
+
+evals/benchmark-runs/*
+!evals/benchmark-runs/README.md
+!evals/benchmark-runs/.gitkeep
+
+evals/**/.DS_Store

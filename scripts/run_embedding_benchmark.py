@@ -73,7 +73,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         default=None,
-        help="Directory where benchmark outputs will be written. Defaults to benchmark_runs/<timestamp>_embedding_benchmark.",
+        help="Directory where benchmark outputs will be written. Defaults to evals/benchmark-runs/<timestamp>_embedding_benchmark.",
     )
     parser.add_argument(
         "--keep-run-indexes",
@@ -116,7 +116,7 @@ def build_run_output_dir(base_output_dir: str | None) -> Path:
         return output_dir
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = PROJECT_ROOT / "benchmark_runs" / f"{timestamp}_embedding_benchmark"
+    output_dir = PROJECT_ROOT / "evals/benchmark-runs" / f"{timestamp}_embedding_benchmark"
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 

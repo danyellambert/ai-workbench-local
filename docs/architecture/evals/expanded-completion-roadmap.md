@@ -225,8 +225,8 @@ Re-run the evidence bundle once the missing slices are implemented.
 Current support-boundary note:
 
 - The repo now supports a merged staged campaign via `scripts/run_phase8_5_benchmark_matrix.py --staged-campaign`.
-- A corrected staged smoke bundle was generated at `benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546`.
-- A larger non-smoke staged bundle was also generated at `benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b`, and audit / decision gate / closure were regenerated against it.
+- A corrected staged smoke bundle was generated at `evals/benchmark-runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546`.
+- A larger non-smoke staged bundle was also generated at `evals/benchmark-runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b`, and audit / decision gate / closure were regenerated against it.
 
 ## 4. Recommended execution order on a 16 GB Apple Silicon machine
 

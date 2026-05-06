@@ -115,7 +115,7 @@ def sqlite_count(path: Path, table: str) -> int:
     finally:
         conn.close()
 
-benchmark_summaries = list((baseline / "benchmark_runs").glob("**/aggregated/summary.json"))
+benchmark_summaries = list((baseline / "evals/benchmark-runs").glob("**/aggregated/summary.json"))
 eval_db = runtime / "evals/phase8/phase8_eval_runs.sqlite3"
 action_store = runtime / "state/evidenceops/actions.sqlite3"
 

@@ -202,7 +202,7 @@ class Phase85DecisionGateTests(unittest.TestCase):
             preflight={"run_id": "run-1", "selected_groups": ["generation", "embeddings", "rerankers"]},
             eval_summary=self._eval_summary(),
             eval_diagnosis=self._eval_diagnosis(),
-            benchmark_run_dir="benchmark_runs/phase8_5_matrix/run-1",
+            benchmark_run_dir="evals/benchmark-runs/phase8_5_matrix/run-1",
         )
 
         runtime_rows = summary["runtime_model_decisions"]["best_local_runtime_by_use_case"]
@@ -224,7 +224,7 @@ class Phase85DecisionGateTests(unittest.TestCase):
             preflight={"run_id": "run-2", "selected_groups": ["generation"]},
             eval_summary=self._eval_summary(),
             eval_diagnosis=self._eval_diagnosis(),
-            benchmark_run_dir="benchmark_runs/phase8_5_matrix/run-2",
+            benchmark_run_dir="evals/benchmark-runs/phase8_5_matrix/run-2",
         )
 
         self.assertTrue(summary["adaptation_decision"]["adaptation_justified"])
@@ -240,7 +240,7 @@ class Phase85DecisionGateTests(unittest.TestCase):
             preflight={"run_id": "run-3", "selected_groups": ["generation"]},
             eval_summary=self._eval_summary(),
             eval_diagnosis=self._eval_diagnosis(),
-            benchmark_run_dir="benchmark_runs/phase8_5_matrix/run-3",
+            benchmark_run_dir="evals/benchmark-runs/phase8_5_matrix/run-3",
         )
         markdown = render_phase8_5_decision_markdown(summary)
 
@@ -260,7 +260,7 @@ class Phase85DecisionGateTests(unittest.TestCase):
             preflight={"run_id": "run-4", "selected_groups": ["rerankers"]},
             eval_summary=self._eval_summary(),
             eval_diagnosis=self._eval_diagnosis(),
-            benchmark_run_dir="benchmark_runs/phase8_5_matrix/run-4",
+            benchmark_run_dir="evals/benchmark-runs/phase8_5_matrix/run-4",
         )
 
         self.assertEqual(

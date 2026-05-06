@@ -39,11 +39,11 @@ PYTHONPATH=. python scripts/run_phase5_structured_eval.py --task cv_analysis --c
 
 Default fixtures live in:
 
-- `phase5_eval/fixtures/01_extraction_input.txt`
-- `phase5_eval/fixtures/02_summary_input.txt`
-- `phase5_eval/fixtures/03_checklist_input.txt`
-- `phase5_eval/fixtures/04_cv_sample.txt`
-- `phase5_eval/fixtures/05_code_sample.py`
+- `evals/phase5/fixtures/01_extraction_input.txt`
+- `evals/phase5/fixtures/02_summary_input.txt`
+- `evals/phase5/fixtures/03_checklist_input.txt`
+- `evals/phase5/fixtures/04_cv_sample.txt`
+- `evals/phase5/fixtures/05_code_sample.py`
 
 ## PASS / WARN / FAIL semantics
 

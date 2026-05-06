@@ -242,7 +242,7 @@ base_url = os.environ.get("AI_DECISION_STUDIO_READINESS_BASE_URL") or f"http://1
 report_path = Path(os.environ.get("AI_DECISION_STUDIO_ORACLE_RICH_SURFACE_REPORT_PATH", "/tmp/ai-decision-studio-oracle-rich-surface-report.json"))
 
 thresholds = {
-    "benchmark_runs": int(os.environ.get("AI_DECISION_STUDIO_ORACLE_MIN_BENCHMARK_RUNS", "66")),
+    "evals/benchmark-runs": int(os.environ.get("AI_DECISION_STUDIO_ORACLE_MIN_BENCHMARK_RUNS", "66")),
     "benchmark_models": int(os.environ.get("AI_DECISION_STUDIO_ORACLE_MIN_BENCHMARK_MODELS", "12")),
     "benchmark_presets": int(os.environ.get("AI_DECISION_STUDIO_ORACLE_MIN_BENCHMARK_PRESETS", "5")),
     "eval_historical_cases": int(os.environ.get("AI_DECISION_STUDIO_ORACLE_MIN_EVAL_HISTORICAL_CASES", "76")),
@@ -294,7 +294,7 @@ def asset_count(item: dict) -> int:
 
 checks = {
     "benchmarks_status_ok": payloads["/api/lab/benchmarks"]["status"] == 200,
-    "benchmarks_total_runs_rich": (bench.get("summary", {}).get("totalRuns") or 0) >= thresholds["benchmark_runs"],
+    "benchmarks_total_runs_rich": (bench.get("summary", {}).get("totalRuns") or 0) >= thresholds["evals/benchmark-runs"],
     "benchmarks_model_count_rich": (bench.get("summary", {}).get("modelCount") or 0) >= thresholds["benchmark_models"],
     "benchmarks_presets_rich": len(bench.get("presets", []) or []) >= thresholds["benchmark_presets"],
     "evals_status_ok": payloads["/api/lab/evals"]["status"] == 200,

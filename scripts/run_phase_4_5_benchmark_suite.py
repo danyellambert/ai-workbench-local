@@ -439,7 +439,7 @@ def main() -> None:
         choices=["embedding_models", "embedding_context_window", "retrieval_tuning"],
         help="Optional subset of benchmark groups to run.",
     )
-    parser.add_argument("--output-dir", help="Optional output directory. Defaults to benchmark_runs/<timestamp>_phase_4_5_suite")
+    parser.add_argument("--output-dir", help="Optional output directory. Defaults to evals/benchmark-runs/<timestamp>_phase_4_5_suite")
     args = parser.parse_args()
 
     pdf_paths = resolve_pdf_paths(args.pdfs)
@@ -450,7 +450,7 @@ def main() -> None:
     embedding_provider = registry["ollama"]["instance"]
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    output_dir = Path(args.output_dir) if args.output_dir else BASE_DIR / "benchmark_runs" / f"{timestamp}_phase_4_5_suite"
+    output_dir = Path(args.output_dir) if args.output_dir else BASE_DIR / "evals/benchmark-runs" / f"{timestamp}_phase_4_5_suite"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     suite_result = {

@@ -420,7 +420,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default=None, help="Generation model.")
     parser.add_argument("--context-window", type=int, default=None, help="Context window for generation.")
     parser.add_argument("--prompt-profile", default="neutral", help="Prompt profile.")
-    parser.add_argument("--output-dir", default=str(BASE_DIR / "benchmark_runs"), help="Output directory.")
+    parser.add_argument("--output-dir", default=str(BASE_DIR / "evals/benchmark-runs"), help="Output directory.")
     return parser.parse_args()
 
 
