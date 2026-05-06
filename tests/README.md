@@ -30,13 +30,36 @@ Interpretation:
 
 ## How to run tests
 
+## Current green gate
+
+Use this as the current presentation/reviewer gate. It is intentionally smaller than the full historical suite and avoids known failing live/provider/legacy UI modules.
+
+```bash
+python3 -m unittest \
+  tests.test_app_bootstrap_smoke_unittest \
+  tests.test_product_presenters_unittest \
+  tests.test_document_context_runtime_unittest \
+  tests.test_runtime_execution_log_unittest \
+  tests.test_document_agent_unittest \
+  tests.test_model_comparison_service_unittest \
+  tests.test_pdf_extraction_unittest \
+  tests.test_structured_service_unittest \
+  tests.test_checklist_and_evidence_eval_unittest \
+  tests.test_lab_chat_unittest \
+  tests.test_lab_evidenceops_payload \
+  tests.test_presentation_export_service_unittest \
+  tests.test_presentation_export_unittest
+```
+
+This gate is not a replacement for repairing the broader suite. It is the currently documented deterministic/offline-ish subset that a reviewer can run without invoking the known non-current/live/legacy failures.
+
 Run an individual module:
 
 ```bash
 python3 -m unittest tests.test_product_presenters_unittest
 ```
 
-Run a focused current-product smoke subset:
+Run a minimal current-product smoke subset:
 
 ```bash
 python3 -m unittest \
@@ -131,31 +154,33 @@ Streamlit/Gradio failures should be handled separately from the current deployab
 
 ## Current known non-passing modules
 
-The latest audit found 21 non-passing modules:
+The latest audit found 21 non-passing modules. They are intentionally documented here, but they are not part of the current green gate.
 
-- `tests.test_ai_lab_live_endpoints_unittest` — **FAIL**, 2.11s. `EE ⏎ ====================================================================== ⏎ ERROR: test_chat_session_message_roundtrip_persists_runtime_state (tests.test_ai_lab_live_endpoints_unittest.AiLabLiveApiTests.test_chat_session_message_roundtrip...`
-- `tests.test_ai_lab_validation_harness_unittest` — **FAIL**, 1.07s. `127.0.0.1 - - [06/May/2026 08:51:54] "GET /health HTTP/1.1" 200 - ⏎ 127.0.0.1 - - [06/May/2026 08:51:54] "GET /api/product/workflows HTTP/1.1" 200 - ⏎ ---------------------------------------- ⏎ Exception occurred during processing of reques...`
-- `tests.test_candidate_review_context_unittest` — **FAIL**, 3.26s. `FF. ⏎ ====================================================================== ⏎ FAIL: test_build_candidate_review_input_text_prefers_explicit_input (tests.test_candidate_review_context_unittest.CandidateReviewContextTests.test_build_candidat...`
-- `tests.test_candidate_review_front_integration_unittest` — **FAIL**, 0.07s. `E ⏎ ====================================================================== ⏎ ERROR: test_candidate_review_front_integration_unittest (unittest.loader._FailedTest.test_candidate_review_front_integration_unittest) ⏎ --------------------------...`
-- `tests.test_evidenceops_external_targets_unittest` — **FAIL**, 0.40s. `....E... ⏎ ====================================================================== ⏎ ERROR: test_create_trello_cards_from_product_result_can_publish_only_selected_card (tests.test_evidenceops_external_targets_unittest.EvidenceOpsExternalTarg...`
-- `tests.test_gradio_components_candidate_review_unittest` — **FAIL**, 0.03s. `E ⏎ ====================================================================== ⏎ ERROR: test_gradio_components_candidate_review_unittest (unittest.loader._FailedTest.test_gradio_components_candidate_review_unittest) ⏎ --------------------------...`
-- `tests.test_huggingface_remote_providers_unittest` — **FAIL**, 0.07s. `E ⏎ ====================================================================== ⏎ ERROR: test_huggingface_remote_providers_unittest (unittest.loader._FailedTest.test_huggingface_remote_providers_unittest) ⏎ --------------------------------------...`
-- `tests.test_ollama_provider_service_compat_unittest` — **FAIL**, 0.80s. `..E... ⏎ ====================================================================== ⏎ ERROR: test_ollama_provider_falls_back_to_openai_compat_chat_when_native_route_is_missing (tests.test_ollama_provider_service_compat_unittest.OllamaProviderSe...`
-- `tests.test_benchmark_campaign_unittest` — **FAIL**, 0.40s. `..F ⏎ ====================================================================== ⏎ FAIL: test_find_latest_phase8_5_run_dir_sees_campaign_runs (tests.test_benchmark_campaign_unittest.Phase85CampaignTests.test_find_latest_phase8_5_run_dir_sees_cam...`
-- `tests.test_evidenceops_local_ops` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_evidenceops_local_ops (unittest.loader._FailedTest.test_evidenceops_local_ops) ⏎ ------------------------------------------------------...`
-- `tests.test_evidenceops_mcp_client` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_evidenceops_mcp_client (unittest.loader._FailedTest.test_evidenceops_mcp_client) ⏎ ----------------------------------------------------...`
-- `tests.test_evidenceops_mcp_server` — **FAIL**, 0.39s. `E ⏎ ====================================================================== ⏎ ERROR: test_evidenceops_mcp_server (unittest.loader._FailedTest.test_evidenceops_mcp_server) ⏎ ----------------------------------------------------...`
-- `tests.test_evidenceops_external_targets_legacy_unittest` — **FAIL**, 0.38s. `E ⏎ ====================================================================== ⏎ ERROR: test_evidenceops_external_targets_legacy_unittest (unittest.loader._FailedTest.test_evidenceops_external_targets_legacy_unittest) ⏎ ----------------------------------------------...`
-- `tests.test_product_api_unittest` — **FAIL**, 9.06s. `127.0.0.1 - - [06/May/2026 08:52:08] "GET /api/product/command-center HTTP/1.1" 200 - ⏎ ---------------------------------------- ⏎ Exception occurred during processing of request from ('127.0.0.1', 57466) ⏎ Traceback (most recent call last)...`
-- `tests.test_product_service_unittest` — **FAIL**, 0.36s. `...E.....F. ⏎ ====================================================================== ⏎ ERROR: test_generate_product_workflow_deck_uses_current_action_plan_items_instead_of_global_action_store (tests.test_product_service_unittest.ProductServ...`
-- `tests.test_product_workflows_front_integration_unittest` — **FAIL**, 0.06s. `E ⏎ ====================================================================== ⏎ ERROR: test_product_workflows_front_integration_unittest (unittest.loader._FailedTest.test_product_workflows_front_integration_unittest) ⏎ ------------------------...`
-- `tests.test_provider_registry_unittest` — **FAIL**, 0.26s. `...FF.F ⏎ ====================================================================== ⏎ FAIL: test_resolve_provider_entry_falls_back_when_requested_provider_is_missing (tests.test_provider_registry_unittest.ProviderRegistryTests.test_resolve_pro...`
-- `tests.test_runtime_snapshot_unittest` — **FAIL**, 0.39s. `....E........... ⏎ ====================================================================== ⏎ ERROR: test_build_runtime_snapshot_exposes_action_governance_metrics_after_sensitive_update (tests.test_runtime_snapshot_unittest.RuntimeSnapshotTes...`
-- `tests.test_streamlit_ai_lab_functional_unittest` — **FAIL**, 43.43s. `E2026-05-06 08:52:20.881 Uncaught app execution ⏎ Traceback (most recent call last): ⏎   File "/Users/danyellambert/.pyenv/versions/3.11.9/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_wit...`
-- `tests.test_streamlit_app_smoke_unittest` — **FAIL**, 0.80s. `2026-05-06 08:53:03.164 Uncaught app execution ⏎ Traceback (most recent call last): ⏎   File "/Users/danyellambert/.pyenv/versions/3.11.9/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with...`
-- `tests.test_structured_provider_resolution_unittest` — **FAIL**, 0.36s. `E. ⏎ ====================================================================== ⏎ ERROR: test_resolve_provider_falls_back_to_ollama_and_records_reason (tests.test_structured_provider_resolution_unittest.StructuredProviderResolutionTests.test_re...`
+| Module | Current interpretation |
+| --- | --- |
+| `tests.test_ai_lab_live_endpoints_unittest` | Live/API runtime-path dependent. |
+| `tests.test_ai_lab_validation_harness_unittest` | AI Lab harness/runtime-path dependent. |
+| `tests.test_candidate_review_context_unittest` | Candidate Review expectation drift. |
+| `tests.test_candidate_review_front_integration_unittest` | Front integration/import drift. |
+| `tests.test_evidenceops_external_targets_unittest` | External targets/Trello optional integration. |
+| `tests.test_gradio_components_candidate_review_unittest` | Legacy Gradio surface. |
+| `tests.test_huggingface_remote_providers_unittest` | Optional remote provider dependency. |
+| `tests.test_ollama_provider_service_compat_unittest` | Provider compatibility/expectation drift. |
+| `tests.test_benchmark_campaign_unittest` | Benchmark campaign discovery expectation drift. |
+| `tests.test_evidenceops_local_ops` | EvidenceOps local integration drift. |
+| `tests.test_evidenceops_mcp_client` | EvidenceOps MCP integration drift. |
+| `tests.test_evidenceops_mcp_server` | EvidenceOps MCP server/import drift. |
+| `tests.test_evidenceops_external_targets_legacy_unittest` | Legacy external targets integration. |
+| `tests.test_product_api_unittest` | Product API runtime-path/environment mismatch. |
+| `tests.test_product_service_unittest` | Product service expectation drift. |
+| `tests.test_product_workflows_front_integration_unittest` | Product/front integration import drift. |
+| `tests.test_provider_registry_unittest` | Provider registry expectation drift. |
+| `tests.test_runtime_snapshot_unittest` | Runtime snapshot expectation/import drift. |
+| `tests.test_streamlit_ai_lab_functional_unittest` | Legacy Streamlit surface. |
+| `tests.test_streamlit_app_smoke_unittest` | Legacy Streamlit surface. |
+| `tests.test_structured_provider_resolution_unittest` | Structured provider fallback expectation drift. |
 
-## Phase-like test names
+## Historical test names cleanup
 
 A prior audit found 21 historical phase-like filenames. They have since been renamed to behavior/subsystem names:
 
@@ -193,16 +218,7 @@ test_structured_output_eval_unittest.py
 
 ## Naming policy
 
-Avoid new test names with historical phase labels such as:
-
-```text
-phase5
-phase6
-phase7
-phase8
-phase8_5
-phase95
-```
+Avoid new test names with historical phase labels. Prefer behavior/subsystem names instead of milestone labels.
 
 Preferred names should describe the subsystem or behavior:
 
@@ -227,8 +243,8 @@ Before changing tests:
 
 ## Current recommended next steps
 
-1. Maintain behavior/subsystem test names; avoid reintroducing phase-like filenames.
-2. Create a green current-product test subset.
+1. Maintain behavior/subsystem test names and avoid reintroducing historical phase-like filenames.
+2. Maintain the documented current green gate while repairing the broader suite.
 3. Repair or quarantine environment-dependent tests.
 4. Separate legacy Streamlit/Gradio tests from current product tests.
 5. Fix provider expectation drift separately from repository cleanup.
