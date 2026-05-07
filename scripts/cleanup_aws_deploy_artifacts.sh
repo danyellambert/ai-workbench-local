@@ -36,12 +36,6 @@ if command -v apt-get >/dev/null 2>&1; then
   sudo rm -rf /var/lib/apt/lists/* || true
 fi
 
-if [ "${AI_DECISION_STUDIO_PUBLIC_CLEANUP_ENABLED:-1}" != "0" ] && [ -x scripts/cleanup_public_demo_sessions.py ]; then
-  echo
-  echo "== AWS deploy cleanup: expired public demo sessions =="
-  scripts/cleanup_public_demo_sessions.py --apply || true
-fi
-
 if command -v docker >/dev/null 2>&1; then
   echo
   echo "== AWS deploy cleanup: Docker build cache =="

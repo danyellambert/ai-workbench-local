@@ -96,8 +96,6 @@ copy_path "scripts/build_oracle_deployment_bundle.sh"
 copy_path "scripts/deploy_aws_slim.sh"
 copy_path "scripts/restore_aws_baselines.sh"
 copy_path "scripts/cleanup_aws_deploy_artifacts.sh"
-copy_path "scripts/cleanup_public_demo_sessions.py"
-copy_path "scripts/monitor_aws_minimal_health.sh"
 copy_path "scripts/smoke_aws_slim.sh"
 copy_path "scripts/validate_aws_env_contract.py"
 copy_path "scripts/readiness_multi_environment_contract_check.sh"
@@ -293,8 +291,6 @@ required_paths = [
     "scripts/deploy_aws_slim.sh",
     "scripts/restore_aws_baselines.sh",
     "scripts/cleanup_aws_deploy_artifacts.sh",
-    "scripts/cleanup_public_demo_sessions.py",
-    "scripts/monitor_aws_minimal_health.sh",
     "scripts/smoke_aws_slim.sh",
     "scripts/validate_aws_env_contract.py",
     "scripts/readiness_multi_environment_contract_check.sh",
