@@ -69,7 +69,15 @@ ensure_ollama_embedding_model() {
   fi
 
   echo
-  echo "== Ensure Ollama embedding model =="
+  echo
+echo "== Restore AWS baselines if this is a fresh data root =="
+if [ "${AI_DECISION_STUDIO_AWS_RESTORE_BASELINES:-1}" != "0" ]; then
+  scripts/restore_aws_baselines.sh "$ENV_FILE"
+else
+  echo "AWS baseline restore disabled"
+fi
+
+echo "== Ensure Ollama embedding model =="
   echo "model=$embedding_model"
 
   compose up -d ollama
@@ -114,3 +122,11 @@ df -h /
 docker system df || true
 
 echo "OK: AWS slim deploy completed."
+
+echo
+echo "== Cleanup temporary AWS deploy artifacts =="
+if [ "${AI_DECISION_STUDIO_AWS_CLEANUP_DEPLOY_TMP:-1}" != "0" ]; then
+  scripts/cleanup_aws_deploy_artifacts.sh
+else
+  echo "AWS deploy cleanup disabled"
+fi
