@@ -36,6 +36,12 @@ if command -v apt-get >/dev/null 2>&1; then
   sudo rm -rf /var/lib/apt/lists/* || true
 fi
 
+if command -v docker >/dev/null 2>&1; then
+  echo
+  echo "== AWS deploy cleanup: Docker build cache =="
+  docker builder prune -f || true
+fi
+
 df -h / || true
 sudo du -sh /tmp /var/cache 2>/dev/null || true
 
