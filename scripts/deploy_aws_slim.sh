@@ -37,6 +37,7 @@ ensure_docker_runtime() {
   sudo apt-get update
 
   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    acl \
     ca-certificates \
     curl \
     docker.io
@@ -54,6 +55,12 @@ ensure_docker_runtime() {
 
   sudo systemctl enable --now docker || true
   sudo usermod -aG docker "$(id -un)" || true
+
+  if ! docker info >/dev/null 2>&1 && sudo -n docker info >/dev/null 2>&1; then
+    echo "Docker installed, but current SSH session does not have socket access yet."
+    echo "Granting current user temporary access to /var/run/docker.sock for this deploy session."
+    sudo setfacl -m "u:$(id -un):rw" /var/run/docker.sock || true
+  fi
 
   if docker info >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
     docker --version
