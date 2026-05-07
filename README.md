@@ -1,624 +1,365 @@
+<p align="center">
+  <img src="frontend/public/favicon.svg" alt="AI Decision Studio Keystone logo" width="96" height="96" />
+</p>
+
 # AI Decision Studio
 
-## Reviewer quick path
+![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111111)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-slim%20deployment-FF9900?logo=amazonaws&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-For a short technical review, start here:
+AI Decision Studio is a local-first applied AI product for document-grounded decision workflows. It turns source documents into reviewable findings, action plans, candidate assessments, run history, and executive artifacts, while keeping the underlying AI system measurable through benchmarks, evals, runtime controls, and observability.
 
-1. Read [`docs/REVIEWER_GUIDE.md`](docs/REVIEWER_GUIDE.md).
-2. Run the current green validation path:
+The current product is the React/Vite frontend backed by `main_product_api.py`, Docker Compose services, and a versioned runtime payload. Historical Streamlit, Gradio, heavy dependency, and Oracle-specific paths are preserved under `legacy/` so the active product contract stays small and readable.
+
+<!-- HERO_MEDIA_SLOT: Add docs/assets/product/hero-workflow-run.gif here. Recommended capture: landing page, guided tour, Nextcloud import, Document Review, evidence-backed output, and Deck Center artifact generation. -->
+
+## Contents
+
+- [Product Thesis](#product-thesis)
+- [What The Product Does](#what-the-product-does)
+- [Workflow Surface](#workflow-surface)
+- [Architecture](#architecture)
+- [Runtime Topology](#runtime-topology)
+- [Integrations](#integrations)
+- [AI Engineering Lab](#ai-engineering-lab)
+- [Technology Stack](#technology-stack)
+- [Repository Map](#repository-map)
+- [Quickstart](#quickstart)
+- [Validation](#validation)
+- [API Surface](#api-surface)
+- [Documentation Map](#documentation-map)
+- [Visual Capture Slots](#visual-capture-slots)
+- [License](#license)
+
+## Product Thesis
+
+Most document AI tools stop at chat. AI Decision Studio is built around a different shape:
+
+- documents become grounded working context;
+- workflows turn that context into decision artifacts;
+- delivery actions send outputs to operational tools;
+- the AI Lab measures model, retrieval, and runtime behavior;
+- deployment contracts keep the same product usable locally, in Docker, and on AWS.
+
+The repository is organized around two complementary layers.
+
+| Layer | Purpose | Product signal |
+| --- | --- | --- |
+| Business Workflows | Document-centered workflows for review, comparison, planning, candidate assessment, and artifact generation. | The product solves concrete work instead of exposing a generic prompt box. |
+| AI Engineering Lab | Benchmarks, evals, runtime controls, model comparison, observability, and EvidenceOps. | The system records why a workflow behaves the way it does and how it can be improved. |
+
+## What The Product Does
+
+AI Decision Studio combines a document workspace, workflow catalog, AI runtime controls, and artifact delivery layer.
+
+| Area | Capability | Current implementation |
+| --- | --- | --- |
+| Document workspace | Upload, import, index, preview, delete, and reuse documents as grounded context. | Product API document library, Nextcloud import sheet, RAG state, preindexed fast-import path. |
+| Workflow catalog | Run document review, policy comparison, action planning, and candidate review flows. | React workflow pages, Product API workflow contracts, presenters, and stored run history. |
+| Evidence-backed outputs | Convert document context into summaries, findings, risks, recommendations, and action items. | Structured Product API responses, workflow history, artifacts, and delivery lineage. |
+| Executive artifacts | Generate presentation-ready decks from workflow outputs. | `ppt-creator` sidecar, deck contracts, artifact lifecycle, and export smoke suite. |
+| Delivery loop | Publish workflow outputs into operational systems. | Trello and Notion publishing adapters, Nextcloud integration, delivery metadata. |
+| Runtime controls | Select and test providers, models, preferences, retrieval behavior, and runtime budget posture. | Preferences page, runtime drawer, provider registry, runtime controls services. |
+| AI Lab | Inspect benchmarks, evals, model comparisons, workflow runs, EvidenceOps state, and observability payloads. | AI Lab pages, eval store, benchmark scripts, runtime snapshots, EvidenceOps MCP tooling. |
+
+## Workflow Surface
+
+The frontend is built as a full product shell rather than a single-page demo. The main surfaces are:
+
+| Surface | What it is for | Files to start with |
+| --- | --- | --- |
+| Landing and guided tour | Product narrative, workflow entry points, and guided walkthrough cards. | `frontend/src/pages/LandingPage.tsx`, `frontend/src/components/landing/`, `frontend/src/components/layout/GuidedWorkbenchTour.tsx` |
+| Overview | Product command center and high-level operating context. | `frontend/src/pages/OverviewPage.tsx`, `src/product/command_center.py` |
+| Documents | Document library, Nextcloud import, indexing state, and corpus controls. | `frontend/src/pages/DocumentsPage.tsx`, `frontend/src/components/product/NextcloudImportSheet.tsx`, `src/product/ingestion_jobs.py` |
+| Document Review | Findings, summaries, risks, grounding, and review-ready outputs. | `frontend/src/pages/DocumentReviewPage.tsx`, `src/product/presenters.py` |
+| Policy Comparison | Compare policies or contracts and summarize meaningful differences. | `frontend/src/pages/ComparisonPage.tsx`, `src/product/presenters.py` |
+| Action Plan | Turn findings into operational actions and delivery handoffs. | `frontend/src/pages/ActionPlanPage.tsx`, `src/product/action_plan_presenter.py` |
+| Candidate Review | Evaluate candidate evidence and produce structured review outputs. | `frontend/src/pages/CandidateReviewPage.tsx`, `src/product/candidate_review_presenter.py` |
+| Deck Center | Generate and inspect presentation artifacts. | `frontend/src/pages/DeckCenterPage.tsx`, `src/services/presentation_export_service.py` |
+| Run History | Inspect prior workflow runs, reruns, artifacts, and lineage. | `frontend/src/pages/RunHistoryPage.tsx`, `src/storage/product_workflow_history.py` |
+| Runtime Controls | Tune active runtime behavior and inspect provider readiness. | `frontend/src/pages/RuntimeControlsPage.tsx`, `src/services/runtime_controls.py` |
+| Preferences | Configure connections, credentials, providers, and product preferences. | `frontend/src/pages/PreferencesPage.tsx`, `src/services/preferences.py` |
+| AI Lab | Benchmarks, evals, model comparison, observability, chat, workflow inspector, and EvidenceOps. | `frontend/src/pages/LabOverviewPage.tsx`, `frontend/src/pages/BenchmarksPage.tsx`, `frontend/src/pages/EvalsDiagnosisPage.tsx`, `frontend/src/pages/EvidenceOpsPage.tsx`, `src/product/lab.py` |
+
+## Architecture
+
+```mermaid
+graph TD
+  User["User in React/Vite frontend"] --> Frontend["Frontend served by Nginx"]
+  Frontend --> API["Product API: main_product_api.py"]
+
+  API --> Workflows["Product workflows and presenters"]
+  API --> Lab["AI Lab payloads and runtime diagnostics"]
+  API --> RAG["RAG, chunking, loaders, vector store"]
+  API --> Delivery["Delivery adapters and artifact lineage"]
+  API --> Storage["Runtime, artifacts, users, logs, state"]
+
+  Workflows --> Providers["Provider registry: Ollama, OpenAI-compatible, Hugging Face lanes"]
+  RAG --> Providers
+  Delivery --> Trello["Trello"]
+  Delivery --> Notion["Notion"]
+  Delivery --> Nextcloud["Nextcloud WebDAV"]
+  Delivery --> PPT["ppt-creator sidecar"]
+  Lab --> Evals["Evals, benchmarks, model comparison"]
+  Lab --> EvidenceOps["EvidenceOps MCP and operational state"]
+```
+
+### Runtime data contract
+
+The frontend does not mount product data directly. It talks to the Product API. The Product API owns the mounted data roots:
+
+| Container path | Purpose | Write behavior |
+| --- | --- | --- |
+| `/app/baseline` | Versioned functional baseline and read-only product payload. | Read-only |
+| `/app/runtime` | Active runtime state, caches, logs, RAG stores, integration state, and AI Lab state. | Read/write |
+| `/app/artifacts` | Generated decks, exported files, thumbnails, and workflow artifacts. | Read/write |
+| `/app/users` | Session/user overlays and public/demo state. | Read/write |
+
+The versioned payload lives under `runtime/ai_decision_studio_functional_baseline/oracle_like_data/`. The directory name is historical; the active Docker contracts are local Docker and AWS slim.
+
+## Runtime Topology
+
+The Docker product stack runs five services:
+
+| Service | Role |
+| --- | --- |
+| `frontend` | React/Vite build served by Nginx. |
+| `product-api` | Python backend started from `main_product_api.py`. |
+| `ppt-creator` | Presentation rendering/export sidecar. |
+| `nextcloud` | Document repository sidecar for WebDAV import and EvidenceOps demo material. |
+| `ollama` | Local model provider sidecar for local generation and embeddings where enabled. |
+
+The active Compose contracts are intentionally explicit:
+
+| Target | Env file | Compose file | Entrypoint |
+| --- | --- | --- | --- |
+| Local Docker | `.env.docker` | `docker-compose.local.yml` | `scripts/run_local_docker.sh` |
+| AWS slim | `.env.aws` | `docker-compose.aws-slim.yml` | `scripts/deploy_aws_slim.sh` |
+| Local host development | `.env.local` | none | `scripts/run_local_dev.sh` |
+
+AWS slim uses a single Compose file. It is not layered on top of the local Compose file.
+
+## Integrations
+
+| Integration | What it does | Notes |
+| --- | --- | --- |
+| Nextcloud | Supplies the document repository used by the import flow and EvidenceOps demo material. | Local Docker and AWS include a Nextcloud sidecar. Golden-baseline restore notes live in `docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md`. |
+| Preindexed import | Activates prebuilt chunks and embeddings for known Nextcloud documents while preserving the normal ingestion UI stages. | Operational notes live in `docs/operations/preindexed-nextcloud-import.md`. |
+| Ollama | Provides the local model sidecar. | Local Docker and AWS deploy scripts can pre-pull `embeddinggemma:300m` through `AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL`. |
+| Trello | Publishes workflow outputs to an operational board. | Requires target credentials and list IDs in the selected env file. |
+| Notion | Publishes workflow outputs to a database. | Requires a Notion integration token and database ID in the selected env file. |
+| OpenAI-compatible APIs | Optional external generation and embedding lanes. | Configured through env/preferences when used. |
+| Hugging Face lanes | Optional local/server/inference provider paths. | Setup notes live in `docs/guides/huggingface-provider-setup.md`. |
+
+## AI Engineering Lab
+
+The AI Lab is the engineering layer behind the workflow product. It exists to make runtime behavior observable and repeatable.
+
+| Lab capability | What it tracks | Representative files |
+| --- | --- | --- |
+| Benchmarks | Retrieval, extraction, embeddings, rerankers, latency, and quality/cost tradeoffs. | `scripts/run_retrieval_extraction_benchmarks.py`, `scripts/run_embedding_benchmark.py`, `docs/assets/phase_4_5/` |
+| Evals | Structured-output, workflow, live-provider, and Phase 8 evaluation records. | `evals/`, `src/evals/`, `.github/workflows/phase8-evals.yml` |
+| Runtime controls | Provider/model selection, RAG settings, budgets, provider readiness, and preference tests. | `src/services/runtime_controls.py`, `src/services/preferences.py`, `frontend/src/pages/RuntimeControlsPage.tsx` |
+| Observability | Runtime snapshots, execution logs, model comparison logs, run history, and artifact lineage. | `src/services/runtime_snapshot.py`, `src/storage/runtime_execution_log.py`, `src/product/telemetry.py` |
+| EvidenceOps | Worklog state, action store, repository snapshots, MCP server, and external targets. | `src/services/evidenceops_*`, `src/mcp/`, `scripts/run_evidenceops_mcp_server.py` |
+| Deck governance | Deck contracts, routing, artifact lifecycle, quality policy, security notes, and test strategy. | `docs/architecture/executive-deck-generation/` |
+
+## Technology Stack
+
+| Layer | Technologies |
+| --- | --- |
+| Frontend | React 18, TypeScript 5, Vite 5, Tailwind CSS, React Router, TanStack Query, Radix primitives, Framer Motion, Zustand, Recharts, React Hook Form, Zod, lucide-react, cmdk, Sonner. |
+| Product API | Python 3.11, standard-library HTTP server, Pydantic, python-dotenv, local filesystem state, SQLite-backed stores where needed. |
+| AI and RAG | Ollama, OpenAI/OpenAI-compatible APIs, Hugging Face provider lanes, LangChain Community, LangChain Chroma, LangChain Text Splitters, LangGraph, ChromaDB, PyPDF, Pillow, NumPy. |
+| Artifacts | ppt-creator sidecar, ReportLab, Matplotlib, presentation export services, artifact lineage and generated deck contracts. |
+| Operations | Docker Compose, AWS slim deployment, readiness scripts, smoke checks, deployment bundle builder, backup/restore notes. |
+| Quality | Vitest, Playwright, ESLint, Python test gate, readiness checks, benchmark runners, eval workflows. |
+
+The current deployable Python dependency contract is a single lean `requirements.txt`. Older heavyweight dependency sets for Docling, local Transformers, sentence-transformers, and earlier Evidence CV experiments are preserved under `legacy/requirements/`.
+
+## Repository Map
+
+```text
+.
+|-- frontend/                  # React/Vite product frontend
+|-- src/product/               # Product API models, services, presenters, lab payloads
+|-- src/rag/                   # Loaders, chunking, retrieval, vector store, LangChain adapter
+|-- src/providers/             # Ollama, OpenAI-compatible, and Hugging Face provider registry
+|-- src/services/              # Runtime controls, preferences, export, EvidenceOps, snapshots
+|-- src/storage/               # Runtime paths, history, eval stores, logs, secret state
+|-- src/evals/                 # Evaluation logic and thresholds
+|-- src/evidence_cv/           # Historical/current evidence-grounded CV extraction pipeline
+|-- src/mcp/                   # EvidenceOps MCP server and JSON-RPC stdio
+|-- docs/                      # Product, architecture, deployment, operations, reference docs
+|-- evals/                     # Tracked eval fixtures and benchmark configs
+|-- scripts/                   # Deployment, readiness, eval, benchmark, and reporting commands
+|-- runtime/                   # Versioned functional baseline payload
+|-- legacy/                    # Historical Streamlit, Gradio, Oracle, and heavy dependency material
+|-- main_product_api.py        # Current backend entrypoint
+|-- docker-compose.local.yml   # Local Docker product stack
+|-- docker-compose.aws-slim.yml # AWS slim product stack
+|-- Dockerfile.frontend
+|-- Dockerfile.product-api.local
+|-- Dockerfile.product-api.aws-slim
+|-- requirements.txt
+|-- ROADMAP.md
+`-- README.md
+```
+
+## Quickstart
+
+### Prerequisites
+
+- Python 3.11
+- Node.js and npm
+- Docker with the Compose plugin
+- Enough disk for Docker volumes, Nextcloud, Ollama models, and generated artifacts
+
+### 1. Install dependencies
+
+```bash
+pip install -r requirements.txt
+npm --prefix frontend install
+```
+
+### 2. Run local host development
+
+```bash
+cp .env.local.example .env.local
+ENV_FILE=.env.local scripts/run_local_dev.sh
+```
+
+For a non-blocking contract check:
+
+```bash
+ENV_FILE=.env.local.example scripts/run_local_dev.sh --check
+```
+
+### 3. Run the local Docker product stack
+
+```bash
+cp .env.docker.example .env.docker
+ENV_FILE=.env.docker scripts/run_local_docker.sh --config-only
+ENV_FILE=.env.docker scripts/run_local_docker.sh
+```
+
+The local Docker script resolves local data roots, starts the five-service stack, and ensures the configured Ollama embedding model is available unless disabled with `SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1`.
+
+### 4. Deploy the AWS slim stack
+
+Use the AWS runbooks for a fresh host or redeploy:
+
+- `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`
+- `docs/deployment/aws-slim-deploy.md`
+- `docs/deployment/REDEPLOY_FAST_PATH.md`
+- `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md`
+
+The operational contract is:
+
+```bash
+cp .env.aws.example .env.aws
+scripts/deploy_aws_slim.sh
+scripts/smoke_aws_slim.sh
+```
+
+Run those commands on the prepared deployment host after the bundle and env file are in place.
+
+## Validation
+
+The fastest current confidence path is:
 
 ```bash
 npm --prefix frontend run test
 npm --prefix frontend run build
 scripts/run_current_test_gate.sh
 scripts/readiness_multi_environment_contract_check.sh
-```
-
-Current expected status:
-
-- Frontend tests: 10 files / 23 tests pass.
-- Frontend build: passes, with a known large-bundle warning.
-- Python current gate: 71 tests pass.
-- Multi-environment readiness: local/Docker/AWS contract passes.
-
-The full Python `unittest discover` inventory is intentionally not the presentation gate today. It mixes current, live/provider, legacy UI, EvidenceOps/MCP, and eval/benchmark tests. See [`tests/README.md`](tests/README.md).
-
-## Deployment status
-
-The current validated deployment target is the **AWS slim Docker deployment**.
-
-- Current runtime path: **Product API + React/Vite frontend** through Docker Compose.
-- AWS deploy path: `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md` and `docs/deployment/REDEPLOY_FAST_PATH.md`.
-- CI status: `product-ci.yml` validates Product API, frontend tests/build, and Docker/AWS compose contracts without deploying.
-- Earlier Vercel work was **frontend-only / historical** and should not be treated as the current production contract.
-
-**AI Decision Studio** is a local-first applied AI platform for **document-grounded decision workflows**, **structured execution**, **evaluation**, and **executive artifact generation**.
-
-This repository is meant to present a complete AI product system — not just a model wrapper, a chatbot demo, or a loose collection of experiments.
-
-It is designed to show how an AI application becomes more credible when it combines:
-
-- **workflow value** for real document-centered use cases
-- **engineering rigor** through evaluation, observability, and structured execution
-- **product direction** across Gradio, Streamlit, API, and web frontend surfaces
-
-## Official product theory
-
-It combines two linked layers:
-
-- **Business Workflows** — the product-facing layer for document review, policy comparison, action plans, candidate review, and executive-ready outputs
-- **AI Engineering Lab** — the engineering-facing layer for benchmarking, evaluation, routing, runtime analysis, observability, and controlled experimentation
-
-In practical terms, the project already demonstrates how to:
-
-- run **document-grounded workflows** with retrieval and structured outputs
-- validate outputs with **explicit schemas and execution contracts**
-- compare model/runtime behavior with **repeatable benchmark evidence**
-- persist **evaluation history, logs, and operational state** locally
-- expose **EvidenceOps operations** through a real local MCP server
-- generate **executive deck artifacts** from grounded workflow outputs
-
-## Current product reading
-
-The current deployable product path is:
-
-- **React/Vite frontend** as the current web product shell
-- **Product API** as the backend contract for document-grounded workflows, run history, artifacts, preferences, and lab surfaces
-- **Docker Compose / AWS slim deployment** as the validated runtime topology
-
-The earlier surfaces are still useful, but they are no longer the main deployment contract:
-
-- **Gradio** is a secondary workflow surface preserved from product exploration
-- **Streamlit** is a historical AI Lab and engineering dashboard surface
-
-This keeps the repository coherent:
-
-- the **frontend + Product API path** represents the current deployable product
-- the **workflow layer** solves real document-centered business problems
-- the **AI Lab layer** preserves the evaluation, benchmark, observability, and experimentation history behind the product
-
-## What is already implemented
-
-The repository already includes real foundations for:
-
-- **local model usage** and optional external provider lanes
-- **document retrieval and RAG**
-- **structured outputs with validation**
-- **workflow-oriented document agents**
-- **model comparison and benchmark reporting**
-- **persistent eval storage and diagnosis**
-- **EvidenceOps MCP tooling**
-- **executive deck generation and presentation export flows**
-- **engineering hardening** through Docker, logging, smoke tests, and artifact tracking
-
-Today, the strongest interpretation is not “one finished app,” but rather **one coherent platform with multiple surfaces built on top of the same AI and workflow foundations**.
-
----
-
-## Core business workflow families
-
-### Document Review
-
-Turn long or messy documents into:
-
-- concise summaries
-- key findings
-- identified risks and gaps
-- recommended next actions
-- optional executive-ready deliverables
-
-### Policy / Contract Comparison
-
-Compare documents or versions to surface:
-
-- meaningful differences
-- likely impact
-- compliance or risk observations
-- review-ready findings for decision makers
-
-### Action Plan / Evidence Review
-
-Convert grounded findings into:
-
-- checklists
-- action items
-- evidence bundles
-- operational handoff artifacts
-
-### Candidate Review
-
-Use the CV pipeline and structured outputs to produce:
-
-- candidate summaries
-- strengths and gaps
-- relevant experience signals
-- initial recommendations
-- executive-ready review artifacts
-
-### Executive Deck Generation
-
-Generate reusable business artifacts such as:
-
-- benchmark and evaluation review decks
-- document review decks
-- policy comparison decks
-- action plan decks
-- candidate review decks
-- evidence pack / audit decks
-
----
-
-## Technology stack
-
-This repository intentionally covers more than “LLM + UI.” It includes product UX, backend orchestration, retrieval, structured validation, evaluation, operations, and executive artifact generation.
-
-### Backend and platform core
-
-- **Python 3.11**
-- **Pydantic**
-- **python-dotenv**
-- **SQLite**
-- filesystem-backed artifacts and logs
-
-### UI surfaces
-
-- **Streamlit** for the AI Lab dashboard
-- **Gradio** for the workflow-oriented product surface
-- **React 18 + TypeScript 5 + Vite 5** for the web product shell
-- **Tailwind CSS 3**, **React Router 6**, **TanStack Query 5**, **Framer Motion**, **Zustand**, **Recharts**, **React Hook Form**, **Zod**, and **Radix UI primitives** in the frontend
-
-### Model and provider layer
-
-- **Ollama**
-- **OpenAI SDK / OpenAI-compatible APIs**
-- **Hugging Face local / server / inference lanes**
-
-### Retrieval, orchestration, and document intelligence
-
-- **LangChain Community**
-- **LangChain Chroma**
-- **LangChain Text Splitters**
-- **LangGraph**
-- **ChromaDB**
-- **PyPDF**
-- **Pillow**
-- **NumPy**
-
-### Reporting, artifacts, and operations
-
-- **ReportLab**
-- **Matplotlib**
-- local MCP server and client integration for **EvidenceOps**
-- **Docker**, `pip`, and `npm` for reproducible local execution
-
-### Quality layer
-
-- Python test suite under `tests/`
-- **Vitest**
-- **Playwright**
-- **ESLint**
-
-### Backend dependency snapshot
-
-The Python environment currently includes, among others:
-
-- `streamlit`
-- `gradio`
-- `openai`
-- `python-dotenv`
-- `pydantic`
-- `pypdf`
-- `Pillow`
-- `numpy`
-- `chromadb`
-- `langchain-community`
-- `langchain-chroma`
-- `langchain-text-splitters`
-- `langgraph`
-- `cryptography`
-- `matplotlib`
-- `reportlab`
-
-Earlier Evidence CV, Docling, local Hugging Face, and neural reranking phases
-used heavier packages such as `docling`, `transformers`, and
-`sentence-transformers`. Those historical dependency sets are preserved under
-`legacy/requirements/`; the current deployable product uses the lean
-`requirements.txt` contract.
-
-### Frontend dependency snapshot
-
-The web product surface uses:
-
-- `react`, `react-dom`
-- `vite`
-- `tailwindcss`, `postcss`, `autoprefixer`
-- `react-router-dom`
-- `@tanstack/react-query`
-- `react-hook-form`, `zod`, `@hookform/resolvers`
-- `framer-motion`
-- `recharts`
-- `zustand`
-- `@radix-ui/*` primitives
-- `vitest`, `@testing-library/*`, `@playwright/test`, `eslint`
-
-### Stack reading in one sentence
-
-This is a **full-stack applied AI system** with a Python platform core, a React product frontend, local-first model/runtime support, retrieval and structured execution, and a serious evaluation and operations layer.
-
----
-
-## Architecture at a glance
-
-```text
-                           AI Decision Studio
-
-                ┌────────────────────────────────────┐
-                │       Product / Workflow Layer     │
-                │ Document Review, Comparison,       │
-                │ Action Plans, Candidate Review,    │
-                │ Executive Deck actions             │
-                └────────────────────────────────────┘
-                               │
-         ┌─────────────────────┼─────────────────────┐
-         │                     │                     │
-         ▼                     ▼                     ▼
- ┌───────────────┐   ┌──────────────────┐   ┌──────────────────┐
- │  UI Surfaces  │   │ Domain Services  │   │ AI Engineering   │
- │ Web Frontend  │   │ retrieval,       │   │ benchmarks, eval │
- │ Streamlit Lab │   │ structured exec, │   │ diagnosis, logs, │
- │ Gradio Product│   │ export, MCP      │   │ runtime analysis │
- └───────────────┘   └──────────────────┘   └──────────────────┘
-                               │
-                               ▼
-                 ┌─────────────────────────────┐
-                 │ Local-first runtime/storage │
-                 │ Ollama, SQLite, filesystem, │
-                 │ Chroma, artifacts, logs     │
-                 └─────────────────────────────┘
-                               │
-                               ▼
-                ┌──────────────────────────────────┐
-                │ Optional external/expansion lanes│
-                │ HF runtimes, OpenAI-compatible,  │
-                │ PPT renderer, external EvidenceOps│
-                └──────────────────────────────────┘
-```
-
-### Architectural principles
-
-- **Local-first by default** for control, reproducibility, and cost discipline
-- **Workflow-driven product design** instead of a generic “ask anything” assistant
-- **Structured contracts** around tasks, outputs, and artifacts
-- **Separated product and lab surfaces** so user-facing workflows and engineering experimentation can evolve at different speeds
-- **Evaluation and observability baked in** instead of added later
-
----
-
-## Repository structure
-
-```text
-src/
-  app/          # bootstrapping and application assembly
-  evals/        # evaluation logic and thresholds
-  evidence_cv/  # evidence-grounded CV extraction pipeline
-  gradio_ui/    # Gradio product-facing surface
-  mcp/          # local MCP server implementation
-  product/      # product API, models, presenters, workflows
-  providers/    # provider registry and runtime abstractions
-  rag/          # ingestion, chunking, retrieval, PDF paths
-  services/     # orchestration, export, comparison, runtime services
-  storage/      # logs, eval stores, history, persistence
-  structured/   # schemas, parsers, task handlers, workflows
-  ui/           # Streamlit panels and UI components
-
-frontend/       # React/Vite product surface
-docs/           # canonical plans, contracts, specs, and phase docs
-scripts/        # reports, benchmarks, validators, local helpers
-tests/          # backend unit and integration tests
-```
-
----
-
-## Quickstart
-
-### 1. Install backend dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Create your environment file
-
-```bash
-cp .env.local.example .env.local
-```
-
-### 3. Run the local product stack
-
-The current product path is the Product API plus the React frontend.
-
-```bash
-ENV_FILE=.env.local scripts/run_local_dev.sh
-```
-
-This starts:
-
-- the Product API from `main_product_api.py`;
-- the React/Vite frontend from `frontend/`;
-- local runtime paths from the selected env file.
-
-For a non-blocking contract check, use:
-
-```bash
-ENV_FILE=.env.local.example scripts/run_local_dev.sh --check
-```
-
-### 4. Optional: start only the Product API
-
-```bash
-python main_product_api.py
-```
-
-### 5. Optional: run only the web product frontend
-
-```bash
-npm --prefix frontend install
-npm --prefix frontend run dev:frontend
-```
-
-This is for frontend-only visual work. For product-level validation, prefer `scripts/run_local_dev.sh` so the frontend and backend use the same local contract.
-
-### 6. Optional: run the containerized product baseline
-
-```bash
-ENV_FILE=.env.docker scripts/run_local_docker.sh
-```
-
-For a non-building Docker contract check, use:
-
-```bash
 ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
+docker compose --env-file .env.aws.example -p ai-decision-studio-contract-aws -f docker-compose.aws-slim.yml config
 ```
 
-### 7. Optional: run historical Streamlit / OpenAI-compatible surfaces
+Additional focused checks are available for AWS env contracts, Nextcloud golden baseline assumptions, required integrations, required providers, AI Lab content, EvidenceOps cache, Candidate Review, presentation export, and frontend surface parity. See `scripts/README.md` for the complete catalog.
 
-These entrypoints are preserved as earlier engineering surfaces. They are useful for understanding the project evolution, but they are not the primary product path.
+### CI workflows
 
-```bash
-streamlit run legacy/entrypoints/main_streamlit_lab.py
-streamlit run legacy/entrypoints/main_openai_streamlit.py
-```
+| Workflow | File | Purpose |
+| --- | --- | --- |
+| Product CI | `.github/workflows/product-ci.yml` | Validates the current Product API, frontend test/build path, and Docker/AWS compose contracts. |
+| Phase 8 evals | `.github/workflows/phase8-evals.yml` | Runs tracked evaluation fixtures without live provider dependencies. |
+| Phase 8 live evals | `.github/workflows/phase8-evals-live.yml` | Preserves the live-provider eval lane for intentional provider-backed runs. |
 
-The historical Streamlit Docker image is intentionally labeled as legacy:
+## API Surface
 
-```bash
-docker build -f legacy/docker/Dockerfile.legacy-streamlit -t ai-decision-studio-streamlit-legacy .
-```
+The active Product API is intentionally workflow-oriented. The most important routes are:
 
-### 8. Optional: run the historical Gradio product surface
-
-```bash
-python legacy/entrypoints/main_gradio_product_surface.py
-```
-
-### 9. Optional: start the executive renderer host helper
-
-```bash
-bash scripts/run_ppt_creator_renderer_host.sh
-```
-
-### 10. Optional: start the local EvidenceOps MCP server
-
-```bash
-python scripts/run_evidenceops_mcp_server.py
-```
-
----
-
-## Product API surface
-
-The dedicated product API is intentionally small and workflow-oriented.
-
-### Product API endpoints
-
-- `GET /health`
-- `GET /api/product/workflows`
-- `GET /api/product/documents`
-- `GET /api/product/grounding-preview`
-- `POST /api/product/run-workflow`
-- `POST /api/product/generate-deck`
-
-### Engineering / export API endpoints
-
-The broader engineering and artifact-facing API surface also exposes:
-
-#### GET
-
-- `/health`
-- `/playground`
-- `/profiles`
-- `/assets`
-- `/workflows`
-- `/marketplace`
-- `/ai/providers`
-- `/ai/status`
-- `/ai/models`
-- `/templates`
-- `/brand-packs`
-- `/artifact`
-
-#### POST
-
-- `/validate`
-- `/render`
-- `/review`
-- `/preview`
-- `/generate`
-- `/generate-and-render`
-- `/preview-pptx`
-- `/review-pptx`
-- `/compare-pptx`
-- `/promote-baseline`
-- `/template`
-- `/workflow-template`
-
-This split matters because the repository already contains both a **product-facing API direction** and a **broader engineering / artifact operations surface**.
-
----
-
-## Configuration themes
-
-Environment-specific example files define the intended runtime contracts:
-
-- local runtime defaults for **Ollama**
-- optional **OpenAI** and **Hugging Face** lanes
-- RAG chunking, retrieval, reranking, and PDF extraction controls
-- OCR and VLM-assisted evidence extraction settings
-- **Executive Deck Generation** integration settings
-- **EvidenceOps** local and external adapter settings
-
-That is a good indicator of maturity: configuration is treated as part of the platform design, not just incidental glue.
-
----
-
-## Quality, evaluation, and operational posture
-
-One of the biggest differences between this repository and a typical AI side project is that it does not stop at inference.
-
-It explicitly invests in:
-
-- **quality measurement**
-- **persistent evaluation history**
-- **benchmark evidence**
-- **auditability**
-- **operational logging**
-- **controlled fallbacks**
-
-### Evaluation foundations already present
-
-- SQLite-backed local eval storage
-- structured smoke evals and regression-oriented validation
-- historical eval reporting and diagnosis scripts
-- benchmark execution layers for model/runtime/retrieval decisions
-- workflow evaluation paths for routing and guardrail behavior
-
-### Operational and observability foundations already present
-
-- runtime execution logs and summaries
-- document-agent audit logs
-- model comparison logs and aggregate reports
-- EvidenceOps worklog and action-store persistence
-- MCP telemetry and repository/action summaries
-- controlled UI error handling and failure reporting
-
-### Why this matters
-
-This gives the repository a much more professional reading.
-
-Instead of saying:
-
-> “I built an AI app.”
-
-the project can credibly say:
-
-> “I built an AI platform with product workflows, measurable quality, reproducible local operation, and engineering evidence for how it behaves.”
-
----
-
-## Concrete implementation evidence
-
-For reviewers who want to verify the claims quickly, here are direct pointers into the codebase and documentation.
-
-| Capability | Evidence in the repository |
+| Route | Purpose |
 | --- | --- |
-| Product web surface | `frontend/src/App.tsx`, `frontend/src/pages/`, `frontend/src/components/` |
-| Product API foundation | `main_product_api.py`, `src/product/api.py`, `src/product/service.py`, `src/product/models.py` |
-| Structured outputs | `src/structured/`, `legacy/docs/phases/phase-5-structured-output-foundation.md` |
-| Document Operations Copilot | `src/structured/document_agent.py`, `legacy/docs/phases/document-operations-copilot.md` |
-| Model comparison | `src/services/model_comparison.py`, `legacy/docs/phases/phase-7-model-comparison.md`, `scripts/report_model_comparison_log.py` |
-| Eval foundation | `legacy/docs/phases/eval-foundation.md`, `scripts/report_eval_store_summary.py`, `scripts/run_live_evals.py` |
-| EvidenceOps MCP | `src/mcp/evidenceops_server.py`, `scripts/run_evidenceops_mcp_server.py`, `legacy/docs/phases/local-evidenceops-mcp-server.md` |
-| Executive deck generation | `src/services/presentation_export.py`, `docs/architecture/executive-deck-generation/`, `scripts/run_presentation_export_smoke_suite.py` |
-| Deployment and hardening | `Dockerfile.product-api.local`, `Dockerfile.product-api.aws-slim`, `Dockerfile.frontend`, Docker Compose contracts in `docs/deployment/`, smoke/integration tests in `tests/` |
+| `GET /health` | Service health. |
+| `GET /api/product/workflows` | Workflow catalog contract. |
+| `GET /api/product/documents` | Indexed document catalog. |
+| `GET /api/product/document-library` | Aggregated document library payload. |
+| `POST /api/product/upload-documents` | Upload and index documents into the product corpus. |
+| `POST /api/product/delete-documents` | Remove indexed documents. |
+| `GET /api/product/command-center` | Aggregated command-center payload. |
+| `GET /api/product/run-history` | Recent workflow execution history. |
+| `GET /api/product/artifacts` | Recent generated artifacts. |
+| `GET /api/product/grounding-preview` | Grounded context preview. |
+| `POST /api/product/run-workflow` | Execute a product workflow. |
+| `POST /api/product/generate-deck` | Generate a workflow executive deck. |
+| `POST /api/product/publish-to-trello` | Publish workflow output to Trello. |
+| `POST /api/product/publish-to-notion` | Publish workflow output to Notion. |
+| `GET /api/lab/overview` | AI Lab overview payload. |
+| `GET /api/lab/runtime` | Runtime observability payload. |
+| `GET /api/lab/benchmarks` | Benchmark payloads. |
+| `GET /api/lab/evals` | Eval diagnosis payloads. |
+| `GET /api/lab/evidenceops` | EvidenceOps state. |
+| `GET /api/runtime/controls` | Runtime controls payload. |
+| `GET /api/preferences` | Preferences and connection configuration payload. |
 
-This section exists for a simple reason: the README should make the current product architecture easy to verify line by line.
+## Documentation Map
 
----
+| Topic | Start here |
+| --- | --- |
+| Product overview | `docs/product/overview.md` |
+| Product vs AI Lab framing | `docs/product/two-track-positioning.md` |
+| Current product surface | `docs/architecture/current-product-surface.md` |
+| Data payload and mounted roots | `docs/architecture/data-payload.md` |
+| Local Docker | `docs/deployment/local-docker-compose.md` |
+| AWS slim deployment | `docs/deployment/aws-slim-deploy.md` |
+| Fresh AWS EC2 bootstrap | `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md` |
+| Multi-environment contract | `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md` |
+| Python dependency contract | `docs/deployment/python-dependencies.md` |
+| Nextcloud golden baseline | `docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md` |
+| Preindexed Nextcloud import | `docs/operations/preindexed-nextcloud-import.md` |
+| Backup and restore | `docs/operations/backup-and-restore.md` |
+| Executive deck generation | `docs/architecture/executive-deck-generation/README.md` |
+| EvidenceOps architecture | `docs/architecture/evidenceops/README.md` |
+| Evals and benchmarks | `docs/architecture/evals/README.md` |
+| Script catalog | `scripts/README.md` |
+| Eval workspace | `evals/README.md` |
+| Project chronology | `ROADMAP.md` |
 
-## Roadmap direction
+## Visual Capture Slots
 
-### Already demonstrated
+Recommended product media assets:
 
-- modular architecture evolution across multiple phases
-- document-grounded retrieval foundations
-- structured outputs with validation
-- workflow-oriented document-agent behavior
-- model comparison and benchmark reporting
-- local eval persistence and diagnosis
-- EvidenceOps local MCP foundations
-- executive deck generation foundations
-- Docker, logging, and smoke-test hardening
-
-### Active direction
-
-- continue hardening the multi-environment deployment path across local dev, local Docker, AWS, and future Oracle deployment
-- keep historical engineering surfaces documented without making them the primary product path
-- sharpen the **product vs lab split** between frontend, Gradio, and Streamlit surfaces
-- deepen **Executive Deck Generation** as a reusable product capability
-- continue raising **evaluation and benchmark rigor** for routing, retrieval, OCR/VLM, and runtime choices
-- extend **EvidenceOps** from local-first foundations toward broader external targets
-
-Reference: `ROADMAP.md`
-
----
-
-## Documentation map
-
-### Best starting points
-
-- `ROADMAP.md` — project chronology and direction
-- `legacy/docs/archive/old-documentation-index.md` — organized documentation map
-- `docs/product/two-track-positioning.md` — official workflow-vs-lab framing
-- `legacy/docs/phases/engineering-hardening.md` — engineering maturity direction
-- `docs/architecture/executive-deck-generation/product-capability.md` — executive artifact capability direction
-- `legacy/docs/phases/product-split-gradio-ai-lab.md` — rationale for the surface split
-
-### Important capability clusters
-
-- `legacy/docs/phases/document-grounded-rag-foundation.md`
-- `legacy/docs/phases/phase-5-structured-output-foundation.md`
-- `legacy/docs/phases/document-operations-copilot.md`
-- `legacy/docs/phases/phase-7-model-comparison.md`
-- `legacy/docs/phases/eval-foundation.md`
-- `legacy/docs/phases/local-evidenceops-mcp-server.md`
-- `docs/architecture/executive-deck-generation/.md`
-
-### Documentation naming conventions
-
-- `PHASE_*` — canonical phase summaries and validation closures
-- `EXECUTIVE_DECK_GENERATION_*` — architecture, contracts, rollout, UX, and governance for the deck capability
-- `GUIDE_*` — practical operating guides for scripts and workflows
-- `REFERENCE_*` — reference-oriented implementation or benchmark material
-
----
-
-## Why this repository is technically meaningful
-
-AI Decision Studio is organized as a product system rather than a single prompt demo.
-
-It demonstrates:
-
-- **product workflow design** — document review, policy comparison, action planning, candidate review, and executive deck generation;
-- **software architecture** — separated product API, frontend surface, provider layer, storage layer, retrieval layer, structured workflow layer, and export services;
-- **LLM application engineering** — RAG, structured outputs, routing, guardrails, context strategies, and provider abstraction;
-- **evaluation discipline** — benchmarks, local eval stores, regression signals, diagnosis, and historical quality evidence;
-- **operational maturity** — logs, runtime summaries, persistence, environment-driven configuration, public/admin session separation, and deployment contracts;
-- **integration boundaries** — EvidenceOps, MCP, Nextcloud/WebDAV, Trello/Notion handoff paths, and an external presentation renderer.
-
-In short, the repository documents the evolution from early local experimentation to a multi-surface AI product with measurable behavior and deployable runtime contracts.
-
----
+| Slot | Suggested path | Recommended capture |
+| --- | --- | --- |
+| Hero workflow GIF | `docs/assets/product/hero-workflow-run.gif` | Landing page, guided tour, document import, Document Review run, generated evidence output, and Deck Center artifact. |
+| Product shell screenshot | `docs/assets/product/product-shell.png` | Sidebar, command palette or runtime drawer, and the main workbench layout. |
+| Document Review screenshot | `docs/assets/product/document-review.png` | Grounded findings, risks, recommendations, and source context. |
+| Policy Comparison screenshot | `docs/assets/product/policy-comparison.png` | Difference summary, impact notes, and evidence-backed findings. |
+| Action Plan screenshot | `docs/assets/product/action-plan.png` | Action items, owners/status language, and publish controls. |
+| Candidate Review screenshot | `docs/assets/product/candidate-review.png` | Candidate signal, evidence, strengths, gaps, and recommendation output. |
+| Nextcloud import GIF | `docs/assets/product/nextcloud-import.gif` | Import from Nextcloud, staged ingestion progress, and indexed document appearing in the library. |
+| Deck generation GIF | `docs/assets/product/deck-generation.gif` | Generate deck, artifact appears, preview/download path. |
+| AI Lab screenshot | `docs/assets/product/ai-lab-overview.png` | Benchmark/eval summary, runtime controls, and observability cards. |
+| Integration screenshots | `docs/assets/product/trello-notion-delivery.png` | Published Trello card and Notion database entry generated from a workflow output. |
 
 ## License
 
-This repository is distributed under the terms defined in the `LICENSE` file at the project root.
+This project is released under the [MIT License](LICENSE).
