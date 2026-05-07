@@ -16,6 +16,70 @@ echo "== AWS slim deploy =="
 echo "env_file=$ENV_FILE"
 echo "project=$PROJECT_NAME"
 
+ensure_docker_runtime() {
+  echo
+  echo "== Ensure Docker runtime =="
+
+  if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+    docker --version
+    docker compose version
+    echo "OK: Docker runtime already available for current user."
+    return 0
+  fi
+
+  if ! command -v apt-get >/dev/null 2>&1; then
+    echo "ERROR: Docker is missing and this bootstrap only supports apt-based Linux hosts." >&2
+    exit 1
+  fi
+
+  echo "Docker runtime missing or not accessible. Installing/repairing Docker via apt..."
+
+  sudo apt-get update
+
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    ca-certificates \
+    curl \
+    docker.io
+
+  if ! sudo docker compose version >/dev/null 2>&1; then
+    if apt-cache show docker-compose-v2 >/dev/null 2>&1; then
+      sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-compose-v2
+    elif apt-cache show docker-compose-plugin >/dev/null 2>&1; then
+      sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-compose-plugin
+    else
+      echo "ERROR: could not find a Docker Compose v2 package in apt." >&2
+      exit 1
+    fi
+  fi
+
+  sudo systemctl enable --now docker || true
+  sudo usermod -aG docker "$(id -un)" || true
+
+  if docker info >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+    docker --version
+    docker compose version
+    echo "OK: Docker runtime installed and accessible."
+    return 0
+  fi
+
+  if sudo -n docker info >/dev/null 2>&1 && sudo -n docker compose version >/dev/null 2>&1; then
+    echo "Docker is installed, but current SSH session lacks docker group access. Using sudo docker for this deploy."
+    docker() {
+      sudo docker "$@"
+    }
+    docker --version
+    docker compose version
+    echo "OK: Docker runtime available through sudo for this deploy."
+    return 0
+  fi
+
+  echo "ERROR: Docker was installed but is not accessible." >&2
+  echo "Try reconnecting over SSH so docker group membership is refreshed." >&2
+  exit 1
+}
+
+ensure_docker_runtime
+
 df -h /
 docker system df || true
 
