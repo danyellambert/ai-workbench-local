@@ -33,6 +33,7 @@ benchmark_pdfs/*
 old/
 diagnostics/
 data/
+docs/deployment/aws-cost-audit.md
 
 phase5_eval/reports/
 phase5_eval/resume_benchmark_quick/
