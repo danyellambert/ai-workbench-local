@@ -232,6 +232,9 @@ restore_product_data_baseline() {
   echo "owner=$owner"
 
   run_sudo mkdir -p "$data_root"
+  run_sudo chown "$owner" "$data_root"
+  run_sudo chmod u+rwx "$data_root"
+
   run_sudo rm -rf \
     "$data_root/baseline" \
     "$data_root/runtime" \
