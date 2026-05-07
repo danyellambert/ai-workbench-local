@@ -45,18 +45,21 @@ sha256_file() {
 
 ensure_archive_available() {
   local archive="$1"
-
-  if [ -f "$archive" ]; then
-    return 0
-  fi
-
   local fallback="/tmp/$(basename "$archive")"
 
-  if [ -f "$fallback" ]; then
-    echo "archive_missing_at=$archive"
-    echo "using_tmp_fallback=$fallback"
-    run_sudo mkdir -p "$(dirname "$archive")"
-    run_sudo cp "$fallback" "$archive"
+  if [ ! -f "$archive" ]; then
+    if [ -f "$fallback" ]; then
+      echo "archive_missing_at=$archive"
+      echo "using_tmp_fallback=$fallback"
+      run_sudo mkdir -p "$(dirname "$archive")"
+      run_sudo cp "$fallback" "$archive"
+    fi
+  fi
+
+  if [ -f "$archive" ]; then
+    # Archives copied into /opt may have been created by sudo. Make them
+    # readable by the deploy user before SHA validation and later cleanup.
+    run_sudo chown "$(id -u):$(id -g)" "$archive" || true
     run_sudo chmod 600 "$archive" || true
   fi
 }
