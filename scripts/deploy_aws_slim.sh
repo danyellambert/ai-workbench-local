@@ -96,7 +96,7 @@ DOCKER_BUILDKIT=1 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
   -f docker-compose.aws-slim.yml \
-  up -d --no-deps --build --force-recreate product-api frontend
+  up -d --build --force-recreate ollama nextcloud ppt-creator product-api frontend
 
 docker compose \
   --env-file "$ENV_FILE" \

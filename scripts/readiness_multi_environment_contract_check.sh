@@ -139,5 +139,18 @@ if grep -nE 'docker-compose\.local\.yml.*docker-compose\.aws-slim\.yml|docker-co
 fi
 echo "OK: AWS scripts use docker-compose.aws-slim.yml as a single compose contract"
 
+echo
+echo "== AWS deploy dependency guardrail =="
+# AWS deploy script must not skip compose dependencies. Fresh EC2 deploys need all
+# compose services: ollama, nextcloud, ppt-creator, product-api, and frontend.
+if grep -qs -- '--no-deps' scripts/deploy_aws_slim.sh; then
+  echo "ERROR: AWS deploy script must not use --no-deps; it must bring up required sidecars." >&2
+  exit 1
+fi
+
+grep -q 'ollama nextcloud ppt-creator product-api frontend' scripts/deploy_aws_slim.sh
+echo "OK: AWS deploy script brings up all required compose services"
+
+
 echo "OK: local Docker and AWS compose contracts render correctly."
 echo "OK: multi-environment contract readiness passed."

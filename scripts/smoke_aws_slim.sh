@@ -42,4 +42,37 @@ assert ollama.get("preferredModel") == "nemotron-3-super:cloud"
 print("OK: preferences smoke passed")
 PY
 
+
+echo
+echo "== Required AWS slim service check =="
+for service in ollama nextcloud ppt-creator product-api frontend; do
+  cid="$(
+    docker compose \
+      --env-file "$ENV_FILE" \
+      -p ai-decision-studio \
+      -f docker-compose.aws-slim.yml \
+      ps -q "$service"
+  )"
+
+  if [ -z "$cid" ]; then
+    echo "ERROR: required AWS slim service is missing: $service" >&2
+    exit 1
+  fi
+
+  state="$(docker inspect -f '{{.State.Status}}' "$cid")"
+  health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$cid")"
+
+  echo "$service state=$state health=$health"
+
+  if [ "$state" != "running" ]; then
+    echo "ERROR: required AWS slim service is not running: $service" >&2
+    exit 1
+  fi
+
+  if [ "$health" != "none" ] && [ "$health" != "healthy" ]; then
+    echo "ERROR: required AWS slim service is not healthy: $service health=$health" >&2
+    exit 1
+  fi
+done
+
 echo "OK: AWS slim smoke passed."
