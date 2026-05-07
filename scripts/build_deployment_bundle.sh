@@ -328,3 +328,78 @@ tar -czf "$ARCHIVE_PATH" -C "$OUT_DIR" "$BUNDLE_NAME"
 echo
 echo "== Bundle created =="
 ls -lh "$ARCHIVE_PATH"
+
+echo
+echo "== Normalize deployment bundle archive for portable tar =="
+_NORMALIZED_BUNDLE_ROOT="${BUNDLE_ROOT:-${bundle_root:-}}"
+_NORMALIZED_ARCHIVE="${ARCHIVE:-${archive:-}}"
+_NORMALIZED_OUT_DIR="${OUT_DIR:-${out_dir:-${AI_DECISION_STUDIO_DEPLOYMENT_BUNDLE_DIR:-}}}"
+
+if [ -z "$_NORMALIZED_BUNDLE_ROOT" ] && [ -n "$_NORMALIZED_OUT_DIR" ]; then
+  _NORMALIZED_BUNDLE_ROOT="$_NORMALIZED_OUT_DIR/ai-decision-studio-app-bundle"
+fi
+
+if [ -z "$_NORMALIZED_ARCHIVE" ] && [ -n "$_NORMALIZED_OUT_DIR" ]; then
+  _NORMALIZED_ARCHIVE="$_NORMALIZED_OUT_DIR/ai-decision-studio-app-bundle.tar.gz"
+fi
+
+if [ -z "$_NORMALIZED_BUNDLE_ROOT" ] || [ -z "$_NORMALIZED_ARCHIVE" ]; then
+  echo "ERROR: could not infer bundle root/archive for clean tar normalization." >&2
+  exit 1
+fi
+
+python3 - "$_NORMALIZED_BUNDLE_ROOT" "$_NORMALIZED_ARCHIVE" <<'PY_CLEAN_TAR'
+from pathlib import Path
+import tarfile
+import sys
+
+bundle_root = Path(sys.argv[1])
+archive = Path(sys.argv[2])
+
+if not bundle_root.is_dir():
+    raise SystemExit(f"ERROR: bundle root does not exist: {bundle_root}")
+
+skip_exact = {".DS_Store", "__MACOSX"}
+
+def should_skip(path: Path) -> bool:
+    parts = path.parts
+    if any(part in skip_exact for part in parts):
+        return True
+    if any(part.startswith("._") for part in parts):
+        return True
+    return False
+
+tmp_archive = archive.with_suffix(archive.suffix + ".tmp")
+
+with tarfile.open(tmp_archive, "w:gz", format=tarfile.GNU_FORMAT) as tar:
+    for path in sorted(bundle_root.rglob("*")):
+        if should_skip(path):
+            continue
+
+        arcname = Path(bundle_root.name) / path.relative_to(bundle_root)
+        info = tar.gettarinfo(str(path), arcname=str(arcname))
+
+        info.uid = 0
+        info.gid = 0
+        info.uname = ""
+        info.gname = ""
+
+        if path.is_file() and not path.is_symlink():
+            with path.open("rb") as fh:
+                tar.addfile(info, fh)
+        else:
+            tar.addfile(info)
+
+tmp_archive.replace(archive)
+print(f"normalized_archive={archive}")
+PY_CLEAN_TAR
+
+tar -tzf "$_NORMALIZED_ARCHIVE" > /tmp/ads_deployment_bundle_listing.txt
+
+if grep -nE '(^|/)\._|(^|/)\.DS_Store|__MACOSX|LIBARCHIVE|xattr|com\.apple' /tmp/ads_deployment_bundle_listing.txt; then
+  echo "ERROR: deployment bundle archive still contains macOS metadata." >&2
+  exit 1
+fi
+
+echo "OK: deployment bundle archive is portable and metadata-clean"
+ls -lh "$_NORMALIZED_ARCHIVE"
