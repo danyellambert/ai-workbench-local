@@ -556,3 +556,105 @@ Admin external validation should confirm:
 - `/api/auth/admin/login` returns role `admin`;
 - `/api/auth/session` returns `can_publish_external: true`;
 - `/api/preferences/connections/huggingface_inference/test` returns `status: connected`.
+
+<!-- AWS_LINUX_ONLY_BOOTSTRAP_VALIDATION -->
+
+## AWS Linux-only bootstrap validation
+
+The AWS slim deployment has been validated from a stronger baseline than a Docker-ready host: a fresh EC2 state with Linux only.
+
+Validated starting state:
+
+~~~text
+Docker absent
+Docker Compose absent
+No AI Decision Studio containers
+No AI Decision Studio images
+No AI Decision Studio volumes
+No Docker build cache
+/opt/ai-decision-studio empty
+/tmp free of previous deployment artifacts
+~~~
+
+The deployment still requires four input artifacts to be copied to the EC2 host before running the deployment script:
+
+~~~text
+/tmp/ai-decision-studio-app-bundle.tar.gz
+/tmp/ai-decision-studio.env.aws
+/tmp/nextcloud-golden-baseline-v1.tar.gz
+/tmp/ai-decision-studio-product-data-baseline.tar.gz
+~~~
+
+The app bundle must remain code-only. It must not include real environment files, runtime state, Nextcloud data, product baseline data, or secrets. Baseline data is intentionally transported as separate tar archives and validated by SHA256.
+
+The deployment entrypoint is:
+
+~~~bash
+cd /opt/ai-decision-studio/app
+scripts/deploy_aws_slim.sh
+~~~
+
+The deployment script is now responsible for bootstrapping the host when Docker is missing. It performs these actions idempotently:
+
+~~~text
+Install Docker when the docker command is absent
+Install Docker Compose v2 when docker compose is absent
+Enable/start the Docker service
+Grant the current SSH session temporary Docker socket access when group membership has not refreshed yet
+Render the single AWS compose contract
+Restore the Nextcloud golden baseline when the Nextcloud volume is fresh/missing
+Restore the AI Decision Studio product data baseline when the product data root is fresh/missing
+Pull the required Ollama embedding model
+Build and start the AWS slim stack
+Wait for the public health endpoint before cleanup
+Clean temporary deployment artifacts and Docker build cache
+~~~
+
+The AWS slim compose contract is intentionally single-file:
+
+~~~text
+docker-compose.aws-slim.yml
+~~~
+
+The required runtime services are:
+
+~~~text
+frontend
+nextcloud
+ollama
+ppt-creator
+product-api
+~~~
+
+Final validation command:
+
+~~~bash
+scripts/smoke_aws_slim.sh
+~~~
+
+Expected successful end state:
+
+~~~text
+Docker installed
+Docker Compose v2 installed
+frontend healthy
+nextcloud healthy
+ollama healthy
+ppt-creator healthy
+product-api healthy
+/health returns ok=true
+scripts/smoke_aws_slim.sh returns OK
+Nextcloud golden baseline persisted under /opt/ai-decision-studio/golden_baseline
+Product data baseline persisted under /opt/ai-decision-studio/baselines
+Docker Build Cache cleaned to 0B or near-zero
+~~~
+
+Important cleanup rule:
+
+~~~text
+The post-deploy cleanup may prune Docker build cache.
+It must not remove active runtime volumes.
+It must not run docker image prune -a as a default post-deploy step.
+~~~
+
+The latest Linux-only validation confirmed that the deployment script can start from an EC2 host with no Docker installed, install Docker/Compose, restore both baselines, start all five services healthy, pass the smoke test, and clean build cache.
