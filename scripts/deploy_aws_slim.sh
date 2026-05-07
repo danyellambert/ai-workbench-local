@@ -54,6 +54,38 @@ grep -q 'image: ai-decision-studio-product-api:aws-slim' "$CFG"
 
 echo "OK: compose config uses AWS slim product-api."
 
+wait_for_public_health() {
+  local url="http://127.0.0.1:${PUBLIC_PORT}/health"
+
+  echo
+  echo "== Wait for public health =="
+  echo "url=$url"
+
+  for attempt in $(seq 1 60); do
+    if curl -fsS "$url"; then
+      echo
+      echo "OK: public health is ready"
+      return 0
+    fi
+
+    echo "public health not ready yet: attempt=$attempt"
+    sleep 2
+  done
+
+  echo "ERROR: public health did not become ready." >&2
+  docker compose \
+    --env-file "$ENV_FILE" \
+    -p "$PROJECT_NAME" \
+    -f docker-compose.aws-slim.yml \
+    ps || true
+  docker compose \
+    --env-file "$ENV_FILE" \
+    -p "$PROJECT_NAME" \
+    -f docker-compose.aws-slim.yml \
+    logs --tail=160 frontend product-api || true
+  return 1
+}
+
 ensure_ollama_embedding_model() {
   if [ "$SKIP_OLLAMA_EMBEDDING_MODEL_PULL" = "1" ]; then
     echo "SKIP: Ollama embedding model pull disabled by SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1"
@@ -112,16 +144,10 @@ docker compose \
   -f docker-compose.aws-slim.yml \
   ps
 
-curl -fsS "http://127.0.0.1:${PUBLIC_PORT}/health"
-echo
+wait_for_public_health
 
 docker builder prune -af || true
 docker image prune -f || true
-
-df -h /
-docker system df || true
-
-echo "OK: AWS slim deploy completed."
 
 echo
 echo "== Cleanup temporary AWS deploy artifacts =="
@@ -130,3 +156,8 @@ if [ "${AI_DECISION_STUDIO_AWS_CLEANUP_DEPLOY_TMP:-1}" != "0" ]; then
 else
   echo "AWS deploy cleanup disabled"
 fi
+
+df -h /
+docker system df || true
+
+echo "OK: AWS slim deploy completed."
