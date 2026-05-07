@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="frontend/public/favicon.svg" alt="AI Decision Studio Keystone logo" width="96" height="96" />
+  <img src="docs/assets/product/readme-header.svg" alt="AI Decision Studio by Danyel Lambert" width="96%" />
 </p>
-
-<h1 align="center">AI Decision Studio</h1>
 
 <p align="center">
   <img alt="Python 3.11" src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" />
@@ -92,26 +90,11 @@ The frontend is built as a full product shell rather than a single-page demo. Th
 
 ## Architecture
 
-```mermaid
-graph TD
-  User["User in React/Vite frontend"] --> Frontend["Frontend served by Nginx"]
-  Frontend --> API["Product API: main_product_api.py"]
+<p align="center">
+  <img src="docs/assets/product/architecture-overview.svg" alt="AI Decision Studio product architecture diagram" width="100%" />
+</p>
 
-  API --> Workflows["Product workflows and presenters"]
-  API --> Lab["AI Lab payloads and runtime diagnostics"]
-  API --> RAG["RAG, chunking, loaders, vector store"]
-  API --> Delivery["Delivery adapters and artifact lineage"]
-  API --> Storage["Runtime, artifacts, users, logs, state"]
-
-  Workflows --> Providers["Provider registry: Ollama, OpenAI-compatible, Hugging Face lanes"]
-  RAG --> Providers
-  Delivery --> Trello["Trello"]
-  Delivery --> Notion["Notion"]
-  Delivery --> Nextcloud["Nextcloud WebDAV"]
-  Delivery --> PPT["ppt-creator sidecar"]
-  Lab --> Evals["Evals, benchmarks, model comparison"]
-  Lab --> EvidenceOps["EvidenceOps MCP and operational state"]
-```
+The active architecture is a five-service product stack: React/Vite frontend, Product API, `ppt-creator`, Nextcloud, and Ollama. The Product API owns workflow execution, RAG/indexing, AI Lab payloads, integration adapters, runtime controls, and the mounted data contract.
 
 ### Runtime data contract
 
