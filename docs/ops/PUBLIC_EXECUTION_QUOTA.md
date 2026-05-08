@@ -35,3 +35,5 @@ This control does not delete data and does not change baseline/global state. It 
 Set max per session to 0 to disable enforcement.
 
 This is separate from the deck-generation rate limiter.
+
+For simultaneous execution protection, see `PUBLIC_EXECUTION_GATE.md`.

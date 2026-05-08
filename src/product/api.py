@@ -25,6 +25,7 @@ from src.product.access_control import (
 )
 from src.product.deck_rate_limit import check_public_deck_generation_rate_limit
 from src.product.public_execution_quota import check_public_execution_quota
+from src.product.public_execution_gate import acquire_public_execution_slot, release_public_execution_slot
 from src.config import ProductApiSettings, get_product_api_settings
 from src.rag.loaders import load_document
 from src.product.command_center import (
@@ -256,6 +257,37 @@ def _public_execution_quota_error_payload(identity, execution_kind: str, users_r
     if quota.get("reset_at"):
         payload["reset_at"] = quota.get("reset_at")
     return payload
+
+def _public_execution_gate_error_payload(gate: dict) -> dict:
+    retry_after = gate.get("retry_after_seconds")
+    payload = {
+        "ok": False,
+        "error": gate.get("message") or "Public demo runtime is busy.",
+        "message": gate.get("message") or "Public demo runtime is busy.",
+        "execution_gate": gate,
+    }
+    if retry_after is not None:
+        payload["retry_after_seconds"] = retry_after
+    return payload
+
+
+def _public_execution_gate_acquire_or_error(identity, execution_kind: str, users_root=None) -> tuple[dict | None, dict | None]:
+    gate = acquire_public_execution_slot(
+        identity=identity,
+        execution_kind=execution_kind,
+        users_root=users_root,
+    )
+    if gate.get("ok", True):
+        return gate, None
+    return None, _public_execution_gate_error_payload(gate)
+
+
+def _release_public_execution_gate(gate: dict | None, users_root=None) -> None:
+    try:
+        release_public_execution_slot(gate, users_root=users_root)
+    except Exception:
+        return
+
 
 def _public_session_quota_error_payload(identity) -> dict | None:
     quota = public_session_quota_status(identity)
@@ -1666,13 +1698,30 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                         "persist_runtime_evals": False,
                     }
 
-                telemetry_execution = execute_product_workflow_with_telemetry(
-                    bootstrap=self.bootstrap,
-                    request=request,
-                    document_lookup=document_lookup,
-                    surface="product_api" if identity.can_write_global else "product_api_public_overlay",
-                    **telemetry_kwargs,
-                )
+                execution_gate = None
+                try:
+                    execution_gate, execution_gate_error = _public_execution_gate_acquire_or_error(
+                        identity,
+                        "product_workflow_run",
+                        users_root=getattr(self, "users_root", None),
+                    )
+                    if execution_gate_error is not None:
+                        self._send_json_with_cookies(
+                            HTTPStatus.TOO_MANY_REQUESTS,
+                            execution_gate_error,
+                            cookies=[set_cookie] if set_cookie else None,
+                        )
+                        return
+
+                    telemetry_execution = execute_product_workflow_with_telemetry(
+                        bootstrap=self.bootstrap,
+                        request=request,
+                        document_lookup=document_lookup,
+                        surface="product_api" if identity.can_write_global else "product_api_public_overlay",
+                        **telemetry_kwargs,
+                    )
+                finally:
+                    _release_public_execution_gate(execution_gate, users_root=getattr(self, "users_root", None))
                 result = telemetry_execution["result"]
                 history_entry = telemetry_execution.get("history_entry") if isinstance(telemetry_execution, dict) else None
                 self._send_json_with_cookies(
@@ -1964,16 +2013,33 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
             try:
                 runs_path = get_lab_workflow_runs_path(self.bootstrap.workspace_root) if identity.can_write_global else _lab_overlay_workflow_runs_path(identity)
-                execution = execute_lab_workflow_inspector_run(
-                    bootstrap=self.bootstrap,
-                    task_id=str(payload.get("task_id") or payload.get("workflow_id") or self.bootstrap.product_settings.default_workflow),
-                    document_id=(str(payload.get("document_id")) if payload.get("document_id") is not None else None),
-                    document_ids=[str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()],
-                    input_text=(str(payload.get("input_text")) if payload.get("input_text") is not None else None),
-                    provider=(str(payload.get("provider")) if payload.get("provider") is not None else None),
-                    model=(str(payload.get("model")) if payload.get("model") is not None else None),
-                    runs_path=runs_path,
-                )
+                execution_gate = None
+                try:
+                    execution_gate, execution_gate_error = _public_execution_gate_acquire_or_error(
+                        identity,
+                        "workflow_inspector_run",
+                        users_root=getattr(self, "users_root", None),
+                    )
+                    if execution_gate_error is not None:
+                        self._send_json_with_cookies(
+                            HTTPStatus.TOO_MANY_REQUESTS,
+                            execution_gate_error,
+                            cookies=[set_cookie] if set_cookie else None,
+                        )
+                        return
+
+                    execution = execute_lab_workflow_inspector_run(
+                        bootstrap=self.bootstrap,
+                        task_id=str(payload.get("task_id") or payload.get("workflow_id") or self.bootstrap.product_settings.default_workflow),
+                        document_id=(str(payload.get("document_id")) if payload.get("document_id") is not None else None),
+                        document_ids=[str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()],
+                        input_text=(str(payload.get("input_text")) if payload.get("input_text") is not None else None),
+                        provider=(str(payload.get("provider")) if payload.get("provider") is not None else None),
+                        model=(str(payload.get("model")) if payload.get("model") is not None else None),
+                        runs_path=runs_path,
+                    )
+                finally:
+                    _release_public_execution_gate(execution_gate, users_root=getattr(self, "users_root", None))
                 result = execution.get("result")
                 request = execution.get("request")
                 run_record = execution.get("run_record")
@@ -2077,13 +2143,30 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     else:
                         sessions_path = overlay_sessions_path
 
-                response_payload = execute_lab_chat_turn(
-                    bootstrap=self.bootstrap,
-                    session_id=effective_session_id,
-                    content=str(payload.get("content") or ""),
-                    document_ids=[str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()],
-                    sessions_path=sessions_path,
-                )
+                execution_gate = None
+                try:
+                    execution_gate, execution_gate_error = _public_execution_gate_acquire_or_error(
+                        identity,
+                        "document_experiment_message",
+                        users_root=getattr(self, "users_root", None),
+                    )
+                    if execution_gate_error is not None:
+                        self._send_json_with_cookies(
+                            HTTPStatus.TOO_MANY_REQUESTS,
+                            execution_gate_error,
+                            cookies=[set_cookie] if set_cookie else None,
+                        )
+                        return
+
+                    response_payload = execute_lab_chat_turn(
+                        bootstrap=self.bootstrap,
+                        session_id=effective_session_id,
+                        content=str(payload.get("content") or ""),
+                        document_ids=[str(item) for item in (payload.get("document_ids") or []) if str(item or "").strip()],
+                        sessions_path=sessions_path,
+                    )
+                finally:
+                    _release_public_execution_gate(execution_gate, users_root=getattr(self, "users_root", None))
                 self._send_json_with_cookies(HTTPStatus.OK, {
                     "ok": True,
                     "session_id": effective_session_id,
