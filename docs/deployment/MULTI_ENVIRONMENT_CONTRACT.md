@@ -11,7 +11,7 @@ local Docker, AWS, and Oracle can coexist without rewriting paths or URLs.
 | Local host/dev check | `.env.local` or legacy `.env` | `.env.local.example` | `scripts/run_local_dev.sh --check` |
 | Local Docker | .env.docker | .env.docker.example | scripts/run_local_docker.sh |
 | Local Docker config check | `.env.docker` | `.env.docker.example` | `ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only` |
-| AWS slim VM | .env.aws | .env.aws.example | scripts/deploy_aws_slim.sh |
+| AWS VM | .env.aws | .env.aws.example | scripts/deploy_aws.sh |
 | Oracle VM | .env.oracle | legacy/deploy/oracle/.env.oracle.example | existing Oracle runbooks/scripts |
 
 Real env files are ignored by Git. Only *.example files are versioned.
@@ -28,23 +28,23 @@ localhost means different things depending on where code runs:
 - container to nextcloud: http://nextcloud
 - container to host service: host.docker.internal on Mac/Windows, host-gateway on Linux
 
-## AWS slim deployment
+## AWS deployment
 
 For a fresh EC2 rebuild, use `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`.
-For code-only redeploys on an existing AWS host, use the slim fast path below.
+For code-only redeploys on an existing AWS host, use the AWS fast path below.
 
-AWS uses a single AWS slim compose contract:
+AWS uses a single AWS compose contract:
 
 docker compose \
   --env-file .env.aws \
   -p ai-decision-studio \
-  -f docker-compose.aws-slim.yml \
+  -f docker-compose.aws.yml \
   up -d --no-deps --build product-api frontend
 
 AWS disk rule:
 
-- Always use docker-compose.aws-slim.yml.
-- product-api image must be ai-decision-studio-product-api:aws-slim.
+- Always use docker-compose.aws.yml.
+- product-api image must be ai-decision-studio-product-api:aws.
 - Do not build Dockerfile.product-api.local for product-api on the 30GB AWS VM.
 - Rebuild only product-api/frontend unless explicitly needed.
 - Check df -h and docker system df before and after deploy.
@@ -69,7 +69,7 @@ initially bootstrapped from the Oracle-like topology. The safe migration path is
 1. cp .env.oracle .env.aws
 2. chmod 600 .env.aws
 3. validate with docker compose --env-file .env.aws
-4. run scripts/smoke_aws_slim.sh
+4. run scripts/smoke_aws.sh
 5. only then switch deploy scripts to .env.aws
 
 Do not delete .env.oracle from a live host until .env.aws has passed smoke.
@@ -84,8 +84,8 @@ Use the repository scripts instead of running raw `docker compose` or ad-hoc API
 | --- | --- | --- | --- |
 | Local host/dev | `ENV_FILE=.env.local scripts/run_local_dev.sh` | `.env.local` | Starts the host API/frontend with local writable users overlay and skips ignored root-level benchmark artifacts. |
 | Local Docker/local | `scripts/run_local_docker.sh` | `.env.docker` plus script-resolved local data roots | Renders Docker volumes against the local `runtime/ai_decision_studio_functional_baseline/oracle_like_data` tree instead of falling back to `/opt/...` paths. |
-| AWS slim deploy | `scripts/deploy_aws_slim.sh` | `.env.aws` | Uses the AWS deployment contract and avoids local/Oracle defaults. |
-| AWS smoke validation | `scripts/smoke_aws_slim.sh` | `.env.aws` | Validates the deployed AWS surface with the same contract. |
+| AWS deploy | `scripts/deploy_aws.sh` | `.env.aws` | Uses the AWS deployment contract and avoids local/Oracle defaults. |
+| AWS smoke validation | `scripts/smoke_aws.sh` | `.env.aws` | Validates the deployed AWS surface with the same contract. |
 
 Do not run `docker compose -f docker-compose.local.yml up ...` directly for local Docker. Without the script-provided environment, Compose can fall back to `/opt/ai-decision-studio/data/...`, which is a Linux/VM deploy layout and not the local Mac data root.
 

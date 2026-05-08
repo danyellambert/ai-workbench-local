@@ -1,8 +1,8 @@
 # AI Decision Studio — AWS fresh EC2 bootstrap runbook
 
-## Current validated AWS slim contract
+## Current validated AWS contract
 
-This runbook assumes the current AWS slim deployment contract:
+This runbook assumes the current AWS deployment contract:
 
 - real runtime env: `.env.aws`;
 - safe example env: `.env.aws.example`;
@@ -14,14 +14,14 @@ This runbook assumes the current AWS slim deployment contract:
 - local/dev-only Vite proxy must be disabled in AWS:
   - `VITE_PRODUCT_API_PROXY_ENABLED=0`;
   - `VITE_PRODUCT_API_PROXY_TARGET=`;
-- compose file: `docker-compose.aws-slim.yml`;
+- compose file: `docker-compose.aws.yml`;
 - deploy command:
 
-    ENV_FILE=.env.aws scripts/deploy_aws_slim.sh
+    ENV_FILE=.env.aws scripts/deploy_aws.sh
 
 - smoke command:
 
-    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws_slim.sh
+    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws.sh
 
 Do not commit real env files. `.env.aws` must stay ignored by Git.
 
@@ -40,9 +40,9 @@ AWS uses:
 
 - real env file: `.env.aws`
 - safe template: `.env.aws.example`
-- compose file: `docker-compose.aws-slim.yml`
-- product API image: `ai-decision-studio-product-api:aws-slim`
-- frontend image: `ai-decision-studio-frontend:aws-slim`
+- compose file: `docker-compose.aws.yml`
+- product API image: `ai-decision-studio-product-api:aws`
+- frontend image: `ai-decision-studio-frontend:aws`
 
 Real env files must never be committed to Git or included in public bundles.
 
@@ -59,7 +59,7 @@ A successful fresh AWS bootstrap should end with five containers running:
 The AWS host should then pass:
 
 - `/health`
-- `ENV_FILE=.env.aws scripts/smoke_aws_slim.sh`
+- `ENV_FILE=.env.aws scripts/smoke_aws.sh`
 - target-specific readiness checks
 
 ## Inputs you need before starting
@@ -100,7 +100,7 @@ Before exposing the demo:
 - do not run `docker system prune -a --volumes` on the demo host;
 - avoid rebuilding unnecessary images on small disks.
 
-The validated AWS flow uses the slim product API image to avoid the heavy build
+The validated AWS flow uses the product API image to avoid the heavy build
 path on a small EC2 disk.
 
 ## Step 1 — Create the EC2 instance
@@ -196,7 +196,7 @@ The bundle path defaults to:
     runtime/ai_decision_studio_functional_baseline/deployment_bundle/ai-decision-studio-app-bundle.tar.gz
 
 The bundle name still says `oracle` for historical compatibility. The bundle now
-contains the AWS env template and AWS slim scripts too.
+contains the AWS env template and AWS scripts too.
 
 Validate that the bundle report says:
 
@@ -272,13 +272,13 @@ On the EC2 host:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       config > /tmp/ads_aws_fresh_compose.yml
 
-    grep -q "dockerfile: Dockerfile.product-api.aws-slim" /tmp/ads_aws_fresh_compose.yml
-    grep -q "image: ai-decision-studio-product-api:aws-slim" /tmp/ads_aws_fresh_compose.yml
+    grep -q "dockerfile: Dockerfile.product-api.aws" /tmp/ads_aws_fresh_compose.yml
+    grep -q "image: ai-decision-studio-product-api:aws" /tmp/ads_aws_fresh_compose.yml
 
-    echo "OK: AWS compose uses the slim product-api image"
+    echo "OK: AWS compose uses the product-api image"
 
 This check must pass before any build.
 
@@ -297,19 +297,19 @@ On the EC2 host:
     DOCKER_BUILDKIT=1 docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       up -d --build
 
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       ps
 
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       exec -T ollama ollama pull embeddinggemma:300m
 
 Wait for health:
@@ -326,10 +326,10 @@ Wait for health:
         docker compose \
           --env-file .env.aws \
           -p ai-decision-studio \
-          -f docker-compose.aws-slim.yml \
+          -f docker-compose.aws.yml \
           ps
-        docker logs ai-decision-studio-product-api-aws-slim --tail 120 || true
-        docker logs ai-decision-studio-frontend-aws-slim --tail 120 || true
+        docker logs ai-decision-studio-product-api-aws --tail 120 || true
+        docker logs ai-decision-studio-frontend-aws --tail 120 || true
         exit 1
       fi
 
@@ -363,7 +363,7 @@ Then re-check:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       ps
 
 The Nextcloud golden baseline is a Docker volume snapshot stored outside Git.
@@ -378,7 +378,7 @@ On the EC2 host:
 
     cd /opt/ai-decision-studio/app
 
-    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws_slim.sh
+    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws.sh
 
 This smoke should confirm:
 
@@ -387,7 +387,7 @@ This smoke should confirm:
 - local Hugging Face server is not exposed
 - Ollama preferred model is `nemotron-3-super:cloud`
 
-During deploy, `scripts/deploy_aws_slim.sh` also ensures the deploy-only
+During deploy, `scripts/deploy_aws.sh` also ensures the deploy-only
 preloaded Ollama embedding model is available in the Ollama sidecar. The default
 is `embeddinggemma:300m`, configured with
 `AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL`. This does not override Runtime
@@ -416,13 +416,13 @@ expected to be live.
 
 ## Step 12 — Code-only redeploy after first boot
 
-After the five-container stack exists, use the slim redeploy script for normal
+After the five-container stack exists, use the AWS redeploy script for normal
 code-only updates:
 
     cd /opt/ai-decision-studio/app
 
-    ENV_FILE=.env.aws scripts/deploy_aws_slim.sh
-    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws_slim.sh
+    ENV_FILE=.env.aws scripts/deploy_aws.sh
+    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws.sh
 
 This path rebuilds/recreates `product-api` and `frontend` only. It is the
 preferred fast path for AWS after first boot.
@@ -471,11 +471,11 @@ If containers fail after a compose change:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       ps
 
-    docker logs ai-decision-studio-product-api-aws-slim --tail 200
-    docker logs ai-decision-studio-frontend-aws-slim --tail 200
+    docker logs ai-decision-studio-product-api-aws --tail 200
+    docker logs ai-decision-studio-frontend-aws --tail 200
 
 Keep `.env.oracle` only as a compatibility fallback on migrated hosts. New AWS
 hosts should use `.env.aws` as the real env file.
@@ -491,7 +491,7 @@ After a fresh AWS EC2 bootstrap or controlled rebuild, validate the stack from i
 
     scripts/readiness_multi_environment_contract_check.sh
 
-    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws_slim.sh
+    ENV_FILE=.env.aws BASE_URL=http://127.0.0.1:8071 scripts/smoke_aws.sh
 
     BASE_URL=http://127.0.0.1:8071 scripts/readiness_admin_session_isolation_check.sh
 
@@ -500,14 +500,14 @@ After a fresh AWS EC2 bootstrap or controlled rebuild, validate the stack from i
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       ps
 
 Expected results:
 
 - env contract returns `ok: true`;
 - multi-environment contract readiness passes without manual skip flags;
-- AWS slim smoke passes;
+- AWS smoke passes;
 - admin session isolation passes;
 - Trello public visibility passes;
 - all stack services are `healthy`.
@@ -561,7 +561,7 @@ Admin external validation should confirm:
 
 ## AWS Linux-only bootstrap validation
 
-The AWS slim deployment has been validated from a stronger baseline than a Docker-ready host: a fresh EC2 state with Linux only.
+The AWS deployment has been validated from a stronger baseline than a Docker-ready host: a fresh EC2 state with Linux only.
 
 Validated starting state:
 
@@ -591,7 +591,7 @@ The deployment entrypoint is:
 
 ~~~bash
 cd /opt/ai-decision-studio/app
-scripts/deploy_aws_slim.sh
+scripts/deploy_aws.sh
 ~~~
 
 The deployment script is now responsible for bootstrapping the host when Docker is missing. It performs these actions idempotently:
@@ -605,15 +605,15 @@ Render the single AWS compose contract
 Restore the Nextcloud golden baseline when the Nextcloud volume is fresh/missing
 Restore the AI Decision Studio product data baseline when the product data root is fresh/missing
 Pull the required Ollama embedding model
-Build and start the AWS slim stack
+Build and start the AWS stack
 Wait for the public health endpoint before cleanup
 Clean temporary deployment artifacts and Docker build cache
 ~~~
 
-The AWS slim compose contract is intentionally single-file:
+The AWS compose contract is intentionally single-file:
 
 ~~~text
-docker-compose.aws-slim.yml
+docker-compose.aws.yml
 ~~~
 
 The required runtime services are:
@@ -629,7 +629,7 @@ product-api
 Final validation command:
 
 ~~~bash
-scripts/smoke_aws_slim.sh
+scripts/smoke_aws.sh
 ~~~
 
 Expected successful end state:
@@ -643,7 +643,7 @@ ollama healthy
 ppt-creator healthy
 product-api healthy
 /health returns ok=true
-scripts/smoke_aws_slim.sh returns OK
+scripts/smoke_aws.sh returns OK
 Nextcloud golden baseline persisted under /opt/ai-decision-studio/golden_baseline
 Product data baseline persisted under /opt/ai-decision-studio/baselines
 Docker Build Cache cleaned to 0B or near-zero

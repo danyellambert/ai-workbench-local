@@ -30,7 +30,7 @@ Main product capabilities represented in the current code and data roots include
 Current deployment modes:
 
 - Local Docker uses .env.docker and docker-compose.local.yml.
-- AWS slim uses .env.aws and docker-compose.aws-slim.yml.
+- AWS uses .env.aws and docker-compose.aws.yml.
 - Oracle-like deployment uses the same product topology concept with an environment-specific data root.
 
 Documentation rule:

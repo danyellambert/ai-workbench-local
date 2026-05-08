@@ -1,6 +1,6 @@
 # AI Lab Golden State Restore
 
-This document defines the slim AI Lab historical state restore used by AI Decision Studio AWS/Oracle-like deployments.
+This document defines the compact AI Lab historical state restore used by AI Decision Studio AWS/Oracle-like deployments.
 
 ## Official baseline archive
 
@@ -18,7 +18,7 @@ c89628335dd1e6a9b9e177d202ab6492361d8b759bb22b41453ed0bc00253a5c
 
 ## What it contains
 
-This is a slim AI Lab state pack. It preserves the historical UI state needed by:
+This is a compact AI Lab state pack. It preserves the historical UI state needed by:
 
 - EvidenceOps
 - Benchmarks
@@ -74,5 +74,5 @@ After restore:
 ## Do not
 
 - Do not commit the tar.gz to Git.
-- Do not include vector stores or Chroma DBs in the slim pack.
+- Do not include vector stores or Chroma DBs in the compact pack.
 - Do not leave restore archives permanently on small AWS disks after a successful deploy.

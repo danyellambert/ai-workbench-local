@@ -10,7 +10,7 @@ Use the correct real env file for the target host:
 
 | Target | Env file | Compose files |
 | --- | --- | --- |
-| AWS slim VM | `.env.aws` | `docker-compose.aws-slim.yml` |
+| AWS VM | `.env.aws` | `docker-compose.aws.yml` |
 | Oracle VM | `.env.oracle` | `docker-compose.local.yml` |
 | Local Docker | `.env.docker` | `docker-compose.local.yml` |
 
@@ -32,17 +32,17 @@ Do not commit these files or values:
   - EVIDENCEOPS_TRELLO_TOKEN
   - EVIDENCEOPS_NOTION_API_KEY
 
-## AWS slim fast path
+## AWS fast path
 
 From the AWS VM:
 
     cd /opt/ai-decision-studio/app
 
-    ENV_FILE=.env.aws scripts/smoke_aws_slim.sh
+    ENV_FILE=.env.aws scripts/smoke_aws.sh
 
-For code-only redeploys, use the AWS slim script:
+For code-only redeploys, use the AWS script:
 
-    ENV_FILE=.env.aws scripts/deploy_aws_slim.sh
+    ENV_FILE=.env.aws scripts/deploy_aws.sh
 
 That script validates the compose config, rebuilds only `product-api` and
 `frontend`, prunes build cache, and checks `/health`.
@@ -52,12 +52,12 @@ Manual equivalent:
     docker compose \
       --env-file .env.aws \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       up -d --no-deps --build --force-recreate product-api frontend
 
 Required AWS final check:
 
-    ENV_FILE=.env.aws scripts/smoke_aws_slim.sh
+    ENV_FILE=.env.aws scripts/smoke_aws.sh
 
     ENV_FILE=.env.aws scripts/readiness_nextcloud_golden_baseline_check.sh \
       --env-file .env.aws \

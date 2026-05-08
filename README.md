@@ -8,7 +8,7 @@
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" />
   <img alt="Vite" src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" />
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" />
-  <img alt="AWS slim deployment" src="https://img.shields.io/badge/AWS-slim%20deployment-FF9900?logo=amazonaws&logoColor=white" />
+  <img alt="AWS deployment" src="https://img.shields.io/badge/AWS-EC2%20deployment-FF9900?logo=amazonaws&logoColor=white" />
   <a href="LICENSE">
     <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg" />
   </a>
@@ -107,7 +107,7 @@ The frontend does not mount product data directly. It talks to the Product API. 
 | `/app/artifacts` | Generated decks, exported files, thumbnails, and workflow artifacts. | Read/write |
 | `/app/users` | Session/user overlays and public/demo state. | Read/write |
 
-The versioned payload lives under `runtime/ai_decision_studio_functional_baseline/oracle_like_data/`. The directory name is historical; the active Docker contracts are local Docker and AWS slim.
+The versioned payload lives under `runtime/ai_decision_studio_functional_baseline/oracle_like_data/`. The directory name is historical; the active Docker contracts are local Docker and AWS.
 
 ## Runtime Topology
 
@@ -126,10 +126,10 @@ The active Compose contracts are intentionally explicit:
 | Target | Env file | Compose file | Entrypoint |
 | --- | --- | --- | --- |
 | Local Docker | `.env.docker` | `docker-compose.local.yml` | `scripts/run_local_docker.sh` |
-| AWS slim | `.env.aws` | `docker-compose.aws-slim.yml` | `scripts/deploy_aws_slim.sh` |
+| AWS | `.env.aws` | `docker-compose.aws.yml` | `scripts/deploy_aws.sh` |
 | Local host development | `.env.local` | none | `scripts/run_local_dev.sh` |
 
-AWS slim uses a single Compose file. It is not layered on top of the local Compose file.
+AWS uses a single Compose file. It is not layered on top of the local Compose file.
 
 ## Integrations
 
@@ -164,7 +164,7 @@ The AI Lab is the engineering layer behind the workflow product. It exists to ma
 | Product API | Python 3.11, standard-library HTTP server, Pydantic, python-dotenv, local filesystem state, SQLite-backed stores where needed. |
 | AI and RAG | Ollama, OpenAI/OpenAI-compatible APIs, Hugging Face provider lanes, LangChain Community, LangChain Chroma, LangChain Text Splitters, LangGraph, ChromaDB, PyPDF, Pillow, NumPy. |
 | Artifacts | ppt-creator sidecar, ReportLab, Matplotlib, presentation export services, artifact lineage and generated deck contracts. |
-| Operations | Docker Compose, AWS slim deployment, readiness scripts, smoke checks, deployment bundle builder, backup/restore notes. |
+| Operations | Docker Compose, AWS deployment, readiness scripts, smoke checks, deployment bundle builder, backup/restore notes. |
 | Quality | Vitest, Playwright, ESLint, Python test gate, readiness checks, benchmark runners, eval workflows. |
 
 The current deployable Python dependency contract is a single lean `requirements.txt`. Older heavyweight dependency sets for Docling, local Transformers, sentence-transformers, and earlier Evidence CV experiments are preserved under `legacy/requirements/`.
@@ -189,10 +189,10 @@ The current deployable Python dependency contract is a single lean `requirements
 |-- legacy/                    # Historical Streamlit, Gradio, Oracle, and heavy dependency material
 |-- main_product_api.py        # Current backend entrypoint
 |-- docker-compose.local.yml   # Local Docker product stack
-|-- docker-compose.aws-slim.yml # AWS slim product stack
+|-- docker-compose.aws.yml # AWS product stack
 |-- Dockerfile.frontend
 |-- Dockerfile.product-api.local
-|-- Dockerfile.product-api.aws-slim
+|-- Dockerfile.product-api.aws
 |-- requirements.txt
 |-- ROADMAP.md
 `-- README.md
@@ -237,12 +237,12 @@ ENV_FILE=.env.docker scripts/run_local_docker.sh
 
 The local Docker script resolves local data roots, starts the five-service stack, and ensures the configured Ollama embedding model is available unless disabled with `SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1`.
 
-### 4. Deploy the AWS slim stack
+### 4. Deploy the AWS stack
 
 Use the AWS runbooks for a fresh host or redeploy:
 
 - `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`
-- `docs/deployment/aws-slim-deploy.md`
+- `docs/deployment/aws-deploy.md`
 - `docs/deployment/REDEPLOY_FAST_PATH.md`
 - `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md`
 
@@ -250,8 +250,8 @@ The operational contract is:
 
 ```bash
 cp .env.aws.example .env.aws
-scripts/deploy_aws_slim.sh
-scripts/smoke_aws_slim.sh
+scripts/deploy_aws.sh
+scripts/smoke_aws.sh
 ```
 
 Run those commands on the prepared deployment host after the bundle and env file are in place.
@@ -266,7 +266,7 @@ npm --prefix frontend run build
 scripts/run_current_test_gate.sh
 scripts/readiness_multi_environment_contract_check.sh
 ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
-docker compose --env-file .env.aws.example -p ai-decision-studio-contract-aws -f docker-compose.aws-slim.yml config
+docker compose --env-file .env.aws.example -p ai-decision-studio-contract-aws -f docker-compose.aws.yml config
 ```
 
 Additional focused checks are available for AWS env contracts, Nextcloud golden baseline assumptions, required integrations, required providers, AI Lab content, EvidenceOps cache, Candidate Review, presentation export, and frontend surface parity. See `scripts/README.md` for the complete catalog.
@@ -316,7 +316,7 @@ The active Product API is intentionally workflow-oriented. The most important ro
 | Current product surface | `docs/architecture/current-product-surface.md` |
 | Data payload and mounted roots | `docs/architecture/data-payload.md` |
 | Local Docker | `docs/deployment/local-docker-compose.md` |
-| AWS slim deployment | `docs/deployment/aws-slim-deploy.md` |
+| AWS deployment | `docs/deployment/aws-deploy.md` |
 | Fresh AWS EC2 bootstrap | `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md` |
 | Multi-environment contract | `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md` |
 | Python dependency contract | `docs/deployment/python-dependencies.md` |

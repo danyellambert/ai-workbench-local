@@ -6,7 +6,7 @@ Deployment runbooks and environment contracts for local Docker, AWS, and Oracle-
 
 - [AI_LAB_GOLDEN_STATE_RESTORE.md](AI_LAB_GOLDEN_STATE_RESTORE.md) — AI Lab Golden State Restore
 - [aws-cost-audit.md](aws-cost-audit.md) — AWS Cost and Resource Audit
-- [aws-slim-deploy.md](aws-slim-deploy.md) — AWS slim deploy
+- [aws-deploy.md](aws-deploy.md) — AWS deploy
 - [AWS_FRESH_EC2_BOOTSTRAP.md](AWS_FRESH_EC2_BOOTSTRAP.md) — AI Decision Studio — AWS fresh EC2 bootstrap runbook
 - [local-docker-compose.md](local-docker-compose.md) — Local Docker Compose
 - [LOCAL_FULL_APP_DEV.md](LOCAL_FULL_APP_DEV.md) — Local full app development
@@ -22,4 +22,4 @@ Deployment runbooks and environment contracts for local Docker, AWS, and Oracle-
 
 ## Legacy / deferred deployment material
 
-Oracle-like / Oracle Always Free deployment material has moved to `../../legacy/docs/deployment/oracle/` and is retained as historical/deferred reference. The active deployment target is AWS slim.
+Oracle-like / Oracle Always Free deployment material has moved to `../../legacy/docs/deployment/oracle/` and is retained as historical/deferred reference. The active deployment target is AWS.

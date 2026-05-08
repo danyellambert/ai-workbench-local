@@ -46,7 +46,7 @@
   <g transform="translate(1482 88)">
     <rect width="178" height="34" rx="17" fill="#0B2742" stroke="#FDBA74" stroke-opacity="0.55"/>
     <circle cx="22" cy="17" r="6" fill="#FDBA74"/>
-    <text x="38" y="22" class="muted" fill="#FFE7CF">AWS slim</text>
+    <text x="38" y="22" class="muted" fill="#FFE7CF">AWS</text>
   </g>
 
   <text x="92" y="232" class="eyebrow" fill="#64748B">PUBLIC EDGE</text>
@@ -273,8 +273,8 @@
     <text x="108" y="1082" class="eyebrow" fill="#64748B">OPERATIONS</text>
     <text x="250" y="1071" class="body">`.env.docker` + `run_local_docker.sh`</text>
     <text x="250" y="1090" class="mono">docker-compose.local.yml</text>
-    <text x="544" y="1071" class="body">`.env.aws` + `deploy_aws_slim.sh`</text>
-    <text x="544" y="1090" class="mono">docker-compose.aws-slim.yml</text>
+    <text x="544" y="1071" class="body">`.env.aws` + `deploy_aws.sh`</text>
+    <text x="544" y="1090" class="mono">docker-compose.aws.yml</text>
     <text x="828" y="1071" class="body">embedding pull automation</text>
     <text x="828" y="1090" class="mono">AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL</text>
     <text x="1190" y="1071" class="body">smoke + readiness gates</text>

@@ -12,8 +12,8 @@ Use the repository scripts instead of running raw `docker compose` or ad-hoc API
 | --- | --- | --- | --- |
 | Local host/dev | `ENV_FILE=.env.local scripts/run_local_dev.sh` | `.env.local` | Starts the host API/frontend with local writable users overlay and skips ignored root-level benchmark artifacts. |
 | Local Docker/local | `scripts/run_local_docker.sh` | `.env.docker` plus script-resolved local data roots | Renders Docker volumes against the local `runtime/ai_decision_studio_functional_baseline/oracle_like_data` tree instead of falling back to `/opt/...` paths. |
-| AWS slim deploy | `scripts/deploy_aws_slim.sh` | `.env.aws` | Uses the AWS deployment contract and avoids local/Oracle defaults. |
-| AWS smoke validation | `scripts/smoke_aws_slim.sh` | `.env.aws` | Validates the deployed AWS surface with the same contract. |
+| AWS deploy | `scripts/deploy_aws.sh` | `.env.aws` | Uses the AWS deployment contract and avoids local/Oracle defaults. |
+| AWS smoke validation | `scripts/smoke_aws.sh` | `.env.aws` | Validates the deployed AWS surface with the same contract. |
 
 Do not run `docker compose -f docker-compose.local.yml up ...` directly for local Docker. Without the script-provided environment, Compose can fall back to `/opt/ai-decision-studio/data/...`, which is a Linux/VM deploy layout and not the local Mac data root.
 
@@ -35,8 +35,8 @@ For local host/dev, `scripts/run_local_dev.sh` protects the Lab benchmark surfac
 | Script | What it does |
 | --- | --- |
 | `build_deployment_bundle.sh` | Builds the clean application bundle used to transfer the app to an AWS/local deployment target. |
-| `deploy_aws_slim.sh` | Starts or refreshes the current AWS slim deployment stack on the target host. |
-| `smoke_aws_slim.sh` | Checks whether the AWS slim deployment responds correctly after it starts. |
+| `deploy_aws.sh` | Starts or refreshes the current AWS deployment stack on the target host. |
+| `smoke_aws.sh` | Checks whether the AWS deployment responds correctly after it starts. |
 | `run_local_docker.sh` | Executes the local Docker workflow for the product stack. |
 | `run_local_dev.sh` | Runs or checks local host development mode outside the AWS target host. |
 | `readiness_multi_environment_contract_check.sh` | Checks the local/Docker/AWS environment contract and protects cross-environment assumptions. |
@@ -49,7 +49,7 @@ For local host/dev, `scripts/run_local_dev.sh` protects the Lab benchmark surfac
 
 - **Deployment scripts** are the current operational path and should stay stable.
 - **Readiness scripts** are guardrails that fail fast when a repo/runtime/deployment contract drifts.
-- **Evaluation and benchmark scripts** are engineering tools. They are useful for review, but they are not required for the AWS slim deployment.
+- **Evaluation and benchmark scripts** are engineering tools. They are useful for review, but they are not required for the AWS deployment.
 - **Reporting scripts** summarize stored logs, benchmark outputs, or eval stores.
 - **Maintenance scripts** may create, restore, or stage local files. Review them before running.
 
@@ -75,10 +75,10 @@ Every top-level tracked script/support file in this directory is listed below.
 | --- | --- | --- | --- | --- |
 | `build_deployment_bundle.sh` | Builds the clean application bundle used to transfer the app to an AWS/local deployment target. | Use before copying the application package to a host or validating what the deployment bundle contains. | Reads the repository tree and writes a sanitized tarball/report. | Current packaging path; keep stable. |
 | `build_oracle_deployment_bundle.sh` | Keeps the older Oracle-named bundle command working while delegating to the generic deployment bundle builder. | Use only when older notes or commands still call the Oracle-named entry point. | Delegates to the generic builder and preserves older environment variable names. | Compatibility wrapper; keep until legacy references are fully retired. |
-| `deploy_aws_slim.sh` | Starts or refreshes the current AWS slim deployment stack on the target host. | Use on the AWS host after the app bundle and `.env.aws` are in place. | Reads AWS env settings and invokes the Docker Compose AWS slim stack. | Current AWS deployment path; keep stable. |
+| `deploy_aws.sh` | Starts or refreshes the current AWS deployment stack on the target host. | Use on the AWS host after the app bundle and `.env.aws` are in place. | Reads AWS env settings and invokes the Docker Compose AWS stack. | Current AWS deployment path; keep stable. |
 | `run_local_dev.sh` | Runs or checks local host development mode outside the AWS target host. | Use for local development and quick host-side validation. | Reads local env/config and executes local development checks. | Current local dev path; keep stable. |
 | `run_local_docker.sh` | Executes the local Docker workflow for the product stack. | Use when validating the app locally through Docker rather than directly on the host. | Reads local Docker env/config and starts the compose-based local workflow. | Current local Docker path; keep stable. |
-| `smoke_aws_slim.sh` | Checks whether the AWS slim deployment responds correctly after it starts. | Use after `deploy_aws_slim.sh` or after host-level changes. | Reads base URL/env settings and performs smoke requests. | Current AWS smoke path; keep stable. |
+| `smoke_aws.sh` | Checks whether the AWS deployment responds correctly after it starts. | Use after `deploy_aws.sh` or after host-level changes. | Reads base URL/env settings and performs smoke requests. | Current AWS smoke path; keep stable. |
 
 ### Readiness gates
 
@@ -185,7 +185,7 @@ Every top-level tracked script/support file in this directory is listed below.
 | `run_frontend_surface_validation.sh` | Shell wrapper for frontend surface validation. | Use in shell/CI-style flows for frontend surface checks. | Delegates to frontend validation logic. | Wrapper; keep aligned with Python command. |
 | `run_mcp_integration_validation.py` | Validates MCP integration behavior. | Use when changing MCP server/client integration paths. | Starts/checks MCP-related behavior and outputs validation status. | Integration-focused check. |
 | `run_mcp_integration_validation.sh` | Shell wrapper for MCP integration validation. | Use in shell/CI-style MCP validation flows. | Delegates to MCP validation logic. | Wrapper; keep aligned with Python command. |
-| `run_ppt_creator_renderer_host.sh` | Starts the PowerPoint creator renderer host. | Use when testing presentation rendering/export support locally. | Starts renderer host process/config. | Development helper, not AWS slim deploy. |
+| `run_ppt_creator_renderer_host.sh` | Starts the PowerPoint creator renderer host. | Use when testing presentation rendering/export support locally. | Starts renderer host process/config. | Development helper, not AWS deploy. |
 | `run_presentation_export_smoke_suite.py` | Runs smoke tests for presentation export. | Use after changing executive deck or export rendering code. | Reads presentation/export fixtures and reports smoke status. | Product-adjacent validation. |
 | `smoke_ai_lab_payloads.py` | Smoke-tests AI Lab payload shapes. | Use after changing AI Lab API payloads or examples. | Reads sample payloads and checks accepted/expected structure. | Fast payload contract check. |
 | `smoke_docker_policy_comparison_write.sh` | Smoke-tests Docker write behavior for policy comparison workflows. | Use when checking Dockerized workflow write paths. | Executes a small write-path smoke in Docker context. | Keep generated output local. |
@@ -219,4 +219,4 @@ A recruiter or technical reviewer should not need to inspect every script. The i
 - reporting utilities for engineering decisions;
 - a clear separation between current product, eval workspace, and legacy/deferred material.
 
-When in doubt, treat `build_deployment_bundle.sh`, `deploy_aws_slim.sh`, `smoke_aws_slim.sh`, and `run_local_docker.sh` as the current operational path.
+When in doubt, treat `build_deployment_bundle.sh`, `deploy_aws.sh`, `smoke_aws.sh`, and `run_local_docker.sh` as the current operational path.

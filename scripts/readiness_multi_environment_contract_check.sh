@@ -16,8 +16,8 @@ required_examples=(
 required_scripts=(
   "scripts/run_local_dev.sh"
   "scripts/run_local_docker.sh"
-  "scripts/deploy_aws_slim.sh"
-  "scripts/smoke_aws_slim.sh"
+  "scripts/deploy_aws.sh"
+  "scripts/smoke_aws.sh"
   "scripts/validate_aws_env_contract.py"
 )
 
@@ -31,8 +31,8 @@ done
 for script in \
   scripts/run_local_dev.sh \
   scripts/run_local_docker.sh \
-  scripts/deploy_aws_slim.sh \
-  scripts/smoke_aws_slim.sh \
+  scripts/deploy_aws.sh \
+  scripts/smoke_aws.sh \
   scripts/build_deployment_bundle.sh
 do
   bash -n "$script"
@@ -120,35 +120,35 @@ grep -q 'image: ai-decision-studio-frontend:local' /tmp/ads_multi_env_docker_con
 docker compose \
   --env-file .env.aws.example \
   -p ai-decision-studio-contract-aws \
-  -f docker-compose.aws-slim.yml \
+  -f docker-compose.aws.yml \
   config >/tmp/ads_multi_env_aws_config.yml
 
-grep -q 'dockerfile: Dockerfile.product-api.aws-slim' /tmp/ads_multi_env_aws_config.yml
-grep -q 'image: ai-decision-studio-product-api:aws-slim' /tmp/ads_multi_env_aws_config.yml
+grep -q 'dockerfile: Dockerfile.product-api.aws' /tmp/ads_multi_env_aws_config.yml
+grep -q 'image: ai-decision-studio-product-api:aws' /tmp/ads_multi_env_aws_config.yml
 
 
 echo
 echo "== AWS compose single-file guardrail =="
-if grep -Rqs 'docker-compose.local.yml' scripts/deploy_aws_slim.sh scripts/smoke_aws_slim.sh; then
+if grep -Rqs 'docker-compose.local.yml' scripts/deploy_aws.sh scripts/smoke_aws.sh; then
   echo "ERROR: AWS deploy/smoke scripts must not use docker-compose.local.yml." >&2
   exit 1
 fi
-if grep -nE 'docker-compose\.local\.yml.*docker-compose\.aws-slim\.yml|docker-compose\.aws-slim\.yml.*docker-compose\.local\.yml' scripts/deploy_aws_slim.sh scripts/smoke_aws_slim.sh; then
+if grep -nE 'docker-compose\.local\.yml.*docker-compose\.aws\.yml|docker-compose\.aws\.yml.*docker-compose\.local\.yml' scripts/deploy_aws.sh scripts/smoke_aws.sh; then
   echo "ERROR: AWS scripts still look like a local+AWS layered compose contract." >&2
   exit 1
 fi
-echo "OK: AWS scripts use docker-compose.aws-slim.yml as a single compose contract"
+echo "OK: AWS scripts use docker-compose.aws.yml as a single compose contract"
 
 echo
 echo "== AWS deploy dependency guardrail =="
 # AWS deploy script must not skip compose dependencies. Fresh EC2 deploys need all
 # compose services: ollama, nextcloud, ppt-creator, product-api, and frontend.
-if grep -qs -- '--no-deps' scripts/deploy_aws_slim.sh; then
+if grep -qs -- '--no-deps' scripts/deploy_aws.sh; then
   echo "ERROR: AWS deploy script must not use --no-deps; it must bring up required sidecars." >&2
   exit 1
 fi
 
-grep -q 'ollama nextcloud ppt-creator product-api frontend' scripts/deploy_aws_slim.sh
+grep -q 'ollama nextcloud ppt-creator product-api frontend' scripts/deploy_aws.sh
 echo "OK: AWS deploy script brings up all required compose services"
 
 

@@ -3,11 +3,11 @@
 This directory contains historical or secondary flows preserved for reference, smoke testing, or old demos.
 
 Current product paths remain at the repository root:
-- docker-compose.oracle-like.yml
-- docker-compose.aws-slim.override.yml
-- Dockerfile.public-demo
-- Dockerfile.frontend-public-demo
-- Dockerfile.aws-slim-product-api
+- docker-compose.local.yml
+- docker-compose.aws.yml
+- Dockerfile.product-api.local
+- Dockerfile.product-api.aws
+- Dockerfile.frontend
 - main_product_api.py
 
 Legacy assets moved in this cleanup:

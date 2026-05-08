@@ -59,9 +59,9 @@ copy_path ".env.docker.example"
 copy_path ".env.local.example"
 copy_path ".dockerignore"
 copy_path "Dockerfile.product-api.local"
-copy_path "Dockerfile.product-api.aws-slim"
+copy_path "Dockerfile.product-api.aws"
 copy_path "requirements.txt"
-copy_path "docker-compose.aws-slim.yml"
+copy_path "docker-compose.aws.yml"
 copy_path "Dockerfile.frontend"
 copy_path "main_product_api.py"
 
@@ -93,10 +93,10 @@ copy_path "scripts/readiness_required_providers_check.sh"
 copy_path "scripts/readiness_admin_session_isolation_check.sh"
 copy_path "scripts/build_deployment_bundle.sh"
 copy_path "scripts/build_oracle_deployment_bundle.sh"
-copy_path "scripts/deploy_aws_slim.sh"
+copy_path "scripts/deploy_aws.sh"
 copy_path "scripts/restore_aws_baselines.sh"
 copy_path "scripts/cleanup_aws_deploy_artifacts.sh"
-copy_path "scripts/smoke_aws_slim.sh"
+copy_path "scripts/smoke_aws.sh"
 copy_path "scripts/validate_aws_env_contract.py"
 copy_path "scripts/readiness_multi_environment_contract_check.sh"
 copy_path "scripts/run_local_docker.sh"
@@ -259,6 +259,8 @@ required_paths = [
     ".env.docker.example",
     ".env.local.example",
     "Dockerfile.product-api.local",
+    "Dockerfile.product-api.aws",
+    "docker-compose.aws.yml",
     "Dockerfile.frontend",
     "requirements.txt",
     "main_product_api.py",
@@ -283,15 +285,16 @@ required_paths = [
     "scripts/readiness_artifacts_compact_check.sh",
     "scripts/readiness_candidate_review_contract_check.sh",
     "docs/deployment/REDEPLOY_FAST_PATH.md",
+    "docs/deployment/aws-deploy.md",
     "docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md",
     "docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md",
     "scripts/measure_surface_latency.sh",
     "scripts/readiness_required_providers_check.sh",
     "scripts/readiness_admin_session_isolation_check.sh",
-    "scripts/deploy_aws_slim.sh",
+    "scripts/deploy_aws.sh",
     "scripts/restore_aws_baselines.sh",
     "scripts/cleanup_aws_deploy_artifacts.sh",
-    "scripts/smoke_aws_slim.sh",
+    "scripts/smoke_aws.sh",
     "scripts/validate_aws_env_contract.py",
     "scripts/readiness_multi_environment_contract_check.sh",
     "scripts/run_local_docker.sh",

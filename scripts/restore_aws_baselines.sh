@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ENV_FILE="${1:-${ENV_FILE:-.env.aws}}"
-COMPOSE_FILE="${AI_DECISION_STUDIO_AWS_COMPOSE_FILE:-docker-compose.aws-slim.yml}"
+COMPOSE_FILE="${AI_DECISION_STUDIO_AWS_COMPOSE_FILE:-docker-compose.aws.yml}"
 PROJECT="${AI_DECISION_STUDIO_DOCKER_PROJECT:-ai-decision-studio}"
 
 if [ ! -f "$ENV_FILE" ]; then

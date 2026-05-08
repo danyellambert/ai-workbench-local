@@ -49,7 +49,7 @@ Frontend parity must hold in:
 
 - local development;
 - local Docker Compose;
-- AWS slim Docker deployment;
+- AWS Docker deployment;
 - Oracle-like deployment.
 
 The same visible product concepts should be backed by the same API contract and compatible mounted data roots across those modes.

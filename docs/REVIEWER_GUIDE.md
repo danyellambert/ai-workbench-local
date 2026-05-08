@@ -2,7 +2,7 @@
 
 This guide is the short path for recruiters, interviewers, and technical reviewers.
 
-AI Decision Studio is a product-oriented AI workbench with a React/Vite frontend, a Python product API, Docker/local deployment support, and an AWS slim deployment path. The repository also contains historical evaluation, benchmark, and legacy UI material. Those are documented, but they are not the primary validation path for the current product.
+AI Decision Studio is a product-oriented AI workbench with a React/Vite frontend, a Python product API, Docker/local deployment support, and an AWS deployment path. The repository also contains historical evaluation, benchmark, and legacy UI material. Those are documented, but they are not the primary validation path for the current product.
 
 ## 5-minute review path
 
@@ -53,8 +53,8 @@ The most important scripts are:
 scripts/run_current_test_gate.sh
 scripts/readiness_multi_environment_contract_check.sh
 scripts/build_deployment_bundle.sh
-scripts/deploy_aws_slim.sh
-scripts/smoke_aws_slim.sh
+scripts/deploy_aws.sh
+scripts/smoke_aws.sh
 scripts/run_local_docker.sh
 scripts/run_local_dev.sh
 ```
@@ -112,8 +112,8 @@ Use the repository scripts instead of running raw `docker compose` or ad-hoc API
 | --- | --- | --- | --- |
 | Local host/dev | `ENV_FILE=.env.local scripts/run_local_dev.sh` | `.env.local` | Starts the host API/frontend with local writable users overlay and skips ignored root-level benchmark artifacts. |
 | Local Docker/local | `scripts/run_local_docker.sh` | `.env.docker` plus script-resolved local data roots | Renders Docker volumes against the local `runtime/ai_decision_studio_functional_baseline/oracle_like_data` tree instead of falling back to `/opt/...` paths. |
-| AWS slim deploy | `scripts/deploy_aws_slim.sh` | `.env.aws` | Uses the AWS deployment contract and avoids local/Oracle defaults. |
-| AWS smoke validation | `scripts/smoke_aws_slim.sh` | `.env.aws` | Validates the deployed AWS surface with the same contract. |
+| AWS deploy | `scripts/deploy_aws.sh` | `.env.aws` | Uses the AWS deployment contract and avoids local/Oracle defaults. |
+| AWS smoke validation | `scripts/smoke_aws.sh` | `.env.aws` | Validates the deployed AWS surface with the same contract. |
 
 Do not run `docker compose -f docker-compose.local.yml up ...` directly for local Docker. Without the script-provided environment, Compose can fall back to `/opt/ai-decision-studio/data/...`, which is a Linux/VM deploy layout and not the local Mac data root.
 

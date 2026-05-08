@@ -1,7 +1,7 @@
 # Legacy Python Requirements
 
 The current product uses the root `requirements.txt` file for local Docker,
-AWS slim, local development, and tests.
+AWS, local development, and tests.
 
 This directory keeps older dependency snapshots for provenance:
 
@@ -9,7 +9,7 @@ This directory keeps older dependency snapshots for provenance:
   dependency set.
 - `requirements-product-api.local.txt` was the previous local Docker product API
   dependency set.
-- `requirements-product-api.aws-slim.txt` was the previous AWS slim product API
+- `requirements-product-api.aws.txt` was the previous AWS product API
   dependency set.
 
 These files are not used by the current Docker or AWS deployment contracts.

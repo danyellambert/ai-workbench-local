@@ -2,9 +2,9 @@ services:
   product-api:
     build:
       context: "."
-      dockerfile: Dockerfile.product-api.aws-slim
-    image: ai-decision-studio-product-api:aws-slim
-    container_name: ai-decision-studio-product-api-aws-slim
+      dockerfile: Dockerfile.product-api.aws
+    image: ai-decision-studio-product-api:aws
+    container_name: ai-decision-studio-product-api-aws
     restart: unless-stopped
     depends_on:
       ppt-creator:
@@ -14,7 +14,7 @@ services:
       nextcloud:
         condition: service_started
     environment:
-      AI_DECISION_STUDIO_DEPLOYMENT_MODE: ${AI_DECISION_STUDIO_DEPLOYMENT_MODE:-aws_slim}
+      AI_DECISION_STUDIO_DEPLOYMENT_MODE: ${AI_DECISION_STUDIO_DEPLOYMENT_MODE:-aws}
       PRODUCT_API_HOST: 0.0.0.0
       PRODUCT_API_PORT: '8011'
       AI_DECISION_STUDIO_PRODUCT_API_HOST: 0.0.0.0
@@ -82,8 +82,8 @@ services:
     build:
       context: "."
       dockerfile: Dockerfile.frontend
-    image: ai-decision-studio-frontend:aws-slim
-    container_name: ai-decision-studio-frontend-aws-slim
+    image: ai-decision-studio-frontend:aws
+    container_name: ai-decision-studio-frontend-aws
     restart: unless-stopped
     depends_on:
       product-api:
@@ -106,8 +106,8 @@ services:
     build:
       context: "./services/ppt_creator_app"
       dockerfile: Dockerfile
-    image: ai-decision-studio-ppt-creator:aws-slim
-    container_name: ai-decision-studio-ppt-creator-aws-slim
+    image: ai-decision-studio-ppt-creator:aws
+    container_name: ai-decision-studio-ppt-creator-aws
     restart: unless-stopped
     environment:
       PPT_CREATOR_RUNTIME_MODE: docker_compose_oracle
@@ -135,7 +135,7 @@ services:
     - ai-decision-studio-private
   ollama:
     image: ollama/ollama
-    container_name: ai-decision-studio-ollama-aws-slim
+    container_name: ai-decision-studio-ollama-aws
     restart: unless-stopped
     environment:
       OLLAMA_MAX_LOADED_MODELS: "${OLLAMA_MAX_LOADED_MODELS:-1}"
@@ -162,7 +162,7 @@ services:
     - ai-decision-studio-private
   nextcloud:
     image: nextcloud:29-apache
-    container_name: ai-decision-studio-nextcloud-aws-slim
+    container_name: ai-decision-studio-nextcloud-aws
     restart: unless-stopped
     environment:
       NEXTCLOUD_ADMIN_USER: "${NEXTCLOUD_ADMIN_USER:-ads_admin}"

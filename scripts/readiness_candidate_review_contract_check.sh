@@ -5,7 +5,7 @@ REPORT="runtime/ai_decision_studio_functional_baseline/parity_reports/candidate_
 ENV_FILE=""
 PROJECT="${PROJECT:-ai-decision-studio}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.local.yml}"
-OVERRIDE_FILE="${OVERRIDE_FILE:-docker-compose.aws-slim.yml}"
+OVERRIDE_FILE="${OVERRIDE_FILE:-docker-compose.aws.yml}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in

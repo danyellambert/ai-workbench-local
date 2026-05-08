@@ -47,23 +47,23 @@ The local Docker script:
 - ensures the configured Ollama embedding model is available;
 - checks `/health` through the frontend/Nginx entrypoint.
 
-### AWS Slim
+### AWS
 
-AWS slim uses:
+AWS uses:
 
 - `.env.aws`
-- `docker-compose.aws-slim.yml`
-- `Dockerfile.product-api.aws-slim`
+- `docker-compose.aws.yml`
+- `Dockerfile.product-api.aws`
 - `Dockerfile.frontend`
 - `services/ppt_creator_app/Dockerfile`
 
-AWS slim is deployed through:
+AWS is deployed through:
 
 ```bash
-ENV_FILE=.env.aws scripts/deploy_aws_slim.sh
+ENV_FILE=.env.aws scripts/deploy_aws.sh
 ```
 
-AWS slim is a single-compose-file contract. It does not layer `docker-compose.local.yml` with an override.
+AWS is a single-compose-file contract. It does not layer `docker-compose.local.yml` with an override.
 
 The AWS deploy script:
 
@@ -113,7 +113,7 @@ The repository currently models the application stack, not a full managed AWS ed
 
 ## 4. Container Runtime
 
-Both local Docker and AWS slim run the same five logical services.
+Both local Docker and AWS run the same five logical services.
 
 ### frontend
 
@@ -139,7 +139,7 @@ The frontend is the public user-facing entrypoint.
 The Product API is built from:
 
 - `Dockerfile.product-api.local` for local Docker;
-- `Dockerfile.product-api.aws-slim` for AWS slim.
+- `Dockerfile.product-api.aws` for AWS.
 
 It runs:
 
@@ -515,7 +515,7 @@ The active payload lives under:
 runtime/ai_decision_studio_functional_baseline/oracle_like_data/
 ```
 
-The `oracle_like_data` name is historical. It is the current functional baseline payload for local Docker and AWS slim.
+The `oracle_like_data` name is historical. It is the current functional baseline payload for local Docker and AWS.
 
 Mounted roots inside Product API:
 
@@ -529,7 +529,7 @@ Mounted roots inside Product API:
 Host roots:
 
 - local Docker: usually under `./runtime/ai_decision_studio_functional_baseline/oracle_like_data`
-- AWS slim: usually under `/opt/ai-decision-studio/data`
+- AWS: usually under `/opt/ai-decision-studio/data`
 
 Root responsibilities:
 
@@ -814,8 +814,8 @@ Important operational scripts include:
 
 ```text
 scripts/run_local_docker.sh
-scripts/deploy_aws_slim.sh
-scripts/smoke_aws_slim.sh
+scripts/deploy_aws.sh
+scripts/smoke_aws.sh
 scripts/readiness_multi_environment_contract_check.sh
 scripts/run_current_test_gate.sh
 scripts/validate_aws_env_contract.py

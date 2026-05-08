@@ -1,12 +1,12 @@
-# AWS slim deploy
+# AWS deploy
 
-Use this document for the current AWS slim deployment shape.
+Use this document for the current AWS deployment shape.
 
-Official AWS slim topology:
+Official AWS topology:
 
-- compose: docker-compose.aws-slim.yml
+- compose: docker-compose.aws.yml
 - env file: .env.aws
-- product API Dockerfile: Dockerfile.product-api.aws-slim
+- product API Dockerfile: Dockerfile.product-api.aws
 - frontend Dockerfile: Dockerfile.frontend
 
 Expected AWS services:
@@ -38,13 +38,13 @@ The local versioned payload can be used as the source for populating the AWS dat
 
 Basic validation:
 
-- docker compose --env-file .env.aws -f docker-compose.aws-slim.yml config --services
-- docker compose --env-file .env.aws -f docker-compose.aws-slim.yml ps
+- docker compose --env-file .env.aws -f docker-compose.aws.yml config --services
+- docker compose --env-file .env.aws -f docker-compose.aws.yml ps
 
 Helper scripts:
 
-- scripts/deploy_aws_slim.sh
-- scripts/smoke_aws_slim.sh
+- scripts/deploy_aws.sh
+- scripts/smoke_aws.sh
 
 ## Runtime prerequisites
 

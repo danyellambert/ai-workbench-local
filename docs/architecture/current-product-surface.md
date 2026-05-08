@@ -13,12 +13,12 @@ Primary services:
 Primary compose files:
 
 - docker-compose.local.yml
-- docker-compose.aws-slim.yml
+- docker-compose.aws.yml
 
 Primary Dockerfiles:
 
 - Dockerfile.product-api.local for local product-api image.
-- Dockerfile.product-api.aws-slim for AWS slim product-api image.
+- Dockerfile.product-api.aws for AWS product-api image.
 - Dockerfile.frontend for the current frontend image.
 
 Current product data contract:

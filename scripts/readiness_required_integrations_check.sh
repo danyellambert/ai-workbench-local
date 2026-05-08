@@ -4,7 +4,7 @@ set -euo pipefail
 ENV_FILE="${ENV_FILE:-.env.oracle}"
 PROJECT="${PROJECT:-ai-decision-studio}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.local.yml}"
-OVERRIDE_FILE="${OVERRIDE_FILE:-docker-compose.aws-slim.yml}"
+OVERRIDE_FILE="${OVERRIDE_FILE:-docker-compose.aws.yml}"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8011}"
 REPORT="runtime/ai_decision_studio_functional_baseline/parity_reports/required_integrations_readiness_report.json"
 

@@ -5,26 +5,26 @@ ENV_FILE="${ENV_FILE:-.env.aws}"
 PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ai-decision-studio}"
 BASE_URL="${BASE_URL:-http://127.0.0.1:8071}"
 
-echo "== AWS slim smoke =="
+echo "== AWS smoke =="
 echo "env_file=$ENV_FILE"
 echo "base_url=$BASE_URL"
 
 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
-  -f docker-compose.aws-slim.yml \
+  -f docker-compose.aws.yml \
   ps
 
 curl -fsS "$BASE_URL/health"
 echo
 
-curl -fsS "$BASE_URL/api/preferences" > /tmp/ads_aws_slim_preferences.json
+curl -fsS "$BASE_URL/api/preferences" > /tmp/ads_aws_preferences.json
 
 python3 - <<'PY'
 import json
 from pathlib import Path
 
-payload = json.loads(Path("/tmp/ads_aws_slim_preferences.json").read_text())
+payload = json.loads(Path("/tmp/ads_aws_preferences.json").read_text())
 connections = payload.get("provider_connections") or []
 ids = [item.get("id") for item in connections]
 
@@ -44,18 +44,18 @@ PY
 
 
 echo
-echo "== Required AWS slim service check =="
+echo "== Required AWS service check =="
 for service in ollama nextcloud ppt-creator product-api frontend; do
   cid="$(
     docker compose \
       --env-file "$ENV_FILE" \
       -p ai-decision-studio \
-      -f docker-compose.aws-slim.yml \
+      -f docker-compose.aws.yml \
       ps -q "$service"
   )"
 
   if [ -z "$cid" ]; then
-    echo "ERROR: required AWS slim service is missing: $service" >&2
+    echo "ERROR: required AWS service is missing: $service" >&2
     exit 1
   fi
 
@@ -65,14 +65,14 @@ for service in ollama nextcloud ppt-creator product-api frontend; do
   echo "$service state=$state health=$health"
 
   if [ "$state" != "running" ]; then
-    echo "ERROR: required AWS slim service is not running: $service" >&2
+    echo "ERROR: required AWS service is not running: $service" >&2
     exit 1
   fi
 
   if [ "$health" != "none" ] && [ "$health" != "healthy" ]; then
-    echo "ERROR: required AWS slim service is not healthy: $service health=$health" >&2
+    echo "ERROR: required AWS service is not healthy: $service health=$health" >&2
     exit 1
   fi
 done
 
-echo "OK: AWS slim smoke passed."
+echo "OK: AWS smoke passed."

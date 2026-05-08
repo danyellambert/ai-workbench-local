@@ -17,7 +17,7 @@ product-oriented AI engineering system with:
 - evals, benchmarks, observability, and runtime diagnostics;
 - EvidenceOps and external integration paths;
 - a React product surface backed by a Product API;
-- local Docker and AWS slim deployment contracts;
+- local Docker and AWS deployment contracts;
 - public/admin policy and session-overlay discipline;
 - a documentation and operations layer that preserves architecture, validation,
   deployment, and maintenance decisions.
@@ -71,10 +71,10 @@ The maintained deployment paths are:
 
 - Local host/dev: `scripts/run_local_dev.sh`
 - Local Docker: `.env.docker` with `docker-compose.local.yml`
-- AWS slim: `.env.aws` with `docker-compose.aws-slim.yml`
+- AWS: `.env.aws` with `docker-compose.aws.yml`
 - Oracle-like: preserved as legacy/deferred operational history
 
-AWS slim is the current validated cloud target.
+AWS is the current validated cloud target.
 
 ### Current Documentation and Validation Path
 
@@ -121,10 +121,10 @@ scripts/readiness_multi_environment_contract_check.sh
 | 9.5 | Completed foundation | EvidenceOps, MCP-style operations, and external integration governance |
 | 10 | Completed foundation | Engineering hardening, tests, scripts, and readiness discipline |
 | 10.25 | Completed current product split | React product surface, AI Lab surface, Product API, live workflows, deck generation |
-| 10.5 | Superseded / replaced | Original Oracle + Cloudflare hybrid plan replaced by local Docker and AWS slim |
+| 10.5 | Superseded / replaced | Original Oracle + Cloudflare hybrid plan replaced by local Docker and AWS |
 | 11 | In progress | Final publication package and public narrative |
 | 12 | Completed foundation | Production-readiness baseline, Golden Surface, provider strategy, frontend parity, and Docker real-backend discipline |
-| 13 | Completed / legacy-deferred | Oracle-like Docker, public/admin overlays, hardening, sidecars, and later AWS slim convergence |
+| 13 | Completed / legacy-deferred | Oracle-like Docker, public/admin overlays, hardening, sidecars, and later AWS convergence |
 | 14 | In progress | Final validation, repository presentation, release polish, screenshots, and public handoff |
 
 There is no intended gap between 10.5 and 13. After the original Phase 11
@@ -739,13 +739,13 @@ Original plan:
 Current interpretation:
 
 - this plan is valuable as architecture thinking but is no longer the maintained path;
-- the current cloud target is AWS slim;
+- the current cloud target is AWS;
 - local Docker validates the full local product stack;
 - Oracle-like material is preserved as legacy/deferred operational history.
 
 Why the change matters:
 
-- AWS slim is easier to explain and reproduce;
+- AWS is easier to explain and reproduce;
 - local Docker and AWS now have explicit contracts;
 - the product no longer depends on a public cloud app calling a private laptop bridge;
 - Ollama is handled as a sidecar/deploy dependency where enabled.
@@ -887,7 +887,7 @@ Current status:
 
 - Oracle-like deployment material is now legacy/deferred.
 - The engineering decisions remain useful history.
-- AWS slim replaced Oracle-like as the active cloud target.
+- AWS replaced Oracle-like as the active cloud target.
 
 Primary references:
 
@@ -957,9 +957,9 @@ Completed / preserved work:
 Current status:
 
 - Oracle-specific scripts moved to legacy;
-- equivalent current active contracts are represented by local Docker and AWS slim docs/scripts.
+- equivalent current active contracts are represented by local Docker and AWS docs/scripts.
 
-#### Phase 13.4 - AWS Slim Convergence
+#### Phase 13.4 - AWS Convergence
 
 Purpose:
 
@@ -968,8 +968,8 @@ Purpose:
 Completed work:
 
 - `.env.aws.example`;
-- AWS slim Product API Dockerfile;
-- AWS slim compose file;
+- AWS Product API Dockerfile;
+- AWS compose file;
 - single-compose AWS contract;
 - AWS fresh EC2 bootstrap runbook;
 - AWS fast redeploy path;
@@ -977,19 +977,19 @@ Completed work:
 - AWS smoke script;
 - AWS env contract validation;
 - current deployment bundle builder;
-- explicit rule that AWS uses `docker-compose.aws-slim.yml` alone;
+- explicit rule that AWS uses `docker-compose.aws.yml` alone;
 - removal of the old AWS local-plus-override contract;
 - deploy-only Ollama embedding model pre-pull (`embeddinggemma:300m`) without overriding Runtime Controls.
 
 Current references:
 
-- `docs/deployment/aws-slim-deploy.md`
+- `docs/deployment/aws-deploy.md`
 - `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`
 - `docs/deployment/REDEPLOY_FAST_PATH.md`
 - `docs/deployment/aws-cost-audit.md`
 - `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md`
-- `scripts/deploy_aws_slim.sh`
-- `scripts/smoke_aws_slim.sh`
+- `scripts/deploy_aws.sh`
+- `scripts/smoke_aws.sh`
 - `scripts/validate_aws_env_contract.py`
 
 ### Phase 14 - Final Validation and Repository Presentation
@@ -1213,7 +1213,7 @@ AI Decision Studio evolved through a coherent engineering arc:
 12. React product surface backed by Product API;
 13. deck/artifact generation;
 14. production-readiness baseline and public/admin overlay policy;
-15. local Docker and AWS slim deployment;
+15. local Docker and AWS deployment;
 16. repository organization for long-term maintainability.
 
 The next milestone is final publication polish: screenshots, architecture diagram,

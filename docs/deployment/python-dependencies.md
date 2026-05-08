@@ -7,9 +7,9 @@ The current AI Decision Studio product uses one Python dependency file:
 Both Docker product API builds install from this same file:
 
 - `Dockerfile.product-api.local`
-- `Dockerfile.product-api.aws-slim`
+- `Dockerfile.product-api.aws`
 
-This keeps local Docker and AWS slim aligned and avoids the old split between
+This keeps local Docker and AWS aligned and avoids the old split between
 environment-specific requirements files.
 
 ## Current Product Scope
@@ -27,7 +27,7 @@ Historical requirements files are archived under `legacy/requirements/`:
 
 - `requirements.legacy-full.txt`
 - `requirements-product-api.local.txt`
-- `requirements-product-api.aws-slim.txt`
+- `requirements-product-api.aws.txt`
 
 Those files are kept for provenance only. Earlier flows used packages such as
 `docling`, `transformers`, and `sentence-transformers` for Evidence CV,

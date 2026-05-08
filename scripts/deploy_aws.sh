@@ -12,7 +12,7 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
-echo "== AWS slim deploy =="
+echo "== AWS deploy =="
 echo "env_file=$ENV_FILE"
 echo "project=$PROJECT_NAME"
 
@@ -112,18 +112,18 @@ compose() {
   docker compose \
     --env-file "$ENV_FILE" \
     -p "$PROJECT_NAME" \
-    -f docker-compose.aws-slim.yml \
+    -f docker-compose.aws.yml \
     "$@"
 }
 
-CFG="/tmp/ads_aws_slim_compose_$(date +%Y%m%d_%H%M%S).yml"
+CFG="/tmp/ads_aws_compose_$(date +%Y%m%d_%H%M%S).yml"
 
 compose config > "$CFG"
 
-grep -q 'dockerfile: Dockerfile.product-api.aws-slim' "$CFG"
-grep -q 'image: ai-decision-studio-product-api:aws-slim' "$CFG"
+grep -q 'dockerfile: Dockerfile.product-api.aws' "$CFG"
+grep -q 'image: ai-decision-studio-product-api:aws' "$CFG"
 
-echo "OK: compose config uses AWS slim product-api."
+echo "OK: compose config uses AWS product-api."
 
 wait_for_public_health() {
   local url="http://127.0.0.1:${PUBLIC_PORT}/health"
@@ -147,12 +147,12 @@ wait_for_public_health() {
   docker compose \
     --env-file "$ENV_FILE" \
     -p "$PROJECT_NAME" \
-    -f docker-compose.aws-slim.yml \
+    -f docker-compose.aws.yml \
     ps || true
   docker compose \
     --env-file "$ENV_FILE" \
     -p "$PROJECT_NAME" \
-    -f docker-compose.aws-slim.yml \
+    -f docker-compose.aws.yml \
     logs --tail=160 frontend product-api || true
   return 1
 }
@@ -206,13 +206,13 @@ ensure_ollama_embedding_model
 DOCKER_BUILDKIT=1 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
-  -f docker-compose.aws-slim.yml \
+  -f docker-compose.aws.yml \
   up -d --build --force-recreate ollama nextcloud ppt-creator product-api frontend
 
 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
-  -f docker-compose.aws-slim.yml \
+  -f docker-compose.aws.yml \
   ps
 
 wait_for_public_health
@@ -231,4 +231,4 @@ fi
 df -h /
 docker system df || true
 
-echo "OK: AWS slim deploy completed."
+echo "OK: AWS deploy completed."
