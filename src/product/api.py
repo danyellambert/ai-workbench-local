@@ -24,6 +24,7 @@ from src.product.access_control import (
     request_identity,
 )
 from src.product.deck_rate_limit import check_public_deck_generation_rate_limit
+from src.product.public_execution_quota import check_public_execution_quota
 from src.config import ProductApiSettings, get_product_api_settings
 from src.rag.loaders import load_document
 from src.product.command_center import (
@@ -232,6 +233,22 @@ def _build_overlay_rag_settings(*, bootstrap: ProductBootstrap, overlay_root: Pa
         chroma_path=overlay_index_root / "chroma",
     )
 
+
+
+def _public_execution_quota_error_payload(identity, execution_kind: str, users_root=None) -> dict | None:
+    quota = check_public_execution_quota(
+        identity=identity,
+        execution_kind=execution_kind,
+        users_root=users_root,
+    )
+    if quota.get("ok", True):
+        return None
+
+    return {
+        "ok": False,
+        "error": quota.get("message") or "Public demo execution quota reached for this session.",
+        "execution_quota": quota,
+    }
 
 def _public_session_quota_error_payload(identity) -> dict | None:
     quota = public_session_quota_status(identity)
