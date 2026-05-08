@@ -1624,6 +1624,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 )
                 return
 
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             try:
                 request = ProductWorkflowRequest.model_validate(payload)
                 request = _resolve_product_workflow_runtime_request(
