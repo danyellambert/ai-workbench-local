@@ -1610,20 +1610,21 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/product/run-workflow":
-            try:
-                execution_quota_error = _public_execution_quota_error_payload(
-                    identity,
-                    "product_workflow_run",
-                    users_root=getattr(self, "users_root", None),
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            execution_quota_error = _public_execution_quota_error_payload(
+                identity,
+                "product_workflow_run",
+                users_root=getattr(self, "users_root", None),
+            )
+            if execution_quota_error is not None:
+                self._send_json_with_cookies(
+                    HTTPStatus.TOO_MANY_REQUESTS,
+                    execution_quota_error,
+                    cookies=[set_cookie] if set_cookie else None,
                 )
-                if execution_quota_error is not None:
-                    self._send_json_with_cookies(
-                        HTTPStatus.TOO_MANY_REQUESTS,
-                        execution_quota_error,
-                        cookies=[set_cookie] if set_cookie else None,
-                    )
-                    return
+                return
 
+            try:
                 request = ProductWorkflowRequest.model_validate(payload)
                 request = _resolve_product_workflow_runtime_request(
                     self.bootstrap,
@@ -1940,6 +1941,19 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
         if path == "/api/lab/workflow-inspector/run":
             identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            execution_quota_error = _public_execution_quota_error_payload(
+                identity,
+                "workflow_inspector_run",
+                users_root=getattr(self, "users_root", None),
+            )
+            if execution_quota_error is not None:
+                self._send_json_with_cookies(
+                    HTTPStatus.TOO_MANY_REQUESTS,
+                    execution_quota_error,
+                    cookies=[set_cookie] if set_cookie else None,
+                )
+                return
+
             try:
                 runs_path = get_lab_workflow_runs_path(self.bootstrap.workspace_root) if identity.can_write_global else _lab_overlay_workflow_runs_path(identity)
                 execution = execute_lab_workflow_inspector_run(
