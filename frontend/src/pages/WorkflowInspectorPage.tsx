@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppStore } from '@/lib/store';
+import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 
 function toStatus(status: string): string {
   if (status === 'completed' || status === 'success') return 'completed';

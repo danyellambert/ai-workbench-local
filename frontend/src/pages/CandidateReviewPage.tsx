@@ -20,6 +20,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
 import { PageHeader, GlassCard, StatusPill, WorkflowProgressHeader } from '@/components/shared/ui-components';
@@ -608,7 +609,7 @@ export default function CandidateReviewPage() {
       toast.success(generatedCandidateReviewInputText ? 'Candidate review completed against the selected role brief.' : 'Candidate review completed with grounded backend output.');
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Candidate review failed.');
+      toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Candidate review failed.');
     },
   });
 

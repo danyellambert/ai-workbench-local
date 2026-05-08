@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/components/ui/sonner';
 import { useAppStore } from '@/lib/store';
 import { findRecommendedDocument, normalizeDemoDocumentName, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
+import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 
 const impactColors = {
   breaking: 'bg-glow-error/10 text-glow-error border-glow-error/20',
@@ -200,7 +201,7 @@ export default function ComparisonPage() {
       toast.success('Policy comparison completed with grounded output.');
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Policy comparison failed.');
+      toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Policy comparison failed.');
     },
   });
 

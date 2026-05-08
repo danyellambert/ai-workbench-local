@@ -4,6 +4,7 @@ import type {
   ProviderConnection,
   RuntimeProfile,
 } from '@/types/settings';
+import { PublicExecutionQuotaError, isPublicExecutionQuotaPayload } from '@/lib/public-demo-limits';
 
 const rawBaseUrl = (import.meta.env.VITE_PRODUCT_API_BASE_URL as string | undefined)?.trim();
 

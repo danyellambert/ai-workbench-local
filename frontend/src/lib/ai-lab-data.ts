@@ -1,5 +1,6 @@
 import { PRODUCT_API_BASE_URL } from '@/lib/product-api';
 import type { DataSource } from '@/types/ai-lab';
+import { PublicExecutionQuotaError, isPublicExecutionQuotaPayload } from '@/lib/public-demo-limits';
 
 export type LabEvalVerdict = 'PASS' | 'WARN' | 'FAIL';
 

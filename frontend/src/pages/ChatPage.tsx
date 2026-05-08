@@ -10,6 +10,7 @@ import type { LabChatMessage, LabChatMessageSource, LabChatPageData, LabChatSess
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/lib/store';
+import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 
 const CHAT_INPUT_MAX_CHARS = 2000;
 

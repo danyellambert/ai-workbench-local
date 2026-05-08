@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, ChevronDown, Clock, ExternalLink, FileText, Info, Loader2, Play, Sparkles, User } from 'lucide-react';
+import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 
 import { PageHeader, StatusPill, SeverityBadge, GlassCard, WorkflowProgressHeader } from '@/components/shared/ui-components';
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
@@ -213,7 +214,7 @@ export default function DocumentReviewPage() {
       toast.success('Document review completed with grounded output.');
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Document review failed.');
+      toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Document review failed.');
     },
   });
 

@@ -5,6 +5,7 @@ import os
 import tempfile
 import threading
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +32,10 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+def _iso_utc(timestamp: float) -> str:
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
+
+
 def _state_path(users_root: Path | None) -> Path:
     root = users_root or users_root_from_env()
     return Path(root).expanduser().resolve() / "public_execution_quota" / "executions.json"
@@ -38,21 +43,21 @@ def _state_path(users_root: Path | None) -> Path:
 
 def _read_state(path: Path) -> dict[str, Any]:
     if not path.exists():
-        return {"version": 1, "events": []}
+        return {"version": 2, "events": []}
 
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
-        return {"version": 1, "events": []}
+        return {"version": 2, "events": []}
 
     if not isinstance(payload, dict):
-        return {"version": 1, "events": []}
+        return {"version": 2, "events": []}
 
     events = payload.get("events")
     if not isinstance(events, list):
         events = []
 
-    return {"version": 1, "events": [event for event in events if isinstance(event, dict)]}
+    return {"version": 2, "events": [event for event in events if isinstance(event, dict)]}
 
 
 def _write_state(path: Path, state: dict[str, Any]) -> None:
@@ -73,6 +78,13 @@ def _write_state(path: Path, state: dict[str, Any]) -> None:
     Path(tmp_name).replace(path)
 
 
+def _event_ts(event: dict[str, Any]) -> float | None:
+    try:
+        return float(event.get("ts"))
+    except (TypeError, ValueError):
+        return None
+
+
 def check_public_execution_quota(
     *,
     identity: RequestIdentity,
@@ -83,7 +95,8 @@ def check_public_execution_quota(
     """Limit public execution attempts per anonymous public session.
 
     This is not a storage quota and it does not delete anything. It only writes a
-    small counter file under the users root. Admin/global requests bypass it.
+    small rolling-window counter file under the users root. Admin/global requests
+    bypass it.
     """
 
     if identity.can_write_global:
@@ -103,7 +116,7 @@ def check_public_execution_quota(
             "message": "Public execution quota is disabled.",
         }
 
-    max_per_session = _env_int("AI_DECISION_STUDIO_PUBLIC_EXECUTION_QUOTA_MAX_PER_SESSION", 20)
+    max_per_session = _env_int("AI_DECISION_STUDIO_PUBLIC_EXECUTION_QUOTA_MAX_PER_SESSION", 4)
     if max_per_session <= 0:
         return {
             "ok": True,
@@ -112,14 +125,29 @@ def check_public_execution_quota(
             "message": "Public execution quota is disabled by max_per_session <= 0.",
         }
 
+    window_seconds = _env_int("AI_DECISION_STUDIO_PUBLIC_EXECUTION_QUOTA_WINDOW_SECONDS", 1200)
+    if window_seconds <= 0:
+        window_seconds = 1200
+
     session_id = str(identity.session_id or identity.user_id or "unknown").strip() or "unknown"
     kind = str(execution_kind or "execution").strip() or "execution"
     current_time = float(now if now is not None else time.time())
+    cutoff = current_time - float(window_seconds)
     path = _state_path(users_root)
 
     with _STATE_LOCK:
         state = _read_state(path)
-        events = state.get("events", [])
+        raw_events = state.get("events", [])
+
+        # Keep only events still relevant to the rolling window, plus malformed events
+        # from other sessions are discarded safely.
+        events: list[dict[str, Any]] = []
+        for event in raw_events:
+            event_time = _event_ts(event)
+            if event_time is None:
+                continue
+            if event_time >= cutoff:
+                events.append(event)
 
         session_events = [
             event
@@ -128,20 +156,28 @@ def check_public_execution_quota(
         ]
 
         if len(session_events) >= max_per_session:
+            oldest_ts = min((_event_ts(event) for event in session_events if _event_ts(event) is not None), default=current_time)
+            reset_at_ts = float(oldest_ts) + float(window_seconds)
+            retry_after_seconds = max(1, int(round(reset_at_ts - current_time)))
+
             state["events"] = events
             _write_state(path, state)
+
             return {
                 "ok": False,
                 "enforced": True,
                 "scope": "session_overlay",
-                "blocked_by": ["session"],
+                "blocked_by": ["session_window"],
                 "session_id": session_id,
                 "execution_kind": kind,
                 "max_per_session": max_per_session,
+                "window_seconds": window_seconds,
+                "retry_after_seconds": retry_after_seconds,
+                "reset_at": _iso_utc(reset_at_ts),
                 "session_count": len(session_events),
                 "message": (
-                    "Public demo execution quota reached for this session. "
-                    "Start a new admin session or increase the public execution quota."
+                    "Public demo execution limit reached. "
+                    "Please wait about 20 minutes before running another workflow."
                 ),
             }
 
@@ -162,6 +198,8 @@ def check_public_execution_quota(
         "session_id": session_id,
         "execution_kind": kind,
         "max_per_session": max_per_session,
+        "window_seconds": window_seconds,
+        "remaining": max(0, max_per_session - (len(session_events) + 1)),
         "session_count": len(session_events) + 1,
         "message": "Public demo execution is within session quota.",
     }

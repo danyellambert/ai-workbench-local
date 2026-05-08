@@ -16,6 +16,7 @@ import {
   Sparkles,
   User,
 } from 'lucide-react';
+import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 
 import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
 import { PageHeader, StatusPill, SeverityBadge, GlassCard, WorkflowProgressHeader } from '@/components/shared/ui-components';
@@ -300,7 +301,7 @@ export default function ActionPlanPage() {
       toast.success('Action plan generated from grounded backend output.');
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Action plan workflow failed.');
+      toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Action plan workflow failed.');
     },
   });
 

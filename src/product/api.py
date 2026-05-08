@@ -244,11 +244,18 @@ def _public_execution_quota_error_payload(identity, execution_kind: str, users_r
     if quota.get("ok", True):
         return None
 
-    return {
+    retry_after = quota.get("retry_after_seconds")
+    payload = {
         "ok": False,
-        "error": quota.get("message") or "Public demo execution quota reached for this session.",
+        "error": quota.get("message") or "Public demo execution limit reached.",
+        "message": quota.get("message") or "Public demo execution limit reached.",
         "execution_quota": quota,
     }
+    if retry_after is not None:
+        payload["retry_after_seconds"] = retry_after
+    if quota.get("reset_at"):
+        payload["reset_at"] = quota.get("reset_at")
+    return payload
 
 def _public_session_quota_error_payload(identity) -> dict | None:
     quota = public_session_quota_status(identity)
