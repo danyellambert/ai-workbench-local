@@ -204,7 +204,7 @@ def public_session_identity(
 
 
 def identity_payload(identity: RequestIdentity) -> dict:
-    return {
+    payload = {
         "ok": True,
         "identity": identity.to_public_dict(),
         "policy": {
@@ -213,6 +213,9 @@ def identity_payload(identity: RequestIdentity) -> dict:
             "public_can_publish_external": identity.can_publish_external,
         },
     }
+
+    payload["quota"] = public_session_quota_status(identity)
+    return payload
 
 def _admin_overlay_root(users_root: Path) -> Path:
     return users_root / "admin" / "overlay"
