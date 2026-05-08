@@ -1611,6 +1611,19 @@ class ProductApiHandler(BaseHTTPRequestHandler):
 
         if path == "/api/product/run-workflow":
             try:
+                execution_quota_error = _public_execution_quota_error_payload(
+                    identity,
+                    "product_workflow_run",
+                    users_root=getattr(self, "users_root", None),
+                )
+                if execution_quota_error is not None:
+                    self._send_json_with_cookies(
+                        HTTPStatus.TOO_MANY_REQUESTS,
+                        execution_quota_error,
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
+                    return
+
                 request = ProductWorkflowRequest.model_validate(payload)
                 request = _resolve_product_workflow_runtime_request(
                     self.bootstrap,
