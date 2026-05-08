@@ -16,6 +16,17 @@ export type PublicExecutionQuotaPayload = {
   };
 };
 
+function formatRetryAfterDuration(seconds: number): string {
+  const roundedSeconds = Math.max(1, Math.ceil(seconds));
+
+  if (roundedSeconds < 60) {
+    return `${roundedSeconds} second${roundedSeconds === 1 ? '' : 's'}`;
+  }
+
+  const minutes = Math.max(1, Math.ceil(roundedSeconds / 60));
+  return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+}
+
 export class PublicExecutionQuotaError extends Error {
   payload: PublicExecutionQuotaPayload;
   retryAfterSeconds?: number;
@@ -26,13 +37,13 @@ export class PublicExecutionQuotaError extends Error {
     const retryAfterSeconds = Number(
       payload.retry_after_seconds ?? quota.retry_after_seconds ?? 1200,
     );
-    const minutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+    const retryAfterLabel = formatRetryAfterDuration(retryAfterSeconds);
     const maxRuns = quota.max_per_session;
 
     super(
       maxRuns
-        ? `Demo limit reached. You can run up to ${maxRuns} workflows every ${minutes} minute(s). Please wait before running another workflow.`
-        : `Demo limit reached. Please wait about ${minutes} minute(s) before running another workflow.`,
+        ? `Demo limit reached. You can run up to ${maxRuns} workflows every ${retryAfterLabel}. Please wait before running another workflow.`
+        : `Demo limit reached. Please wait about ${retryAfterLabel} before running another workflow.`,
     );
 
     this.name = 'PublicExecutionQuotaError';
