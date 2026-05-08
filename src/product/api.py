@@ -23,6 +23,7 @@ from src.product.access_control import (
     public_session_quota_status,
     request_identity,
 )
+from src.product.deck_rate_limit import check_public_deck_generation_rate_limit
 from src.config import ProductApiSettings, get_product_api_settings
 from src.rag.loaders import load_document
 from src.product.command_center import (
@@ -1762,6 +1763,25 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     self._send_json_with_cookies(
                         HTTPStatus.TOO_MANY_REQUESTS,
                         quota_error,
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
+                    return
+
+                deck_rate_limit = check_public_deck_generation_rate_limit(
+                    identity=identity,
+                    headers=self.headers,
+                    client_address=getattr(self, "client_address", None),
+                    users_root=getattr(self, "users_root", None),
+                )
+                if not deck_rate_limit.get("ok", True):
+                    self._send_json_with_cookies(
+                        HTTPStatus.TOO_MANY_REQUESTS,
+                        {
+                            "ok": False,
+                            "error": deck_rate_limit.get("message")
+                            or "Public demo deck generation rate limit reached.",
+                            "rate_limit": deck_rate_limit,
+                        },
                         cookies=[set_cookie] if set_cookie else None,
                     )
                     return
