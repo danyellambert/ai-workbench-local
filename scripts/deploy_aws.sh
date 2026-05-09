@@ -207,7 +207,7 @@ DOCKER_BUILDKIT=1 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
   -f docker-compose.aws.yml \
-  up -d --build --force-recreate ollama nextcloud ppt-creator product-api frontend
+  up -d --build --force-recreate ollama nextcloud ppt-creator product-api frontend caddy
 
 docker compose \
   --env-file "$ENV_FILE" \
