@@ -1,0 +1,8 @@
+{$AI_DECISION_STUDIO_PUBLIC_DOMAIN} {
+    encode gzip zstd
+
+    @dynamic path /api/* /health
+    header @dynamic Cache-Control "no-store, max-age=0"
+
+    reverse_proxy frontend:8080
+}

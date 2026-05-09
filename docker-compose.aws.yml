@@ -1,4 +1,20 @@
 services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      AI_DECISION_STUDIO_PUBLIC_DOMAIN: ${AI_DECISION_STUDIO_PUBLIC_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
   product-api:
     build:
       context: "."
@@ -189,6 +205,8 @@ services:
     networks:
     - ai-decision-studio-private
 volumes:
+  caddy_config:
+  caddy_data:
   ppt_creator_workspace:
   ollama_data:
   nextcloud_app:
