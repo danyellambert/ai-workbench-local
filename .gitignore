@@ -228,3 +228,9 @@ evals/benchmark-runs/*
 
 evals/**/.DS_Store
 !legacy/deploy/oracle/.env.oracle.example
+
+# Product architecture asset policy:
+# track only canonical README visuals, ignore all other drafts/exports.
+docs/assets/product/*
+!docs/assets/product/architecture-overview.svg
+!docs/assets/product/readme-header.svg
