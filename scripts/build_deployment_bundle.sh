@@ -58,6 +58,7 @@ copy_path ".env.aws.example"
 copy_path ".env.docker.example"
 copy_path ".env.local.example"
 copy_path ".dockerignore"
+copy_path "deploy"
 copy_path "Dockerfile.product-api.local"
 copy_path "Dockerfile.product-api.aws"
 copy_path "requirements.txt"
@@ -274,6 +275,7 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
     return findings
 
 required_paths = [
+    "deploy/caddy/Caddyfile",
     "docker-compose.local.yml",
     ".env.aws.example",
     ".env.docker.example",
