@@ -116,6 +116,34 @@ compose() {
     "$@"
 }
 
+ensure_secret_store_root() {
+  local secret_root
+  secret_root="$(get_env_value AI_DECISION_STUDIO_SECRET_ROOT "/opt/ai-decision-studio/secrets")"
+
+  echo
+  echo "== Ensure private secret store volume =="
+  echo "secret_root=$secret_root"
+
+  if [ -z "$secret_root" ] || [ "$secret_root" = "/" ]; then
+    echo "ERROR: unsafe AI_DECISION_STUDIO_SECRET_ROOT=$secret_root" >&2
+    exit 1
+  fi
+
+  if [ "$(id -u)" = "0" ]; then
+    mkdir -p "$secret_root"
+    chown "$(id -u):$(id -g)" "$secret_root" || true
+    chmod 700 "$secret_root"
+  else
+    sudo mkdir -p "$secret_root"
+    sudo chown "$(id -u):$(id -g)" "$secret_root"
+    chmod 700 "$secret_root"
+  fi
+
+  ls -ld "$secret_root"
+}
+
+ensure_secret_store_root
+
 CFG="/tmp/ads_aws_compose_$(date +%Y%m%d_%H%M%S).yml"
 
 compose config > "$CFG"

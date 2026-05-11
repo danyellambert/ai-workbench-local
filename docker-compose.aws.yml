@@ -79,7 +79,10 @@ services:
       AI_DECISION_STUDIO_ADMIN_USERNAME: "${AI_DECISION_STUDIO_ADMIN_USERNAME:-}"
       AI_DECISION_STUDIO_ADMIN_PASSWORD_HASH: "${AI_DECISION_STUDIO_ADMIN_PASSWORD_HASH:-}"
       AI_DECISION_STUDIO_SESSION_SECRET: "${AI_DECISION_STUDIO_SESSION_SECRET:-}"
+      AI_DECISION_STUDIO_SECRET_STORE_BACKEND: "${AI_DECISION_STUDIO_SECRET_STORE_BACKEND:-file}"
+      AI_DECISION_STUDIO_SECRET_STORE_PATH: "${AI_DECISION_STUDIO_SECRET_STORE_PATH:-/app/secrets/credential_store.json}"
     volumes:
+    - "${AI_DECISION_STUDIO_SECRET_ROOT:-/opt/ai-decision-studio/secrets}:/app/secrets"
     - "${AI_DECISION_STUDIO_BASELINE_ROOT:-/opt/ai-decision-studio/data/baseline}:/app/baseline:ro"
     - "${AI_DECISION_STUDIO_RUNTIME_ROOT:-/opt/ai-decision-studio/data/runtime}:/app/runtime"
     - "${AI_DECISION_STUDIO_ARTIFACT_ROOT:-/opt/ai-decision-studio/data/artifacts}:/app/artifacts"
