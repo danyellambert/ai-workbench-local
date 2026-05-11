@@ -205,6 +205,21 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
         r"(?i)[\"']?(api[_-]?key|apikey|token|password|passwd|authorization|bearer|secret)[\"']?\s*:\s*[\"']([^\"']+)[\"']"
     )
 
+    # These keys contain the word SECRET, but in .env.*.example they are not
+    # credential values. They are safe filesystem paths used to configure the
+    # private credential-store backend/volume.
+    allowed_env_example_path_secret_keys = {
+        "AI_DECISION_STUDIO_SECRET_STORE_PATH",
+        "AI_DECISION_STUDIO_SECRET_ROOT",
+    }
+
+    def is_allowed_env_example_path_secret(relative_path: str, key: str) -> bool:
+        return (
+            key in allowed_env_example_path_secret_keys
+            and relative_path.startswith(".env.")
+            and relative_path.endswith(".example")
+        )
+
     for item in path.rglob("*"):
         if len(findings) >= limit:
             break
@@ -239,10 +254,15 @@ def secret_findings(path: Path, limit: int = 50) -> list[dict]:
             if yaml_match:
                 matches.append((yaml_match.group(1), yaml_match.group(2)))
 
+            relative_path = str(item.relative_to(path))
+
             for key, value in matches:
+                if is_allowed_env_example_path_secret(relative_path, key):
+                    continue
+
                 if looks_real_secret_value(value):
                     findings.append({
-                        "path": str(item.relative_to(path)),
+                        "path": relative_path,
                         "line": lineno,
                         "key": key,
                     })
