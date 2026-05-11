@@ -51,6 +51,8 @@ def _extract_action_items(structured_response: dict[str, Any]) -> list[dict[str,
         normalized.append(
             {
                 "description": description,
+                "card_summary": _clean_text(item.get("card_summary") or item.get("summary")),
+                "summary": _clean_text(item.get("summary") or item.get("card_summary")),
                 "owner": owner,
                 "due_date": due_date,
                 "status": status,

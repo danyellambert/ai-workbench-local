@@ -326,6 +326,17 @@ def _heuristic_action_items_from_preview(
     return normalized
 
 
+
+def _action_card_summary_from_item(item: object) -> str | None:
+    for key in ("card_summary", "summary", "short_summary", "action_summary", "narrative", "explanation"):
+        value = getattr(item, key, None)
+        if value is None and isinstance(item, dict):
+            value = item.get(key)
+        cleaned = _clean_optional_text(value)
+        if cleaned:
+            return cleaned
+    return None
+
 def _normalize_action_items(
     *,
     payload: DocumentAgentPayload,

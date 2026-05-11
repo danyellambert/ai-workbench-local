@@ -11,6 +11,7 @@ import { getProductCommandCenter } from '@/lib/product-api';
 import { Button } from '@/components/ui/button';
 import { AI_LAB_ROUTES } from '@/lib/ai-lab-navigation';
 
+import { formatUserDateTime } from '@/lib/user-time';
 const stagger = { animate: { transition: { staggerChildren: 0.06 } } };
 const item = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } } };
 
@@ -28,11 +29,8 @@ const demoScenarios = [
   { label: 'Review Candidate CV', path: '/app/workflows/candidate-review', icon: UserCheck },
 ];
 
-function formatDateTime(value?: string | null): string {
-  if (!value) return 'n/a';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+function formatDateTime(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 export default function OverviewPage() {

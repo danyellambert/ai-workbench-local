@@ -760,6 +760,58 @@ def _summarize_payload(
     return summary.strip(), [], None, warnings
 
 
+
+def _policy_comparison_v2_quality_is_clean(structured_result: StructuredResult) -> bool:
+    payload = getattr(structured_result, "validated_output", None)
+    structured_response = getattr(payload, "structured_response", None)
+    if not isinstance(structured_response, dict):
+        return False
+
+    policy_v2 = structured_response.get("policy_comparison_v2")
+    if not isinstance(policy_v2, dict):
+        return False
+
+    quality_report = policy_v2.get("quality_report")
+    if not isinstance(quality_report, dict):
+        return False
+
+    deltas = policy_v2.get("deltas") if isinstance(policy_v2.get("deltas"), list) else []
+    priorities = policy_v2.get("negotiation_priorities") if isinstance(policy_v2.get("negotiation_priorities"), list) else []
+
+    generic_priority_labels = {"critical", "high", "medium", "low", "urgent", "p0", "p1", "p2", "p3"}
+    has_generic_priorities = any(
+        "".join(ch for ch in str(item or "").casefold() if ch.isalnum()) in generic_priority_labels
+        for item in priorities
+    )
+
+    required_delta_fields = {
+        "title",
+        "impact",
+        "category",
+        "change_summary",
+        "doc_a_evidence",
+        "doc_b_evidence",
+        "must_fix_title",
+        "negotiation_priority",
+        "watchout",
+        "next_step",
+    }
+    returned_deltas = [item for item in deltas if isinstance(item, dict)]
+    returned_deltas_complete = all(
+        all(str(item.get(field) or "").strip() for field in required_delta_fields)
+        for item in returned_deltas
+    )
+
+    return (
+        returned_deltas_complete
+        and not has_generic_priorities
+        and not quality_report.get("final_issues")
+        and not quality_report.get("blocking_issues")
+        and not quality_report.get("json_extraction_failed")
+        and not quality_report.get("needs_review")
+    )
+
+
 def _run_structured_product_workflow(
     request: ProductWorkflowRequest,
     *,
@@ -805,8 +857,17 @@ def _run_structured_product_workflow(
         workflow_id=request.workflow_id,
         structured_result=structured_result,
     )
+
+    # Policy Comparison watchouts are business cautions used by the UI, not technical
+    # workflow warnings. When policy_comparison_v2 is structurally clean, keep the
+    # run completed even if the payload carries watchouts/limitations.
+    if request.workflow_id == "policy_contract_comparison" and _policy_comparison_v2_quality_is_clean(structured_result):
+        warnings = []
+
     status = "completed" if structured_result.success else "error"
-    if status == "completed" and warnings:
+    # Document Review warnings are business review signals, not technical execution failures.
+    # Keep the run completed when the structured workflow succeeded.
+    if status == "completed" and warnings and request.workflow_id not in {"document_review", "action_plan_evidence_review"}:
         status = "warning"
     if request.workflow_id == "candidate_review" and len(request.document_ids) > 1:
         warnings.insert(0, "Candidate Review is designed for one CV at a time.")

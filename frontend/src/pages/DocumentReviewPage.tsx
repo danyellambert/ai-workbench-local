@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, ChevronDown, Clock, ExternalLink, FileText, Info, Loader2, Play, Sparkles, User } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, Clock, FileText, Info, Loader2, Play, Sparkles, User } from 'lucide-react';
 import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 
 import { PageHeader, StatusPill, SeverityBadge, GlassCard, WorkflowProgressHeader } from '@/components/shared/ui-components';
@@ -30,6 +30,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useAppStore } from '@/lib/store';
 import { findRecommendedDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
 
+import { formatUserDate } from '@/lib/user-time';
+import { aiLabQueryKeys } from '@/lib/ai-lab-data';
 const workflowSteps = [
   { key: 'select', label: 'Select' },
   { key: 'ground', label: 'Ground' },
@@ -38,11 +40,8 @@ const workflowSteps = [
   { key: 'export', label: 'Export' },
 ];
 
-function formatDate(value?: string | null): string {
-  if (!value) return 'n/a';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+function formatDate(value?: string | number | null): string {
+  return formatUserDate(value);
 }
 
 function buildSeverityNarrative(counts: Record<'critical' | 'high' | 'medium' | 'low', number>, fallback: string): string {
@@ -210,6 +209,9 @@ export default function DocumentReviewPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
       ]);
       toast.success('Document review completed with grounded output.');
     },
@@ -231,6 +233,9 @@ export default function DocumentReviewPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
       ]);
       toast.success('Executive deck artifacts generated successfully.');
@@ -409,7 +414,7 @@ export default function DocumentReviewPage() {
                           {previewQuery.isLoading ? 'Loading context...' : (groundingPreview?.warnings?.length ?? 0) > 0 ? 'Context loaded with caveats' : 'Context loaded'}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
+                      <p className="text-xs text-muted-foreground leading-relaxed">
                         {groundingPreview?.preview_text || 'Select an indexed document to preview the grounded context before running the workflow.'}
                       </p>
                     </div>
@@ -489,16 +494,15 @@ export default function DocumentReviewPage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + index * 0.05 }}
-                  className="glass rounded-xl p-4 hover:border-primary/20 transition-all duration-300 cursor-pointer group"
+                  className="glass rounded-xl p-4 hover:border-primary/20 transition-all duration-300"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <SeverityBadge severity={finding.severity} />
                       <span className="text-[10px] px-2 py-0.5 rounded-md bg-secondary/50 text-muted-foreground">{finding.category}</span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground">Confidence: {(finding.confidence * 100).toFixed(0)}%</span>
                   </div>
-                  <h4 className="text-sm font-medium text-foreground mb-1 group-hover:text-primary transition-colors">{finding.title}</h4>
+                  <h4 className="text-sm font-medium text-foreground mb-1">{finding.title}</h4>
                   <p className="text-xs text-muted-foreground leading-relaxed mb-3">{finding.description}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
@@ -512,7 +516,6 @@ export default function DocumentReviewPage() {
                         </>
                       ) : null}
                     </div>
-                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="mt-3 pt-3 border-t border-border/30">
                     <div className="flex items-start gap-2">
@@ -585,7 +588,7 @@ export default function DocumentReviewPage() {
                     <div key={`${artifact.artifact_type}-${artifact.path || artifact.label}`} className="flex items-center justify-between py-2 px-3 rounded-lg bg-secondary/20 hover:bg-secondary/30 transition-colors">
                       <div className="flex items-center gap-2 min-w-0">
                         <StatusPill status={artifact.available ? 'ready' : 'pending'} />
-                        <span className="text-xs text-foreground truncate">{artifact.download_name || artifact.label}</span>
+                        <span className="text-xs text-foreground">{artifact.download_name || artifact.label}</span>
                       </div>
                       <Button variant="ghost" size="sm" className="h-7 text-[10px] text-muted-foreground hover:text-foreground" onClick={() => handleOpenArtifact(artifact)}>
                         Open

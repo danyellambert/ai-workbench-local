@@ -46,6 +46,8 @@ import {
 } from '@/lib/product-api';
 import { findRecommendedDocument, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
 
+import { formatUserDate } from '@/lib/user-time';
+import { aiLabQueryKeys } from '@/lib/ai-lab-data';
 const workflowSteps = [
   { key: 'select', label: 'Select' },
   { key: 'ground', label: 'Ground' },
@@ -338,11 +340,8 @@ function roleContextSummary(roleContext: CandidateReviewRoleContext | null | und
   return parts.join(' · ');
 }
 
-function formatDate(value?: string | null): string {
-  if (!value) return 'n/a';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+function formatDate(value?: string | number | null): string {
+  return formatUserDate(value);
 }
 
 function buildInitials(name?: string | null): string {
@@ -437,6 +436,25 @@ function getStatusCopy(response: ProductRunWorkflowResponse | null): { label: st
     label: 'Awaiting live run',
     detail: 'Select a CV-like document and run the backend workflow to replace placeholders with grounded hiring signals.',
   };
+}
+
+
+function isPublicationLeadershipText(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  return Boolean(
+    normalized.includes('publication') ||
+    normalized.includes('leadership') ||
+    normalized.includes('mentored') ||
+    normalized.includes('managed') ||
+    normalized.includes('led ') ||
+    normalized.includes('paper') ||
+    normalized.includes('conference')
+  );
+}
+
+function isStandaloneSectionHeading(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  return ['publications and leadership', 'publication and leadership', 'publications', 'leadership'].includes(normalized);
 }
 
 export default function CandidateReviewPage() {
@@ -604,6 +622,9 @@ export default function CandidateReviewPage() {
       setNotionPublishResult(null);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
       ]);
       toast.success(generatedCandidateReviewInputText ? 'Candidate review completed against the selected role brief.' : 'Candidate review completed with grounded backend output.');
@@ -625,6 +646,9 @@ export default function CandidateReviewPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
       ]);
       toast.success('Candidate review deck artifacts generated successfully.');
@@ -658,11 +682,19 @@ export default function CandidateReviewPage() {
       .filter(Boolean);
     return fromCandidateView.length ? fromCandidateView : fromSections;
   }, [candidateReviewView?.education, educationTable?.rows]);
+
+  const educationDisplayRows = educationRows.filter((item) => !isPublicationLeadershipText(item));
+  const publicationLeadershipRows = educationRows
+    .filter((item) => isPublicationLeadershipText(item))
+    .filter((item) => !isStandaloneSectionHeading(item));
+
   const strengths = candidateReviewView?.strengths?.length ? candidateReviewView.strengths : (sections?.strengths ?? []);
   const gaps = candidateReviewView?.gaps?.length ? candidateReviewView.gaps : (sections?.warnings ?? []);
   const senioritySignals = candidateReviewView?.seniority_signals?.length ? candidateReviewView.seniority_signals : (sections?.highlights ?? []);
   const watchouts = candidateReviewView?.watchouts?.length ? candidateReviewView.watchouts : (sections?.watchouts ?? sections?.warnings ?? []);
   const nextSteps = candidateReviewView?.next_steps?.length ? candidateReviewView.next_steps : (sections?.next_steps ?? []);
+
+
   const documentMetrics = candidateReviewView?.document_metrics ?? null;
   const showSourceBlockCount = documentMetrics?.show_source_block_count ?? ((workflowResponse?.result?.grounding_preview?.source_block_count ?? previewQuery.data?.preview?.source_block_count ?? 0) > 0);
   const sourceBlockCount = documentMetrics?.source_block_count ?? workflowResponse?.result?.grounding_preview?.source_block_count ?? previewQuery.data?.preview?.source_block_count ?? 0;
@@ -694,6 +726,18 @@ export default function CandidateReviewPage() {
     }
     window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer');
   };
+
+  const candidateHeroLabel =
+    nextSteps[0]
+    || (workflowResponse as unknown as { result?: { recommendation?: string } })?.result?.recommendation
+    || statusCopy.label;
+
+  const candidateHeroDetail =
+    strengths[0]
+      ? `Strongest grounded signal: ${strengths[0]}`
+      : watchouts[0]
+        ? `Validate in interview: ${watchouts[0]}`
+        : statusCopy.detail;
 
   return (
     <motion.div data-testid="candidate-review-page" className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -880,9 +924,9 @@ export default function CandidateReviewPage() {
             <div data-testid="candidate-review-status-panel" className="mt-4 bg-glow-success/5 border border-glow-success/20 rounded-lg p-3">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-glow-success" />
-                <span className="text-sm font-semibold text-glow-success">{statusCopy.label}</span>
+                <span className="text-sm font-semibold text-glow-success">{candidateHeroLabel}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1.5">{statusCopy.detail}</p>
+              <p className="text-[10px] text-muted-foreground mt-1.5">{candidateHeroDetail}</p>
             </div>
 
             <div data-testid="candidate-review-run-metadata" className="mt-4 space-y-2 text-left">
@@ -892,15 +936,28 @@ export default function CandidateReviewPage() {
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <GraduationCap className="w-3.5 h-3.5" />
-                {educationRows.length ? 'Education snapshot available' : 'Education snapshot will appear when available'}
+                {educationDisplayRows.length ? 'Education snapshot available' : 'Education snapshot will appear when available'}
               </div>
-              {educationRows.length > 0 && (
+              {educationDisplayRows.length > 0 && (
                 <div className="mt-3 space-y-2">
-                  {educationRows.slice(0, 4).map((item, index) => (
+                  {educationDisplayRows.slice(0, 4).map((item, index) => (
                     <p key={`${item}-${index}`} className="text-xs text-muted-foreground leading-relaxed">
                       {item}
                     </p>
                   ))}
+                </div>
+              )}
+              {publicationLeadershipRows.length > 0 && (
+                <div className="mt-4 border-t border-border/40 pt-3">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Publications & leadership</p>
+                  <div className="mt-2 space-y-1.5">
+                    {publicationLeadershipRows.slice(0, 4).map((item, index) => (
+                      <p key={`${item}-${index}`} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-muted-foreground/60 shrink-0" />
+                        <span>{item}</span>
+                      </p>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -1158,9 +1215,7 @@ export default function CandidateReviewPage() {
             <div className="flex items-center justify-between gap-3 mb-3">
               <div>
                 <h4 className="text-sm font-medium text-foreground">Artifacts</h4>
-                <p className="text-xs text-muted-foreground">Generated deck artifacts and any structured exports registered by the live candidate-review flow.</p>
               </div>
-              <StatusPill status={allArtifacts.length ? 'ready' : workflowResponse?.result ? workflowResponse.result.status : 'pending'} />
             </div>
             {(trelloPublishResult || notionPublishResult) ? (
               <div className="mb-4 grid gap-3 md:grid-cols-2">
@@ -1211,12 +1266,6 @@ export default function CandidateReviewPage() {
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">Run the workflow and generate the deck to register downloadable candidate-review artifacts here.</p>
-            )}
-            {workflowResponse?.run_id && (
-              <p className="mt-3 text-[10px] text-muted-foreground">Linked run id: {workflowResponse.run_id}</p>
-            )}
-            {workflowResponse?.source_run?.id && (
-              <p className="mt-1 text-[10px] text-muted-foreground">Rerun source: {workflowResponse.source_run.id}</p>
             )}
           </GlassCard>
         </div>

@@ -121,6 +121,14 @@ class ActionItem(BaseModel):
     """A structured action item identified in the source."""
 
     description: str = Field(description="Action description")
+    card_summary: Optional[str] = Field(
+        default=None,
+        description="Short explanatory subtitle for an action card; explains what the action means, why it matters, and what outcome it should unblock",
+    )
+    summary: Optional[str] = Field(
+        default=None,
+        description="Optional longer explanation for the action item; may mirror card_summary",
+    )
     owner: Optional[str] = Field(default=None, description="Assigned owner if mentioned")
     due_date: Optional[str] = Field(default=None, description="Due date if mentioned")
     status: Optional[str] = Field(default=None, description="Optional action status")

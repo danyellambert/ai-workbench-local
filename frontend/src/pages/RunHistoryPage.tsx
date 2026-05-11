@@ -32,6 +32,7 @@ import {
 } from '@/lib/product-api';
 import { toast } from '@/components/ui/sonner';
 
+import { formatUserDateTime } from '@/lib/user-time';
 const STATUS_FILTERS = ['all', 'completed', 'warning', 'error'] as const;
 const WINDOW_FILTERS = ['24h', '7d', '30d', 'all'] as const;
 const DEFAULT_PAGE_SIZE = 25;
@@ -51,11 +52,8 @@ type DeliveryEvent = {
   delivery: ProductDeliveryOutput;
 };
 
-function formatDateTime(value?: string | null): string {
-  if (!value) return 'n/a';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+function formatDateTime(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 function stringifyPayload(payload: unknown): string {

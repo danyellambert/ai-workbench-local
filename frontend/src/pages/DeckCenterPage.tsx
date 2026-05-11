@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatUserDateTime } from '@/lib/user-time';
 import {
   buildProductArtifactUrl,
   getProductArtifactEntry,
@@ -34,11 +35,8 @@ import {
 const STATUS_OPTIONS = ['all', 'ready', 'warning', 'error', 'pending'] as const;
 const DEFAULT_PAGE_SIZE = 24;
 
-function formatDateTime(value?: string | null): string {
-  if (!value) return 'n/a';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+function formatDateTime(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 function safeNumber(value?: number | null, fallback = 0): number {

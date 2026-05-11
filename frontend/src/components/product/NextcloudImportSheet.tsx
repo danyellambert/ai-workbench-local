@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/sonner';
 import AdminOnlyFeatureCard from '@/components/access/AdminOnlyFeatureCard';
+import { formatUserDate } from '@/lib/user-time';
 import {
   getProductNextcloudDocuments,
   buildProductNextcloudOpenUrl,
@@ -71,13 +72,7 @@ function createFolderNode(name: string, path: string): FolderNode {
 }
 
 function formatDate(value?: string | number | null): string {
-  if (typeof value === 'number' && value > 0) return new Date(value * 1000).toLocaleString();
-  if (typeof value === 'string' && value.trim()) {
-    const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-    const parsed = new Date(normalized);
-    return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
-  }
-  return 'Unknown';
+  return formatUserDate(value);
 }
 
 function formatSize(value?: number | null): string {

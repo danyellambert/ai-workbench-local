@@ -23,6 +23,7 @@ import type { LabRuntimePayload } from '../lib/ai-lab-data';
 import { Input } from '../components/ui/input';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
+import { formatUserDateTime } from '@/lib/user-time';
 
 const latencyChartConfig = {
   seconds: { label: 'Seconds' },
@@ -654,7 +655,7 @@ export default function RuntimeObservabilityPage() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-medium text-foreground">{trace.task}</p>
-                    <p className="text-[10px] text-muted-foreground">{new Date(trace.timestamp).toLocaleString()} · {trace.taskDetail ? `${trace.taskDetail} · ` : ''}{trace.provider} · {trace.model}</p>
+                    <p className="text-[10px] text-muted-foreground">{formatUserDateTime(trace.timestamp)} · {trace.taskDetail ? `${trace.taskDetail} · ` : ''}{trace.provider} · {trace.model}</p>
                   </div>
                   <StatusPill status={!trace.success ? 'error' : trace.needsReview ? 'warning' : 'completed'} />
                 </div>

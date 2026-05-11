@@ -1,6 +1,7 @@
 import type { ProviderCapabilities, ProviderConnection, RuntimeProfile, WorkflowFit } from '@/types/settings';
 import type { RuntimeControlsCatalogItem, RuntimeControlsResponse } from '@/lib/product-api';
 
+import { formatUserDateTime } from '@/lib/user-time';
 export const RUNTIME_COMPATIBILITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   recommended: { bg: 'bg-glow-success/10', text: 'text-glow-success', border: 'border-glow-success/20' },
   compatible: { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' },
@@ -30,10 +31,8 @@ export function getRuntimeConnection(payload: RuntimeControlsResponse | undefine
   return payload?.available_connections.find((connection) => connection.id === id);
 }
 
-export function formatRuntimeUpdatedAt(value?: string | null): string {
-  if (!value) return 'Not saved yet';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+export function formatRuntimeUpdatedAt(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 export function deriveRuntimeFallbackChain(profile: RuntimeProfile, payload: RuntimeControlsResponse | undefined) {

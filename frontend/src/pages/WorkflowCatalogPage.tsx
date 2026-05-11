@@ -6,6 +6,7 @@ import { Shield, GitCompare, ClipboardList, UserCheck, ArrowRight, FileOutput, S
 import { PageHeader, StatusPill, GlassCard } from '@/components/shared/ui-components';
 import { getProductDocumentLibrary, getProductRunHistory, getProductWorkflows, type ProductDocumentLibraryEntry, type ProductRunEntry, type ProductWorkflowDefinition } from '@/lib/product-api';
 
+import { formatUserDateTime } from '@/lib/user-time';
 const WORKFLOW_ICON_MAP: Record<string, typeof Shield> = {
   document_review: Shield,
   policy_contract_comparison: GitCompare,
@@ -27,11 +28,8 @@ const WORKFLOW_COLOR_MAP: Record<string, { gradient: string; icon: string }> = {
   candidate_review: { gradient: 'from-glow-warning/20 to-glow-warning/5', icon: 'bg-glow-warning/15 text-glow-warning' },
 };
 
-function formatDateTime(value?: string | null): string {
-  if (!value) return 'No live runs yet';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+function formatDateTime(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 function isCandidateLikeDocument(document: ProductDocumentLibraryEntry): boolean {

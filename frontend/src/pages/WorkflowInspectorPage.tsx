@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppStore } from '@/lib/store';
 import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 
+import { formatUserDateTime } from '@/lib/user-time';
 function toStatus(status: string): string {
   if (status === 'completed' || status === 'success') return 'completed';
   if (status === 'warning') return 'warning';
@@ -244,7 +245,7 @@ export default function WorkflowInspectorPage() {
         <GlassCard>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Recent window</p>
           <p className="text-lg font-semibold text-foreground">{summary?.recent_window_count ?? recentCases.length}</p>
-          <p className="text-[10px] text-muted-foreground">Last {summary?.recent_window_limit ?? 30} persisted traces · {summary?.last_run_at ? `updated ${new Date(summary.last_run_at).toLocaleString()}` : 'no recent live run'}</p>
+          <p className="text-[10px] text-muted-foreground">Last {summary?.recent_window_limit ?? 30} persisted traces · {summary?.last_run_at ? `updated ${formatUserDateTime(summary.last_run_at)}` : 'no recent live run'}</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Mode mix</p>
@@ -621,7 +622,7 @@ export default function WorkflowInspectorPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs font-medium text-foreground">{task.label}</p>
-                      <p className="text-[10px] text-muted-foreground">{task.runs} run(s) · last {task.last_run_at ? new Date(task.last_run_at).toLocaleString() : 'never'}</p>
+                      <p className="text-[10px] text-muted-foreground">{task.runs} run(s) · last {task.last_run_at ? formatUserDateTime(task.last_run_at) : 'never'}</p>
                     </div>
                     <StatusPill status={toStatus(task.last_status)} />
                   </div>
@@ -655,7 +656,7 @@ export default function WorkflowInspectorPage() {
                     <StatusPill status={toStatus(run.status)} />
                   </div>
                   <div className="mt-2 text-[10px] text-muted-foreground flex flex-wrap items-center gap-2">
-                    <span>{run.timestamp ? new Date(run.timestamp).toLocaleString() : '—'}</span>
+                    <span>{run.timestamp ? formatUserDateTime(run.timestamp) : '—'}</span>
                     <span>·</span>
                     <span>{typeof run.latency_s === 'number' && run.latency_s > 0 ? `${run.latency_s.toFixed(1)}s` : 'latency n/a'}</span>
                     <span>·</span>

@@ -22,6 +22,7 @@ import { aiLabQueryKeys, getLabOverviewPage, type LabOverviewKpi } from '@/lib/a
 import { AI_LAB_ROUTES } from '@/lib/ai-lab-navigation';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { formatUserDateTime } from '@/lib/user-time';
 
 const workflowChartConfig = {
   volume: { label: 'Workflow share' },
@@ -262,7 +263,7 @@ export default function LabOverviewPage() {
               <div className="hidden h-4 w-px bg-border/60 lg:block" />
               <div className="flex items-center gap-2 min-w-0">
                 <span className="uppercase tracking-wide text-[10px] text-muted-foreground/80">Updated</span>
-                <span className="text-foreground">{new Date(data.meta.updated_at).toLocaleString()}</span>
+                <span className="text-foreground">{formatUserDateTime(data.meta.updated_at)}</span>
               </div>
             </>
           ) : null}
@@ -298,7 +299,7 @@ export default function LabOverviewPage() {
                   <p className="mt-1 text-[11px] text-foreground/80">{alert.detail}</p>
                   <div className="mt-1 flex items-center gap-3 text-[10px] text-muted-foreground">
                     <span>{alert.source}</span>
-                    <span>{new Date(alert.timestamp).toLocaleString()}</span>
+                    <span>{formatUserDateTime(alert.timestamp)}</span>
                   </div>
                 </div>
               ))}

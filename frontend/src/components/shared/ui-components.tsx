@@ -71,7 +71,7 @@ export function StatusPill({ status, className }: StatusPillProps) {
         status === 'error' || status === 'blocked' || status === 'disconnected' ? 'bg-glow-error' : '',
         status === 'pending' || status === 'inactive' || status === 'not_configured' || status === 'historical' || status === 'empty' ? 'bg-muted-foreground' : '',
       )} />
-      {status.split('_').join(' ').split('-').join(' ')}
+      {({ in_progress: 'Approved / WIP' } as Record<string, string>)[status] || status.split('_').join(' ').split('-').join(' ')}
     </span>
   );
 }

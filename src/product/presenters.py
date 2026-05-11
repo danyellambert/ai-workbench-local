@@ -19,6 +19,44 @@ def _clean_optional_text(value: object) -> str | None:
     return cleaned or None
 
 
+
+
+def _action_card_summary_from_raw(raw: object) -> str | None:
+    if not isinstance(raw, dict):
+        return None
+
+    title = _clean_optional_text(raw.get("title") or raw.get("description")) or ""
+    title_norm = title.casefold()
+
+    for key in ("card_summary", "summary", "short_summary", "action_summary", "narrative", "explanation"):
+        value = _clean_optional_text(raw.get(key))
+        if not value:
+            continue
+
+        value_norm = value.casefold()
+        if value_norm == title_norm:
+            continue
+        if " | " in value:
+            continue
+        if "CTR-" in value.upper():
+            continue
+        if "2024-" in value and any(token in value_norm for token in ("open", "in progress", "approved", "done", "blocked")):
+            continue
+
+        return value
+
+    return None
+
+def _action_item_summary_from_raw(raw: object) -> str | None:
+    if not isinstance(raw, dict):
+        return None
+    for key in ("summary", "card_summary", "short_summary", "rationale", "detail"):
+        value = raw.get(key)
+        cleaned = _clean_optional_text(value)
+        if cleaned:
+            return cleaned
+    return None
+
 def _title_from_finding_text(value: object, *, fallback: str = "Grounded finding") -> str:
     cleaned = _clean_text(value)
     if not cleaned:
@@ -166,6 +204,7 @@ def _serialize_native_document_review_findings(payload: DocumentAgentPayload) ->
     return normalized
 
 
+
 def _serialize_native_top_blockers(payload: DocumentAgentPayload, findings: list[dict[str, object]]) -> list[dict[str, object]]:
     blockers: list[dict[str, object]] = []
     seen: set[str] = set()
@@ -197,7 +236,6 @@ def _serialize_native_top_blockers(payload: DocumentAgentPayload, findings: list
             break
     return blockers
 
-
 def _serialize_native_business_impact(payload: DocumentAgentPayload) -> list[dict[str, str]]:
     normalized: list[dict[str, str]] = []
     for index, item in enumerate(payload.document_review_business_impact, start=1):
@@ -208,6 +246,75 @@ def _serialize_native_business_impact(payload: DocumentAgentPayload) -> list[dic
         if len(normalized) >= 4:
             break
     return normalized
+
+
+
+def _document_gap_description_text(
+    gap_text: str | None,
+    gap_evidence: str | None,
+    raw_gap: dict[str, object] | None,
+    paired_action: dict[str, object] | None,
+) -> str:
+    raw_gap = raw_gap or {}
+    paired_action = paired_action or {}
+    title = _clean_optional_text(gap_text)
+    candidates = [
+        raw_gap.get("summary"),
+        raw_gap.get("detail"),
+        raw_gap.get("rationale"),
+        raw_gap.get("impact"),
+        raw_gap.get("context"),
+        raw_gap.get("why_it_matters"),
+        raw_gap.get("explanation"),
+        raw_gap.get("notes"),
+        gap_evidence,
+    ]
+
+    for candidate in candidates:
+        cleaned = _clean_optional_text(candidate)
+        if cleaned and cleaned.casefold() != title.casefold():
+            return cleaned
+
+    action_context = (
+        _clean_optional_text(paired_action.get("card_summary"))
+        or _clean_optional_text(paired_action.get("summary"))
+        or _clean_optional_text(paired_action.get("rationale"))
+        or _clean_optional_text(paired_action.get("description"))
+        or _clean_optional_text(paired_action.get("action"))
+    )
+    if action_context and action_context.casefold() != title.casefold():
+        return f"Missing evidence blocks this follow-up: {action_context}"
+
+    return "Evidence is still missing to validate this requirement before approval."
+
+
+def _document_gap_recommendation_text(
+    gap_text: str | None,
+    raw_gap: dict[str, object] | None,
+    paired_action: dict[str, object] | None,
+) -> str:
+    raw_gap = raw_gap or {}
+    paired_action = paired_action or {}
+
+    candidates = [
+        raw_gap.get("recommendation"),
+        raw_gap.get("recommended_action"),
+        raw_gap.get("next_step"),
+        raw_gap.get("remediation"),
+        raw_gap.get("action"),
+        paired_action.get("card_summary"),
+        paired_action.get("summary"),
+        paired_action.get("description"),
+        paired_action.get("action"),
+    ]
+
+    title = _clean_optional_text(gap_text)
+    for candidate in candidates:
+        cleaned = _clean_optional_text(candidate)
+        if cleaned and cleaned.casefold() != title.casefold():
+            return cleaned
+
+    return "Collect or confirm the missing evidence before approval."
 
 
 def build_document_review_view(result: ProductWorkflowResult) -> dict[str, Any]:
@@ -241,6 +348,12 @@ def build_document_review_view(result: ProductWorkflowResult) -> dict[str, Any]:
 
     risk_items = [item for item in extraction_payload.get("risks", []) if isinstance(item, dict)]
     action_items = [item for item in extraction_payload.get("action_items", []) if isinstance(item, dict)]
+
+    gap_source_items: list[object] = []
+    for gap_key in ("missing_information", "evidence_gaps"):
+        raw_gap_items = extraction_payload.get(gap_key)
+        if isinstance(raw_gap_items, list):
+            gap_source_items.extend(raw_gap_items)
 
     findings: list[dict[str, object]] = list(native_findings)
     confidence_seed = overall_confidence
@@ -294,6 +407,101 @@ def build_document_review_view(result: ProductWorkflowResult) -> dict[str, Any]:
                 }
             )
 
+    # Evidence gaps are first-class findings in the UI.
+    # Deck/run history already count risks + gaps, so Open Flow should surface the same count.
+    if gap_source_items:
+        existing_keys = {
+            _clean_text(value).casefold()
+            for finding in findings
+            for value in (
+                finding.get("title"),
+                finding.get("description"),
+                finding.get("snippet"),
+            )
+            if _clean_text(value)
+        }
+
+        gap_index = 0
+        for raw_gap in gap_source_items:
+            gap_record = raw_gap if isinstance(raw_gap, dict) else {}
+            if isinstance(raw_gap, dict):
+                gap_text = (
+                    _clean_optional_text(raw_gap.get("description"))
+                    or _clean_optional_text(raw_gap.get("title"))
+                    or _clean_optional_text(raw_gap.get("gap"))
+                    or _clean_optional_text(raw_gap.get("evidence"))
+                )
+                gap_evidence = _clean_optional_text(raw_gap.get("evidence")) or gap_text
+                gap_owner = _clean_optional_text(raw_gap.get("owner"))
+                gap_due_date = _clean_optional_text(raw_gap.get("due_date"))
+                gap_status = _clean_optional_text(raw_gap.get("status"))
+            else:
+                gap_text = _clean_optional_text(raw_gap)
+                gap_evidence = gap_text
+                gap_owner = None
+                gap_due_date = None
+                gap_status = None
+
+            if not gap_text:
+                continue
+
+            key = _clean_text(gap_text).casefold()
+            if key in existing_keys:
+                continue
+
+            existing_keys.add(key)
+            gap_index += 1
+
+            paired_action = action_items[min(gap_index - 1, len(action_items) - 1)] if action_items else {}
+            gap_description = _document_gap_description_text(gap_text, gap_evidence, gap_record, paired_action)
+            recommendation = _document_gap_recommendation_text(gap_text, gap_record, paired_action)
+
+            severity = _infer_finding_severity(gap_text, gap_evidence, "evidence gap")
+            if severity == "low":
+                severity = "medium"
+
+            best_source = _best_source_match(raw_sources, gap_text, gap_evidence)
+
+            findings.append(
+                {
+                    "id": f"gap-{gap_index}",
+                    "severity": severity,
+                    "category": "Evidence Gap",
+                    "title": gap_text,
+                    "description": gap_description,
+                    "source": best_source.get("source") or "Grounded corpus",
+                    "chunkId": f"chunk_{best_source.get('chunk_id')}" if isinstance(best_source.get("chunk_id"), int) else "chunk_n/a",
+                    "confidence": _normalize_confidence(confidence_seed, severity=severity),
+                    "recommendation": recommendation,
+                    "snippet": gap_evidence or gap_text,
+                    "owner": gap_owner,
+                    "due_date": gap_due_date,
+                    "status": gap_status or "Review",
+                }
+            )
+
+    # Normalize Document Review titles before computing counters/rendering.
+    # If a title was generated from a shortened helper and ends with ellipsis,
+    # prefer the full description so UI/Notion/Trello do not show artificial "...".
+    def _document_review_title_looks_truncated(value: object) -> bool:
+        cleaned = _clean_text(value).strip()
+        return cleaned.endswith("...") or cleaned.endswith("…")
+
+    for finding in findings:
+        if not isinstance(finding, dict):
+            continue
+        title = _clean_optional_text(finding.get("title"))
+        description = _clean_optional_text(finding.get("description"))
+        snippet = _clean_optional_text(finding.get("snippet"))
+        replacement_title = description or snippet
+
+        if title and _document_review_title_looks_truncated(title) and replacement_title:
+            finding["title"] = replacement_title
+        elif title:
+            finding["title"] = title.rstrip(".… ").rstrip()
+        elif replacement_title:
+            finding["title"] = replacement_title
+
     severity_counts = {level: 0 for level in ("critical", "high", "medium", "low")}
     for finding in findings:
         severity = str(finding.get("severity") or "medium")
@@ -307,6 +515,8 @@ def build_document_review_view(result: ProductWorkflowResult) -> dict[str, Any]:
         top_blockers = [
             {
                 "title": finding.get("title"),
+                "card_summary": _action_card_summary_from_raw(locals().get("raw_item")) or _action_card_summary_from_raw(locals().get("item")) or _action_card_summary_from_raw(locals().get("raw_action")),
+                "summary": _action_card_summary_from_raw(locals().get("raw_item")) or _action_card_summary_from_raw(locals().get("item")) or _action_card_summary_from_raw(locals().get("raw_action")),
                 "severity": finding.get("severity"),
                 "recommendation": finding.get("recommendation"),
             }
@@ -318,6 +528,8 @@ def build_document_review_view(result: ProductWorkflowResult) -> dict[str, Any]:
         top_blockers = [
             {
                 "title": finding.get("title"),
+                "card_summary": _action_card_summary_from_raw(locals().get("raw_item")) or _action_card_summary_from_raw(locals().get("item")) or _action_card_summary_from_raw(locals().get("raw_action")),
+                "summary": _action_card_summary_from_raw(locals().get("raw_item")) or _action_card_summary_from_raw(locals().get("item")) or _action_card_summary_from_raw(locals().get("raw_action")),
                 "severity": finding.get("severity"),
                 "recommendation": finding.get("recommendation"),
             }
@@ -507,6 +719,52 @@ def _is_operational_technical_note(value: object) -> bool:
     return any(marker in text for marker in technical_markers)
 
 
+def _policy_v2_must_fix_items_for_ui(
+    differences: list[dict[str, Any]],
+    policy_comparison_v2: dict[str, Any],
+    *,
+    fallback_items: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+
+    for diff in differences:
+        title = _clean_optional_text(diff.get("must_fix_title")) or _clean_optional_text(diff.get("clause"))
+        if not title:
+            continue
+        detail = (
+            _clean_optional_text(diff.get("business_impact"))
+            or _clean_optional_text(diff.get("change_summary"))
+            or _clean_optional_text(diff.get("watchout"))
+        )
+        recommendation = (
+            _clean_optional_text(diff.get("next_step"))
+            or _clean_optional_text(diff.get("recommendation"))
+            or _clean_optional_text(diff.get("negotiation_priority"))
+        )
+        items.append(
+            {
+                "title": title,
+                "impact": _clean_optional_text(diff.get("impact")) or "significant",
+                "detail": detail,
+                "recommendation": recommendation,
+            }
+        )
+
+    deduped: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in items:
+        key = _clean_text(item.get("title")).casefold()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+
+    if deduped:
+        return deduped[:6]
+
+    return fallback_items[:6]
+
+
 def _build_policy_comparison_watchouts(
     *,
     differences: list[dict[str, Any]],
@@ -570,10 +828,12 @@ def _comparison_document_summary_lookup(payload: DocumentAgentPayload) -> dict[s
         label = _clean_optional_text(item.get("label")) or _clean_optional_text(item.get("document_id")) or f"Document {len(lookup) + 1}"
         summary = _clean_optional_text(item.get("summary")) or "Summary unavailable."
         key_points = _dedupe_texts(item.get("key_points") if isinstance(item.get("key_points"), list) else [], limit=4)
+        evidence_lines = _dedupe_texts(item.get("evidence_lines") if isinstance(item.get("evidence_lines"), list) else [], limit=6)
         lookup[label] = {
             "label": label,
             "summary": summary,
             "key_points": key_points,
+            "evidence_lines": evidence_lines,
         }
     return lookup
 
@@ -586,6 +846,10 @@ def _comparison_document_text(label: str, lookup: dict[str, dict[str, Any]], *, 
     for key_point in item.get("key_points") or []:
         parts.append(str(key_point))
         if len(parts) >= 3:
+            break
+    for evidence_line in item.get("evidence_lines") or []:
+        parts.append(str(evidence_line))
+        if len(parts) >= 4:
             break
     if fallback:
         parts.append(fallback)
@@ -602,6 +866,7 @@ def build_policy_comparison_view(result: ProductWorkflowResult) -> dict[str, Any
     document_lookup: dict[str, dict[str, Any]] = {}
     recommended_actions: list[str] = []
     limitations: list[str] = []
+    policy_comparison_v2: dict[str, Any] = {}
 
     if isinstance(payload, DocumentAgentPayload):
         compared_documents = _dedupe_texts(list(payload.compared_documents or []), limit=3)
@@ -609,6 +874,10 @@ def build_policy_comparison_view(result: ProductWorkflowResult) -> dict[str, Any
         document_lookup = _comparison_document_summary_lookup(payload)
         recommended_actions = _dedupe_texts(list(payload.recommended_actions or []), limit=6)
         limitations = _dedupe_texts(list(payload.limitations or []), limit=6)
+        structured_response = payload.structured_response if isinstance(payload.structured_response, dict) else {}
+        candidate_policy_v2 = structured_response.get("policy_comparison_v2")
+        if isinstance(candidate_policy_v2, dict):
+            policy_comparison_v2 = candidate_policy_v2
 
     if not compared_documents:
         compared_documents = list(document_lookup.keys())
@@ -621,41 +890,86 @@ def build_policy_comparison_view(result: ProductWorkflowResult) -> dict[str, Any
         "Document B",
     )
 
-    raw_differences = [
-        item
-        for item in comparison_findings
-        if _clean_text(getattr(item, "finding_type", None)).replace("_", " ").casefold() != "document summary"
-    ]
+    policy_deltas = policy_comparison_v2.get("deltas") if isinstance(policy_comparison_v2.get("deltas"), list) else []
 
     differences: list[dict[str, Any]] = []
-    for index, item in enumerate(raw_differences[:8], start=1):
-        title = _clean_optional_text(getattr(item, "title", None)) or _title_from_finding_text(getattr(item, "description", None), fallback=f"Difference {index}")
-        description = _clean_optional_text(getattr(item, "description", None)) or title
-        evidence = _dedupe_texts(list(getattr(item, "evidence", []) or []), limit=3)
-        documents = _dedupe_texts(list(getattr(item, "documents", []) or []), limit=3)
-        left_label = documents[0] if documents else primary_document
-        right_label = documents[1] if len(documents) > 1 else secondary_document
-        impact = _infer_comparison_impact(title, description, *evidence, result.recommendation)
-        category = _humanize_comparison_finding_type(getattr(item, "finding_type", None))
-        differences.append(
-            {
-                "id": f"comparison-diff-{index}",
-                "clause": title,
-                "impact": impact,
-                "category": category,
-                "doc_a_label": left_label,
-                "doc_a_text": _comparison_document_text(left_label, document_lookup, fallback=(evidence[0] if evidence else None)),
-                "doc_b_label": right_label,
-                "doc_b_text": _comparison_document_text(
-                    right_label,
-                    document_lookup,
-                    fallback=(evidence[1] if len(evidence) > 1 else (evidence[0] if evidence else None)),
-                ),
-                "business_impact": _truncate_ui_text(description),
-                "recommendation": _clean_optional_text(result.recommendation) or (recommended_actions[0] if recommended_actions else None),
-                "evidence": evidence,
-            }
-        )
+    if policy_deltas:
+        for index, item in enumerate(policy_deltas[:8], start=1):
+            if not isinstance(item, dict):
+                continue
+            title = _clean_optional_text(item.get("title")) or _title_from_finding_text(item.get("change_summary"), fallback=f"Difference {index}")
+            change_summary = _clean_optional_text(item.get("change_summary")) or title
+            impact = str(item.get("impact") or "significant").strip().lower()
+            if impact not in {"breaking", "significant", "minor"}:
+                impact = _infer_comparison_impact(title, change_summary, item.get("must_fix_title"), item.get("watchout"))
+            category = _clean_optional_text(item.get("category")) or "Grounded delta"
+            doc_a_label = primary_document
+            doc_b_label = secondary_document
+            doc_a_text = _truncate_ui_text(_clean_optional_text(item.get("doc_a_evidence")) or _comparison_document_text(doc_a_label, document_lookup))
+            doc_b_text = _truncate_ui_text(_clean_optional_text(item.get("doc_b_evidence")) or _comparison_document_text(doc_b_label, document_lookup))
+            evidence = _dedupe_texts(
+                [
+                    f"{doc_a_label}: {doc_a_text}" if doc_a_text else "",
+                    f"{doc_b_label}: {doc_b_text}" if doc_b_text else "",
+                ],
+                limit=3,
+            )
+            differences.append(
+                {
+                    "id": f"comparison-diff-{index}",
+                    "clause": title,
+                    "impact": impact,
+                    "category": category,
+                    "doc_a_label": doc_a_label,
+                    "doc_a_text": doc_a_text,
+                    "doc_b_label": doc_b_label,
+                    "doc_b_text": doc_b_text,
+                    "business_impact": _truncate_ui_text(change_summary),
+                    "change_summary": _truncate_ui_text(change_summary),
+                    "recommendation": _clean_optional_text(item.get("next_step")) or _clean_optional_text(policy_comparison_v2.get("recommendation")),
+                    "must_fix_title": _clean_optional_text(item.get("must_fix_title")),
+                    "negotiation_priority": _clean_optional_text(item.get("negotiation_priority")),
+                    "watchout": _clean_optional_text(item.get("watchout")),
+                    "next_step": _clean_optional_text(item.get("next_step")),
+                    "evidence": evidence,
+                }
+            )
+
+    if not differences:
+        raw_differences = [
+            item
+            for item in comparison_findings
+            if _clean_text(getattr(item, "finding_type", None)).replace("_", " ").casefold() != "document summary"
+        ]
+
+        for index, item in enumerate(raw_differences[:8], start=1):
+            title = _clean_optional_text(getattr(item, "title", None)) or _title_from_finding_text(getattr(item, "description", None), fallback=f"Difference {index}")
+            description = _clean_optional_text(getattr(item, "description", None)) or title
+            evidence = _dedupe_texts(list(getattr(item, "evidence", []) or []), limit=3)
+            documents = _dedupe_texts(list(getattr(item, "documents", []) or []), limit=3)
+            left_label = documents[0] if documents else primary_document
+            right_label = documents[1] if len(documents) > 1 else secondary_document
+            impact = _infer_comparison_impact(title, description, *evidence, result.recommendation)
+            category = _humanize_comparison_finding_type(getattr(item, "finding_type", None))
+            differences.append(
+                {
+                    "id": f"comparison-diff-{index}",
+                    "clause": title,
+                    "impact": impact,
+                    "category": category,
+                    "doc_a_label": left_label,
+                    "doc_a_text": _comparison_document_text(left_label, document_lookup, fallback=(evidence[0] if evidence else None)),
+                    "doc_b_label": right_label,
+                    "doc_b_text": _comparison_document_text(
+                        right_label,
+                        document_lookup,
+                        fallback=(evidence[1] if len(evidence) > 1 else (evidence[0] if evidence else None)),
+                    ),
+                    "business_impact": _truncate_ui_text(description),
+                    "recommendation": _clean_optional_text(result.recommendation) or (recommended_actions[0] if recommended_actions else None),
+                    "evidence": evidence,
+                }
+            )
 
     if not differences:
         fallback_points = _dedupe_texts([*(result.highlights or []), result.summary], limit=4)
@@ -688,7 +1002,7 @@ def build_policy_comparison_view(result: ProductWorkflowResult) -> dict[str, Any
         must_fix_candidates = [diff for diff in differences if str(diff.get("impact")) == "significant"]
     must_fix_items = [
         {
-            "title": diff.get("clause"),
+            "title": diff.get("must_fix_title") or diff.get("clause"),
             "detail": diff.get("business_impact"),
             "impact": diff.get("impact"),
             "recommendation": diff.get("recommendation"),
@@ -696,7 +1010,14 @@ def build_policy_comparison_view(result: ProductWorkflowResult) -> dict[str, Any
         for diff in must_fix_candidates[:4]
     ]
 
-    negotiation_priorities = _dedupe_texts(
+    structured_negotiation_priorities = _dedupe_texts(
+        [
+            *(policy_comparison_v2.get("negotiation_priorities") if isinstance(policy_comparison_v2.get("negotiation_priorities"), list) else []),
+            *(diff.get("negotiation_priority") for diff in differences if diff.get("negotiation_priority")),
+        ],
+        limit=5,
+    )
+    negotiation_priorities = structured_negotiation_priorities or _dedupe_texts(
         [
             *recommended_actions,
             *(sections.get("next_steps") or []),
@@ -708,14 +1029,29 @@ def build_policy_comparison_view(result: ProductWorkflowResult) -> dict[str, Any
     if not negotiation_priorities and result.recommendation:
         negotiation_priorities = [_clean_text(result.recommendation)]
 
-    watchouts = _build_policy_comparison_watchouts(
+    structured_watchouts = _dedupe_texts(
+        [
+            *(policy_comparison_v2.get("watchouts") if isinstance(policy_comparison_v2.get("watchouts"), list) else []),
+            *(diff.get("watchout") for diff in differences if diff.get("watchout")),
+        ],
+        limit=6,
+    )
+    watchouts = structured_watchouts or _build_policy_comparison_watchouts(
         differences=differences,
         must_fix_items=must_fix_items,
         sections=sections,
         limitations=limitations,
         result_warnings=list(result.warnings or []),
     )
-    next_steps = _dedupe_texts([*(sections.get("next_steps") or []), *recommended_actions], limit=6)
+    next_steps = _dedupe_texts(
+        [
+            *(policy_comparison_v2.get("next_steps") if isinstance(policy_comparison_v2.get("next_steps"), list) else []),
+            *(diff.get("next_step") for diff in differences if diff.get("next_step")),
+            *(sections.get("next_steps") or []),
+            *recommended_actions,
+        ],
+        limit=6,
+    )
 
     run_steps = [
         {"key": "select", "label": "Select", "status": "completed"},
@@ -740,19 +1076,24 @@ def build_policy_comparison_view(result: ProductWorkflowResult) -> dict[str, Any
     return {
         "compared_documents": [item for item in [primary_document, secondary_document] if item],
         "executive_summary": {
-            "narrative": _clean_optional_text(result.summary) or "Run the comparison to generate a grounded executive summary.",
+            "narrative": _clean_optional_text(policy_comparison_v2.get("executive_summary")) or _clean_optional_text(result.summary) or "Run the comparison to generate a grounded executive summary.",
             "counts": impact_counts,
             "status": "Requires Review" if watchouts or result.status in {"warning", "error"} else "Comparison Ready",
             "documents": [item for item in [primary_document, secondary_document] if item],
         },
-        "must_fix_items": must_fix_items,
+        "must_fix_items": _policy_v2_must_fix_items_for_ui(
+                differences,
+                policy_comparison_v2,
+                fallback_items=must_fix_items,
+            ),
         "negotiation_priorities": negotiation_priorities,
         "differences": differences,
         "recommendation": {
-            "summary": _clean_optional_text(result.recommendation) or (negotiation_priorities[0] if negotiation_priorities else "Validate the critical differences with a final human review before making the decision."),
+            "summary": _clean_optional_text(policy_comparison_v2.get("recommendation")) or _clean_optional_text(result.recommendation) or (negotiation_priorities[0] if negotiation_priorities else "Validate the critical differences with a final human review before making the decision."),
             "handoff": "Legal / policy review" if must_fix_items else "Human document review",
             "artifact_label": artifact_label,
         },
+        "quality_report": policy_comparison_v2.get("quality_report") if isinstance(policy_comparison_v2.get("quality_report"), dict) else {},
         "artifacts": [artifact.model_dump(mode="json") for artifact in result.artifacts],
         "watchouts": watchouts,
         "next_steps": next_steps,

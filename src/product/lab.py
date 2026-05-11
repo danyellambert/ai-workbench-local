@@ -3394,6 +3394,230 @@ def _build_product_eval_scope(workspace_root: Path, *, additional_product_teleme
     }
 
 
+
+
+def _technical_failure_markers() -> tuple[str, ...]:
+    return (
+        'document agent execution failed',
+        'execution failed:',
+        'http error',
+        '401',
+        '403',
+        'unauthorized',
+        'forbidden',
+        'timeout',
+        'timed out',
+        'traceback',
+        'no valid json',
+        'remote end closed',
+        'connection refused',
+        'workflow failed',
+        'parse failure',
+        'json object could be extracted',
+        'insufficient_document_summaries',
+    )
+
+
+def _live_run_text_blob(run: dict[str, Any]) -> str:
+    # Only technical fields should participate in technical-failure detection.
+    # Business language can contain terms like "exception justification", which is not a runtime exception.
+    values = [
+        run.get('status'),
+        run.get('review_reason'),
+        run.get('error_message'),
+    ]
+    return ' '.join(str(value or '') for value in values).casefold()
+
+
+def _has_live_run_technical_failure(run: dict[str, Any]) -> bool:
+    status = str(run.get('status') or '').strip().lower()
+    text_blob = _live_run_text_blob(run)
+    return (
+        status in {'error', 'failed', 'failure'}
+        or any(marker in text_blob for marker in _technical_failure_markers())
+    )
+
+
+def _safe_count_from_run(run: dict[str, Any], *keys: str) -> int:
+    for key in keys:
+        value = run.get(key)
+        if isinstance(value, int):
+            return max(value, 0)
+        if isinstance(value, float):
+            return max(int(value), 0)
+        if isinstance(value, list):
+            return len(value)
+        if isinstance(value, dict):
+            for nested_key in (
+                'findings',
+                'deltas',
+                'differences',
+                'must_fix_items',
+                'negotiation_priorities',
+                'actions',
+                'next_steps',
+                'highlights',
+                'strengths',
+                'watchouts',
+                'interview_focus',
+            ):
+                nested_value = value.get(nested_key)
+                if isinstance(nested_value, list) and nested_value:
+                    return len(nested_value)
+    return 0
+
+
+def _surface_count_from_live_run(run: dict[str, Any]) -> tuple[int, str]:
+    """Return count + label for useful workflow-specific surfaced output."""
+    workflow_id = str(run.get('workflow_id') or run.get('workflowId') or '').strip()
+
+    common_keys = (
+        'findings_count',
+        'finding_count',
+        'findings',
+        'highlights',
+        'actions',
+        'next_steps',
+        'watchouts',
+        'result_view',
+        'view',
+        'preview_payload',
+    )
+
+    if workflow_id == 'policy_contract_comparison':
+        count = _safe_count_from_run(
+            run,
+            'deltas',
+            'differences',
+            'must_fix_items',
+            'negotiation_priorities',
+            'comparison_findings',
+            *common_keys,
+        )
+        return count, 'comparison output'
+
+    if workflow_id == 'candidate_review':
+        count = _safe_count_from_run(
+            run,
+            'strengths',
+            'gaps',
+            'risks',
+            'watchouts',
+            'interview_focus',
+            'recommendations',
+            *common_keys,
+        )
+        return count, 'candidate review output'
+
+    if workflow_id == 'action_plan_evidence_review':
+        count = _safe_count_from_run(
+            run,
+            'actions',
+            'action_items',
+            'next_steps',
+            'evidence_gaps',
+            'risks',
+            *common_keys,
+        )
+        return count, 'action plan output'
+
+    count = _safe_count_from_run(run, *common_keys)
+    return count, 'finding(s)'
+
+
+def _score_live_product_workflow_run(run: dict[str, Any]) -> tuple[float, list[str], str, str]:
+    """Cheap operational proxy for model output quality.
+
+    This is not an LLM judge. It scores execution health, output structure,
+    useful surfaced content, and review/warning signals.
+    """
+    status = str(run.get('status') or '').strip().lower()
+    review_reason = str(run.get('review_reason') or '').strip()
+    error_message = str(run.get('error_message') or '').strip()
+
+    warnings_value = run.get('warnings')
+    warnings = warnings_value if isinstance(warnings_value, list) else []
+
+    factors: list[str] = []
+
+    if _has_live_run_technical_failure(run):
+        factors.append('technical failure or provider/parse error detected')
+        return 0.35, factors, 'Fail', 'Technical failure'
+
+    score = 0.62
+
+    if status in {'completed', 'warning'}:
+        score += 0.12
+        factors.append('workflow completed')
+    else:
+        score -= 0.10
+        factors.append(f'workflow status: {status or "unknown"}')
+
+    if str(run.get('summary') or '').strip():
+        score += 0.05
+        factors.append('summary present')
+    else:
+        score -= 0.05
+        factors.append('summary missing')
+
+    surface_count, surface_label = _surface_count_from_live_run(run)
+    summary_present = bool(str(run.get('summary') or '').strip())
+
+    if surface_count > 0:
+        score += min(0.10, 0.04 + 0.015 * min(surface_count, 4))
+        factors.append(f'{surface_count} {surface_label} item(s) surfaced')
+    elif review_reason:
+        score += 0.02
+        factors.append('review rationale present')
+    elif summary_present:
+        # Some live eval rows only retain summary/status, not the full result_view.
+        # This is not a failure, but it is partial evaluation coverage, so keep it
+        # below the PASS threshold unless richer artifacts are available.
+        score -= 0.05
+        factors.append('summary-only output available')
+    else:
+        score -= 0.06
+        factors.append('no workflow output surfaced')
+
+    if str(run.get('recommendation') or '').strip():
+        score += 0.05
+        factors.append('recommendation present')
+
+    if bool(run.get('needs_review')):
+        score -= 0.04
+        factors.append('needs review signal present')
+
+    if warnings:
+        penalty = min(0.06, 0.015 * len(warnings))
+        score -= penalty
+        factors.append(f'{len(warnings)} warning/review signal(s)')
+
+    if review_reason:
+        score -= 0.02
+        factors.append('review reason present')
+
+    if error_message:
+        score -= 0.12
+        factors.append('error message present')
+
+    score = round(max(0.20, min(1.0, score)), 3)
+
+    technical_status = 'Pass'
+    has_review_signal = bool(run.get('needs_review')) or bool(review_reason) or bool(warnings)
+    has_summary_only_output = 'summary-only output available' in factors
+
+    if has_summary_only_output and not has_review_signal:
+        review_signal = 'Partial eval coverage'
+    elif score >= 0.82 or (score >= 0.75 and not has_review_signal):
+        review_signal = 'Clean'
+    elif score >= 0.60:
+        review_signal = 'Needs review'
+    else:
+        review_signal = 'Poor output'
+
+    return score, factors, technical_status, review_signal
+
+
 def _build_live_product_eval_cases(scope: dict[str, Any], historical_entries: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     catalog = scope.get('catalog') if isinstance(scope.get('catalog'), dict) else {}
     workflow_labels = scope.get('workflow_labels') if isinstance(scope.get('workflow_labels'), dict) else {}
@@ -3412,8 +3636,11 @@ def _build_live_product_eval_cases(scope: dict[str, Any], historical_entries: li
         workflow_id = str(run.get('workflow_id') or '').strip()
         runtime = run.get('runtime') if isinstance(run.get('runtime'), dict) else {}
         status = str(run.get('status') or '').strip().lower()
-        verdict = 'PASS' if status == 'completed' and not bool(run.get('needs_review')) else 'WARN' if status in {'completed', 'warning'} else 'FAIL'
-        score = 1.0 if verdict == 'PASS' else 0.72 if verdict == 'WARN' else 0.35
+        score, score_factors, technical_status, review_signal = _score_live_product_workflow_run(run)
+        # Evals verdict is based on model-output quality score.
+        # 0.75+ is good enough to count as PASS while reviewSignal still communicates
+        # whether the output needs human/business review.
+        verdict = 'PASS' if score >= 0.75 else 'WARN' if score >= 0.55 else 'FAIL'
         provider = str(runtime.get('provider') or 'unknown')
         model = str(runtime.get('model') or 'unknown')
         latency = round(_safe_float(runtime.get('latency_s') or 0.0), 3)
@@ -3434,6 +3661,10 @@ def _build_live_product_eval_cases(scope: dict[str, Any], historical_entries: li
             'suite': 'live_product_workflows',
             'verdict': verdict,
             'score': round(score, 3),
+            'modelQualityScore': round(score, 3),
+            'scoreFactors': score_factors,
+            'technicalStatus': technical_status,
+            'reviewSignal': review_signal,
             'needsReview': bool(run.get('needs_review')),
             'model': model,
             'provider': provider,

@@ -26,6 +26,7 @@ import { toast } from '@/components/ui/sonner';
 import { useAppStore } from '@/lib/store';
 import { findRecommendedDocument, normalizeDemoDocumentName, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
 import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
+import { aiLabQueryKeys } from '@/lib/ai-lab-data';
 
 const impactColors = {
   breaking: 'bg-glow-error/10 text-glow-error border-glow-error/20',
@@ -197,6 +198,9 @@ export default function ComparisonPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
       ]);
       toast.success('Policy comparison completed with grounded output.');
     },
@@ -234,6 +238,9 @@ export default function ComparisonPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
       ]);
       if (hasArtifacts) {
@@ -534,6 +541,10 @@ export default function ComparisonPage() {
                 <span className="text-[10px] px-2 py-0.5 rounded-md bg-secondary/50 text-muted-foreground">{diff.category}</span>
               </div>
             </div>
+            <div className="flex items-start gap-2 bg-secondary/20 rounded-lg p-3 mb-3">
+              <ArrowLeftRight className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground leading-relaxed">{diff.business_impact}</p>
+            </div>
             <div className="grid md:grid-cols-2 gap-4 mb-3">
               <div className="bg-glow-error/5 border border-glow-error/10 rounded-lg p-3">
                 <span className="text-[10px] uppercase tracking-wider text-glow-error/60 font-medium block mb-1">{diff.doc_a_label}</span>
@@ -544,17 +555,7 @@ export default function ComparisonPage() {
                 <p className="text-xs text-foreground/80 leading-relaxed">{diff.doc_b_text}</p>
               </div>
             </div>
-            <div className="flex items-start gap-2 bg-secondary/20 rounded-lg p-3">
-              <ArrowLeftRight className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground leading-relaxed">{diff.business_impact}</p>
-            </div>
-            {showSourceBadges && diff.evidence.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-border/30 space-y-1">
-                {diff.evidence.map((item) => (
-                  <p key={item} className="text-[10px] text-muted-foreground">• {item}</p>
-                ))}
-              </div>
-            )}
+
           </motion.div>
         )) : (
           <GlassCard>

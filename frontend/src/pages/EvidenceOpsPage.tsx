@@ -11,17 +11,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+import { formatUserDateTime, formatUserTime } from '@/lib/user-time';
 const priorityStyle: Record<string, string> = {
   high: 'bg-glow-error/10 text-glow-error border-glow-error/20',
   medium: 'bg-glow-warning/10 text-glow-warning border-glow-warning/20',
   low: 'bg-muted text-muted-foreground border-border',
 };
 
-function formatDateTime(value?: string | null): string {
-  if (!value) return '—';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const parsed = new Date(normalized);
-  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+function formatDateTime(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 export default function EvidenceOpsPage() {
@@ -181,7 +179,7 @@ export default function EvidenceOpsPage() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <StatusPill status={tool.status} />
-                  {tool.lastCall ? <span className="text-[10px] text-muted-foreground">{new Date(tool.lastCall).toLocaleTimeString()}</span> : null}
+                  {tool.lastCall ? <span className="text-[10px] text-muted-foreground">{formatUserTime(tool.lastCall)}</span> : null}
                 </div>
               </div>
             </motion.div>
@@ -354,7 +352,7 @@ export default function EvidenceOpsPage() {
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="text-[10px] text-muted-foreground">{item.latency}</span>
                     <StatusPill status={item.status === 'ok' ? 'active' : item.status === 'warning' ? 'degraded' : 'inactive'} />
-                    {item.ts ? <span className="text-[10px] text-muted-foreground">{new Date(item.ts).toLocaleTimeString()}</span> : null}
+                    {item.ts ? <span className="text-[10px] text-muted-foreground">{formatUserTime(item.ts)}</span> : null}
                   </div>
                 </div>
               ))}

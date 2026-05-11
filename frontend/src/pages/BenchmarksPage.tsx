@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { aiLabQueryKeys, getLabBenchmarksPage } from '@/lib/ai-lab-data';
 import { useAppStore } from '@/lib/store';
 
+import { formatUserDateTime } from '@/lib/user-time';
 const profileColors: Record<string, string> = {
   'Recommended production': 'hsl(142, 71%, 45%)',
   'External reference': 'hsl(217, 91%, 60%)',
@@ -58,23 +59,8 @@ function formatCount(value?: number | null) {
   return isNumber(value) ? `${Math.round(value)}` : '—';
 }
 
-function formatBenchmarkTimestamp(value?: string | null) {
-  const text = String(value || '').trim();
-  if (!text) {
-    return 'Unknown';
-  }
-  const normalized = text.includes('T') ? text : text.replace(' ', 'T');
-  const parsed = new Date(normalized.endsWith('Z') || /[+-]\d\d:?\d\d$/.test(normalized) ? normalized : `${normalized}Z`);
-  if (Number.isNaN(parsed.getTime())) {
-    return text;
-  }
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(parsed);
+function formatBenchmarkTimestamp(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 function MetricRow({

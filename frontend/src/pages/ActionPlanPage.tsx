@@ -47,6 +47,8 @@ import { useAppStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { ACTION_PLAN_DOCUMENT_LIMIT, findRecommendedDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
 
+import { formatUserDate } from '@/lib/user-time';
+import { aiLabQueryKeys } from '@/lib/ai-lab-data';
 const statusCols: Array<ProductActionPlanItem['status']> = ['open', 'in_progress', 'blocked', 'done'];
 const workflowSteps = [
   { key: 'select', label: 'Select' },
@@ -58,11 +60,167 @@ const workflowSteps = [
 
 type ActionPlanTab = 'board' | 'table' | 'timeline' | 'evidence';
 
-function formatDate(value?: string | null): string {
-  if (!value) return 'n/a';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+function formatDate(value?: string | number | null): string {
+  return formatUserDate(value);
+}
+
+
+
+function normalizeActionSummaryKey(value: unknown): string {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function actionSummaryFromRecord(record: Record<string, unknown>): string {
+  const title = normalizeActionSummaryKey(record.title || record.description || record.name);
+  const candidates = [
+    record.card_summary,
+    record.summary,
+    record.short_summary,
+    record.action_summary,
+    record.narrative,
+    record.explanation,
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+
+  const selected = candidates.find((value) => {
+    const normalized = normalizeActionSummaryKey(value);
+    if (!normalized || normalized === title) return false;
+    if (value.includes(' | ')) return false;
+    if (/\bCTR-\d+\b/i.test(value)) return false;
+    if (/\b(Open|In progress|Approved|Done|Blocked)\b/i.test(value) && /\b\d{4}-\d{2}-\d{2}\b/.test(value)) return false;
+    return true;
+  });
+
+  return selected || '';
+}
+
+function collectActionSummaryLookup(source: unknown): Map<string, string> {
+  const lookup = new Map<string, string>();
+  const seen = new WeakSet<object>();
+
+  function visit(value: unknown): void {
+    if (!value || typeof value !== 'object') return;
+    if (seen.has(value as object)) return;
+
+    seen.add(value as object);
+
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+
+    const record = value as Record<string, unknown>;
+    const summary = actionSummaryFromRecord(record);
+    const title = normalizeActionSummaryKey(record.title || record.description || record.name);
+    const evidence = normalizeActionSummaryKey(record.evidence);
+
+    if (summary && title) lookup.set(title, summary);
+    if (summary && evidence) lookup.set(evidence, summary);
+
+    Object.values(record).forEach(visit);
+  }
+
+  visit(source);
+  return lookup;
+}
+
+
+function hasTextEllipsis(value: unknown): boolean {
+  const text = String(value || '');
+  return text.includes('...') || text.includes('…');
+}
+
+function normalizeActionTitleKey(value: unknown): string {
+  return String(value || '')
+    .trim()
+    .replace(/[.…]+$/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function collectFullActionTitles(source: unknown): string[] {
+  const titles: string[] = [];
+  const seen = new WeakSet<object>();
+
+  function visit(value: unknown): void {
+    if (!value || typeof value !== 'object') return;
+    if (seen.has(value as object)) return;
+    seen.add(value as object);
+
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+
+    const record = value as Record<string, unknown>;
+    [
+      record.full_title,
+      record.fullTitle,
+      record.full_name,
+      record.fullName,
+      record.card_title,
+      record.cardTitle,
+      record.action_title,
+      record.actionTitle,
+      record.title,
+      record.description,
+      record.name,
+    ].forEach((candidate) => {
+      const text = String(candidate || '').trim();
+      if (text && !hasTextEllipsis(text) && text.length > 8) titles.push(text);
+    });
+
+    Object.values(record).forEach(visit);
+  }
+
+  visit(source);
+  return Array.from(new Set(titles));
+}
+
+function actionItemFullTitle(item: ProductActionPlanItem, source?: unknown): string {
+  const raw = item as unknown as Record<string, unknown>;
+  const current = String(item.title || raw.description || raw.name || '').trim();
+
+  if (!hasTextEllipsis(current)) return current;
+
+  const currentKey = normalizeActionTitleKey(current);
+  const candidates = collectFullActionTitles(source);
+
+  const matched = candidates.find((candidate) => {
+    const candidateKey = normalizeActionTitleKey(candidate);
+    return candidateKey.startsWith(currentKey) || currentKey.startsWith(candidateKey);
+  });
+
+  return matched || current;
+}
+
+function actionItemNarrative(item: ProductActionPlanItem, source?: unknown): string {
+  const raw = item as unknown as Record<string, unknown>;
+  const direct = actionSummaryFromRecord(raw);
+  if (direct) return direct;
+
+  const lookup = collectActionSummaryLookup(source);
+  const keyCandidates = [
+    item.title,
+    raw.description,
+    raw.evidence,
+    raw.name,
+  ]
+    .map(normalizeActionSummaryKey)
+    .filter(Boolean);
+
+  return keyCandidates
+    .map((key) => lookup.get(key))
+    .find(Boolean) || '';
+}
+
+function actionItemNotionLine(item: ProductActionPlanItem): string {
+  const due = formatDate(item.due_date);
+  return due && due !== '—' ? `Due: ${due}` : '';
 }
 
 function dueSortKey(value?: string | null): [number, string] {
@@ -297,6 +455,9 @@ export default function ActionPlanPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
       ]);
       toast.success('Action plan generated from grounded backend output.');
     },
@@ -317,6 +478,9 @@ export default function ActionPlanPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
         queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
         queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
       ]);
       toast.success('Action plan deck artifacts generated successfully.');
@@ -752,7 +916,7 @@ export default function ActionPlanPage() {
       <motion.div data-tour="action-plan-status-strip" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
           { label: 'Open', value: summary.open, color: 'text-primary' },
-          { label: 'In Progress', value: summary.in_progress, color: 'text-glow-warning' },
+          { label: 'Approved / WIP', value: summary.in_progress, color: 'text-glow-warning' },
           { label: 'Blocked', value: summary.blocked, color: 'text-glow-error' },
           { label: 'Done', value: summary.done, color: 'text-glow-success' },
         ].map((metric) => (
@@ -765,9 +929,16 @@ export default function ActionPlanPage() {
 
       {!!criticalPath.length && (
         <GlassCard className="mb-6" delay={0.12} data-tour="action-plan-critical-path">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-4 h-4 text-glow-warning" />
-            <h3 className="text-sm font-medium text-foreground">Critical Path - Top Unblockers</h3>
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-glow-warning mt-0.5" />
+              <div>
+                <h3 className="text-sm font-medium text-foreground">Critical Path · Top Operational Risks</h3>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Highest-impact unblockers selected from the action plan, not the full list of high-priority tasks.
+                </p>
+              </div>
+            </div>
           </div>
           <div className="space-y-2">
             {criticalPath.slice(0, 3).map((item, index) => (
@@ -775,7 +946,7 @@ export default function ActionPlanPage() {
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-[10px] font-bold text-muted-foreground w-4">{index + 1}</span>
                   <SeverityBadge severity={item.priority} />
-                  <span className="text-xs text-foreground truncate">{item.title}</span>
+                  <span className="text-xs text-foreground whitespace-normal break-words" style={{ display: 'block', overflow: 'visible', whiteSpace: 'normal', WebkitLineClamp: 'unset' }}>{actionItemFullTitle(item, workflowResponse)}</span>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground shrink-0">
                   {item.owner ? <span>{item.owner}</span> : null}
@@ -837,8 +1008,10 @@ export default function ActionPlanPage() {
                           <SeverityBadge severity={item.priority} />
                           {item.source ? <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[110px]">{item.source}</span> : null}
                         </div>
-                        <h4 className="text-xs font-medium text-foreground mb-2 leading-relaxed">{item.title}</h4>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed min-h-8">{item.rationale || item.evidence || item.notes || 'Grounded execution item.'}</p>
+                        <h4 className="text-xs font-medium text-foreground mb-2 leading-relaxed whitespace-normal break-words" style={{ display: 'block', overflow: 'visible', whiteSpace: 'normal', WebkitLineClamp: 'unset' }}>{actionItemFullTitle(item, workflowResponse)}</h4>
+                        {actionItemNarrative(item, workflowResponse) ? (
+                          <p className="text-[10px] text-muted-foreground leading-relaxed min-h-8">{actionItemNarrative(item, workflowResponse)}</p>
+                        ) : null}
                         <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-3">
                           <User className="w-3 h-3" />
                           <span>{item.owner || 'Owner TBD'}</span>
@@ -875,8 +1048,10 @@ export default function ActionPlanPage() {
                   {items.map((item) => (
                     <tr key={item.id} className="border-b border-border/30 hover:bg-secondary/20 transition-colors align-top">
                       <td className="px-4 py-3 text-xs text-foreground max-w-[320px]">
-                        <div className="font-medium leading-relaxed">{item.title}</div>
-                        {item.rationale ? <div className="text-[10px] text-muted-foreground mt-1 leading-relaxed">{item.rationale}</div> : null}
+                        <div className="font-medium leading-relaxed whitespace-normal break-words" style={{ display: 'block', overflow: 'visible', whiteSpace: 'normal', WebkitLineClamp: 'unset' }}>{actionItemFullTitle(item, workflowResponse)}</div>
+                        {actionItemNarrative(item, workflowResponse) ? (
+                          <div className="text-[10px] text-muted-foreground mt-1 leading-relaxed">{actionItemNarrative(item, workflowResponse)}</div>
+                        ) : null}
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">{item.owner || 'Owner TBD'}</td>
                       <td className="px-4 py-3"><SeverityBadge severity={item.priority} /></td>
@@ -915,7 +1090,7 @@ export default function ActionPlanPage() {
                     </div>
                     <div className="pb-4 flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="text-xs font-medium text-foreground">{item.title}</span>
+                        <span className="text-xs font-medium text-foreground whitespace-normal break-words" style={{ display: 'block', overflow: 'visible', whiteSpace: 'normal', WebkitLineClamp: 'unset' }}>{actionItemFullTitle(item, workflowResponse)}</span>
                         <SeverityBadge severity={item.priority} />
                       </div>
                       <div className="flex items-center gap-3 text-[10px] text-muted-foreground flex-wrap">
@@ -1054,7 +1229,7 @@ export default function ActionPlanPage() {
                     ))}
                   </div>
                   <p className="mt-2 text-[10px] text-muted-foreground">
-                    Action status is mapped to Trello lists as Open → Open, In Progress → Approved, Blocked/Needs review → Review, Done → Done.
+                    Action status is mapped to Trello lists as Open → Open, Approved / WIP → Approved, Blocked/Needs review → Review, Done → Done.
                   </p>
                   {trelloPublishResult.board_url ? (
                     <Button variant="outline" size="sm" className="mt-3 h-7 px-2 text-[10px]" onClick={() => window.open(trelloPublishResult.board_url || '', '_blank', 'noopener,noreferrer')}>
@@ -1123,7 +1298,15 @@ export default function ActionPlanPage() {
             summary: workflowResponse?.result.summary,
             recommendation: workflowResponse?.result.recommendation,
             next_owner: criticalPath[0]?.owner || items.find((item) => item.owner)?.owner || null,
-            actions: items.map((item) => ({ title: item.title, owner: item.owner, due_date: item.due_date, priority: item.priority, status: item.status })),
+            actions: items.map((item) => ({
+              title: item.title,
+              detail: actionItemNotionLine(item),
+              summary: actionItemNarrative(item, workflowResponse),
+              owner: item.owner,
+              due_date: item.due_date,
+              priority: item.priority,
+              status: item.status,
+            })),
             evidence_gaps: evidenceGaps.map((gap) => ({ title: gap.title, status: gap.status, detail: gap.detail })),
             next_steps: items.slice(0, 6).map((item) => item.title),
             highlights,

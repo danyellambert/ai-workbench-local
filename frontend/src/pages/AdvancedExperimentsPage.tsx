@@ -7,10 +7,9 @@ import { ArtifactExplorerPanel } from '@/components/ai-lab/ArtifactExplorerPanel
 import { GlassCard } from '@/components/shared/ui-components';
 import { aiLabQueryKeys, getLabArtifactsPage } from '@/lib/ai-lab-data';
 
-function formatDateTime(value?: string | null): string {
-  if (!value) return 'n/a';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+import { formatUserDateTime } from '@/lib/user-time';
+function formatDateTime(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 export default function AdvancedExperimentsPage() {

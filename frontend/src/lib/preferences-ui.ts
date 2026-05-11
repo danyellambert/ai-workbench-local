@@ -1,5 +1,6 @@
 import type { ProviderConnection } from '@/types/settings';
 
+import { formatUserDateTime } from '@/lib/user-time';
 export const CONNECTION_ROLE_LABELS: Record<string, string> = {
   production: 'Production',
   benchmark_reference: 'Benchmark',
@@ -9,10 +10,8 @@ export const CONNECTION_ROLE_LABELS: Record<string, string> = {
   long_context: 'Long Context',
 };
 
-export function formatPreferencesUpdatedAt(value?: string | null): string {
-  if (!value) return 'Not saved yet';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+export function formatPreferencesUpdatedAt(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 export function formatConnectionCheckedAt(value?: string | null): string {

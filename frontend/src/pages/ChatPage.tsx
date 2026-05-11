@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/lib/store';
 import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
+import { formatUserDateTime, formatUserTime } from '@/lib/user-time';
 
 const CHAT_INPUT_MAX_CHARS = 2000;
 
@@ -763,7 +764,7 @@ export default function ChatPage() {
                         </div>
                         <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between gap-2">
                           <span>{session.message_count} msg · {session.document_count ?? 0} docs</span>
-                          <span>{session.updated_at ? new Date(session.updated_at).toLocaleString() : '—'}</span>
+                          <span>{session.updated_at ? formatUserDateTime(session.updated_at) : '—'}</span>
                         </div>
                         <div className="mt-1 text-[10px] text-muted-foreground flex items-center justify-between gap-2">
                           <span>{session.last_model ?? 'model n/a'}</span>
@@ -885,7 +886,7 @@ export default function ChatPage() {
                   <div key={event.id} className="rounded-lg border border-border/30 bg-secondary/20 p-2">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[10px] text-foreground font-medium">{event.label}</span>
-                      <span className="text-[10px] text-muted-foreground">{event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : '—'}</span>
+                      <span className="text-[10px] text-muted-foreground">{event.timestamp ? formatUserTime(event.timestamp) : '—'}</span>
                     </div>
                     <p className="mt-1 text-[10px] text-muted-foreground">{event.detail ?? 'Recorded event'}</p>
                   </div>

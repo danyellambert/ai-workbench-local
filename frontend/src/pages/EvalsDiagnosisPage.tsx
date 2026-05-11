@@ -9,6 +9,7 @@ import type { LabEvalVerdict, LabEvalsCase } from '@/lib/ai-lab-data';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 
+import { formatUserDateTime } from '@/lib/user-time';
 const verdictStyle: Record<LabEvalVerdict, string> = {
   PASS: 'bg-glow-success/10 text-glow-success border-glow-success/20',
   WARN: 'bg-glow-warning/10 text-glow-warning border-glow-warning/20',
@@ -25,29 +26,88 @@ function formatPercent(value: number) {
   return `${Math.round(value)}%`;
 }
 
+
+function formatModelQualityScore(value: unknown): string {
+  const score = Number(value);
+  if (!Number.isFinite(score)) return '—';
+  return `${Math.round(score * 100)}%`;
+}
+
+function formatScoreFactors(value: unknown): string {
+  if (!Array.isArray(value)) return '';
+  return value
+    .map((item) => String(item || '').trim())
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(' · ');
+}
+
 function statusLabel(status?: string) {
   if (status === 'live') return 'Live + historical';
-  if (status === 'derived-live') return 'Historical baseline only';
+  if (status === 'derived-live') return 'Benchmark baseline only';
   if (status === 'empty') return 'Waiting for product usage';
   return 'Product scoped';
 }
 
-function formatDateTime(value?: string | null) {
-  if (!value) return '—';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+function formatDateTime(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 function formatTaskLabel(value?: string | null) {
   return String(value || 'Task');
 }
 
+
+function normalizeTechnicalDiagnosisStatus(
+  status: unknown,
+  item?: Record<string, unknown>,
+): string {
+  const raw = String(status || '').trim().toLowerCase();
+
+  const workflowText = [
+    item?.workflow_id,
+    item?.workflowId,
+    item?.workflow,
+    item?.workflow_label,
+    item?.workflowLabel,
+    item?.suite,
+    item?.label,
+    item?.name,
+    item?.title,
+  ]
+    .map((value) => String(value || '').toLowerCase())
+    .join(' ');
+
+  const isDocumentReview =
+    workflowText.includes('document_review') ||
+    workflowText.includes('document review');
+
+  const hasTechnicalFailure =
+    raw.includes('fail') ||
+    raw.includes('error') ||
+    Boolean(item?.error || item?.exception || item?.traceback);
+
+  if (isDocumentReview && !hasTechnicalFailure) {
+    return 'pass';
+  }
+
+  if (raw === 'completed') return 'pass';
+  if (raw === 'warning') return 'warn';
+  if (raw === 'failed') return 'fail';
+  if (raw === 'error') return 'fail';
+
+  return raw || 'unknown';
+}
+
+
 export default function EvalsDiagnosisPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: aiLabQueryKeys.evals,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    staleTime: 0,
     queryFn: getLabEvalsPage,
     retry: false,
-    refetchOnWindowFocus: false,
   });
 
   const suites = data?.suites ?? [];
@@ -133,25 +193,36 @@ export default function EvalsDiagnosisPage() {
       </div>
 
       <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-evals-coverage">
-        <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Observed workflows</p>
+        <GlassCard className="p-4 min-h-[150px]">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Workflow catalog</p>
           <p className="mt-2 text-2xl font-semibold text-foreground">{observedWorkflowCount || '—'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Historical coverage: {historicalWorkflowCoverage}/{Math.max(observedWorkflowCount, 1)} · live coverage: {liveWorkflowCoverage}/{Math.max(observedWorkflowCount, 1)} observed workflows.</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Product workflows currently tracked by the eval dashboard.
+          </p>
         </GlassCard>
-        <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Historical baseline window</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">{historicalWindow?.label ?? statusLabel(data?.status)}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{historicalWindow?.start ? `${formatDateTime(historicalWindow.start)} → ${formatDateTime(historicalWindow.end)}` : 'No retained historical timestamps yet.'}</p>
+
+        <GlassCard className="p-4 min-h-[150px]">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Benchmark baseline</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{totals.total || '—'}</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Saved benchmark cases used to compare quality across product changes.
+          </p>
         </GlassCard>
-        <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Live telemetry window</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">{liveTotals.total ? (liveWindow?.label ?? 'Retained product telemetry') : 'No live evals yet'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{liveWindow?.start ? `${formatDateTime(liveWindow.start)} → ${formatDateTime(liveWindow.end)}` : 'These live numbers come from retained workflow telemetry, not a fixed last-24h slice.'}</p>
+
+        <GlassCard className="p-4 min-h-[150px]">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Live run checks</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{liveTotals.total || '—'}</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Quality checks generated from real workflow runs in the product.
+          </p>
         </GlassCard>
-        <GlassCard className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Coverage gap</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">{uncoveredTaskTypes.length ? uncoveredTaskTypes.join(', ') : 'No obvious task gap in current catalog'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">Observed workflows: {observedWorkflowCount}. Historical eval coverage: {historicalWorkflowCoverage}. Live eval coverage: {liveWorkflowCoverage}. Current product workflow catalog and observed task types are aligned; the bigger issue here was provenance clarity.</p>
+
+        <GlassCard className="p-4 min-h-[150px]">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Eval coverage</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">{uncoveredTaskTypes.length ? `${uncoveredTaskTypes.length} task type(s) need coverage` : 'Catalog aligned'}</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            {uncoveredTaskTypes.length ? `Missing visibility for: ${uncoveredTaskTypes.join(', ')}.` : 'Current workflows and task types are covered by the dashboard.'}
+          </p>
         </GlassCard>
       </div>
 
@@ -274,6 +345,14 @@ export default function EvalsDiagnosisPage() {
                     </div>
                   </div>
                   <p className="text-[10px] text-muted-foreground">{item.errorDetail || item.reason || 'Failure details were not persisted for this case.'}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground/80">
+                    Model quality: <span className="text-foreground">{formatModelQualityScore((item as Record<string, unknown>).modelQualityScore ?? item.score)}</span>
+                    {(item as Record<string, unknown>).technicalStatus ? ` · Technical: ${(item as Record<string, unknown>).technicalStatus}` : ''}
+                    {(item as Record<string, unknown>).reviewSignal ? ` · Review: ${(item as Record<string, unknown>).reviewSignal}` : ''}
+                  </p>
+                  {formatScoreFactors((item as Record<string, unknown>).scoreFactors) ? (
+                    <p className="mt-1 text-[10px] text-muted-foreground/70">{formatScoreFactors((item as Record<string, unknown>).scoreFactors)}</p>
+                  ) : null}
                   <div className="flex items-center gap-3 mt-1.5 text-[9px] text-muted-foreground/60 flex-wrap">
                     <span>{item.suite}</span>
                     <span>{item.model}</span>
@@ -353,7 +432,7 @@ export default function EvalsDiagnosisPage() {
                     </div>
                   </div>
                   <p className="mt-1 text-[10px] text-muted-foreground">{item.reason || item.errorDetail || 'Escalated product-scoped eval case.'}</p>
-                  <p className="mt-1 text-[10px] text-muted-foreground/70">{item.suite}{item.timestamp ? ` · ${new Date(item.timestamp).toLocaleString()}` : ''}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground/70">{item.suite}{item.timestamp ? ` · ${formatUserDateTime(item.timestamp)}` : ''}</p>
                 </div>
               ))}
             </div>

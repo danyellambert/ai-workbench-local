@@ -394,165 +394,82 @@ def _coerce_request_payload(entry: dict[str, object]) -> dict[str, object] | Non
 
 
 def _count_product_workflow_findings(*args, **kwargs) -> int:
-    """Count the most useful visible outcome for each product workflow.
+    """Count only user-facing workflow findings.
 
-    The Run History column is named findings for historical UI reasons, but not every
-    workflow emits literal `findings`. Action Plan emits actions/deadlines/risks,
-    Candidate Review emits strengths/signals, and Policy Comparison emits comparison
-    findings or highlights. This function counts real structured outputs only; it
-    does not invent synthetic findings.
+    Policy Comparison summaries are intermediate inputs and must not count as findings.
+    Document Review should match the Open Flow findings surface.
     """
-
-    def _as_dict(value):
-        if isinstance(value, dict):
-            return value
-        if hasattr(value, "model_dump"):
-            try:
-                dumped = value.model_dump(mode="json")
-                return dumped if isinstance(dumped, dict) else {}
-            except Exception:
-                return {}
-        return {}
-
-    def _clean_len(value) -> int:
-        if isinstance(value, list):
-            return len([item for item in value if str(item or "").strip()])
-        if isinstance(value, dict):
-            return len([key for key, item in value.items() if str(item or "").strip()])
-        return 1 if str(value or "").strip() else 0
-
-    def _walk(value, depth: int = 0):
-        if depth > 5:
-            return
-        if isinstance(value, dict):
-            yield value
-            for nested in value.values():
-                yield from _walk(nested, depth + 1)
-        elif isinstance(value, list):
-            for item in value:
-                yield from _walk(item, depth + 1)
-        else:
-            dumped = _as_dict(value)
-            if dumped:
-                yield from _walk(dumped, depth + 1)
-
-    result = kwargs.get("result")
-    if result is None:
-        for arg in args:
-            if hasattr(arg, "workflow_id") or hasattr(arg, "structured_result") or isinstance(arg, dict):
-                result = arg
-                break
-
+    result = kwargs.get("result") if "result" in kwargs else (args[0] if args else None)
     if result is None:
         return 0
 
-    result_dict = _as_dict(result)
-    workflow_id = str(
-        result_dict.get("workflow_id")
-        or getattr(result, "workflow_id", "")
-        or kwargs.get("workflow_id", "")
-        or ""
-    ).lower()
+    def get_value(obj, key, default=None):
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return getattr(obj, key, default)
 
-    containers = [result_dict]
+    def as_list(value):
+        return value if isinstance(value, list) else []
 
-    structured_result = result_dict.get("structured_result") or getattr(result, "structured_result", None)
-    if structured_result is not None:
-        containers.append(_as_dict(structured_result))
-        validated_output = getattr(structured_result, "validated_output", None)
-        if validated_output is not None:
-            containers.append(_as_dict(validated_output))
-        parsed_json = getattr(structured_result, "parsed_json", None)
-        if parsed_json is not None:
-            containers.append(_as_dict(parsed_json))
+    workflow_id = str(get_value(result, "workflow_id", "") or "")
 
-    for attr in ("validated_output", "parsed_json", "result_view", "response_payload"):
-        value = result_dict.get(attr) if isinstance(result_dict, dict) else None
-        if value:
-            containers.append(_as_dict(value))
+    structured_result = get_value(result, "structured_result")
+    payload = (
+        get_value(structured_result, "validated_output")
+        or get_value(structured_result, "parsed_json")
+        or {}
+    )
+    structured_response = get_value(payload, "structured_response", {}) or {}
 
-    # Include top-level ProductWorkflowResult lists.
-    for attr in ("highlights", "warnings", "artifacts"):
-        value = result_dict.get(attr)
-        if value:
-            containers.append({attr: value})
+    if workflow_id == "policy_contract_comparison":
+        policy_v2 = get_value(structured_response, "policy_comparison_v2", {}) or {}
 
-    key_sets = {
-        "action_plan_evidence_review": [
-            "actions",
-            "action_items",
-            "recommended_actions",
-            "checklist_preview",
-            "deadlines",
-            "important_dates",
-            "risks",
-            "blockers",
-            "evidence_gaps",
-            "missing_information",
-        ],
-        "policy_contract_comparison": [
-            "comparison_findings",
-            "findings",
-            "differences",
-            "key_differences",
-            "recommendations",
-            "key_points",
-            "highlights",
-            "risks",
-            "gaps",
-        ],
-        "candidate_review": [
-            "strengths",
-            "seniority_signals",
-            "skills",
-            "concerns",
-            "risks",
-            "key_points",
-            "highlights",
-            "recommendations",
-        ],
-        "document_review": [
-            "findings",
-            "risks",
-            "gaps",
-            "missing_information",
-            "actions",
-            "action_items",
-            "key_points",
-            "highlights",
-        ],
-    }
+        for key in ("deltas", "differences", "must_fix_items"):
+            items = as_list(get_value(policy_v2, key)) or as_list(get_value(payload, key))
+            if items:
+                return len(items)
 
-    selected_keys = key_sets.get(workflow_id)
-    if not selected_keys:
-        selected_keys = [
-            "findings",
-            "actions",
-            "action_items",
-            "recommendations",
-            "key_points",
-            "highlights",
-            "risks",
-            "gaps",
-        ]
+        comparison_findings = as_list(get_value(payload, "comparison_findings"))
+        real_findings = []
+        for finding in comparison_findings:
+            finding_type = str(get_value(finding, "finding_type", "") or "").replace("_", " ").casefold()
+            title = str(get_value(finding, "title", "") or "").strip().casefold()
+            if finding_type == "document summary" or title.startswith("summary of "):
+                continue
+            real_findings.append(finding)
 
-    counts: list[int] = []
+        return len(real_findings)
 
-    for container in containers:
-        for obj in _walk(container):
-            for key in selected_keys:
-                if key in obj:
-                    counts.append(_clean_len(obj.get(key)))
+    if workflow_id == "document_review":
+        try:
+            from src.product.presenters import build_document_review_view
 
-            structured_response = obj.get("structured_response")
-            if isinstance(structured_response, dict):
-                for key in selected_keys:
-                    if key in structured_response:
-                        counts.append(_clean_len(structured_response.get(key)))
+            view = build_document_review_view(result)
+            findings = view.get("findings") if isinstance(view, dict) else None
+            if isinstance(findings, list):
+                return len(findings)
+        except Exception:
+            pass
 
-    # Prefer the strongest workflow-specific signal, not a sum that double-counts
-    # the same item repeated in payload, structured_response and highlights.
-    return max(counts or [0])
+        document_review_findings = as_list(get_value(payload, "document_review_findings"))
+        if document_review_findings:
+            return len(document_review_findings)
+
+        extraction_payload = get_value(structured_response, "extraction_payload", {}) or {}
+        risks = as_list(get_value(extraction_payload, "risks"))
+        if risks:
+            return len(risks)
+
+        return 0
+
+    for key in ("document_review_findings", "comparison_findings", "findings", "actions"):
+        items = as_list(get_value(payload, key))
+        if items:
+            return len(items)
+
+    highlights = as_list(get_value(result, "highlights"))
+    return len(highlights)
+
 
 
 def build_product_workflow_history_entry(

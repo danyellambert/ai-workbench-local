@@ -85,8 +85,8 @@ function isTargetReady(status?: string | null): boolean {
 
 function displayLabel(value: unknown, fallback: string): string {
   const normalized = String(value || '').trim();
-  if (!normalized || /^untitled\b/i.test(normalized)) return fallback;
-  return normalized.length > 88 ? `${normalized.slice(0, 87).trimEnd()}…` : normalized;
+  if (!normalized || /^untitled/i.test(normalized)) return fallback;
+  return normalized;
 }
 
 function compactText(value: unknown, fallback = '—', maxChars = 140): string {
@@ -156,17 +156,19 @@ function parseMarkdownBullets(value: string): string[] {
 }
 
 function parseTrelloCard(card: TrelloPreviewCard | null): { title: string; listLabel: string; summary: string | null; sections: TrelloPreviewSection[] } {
-  const title = displayLabel(card?.name || card?.title, 'Card');
+  const title = trelloPreviewFullName(card);
   const listLabel = displayLabel(card?.list_label || card?.list_name, 'Mapped list');
   const description = String(card?.description || '').replace(/\r\n/g, '\n').trim();
+  const explicitSummary = stripMarkdown(String(card?.summary || ''));
+
   if (!description) {
-    return { title, listLabel, summary: null, sections: [] };
+    return { title, listLabel, summary: explicitSummary || null, sections: [] };
   }
 
   const lines = description.split('\n').map((line) => line.trim()).filter(Boolean);
   const sections: TrelloPreviewSection[] = [];
   const seenItems = new Set<string>();
-  let summary: string | null = null;
+  let summary: string | null = explicitSummary || null;
   let currentHeading = 'Details';
   let currentItems: string[] = [];
 
@@ -200,13 +202,13 @@ function parseTrelloCard(card: TrelloPreviewCard | null): { title: string; listL
 
     if (/^##+\s+/.test(line)) {
       if (!summary && normalized.toLowerCase() !== title.toLowerCase()) {
-        summary = compactText(normalized, '', 180) || null;
+        summary = normalized || null;
       }
       continue;
     }
 
     if (!summary && currentHeading === 'Details') {
-      summary = compactText(normalized, '', 180) || null;
+      summary = normalized || null;
       continue;
     }
 
@@ -215,7 +217,7 @@ function parseTrelloCard(card: TrelloPreviewCard | null): { title: string; listL
 
   flushSection();
 
-  const cleanedSections = sections.filter((section) => section.items.length);
+  let cleanedSections = sections.filter((section) => section.items.length);
   if (!cleanedSections.length) {
     const fallbackItems = dedupeItems(parseMarkdownBullets(description), 6);
     if (fallbackItems.length) {
@@ -223,32 +225,234 @@ function parseTrelloCard(card: TrelloPreviewCard | null): { title: string; listL
     }
   }
 
+  // The real Trello checklist is rendered separately from card.checklist_items.
+  // Avoid showing a duplicate Markdown-derived Suggested checklist section.
+  cleanedSections = cleanedSections.filter(
+    (section) => section.heading.trim().toLowerCase() !== 'suggested checklist',
+  );
+
   return { title, listLabel, summary, sections: cleanedSections };
 }
 
-function extractTrelloLabelNames(card: TrelloPreviewCard | null): string[] {
+function rawTrelloLabelNames(card: TrelloPreviewCard | null): string[] {
   const labels = Array.isArray(card?.labels) ? card.labels : [];
   return labels
-    .map((label) => (label && typeof label === 'object' ? stripMarkdown(String((label as { name?: unknown }).name || '')) : ''))
-    .filter(Boolean)
+    .map((label) => (
+      label && typeof label === 'object'
+        ? stripMarkdown(String((label as { name?: unknown }).name || ''))
+        : ''
+    ))
+    .filter(Boolean);
+}
+
+function normalizePreviewToken(value: unknown): string {
+  return String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, ' ');
+}
+
+function inferPreviewCategoryFromLabels(card: TrelloPreviewCard | null): string {
+  const labels = rawTrelloLabelNames(card);
+  const statusValue = normalizePreviewToken(card?.status || card?.list_label || card?.list_name);
+
+  const severityValues = new Set(['critical', 'high', 'medium', 'low', 'urgent']);
+  const statusValues = new Set(['open', 'review', 'needs review', 'done', 'completed', 'approved']);
+
+  const candidate = labels.find((label) => {
+    const normalized = normalizePreviewToken(label);
+    if (!normalized) return false;
+    if (severityValues.has(normalized)) return false;
+    if (statusValues.has(normalized)) return false;
+    if (statusValue && (
+      normalized === statusValue ||
+      normalized.includes(statusValue) ||
+      statusValue.includes(normalized)
+    )) return false;
+    return true;
+  });
+
+  return compactText(card?.category || candidate, '', 80);
+}
+
+function extractTrelloLabelNames(card: TrelloPreviewCard | null): string[] {
+  const statusValue = normalizePreviewToken(card?.status || card?.list_label || card?.list_name);
+  const severityValue = normalizePreviewToken(card?.severity);
+  const categoryValue = normalizePreviewToken(inferPreviewCategoryFromLabels(card));
+  const duplicateValues = new Set([statusValue, severityValue, categoryValue].filter(Boolean));
+
+  return rawTrelloLabelNames(card)
+    .filter((label) => {
+      const normalized = normalizePreviewToken(label);
+      if (!normalized) return false;
+
+      if (duplicateValues.has(normalized)) return false;
+      if (severityValue && normalized === severityValue) return false;
+
+      if (statusValue && (
+        normalized === statusValue ||
+        normalized.includes(statusValue) ||
+        statusValue.includes(normalized)
+      )) return false;
+
+      if (categoryValue && (
+        normalized === categoryValue ||
+        normalized.includes(categoryValue) ||
+        categoryValue.includes(normalized)
+      )) return false;
+
+      if (normalized === 'needs review' && statusValue.includes('review')) return false;
+
+      return true;
+    })
     .slice(0, 6);
 }
 
+function extractTrelloMetaItems(card: TrelloPreviewCard | null): Array<{ label: string; value: string }> {
+  const status = compactText(card?.status || card?.list_label || card?.list_name, '', 80);
+  const category = inferPreviewCategoryFromLabels(card);
+
+  const items: Array<{ label: string; value: string | null }> = [
+    { label: 'Owner', value: compactText(card?.owner, '', 80) },
+    { label: 'Status', value: status },
+    { label: 'Severity', value: compactText(card?.severity, '', 80) },
+    { label: 'Category', value: category },
+    { label: 'Due', value: compactText(card?.due, '', 80) },
+  ];
+
+  return items.filter((item): item is { label: string; value: string } => Boolean(item.value));
+}
+
+
+function isActionPlanTrelloCard(card: TrelloPreviewCard | null): boolean {
+  if (!card) return false;
+
+  const raw = [
+    (card as Record<string, unknown>).workflow_id,
+    (card as Record<string, unknown>).workflowId,
+    (card as Record<string, unknown>).workflow,
+    card.name,
+    card.category,
+    card.owner,
+    card.list_label,
+    card.list_name,
+    ...extractTrelloLabelNames(card),
+  ]
+    .map((value) => String(value || '').toLowerCase())
+    .join(' ');
+
+  return raw.includes('action_plan_evidence_review')
+    || raw.includes('action plan')
+    || raw.includes('evidence review')
+    || raw.includes('[action plan');
+}
+
+
+function hasPreviewEllipsis(value: unknown): boolean {
+  const text = String(value || '');
+  return text.includes('...') || text.includes('…');
+}
+
+function normalizePreviewTitleKey(value: unknown): string {
+  return String(value || '')
+    .trim()
+    .replace(/[.…]+$/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function collectPreviewFullTitles(source: unknown): string[] {
+  const titles: string[] = [];
+  const seen = new WeakSet<object>();
+
+  function visit(value: unknown): void {
+    if (!value || typeof value !== 'object') return;
+    if (seen.has(value as object)) return;
+    seen.add(value as object);
+
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+
+    const record = value as Record<string, unknown>;
+    [
+      record.full_name,
+      record.fullName,
+      record.full_title,
+      record.fullTitle,
+      record.card_title,
+      record.cardTitle,
+      record.action_title,
+      record.actionTitle,
+      record.title,
+      record.name,
+      record.description,
+    ].forEach((candidate) => {
+      const text = String(candidate || '').trim();
+      if (text && !hasPreviewEllipsis(text) && text.length > 8) titles.push(text);
+    });
+
+    Object.values(record).forEach(visit);
+  }
+
+  visit(source);
+  return Array.from(new Set(titles));
+}
+
+function trelloPreviewFullName(card: TrelloPreviewCard | null | undefined): string {
+  if (!card) return 'Untitled card';
+
+  const raw = card as unknown as Record<string, unknown>;
+  const direct = String(
+    raw.full_name
+    || raw.fullName
+    || raw.full_title
+    || raw.fullTitle
+    || raw.card_title
+    || raw.cardTitle
+    || raw.title
+    || raw.name
+    || ''
+  ).trim();
+
+  if (direct && !hasPreviewEllipsis(direct)) return direct;
+
+  const currentKey = normalizePreviewTitleKey(direct || raw.name || raw.title);
+  const candidates = collectPreviewFullTitles(card);
+
+  const matched = candidates.find((candidate) => {
+    const candidateKey = normalizePreviewTitleKey(candidate);
+    return candidateKey.startsWith(currentKey) || currentKey.startsWith(candidateKey);
+  });
+
+  return matched || direct || 'Untitled card';
+}
+
+
+function trelloCardDisplayName(card: TrelloPreviewCard | null | undefined): string {
+  if (!card) return 'Untitled card';
+
+  const raw = card as unknown as Record<string, unknown>;
+  const candidates = [
+    raw.full_name,
+    raw.fullName,
+    raw.full_title,
+    raw.fullTitle,
+    raw.card_title,
+    raw.cardTitle,
+    raw.title,
+    raw.name,
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+
+  return candidates.find(Boolean) || 'Untitled card';
+}
+
 function extractTrelloChecklistItems(card: TrelloPreviewCard | null): string[] {
+  if (isActionPlanTrelloCard(card)) return [];
   const checklist = Array.isArray(card?.checklist_items) ? card.checklist_items : [];
   return dedupeItems(checklist.map((item) => String(item || '')), 6);
 }
 
-function extractTrelloMetaItems(card: TrelloPreviewCard | null): Array<{ label: string; value: string }> {
-  const items: Array<{ label: string; value: string | null }> = [
-    { label: 'Owner', value: compactText(card?.owner, '', 80) },
-    { label: 'Status', value: compactText(card?.status, '', 80) },
-    { label: 'Severity', value: compactText(card?.severity, '', 80) },
-    { label: 'Category', value: compactText(card?.category, '', 80) },
-    { label: 'Due', value: compactText(card?.due, '', 80) },
-  ];
-  return items.filter((item): item is { label: string; value: string } => Boolean(item.value));
-}
 
 function openExternalUrl(url: string | null, fallbackMessage: string): void {
   if (!url) {
@@ -777,7 +981,7 @@ export function WorkflowPublishActions({
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
-                                  <p className="text-xs font-medium text-foreground">{parsed.title}</p>
+                                  <p className="text-xs font-medium leading-relaxed text-foreground whitespace-normal break-words">{parsed.title}</p>
                                   <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{parsed.listLabel}</p>
                                 </div>
                                 <Badge variant="outline" className="shrink-0 text-[9px]">#{index + 1}</Badge>
@@ -791,19 +995,21 @@ export function WorkflowPublishActions({
                   </div>
                 </div>
 
-                <div className="flex min-h-0 flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
+                <div className="flex min-h-0 overflow-hidden flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Card preview</p>
                   {activeTrelloCard ? (
                     <>
                       <div className="mt-3 rounded-md bg-background/80 px-3 py-3">
-                        <p className="text-sm font-medium text-foreground">{parsedActiveTrelloCard.title}</p>
+                        <p className="text-sm font-medium leading-relaxed text-foreground whitespace-normal break-words">{parsedActiveTrelloCard.title}</p>
                         <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{parsedActiveTrelloCard.listLabel}</p>
                         {parsedActiveTrelloCard.summary ? <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{parsedActiveTrelloCard.summary}</p> : null}
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {extractTrelloLabelNames(activeTrelloCard).map((label) => (
-                            <Badge key={label} variant="outline" className="text-[10px]">{label}</Badge>
-                          ))}
-                        </div>
+                        {extractTrelloLabelNames(activeTrelloCard).length ? (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {extractTrelloLabelNames(activeTrelloCard).map((label) => (
+                              <Badge key={label} variant="outline" className="text-[10px]">{label}</Badge>
+                            ))}
+                          </div>
+                        ) : null}
                         {extractTrelloMetaItems(activeTrelloCard).length ? (
                           <div className="mt-3 grid gap-2 sm:grid-cols-2">
                             {extractTrelloMetaItems(activeTrelloCard).map((item) => (
@@ -825,7 +1031,7 @@ export function WorkflowPublishActions({
                               </ul>
                             </div>
                           ))}
-                          {extractTrelloChecklistItems(activeTrelloCard).length ? (
+                          {!isActionPlanTrelloCard(activeTrelloCard) && extractTrelloChecklistItems(activeTrelloCard).length ? (
                             <div className="rounded-md bg-background/80 px-3 py-2">
                               <p className="text-xs font-medium text-foreground">Suggested checklist</p>
                               <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
@@ -839,7 +1045,7 @@ export function WorkflowPublishActions({
                   ) : <p className="mt-3 text-xs text-muted-foreground">Select a planned card to inspect the publish preview.</p>}
                 </div>
               </div>
-              <DialogFooter className="mt-2 gap-2 border-t border-border/40 pt-3 sm:justify-between">
+              <DialogFooter className="mt-2 shrink-0 gap-2 border-t border-border/40 pt-3 sm:justify-between">
                 <p className="text-[11px] text-muted-foreground">
                   {canOpenPublishedTrelloPage
                     ? 'Published. You can reopen the created Trello page from here.'
@@ -848,9 +1054,6 @@ export function WorkflowPublishActions({
                 <div className="flex items-center gap-2">
                   <Button variant="outline" onClick={openCurrentTrelloPage}>
                     Open current Trello page <ExternalLink className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" onClick={openTrelloPage} disabled={!canOpenPublishedTrelloPage}>
-                    {canOpenPublishedTrelloPage ? 'Open page' : 'Open page after publish'} <ExternalLink className="ml-2 h-4 w-4" />
                   </Button>
                   <Button disabled={publishTrelloMutation.isPending} onClick={handlePublishTrello}>
                     {publishTrelloMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KanbanSquare className="mr-2 h-4 w-4" />}
@@ -871,8 +1074,8 @@ export function WorkflowPublishActions({
                   Review the template and sections that will be published to Notion.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid min-h-0 flex-1 gap-4 py-2 md:grid-cols-[0.82fr_1.18fr]">
-                <div className="flex min-h-0 flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
+              <div className="grid min-h-0 flex-1 overflow-hidden gap-4 py-2 md:grid-cols-[0.82fr_1.18fr]">
+                <div className="flex min-h-0 overflow-hidden flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected template</p>
                   <p className="mt-1 text-sm font-medium text-foreground">{displayLabel(notionPreview?.template_label || selectedTemplate?.label, 'Executive summary')}</p>
                   <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{displayLabel(notionPreview?.template_description || selectedTemplate?.description, 'Executive handoff template')}</p>
@@ -908,7 +1111,7 @@ export function WorkflowPublishActions({
                     </div>
                   </ScrollArea>
                 </div>
-                <div className="flex min-h-0 flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
+                <div className="flex min-h-0 overflow-hidden flex-col rounded-lg border border-border/50 bg-secondary/10 p-3">
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Preview sections</p>
                   <ScrollArea className="mt-3 h-[46vh] max-h-[430px] pr-3">
                     <div className="space-y-3">
@@ -933,7 +1136,7 @@ export function WorkflowPublishActions({
                   </ScrollArea>
                 </div>
               </div>
-              <DialogFooter className="mt-2 gap-2 border-t border-border/40 pt-3 sm:justify-between">
+              <DialogFooter className="mt-2 shrink-0 gap-2 border-t border-border/40 pt-3 sm:justify-between">
                 <p className="text-[11px] text-muted-foreground">
                   {canOpenPublishedNotionPage
                     ? 'Published. You can reopen the created Notion page from here.'
@@ -942,9 +1145,6 @@ export function WorkflowPublishActions({
                 <div className="flex items-center gap-2">
                   <Button variant="outline" onClick={openCurrentNotionPage}>
                     Open current Notion page <ExternalLink className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" onClick={openNotionPage} disabled={!canOpenPublishedNotionPage}>
-                    {canOpenPublishedNotionPage ? 'Open page' : 'Open page after publish'} <ExternalLink className="ml-2 h-4 w-4" />
                   </Button>
                   <Button disabled={publishNotionMutation.isPending} onClick={handlePublishNotion}>
                     {publishNotionMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ScrollText className="mr-2 h-4 w-4" />}

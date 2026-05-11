@@ -18,6 +18,7 @@ import {
 } from '@/lib/product-api';
 import { toast } from '@/components/ui/sonner';
 
+import { formatUserDateTime } from '@/lib/user-time';
 type DeliveryLoopPanelProps = {
   title?: string;
   description?: string;
@@ -32,17 +33,12 @@ type DeliveryLoopPanelProps = {
   onNextcloudSynced?: (payload: ProductNextcloudSyncResponse) => void;
 };
 
-function formatDateTime(value?: string | null): string {
-  if (!value) return 'n/a';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const parsed = new Date(normalized);
-  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+function formatDateTime(value?: string | number | null): string {
+  return formatUserDateTime(value);
 }
 
 function formatDocumentTimestamp(value?: string | number | null): string {
-  if (typeof value === 'number' && value > 0) return new Date(value * 1000).toLocaleString();
-  if (typeof value === 'string') return formatDateTime(value);
-  return 'n/a';
+  return formatUserDateTime(value);
 }
 
 function looksOpaque(value?: string | null): boolean {

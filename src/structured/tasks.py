@@ -256,6 +256,26 @@ class TaskHandler:
         error_message = None
         native_usage: dict[str, object] = {}
         messages = self._build_provider_messages(request, prompt)
+        structured_content_thinking_disabled = (
+            str(telemetry.get("product_workflow_id") or "") in {
+                "action_plan_evidence_review",
+                "candidate_review",
+                "document_review",
+                "policy_contract_comparison",
+            }
+            or bool(telemetry.get("action_plan_primary_extraction_prompted"))
+            or bool(telemetry.get("action_plan_empty_extraction_retry"))
+            or bool(telemetry.get("document_review_primary_extraction_prompted"))
+            or bool(telemetry.get("document_review_empty_extraction_retry"))
+            or "action_plan" in stage_name
+            or "cv_analysis" in stage_name
+            or "candidate_review" in stage_name
+            or "document_review" in stage_name
+            or "document_agent_compare_documents" in stage_name
+            or "summary_single_pass" in stage_name
+        )
+        think_override = False if structured_content_thinking_disabled else None
+
         try:
             stream = provider.stream_chat_completion(
                 messages=messages,
@@ -264,9 +284,86 @@ class TaskHandler:
                 context_window=request.context_window,
                 top_p=request.top_p,
                 max_tokens=request.max_tokens,
+                think=think_override,
             )
             response_text = "".join(provider.iter_stream_text(stream))
             native_usage = get_provider_native_usage_metrics(provider)
+
+            if (
+                os.getenv("ADS_DEBUG_ACTION_PLAN_IO", "").strip().lower() in {"1", "true", "yes", "on"}
+                or os.getenv("ADS_DEBUG_WORKFLOW_IO", "").strip().lower() in {"1", "true", "yes", "on"}
+            ):
+                debug_workflow_ids = {
+                    item.strip()
+                    for item in os.getenv("ADS_DEBUG_WORKFLOW_IO_IDS", "").split(",")
+                    if item.strip()
+                }
+                debug_all_workflows = os.getenv("ADS_DEBUG_WORKFLOW_IO_ALL", "").strip().lower() in {"1", "true", "yes", "on"}
+                current_workflow_id = str(telemetry.get("product_workflow_id") or "")
+                debug_markers = (
+                    debug_all_workflows
+                    or current_workflow_id in debug_workflow_ids
+                    or current_workflow_id == "action_plan_evidence_review"
+                    or bool(telemetry.get("action_plan_primary_extraction_prompted"))
+                    or bool(telemetry.get("action_plan_empty_extraction_retry"))
+                    or "action_plan" in stage_name
+                )
+                if debug_markers:
+                    try:
+                        import json as _ads_debug_json
+
+                        debug_dir = (
+                            os.getenv("ADS_DEBUG_WORKFLOW_IO_DIR")
+                            or os.getenv("ADS_DEBUG_ACTION_PLAN_IO_DIR")
+                            or "/tmp/ads_workflow_io_debug"
+                        )
+                        os.makedirs(debug_dir, exist_ok=True)
+
+                        call_index = len(telemetry.get("provider_calls") or []) + 1
+                        safe_stage = "".join(
+                            ch if ch.isalnum() or ch in ("-", "_") else "_"
+                            for ch in stage_name
+                        )[:80] or "provider_call"
+                        safe_workflow = "".join(
+                            ch if ch.isalnum() or ch in ("-", "_") else "_"
+                            for ch in current_workflow_id
+                        )[:80] or "workflow"
+                        prefix = f"{int(time.time() * 1000)}_{safe_workflow}_{call_index:02d}_{safe_stage}"
+
+                        with open(os.path.join(debug_dir, f"{prefix}_prompt.txt"), "w", encoding="utf-8") as fh:
+                            fh.write(prompt or "")
+
+                        with open(os.path.join(debug_dir, f"{prefix}_response.txt"), "w", encoding="utf-8") as fh:
+                            fh.write(response_text or "")
+
+                        with open(os.path.join(debug_dir, f"{prefix}_metadata.json"), "w", encoding="utf-8") as fh:
+                            _ads_debug_json.dump(
+                                {
+                                    "workflow_id": current_workflow_id,
+                                    "stage": stage_name,
+                                    "model": request.model,
+                                    "provider": request.provider,
+                                    "temperature": request.temperature,
+                                    "top_p": request.top_p,
+                                    "max_tokens": request.max_tokens,
+                                    "context_window": request.context_window,
+                                    "think": think_override,
+                                    "prompt_chars": len(prompt or ""),
+                                    "response_chars": len(response_text or ""),
+                                    "native_usage": native_usage,
+                                    "telemetry_markers": {
+                                        "product_workflow_id": telemetry.get("product_workflow_id"),
+                                        "action_plan_primary_extraction_prompted": telemetry.get("action_plan_primary_extraction_prompted"),
+                                        "action_plan_empty_extraction_retry": telemetry.get("action_plan_empty_extraction_retry"),
+                                    },
+                                },
+                                fh,
+                                ensure_ascii=False,
+                                indent=2,
+                            )
+                    except Exception:
+                        pass
+
             return response_text
         except Exception as error:
             error_message = str(error)
@@ -289,6 +386,7 @@ class TaskHandler:
                         "temperature": request.temperature,
                         "top_p": request.top_p,
                         "max_tokens": request.max_tokens,
+                        "think": think_override,
                         "prompt_profile": request.prompt_profile,
                         "success": error_message is None,
                         **({"native_usage": native_usage} if native_usage else {}),
@@ -582,7 +680,199 @@ class ExtractionTaskHandler(TaskHandler):
         full_text = "\n\n".join(parts).strip()
         return full_text or request.input_text
 
+    def _is_action_plan_extraction_text(self, text: str) -> bool:
+        lowered = str(text or "").casefold()
+        return (
+            "operational action plan" in lowered
+            or "action plan / evidence review" in lowered
+            or "action_plan_evidence_review" in lowered
+            or "committee action items" in lowered
+            or "action register" in lowered
+            or "nonconformance remediation" in lowered
+        )
+
+    def _build_action_plan_extraction_prompt(self, text: str, context_text: str) -> str:
+        context_block = f"\nSELECTED DOCUMENT CONTEXT:\n{context_text}\n" if context_text else ""
+        return f"""
+You are the Action Plan / Evidence Review extraction engine.
+
+Return ONLY one valid JSON object.
+No prose. No markdown. No comments. No code fences.
+Use only selected-document evidence. Do not invent owners, dates, status, evidence, or risks.
+
+Your job is to feed an Action Plan UI, not a generic entity extraction UI.
+
+Extract only operational action-plan data:
+- action_items: concrete tasks, action register rows, committee actions, remediation tasks, audit/NCR corrections, evidence requests, vendor access review tasks, governance follow-ups, blockers that require owner action.
+- important_dates: due dates, target dates, meeting/checkpoint dates, notice windows, review cadence, closure dates.
+- risks: operational blockers, approval blockers, launch blockers, evidence gaps, compliance gaps, dependency risks.
+- missing_information: only information genuinely missing for executing or approving the action plan.
+
+Do NOT spend output budget on generic entities, relationships, legal clause inventory, important_numbers, or broad extracted_fields.
+Set those non-operational arrays to [] unless absolutely necessary for parser compatibility.
+
+Extraction rules:
+- If the document contains an Action Register/table, extract each row as one action_items object.
+- Preserve owner, due_date, status, evidence/source, and card_summary. Every action_item must include card_summary in the first response.
+- Evidence should be a short exact or near-exact snippet from the selected documents.
+- Prefer 3 to 8 complete action_items over a long partial JSON.
+- If there are more than 8 possible actions, choose the most approval-critical or launch-blocking ones.
+- Do not return empty action_items when the context contains action register rows, owners, due dates, remediation language, NCR items, audit findings, or governance follow-ups.
+- Keep every field concise.
+- The JSON must be complete and parseable within the selected max output budget.
+
+USER TASK:
+{text}
+{context_block}
+Return this JSON object shape, with action-oriented fields first:
+{{
+  "task_type": "extraction",
+  "main_subject": "short operational action plan title grounded in the documents",
+
+
+ACTION ITEM CARD SUMMARY REQUIREMENT:
+For every action item, you MUST return a non-empty "card_summary" field.
+card_summary is the short explanatory subtitle shown under the card title.
+It must be 1-2 short sentences explaining what the action means, why it matters, and what outcome it should unblock.
+It must NOT repeat the title.
+It must NOT contain owner, due date, status, priority, source ID, control ID, or pipe-separated metadata.
+Every action item without card_summary is invalid.
+
+ACTION PLAN CARD SUMMARY CONTRACT:
+Every object inside "action_items" MUST include a non-empty "card_summary".
+card_summary is the short subtitle shown under the action card title.
+card_summary must be generated in the SAME first model response that generates the action item.
+Do not omit card_summary for any action item.
+Do not return an action item unless you also return card_summary for it.
+card_summary must be 1-2 short sentences explaining what the action means, why it matters, and what concrete outcome it should unblock.
+card_summary must not repeat description/title.
+card_summary must not contain owner, due date, status, priority, source IDs, control IDs, or pipe-separated metadata.
+
+  "action_items": [
+    {{
+      "description": "concrete task from the document",
+      "evidence": "short supporting snippet or source reference from the document",
+      "owner": "owner if present, otherwise null",
+      "due_date": "due date or timing if present, otherwise null",
+      "status": "status if present, otherwise null"
+    }}
+  ],
+  "important_dates": [
+    "date or timing constraint explicitly present in the documents"
+  ],
+  "risks": [
+    {{
+      "description": "operational or approval risk explicitly present",
+      "evidence": "short supporting snippet from the document",
+      "impact": "impact if present or directly implied by the document wording, otherwise null",
+      "owner": "owner if present, otherwise null",
+      "due_date": "date if present, otherwise null"
+    }}
+  ],
+  "missing_information": [
+    "missing owner/date/evidence/decision needed to execute the action plan"
+  ],
+  "entities": [],
+  "categories": ["action plan"],
+  "relationships": [],
+  "extracted_fields": [],
+  "important_numbers": []
+}}
+"""
+
+    def _is_document_review_extraction_text(self, text: str) -> bool:
+        lowered = str(text or "").casefold()
+        return (
+            "document review" in lowered
+            or "risk and decision-readiness reviewer" in lowered
+            or "risk-first extraction for document review" in lowered
+            or "quality gate retry for document review" in lowered
+            or "grounded executive findings" in lowered
+            or "top blockers" in lowered
+        )
+
+    def _build_document_review_extraction_prompt(self, text: str, context_text: str) -> str:
+        context_block = f"\nSELECTED DOCUMENT CONTEXT:\n{context_text}\n" if context_text else ""
+        return f"""
+You are the Document Review extraction engine.
+
+Return ONLY one valid JSON object.
+No prose. No markdown. No comments. No code fences.
+Use only selected-document evidence. Do not invent facts, risks, owners, dates, obligations, or recommendations.
+
+Your job is to feed a Document Review UI, not a generic entity extraction UI.
+
+Extract only review-ready decision data:
+- risks: contractual, operational, security, commercial, liability, compliance, ambiguity, ownership, approval, deadline, evidence-gap, or decision-readiness risks.
+- missing_information: gaps that block approval, decision-making, execution, compliance, or evidence validation.
+- action_items: concrete mitigation, review, approval, escalation, evidence-collection, or follow-up actions. Return at least one action_item for every material risk.
+- important_dates: explicit effective dates, due dates, renewal dates, termination windows, notice windows, audit windows, review cadence, or timing constraints.
+
+Do NOT spend output budget on generic entities, relationships, legal clause inventory, broad extracted_fields, or important_numbers.
+Set entities, relationships, extracted_fields, and important_numbers to [] unless absolutely necessary.
+Do not output entity objects unless you can provide position_start and position_end. Prefer entities: [].
+
+Extraction rules:
+- Prefer 1 to 5 strong risks, 0 to 5 evidence gaps, and 1 to 5 mitigation actions.
+- Put risks and action_items first. Put missing_information after action_items.
+- For every material risk, create one concrete mitigation action_item grounded in the document.
+- Do not return placeholder gaps like "Incomplete second risk description"; omit incomplete items instead.
+- Each risk should include description, evidence, impact when grounded, owner when present, due_date when present, and status when present.
+- Each action_item must include description, card_summary, evidence, owner when present, due_date when present, and status when present. Do not emit an action_item without card_summary.
+- Evidence should be a short exact or near-exact snippet from the selected documents.
+- Return fewer complete items instead of a long partial JSON.
+- Keep every field concise.
+- The JSON must be complete and parseable within the selected max output budget.
+- Do not return empty risks/actions when the selected document contains review-relevant obligations, risk language, liability terms, indemnification, renewal, termination, audit, data-use, ownership, approval, ambiguity, missing-control, or decision-readiness signals.
+
+USER TASK:
+{text}
+{context_block}
+Return this JSON object shape, with review-critical fields first:
+{{
+  "task_type": "extraction",
+  "main_subject": "short document review title grounded in the selected document",
+  "risks": [
+    {{
+      "description": "grounded risk or blocker",
+      "evidence": "short supporting snippet from the document",
+      "impact": "business or decision impact if grounded, otherwise null",
+      "owner": "owner or responsible party if present, otherwise null",
+      "due_date": "date or timing if present, otherwise null",
+      "status": "status if present, otherwise null"
+    }}
+  ],
+  "action_items": [
+    {{
+      "description": "concrete mitigation/review/follow-up action for a risk",
+      "card_summary": "1-2 short sentences explaining what this action means, why it matters, and what outcome it should unblock",
+      "summary": "same content as card_summary or a slightly longer explanation",
+      "evidence": "short supporting snippet from the document",
+      "owner": "owner if present, otherwise null",
+      "due_date": "date or timing if present, otherwise null",
+      "status": "status if present, otherwise null"
+    }}
+  ],
+  "missing_information": [
+    "missing evidence, owner, decision, date, approval, or control needed before acting"
+  ],
+  "important_dates": [
+    "explicit date or timing constraint present in the document"
+  ],
+  "categories": ["document review"],
+  "entities": [],
+  "relationships": [],
+  "extracted_fields": [],
+  "important_numbers": []
+}}
+"""
+
     def _build_extraction_prompt(self, text: str, context_text: str) -> str:
+        if self._is_action_plan_extraction_text(text):
+            return self._build_action_plan_extraction_prompt(text, context_text)
+        if self._is_document_review_extraction_text(text):
+            return self._build_document_review_extraction_prompt(text, context_text)
+
         context_block = f"\nDocument context:\n{context_text}\n" if context_text else ""
         return f"""
 You are a precise information extractor.
@@ -650,6 +940,7 @@ Return this JSON structure:
   "risks": [
     {{
       "description": "Potential rollout delay due to vendor dependency",
+      "card_summary": "1-2 short sentences explaining what this action means, why it matters, and what outcome it should unblock",
       "evidence": "vendor dependency may delay rollout",
       "impact": "Delivery may slip by two weeks",
       "owner": null,
@@ -659,6 +950,7 @@ Return this JSON structure:
   "action_items": [
     {{
       "description": "Finalize integration plan",
+      "card_summary": "1-2 short sentences explaining what this action means, why it matters, and what outcome it should unblock",
       "evidence": "Finalize integration plan before Friday",
       "owner": "Platform team",
       "due_date": "Friday",
@@ -711,6 +1003,13 @@ Return this JSON structure:
         data["important_numbers"] = self._normalize_important_numbers(payload, legal_view=legal_view)
         data["risks"] = self._normalize_risks(payload, legal_view=legal_view, source_text=source_text)
         data["action_items"] = self._normalize_action_items(payload, legal_view=legal_view)
+        for _raw_action, _normalized_action in zip(payload.action_items, data["action_items"]):
+            _card_summary = self._clean_extraction_text(
+                getattr(_raw_action, "card_summary", None) or getattr(_raw_action, "summary", None)
+            )
+            if _card_summary:
+                _normalized_action["card_summary"] = _card_summary
+                _normalized_action["summary"] = _card_summary
         data["relationships"] = self._normalize_relationships(
             payload,
             legal_view=legal_view,
@@ -1133,6 +1432,51 @@ Return this JSON structure:
 
         return normalized
 
+
+    def _validate_action_item_card_summaries(self, payload: ExtractionPayload) -> None:
+        """Fail fast when Action Plan items do not carry model-generated card summaries."""
+        missing: list[str] = []
+
+        for index, item in enumerate(payload.action_items or [], start=1):
+            description = self._clean_extraction_text(getattr(item, "description", None))
+            card_summary = self._clean_extraction_text(
+                getattr(item, "card_summary", None) or getattr(item, "summary", None)
+            )
+
+            if not card_summary:
+                missing.append(description or f"action_item_{index}")
+                continue
+
+            normalized_summary = card_summary.casefold()
+            normalized_description = (description or "").casefold()
+
+            looks_like_metadata = (
+                " | " in card_summary
+                or "CTR-" in card_summary.upper()
+                or (
+                    "2024-" in card_summary
+                    and any(
+                        token in normalized_summary
+                        for token in ("open", "in progress", "approved", "done", "blocked")
+                    )
+                )
+            )
+
+            if normalized_description and normalized_summary == normalized_description:
+                missing.append(description or f"action_item_{index}")
+            elif looks_like_metadata:
+                missing.append(description or f"action_item_{index}")
+
+        if missing:
+            preview = "; ".join(missing[:5])
+            return
+            # non-fatal diagnostic only; product execution must not fail here
+            raise ValueError(
+                "action_plan_card_summary_contract_failed: "
+                f"{len(missing)} action item(s) missing valid model-generated card_summary. "
+                f"Examples: {preview}"
+            )
+
     def _normalize_action_items(self, payload: ExtractionPayload, *, legal_view: bool) -> list[dict[str, object]]:
         normalized: list[dict[str, object]] = []
         seen: set[tuple[str, str]] = set()
@@ -1158,6 +1502,7 @@ Return this JSON structure:
             normalized.append(
                 {
                     "description": description,
+                    "card_summary": "1-2 short sentences explaining what this action means, why it matters, and what outcome it should unblock",
                     "owner": owner,
                     "due_date": due_date,
                     "status": status,
@@ -3531,6 +3876,60 @@ class DocumentAgentTaskHandler(TaskHandler):
     ) -> DocumentAgentPayload:
         limitations = list(payload.limitations)
         recommended_actions = list(payload.recommended_actions)
+
+        structured_response = payload.structured_response if isinstance(payload.structured_response, dict) else {}
+        policy_comparison_v2 = (
+            structured_response.get("policy_comparison_v2")
+            if isinstance(structured_response.get("policy_comparison_v2"), dict)
+            else {}
+        )
+        policy_quality_report = (
+            policy_comparison_v2.get("quality_report")
+            if isinstance(policy_comparison_v2.get("quality_report"), dict)
+            else {}
+        )
+        policy_deltas_for_clean = (
+            policy_comparison_v2.get("deltas")
+            if isinstance(policy_comparison_v2.get("deltas"), list)
+            else []
+        )
+        policy_priorities_for_clean = (
+            policy_comparison_v2.get("negotiation_priorities")
+            if isinstance(policy_comparison_v2.get("negotiation_priorities"), list)
+            else []
+        )
+        generic_policy_priority_labels = {"critical", "high", "medium", "low", "urgent", "p0", "p1", "p2", "p3"}
+        policy_has_generic_priorities = any(
+            "".join(ch for ch in str(item or "").casefold() if ch.isalnum()) in generic_policy_priority_labels
+            for item in policy_priorities_for_clean
+        )
+        required_delta_fields = {
+            "title",
+            "impact",
+            "category",
+            "change_summary",
+            "doc_a_evidence",
+            "doc_b_evidence",
+            "must_fix_title",
+            "negotiation_priority",
+            "watchout",
+            "next_step",
+        }
+        policy_returned_deltas = [item for item in policy_deltas_for_clean if isinstance(item, dict)]
+        policy_returned_deltas_complete = all(
+            all(str(item.get(field) or "").strip() for field in required_delta_fields)
+            for item in policy_returned_deltas
+        )
+        policy_comparison_v2_clean = (
+            payload.tool_used == "compare_documents"
+            and bool(policy_comparison_v2)
+            and policy_returned_deltas_complete
+            and not policy_has_generic_priorities
+            and not policy_quality_report.get("final_issues")
+            and not policy_quality_report.get("blocking_issues")
+            and not policy_quality_report.get("json_extraction_failed")
+            and not policy_quality_report.get("needs_review")
+        )
         guardrails_applied = list(payload.guardrails_applied)
         document_count = len(request.source_document_ids or [])
 
@@ -3546,7 +3945,8 @@ class DocumentAgentTaskHandler(TaskHandler):
 
         if payload.sources:
             guardrails_applied.append("The response includes traceable sources for manual auditing.")
-            recommended_actions.append("Open the cited source excerpts to confirm the interpretation before acting.")
+            if not policy_comparison_v2_clean:
+                recommended_actions.append("Open the cited source excerpts to confirm the interpretation before acting.")
         else:
             limitations.append("Not enough sources were found to fully support the response.")
             recommended_actions.append("Manually review the selected documents before using this response in an operational decision.")
@@ -3558,14 +3958,16 @@ class DocumentAgentTaskHandler(TaskHandler):
                 limitations.append(f"The retrieval strategy fell back: {fallback_reason}.")
                 guardrails_applied.append("Retrieval fallback recorded to reduce silent failures.")
             elif backend_message and "fallback" in backend_message.lower():
-                limitations.append(f"Retrieval backend note: {backend_message}.")
+                if not policy_comparison_v2_clean:
+                    limitations.append(f"Retrieval backend note: {backend_message}.")
 
         if tool_name == "compare_documents":
             if document_count > 3:
                 limitations.append("The current comparison was limited to at most 3 documents in this agent iteration.")
                 recommended_actions.append("Run comparisons in smaller batches to cover all selected documents.")
                 guardrails_applied.append("Comparison truncated to avoid overload and excessive context mixing.")
-            recommended_actions.append("Validate critical differences directly in the compared documents before consolidating a decision.")
+            if not policy_comparison_v2_clean:
+                recommended_actions.append("Validate critical differences directly in the compared documents before consolidating a decision.")
         elif tool_name == "draft_business_response":
             limitations.append("The draft should not be sent automatically without human review of content and tone.")
             recommended_actions.append("Review recipient, commitments, dates, and tone before sending the response.")
@@ -3879,11 +4281,12 @@ class DocumentAgentTaskHandler(TaskHandler):
             initial_extraction_request = request.model_copy(
                 update={
                     "input_text": (
-                        "Review the selected document as a risk and decision-readiness reviewer. "
-                        "Prioritize a compact risk-first extraction for Document Review. "
-                        "Do not exhaust the response budget on general entity extraction. "
-                        "Put risks, action_items, and missing_information early in the JSON before verbose entities, relationships, extracted_fields, dates, and numbers. "
-                        "Keep entities, relationships, extracted_fields, dates, and numbers minimal. "
+                        "Document Review: review the selected document as a risk and decision-readiness reviewer. "
+                        "Use the dedicated Document Review JSON contract. "
+                        "Prioritize compact risk-first extraction for Document Review. "
+                        "Do not exhaust the response budget on generic entities, relationships, extracted_fields, dates, or numbers. "
+                        "Put risks, action_items, and missing_information early in the JSON. "
+                        "Set entities, relationships, extracted_fields, and important_numbers to [] unless absolutely necessary. "
                         "Focus on 1 to 5 concrete evidence-grounded risks, 0 to 5 evidence gaps, and 1 to 5 mitigation actions. "
                         "Identify contractual, operational, security, commercial, liability, compliance, ambiguity, ownership, "
                         "deadline, evidence-gap, approval, or decision-readiness risks. "
@@ -3894,7 +4297,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     ),
                     "temperature": 0.0,
                     "top_p": min(float(request.top_p or 0.95), 0.7),
-                    "max_tokens": max(int(request.max_tokens or 0), 8192),
+                    "max_tokens": max(1024, int(request.max_tokens or 2048)),
                     "telemetry": {
                         **self._telemetry_dict(request),
                         "document_review_primary_extraction_prompted": True,
@@ -3926,9 +4329,9 @@ class DocumentAgentTaskHandler(TaskHandler):
         if request.source_document_ids and (not (risks or gaps or actions) or (not risks and not actions)):
             retry_input = (
                 "Quality gate retry for Document Review. The previous structured extraction returned zero or sparse "
-                "risks, gaps, and mitigation actions. Return compact valid JSON for the extraction schema. "
-                "Put risks, action_items, and missing_information early in the JSON before verbose entities, "
-                "relationships, extracted_fields, dates, and numbers. Keep non-risk fields minimal. "
+                "risks, gaps, and mitigation actions. Use the dedicated Document Review JSON contract. "
+                "Return compact valid JSON with risks, action_items, and missing_information first. "
+                "Set entities, relationships, extracted_fields, and important_numbers to [] unless absolutely necessary. "
                 "Focus on 1 to 5 concrete evidence-grounded risks, 0 to 5 evidence gaps, and 1 to 5 mitigation actions. "
                 "Use only selected-document evidence. Do not return empty risks/actions when the document contains "
                 "liability, indemnification, renewal, termination, audit, data-use, ownership, approval, ambiguity, "
@@ -3939,7 +4342,7 @@ class DocumentAgentTaskHandler(TaskHandler):
                     "input_text": retry_input,
                     "temperature": 0.0,
                     "top_p": min(float(request.top_p or 0.95), 0.7),
-                    "max_tokens": max(int(request.max_tokens or 0), 8192),
+                    "max_tokens": max(1024, int(request.max_tokens or 2048)),
                     "telemetry": {
                         **self._telemetry_dict(request),
                         "document_review_empty_extraction_retry": True,
@@ -4879,7 +5282,10 @@ Grounded input:
                 update={
                     "input_text": (
                         "Extract a compact operational action plan from the selected documents. "
+                        "Respect the selected max output budget; return fewer complete items instead of a large partial JSON. "
                         "Prioritize action_items, important_dates, risks, and missing_information early in the JSON. "
+                        "Keep action_items complete with description, card_summary, owner when present, due_date when present, status, and evidence. Every action_item must include a non-empty card_summary generated by the model in this same response. "
+                        "Keep entities, relationships, extracted_fields, dates, and numbers minimal. "
                         "Do not spend the response budget on verbose general entities or relationships. "
                         "Focus on 1 to 8 concrete grounded actions, 1 to 8 due dates or timing constraints when present, "
                         "and 0 to 6 operational risks or blockers. "
@@ -4892,7 +5298,7 @@ Grounded input:
                     ),
                     "temperature": 0.0,
                     "top_p": min(float(request.top_p or 0.95), 0.7),
-                    "max_tokens": max(int(request.max_tokens or 0), 8192),
+                    "max_tokens": max(1024, int(request.max_tokens or 2048)),
                     "telemetry": {
                         **self._telemetry_dict(request),
                         "action_plan_primary_extraction_prompted": True,
@@ -4958,22 +5364,19 @@ Grounded input:
         empty_extraction_retry_metadata: dict[str, object] | None = None
         if request.source_document_ids and not (actions or deadlines or risks):
             retry_input = (
-                "Quality gate retry for Action Plan / Evidence Review. The previous extraction returned zero "
-                "actions, zero deadlines, and zero operational risks. Return compact valid JSON for the extraction schema. "
-                "Put action_items, important_dates, risks, and missing_information early in the JSON before verbose "
-                "entities, relationships, extracted_fields, dates, and numbers. Keep non-operational fields minimal. "
-                "Extract concrete tasks, owners, target dates, remediation actions, evidence requests, blockers, "
-                "audit checklist gaps, committee action items, NCR/nonconformance remediation items, and governance "
-                "follow-ups explicitly present in the selected documents. Use only selected-document evidence. "
-                "Do not return empty action_items when the selected documents contain owners, due dates, remediation "
-                "language, evidence gaps, action registers, committee actions, audit findings, or closure tasks."
+                "Action Plan / Evidence Review retry. The previous extraction returned zero operational items. "
+                "Use the dedicated Action Plan JSON contract. Extract action_items with mandatory non-empty card_summary subtitles, important_dates, risks, and "
+                "missing_information only. Do not extract generic entities, relationships, legal inventory, or numbers. "
+                "If an Action Register, committee action, remediation task, NCR item, evidence gap, owner, due date, "
+                "status, or governance follow-up exists in the selected documents, return it as action_items. "
+                "Return fewer complete items instead of a large partial JSON."
             ).strip()
             retry_request = request.model_copy(
                 update={
                     "input_text": retry_input,
                     "temperature": 0.0,
                     "top_p": min(float(request.top_p or 0.95), 0.7),
-                    "max_tokens": max(int(request.max_tokens or 0), 8192),
+                    "max_tokens": max(1024, int(request.max_tokens or 2048)),
                     "telemetry": {
                         **self._telemetry_dict(request),
                         "action_plan_empty_extraction_retry": True,
@@ -5237,6 +5640,19 @@ Grounded input:
                 )
                 continue
             payload = nested_result.validated_output
+            comparison_context_request = request.model_copy(
+                update={
+                    "source_document_ids": [document_id],
+                    "use_document_context": True,
+                    "use_rag_context": False,
+                    "context_strategy": "document_scan",
+                }
+            )
+            comparison_context = self._build_optional_document_context(
+                comparison_context_request,
+                strategy="document_scan",
+                max_chars=12000,
+            )
             document_summaries.append(
                 {
                     "document_id": document_id,
@@ -5244,6 +5660,7 @@ Grounded input:
                     "summary": payload.executive_summary,
                     "key_points": normalize_agent_bullet_points(payload.key_insights or [topic.title for topic in payload.topics], limit=4),
                     "evidence_lines": self._comparison_summary_evidence_lines(payload),
+                    "comparison_context": str(comparison_context or "").strip()[:12000],
                     "quality_score": nested_result.quality_score,
                 }
             )
@@ -5263,8 +5680,134 @@ Grounded input:
             user_query=request.input_text,
             document_summaries=document_summaries,
         )
-        comparison_text = self._collect_response_text(provider, request, comparison_prompt)
-        comparison_points = extract_bullet_points_from_text(comparison_text, limit=6)
+        # Honor Runtime Controls exactly for Policy Comparison generation.
+        # The prompt is budget-aware: it asks the model to return only complete,
+        # material deltas that fit the selected output/context budget instead of
+        # forcing a hidden minimum budget inside this workflow.
+        comparison_request = request
+        comparison_retry_request = request
+        comparison_text = self._collect_response_text(provider, comparison_request, comparison_prompt)
+        if not str(comparison_text or "").strip():
+            self._set_telemetry_value(request, "current_stage", "document_agent_compare_documents_retry_empty_response")
+            empty_retry_prompt = self._build_policy_comparison_empty_response_retry_prompt(
+                user_query=request.input_text,
+                document_summaries=document_summaries,
+            )
+            comparison_text = self._collect_response_text(provider, comparison_retry_request, empty_retry_prompt)
+
+        policy_comparison = self._normalize_policy_comparison_payload(
+            self._extract_json_object_from_text(comparison_text),
+            document_summaries=document_summaries,
+        )
+        initial_policy_issues = self._policy_comparison_payload_issues(policy_comparison)
+
+        parse_empty_issues = {
+            "executive_summary is empty",
+            "deltas is empty",
+            "recommendation is empty",
+            "negotiation_priorities is empty",
+            "watchouts is empty",
+            "next_steps is empty",
+        }
+        if parse_empty_issues.issubset(set(initial_policy_issues)):
+            self._set_telemetry_value(request, "current_stage", "document_agent_compare_documents_retry_compact_full_json")
+            compact_retry_prompt = (
+                comparison_prompt
+                + "\n\nRetry instruction: your previous answer was not parseable as one complete JSON object. "
+                  "Return the same required JSON shape again, but make every field concise. "
+                  "Return fewer deltas rather than risking truncation. "
+                  "Keep executive_summary to 2 sentences, each delta field to one short sentence, "
+                  "and evidence to the shortest exact source excerpt. "
+                  "Do not start a delta unless you can complete every required field and close the JSON object. "
+                  "Output only complete JSON."
+            )
+            comparison_text = self._collect_response_text(provider, comparison_retry_request, compact_retry_prompt)
+            policy_comparison = self._normalize_policy_comparison_payload(
+                self._extract_json_object_from_text(comparison_text),
+                document_summaries=document_summaries,
+            )
+            initial_policy_issues = self._policy_comparison_payload_issues(policy_comparison)
+
+        repair_attempted = False
+        repaired_fields: list[str] = []
+        if initial_policy_issues:
+            repair_attempted = True
+            self._set_telemetry_value(request, "current_stage", "document_agent_compare_documents_repair_policy_v2")
+            repair_prompt = self._build_policy_comparison_section_repair_prompt(
+                user_query=request.input_text,
+                document_summaries=document_summaries,
+                prior_payload=policy_comparison,
+                issues=initial_policy_issues,
+            )
+            repair_text = self._collect_response_text(provider, comparison_request, repair_prompt)
+            if not str(repair_text or "").strip():
+                self._set_telemetry_value(request, "current_stage", "document_agent_compare_documents_repair_retry_empty_response")
+                repair_retry_prompt = self._build_policy_comparison_empty_response_retry_prompt(
+                    user_query=request.input_text,
+                    document_summaries=document_summaries,
+                    prior_payload=policy_comparison,
+                    issues=initial_policy_issues,
+                )
+                repair_text = self._collect_response_text(provider, comparison_request, repair_retry_prompt)
+
+            repair_payload = self._normalize_policy_comparison_payload(
+                self._extract_json_object_from_text(repair_text),
+                document_summaries=document_summaries,
+            )
+            policy_comparison, repaired_fields = self._merge_policy_comparison_repair(
+                policy_comparison,
+                repair_payload,
+                issues=initial_policy_issues,
+            )
+
+        policy_comparison = self._ground_policy_comparison_evidence(
+            policy_comparison,
+            document_summaries=document_summaries,
+        )
+
+        final_policy_issues = self._policy_comparison_payload_issues(policy_comparison)
+        blocking_policy_issues = [
+            issue for issue in final_policy_issues
+            if issue.startswith(("executive_summary", "deltas"))
+        ]
+        raw_model_preview = self._policy_clean_text(comparison_text, max_chars=1200)
+        raw_repair_preview = self._policy_clean_text(locals().get("repair_text", ""), max_chars=1200)
+        policy_comparison["quality_report"] = {
+            "initial_issues": initial_policy_issues,
+            "final_issues": final_policy_issues,
+            "blocking_issues": blocking_policy_issues,
+            "repair_attempted": repair_attempted,
+            "repaired_fields": repaired_fields,
+            "needs_review": bool(final_policy_issues),
+            "raw_model_preview": raw_model_preview,
+            "raw_repair_preview": raw_repair_preview,
+            "json_extraction_failed": bool(blocking_policy_issues),
+        }
+
+        # Do not crash the product when the model fails the strict JSON contract.
+        # Keep the failure visible in quality_report so the UI/run-history can show
+        # that the structured comparison needs review instead of silently rendering
+        # generic or misleading content.
+        if blocking_policy_issues:
+            fallback_summary = raw_model_preview or raw_repair_preview
+            if fallback_summary:
+                policy_comparison["executive_summary"] = fallback_summary
+            else:
+                policy_comparison["executive_summary"] = (
+                    "The model did not return a usable structured Policy Comparison JSON payload. "
+                    "Review the quality report before approving this comparison."
+                )
+
+        policy_deltas = [item for item in policy_comparison.get("deltas", []) if isinstance(item, dict)]
+        comparison_points = normalize_agent_bullet_points(
+            [item.get("must_fix_title") or item.get("title") or item.get("change_summary") for item in policy_deltas],
+            limit=6,
+        )
+        if not comparison_points and blocking_policy_issues:
+            comparison_points = [
+                "Structured Policy Comparison JSON needs review before approval.",
+                "The model response did not produce usable deltas for must-fix, negotiation, and watchout sections.",
+            ]
 
         findings = [
             ComparisonFinding(
@@ -5278,16 +5821,17 @@ Grounded input:
         ]
         findings.extend(
             ComparisonFinding(
-                finding_type=self._infer_cross_document_finding_type(point),
-                title=self._short_label_from_text(point),
-                description=point,
+                finding_type=str(delta.get("category") or "").strip().replace(" ", "_").lower()
+                or self._infer_cross_document_finding_type(str(delta.get("title") or delta.get("change_summary") or "")),
+                title=str(delta.get("title") or delta.get("must_fix_title") or f"Difference {index}").strip(),
+                description=str(delta.get("change_summary") or delta.get("title") or "").strip(),
                 documents=[str(item["label"]) for item in document_summaries],
                 evidence=[
-                    f"{item['label']}: {self._best_document_summary_evidence(point, item) or item['summary']}"
-                    for item in document_summaries[:2]
+                    f"{document_summaries[0]['label']}: {delta.get('doc_a_evidence') or ''}",
+                    f"{document_summaries[1]['label']}: {delta.get('doc_b_evidence') or ''}",
                 ],
             )
-            for point in comparison_points
+            for index, delta in enumerate(policy_deltas, start=1)
         )
         tool_runs.append(
             AgentToolExecution(
@@ -5312,13 +5856,17 @@ Grounded input:
                 intent_reason=str(self._telemetry_dict(request).get("agent_intent_reason") or "") or None,
                 answer_mode=answer_mode,
                 tool_used="compare_documents",
-                summary=comparison_text.strip() or "Document comparison completed.",
+                summary=str(policy_comparison.get("executive_summary") or "").strip() or "Document comparison completed.",
                 key_points=comparison_points,
+                recommendation=str(policy_comparison.get("recommendation") or "").strip() or None,
+                recommended_actions=list(policy_comparison.get("next_steps") or [])[:6],
+                limitations=list(policy_comparison.get("watchouts") or [])[:6],
                 compared_documents=[str(item["label"]) for item in document_summaries],
                 comparison_findings=findings,
                 structured_response={
                     "document_summaries": document_summaries,
-                    "comparison_text": comparison_text,
+                    "comparison_text": str(policy_comparison.get("executive_summary") or "").strip(),
+                    "policy_comparison_v2": policy_comparison,
                     "truncated_document_count": max(0, len(document_ids) - len(selected_document_ids)),
                 },
                 sources=sources,
@@ -5328,6 +5876,611 @@ Grounded input:
             ),
             tool_runs,
         )
+
+    def _extract_json_object_from_text(self, value: object) -> dict[str, object]:
+        raw = str(value or "").strip()
+        if not raw:
+            return {}
+
+        def _loads(candidate: str) -> dict[str, object]:
+            candidate = candidate.strip()
+            if not candidate:
+                return {}
+            try:
+                parsed = json.loads(candidate, strict=False)
+            except Exception:
+                parsed = None
+            if isinstance(parsed, dict):
+                return parsed
+            if isinstance(parsed, str) and parsed.strip() != candidate:
+                nested = self._extract_json_object_from_text(parsed)
+                if nested:
+                    return nested
+
+            try:
+                decoder = json.JSONDecoder(strict=False)
+                decoded, _ = decoder.raw_decode(candidate)
+            except Exception:
+                return {}
+            if isinstance(decoded, dict):
+                return decoded
+            if isinstance(decoded, str) and decoded.strip() != candidate:
+                return self._extract_json_object_from_text(decoded)
+            return {}
+
+        def _balanced_json_slices(candidate: str) -> list[str]:
+            slices: list[str] = []
+            starts = [index for index, char in enumerate(candidate) if char == "{"]
+            for start_index in starts[:12]:
+                depth = 0
+                in_string = False
+                escape = False
+                for index in range(start_index, len(candidate)):
+                    char = candidate[index]
+                    if in_string:
+                        if escape:
+                            escape = False
+                        elif char == "\\":
+                            escape = True
+                        elif char == '"':
+                            in_string = False
+                        continue
+
+                    if char == '"':
+                        in_string = True
+                    elif char == "{":
+                        depth += 1
+                    elif char == "}":
+                        depth -= 1
+                        if depth == 0:
+                            slices.append(candidate[start_index : index + 1])
+                            break
+            return slices
+
+        candidates: list[str] = []
+
+        # Common model wrappers.
+        fenced_matches = re.findall(r"```(?:json)?\s*(.*?)\s*```", raw, flags=re.IGNORECASE | re.DOTALL)
+        candidates.extend(match.strip() for match in fenced_matches if match.strip())
+
+        cleaned = raw
+        if cleaned.startswith("```"):
+            cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE).strip()
+            cleaned = re.sub(r"\s*```$", "", cleaned).strip()
+        candidates.append(cleaned)
+
+        first = cleaned.find("{")
+        last = cleaned.rfind("}")
+        if first >= 0:
+            candidates.append(cleaned[first : last + 1] if last > first else cleaned[first:])
+
+        for candidate in list(candidates):
+            candidates.extend(_balanced_json_slices(candidate))
+
+        seen: set[str] = set()
+        for candidate in candidates:
+            candidate = candidate.strip()
+            if not candidate or candidate in seen:
+                continue
+            seen.add(candidate)
+            parsed = _loads(candidate)
+            if parsed:
+                return parsed
+
+        return {}
+
+
+    def _policy_clean_text(self, value: object, *, max_chars: int = 420) -> str:
+        cleaned = " ".join(str(value or "").split()).strip()
+        if cleaned in {"...", "…"}:
+            return ""
+        if len(cleaned) <= max_chars:
+            return cleaned
+        shortened = cleaned[: max_chars - 1].rsplit(" ", 1)[0].strip()
+        return shortened or cleaned[: max_chars - 1].strip()
+
+    def _policy_clean_list(self, value: object, *, limit: int = 8, max_chars: int = 220) -> list[str]:
+        if isinstance(value, list):
+            raw_items = value
+        elif value:
+            raw_items = [value]
+        else:
+            raw_items = []
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for item in raw_items:
+            if isinstance(item, dict):
+                candidate = (
+                    item.get("text")
+                    or item.get("title")
+                    or item.get("summary")
+                    or item.get("detail")
+                    or item.get("recommendation")
+                    or item.get("next_step")
+                    or item.get("watchout")
+                )
+            else:
+                candidate = item
+            cleaned = self._policy_clean_text(candidate, max_chars=max_chars)
+            if not cleaned:
+                continue
+            key = cleaned.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized.append(cleaned)
+            if len(normalized) >= limit:
+                break
+        return normalized
+
+    def _normalize_policy_impact(self, value: object) -> str:
+        normalized = self._policy_clean_text(value, max_chars=32).casefold().replace("_", " ")
+        if normalized in {"breaking", "critical", "blocker", "must fix", "must-fix"}:
+            return "breaking"
+        if normalized in {"minor", "low", "editorial", "wording"}:
+            return "minor"
+        return "significant"
+
+    def _policy_evidence_match_key(self, value: object) -> str:
+        text = str(value or "")
+        text = (
+            text.replace("\u2011", "-")
+            .replace("\u2010", "-")
+            .replace("\u2012", "-")
+            .replace("\u2013", "-")
+            .replace("\u2014", "-")
+            .replace("\u2212", "-")
+            .replace("\u00a0", " ")
+        )
+        text = re.sub(r"\s+", " ", text).strip().casefold()
+        return text
+
+    def _policy_context_literal_candidates(self, context: object) -> list[str]:
+        raw = str(context or "")
+        candidates: list[str] = []
+        for line in re.split(r"[\r\n]+", raw):
+            cleaned = self._policy_clean_text(line, max_chars=800)
+            if cleaned:
+                candidates.append(cleaned)
+                # If a line is long, also expose sentence-level candidates.
+                for sentence in re.split(r"(?<=[.!?])\s+", cleaned):
+                    sentence = self._policy_clean_text(sentence, max_chars=500)
+                    if sentence and sentence != cleaned:
+                        candidates.append(sentence)
+
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for candidate in candidates:
+            key = self._policy_evidence_match_key(candidate)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            deduped.append(candidate)
+        return deduped
+
+    def _policy_snap_evidence_to_context(self, evidence: object, context: object) -> str:
+        cleaned = self._policy_clean_text(evidence, max_chars=500)
+        if not cleaned:
+            return ""
+        if self._policy_evidence_match_key(cleaned).startswith("no equivalent clause"):
+            return "No equivalent clause found in Document A."
+
+        raw_context = str(context or "")
+        if cleaned and cleaned in raw_context:
+            return cleaned
+
+        evidence_key = self._policy_evidence_match_key(cleaned)
+        if not evidence_key:
+            return cleaned
+
+        candidates = self._policy_context_literal_candidates(raw_context)
+
+        # Exact normalized containment: fixes Unicode hyphen/spacing drift while preserving the literal source line.
+        scored: list[tuple[int, int, str]] = []
+        for candidate in candidates:
+            candidate_key = self._policy_evidence_match_key(candidate)
+            if not candidate_key:
+                continue
+            if evidence_key in candidate_key:
+                scored.append((100, -len(candidate), candidate))
+            elif candidate_key in evidence_key and len(candidate_key) >= 40:
+                scored.append((90, -len(candidate), candidate))
+
+        if scored:
+            scored.sort(reverse=True)
+            return scored[0][2]
+
+        # Token-overlap fallback for near-literal excerpts, but only when the match is strong.
+        evidence_tokens = {token for token in re.findall(r"[a-z0-9]+", evidence_key) if len(token) >= 4}
+        if len(evidence_tokens) >= 5:
+            overlap_scored: list[tuple[int, int, str]] = []
+            for candidate in candidates:
+                candidate_key = self._policy_evidence_match_key(candidate)
+                candidate_tokens = {token for token in re.findall(r"[a-z0-9]+", candidate_key) if len(token) >= 4}
+                overlap = len(evidence_tokens & candidate_tokens)
+                if overlap >= max(5, int(len(evidence_tokens) * 0.75)):
+                    overlap_scored.append((overlap, -len(candidate), candidate))
+            if overlap_scored:
+                overlap_scored.sort(reverse=True)
+                return overlap_scored[0][2]
+
+        return cleaned
+
+    def _ground_policy_comparison_evidence(
+        self,
+        payload: dict[str, object],
+        *,
+        document_summaries: list[dict[str, object]],
+    ) -> dict[str, object]:
+        deltas = payload.get("deltas") if isinstance(payload.get("deltas"), list) else []
+        if not deltas:
+            return payload
+
+        doc_a_context = ""
+        doc_b_context = ""
+        if len(document_summaries) > 0 and isinstance(document_summaries[0], dict):
+            doc_a_context = str(document_summaries[0].get("comparison_context") or "")
+        if len(document_summaries) > 1 and isinstance(document_summaries[1], dict):
+            doc_b_context = str(document_summaries[1].get("comparison_context") or "")
+
+        for delta in deltas:
+            if not isinstance(delta, dict):
+                continue
+            delta["doc_a_evidence"] = self._policy_snap_evidence_to_context(delta.get("doc_a_evidence"), doc_a_context)
+            delta["doc_b_evidence"] = self._policy_snap_evidence_to_context(delta.get("doc_b_evidence"), doc_b_context)
+
+        return payload
+
+
+    def _normalize_policy_delta(self, value: object, *, index: int, document_summaries: list[dict[str, object]]) -> dict[str, object]:
+        raw = value if isinstance(value, dict) else {"title": value}
+        title = self._policy_clean_text(raw.get("title") or raw.get("name") or raw.get("label"), max_chars=120)
+        change_summary = self._policy_clean_text(
+            raw.get("change_summary")
+            or raw.get("business_impact")
+            or raw.get("impact_summary")
+            or raw.get("description")
+            or raw.get("summary"),
+            max_chars=360,
+        )
+        if not title:
+            title = self._short_label_from_text(change_summary or f"Difference {index}")
+        if not change_summary:
+            change_summary = title
+
+        doc_a_evidence = self._policy_clean_text(
+            raw.get("doc_a_evidence")
+            or raw.get("document_a_evidence")
+            or raw.get("source_a_evidence")
+            or raw.get("old_evidence"),
+            max_chars=360,
+        )
+        doc_b_evidence = self._policy_clean_text(
+            raw.get("doc_b_evidence")
+            or raw.get("document_b_evidence")
+            or raw.get("source_b_evidence")
+            or raw.get("new_evidence"),
+            max_chars=360,
+        )
+
+        must_fix_title = self._policy_clean_text(raw.get("must_fix_title") or raw.get("must_fix"), max_chars=160)
+        negotiation_priority = self._policy_clean_text(raw.get("negotiation_priority"), max_chars=220)
+        watchout = self._policy_clean_text(raw.get("watchout") or raw.get("risk") or raw.get("caution"), max_chars=220)
+        next_step = self._policy_clean_text(raw.get("next_step") or raw.get("action"), max_chars=220)
+
+        return {
+            "title": title,
+            "impact": self._normalize_policy_impact(raw.get("impact") or raw.get("severity")),
+            "category": self._policy_clean_text(raw.get("category"), max_chars=80) or self._infer_cross_document_finding_type(title).replace("_", " ").title(),
+            "change_summary": change_summary,
+            "doc_a_evidence": doc_a_evidence,
+            "doc_b_evidence": doc_b_evidence,
+            "must_fix_title": must_fix_title,
+            "negotiation_priority": negotiation_priority,
+            "watchout": watchout,
+            "next_step": next_step,
+        }
+
+    def _normalize_policy_comparison_payload(
+        self,
+        payload: dict[str, object],
+        *,
+        document_summaries: list[dict[str, object]],
+    ) -> dict[str, object]:
+        if not isinstance(payload, dict):
+            payload = {}
+
+        raw_deltas = payload.get("deltas")
+        if not isinstance(raw_deltas, list):
+            raw_deltas = payload.get("differences") if isinstance(payload.get("differences"), list) else []
+        deltas = [
+            self._normalize_policy_delta(item, index=index, document_summaries=document_summaries)
+            for index, item in enumerate(raw_deltas, start=1)
+            if isinstance(item, (dict, str))
+        ]
+
+        negotiation_priorities = self._policy_clean_list(payload.get("negotiation_priorities"), limit=6)
+        watchouts = self._policy_clean_list(payload.get("watchouts"), limit=6)
+        next_steps = self._policy_clean_list(payload.get("next_steps"), limit=6)
+
+        if not negotiation_priorities:
+            negotiation_priorities = self._policy_clean_list([item.get("negotiation_priority") for item in deltas], limit=6)
+        if not watchouts:
+            watchouts = self._policy_clean_list([item.get("watchout") for item in deltas], limit=6)
+        if not next_steps:
+            next_steps = self._policy_clean_list([item.get("next_step") for item in deltas], limit=6)
+
+        compared_documents = [str(item.get("label") or item.get("document_id") or "").strip() for item in document_summaries]
+        compared_documents = [item for item in compared_documents if item]
+
+        return {
+            "executive_summary": self._policy_clean_text(
+                payload.get("executive_summary") or payload.get("summary"),
+                max_chars=900,
+            ),
+            "deltas": deltas,
+            "recommendation": self._policy_clean_text(payload.get("recommendation"), max_chars=420),
+            "negotiation_priorities": negotiation_priorities,
+            "watchouts": watchouts,
+            "next_steps": next_steps,
+            "compared_documents": compared_documents[:3],
+            "schema_version": "policy_comparison_v2",
+        }
+
+    def _policy_comparison_payload_issues(self, payload: dict[str, object]) -> list[str]:
+        issues: list[str] = []
+
+        executive_summary = self._policy_clean_text(payload.get("executive_summary"), max_chars=1200)
+        if not executive_summary:
+            issues.append("executive_summary is empty")
+
+        recommendation = self._policy_clean_text(payload.get("recommendation"), max_chars=1200)
+        if not recommendation:
+            issues.append("recommendation is empty")
+
+        deltas = payload.get("deltas") if isinstance(payload.get("deltas"), list) else []
+
+        # Zero-delta comparisons are valid when the documents have no material
+        # differences. Do not force a fake delta just to satisfy the UI.
+        if not deltas:
+            return issues
+
+        for index, item in enumerate(deltas, start=1):
+            if not isinstance(item, dict):
+                issues.append(f"delta {index} is not an object")
+                continue
+
+            title = self._policy_clean_text(item.get("title"), max_chars=240)
+            impact = self._policy_clean_text(item.get("impact"), max_chars=80)
+            category = self._policy_clean_text(item.get("category"), max_chars=120)
+            change_summary = self._policy_clean_text(item.get("change_summary"), max_chars=500)
+            doc_a_evidence = self._policy_clean_text(item.get("doc_a_evidence"), max_chars=500)
+            doc_b_evidence = self._policy_clean_text(item.get("doc_b_evidence"), max_chars=500)
+            must_fix_title = self._policy_clean_text(item.get("must_fix_title"), max_chars=240)
+            negotiation_priority = self._policy_clean_text(item.get("negotiation_priority"), max_chars=320)
+            watchout = self._policy_clean_text(item.get("watchout"), max_chars=320)
+            next_step = self._policy_clean_text(item.get("next_step"), max_chars=320)
+
+            if not title:
+                issues.append(f"delta {index} title is empty")
+            if not impact:
+                issues.append(f"delta {index} impact is empty")
+            if not category:
+                issues.append(f"delta {index} category is empty")
+            if not change_summary:
+                issues.append(f"delta {index} change_summary is empty")
+            if not doc_a_evidence:
+                issues.append(f"delta {index} doc_a_evidence is empty")
+            if not doc_b_evidence:
+                issues.append(f"delta {index} doc_b_evidence is empty")
+            if not must_fix_title:
+                issues.append(f"delta {index} must_fix_title is empty")
+            if not negotiation_priority:
+                issues.append(f"delta {index} negotiation_priority is empty")
+            if not watchout:
+                issues.append(f"delta {index} watchout is empty")
+            if not next_step:
+                issues.append(f"delta {index} next_step is empty")
+
+            existing = {title.casefold(), must_fix_title.casefold(), negotiation_priority.casefold()}
+            if watchout and watchout.casefold() in existing:
+                issues.append(f"delta {index} watchout duplicates another UI field")
+            if next_step and next_step.casefold() in {
+                title.casefold(),
+                must_fix_title.casefold(),
+                negotiation_priority.casefold(),
+                watchout.casefold(),
+            }:
+                issues.append(f"delta {index} next_step duplicates another UI field")
+
+        # Top-level sections are required only when deltas exist. They do not need
+        # a fixed count; the per-delta fields are the source of truth for full UI hydration.
+        if not self._policy_clean_list(payload.get("negotiation_priorities"), limit=8):
+            issues.append("negotiation_priorities is empty")
+        if not self._policy_clean_list(payload.get("watchouts"), limit=8):
+            issues.append("watchouts is empty")
+        if not self._policy_clean_list(payload.get("next_steps"), limit=8):
+            issues.append("next_steps is empty")
+
+        return issues
+
+
+    def _build_policy_comparison_empty_response_retry_prompt(
+        self,
+        *,
+        user_query: str,
+        document_summaries: list[dict[str, object]],
+        prior_payload: dict[str, object] | None = None,
+        issues: list[str] | None = None,
+    ) -> str:
+        compact_docs = []
+        for index, item in enumerate(document_summaries[:2], start=1):
+            evidence = item.get("evidence_lines") if isinstance(item.get("evidence_lines"), list) else []
+            key_points = item.get("key_points") if isinstance(item.get("key_points"), list) else []
+            compact_docs.append(
+                f"Document {index}: {item.get('label')}\n"
+                f"Summary: {self._policy_clean_text(item.get('summary'), max_chars=700)}\n"
+                f"Evidence: {'; '.join(str(x) for x in [*evidence[:4], *key_points[:3]])}"
+            )
+
+        issue_block = ""
+        if issues:
+            issue_block = "\nWeak fields to repair:\n" + "\n".join(f"- {issue}" for issue in issues[:12])
+
+        prior_block = ""
+        if prior_payload:
+            prior_block = "\nPrior weak payload:\n" + json.dumps(prior_payload, ensure_ascii=False)[:3000]
+
+        return f"""
+Return ONLY valid minified JSON. No markdown. No prose outside JSON.
+
+Task: compare Document 1 and Document 2 for a Policy Comparison UI.
+Use only the provided summaries/evidence.
+Produce 2 to 4 grounded deltas.
+
+Required JSON shape:
+{{"executive_summary":"string","deltas":[{{"title":"string","impact":"breaking|significant|minor","category":"string","change_summary":"string","doc_a_evidence":"string","doc_b_evidence":"string","must_fix_title":"string","negotiation_priority":"string","watchout":"string","next_step":"string"}}],"recommendation":"string","negotiation_priorities":["string"],"watchouts":["string"],"next_steps":["string"]}}
+
+Rules:
+- Each delta needs different doc_a_evidence and doc_b_evidence.
+- must_fix_title, negotiation_priority, watchout, and next_step must be distinct.
+- Avoid generic advice such as opening cited excerpts.
+- If unsure, return the best grounded JSON with fewer deltas, not an empty response.
+
+User request: {user_query}
+
+{chr(10).join(compact_docs)}
+{issue_block}
+{prior_block}
+""".strip()
+
+
+    def _build_policy_comparison_section_repair_prompt(
+        self,
+        *,
+        user_query: str,
+        document_summaries: list[dict[str, object]],
+        prior_payload: dict[str, object],
+        issues: list[str],
+    ) -> str:
+        serialized = []
+        for item in document_summaries:
+            serialized.append(
+                f"[DOCUMENT] {item['label']}\n"
+                f"Summary: {item['summary']}\n"
+                f"Key points: {'; '.join(item.get('key_points') or [])}\n"
+                f"Grounded evidence lines: {'; '.join(item.get('evidence_lines') or [])}"
+            )
+        summary_block = "\n\n".join(serialized)
+        issue_block = "\n".join(f"- {item}" for item in issues)
+        prior_json = json.dumps(prior_payload, ensure_ascii=False, indent=2)
+        return f"""
+You previously returned a policy comparison JSON object, but some UI-critical fields are weak or missing.
+Repair ONLY the weak/missing sections listed below.
+Use ONLY the provided summaries and grounded evidence lines.
+Return ONLY one valid JSON object.
+Do not return markdown, prose outside JSON, code fences, or placeholder ellipses such as `...` or `…`.
+
+Weak or missing sections:
+{issue_block}
+
+Rules:
+- Keep good existing content when it is grounded.
+- Fill missing `must_fix_title`, `negotiation_priority`, `watchout`, and `next_step` distinctly.
+- If side-specific evidence is missing, provide compact evidence for Document A and Document B from the grounded lines.
+- Do not repeat the same sentence across fields.
+- Do not use generic advice like "open the cited source excerpts to confirm the interpretation before acting".
+
+Prior payload:
+{prior_json}
+
+Return this JSON shape, with repaired content:
+{{
+  "executive_summary": "string",
+  "deltas": [
+    {{
+      "title": "string",
+      "impact": "breaking | significant | minor",
+      "category": "string",
+      "change_summary": "string",
+      "doc_a_evidence": "string",
+      "doc_b_evidence": "string",
+      "must_fix_title": "string",
+      "negotiation_priority": "string",
+      "watchout": "string",
+      "next_step": "string"
+    }}
+  ],
+  "recommendation": "string",
+  "negotiation_priorities": ["string"],
+  "watchouts": ["string"],
+  "next_steps": ["string"]
+}}
+
+User request:
+{user_query}
+
+Document summaries:
+{summary_block}
+"""
+
+    def _merge_policy_comparison_repair(
+        self,
+        original: dict[str, object],
+        repair: dict[str, object],
+        *,
+        issues: list[str],
+    ) -> tuple[dict[str, object], list[str]]:
+        merged = dict(original)
+        repaired_fields: list[str] = []
+
+        for key in ("executive_summary", "recommendation"):
+            if self._policy_clean_text(repair.get(key), max_chars=900):
+                if not self._policy_clean_text(merged.get(key), max_chars=900) or any(key in issue for issue in issues):
+                    merged[key] = repair[key]
+                    repaired_fields.append(key)
+
+        for key in ("negotiation_priorities", "watchouts", "next_steps"):
+            repaired_list = self._policy_clean_list(repair.get(key), limit=6)
+            if repaired_list and (not self._policy_clean_list(merged.get(key), limit=6) or any(key in issue for issue in issues)):
+                merged[key] = repaired_list
+                repaired_fields.append(key)
+
+        original_deltas = original.get("deltas") if isinstance(original.get("deltas"), list) else []
+        repair_deltas = repair.get("deltas") if isinstance(repair.get("deltas"), list) else []
+        if repair_deltas:
+            merged_deltas: list[dict[str, object]] = []
+            max_len = max(len(original_deltas), len(repair_deltas))
+            for index in range(max_len):
+                base = original_deltas[index] if index < len(original_deltas) and isinstance(original_deltas[index], dict) else {}
+                patched = repair_deltas[index] if index < len(repair_deltas) and isinstance(repair_deltas[index], dict) else {}
+                item = dict(base)
+                for key in (
+                    "title",
+                    "impact",
+                    "category",
+                    "change_summary",
+                    "doc_a_evidence",
+                    "doc_b_evidence",
+                    "must_fix_title",
+                    "negotiation_priority",
+                    "watchout",
+                    "next_step",
+                ):
+                    value = self._policy_clean_text(patched.get(key), max_chars=420)
+                    if value:
+                        current = self._policy_clean_text(item.get(key), max_chars=420)
+                        issue_mentions_field = any(key in issue for issue in issues)
+                        if not current or issue_mentions_field:
+                            item[key] = patched.get(key)
+                if item:
+                    merged_deltas.append(item)
+            if merged_deltas:
+                merged["deltas"] = merged_deltas
+                repaired_fields.append("deltas")
+
+        return merged, sorted(set(repaired_fields))
+
 
     def _merge_nested_task_telemetry(
         self,
@@ -5553,28 +6706,106 @@ Document context:
 
     def _build_document_comparison_prompt(self, *, user_query: str, document_summaries: list[dict[str, object]]) -> str:
         serialized = []
-        for item in document_summaries:
+        for index, item in enumerate(document_summaries[:2], start=1):
+            context = str(item.get("comparison_context") or "").strip()[:12000]
+            if not context:
+                context = "\n".join(
+                    [
+                        f"Summary: {item.get('summary')}",
+                        f"Key points: {'; '.join(item.get('key_points') or [])}",
+                        f"Grounded evidence lines: {'; '.join(item.get('evidence_lines') or [])}",
+                    ]
+                )
             serialized.append(
-                f"[DOCUMENT] {item['label']}\n"
-                f"Summary: {item['summary']}\n"
-                f"Key points: {'; '.join(item.get('key_points') or [])}"
+                f"DOCUMENT {index} — {item.get('label')}\n"
+                f"{context}"
             )
-        summary_block = "\n\n".join(serialized)
+
+        document_block = "\n\n".join(serialized)
         return f"""
-You are the Document Operations Copilot.
-Compare the summarized documents below and respond in English.
-Use only the content provided.
-Do not invent differences or similarities not supported by the summaries.
-Deliver:
-1. a short executive comparison paragraph;
-2. up to 6 short bullets starting with '-'.
+You are producing JSON for a Policy Comparison UI.
+Your first answer must be directly renderable in the UI.
+
+Goal:
+Hydrate these UI sections with useful, non-repetitive content:
+1. Executive summary
+2. Grounded deltas
+3. Must-fix before approval
+4. Negotiation priorities
+5. Watchouts
+6. Next steps
+7. Recommendation
+8. Red/green evidence boxes for each delta
+
+Return ONLY one valid JSON object. No markdown, no code fences, no prose outside JSON.
+
+Required JSON shape:
+{{
+  "executive_summary": "one paragraph",
+  "deltas": [
+    {{
+      "title": "specific change label",
+      "impact": "breaking | significant | minor",
+      "category": "short category",
+      "change_summary": "one sentence explaining what changed",
+      "doc_a_evidence": "literal excerpt from Document A only",
+      "doc_b_evidence": "literal excerpt from Document B only",
+      "must_fix_title": "approval blocker / must-fix phrasing",
+      "negotiation_priority": "approval or negotiation position",
+      "watchout": "operational caution",
+      "next_step": "concrete next action"
+    }}
+  ],
+  "recommendation": "one actionable recommendation",
+  "negotiation_priorities": ["approval/negotiation bullet"],
+  "watchouts": ["operational caution bullet"],
+  "next_steps": ["concrete action bullet"]
+}}
+
+Hard requirements:
+- Treat the selected max output token budget as a hard budget.
+- Internally rank all possible deltas by materiality before writing JSON.
+- Return only the highest-impact material deltas that fit the selected output budget.
+- Prefer fewer complete deltas over many partial deltas.
+- Do not start an additional delta unless you can complete every required field for that delta and still close the JSON object.
+- If adding another delta may truncate the JSON, stop after the last complete delta.
+- Top-level `negotiation_priorities`, `watchouts`, and `next_steps` must correspond only to returned deltas.
+- If the selected documents have no material differences, return an empty `deltas` array and explain that clearly in `executive_summary` and `recommendation`.
+- Check possible topics such as MFA scope, privileged access reviews, vendor oversight, incident notice timing, log retention, and transition obligations when evidence supports them.
+- Every delta must include specific Document A evidence and specific Document B evidence.
+
+Evidence box contract:
+- `doc_a_evidence` feeds the red comparison box. It must be an exact short excerpt copied from Document A, not a paraphrase.
+- `doc_b_evidence` feeds the green comparison box. It must be an exact short excerpt copied from Document B, not a paraphrase.
+- Evidence must be the smallest useful clause, sentence, table cell, or requirement line that proves the delta.
+- Do not use summaries as evidence.
+- Do not write "Document A says", "Document B says", "v3.1 says", or similar unless those exact words appear in the selected document text.
+- If a clause is newly introduced in Document B and Document A has no equivalent clause, set `doc_a_evidence` to exactly: "No equivalent clause found in Document A."
+- Never put Document B wording in `doc_a_evidence`.
+- Never put Document A wording in `doc_b_evidence`.
+
+UI quality requirements:
+- Keep output concise enough to fit in one complete JSON object.
+- executive_summary must be 2 sentences maximum.
+- Each delta field must be one short sentence.
+- Evidence excerpts should be under 220 characters when possible.
+- negotiation_priority must be a sentence about what must be agreed before approval: owner, budget, timeline, evidence standard, exception handling, implementation sequencing, or approval risk.
+- negotiation_priority must NOT be only High, Medium, Low, Critical, P0, or P1.
+- negotiation_priority must NOT repeat must_fix_title, watchout, next_step, title, or change_summary.
+- must_fix_title should be an approval blocker or required change, not a generic summary.
+- watchout should be an operational risk/caution, not a must-fix and not a next step.
+- next_step should be a concrete action.
+- No placeholders, ellipses, copied schema descriptions, or generic advice like "open the cited source excerpts".
+- Do not invent facts, obligations, risks, dates, names, numbers, similarities, or differences.
+- Use only the selected document text below.
 
 User request:
 {user_query}
 
-Document summaries:
-{summary_block}
-"""
+Selected documents:
+{document_block}
+""".strip()
+
 
 
 def get_task_handler(task_type: str) -> Optional[TaskHandler]:

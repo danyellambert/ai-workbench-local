@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Separator } from '@/components/ui/separator';
 import KeystoneLogo from '@/components/KeystoneLogo';
 
+import { formatUserDate } from '@/lib/user-time';
 const stagger = { animate: { transition: { staggerChildren: 0.04 } } };
 const item = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 
@@ -47,11 +48,8 @@ async function fetchAuthSession(): Promise<AuthSession> {
   return payload;
 }
 
-function formatDate(value?: string | null): string {
-  if (!value) return '—';
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+function formatDate(value?: string | number | null): string {
+  return formatUserDate(value);
 }
 
 function buildEmptyStateMessage(isLoading: boolean, totalDocuments: number, search: string): string {
@@ -486,7 +484,7 @@ export default function DocumentsPage() {
                   <td className="px-4 py-3 text-xs text-muted-foreground">{doc.chunk_count || '—'}</td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">{doc.char_count ? doc.char_count.toLocaleString() : '—'}</td>
                   <td className="px-4 py-3"><span className="text-[10px] font-mono text-muted-foreground">{doc.loader_strategy_label || '—'}</span></td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{doc.indexed_at ? new Date(doc.indexed_at).toLocaleDateString() : '—'}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{doc.indexed_at ? formatUserDate(doc.indexed_at) : '—'}</td>
                   <td className="px-4 py-3">
                     <Button
                       type="button"

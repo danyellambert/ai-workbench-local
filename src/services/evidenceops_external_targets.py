@@ -725,6 +725,40 @@ def _trim_text(value: object, *, max_chars: int = 240) -> str:
     return normalized[: max_chars - 1].rstrip() + "…"
 
 
+
+def _preview_text_has_ellipsis(value: object) -> bool:
+    text = str(value or "")
+    return "..." in text or "…" in text
+
+
+def _full_preview_text(value: object, *, max_chars: int = 1000) -> str:
+    normalized = " ".join(str(value or "").split()).strip()
+    if not normalized:
+        return ""
+    # Hard safety cap without adding ellipsis; UI/publish preview should not invent "...".
+    return normalized[:max_chars].rstrip()
+
+
+def _first_full_preview_value(
+    record: dict[str, Any] | None,
+    *keys: str,
+    fallback: object = None,
+    max_chars: int = 1000,
+) -> str:
+    candidates: list[object] = []
+    if isinstance(record, dict):
+        for key in keys:
+            candidates.append(record.get(key))
+    if fallback is not None:
+        candidates.append(fallback)
+
+    cleaned = [_full_preview_text(candidate, max_chars=max_chars) for candidate in candidates]
+    clean_without_ellipsis = [candidate for candidate in cleaned if candidate and not _preview_text_has_ellipsis(candidate)]
+    if clean_without_ellipsis:
+        return clean_without_ellipsis[0]
+    return next((candidate for candidate in cleaned if candidate), "")
+
+
 _TRELLO_WORKFLOW_LABEL_SPECS: dict[str, tuple[str, str]] = {
     "document_review": ("Document review", "blue"),
     "policy_contract_comparison": ("Policy comparison", "purple"),
@@ -862,6 +896,79 @@ def _build_trello_label_specs(
     return deduped[:3]
 
 
+def _clean_preview_text(value: object, *, max_chars: int = 2000) -> str:
+    """Normalize free-text preview content without adding UI truncation artifacts."""
+    normalized = _trim_text(value, max_chars=max_chars)
+    if not normalized:
+        return ""
+    normalized = normalized.strip()
+    normalized = normalized.lstrip("-•* ").strip()
+    normalized = normalized.replace("**", "").replace("__", "").replace("`", "")
+    return normalized.strip()
+
+def _is_generic_policy_publish_note(value: object) -> bool:
+    text = _clean_preview_text(value).casefold()
+    if not text:
+        return True
+
+    compact = "".join(ch for ch in text if ch.isalnum())
+    if compact in {"high", "medium", "low", "critical", "urgent", "p0", "p1", "p2", "p3"}:
+        return True
+
+    generic_phrases = {
+        "open the cited source excerpts to confirm the interpretation before acting",
+        "validate critical differences directly in the compared documents before consolidating a decision",
+        "structured policy comparison json needs review before approval",
+        "review the quality report before approving this comparison",
+    }
+    normalized = " ".join(text.split()).rstrip(".")
+    return normalized in generic_phrases
+
+
+def _align_trello_status_label_specs_to_list_label(
+    label_specs: list[dict[str, str]],
+    list_label: object,
+) -> list[dict[str, str]]:
+    """Make the Trello status label match the target list shown in the preview."""
+    normalized_list_label = _trim_text(list_label, max_chars=48)
+    if not normalized_list_label or normalized_list_label.casefold() in {"mapped list", "unknown", "none"}:
+        return label_specs
+
+    status_label_names = {
+        _trim_text(spec[0], max_chars=48).casefold()
+        for spec in _TRELLO_STATUS_LABEL_SPECS.values()
+        if spec and _trim_text(spec[0], max_chars=48)
+    }
+
+    filtered = [
+        spec for spec in label_specs
+        if _trim_text(spec.get("name"), max_chars=48).casefold() not in status_label_names
+    ]
+
+    status_key = normalized_list_label.casefold().replace(" ", "_").replace("-", "_")
+    status_spec = _TRELLO_STATUS_LABEL_SPECS.get(status_key)
+
+    if status_spec:
+        filtered.insert(0, {"name": status_spec[0], "color": status_spec[1]})
+    else:
+        filtered.insert(0, {"name": normalized_list_label, "color": "blue"})
+
+    deduped: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for spec in filtered:
+        name = _trim_text(spec.get("name"), max_chars=48)
+        color = _trim_text(spec.get("color"), max_chars=16).lower() or "blue"
+        if not name:
+            continue
+        key = name.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append({"name": name, "color": color})
+
+    return deduped[:3]
+
+
 def _build_trello_checklist_items(
     *,
     result: ProductWorkflowResult,
@@ -869,16 +976,56 @@ def _build_trello_checklist_items(
     preview_record: dict[str, Any] | None = None,
     preview_payload: dict[str, Any] | None = None,
 ) -> list[str]:
+    if result.workflow_id == "action_plan_evidence_review":
+        return []
+
     items: list[str] = []
+    # Document Review card-specific checklist.
+    if result.workflow_id == "document_review" and isinstance(preview_record, dict):
+        items.extend(
+            [
+                _preview_record_value(preview_record, "recommendation", "next_step", "action", max_chars=220),
+                _preview_record_value(preview_record, "title", "name", "label", max_chars=180),
+                _preview_record_value(preview_record, "snippet", "evidence", "description", max_chars=220),
+            ]
+        )
+
+        owner = _preview_record_value(preview_record, "owner", max_chars=100)
+        due_date = _preview_record_value(preview_record, "due_date", max_chars=90)
+
+        if owner:
+            items.append(f"Confirm accountable owner: {owner}")
+        if due_date:
+            items.append(f"Confirm target date: {due_date}")
+
+        if not any(str(item or "").strip() for item in items):
+            items.append("Review this finding and define the next concrete action.")
+
+        return _dedupe_preserve_order(items, max_items=5)
+
+
+    if result.workflow_id == "policy_contract_comparison":
+        # Trello checklist should become the operational approval checklist:
+        # mirror the Must fix before approval section from the Policy Comparison UI.
+        items.extend(_preview_items_from_keys_full(preview_payload, "must_fix_items", max_items=6, max_chars=260))
+        if not items:
+            items.extend(_preview_record_titles_full((preview_payload or {}).get("differences"), max_items=6))
+        if not items:
+            items.extend(_preview_items_from_keys_full(preview_payload, "next_steps", max_items=6, max_chars=260))
+        items = [item for item in items if not _is_generic_policy_publish_note(item)]
+        return _dedupe_preserve_order(items, max_items=6)
+
     action_description = _trim_text((action_item or {}).get("description"), max_chars=120)
     if action_description:
         items.append(action_description)
+
     for value in [
         _preview_record_value(preview_record, "recommendation", "next_step", "action", "detail", max_chars=120),
         _trim_text(_derive_publish_recommendation(result), max_chars=120),
     ]:
         if value:
             items.append(value)
+
     items.extend(_preview_items_from_keys(preview_payload, "next_steps", max_items=3))
     return _dedupe_preserve_order(items, max_items=4)
 
@@ -908,6 +1055,8 @@ def _build_trello_preview_sections(
     add_section("Evidence used", evidence)
     add_section("Watchouts", warnings)
     return sections
+
+
 
 
 def _ensure_trello_label_ids(trello: TrelloClient, label_specs: list[dict[str, str]]) -> list[str]:
@@ -1063,6 +1212,7 @@ def _build_trello_list_breakdown(cards: list[dict[str, Any]], settings: Evidence
     counts: dict[str, int] = {}
     for card in cards:
         list_id = str(card.get("list_id") or "").strip()
+        list_label = _trello_list_label_for_id(list_id, settings)
         if not list_id:
             continue
         counts[list_id] = counts.get(list_id, 0) + 1
@@ -1073,7 +1223,7 @@ def _build_trello_list_breakdown(cards: list[dict[str, Any]], settings: Evidence
         breakdown.append(
             {
                 "list_id": list_id,
-                "list_label": _trello_list_label_for_id(list_id, settings),
+                "list_label": list_label,
                 "count": counts[list_id],
             }
         )
@@ -1087,8 +1237,59 @@ def _build_trello_list_breakdown(cards: list[dict[str, Any]], settings: Evidence
 def _candidate_card_name(result: ProductWorkflowResult, payload: CVAnalysisPayload) -> str:
     candidate_name = _candidate_full_name(payload)
     if candidate_name:
-        return _trim_text(f"Candidate brief — {candidate_name}", max_chars=120)
-    return _trim_text(f"Candidate brief — {result.recommendation or result.summary or result.workflow_id}", max_chars=120)
+        return _full_preview_text(f"[{result.workflow_label}] {candidate_name}", max_chars=1000)
+    return _full_preview_text(
+        f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}",
+        max_chars=1000,
+    )
+
+
+
+def _normalize_preview_token(value: object, *, max_chars: int = 80) -> str:
+    return " ".join(_clean_preview_text(value, max_chars=max_chars).split()).casefold()
+
+
+def _filter_trello_labels_for_preview_and_publish(
+    label_specs: object,
+    *,
+    list_label: object = None,
+    status: object = None,
+) -> list[object]:
+    items = label_specs if isinstance(label_specs, list) else []
+    blocked = {
+        token
+        for token in (
+            _normalize_preview_token(list_label),
+            _normalize_preview_token(status),
+        )
+        if token
+    }
+
+    seen: set[str] = set()
+    filtered: list[object] = []
+
+    for item in items:
+        if isinstance(item, dict):
+            raw_name = (
+                item.get("name")
+                or item.get("label")
+                or item.get("text")
+                or item.get("value")
+            )
+            token = _normalize_preview_token(raw_name)
+            if not token or token in blocked or token in seen:
+                continue
+            filtered.append(item)
+            seen.add(token)
+            continue
+
+        token = _normalize_preview_token(item)
+        if not token or token in blocked or token in seen:
+            continue
+        filtered.append(item)
+        seen.add(token)
+
+    return filtered
 
 
 def _build_product_result_trello_card(
@@ -1102,32 +1303,77 @@ def _build_product_result_trello_card(
     preview_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload = result.structured_result.validated_output if result.structured_result is not None else None
+    # Normalize Candidate/Policy Trello card names to the same [Workflow] Title pattern.
+    if result.workflow_id in {"candidate_review", "policy_contract_comparison"} and not str(name or "").strip().startswith("["):
+        cleaned_name = str(name or "").strip()
+        for prefix in (
+            "Candidate brief —",
+            "Candidate brief -",
+            "Policy comparison —",
+            "Policy comparison -",
+        ):
+            if cleaned_name.casefold().startswith(prefix.casefold()):
+                cleaned_name = cleaned_name[len(prefix):].strip()
+        name = _full_preview_text(
+            f"[{result.workflow_label}] {cleaned_name or result.summary or result.workflow_id}",
+            max_chars=1000,
+        )
+
+
+    list_label = _trello_list_label_for_id(list_id, settings)
+
+    summary_max_chars = 1200 if result.workflow_id == "policy_contract_comparison" else 220
     summary = (
-        _preview_record_value(preview_record, "summary", "detail", "description", "impact", "business_impact", max_chars=220)
-        or _preview_string((preview_payload or {}).get("summary"), max_chars=220)
-        or _trim_text(_derive_publish_summary(result), max_chars=220)
+        _preview_record_value(preview_record, "summary", "detail", "description", "impact", "business_impact", max_chars=summary_max_chars)
+        or _preview_string((preview_payload or {}).get("summary"), max_chars=summary_max_chars)
+        or _trim_text(_derive_publish_summary(result), max_chars=summary_max_chars)
     )
+
     record_title = _preview_record_value(preview_record, "title", "name", "label", max_chars=96)
     record_category = _preview_record_value(preview_record, "category", max_chars=40)
     record_severity = _preview_record_value(preview_record, "severity", "priority", max_chars=32)
-    highlights = _preview_items_from_keys(preview_payload, "highlights", "strengths", max_items=3) or _derive_publish_highlights(result)[:3]
-    if record_title and record_title.casefold() not in {item.casefold() for item in highlights}:
-        highlights = [record_title, *highlights]
-    if record_severity or record_category:
-        detail_bits = [bit for bit in [record_severity, record_category] if bit]
-        if detail_bits:
-            highlights = [*highlights, " · ".join(detail_bits)]
-    highlights = _dedupe_preserve_order(highlights, max_items=4)
+    status_for_preview = (
+        _trim_text(list_label, max_chars=48)
+        or _trim_text((action_item or {}).get("status"), max_chars=48)
+        or _preview_record_value(preview_record, "status", max_chars=48)
+    )
 
-    recommendation = _preview_record_value(preview_record, "recommendation", "action", max_chars=220)
+    if result.workflow_id == "policy_contract_comparison":
+        highlights = _preview_items_from_keys_full(preview_payload, "must_fix_items", max_items=6, max_chars=260)
+        if not highlights:
+            highlights = _preview_record_titles_full((preview_payload or {}).get("differences"), max_items=6)
+        if not highlights:
+            highlights = _preview_items_from_keys_full(preview_payload, "highlights", max_items=6, max_chars=260)
+        highlights = _dedupe_preserve_order(highlights, max_items=6)
+    else:
+        highlights = _preview_items_from_keys(preview_payload, "highlights", "strengths", max_items=3) or _derive_publish_highlights(result)[:3]
+        if record_title and record_title.casefold() not in {item.casefold() for item in highlights}:
+            highlights = [record_title, *highlights]
+        if record_severity or record_category:
+            detail_bits = [bit for bit in [record_severity, record_category] if bit]
+            if detail_bits:
+                highlights = [*highlights, " · ".join(detail_bits)]
+        highlights = _dedupe_preserve_order(highlights, max_items=4)
+
+    recommendation = _preview_record_value(preview_record, "recommendation", "action", max_chars=summary_max_chars)
     if not recommendation:
-        recommendation = _preview_string((preview_payload or {}).get("recommendation"), max_chars=220)
+        recommendation = _preview_string((preview_payload or {}).get("recommendation"), max_chars=summary_max_chars)
     if not recommendation:
         fallback_recommendation = _derive_publish_recommendation(result)
-        recommendation = _trim_text(fallback_recommendation, max_chars=220) if fallback_recommendation else None
+        recommendation = _trim_text(fallback_recommendation, max_chars=summary_max_chars) if fallback_recommendation else None
 
     evidence = _preview_documents(preview_payload, result)[:4]
-    warnings = _preview_items_from_keys(preview_payload, "watchouts", max_items=3) or _derive_publish_warnings(result)[:3]
+    if result.workflow_id == "document_review" and isinstance(preview_record, dict):
+        warnings = _dedupe_preserve_order(
+            [
+                _preview_record_value(preview_record, "watchout", max_chars=220),
+                _preview_record_value(preview_record, "description", "detail", max_chars=220),
+                _preview_record_value(preview_record, "snippet", "evidence", max_chars=220),
+            ],
+            max_items=3,
+        )
+    else:
+        warnings = _preview_items_from_keys(preview_payload, "watchouts", max_items=3) or _derive_publish_warnings(result)[:3]
     interview_focus = _preview_items_from_keys(preview_payload, "interview_focus", "interview_questions", max_items=3)
     if not interview_focus and isinstance(payload, CVAnalysisPayload):
         interview_focus = _derive_candidate_interview_focus(payload)[:3]
@@ -1135,7 +1381,7 @@ def _build_product_result_trello_card(
     action_details: list[str] = []
     for label, value in [
         ("Owner", (action_item or {}).get("owner") or _preview_record_value(preview_record, "owner")),
-        ("Status", (action_item or {}).get("status") or _preview_record_value(preview_record, "status")),
+        ("Status", status_for_preview),
         ("Due date", (action_item or {}).get("due_date") or _preview_record_value(preview_record, "due_date")),
         ("Evidence", (action_item or {}).get("evidence") or _preview_record_value(preview_record, "evidence")),
     ]:
@@ -1143,14 +1389,107 @@ def _build_product_result_trello_card(
         if normalized:
             action_details.append(f"{label}: {normalized}")
 
+    card_summary = summary
+    if result.workflow_id == "document_review":
+        document_card_summary = ""
+        document_title = ""
+
+        if isinstance(preview_record, dict):
+            document_card_summary = (
+                _preview_record_value(
+                    preview_record,
+                    "card_summary",
+                    "summary",
+                    "detail",
+                    "description",
+                    "impact",
+                    "business_impact",
+                    "rationale",
+                    "context",
+                    "explanation",
+                    max_chars=900,
+                )
+                or ""
+            )
+            document_title = _preview_record_value(
+                preview_record,
+                "full_title",
+                "full_name",
+                "card_title",
+                "title",
+                "name",
+                "label",
+                max_chars=900,
+            )
+
+        if not document_card_summary and isinstance(action_item, dict):
+            document_card_summary = _trim_text(
+                action_item.get("card_summary")
+                or action_item.get("summary")
+                or action_item.get("description")
+                or action_item.get("detail")
+                or action_item.get("rationale")
+                or action_item.get("explanation"),
+                max_chars=900,
+            )
+            document_title = document_title or str(action_item.get("title") or action_item.get("name") or "").strip()
+
+        if document_card_summary and document_card_summary.casefold() != document_title.casefold():
+            card_summary = document_card_summary
+
+    if result.workflow_id == "action_plan_evidence_review":
+        action_specific_summary = ""
+        action_title = ""
+
+        if isinstance(preview_record, dict):
+            action_specific_summary = _preview_record_value(
+                preview_record,
+                "card_summary",
+                "summary",
+                "short_summary",
+                "action_summary",
+                "narrative",
+                "explanation",
+                max_chars=520,
+            )
+            action_title = _preview_record_value(preview_record, "title", "name", "label", max_chars=520)
+
+        if not action_specific_summary and isinstance(action_item, dict):
+            action_specific_summary = _trim_text(
+                action_item.get("card_summary")
+                or action_item.get("summary")
+                or action_item.get("short_summary")
+                or action_item.get("action_summary")
+                or action_item.get("narrative")
+                or action_item.get("explanation"),
+                max_chars=520,
+            )
+            action_title = str(action_item.get("title") or action_item.get("description") or "").strip()
+
+        if action_specific_summary and action_specific_summary.casefold() != action_title.casefold():
+            looks_like_metadata = (
+                " | " in action_specific_summary
+                or "CTR-" in action_specific_summary.upper()
+                or (
+                    "2024-" in action_specific_summary
+                    and any(
+                        token in action_specific_summary.lower()
+                        for token in ("open", "in progress", "approved", "done", "blocked")
+                    )
+                )
+            )
+            if not looks_like_metadata:
+                card_summary = action_specific_summary
+
     preview_sections = _build_trello_preview_sections(
-        summary=summary,
+        summary=card_summary,
         highlights=highlights,
         action_details=action_details,
         recommendation=recommendation,
         evidence=evidence,
         warnings=warnings,
     )
+
     due_date = _normalize_trello_due_date((action_item or {}).get("due_date") or _preview_record_value(preview_record, "due_date"))
     checklist_items = _build_trello_checklist_items(
         result=result,
@@ -1158,10 +1497,20 @@ def _build_product_result_trello_card(
         preview_record=preview_record,
         preview_payload=preview_payload,
     )
-    label_specs = _build_trello_label_specs(result=result, action_item=action_item, preview_record=preview_record)
+
+    label_specs = _align_trello_status_label_specs_to_list_label(
+        _build_trello_label_specs(result=result, action_item=action_item, preview_record=preview_record),
+        list_label,
+    )
+    label_specs = _filter_trello_labels_for_preview_and_publish(
+        label_specs,
+        list_label=list_label,
+        status=status_for_preview,
+    )
+
     description = _build_trello_markdown_sections(
         title=name,
-        summary=summary or "",
+        summary=card_summary or "",
         highlights=highlights,
         recommendation=recommendation,
         evidence=evidence,
@@ -1169,23 +1518,322 @@ def _build_product_result_trello_card(
         action_item=action_item,
         interview_focus=interview_focus,
     )
-    if checklist_items:
+
+    if checklist_items and result.workflow_id != "policy_contract_comparison":
         description = "\n\n".join([description, "### Suggested checklist", *[f"- {item}" for item in checklist_items]])
+
     return {
         "name": name,
+        "full_name": name,
+        "full_title": name,
+        "card_title": name,
         "description": description,
         "list_id": list_id,
-        "list_label": _trello_list_label_for_id(list_id, settings),
-        "summary": summary,
+        "list_label": list_label,
+        "summary": card_summary,
         "preview_sections": preview_sections,
         "labels": label_specs,
         "checklist_items": checklist_items,
         "due": due_date,
         "owner": _trim_text((action_item or {}).get("owner"), max_chars=72) or _preview_record_value(preview_record, "owner", max_chars=72),
-        "status": _trim_text((action_item or {}).get("status"), max_chars=48) or _preview_record_value(preview_record, "status", max_chars=48),
+        "status": status_for_preview,
         "severity": record_severity,
         "category": record_category,
     }
+
+
+
+
+
+
+
+
+def _looks_like_schema_field_name(value: object) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return True
+
+    lowered = text.casefold()
+    blocked = {
+        "document_type",
+        "due_date",
+        "owner",
+        "status",
+        "priority",
+        "severity",
+        "evidence",
+        "card_summary",
+        "summary",
+        "title",
+        "description",
+        "name",
+        "action_items",
+        "important_dates",
+        "risks",
+        "watchouts",
+    }
+    if lowered in blocked:
+        return True
+
+    # snake_case field names, not human titles.
+    if re.fullmatch(r"[a-z][a-z0-9_]{2,50}", text) and " " not in text:
+        return True
+
+    # Prompt/schema prose, not title.
+    if "1-2 short sentences" in lowered or "concrete outcome" in lowered:
+        return True
+
+    return False
+
+
+def _valid_action_plan_title_candidate(value: object) -> str:
+    title = _full_preview_text(value, max_chars=1000)
+    if not title:
+        return ""
+    if _preview_text_has_ellipsis(title):
+        return ""
+    if _looks_like_schema_field_name(title):
+        return ""
+    if len(title) < 10:
+        return ""
+    return title
+
+
+def _collect_action_plan_raw_action_records(*sources: object) -> list[dict[str, Any]]:
+    """Collect only real model action item records, never schema/property records."""
+    groups: list[tuple[int, list[dict[str, Any]]]] = []
+    seen_objects: set[int] = set()
+
+    skip_path_tokens = {
+        "schema",
+        "json_schema",
+        "properties",
+        "required",
+        "examples",
+        "example",
+        "field",
+        "fields",
+        "field_descriptions",
+        "contract",
+        "instructions",
+    }
+
+    def to_record(value: object) -> dict[str, Any] | None:
+        if isinstance(value, dict):
+            return value
+
+        if hasattr(value, "model_dump"):
+            try:
+                dumped = value.model_dump()
+                if isinstance(dumped, dict):
+                    return dumped
+            except Exception:
+                pass
+
+        if hasattr(value, "dict"):
+            try:
+                dumped = value.dict()
+                if isinstance(dumped, dict):
+                    return dumped
+            except Exception:
+                pass
+
+        if hasattr(value, "__dict__"):
+            try:
+                dumped = vars(value)
+                if isinstance(dumped, dict):
+                    return dumped
+            except Exception:
+                pass
+
+        return None
+
+    def is_valid_action_record(record: dict[str, Any]) -> bool:
+        title = _valid_action_plan_title_candidate(
+            record.get("description")
+            or record.get("title")
+            or record.get("name")
+            or record.get("label")
+        )
+        if not title:
+            return False
+
+        # Real action items usually have at least one operational field.
+        has_operational_context = any(
+            key in record
+            for key in (
+                "card_summary",
+                "summary",
+                "owner",
+                "due_date",
+                "status",
+                "evidence",
+                "priority",
+                "severity",
+            )
+        )
+        return has_operational_context
+
+    def collect_from_list(value: object) -> list[dict[str, Any]]:
+        if not isinstance(value, list):
+            return []
+
+        records: list[dict[str, Any]] = []
+        for item in value:
+            record = to_record(item)
+            if record and is_valid_action_record(record):
+                records.append(record)
+
+        return records
+
+    def visit(value: object, *, path: tuple[str, ...] = ()) -> None:
+        if value is None:
+            return
+
+        if any(token in skip_path_tokens for token in (part.casefold() for part in path)):
+            return
+
+        if isinstance(value, str):
+            return
+
+        if isinstance(value, (dict, list, tuple)) or hasattr(value, "__dict__") or hasattr(value, "model_dump") or hasattr(value, "dict"):
+            obj_id = id(value)
+            if obj_id in seen_objects:
+                return
+            seen_objects.add(obj_id)
+
+        record = to_record(value)
+        if isinstance(record, dict):
+            for key, child in record.items():
+                normalized_key = str(key or "").casefold()
+
+                if normalized_key in {"action_items", "actionitems"}:
+                    records = collect_from_list(child)
+                    if records:
+                        # Highest priority: explicit model action_items.
+                        groups.append((0, records))
+                    continue
+
+                if normalized_key == "actions":
+                    records = collect_from_list(child)
+                    if records:
+                        groups.append((1, records))
+                    continue
+
+                visit(child, path=(*path, str(key)))
+            return
+
+        if isinstance(value, (list, tuple)):
+            for index, child in enumerate(value):
+                visit(child, path=(*path, str(index)))
+
+    for source in sources:
+        visit(source)
+
+    groups.sort(key=lambda item: item[0])
+
+    deduped: list[dict[str, Any]] = []
+    seen_titles: set[str] = set()
+
+    for _, records in groups:
+        for record in records:
+            title = _valid_action_plan_title_candidate(
+                record.get("description")
+                or record.get("title")
+                or record.get("name")
+                or record.get("label")
+            )
+            key = title.casefold()
+            if title and key not in seen_titles:
+                seen_titles.add(key)
+                deduped.append(record)
+
+        # Se já achou action_items explícitos, não mistura com grupos piores.
+        if deduped:
+            break
+
+    return deduped
+
+
+def _action_plan_full_title_for_index(
+    index: int,
+    *,
+    view_item: dict[str, Any],
+    raw_action_records: list[dict[str, Any]],
+) -> str:
+    """Return the full human action title for Trello card titles."""
+    candidates: list[object] = []
+
+    if index < len(raw_action_records):
+        raw_record = raw_action_records[index]
+        candidates.extend(
+            [
+                raw_record.get("full_title"),
+                raw_record.get("full_name"),
+                raw_record.get("card_title"),
+                raw_record.get("description"),
+                raw_record.get("title"),
+                raw_record.get("name"),
+                raw_record.get("label"),
+            ]
+        )
+
+    candidates.extend(
+        [
+            view_item.get("full_title"),
+            view_item.get("full_name"),
+            view_item.get("card_title"),
+            view_item.get("description"),
+            view_item.get("title"),
+            view_item.get("name"),
+            view_item.get("label"),
+            "Action plan item",
+        ]
+    )
+
+    for candidate in candidates:
+        title = _valid_action_plan_title_candidate(candidate)
+        if title:
+            return title
+
+    fallback = _full_preview_text(view_item.get("title") or view_item.get("description") or "Action plan item", max_chars=1000)
+    return fallback or "Action plan item"
+
+def _document_review_trello_card_summary(record: object) -> str:
+    if not isinstance(record, dict):
+        return ""
+
+    title = _clean_preview_text(
+        record.get("full_title")
+        or record.get("full_name")
+        or record.get("card_title")
+        or record.get("title")
+        or record.get("name")
+        or record.get("label")
+        or "",
+        max_chars=1000,
+    ).casefold()
+
+    candidates = [
+        record.get("card_summary"),
+        record.get("summary"),
+        record.get("description"),
+        record.get("detail"),
+        record.get("rationale"),
+        record.get("impact"),
+        record.get("context"),
+        record.get("explanation"),
+        record.get("snippet"),
+        record.get("evidence"),
+        record.get("recommendation"),
+    ]
+
+    for candidate in candidates:
+        cleaned = _clean_preview_text(candidate, max_chars=900)
+        if cleaned and cleaned.casefold() != title:
+            return cleaned
+
+    return ""
 
 
 def _build_product_result_trello_cards(
@@ -1200,6 +1848,15 @@ def _build_product_result_trello_cards(
     cards: list[dict[str, Any]] = []
 
     if result.workflow_id == "action_plan_evidence_review":
+        raw_action_records = _collect_action_plan_raw_action_records(
+            result,
+            preview_payload,
+            payload,
+            getattr(result, "structured_result", None),
+            getattr(getattr(result, "structured_result", None), "validated_output", None),
+            getattr(getattr(result, "structured_result", None), "raw_response", None),
+            getattr(getattr(result, "structured_result", None), "response_payload", None),
+        )
         preview_actions = _preview_record_list(preview_payload, "actions", "evidence_gaps", max_items=max_cards)
         try:
             action_plan_view = build_action_plan_view(result)
@@ -1210,7 +1867,12 @@ def _build_product_result_trello_cards(
             for index, item in enumerate(items[:max_cards]):
                 if not isinstance(item, dict):
                     continue
-                action_name = _trim_text(item.get("title") or "Action plan item", max_chars=96)
+                preview_record_for_title = preview_actions[index] if index < len(preview_actions) else None
+                action_name = _action_plan_full_title_for_index(
+                    index,
+                    view_item=item if isinstance(item, dict) else {},
+                    raw_action_records=raw_action_records,
+                )
                 list_id = _resolve_trello_target_list_id_for_action_item(
                     action_item=item,
                     result=result,
@@ -1220,7 +1882,7 @@ def _build_product_result_trello_cards(
                     _build_product_result_trello_card(
                         result=result,
                         settings=settings,
-                        name=_trim_text(f"[{result.workflow_label}] {action_name}", max_chars=120),
+                        name=f"[{result.workflow_label}] {action_name}",
                         list_id=list_id,
                         action_item=item,
                         preview_record=(preview_actions[index] if index < len(preview_actions) else None),
@@ -1231,6 +1893,57 @@ def _build_product_result_trello_cards(
                 return cards, "action_plan_items"
 
     target_list_id = _resolve_trello_target_list_id(result=result, settings=settings)
+
+    if result.workflow_id == "document_review":
+        document_review_max_cards = max(max_cards, 6)
+        preview_records = _preview_record_list(preview_payload, "findings", max_items=document_review_max_cards)
+
+        for record in preview_records[:document_review_max_cards]:
+            if not isinstance(record, dict):
+                continue
+
+            title = _first_full_preview_value(
+                record,
+                "full_title",
+                "full_name",
+                "card_title",
+                "title",
+                "name",
+                "label",
+                fallback="Document review finding",
+                max_chars=1000,
+            )
+
+            card_summary = _document_review_trello_card_summary(record)
+
+            action_item = {
+                "description": _trim_text(
+                    card_summary or record.get("description") or record.get("recommendation") or title,
+                    max_chars=900,
+                ),
+                "owner": _trim_text(record.get("owner"), max_chars=90) or "Review owner",
+                "status": _trim_text(record.get("status"), max_chars=48) or "Review",
+                "due_date": _trim_text(record.get("due_date"), max_chars=80),
+                "evidence": _trim_text(
+                    record.get("snippet") or record.get("evidence") or record.get("description"),
+                    max_chars=240,
+                ),
+            }
+
+            cards.append(
+                _build_product_result_trello_card(
+                    result=result,
+                    settings=settings,
+                    name=f"[{result.workflow_label}] {title}",
+                    list_id=target_list_id,
+                    action_item=action_item,
+                    preview_record=record,
+                    preview_payload=preview_payload,
+                )
+            )
+
+        if cards:
+            return cards, "document_review_findings"
 
     if isinstance(payload, DocumentAgentPayload):
         preview_records = _preview_record_list(preview_payload, "findings", "differences", "must_fix_items", max_items=max_cards)
@@ -1248,12 +1961,12 @@ def _build_product_result_trello_cards(
         for index, item in enumerate(action_items[:max_cards]):
             if not isinstance(item, dict):
                 continue
-            action_name = _trim_text(item.get("description") or "EvidenceOps action", max_chars=96)
+            action_name = str(item.get("description") or "EvidenceOps action" or "").strip()
             cards.append(
                 _build_product_result_trello_card(
                     result=result,
                     settings=settings,
-                    name=_trim_text(f"[{result.workflow_label}] {action_name}", max_chars=120),
+                    name=f"[{result.workflow_label}] {action_name}",
                     list_id=target_list_id,
                     action_item=item,
                     preview_record=(preview_records[index] if index < len(preview_records) else None),
@@ -1656,26 +2369,33 @@ def _split_summary_sentences(text: object, *, limit: int = 3) -> list[str]:
 def _derive_publish_title(result: ProductWorkflowResult) -> str:
     payload = result.structured_result.validated_output if result.structured_result is not None else None
     document_labels = _extract_result_document_labels(result)
+
     if isinstance(payload, CVAnalysisPayload):
         candidate_name = _candidate_full_name(payload) or "Candidate"
-        return _trim_text(f"Candidate brief — {candidate_name}", max_chars=120)
+        return _full_preview_text(f"Candidate brief — {candidate_name}", max_chars=1000)
+
     if result.workflow_id == "policy_contract_comparison":
         if len(document_labels) >= 2:
             left = document_labels[0].replace('.pdf', '')
             right = document_labels[1].replace('.pdf', '')
-            return _trim_text(f"Policy comparison — {left} vs {right}", max_chars=120)
-        return _trim_text("Policy comparison — evidence and access governance", max_chars=120)
+            return _full_preview_text(f"Policy comparison — {left} vs {right}", max_chars=1000)
+        return "Policy comparison — evidence and access governance"
+
     if result.workflow_id == "document_review":
         if document_labels:
-            return _trim_text(f"Document review — {document_labels[0].replace('.pdf', '')}", max_chars=120)
-        return _trim_text(f"Document review — {result.recommendation or result.summary}", max_chars=120)
+            return _full_preview_text(f"Document review — {document_labels[0].replace('.pdf', '')}", max_chars=1000)
+        return _full_preview_text(f"Document review — {result.recommendation or result.summary}", max_chars=1000)
+
     if result.workflow_id == "action_plan_evidence_review":
-        return _trim_text(f"Action plan — {result.recommendation or result.summary}", max_chars=120)
+        return _full_preview_text(f"Action plan — {result.recommendation or result.summary}", max_chars=1000)
+
     if isinstance(payload, CVAnalysisPayload) and payload.personal_info is not None:
-        full_name = _trim_text(getattr(payload.personal_info, "full_name", ""), max_chars=64)
+        full_name = _full_preview_text(getattr(payload.personal_info, "full_name", ""), max_chars=1000)
         if full_name:
-            return _trim_text(f"[{result.workflow_label}] {full_name}", max_chars=120)
-    return _trim_text(f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}", max_chars=120)
+            return _full_preview_text(f"[{result.workflow_label}] {full_name}", max_chars=1000)
+
+    return _full_preview_text(f"[{result.workflow_label}] {result.recommendation or result.summary or result.workflow_id}", max_chars=1000)
+
 
 
 def _derive_publish_summary(result: ProductWorkflowResult) -> str:
@@ -1901,18 +2621,76 @@ def _derive_publish_template_value(template_label: str | None, template_id: str 
 
 def _derive_publish_findings_count(result: ProductWorkflowResult, preview_payload: dict[str, Any] | None = None) -> int | None:
     payload = result.structured_result.validated_output if result.structured_result is not None else None
+
+    if result.workflow_id == "policy_contract_comparison":
+        # Summary helper calls are inputs to the comparison, not findings.
+        # Count only real comparison deltas / must-fix items.
+        if isinstance(preview_payload, dict):
+            for key in ("must_fix_items", "differences", "deltas"):
+                value = preview_payload.get(key)
+                if isinstance(value, list) and value:
+                    return len(value)
+
+        if isinstance(payload, DocumentAgentPayload):
+            structured_response = payload.structured_response if isinstance(payload.structured_response, dict) else {}
+            policy_v2 = structured_response.get("policy_comparison_v2") if isinstance(structured_response.get("policy_comparison_v2"), dict) else {}
+            deltas = policy_v2.get("deltas") if isinstance(policy_v2.get("deltas"), list) else []
+            if deltas:
+                return len(deltas)
+
+            comparison_findings = [
+                finding
+                for finding in payload.comparison_findings
+                if str(getattr(finding, "finding_type", "") or "").replace("_", " ").casefold() != "document summary"
+            ]
+            if comparison_findings:
+                return len(comparison_findings)
+
+    if result.workflow_id == "document_review":
+        if isinstance(preview_payload, dict):
+            findings = preview_payload.get("findings")
+            if isinstance(findings, list) and findings:
+                return len(findings)
+
+            risks = preview_payload.get("risks")
+            gaps = preview_payload.get("evidence_gaps") or preview_payload.get("missing_information")
+            count = (len(risks) if isinstance(risks, list) else 0) + (len(gaps) if isinstance(gaps, list) else 0)
+            if count:
+                return count
+
+        if isinstance(payload, DocumentAgentPayload):
+            if payload.document_review_findings:
+                return len(payload.document_review_findings)
+
+            structured_response = payload.structured_response if isinstance(payload.structured_response, dict) else {}
+            extraction_payload = structured_response.get("extraction_payload") if isinstance(structured_response.get("extraction_payload"), dict) else {}
+            risks = extraction_payload.get("risks") if isinstance(extraction_payload.get("risks"), list) else []
+
+            gaps: list[object] = []
+            for key in ("missing_information", "evidence_gaps"):
+                value = extraction_payload.get(key)
+                if isinstance(value, list):
+                    gaps.extend(value)
+
+            count = len(risks) + len(gaps)
+            if count:
+                return count
+
     if isinstance(preview_payload, dict):
-        for key in ('findings', 'must_fix_items', 'actions'):
+        for key in ("findings", "must_fix_items", "actions"):
             value = preview_payload.get(key)
             if isinstance(value, list) and value:
                 return len(value)
+
     if isinstance(payload, DocumentAgentPayload):
         if payload.document_review_findings:
             return len(payload.document_review_findings)
         if payload.comparison_findings:
             return len(payload.comparison_findings)
+
     if result.highlights:
         return len(result.highlights)
+
     return None
 
 
@@ -2184,6 +2962,54 @@ def _preview_items_from_value(value: object, *, max_items: int = 6) -> list[str]
     return deduped
 
 
+def _preview_items_from_value_full(value: object, *, max_items: int = 6, max_chars: int = 700) -> list[str]:
+    collected: list[str] = []
+
+    def add(item: object) -> None:
+        if len(collected) >= max_items:
+            return
+        if isinstance(item, dict):
+            for key in ("must_fix_title", "title", "name", "label", "summary", "detail", "business_impact", "recommendation", "next_step", "action"):
+                text_value = _trim_text(item.get(key), max_chars=max_chars)
+                if text_value:
+                    collected.append(text_value)
+                    return
+            return
+        if isinstance(item, (list, tuple)):
+            for nested in item:
+                add(nested)
+                if len(collected) >= max_items:
+                    break
+            return
+        text_value = _trim_text(item, max_chars=max_chars)
+        if text_value:
+            collected.append(text_value)
+
+    add(value)
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for item in collected:
+        key = item.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+        if len(deduped) >= max_items:
+            break
+    return deduped
+
+
+def _preview_items_from_keys_full(preview_payload: dict[str, Any] | None, *keys: str, max_items: int = 6, max_chars: int = 700) -> list[str]:
+    if not isinstance(preview_payload, dict):
+        return []
+    collected: list[str] = []
+    for key in keys:
+        collected.extend(_preview_items_from_value_full(preview_payload.get(key), max_items=max_items, max_chars=max_chars))
+        if len(collected) >= max_items:
+            break
+    return _dedupe_preserve_order(collected, max_items=max_items)
+
 def _preview_items_from_keys(preview_payload: dict[str, Any] | None, *keys: str, max_items: int = 6) -> list[str]:
     if not isinstance(preview_payload, dict):
         return []
@@ -2201,12 +3027,36 @@ def _preview_items_from_keys(preview_payload: dict[str, Any] | None, *keys: str,
     return deduped
 
 
-def _preview_documents(preview_payload: dict[str, Any] | None, result: ProductWorkflowResult) -> list[str]:
-    documents = _preview_items_from_keys(preview_payload, "documents", "primary_documents", max_items=5)
-    if documents:
-        return documents
-    return _extract_result_document_labels(result)[:5]
+def _normalize_preview_document_label(value: object) -> str:
+    normalized = _trim_text(value, max_chars=180)
+    normalized = re.sub(r"\s+\((?:pdf|docx?|txt|md)\)$", "", normalized, flags=re.IGNORECASE).strip()
+    normalized = re.sub(r"\s+\[(?:pdf|docx?|txt|md)\]$", "", normalized, flags=re.IGNORECASE).strip()
+    return normalized
 
+
+def _preview_document_dedupe_key(value: object) -> str:
+    label = _normalize_preview_document_label(value).casefold()
+    label = re.sub(r"\s+\((?:pdf|docx?|txt|md)\)$", "", label, flags=re.IGNORECASE).strip()
+    label = re.sub(r"\.(?:pdf|docx?|txt|md)$", "", label, flags=re.IGNORECASE).strip()
+    return re.sub(r"[^a-z0-9]+", " ", label).strip()
+
+def _preview_documents(preview_payload: dict[str, Any] | None, result: ProductWorkflowResult) -> list[str]:
+    documents = _preview_items_from_keys_full(preview_payload, "documents", "primary_documents", max_items=8, max_chars=220)
+    if not documents:
+        documents = _extract_result_document_labels(result)[:8]
+
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for document in documents:
+        label = _normalize_preview_document_label(document)
+        if not label:
+            continue
+        key = _preview_document_dedupe_key(label)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        normalized.append(label)
+    return normalized[:5]
 
 def _build_product_notion_preview_sections(
     result: ProductWorkflowResult,
@@ -2221,20 +3071,140 @@ def _build_product_notion_preview_sections(
     next_steps = _preview_items_from_keys(preview_payload, "next_steps")
     findings = _preview_items_from_keys(preview_payload, "findings", "differences")
     actions = _preview_items_from_keys(preview_payload, "actions")
-    evidence_gaps = _preview_items_from_keys(preview_payload, "evidence_gaps")
+    evidence_gaps = _preview_items_from_keys(preview_payload, "evidence_gaps", "missing_information")
     must_fix_items = _preview_items_from_keys(preview_payload, "must_fix_items")
     negotiation_priorities = _preview_items_from_keys(preview_payload, "negotiation_priorities")
     watchouts = _preview_items_from_keys(preview_payload, "watchouts") or _derive_publish_warnings(result)
+    # Candidate Review full summary cleanup.
+    if result.workflow_id == "candidate_review":
+        summary = _clean_preview_text(
+            (preview_payload or {}).get("summary") if isinstance(preview_payload, dict) else None,
+            max_chars=2400,
+        ) or _clean_preview_text(_derive_publish_summary(result), max_chars=2400)
+
+        recommendation = _clean_preview_text(
+            (preview_payload or {}).get("recommendation") if isinstance(preview_payload, dict) else None,
+            max_chars=1800,
+        ) or _clean_preview_text(_derive_publish_recommendation(result), max_chars=1800)
+
+        highlights = _preview_items_from_keys_full(
+            preview_payload,
+            "highlights",
+            "strengths",
+            max_items=10,
+            max_chars=1200,
+        ) or [
+            _clean_preview_text(item, max_chars=1200)
+            for item in _derive_publish_highlights(result)
+            if _clean_preview_text(item, max_chars=1200)
+        ]
+
+        next_steps = _preview_items_from_keys_full(preview_payload, "next_steps", max_items=10, max_chars=1200)
+        findings = _preview_items_from_keys_full(preview_payload, "findings", "differences", max_items=10, max_chars=1200)
+        actions = _preview_items_from_keys_full(preview_payload, "actions", max_items=10, max_chars=1200)
+        watchouts = _preview_items_from_keys_full(preview_payload, "watchouts", max_items=10, max_chars=1200) or [
+            _clean_preview_text(item, max_chars=1200)
+            for item in _derive_publish_warnings(result)
+            if _clean_preview_text(item, max_chars=1200)
+        ]
+
     interview_focus = _preview_items_from_keys(preview_payload, "interview_focus", "interview_questions")
     documents = _preview_documents(preview_payload, result)
     candidate_bits = _preview_items_from_keys(preview_payload, "candidate_name", "candidate_headline", "candidate_location", max_items=4)
+
+    if result.workflow_id == "policy_contract_comparison":
+        summary = _preview_string((preview_payload or {}).get("summary"), max_chars=1200) or _trim_text(_derive_publish_summary(result), max_chars=1200)
+        recommendation = _preview_string((preview_payload or {}).get("recommendation"), max_chars=1200) or _trim_text(_derive_publish_recommendation(result), max_chars=1200)
+        highlights = _preview_items_from_keys_full(preview_payload, "must_fix_items", "highlights", max_items=8, max_chars=500) or _derive_publish_highlights(result)
+        next_steps = _preview_items_from_keys_full(preview_payload, "next_steps", max_items=8, max_chars=500)
+        findings = _preview_items_from_keys_full(preview_payload, "findings", "differences", max_items=8, max_chars=500)
+        must_fix_items = _preview_items_from_keys_full(preview_payload, "must_fix_items", max_items=8, max_chars=500)
+        negotiation_priorities = _preview_items_from_keys_full(preview_payload, "negotiation_priorities", max_items=8, max_chars=500)
+        watchouts = _preview_items_from_keys_full(preview_payload, "watchouts", max_items=8, max_chars=500) or _derive_publish_warnings(result)
+        documents = _preview_documents(preview_payload, result)
+
+
+    def _strip_preview_ellipsis(value: object) -> str:
+        cleaned = str(value or "").strip()
+        for suffix in ("...", "…"):
+            while cleaned.endswith(suffix):
+                cleaned = cleaned[: -len(suffix)].rstrip()
+        return cleaned
+
+    def _record_to_notion_item(record: dict[str, Any]) -> str:
+        raw_title = _preview_record_value(record, "title", "name", "label", max_chars=1200)
+        description = _preview_record_value(record, "description", "detail", "impact", max_chars=1400)
+        recommendation = _preview_record_value(record, "recommendation", "next_step", "action", max_chars=1000)
+
+        title = _strip_preview_ellipsis(raw_title) if "_strip_preview_ellipsis" in locals() else str(raw_title or "").strip()
+        if str(raw_title or "").strip().endswith(("...", "…")) and description:
+            title = description
+
+        parts = []
+        if title:
+            parts.append(title)
+        if description and description.casefold() != str(title or "").casefold():
+            parts.append(description)
+        if recommendation and recommendation.casefold() not in {str(part or "").casefold() for part in parts}:
+            parts.append(recommendation)
+
+        text_value = _clean_preview_text(" — ".join(part for part in parts if part), max_chars=2400)
+        return _strip_preview_ellipsis(text_value) if "_strip_preview_ellipsis" in locals() else text_value
+
+
+    if result.workflow_id == "document_review":
+        summary = _strip_preview_ellipsis(
+            _preview_string((preview_payload or {}).get("summary"), max_chars=2200)
+            or _derive_publish_summary(result)
+        )
+        recommendation = _strip_preview_ellipsis(
+            _preview_string((preview_payload or {}).get("recommendation"), max_chars=1600)
+            or (_derive_publish_recommendation(result) or "")
+        )
+
+        finding_records = _preview_record_list(preview_payload, "findings", max_items=16)
+        if finding_records:
+            normal_records: list[dict[str, Any]] = []
+            gap_records: list[dict[str, Any]] = []
+
+            for record in finding_records:
+                if not isinstance(record, dict):
+                    continue
+                haystack = " ".join(
+                    str(record.get(key) or "")
+                    for key in ("category", "title", "description", "detail")
+                ).casefold()
+                if "gap" in haystack or "missing" in haystack:
+                    gap_records.append(record)
+                else:
+                    normal_records.append(record)
+
+            findings = [_record_to_notion_item(record) for record in (normal_records or finding_records) if isinstance(record, dict)]
+            evidence_gaps = [_record_to_notion_item(record) for record in gap_records]
+
+        highlights = [_strip_preview_ellipsis(item) for item in _preview_items_from_keys_full(preview_payload, "highlights", max_items=10, max_chars=1200)]
+        next_steps = [_strip_preview_ellipsis(item) for item in _preview_items_from_keys_full(preview_payload, "next_steps", max_items=10, max_chars=1200)]
+        actions = [_strip_preview_ellipsis(item) for item in _preview_items_from_keys_full(preview_payload, "actions", "next_steps", max_items=10, max_chars=1200)]
+        watchouts = [_strip_preview_ellipsis(item) for item in (_preview_items_from_keys_full(preview_payload, "watchouts", max_items=10, max_chars=1200) or _derive_publish_warnings(result))]
+
+        if not evidence_gaps:
+            evidence_gaps = [
+                _strip_preview_ellipsis(item)
+                for item in _preview_items_from_keys_full(
+                    preview_payload,
+                    "evidence_gaps",
+                    "missing_information",
+                    max_items=10,
+                    max_chars=1200,
+                )
+            ]
 
     sections: list[dict[str, Any]] = []
 
     def add_section(heading: str, items: list[str] | None = None) -> None:
         normalized_items = [item for item in (items or []) if str(item).strip()]
         if normalized_items:
-            sections.append({"heading": heading, "items": normalized_items[:6]})
+            sections.append({"heading": heading, "items": normalized_items[:8]})
 
     template_key = template.get("id") or "executive_summary"
     if template_key == "action_register":
@@ -2265,23 +3235,26 @@ def _build_product_notion_preview_sections(
     elif template_key == "review_summary":
         add_section("Executive summary", [summary] if summary else [])
         add_section("Findings", findings or highlights)
+        add_section("Evidence gaps", evidence_gaps)
         add_section("Recommendation", [recommendation] if recommendation else [])
         add_section("Next steps", next_steps)
         add_section("Evidence used", documents)
     elif template_key == "findings_register":
         add_section("Executive summary", [summary] if summary else [])
         add_section("Findings", findings or highlights)
-        add_section("Remediation", next_steps or ([recommendation] if recommendation else []))
+        add_section("Evidence gaps", evidence_gaps)
+        add_section("Remediation actions", actions or next_steps or ([recommendation] if recommendation else []))
         add_section("Evidence used", documents)
     elif template_key == "comparison_memo":
         add_section("Executive summary", [summary] if summary else [])
-        add_section("Must-fix items", must_fix_items or findings)
-        add_section("Negotiation priorities", negotiation_priorities)
+        add_section("Key deltas", findings or highlights or must_fix_items)
+        add_section("Recommendation", [recommendation] if recommendation else [])
         add_section("Evidence used", documents)
     elif template_key == "remediation_register":
-        add_section("Executive summary", [summary] if summary else [])
         add_section("Must-fix items", must_fix_items or findings)
         add_section("Negotiation priorities", negotiation_priorities)
+        add_section("Watchouts", watchouts)
+        add_section("Remediation checklist", next_steps or must_fix_items or ([recommendation] if recommendation else []))
         add_section("Evidence used", documents)
     else:
         add_section("Executive summary", [summary] if summary else [])
