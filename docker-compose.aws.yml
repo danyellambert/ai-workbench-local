@@ -2,6 +2,8 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    networks:
+      - ai-decision-studio-private
     depends_on:
       frontend:
         condition: service_healthy
