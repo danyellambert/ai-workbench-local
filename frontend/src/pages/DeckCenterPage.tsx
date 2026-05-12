@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { formatUserDateTime } from '@/lib/user-time';
+import { formatUserDateTime, parseUserDateMs } from '@/lib/user-time';
 import {
   buildProductArtifactUrl,
   getProductArtifactEntry,
@@ -72,8 +72,8 @@ function ArtifactAssetButton({ asset }: { asset: ProductArtifactAssetLink }) {
 
 function sortArtifacts(artifacts: ProductArtifactEntry[]): ProductArtifactEntry[] {
   return [...artifacts].sort((left, right) => {
-    const leftTime = left.created_at ? new Date(left.created_at).getTime() : 0;
-    const rightTime = right.created_at ? new Date(right.created_at).getTime() : 0;
+    const leftTime = parseUserDateMs(left.created_at) ?? 0;
+    const rightTime = parseUserDateMs(right.created_at) ?? 0;
     if (leftTime !== rightTime) return rightTime - leftTime;
     return (right.title || right.name).localeCompare(left.title || left.name);
   });

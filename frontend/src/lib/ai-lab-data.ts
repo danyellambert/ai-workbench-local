@@ -191,6 +191,7 @@ export interface LabRuntimePayload {
   }>;
   timeline?: Array<{
     label: string;
+    timestamp?: string | null;
     latencyS: number;
     contextPressurePct: number;
     error: number;

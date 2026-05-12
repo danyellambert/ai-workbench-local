@@ -2120,7 +2120,7 @@ def create_trello_smoke_card(
     if missing_fields:
         raise ValueError(f"Trello is not fully configured. Missing: {', '.join(missing_fields)}")
 
-    card_name = f"{_trim_text(title_prefix, max_chars=72)} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    card_name = f"{_trim_text(title_prefix, max_chars=72)} {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}"
     plan = {
         "status": "planned" if dry_run else "success",
         "dry_run": bool(dry_run),
@@ -2860,7 +2860,7 @@ def create_notion_smoke_page(
 ) -> dict[str, Any]:
     resolved_settings = settings or get_evidenceops_external_settings()
     _require_notion_settings(resolved_settings)
-    title = f"{_trim_text(title_prefix, max_chars=72)} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    title = f"{_trim_text(title_prefix, max_chars=72)} {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}"
     children = [
         _build_notion_paragraph_block("Smoke test page created from the Gradio UI integration test."),
         _build_notion_paragraph_block("If this page exists in the configured database, the Notion integration is working."),

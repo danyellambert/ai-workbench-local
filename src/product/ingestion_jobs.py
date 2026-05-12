@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from threading import Lock
 from typing import Any
 from uuid import uuid4
@@ -19,7 +19,7 @@ _JOB_LOCK = Lock()
 
 
 def _now_iso() -> str:
-    return datetime.now().isoformat()
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _build_steps() -> list[dict[str, Any]]:

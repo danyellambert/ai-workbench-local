@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
@@ -21,6 +22,10 @@ from src.rag.vector_store import ChromaVectorStore, LocalVectorStore
 
 
 logger = get_logger(__name__)
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 
@@ -474,7 +479,7 @@ def upsert_documents_in_rag_index(
         if isinstance(chunk, dict) and (chunk.get("document_id") or chunk.get("file_hash")) not in document_ids_to_replace
     ]
 
-    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    now = _utc_now_iso()
     total_documents = len(documents)
 
     for position, document in enumerate(documents, start=1):
@@ -740,7 +745,7 @@ def remove_documents_from_rag_index(
         "documents": remaining_documents,
         "chunks": remaining_chunks,
         "settings": normalized.get("settings", _settings_payload(settings)),
-        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "updated_at": _utc_now_iso(),
     }
     sync_status = sync_chroma_from_rag_index(settings, updated_index)
     return updated_index, sync_status

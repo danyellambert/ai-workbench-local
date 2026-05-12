@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -69,6 +69,16 @@ def _normalize_status_for_artifact(status: str) -> str:
     return normalized or "pending"
 
 
+def _utc_iso(value: datetime) -> str:
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _now_utc_iso() -> str:
+    return _utc_iso(datetime.now(timezone.utc))
+
+
 def _normalize_timestamp(value: object) -> str | None:
     text = str(value or "").strip()
     return text or None
@@ -80,10 +90,10 @@ def _parse_export_created_at(export_id: str | None, metadata_path: Path) -> str:
     if match:
         raw = f"{match.group(1)}{match.group(2)}"
         try:
-            return datetime.strptime(raw, "%Y%m%d%H%M%S").isoformat()
+            return _utc_iso(datetime.strptime(raw, "%Y%m%d%H%M%S"))
         except ValueError:
             pass
-    return datetime.fromtimestamp(metadata_path.stat().st_mtime).isoformat()
+    return _utc_iso(datetime.fromtimestamp(metadata_path.stat().st_mtime, tz=timezone.utc))
 
 
 def _workflow_label_from_runtime_entry(entry: dict[str, object]) -> tuple[str, str] | None:
@@ -487,8 +497,8 @@ def build_product_workflow_history_entry(
     result_sections = build_product_result_sections(result) if result is not None else None
     artifact_items = [artifact.model_dump(mode="json") for artifact in artifacts if artifact.available]
     return {
-        "id": f"{request.workflow_id}-{int(datetime.now().timestamp() * 1000)}",
-        "timestamp": datetime.now().isoformat(),
+        "id": f"{request.workflow_id}-{int(datetime.now(timezone.utc).timestamp() * 1000)}",
+        "timestamp": _now_utc_iso(),
         "workflow_id": request.workflow_id,
         "workflow_label": workflow_label,
         "status": status,

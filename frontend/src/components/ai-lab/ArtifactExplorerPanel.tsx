@@ -5,6 +5,7 @@ import { StatusPill } from '@/components/shared/ui-components';
 import { DataSourceBadge } from './AiLabSectionIntro';
 import type { LabArtifact } from '@/types/ai-lab';
 import type { DataSource } from '@/types/ai-lab';
+import { formatUserDate } from '@/lib/user-time';
 
 const typeIcons: Record<string, ElementType> = {
   deck_bundle: FileStack,
@@ -17,9 +18,8 @@ interface ArtifactExplorerPanelProps {
   dataSource: DataSource;
 }
 
-function formatDate(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+function formatDate(value?: string | number | null): string {
+  return formatUserDate(value);
 }
 
 export function ArtifactExplorerPanel({ artifacts, dataSource }: ArtifactExplorerPanelProps) {

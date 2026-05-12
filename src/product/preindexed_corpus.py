@@ -4,6 +4,7 @@ import math
 import os
 import time
 from copy import deepcopy
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
@@ -14,6 +15,10 @@ from src.storage.runtime_paths import get_runtime_root
 
 PREINDEX_KIND = "evidenceops_preindexed_corpus.v1"
 DEFAULT_PREINDEX_RELATIVE_PATH = Path("state") / "rag" / "preindexed_public_corpus.json"
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _truthy_env(name: str, default: bool = True) -> bool:
@@ -405,7 +410,7 @@ def activate_preindexed_documents(
         if isinstance(entry.get("document"), dict)
     }
     replacement_ids = {item for item in replacement_ids if item}
-    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    now = _utc_now_iso()
 
     activated_documents: list[dict[str, Any]] = []
     activated_chunks: list[dict[str, Any]] = []

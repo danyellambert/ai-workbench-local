@@ -32,7 +32,7 @@ import {
 } from '@/lib/product-api';
 import { toast } from '@/components/ui/sonner';
 
-import { formatUserDateTime } from '@/lib/user-time';
+import { formatUserDateTime, parseUserDateMs } from '@/lib/user-time';
 const STATUS_FILTERS = ['all', 'completed', 'warning', 'error'] as const;
 const WINDOW_FILTERS = ['24h', '7d', '30d', 'all'] as const;
 const DEFAULT_PAGE_SIZE = 25;
@@ -99,8 +99,8 @@ function buildRecentDeliveryEvents(sourceRuns: ProductRunEntry[], preferredRunId
   }
 
   const score = (event: DeliveryEvent) => {
-    const deliveryTime = event.delivery.timestamp ? new Date(event.delivery.timestamp).getTime() : 0;
-    const runTime = event.runTimestamp ? new Date(event.runTimestamp).getTime() : 0;
+    const deliveryTime = parseUserDateMs(event.delivery.timestamp) ?? 0;
+    const runTime = parseUserDateMs(event.runTimestamp) ?? 0;
     const preferredBoost = preferredRunId && event.runId === preferredRunId ? 1 : 0;
     return { preferredBoost, time: deliveryTime || runTime || 0 };
   };
@@ -126,7 +126,7 @@ function buildRecentDeliveryEvents(sourceRuns: ProductRunEntry[], preferredRunId
 function inWindow(timestamp: string | null | undefined, filter: (typeof WINDOW_FILTERS)[number]): boolean {
   if (filter === 'all') return true;
   if (!timestamp) return false;
-  const value = new Date(timestamp).getTime();
+  const value = parseUserDateMs(timestamp) ?? Number.NaN;
   if (Number.isNaN(value)) return true;
   const now = Date.now();
   const windowMs = filter === '24h' ? 24 * 60 * 60 * 1000 : filter === '7d' ? 7 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
@@ -152,8 +152,8 @@ export default function RunHistoryPage() {
   const runs = useMemo(() => {
     const sourceRuns = runHistoryQuery.data?.runs ?? [];
     return [...sourceRuns].sort((left, right) => {
-      const leftTime = left.timestamp ? new Date(left.timestamp).getTime() : 0;
-      const rightTime = right.timestamp ? new Date(right.timestamp).getTime() : 0;
+      const leftTime = parseUserDateMs(left.timestamp) ?? 0;
+      const rightTime = parseUserDateMs(right.timestamp) ?? 0;
       return rightTime - leftTime;
     });
   }, [runHistoryQuery.data?.runs]);

@@ -23,7 +23,7 @@ import type { LabRuntimePayload } from '../lib/ai-lab-data';
 import { Input } from '../components/ui/input';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
-import { formatUserDateTime } from '@/lib/user-time';
+import { formatUserDateTime, formatUserTime } from '@/lib/user-time';
 
 const latencyChartConfig = {
   seconds: { label: 'Seconds' },
@@ -164,7 +164,13 @@ export default function RuntimeObservabilityPage() {
   const providerBreakdown = data?.provider_breakdown ?? [];
   const failureModes = data?.failure_modes ?? [];
   const recentTraces = data?.recent_traces ?? [];
-  const timeline = data?.timeline ?? [];
+  const timeline = useMemo(
+    () => (data?.timeline ?? []).map((item) => ({
+      ...item,
+      label: item.timestamp ? formatUserTime(item.timestamp) : item.label,
+    })),
+    [data?.timeline],
+  );
   const watchouts = data?.watchouts ?? [];
 
   const sourceCoverageValues = (timeline.length ? timeline : recentTraces)

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +10,7 @@ from .phase8_eval_store import append_eval_run
 
 
 def _json_mtime_iso(path: Path) -> str:
-    return datetime.fromtimestamp(path.stat().st_mtime).isoformat()
+    return datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:

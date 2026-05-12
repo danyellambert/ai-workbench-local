@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from ..structured.base import ComparisonFinding, DocumentAgentPayload
@@ -240,7 +240,7 @@ def build_evidenceops_worklog_entry(
     )
 
     return {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "query": _clean_text(query),
         "task_type": "document_agent",
         "review_type": review_type,

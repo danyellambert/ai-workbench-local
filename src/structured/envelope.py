@@ -1,7 +1,7 @@
 """Execution envelope for structured outputs."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List
 from uuid import uuid4
 
@@ -25,7 +25,7 @@ class ExecutionError(BaseModel):
     error_type: str = Field(description="Type of error that occurred")
     message: str = Field(description="Error message")
     details: Optional[Dict[str, Any]] = Field(default=None, description="Additional error details")
-    timestamp: datetime = Field(default_factory=datetime.now, description="When error occurred")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When error occurred")
 
 
 class StructuredResult(BaseModel):
@@ -34,7 +34,7 @@ class StructuredResult(BaseModel):
     success: bool = Field(description="Whether the structured task was successful")
     task_type: str = Field(description="Type of task executed")
     execution_id: str = Field(default_factory=lambda: str(uuid4()), description="Unique execution ID")
-    executed_at: datetime = Field(default_factory=datetime.now, description="When the task was executed")
+    executed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When the task was executed")
 
     raw_output_text: Optional[str] = Field(default=None, description="Raw output from LLM")
     parsed_json: Optional[Dict[str, Any]] = Field(default=None, description="Parsed JSON from raw output")

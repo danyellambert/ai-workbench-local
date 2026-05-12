@@ -14,10 +14,8 @@ export function formatPreferencesUpdatedAt(value?: string | number | null): stri
   return formatUserDateTime(value);
 }
 
-export function formatConnectionCheckedAt(value?: string | null): string {
-  if (!value) return 'Never';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+export function formatConnectionCheckedAt(value?: string | number | null): string {
+  return formatUserDateTime(value, 'Never');
 }
 
 export function credentialStatusCopy(connection: ProviderConnection): string {

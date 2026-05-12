@@ -5,7 +5,7 @@ import hashlib
 import sqlite3
 from collections import Counter
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -96,7 +96,7 @@ def _build_run_key(payload: dict[str, Any]) -> str:
 def append_eval_run(path: Path, entry: dict[str, Any]) -> int:
     ensure_eval_store(path)
     payload = {
-        "created_at": str(entry.get("created_at") or datetime.now().isoformat()),
+        "created_at": str(entry.get("created_at") or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")),
         "suite_name": str(entry.get("suite_name") or "eval").strip() or "eval",
         "task_type": str(entry.get("task_type") or "").strip() or None,
         "case_name": str(entry.get("case_name") or "").strip() or None,

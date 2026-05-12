@@ -1,6 +1,10 @@
 type DateInput = string | number | Date | null | undefined;
 
-function coerceDate(value: DateInput): Date | null {
+type CoerceOptions = {
+  dateOnlyAsLocal?: boolean;
+};
+
+function coerceDate(value: DateInput, options: CoerceOptions = {}): Date | null {
   if (value === null || value === undefined || value === '') return null;
 
   if (value instanceof Date) {
@@ -18,6 +22,13 @@ function coerceDate(value: DateInput): Date | null {
   let text = String(value).trim();
   if (!text) return null;
 
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  if (dateOnlyMatch && options.dateOnlyAsLocal !== false) {
+    const [, year, month, day] = dateOnlyMatch;
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
   // Docker/AWS/backend histories often store UTC timestamps as ISO strings
   // without an explicit timezone suffix, e.g. "2026-05-10T15:55:00".
   // Browser Date treats that as local time. For product run/history timestamps,
@@ -33,6 +44,11 @@ function coerceDate(value: DateInput): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+export function parseUserDateMs(value: DateInput): number | null {
+  const date = coerceDate(value);
+  return date ? date.getTime() : null;
+}
+
 export function formatUserDateTime(value: DateInput, fallback = '—'): string {
   const date = coerceDate(value);
   if (!date) return value ? String(value) : fallback;
@@ -44,7 +60,7 @@ export function formatUserDateTime(value: DateInput, fallback = '—'): string {
 }
 
 export function formatUserDate(value: DateInput, fallback = '—'): string {
-  const date = coerceDate(value);
+  const date = coerceDate(value, { dateOnlyAsLocal: true });
   if (!date) return value ? String(value) : fallback;
 
   return new Intl.DateTimeFormat(undefined, {

@@ -1,7 +1,7 @@
 """Task handlers for structured outputs."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import math
 import os
@@ -3831,7 +3831,7 @@ class DocumentAgentTaskHandler(TaskHandler):
             )
 
             entry = {
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
                 "task_type": "document_agent",
                 "success": success,
                 "query": request.input_text,

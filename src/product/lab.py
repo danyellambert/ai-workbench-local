@@ -788,6 +788,7 @@ def _build_runtime_timeline(runtime_entries: list[dict[str, Any]]) -> list[dict[
         timeline.append(
             {
                 'label': _format_runtime_timeline_label(entry.get('timestamp')),
+                'timestamp': _format_timestamp(entry.get('timestamp')),
                 'task': task_label,
                 'latencyS': round(_safe_float(entry.get('latency_s')), 3),
                 'contextPressurePct': round(_normalize_ratio_to_unit(entry.get('context_pressure_ratio')) * 100, 1),
