@@ -20,6 +20,7 @@ import { GlassCard, PageHeader, StatusPill } from '@/components/shared/ui-compon
 import AdminOnlyFeatureCard from '@/components/access/AdminOnlyFeatureCard';
 import { isAdminSession, useAuthSession } from '@/lib/auth-session';
 import {
+  getOllamaHostedModels,
   getRuntimeControls,
   updateRuntimeControls,
   type RuntimeControlsCatalogItem,
@@ -63,6 +64,19 @@ const ToggleRow = ({
 );
 function buildSelectLookup(items: RuntimeControlsCatalogItem[] | undefined): Record<string, RuntimeControlsCatalogItem> {
   return buildCatalogLookup(items);
+}
+
+const OLLAMA_HOSTED_CONNECTION_ID = 'ollama_hosted';
+const OLLAMA_HOSTED_DEFAULT_MODEL = 'nemotron-3-super:cloud';
+const OLLAMA_HOSTED_FALLBACK_MODELS = [OLLAMA_HOSTED_DEFAULT_MODEL, 'nemotron-3-nano:30b-cloud'];
+
+function uniqueModelOptions(values: Array<string | null | undefined>): string[] {
+  const ordered: string[] = [];
+  for (const value of values) {
+    const normalized = String(value || '').trim();
+    if (normalized && !ordered.includes(normalized)) ordered.push(normalized);
+  }
+  return ordered;
 }
 
 
@@ -111,6 +125,39 @@ export default function RuntimeControlsPage() {
   const primaryConnection = profile ? getRuntimeConnection(data, profile.primaryConnectionId) : undefined;
   const embeddingConnection = profile ? getRuntimeConnection(data, profile.embeddingConnectionId) : undefined;
   const embeddingModelOptions = ((profile && data?.options.embeddingModelsByConnection[profile.embeddingConnectionId]) || []).filter(Boolean);
+  const isPrimaryOllamaHosted = profile?.primaryConnectionId === OLLAMA_HOSTED_CONNECTION_ID;
+  const {
+    data: ollamaHostedModels,
+    isFetching: ollamaHostedModelsFetching,
+    refetch: refreshOllamaHostedModels,
+  } = useQuery({
+    queryKey: ['ollama-hosted-cloud-models'],
+    queryFn: getOllamaHostedModels,
+    enabled: false,
+    retry: false,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const basePrimaryModelOptions = ((profile && data?.options.modelsByConnection[profile.primaryConnectionId]) || []).filter(Boolean);
+  const primaryModelOptions = isPrimaryOllamaHosted
+    ? uniqueModelOptions([
+        profile?.primaryModel,
+        ...(ollamaHostedModels?.models || []),
+        ...basePrimaryModelOptions,
+        ...OLLAMA_HOSTED_FALLBACK_MODELS,
+      ])
+    : uniqueModelOptions([profile?.primaryModel, ...basePrimaryModelOptions]);
+  const ollamaHostedModelsUsingFallback = isPrimaryOllamaHosted && ollamaHostedModels?.source === 'fallback';
+  const refreshOllamaHostedModelOptions = () => {
+    if (isPrimaryOllamaHosted && !ollamaHostedModelsFetching) {
+      refreshOllamaHostedModels();
+    }
+  };
+  const handlePrimaryModelOpenChange = (open: boolean) => {
+    if (open) {
+      refreshOllamaHostedModelOptions();
+    }
+  };
 
 
   const runtimeAdminOnlyCard = (
@@ -139,8 +186,13 @@ export default function RuntimeControlsPage() {
 
   const handlePrimaryConnectionChange = (connectionId: string) => {
     updateProfile((current) => {
-      const modelOptions = (data?.options.modelsByConnection[connectionId] || []).filter(Boolean);
-      const nextModel = modelOptions.includes(current.primaryModel) ? current.primaryModel : (modelOptions[0] || '');
+      const modelOptions = uniqueModelOptions([
+        ...(connectionId === OLLAMA_HOSTED_CONNECTION_ID ? OLLAMA_HOSTED_FALLBACK_MODELS : []),
+        ...(data?.options.modelsByConnection[connectionId] || []),
+      ]);
+      const nextModel = connectionId === OLLAMA_HOSTED_CONNECTION_ID
+        ? (modelOptions.includes(current.primaryModel) ? current.primaryModel : OLLAMA_HOSTED_DEFAULT_MODEL)
+        : (modelOptions.includes(current.primaryModel) ? current.primaryModel : (modelOptions[0] || ''));
       return {
         ...current,
         primaryConnectionId: connectionId,
@@ -362,7 +414,9 @@ export default function RuntimeControlsPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Control label="Provider Connection">
               <Select value={profile.primaryConnectionId} onValueChange={handlePrimaryConnectionChange}>
-                <SelectTrigger className="h-9 bg-secondary/30 text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9 bg-secondary/30 text-xs" onClick={refreshOllamaHostedModelOptions}>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {(data?.available_connections || []).map((connection) => (
                     <SelectItem key={connection.id} value={connection.id}>{connection.name}</SelectItem>
@@ -372,14 +426,32 @@ export default function RuntimeControlsPage() {
             </Control>
 
             <Control label="Model">
-              <Select value={profile.primaryModel} onValueChange={(value) => updateProfile((current) => ({ ...current, primaryModel: value }))}>
+              <Select
+                value={profile.primaryModel}
+                onValueChange={(value) => updateProfile((current) => ({ ...current, primaryModel: value }))}
+                onOpenChange={handlePrimaryModelOpenChange}
+              >
                 <SelectTrigger className="h-9 bg-secondary/30 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {((data?.options.modelsByConnection[profile.primaryConnectionId] || []).filter(Boolean)).map((model) => (
+                  {primaryModelOptions.map((model) => (
                     <SelectItem key={model} value={model}>{model}</SelectItem>
                   ))}
+                  {isPrimaryOllamaHosted && ollamaHostedModelsFetching ? (
+                    <div className="px-2 py-1.5 text-[10px] text-muted-foreground">Refreshing Ollama cloud models…</div>
+                  ) : null}
                 </SelectContent>
               </Select>
+              {isPrimaryOllamaHosted ? (
+                <p className="text-[10px] text-muted-foreground">
+                  {ollamaHostedModelsFetching
+                    ? 'Checking Ollama Hosted for the latest cloud model list…'
+                    : ollamaHostedModelsUsingFallback
+                      ? 'Could not refresh Ollama Hosted models. Showing the safe Nemotron Super/Nano fallback.'
+                      : ollamaHostedModels?.source === 'ollama_hosted_tags'
+                        ? 'Model list refreshed from Ollama Hosted when the dropdown opened.'
+                        : 'Open the dropdown to refresh the Ollama Hosted cloud model list.'}
+                </p>
+              ) : null}
             </Control>
 
             <Control label="Context Window">

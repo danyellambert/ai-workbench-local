@@ -103,6 +103,7 @@ from src.services.runtime_controls import (
     apply_runtime_controls_to_product_request,
     build_effective_rag_settings,
     build_runtime_controls_payload,
+    discover_ollama_hosted_cloud_models,
     update_runtime_controls_payload,
 )
 from src.storage.lab_state import (
@@ -1750,6 +1751,11 @@ class ProductApiHandler(BaseHTTPRequestHandler):
             query_text = input_text.strip() or (workflow_definition.headline if workflow_definition else "workflow preview")
             preview = build_grounding_preview(query=query_text, document_ids=document_ids, strategy=strategy)
             self._send_json(HTTPStatus.OK, {"ok": True, "preview": preview.model_dump(mode="json")})
+            return
+
+        if path == "/api/runtime/ollama-hosted/models":
+            force_refresh = str((query.get("refresh") or [""])[0]).strip().lower() in {"1", "true", "yes", "on"}
+            self._send_json(HTTPStatus.OK, discover_ollama_hosted_cloud_models(force_refresh=force_refresh))
             return
 
         if path == "/api/runtime/controls":

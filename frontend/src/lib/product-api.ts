@@ -908,6 +908,17 @@ export interface RuntimeControlsResponse {
   options: RuntimeControlsOptions;
 }
 
+export interface OllamaHostedModelsResponse {
+  ok: boolean;
+  source: 'ollama_hosted_tags' | 'fallback' | string;
+  default_model: string;
+  models: string[];
+  fallback_models: string[];
+  cached?: boolean;
+  error?: string | null;
+  updated_at?: string | null;
+}
+
 export interface RuntimeControlsPatchPayload {
   profile: Partial<RuntimeProfile>;
 }
@@ -1440,6 +1451,10 @@ export async function deleteProductDocuments(documentIds: string[]): Promise<Pro
 
 export function getRuntimeControls(): Promise<RuntimeControlsResponse> {
   return fetchProductApi<RuntimeControlsResponse>('/api/runtime/controls');
+}
+
+export function getOllamaHostedModels(): Promise<OllamaHostedModelsResponse> {
+  return fetchProductApi<OllamaHostedModelsResponse>('/api/runtime/ollama-hosted/models');
 }
 
 export function updateRuntimeControls(payload: RuntimeControlsPatchPayload): Promise<RuntimeControlsResponse> {

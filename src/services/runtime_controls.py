@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+import html
+import json
+import os
+import re
+import time
+from urllib import error as urllib_error
+from urllib import request as urllib_request
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -109,7 +116,11 @@ WORKFLOW_CATALOG = [
 # when explicitly configured as a remote/cloud provider.
 PRODUCT_CONNECTION_BLACKLIST = {"huggingface_local", "huggingface_server"}
 BLOCKED_PRODUCT_MODELS = {"pptagent-q8"}
-DEMO_PREFERRED_OLLAMA_MODEL = "nemotron-3-super:cloud"
+OLLAMA_HOSTED_DEFAULT_MODEL = "nemotron-3-super:cloud"
+OLLAMA_HOSTED_FALLBACK_MODELS = [OLLAMA_HOSTED_DEFAULT_MODEL, "nemotron-3-nano:30b-cloud"]
+OLLAMA_HOSTED_MODEL_CACHE_TTL_SECONDS = int(os.getenv("OLLAMA_HOSTED_MODEL_CACHE_TTL_SECONDS", "600"))
+_OLLAMA_HOSTED_MODEL_CACHE: dict[str, Any] = {}
+DEMO_PREFERRED_OLLAMA_MODEL = OLLAMA_HOSTED_DEFAULT_MODEL
 
 
 def _canonical_ollama_hosted_model(model: str | None) -> str:
@@ -162,11 +173,245 @@ def _default_ollama_embedding_model() -> str:
 
 def _hosted_ollama_model_catalog(configured: list[str] | tuple[str, ...] | None = None) -> list[str]:
     ordered: list[str] = []
-    for item in [*(configured or []), "nemotron-3-nano:30b-cloud", "nemotron-3-super:cloud"]:
+    for item in [*OLLAMA_HOSTED_FALLBACK_MODELS, *(configured or [])]:
         normalized = _canonical_ollama_hosted_model(str(item or "").strip())
         if normalized and normalized not in ordered:
             ordered.append(normalized)
     return ordered
+
+
+def _ollama_hosted_api_key() -> str:
+    candidates = [
+        get_secret("ollama_hosted_api_key"),
+        os.getenv("OLLAMA_HOSTED_API_KEY"),
+        os.getenv("OLLAMA_API_KEY"),
+    ]
+    settings = get_ollama_hosted_settings()
+    if settings is not None:
+        candidates.insert(0, settings.api_key)
+    for candidate in candidates:
+        value = str(candidate or "").strip()
+        if value:
+            return value
+    return ""
+
+
+def _ollama_hosted_tags_url() -> str:
+    settings = get_ollama_hosted_settings()
+    configured_base = str((settings.base_url if settings is not None else "") or os.getenv("OLLAMA_HOSTED_BASE_URL", "") or "https://ollama.com/api").strip()
+    normalized = configured_base.rstrip("/")
+    if normalized.endswith("/v1"):
+        normalized = normalized[:-3].rstrip("/")
+    if normalized.endswith("/api"):
+        return f"{normalized}/tags"
+    return f"{normalized}/api/tags"
+
+
+def _cloud_model_name_from_ollama_tag_item(item: Any) -> str:
+    if not isinstance(item, dict):
+        return ""
+    for key in ("name", "model", "model_ref"):
+        candidate = _canonical_ollama_hosted_model(str(item.get(key) or "").strip())
+        if candidate and "cloud" in candidate.lower():
+            return candidate
+    return ""
+
+
+def _extract_ollama_hosted_cloud_models(payload: dict[str, Any]) -> list[str]:
+    ordered: list[str] = []
+    for fallback in OLLAMA_HOSTED_FALLBACK_MODELS:
+        normalized = _canonical_ollama_hosted_model(fallback)
+        if normalized and normalized not in ordered:
+            ordered.append(normalized)
+
+    models = payload.get("models") if isinstance(payload, dict) else []
+    for item in models if isinstance(models, list) else []:
+        model_name = _cloud_model_name_from_ollama_tag_item(item)
+        if model_name and model_name not in ordered:
+            ordered.append(model_name)
+    return ordered
+
+
+def _append_unique_cloud_model(target: list[str], model_name: str | None) -> None:
+    normalized = _canonical_ollama_hosted_model(str(model_name or "").strip())
+    if normalized and "cloud" in normalized.lower() and normalized not in target:
+        target.append(normalized)
+
+
+def _fetch_ollama_public_text(url: str, *, timeout_seconds: float) -> str:
+    request = urllib_request.Request(
+        url,
+        headers={
+            "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
+            "User-Agent": "AI-Decision-Studio/1.0 model-discovery",
+        },
+        method="GET",
+    )
+    with urllib_request.urlopen(request, timeout=timeout_seconds) as response:
+        return response.read().decode("utf-8", errors="replace")
+
+
+def _extract_cloud_families_from_ollama_search_html(page_html: str) -> list[str]:
+    body = html.unescape(str(page_html or ""))
+    ordered: list[str] = []
+    for match in re.finditer(r"/library/([A-Za-z0-9_.\-]+)", body):
+        family = str(match.group(1) or "").strip()
+        if not family:
+            continue
+        window_start = max(0, match.start() - 500)
+        window_end = min(len(body), match.end() + 1200)
+        if "cloud" not in body[window_start:window_end].lower():
+            continue
+        if family not in ordered:
+            ordered.append(family)
+    return ordered
+
+
+
+def _extract_cloud_model_tags_from_ollama_library_html(page_html: str) -> list[str]:
+    body = html.unescape(str(page_html or ""))
+    ordered: list[str] = []
+
+    patterns = [
+        r"ollama\s+run\s+([A-Za-z0-9_.\-/]+(?::[A-Za-z0-9_.\-]*cloud[A-Za-z0-9_.\-]*)?)",
+        r"/library/([A-Za-z0-9_.\-/]+:[A-Za-z0-9_.\-]*cloud[A-Za-z0-9_.\-]*)",
+        r">\s*([A-Za-z0-9_.\-/]+:[A-Za-z0-9_.\-]*cloud[A-Za-z0-9_.\-]*)\s*<",
+        r'"model"\s*:\s*"([^"]*cloud[^"]*)"',
+        r"model=['\"]([^'\"]*cloud[^'\"]*)['\"]",
+    ]
+
+    for pattern in patterns:
+        for match in re.finditer(pattern, body, re.IGNORECASE):
+            _append_unique_cloud_model(ordered, match.group(1))
+
+    return ordered
+
+
+
+def discover_ollama_public_cloud_library_models(*, max_family_pages: int = 60, max_search_pages: int = 6) -> list[str]:
+    """Best-effort discovery from the public Ollama cloud catalog.
+
+    `/api/tags` remains the verified API source. This public catalog pass fills
+    the Runtime Controls dropdown with the broader cloud model catalog shown on
+    ollama.com, while still only accepting exact tags containing `cloud`.
+    """
+    if os.getenv("OLLAMA_HOSTED_PUBLIC_CATALOG_ENABLED", "1").strip().lower() in {"0", "false", "no", "off"}:
+        return []
+
+    timeout_seconds = float(os.getenv("OLLAMA_HOSTED_LIBRARY_DISCOVERY_TIMEOUT_SECONDS", "5"))
+    ordered: list[str] = []
+    families: list[str] = []
+
+    search_urls = ["https://ollama.com/search?c=cloud"]
+    search_urls.extend(f"https://ollama.com/search?c=cloud&page={page}" for page in range(2, max_search_pages + 1))
+
+    for search_url in search_urls:
+        try:
+            search_html = _fetch_ollama_public_text(search_url, timeout_seconds=timeout_seconds)
+        except Exception:
+            continue
+
+        before_tags = len(ordered)
+        before_families = len(families)
+
+        for tag in _extract_cloud_model_tags_from_ollama_library_html(search_html):
+            _append_unique_cloud_model(ordered, tag)
+
+        for family in _extract_cloud_families_from_ollama_search_html(search_html):
+            if family not in families:
+                families.append(family)
+
+        if "No models found" in search_html and len(ordered) == before_tags and len(families) == before_families:
+            break
+
+    for family in families[:max_family_pages]:
+        try:
+            family_html = _fetch_ollama_public_text(f"https://ollama.com/library/{family}", timeout_seconds=timeout_seconds)
+        except Exception:
+            continue
+        for tag in _extract_cloud_model_tags_from_ollama_library_html(family_html):
+            _append_unique_cloud_model(ordered, tag)
+
+    return ordered
+
+
+def _fallback_ollama_hosted_models_payload(error_message: str = "") -> dict[str, Any]:
+    models = _hosted_ollama_model_catalog([])
+    return {
+        "ok": False,
+        "source": "fallback",
+        "default_model": OLLAMA_HOSTED_DEFAULT_MODEL,
+        "models": models,
+        "fallback_models": list(OLLAMA_HOSTED_FALLBACK_MODELS),
+        "cached": False,
+        "error": error_message or "Could not refresh Ollama Hosted cloud models.",
+        "updated_at": _utc_now_iso(),
+    }
+
+
+def discover_ollama_hosted_cloud_models(*, force_refresh: bool = False) -> dict[str, Any]:
+    """Return Ollama Hosted cloud models for Runtime Controls.
+
+    This intentionally uses Ollama's lightweight `/api/tags` endpoint, never an
+    inference endpoint. It filters any model name containing `cloud`
+    case-insensitively, because Ollama uses both `:cloud` and `-cloud` tags.
+    """
+    cache_key = "ollama_hosted_cloud_models"
+    now = time.time()
+    cached = _OLLAMA_HOSTED_MODEL_CACHE.get(cache_key)
+    if (
+        not force_refresh
+        and isinstance(cached, dict)
+        and now - float(cached.get("cached_at") or 0.0) < OLLAMA_HOSTED_MODEL_CACHE_TTL_SECONDS
+    ):
+        payload = dict(cached.get("payload") or {})
+        payload["cached"] = True
+        return payload
+
+    api_key = _ollama_hosted_api_key()
+    if not api_key:
+        return _fallback_ollama_hosted_models_payload("Ollama Hosted API key is not configured.")
+
+    request = urllib_request.Request(
+        _ollama_hosted_tags_url(),
+        headers={
+            "Accept": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
+        method="GET",
+    )
+
+    try:
+        with urllib_request.urlopen(request, timeout=float(os.getenv("OLLAMA_HOSTED_MODEL_DISCOVERY_TIMEOUT_SECONDS", "5"))) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        models = _extract_ollama_hosted_cloud_models(payload if isinstance(payload, dict) else {})
+        public_catalog_models = discover_ollama_public_cloud_library_models()
+        for public_model in public_catalog_models:
+            _append_unique_cloud_model(models, public_model)
+        if not models:
+            return _fallback_ollama_hosted_models_payload("Ollama Hosted returned no cloud models.")
+        resolved = {
+            "ok": True,
+            "source": "ollama_hosted_tags+public_catalog" if public_catalog_models else "ollama_hosted_tags",
+            "default_model": OLLAMA_HOSTED_DEFAULT_MODEL,
+            "models": models,
+            "fallback_models": list(OLLAMA_HOSTED_FALLBACK_MODELS),
+            "cached": False,
+            "error": None,
+            "updated_at": _utc_now_iso(),
+        }
+        _OLLAMA_HOSTED_MODEL_CACHE[cache_key] = {"cached_at": now, "payload": dict(resolved)}
+        return resolved
+    except urllib_error.HTTPError as error:
+        try:
+            error.close()
+        except Exception:
+            pass
+        return _fallback_ollama_hosted_models_payload(
+            f"HTTP {getattr(error, 'code', 'error')}: {getattr(error, 'reason', 'request failed')}"
+        )
+    except Exception as error:
+        return _fallback_ollama_hosted_models_payload(str(error))
 
 
 def _remote_model_discovery_disabled(provider_key: str, static_config: dict[str, Any]) -> bool:
@@ -801,7 +1046,11 @@ def _normalize_profile(
         preserve_requested_if_unlisted=True,
     )
     if primary_connection_id == "ollama_hosted":
-        primary_model = _canonical_ollama_hosted_model(primary_model)
+        requested_dynamic_primary_model = _canonical_ollama_hosted_model(str(patch.get("primaryModel") or "").strip())
+        if requested_dynamic_primary_model and "cloud" in requested_dynamic_primary_model.lower():
+            primary_model = requested_dynamic_primary_model
+        else:
+            primary_model = _canonical_ollama_hosted_model(primary_model)
     embedding_model = _resolve_selected_model(
         patch.get("embeddingModel"),
         embedding_models,
