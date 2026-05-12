@@ -1404,7 +1404,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AI Workbench Product API</title>
+    <title>AI Decision Studio Product API</title>
     <style>
       body { font-family: Inter, system-ui, sans-serif; background: #0b1321; color: #e5f2ff; margin: 0; padding: 32px; }
       .card { background: #111b2e; border: 1px solid #28415f; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
@@ -1415,7 +1415,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
   </head>
   <body>
     <div class="card">
-      <h1>AI Workbench Product API</h1>
+      <h1>AI Decision Studio Product API</h1>
       <p>HTTP surface for <strong>Decision workflows grounded in documents</strong>.</p>
       <ul>
         <li><code>GET /health</code> — service health</li>

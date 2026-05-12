@@ -23,7 +23,7 @@ class GradioAppSmokeTests(unittest.TestCase):
         fake_provider = SimpleNamespace(list_available_models=lambda: ["qwen2.5:7b"])
         bootstrap = SimpleNamespace(
             product_settings=SimpleNamespace(
-                app_name="AI Workbench Product",
+                app_name="AI Decision Studio Product",
                 default_workflow="document_review",
                 show_ai_lab_entry=True,
                 accent_color="#6ae3ff",
@@ -71,7 +71,7 @@ class GradioAppSmokeTests(unittest.TestCase):
 
         try:
             self.assertIsNotNone(app)
-            self.assertIn("AI Workbench Product", app.config.get("title", ""))
+            self.assertIn("AI Decision Studio Product", app.config.get("title", ""))
         finally:
             app.close()
             try:

@@ -83,7 +83,7 @@ class ProductApiTests(unittest.TestCase):
         try:
             with urllib_request.urlopen(self._url(server, "/"), timeout=5) as response:
                 body = response.read().decode("utf-8")
-            self.assertIn("AI Workbench Product API", body)
+            self.assertIn("AI Decision Studio Product API", body)
 
             health = self._get_json(server, "/health")
             self.assertTrue(health["ok"])

@@ -255,7 +255,7 @@ def get_ollama_settings() -> OllamaSettings:
     ]
 
     return OllamaSettings(
-        project_name=os.getenv("PROJECT_NAME", "AI Workbench Local"),
+        project_name=os.getenv("PROJECT_NAME", "AI Decision Studio"),
         base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
         default_model=default_model,
         default_temperature=float(os.getenv("OLLAMA_TEMPERATURE", "0.2")),
@@ -291,7 +291,7 @@ def get_ollama_hosted_settings() -> OllamaSettings | None:
     hosted_max_tokens = _optional_int_env("OLLAMA_HOSTED_MAX_TOKENS")
 
     return OllamaSettings(
-        project_name=os.getenv("PROJECT_NAME", "AI Workbench Local"),
+        project_name=os.getenv("PROJECT_NAME", "AI Decision Studio"),
         base_url=hosted_base_url,
         default_model=default_model,
         default_temperature=float(os.getenv("OLLAMA_HOSTED_TEMPERATURE", os.getenv("OLLAMA_TEMPERATURE", "0.2"))),
@@ -457,7 +457,7 @@ def get_presentation_export_settings() -> PresentationExportSettings:
 
 def get_gradio_product_settings() -> GradioProductSettings:
     return GradioProductSettings(
-        app_name=os.getenv("GRADIO_PRODUCT_APP_NAME", "AI Workbench Product").strip() or "AI Workbench Product",
+        app_name=os.getenv("GRADIO_PRODUCT_APP_NAME", "AI Decision Studio Product").strip() or "AI Decision Studio Product",
         server_name=os.getenv("GRADIO_PRODUCT_SERVER_NAME", "127.0.0.1").strip() or "127.0.0.1",
         server_port=int(os.getenv("GRADIO_PRODUCT_SERVER_PORT", "7860")),
         theme=os.getenv("GRADIO_PRODUCT_THEME", "premium_dark").strip() or "premium_dark",

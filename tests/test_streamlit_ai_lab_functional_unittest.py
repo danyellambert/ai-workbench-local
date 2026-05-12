@@ -165,7 +165,7 @@ class StreamlitAiLabFunctionalTests(unittest.TestCase):
         chroma_path = temp_root / ".runtime" / "state" / "rag" / "chroma"
         provider = _FakeProvider()
         settings = OllamaSettings(
-            project_name="AI Workbench Local",
+            project_name="AI Decision Studio",
             base_url="http://localhost:11434",
             default_model="fake-model-a",
             default_temperature=0.1,
@@ -405,7 +405,7 @@ class StreamlitAiLabFunctionalTests(unittest.TestCase):
                 languages=["Português", "English (advanced)"],
                 strengths=["Grounded analysis"],
                 improvement_areas=["Add more quantified impact"],
-                projects=["AI Workbench"],
+                projects=["AI Decision Studio"],
             )
         elif task_type == "code_analysis":
             payload = CodeAnalysisPayload(

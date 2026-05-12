@@ -1,10 +1,10 @@
 # AI Decision Studio Frontend
 
-This is the **web product surface** for the AI Workbench Local ecosystem.
+This is the **web product surface** for the AI Decision Studio ecosystem.
 
 If the root repository explains the platform as a whole, this folder explains the **product experience the platform is converging toward**.
 
-In the UI, this surface is branded as **AI Decision Studio**. In architectural terms, it should be read as the frontend north star for **AI Workbench Local**.
+In the UI, this surface is branded as **AI Decision Studio**. In architectural terms, it should be read as the frontend north star for **AI Decision Studio**.
 
 ---
 

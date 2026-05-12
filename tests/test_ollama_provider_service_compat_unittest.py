@@ -26,7 +26,7 @@ class _FakeHttpResponse:
 class OllamaProviderServiceCompatTests(unittest.TestCase):
     def test_ollama_provider_discovers_models_via_api_before_cli(self) -> None:
         settings = OllamaSettings(
-            project_name="AI Workbench Local",
+            project_name="AI Decision Studio",
             base_url="http://127.0.0.1:8788/v1",
             default_model="service-default",
             default_temperature=0.2,
@@ -61,7 +61,7 @@ class OllamaProviderServiceCompatTests(unittest.TestCase):
 
     def test_ollama_provider_skips_native_cli_runtime_hints_for_service_base_url(self) -> None:
         settings = OllamaSettings(
-            project_name="AI Workbench Local",
+            project_name="AI Decision Studio",
             base_url="http://127.0.0.1:8788/v1",
             default_model="service-default",
             default_temperature=0.2,
@@ -76,7 +76,7 @@ class OllamaProviderServiceCompatTests(unittest.TestCase):
 
     def test_ollama_provider_forwards_chat_operational_overrides(self) -> None:
         settings = OllamaSettings(
-            project_name="AI Workbench Local",
+            project_name="AI Decision Studio",
             base_url="http://127.0.0.1:11434/v1",
             default_model="qwen2.5:7b",
             default_temperature=0.2,
@@ -121,7 +121,7 @@ class OllamaProviderServiceCompatTests(unittest.TestCase):
 
     def test_ollama_hosted_base_urls_are_normalized_for_native_and_openai_compat_routes(self) -> None:
         settings = OllamaSettings(
-            project_name="AI Workbench Hosted",
+            project_name="AI Decision Studio Hosted",
             base_url="https://ollama.com/api",
             default_model="nemotron-3-nano:30b-cloud",
             default_temperature=0.2,
@@ -140,7 +140,7 @@ class OllamaProviderServiceCompatTests(unittest.TestCase):
 
     def test_ollama_provider_falls_back_to_openai_compat_chat_when_native_route_is_missing(self) -> None:
         settings = OllamaSettings(
-            project_name="AI Workbench Hosted",
+            project_name="AI Decision Studio Hosted",
             base_url="https://ollama.com/api",
             default_model="nemotron-3-nano:30b-cloud",
             default_temperature=0.2,
@@ -198,7 +198,7 @@ class OllamaProviderServiceCompatTests(unittest.TestCase):
 
     def test_ollama_provider_tries_alternate_openai_compat_routes_when_client_route_is_missing(self) -> None:
         settings = OllamaSettings(
-            project_name="AI Workbench Hosted",
+            project_name="AI Decision Studio Hosted",
             base_url="https://ollama.com/api",
             default_model="nemotron-3-nano:30b-cloud",
             default_temperature=0.2,
