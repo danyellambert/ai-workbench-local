@@ -10,6 +10,23 @@ const rawBaseUrl = (import.meta.env.VITE_PRODUCT_API_BASE_URL as string | undefi
 
 export const PRODUCT_API_BASE_URL = (rawBaseUrl || "http://127.0.0.1:8011").replace(/\/$/, "");
 
+export const PRODUCT_WORKFLOW_TIMEOUT_RECOVERY_MESSAGE =
+  'This workflow is taking longer than expected. It may still finish in the background. Please check Run History in a moment.';
+
+export class ProductWorkflowTimeoutRecoveryError extends Error {
+  status: number;
+
+  constructor(status: number, message = PRODUCT_WORKFLOW_TIMEOUT_RECOVERY_MESSAGE) {
+    super(message);
+    this.name = 'ProductWorkflowTimeoutRecoveryError';
+    this.status = status;
+  }
+}
+
+export function isProductWorkflowTimeoutStatus(status: number): boolean {
+  return status === 524 || status === 502 || status === 503 || status === 504;
+}
+
 export interface ProductWorkflowDefinition {
   workflow_id: string;
   label: string;
@@ -1087,16 +1104,24 @@ export async function runProductWorkflow(payload: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+
   if (!response.ok) {
+    if (isProductWorkflowTimeoutStatus(response.status)) {
+      throw new ProductWorkflowTimeoutRecoveryError(response.status);
+    }
+
     let message = `Product API workflow failed: ${response.status}`;
     try {
-      const errorPayload = await response.json() as { error?: string };
+      const errorPayload = await response.json() as { error?: string; message?: string };
+      if (isPublicExecutionQuotaPayload(errorPayload)) throw new PublicExecutionQuotaError(errorPayload);
       if (errorPayload?.error) message = errorPayload.error;
-    } catch {
-      // ignore JSON parsing error and keep fallback message
+      else if (errorPayload?.message) message = errorPayload.message;
+    } catch (error) {
+      if (error instanceof PublicExecutionQuotaError) throw error;
     }
     throw new Error(message);
   }
+
   return response.json() as Promise<ProductRunWorkflowResponse>;
 }
 

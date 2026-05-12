@@ -14,6 +14,7 @@ import {
   getProductGroundingPreview,
   getProductRunHistoryEntry,
   runProductWorkflow,
+  ProductWorkflowTimeoutRecoveryError,
   type ProductPolicyComparisonDiff,
   type ProductPublishNotionResponse,
   type ProductPublishTrelloResponse,
@@ -27,6 +28,7 @@ import { useAppStore } from '@/lib/store';
 import { findRecommendedDocument, normalizeDemoDocumentName, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
 import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
 import { aiLabQueryKeys } from '@/lib/ai-lab-data';
+import { refreshWorkflowTimeoutRecoveryQueries } from '@/lib/workflow-timeout-recovery';
 
 const impactColors = {
   breaking: 'bg-glow-error/10 text-glow-error border-glow-error/20',
@@ -204,7 +206,12 @@ export default function ComparisonPage() {
       ]);
       toast.success('Policy comparison completed with grounded output.');
     },
-    onError: (error) => {
+    onError: async (error) => {
+      if (error instanceof ProductWorkflowTimeoutRecoveryError) {
+        await refreshWorkflowTimeoutRecoveryQueries(queryClient);
+        toast.error('Policy comparison is still taking longer than expected. Check Run History in a moment; the backend may still finish the run.');
+        return;
+      }
       toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Policy comparison failed.');
     },
   });

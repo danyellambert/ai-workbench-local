@@ -37,6 +37,7 @@ import {
   getProductGroundingPreview,
   getProductRunHistoryEntry,
   runProductWorkflow,
+  ProductWorkflowTimeoutRecoveryError,
   type ProductDocumentLibraryEntry,
   type ProductResultSections,
   type ProductPublishNotionResponse,
@@ -48,6 +49,7 @@ import { findRecommendedDocument, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/w
 
 import { formatUserDate } from '@/lib/user-time';
 import { aiLabQueryKeys } from '@/lib/ai-lab-data';
+import { refreshWorkflowTimeoutRecoveryQueries } from '@/lib/workflow-timeout-recovery';
 const workflowSteps = [
   { key: 'select', label: 'Select' },
   { key: 'ground', label: 'Ground' },
@@ -629,7 +631,12 @@ export default function CandidateReviewPage() {
       ]);
       toast.success(generatedCandidateReviewInputText ? 'Candidate review completed against the selected role brief.' : 'Candidate review completed with grounded backend output.');
     },
-    onError: (error) => {
+    onError: async (error) => {
+      if (error instanceof ProductWorkflowTimeoutRecoveryError) {
+        await refreshWorkflowTimeoutRecoveryQueries(queryClient);
+        toast.error('Candidate review is still taking longer than expected. Check Run History in a moment; the backend may still finish the run.');
+        return;
+      }
       toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Candidate review failed.');
     },
   });

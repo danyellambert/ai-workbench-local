@@ -29,6 +29,7 @@ import {
   getProductGroundingPreview,
   getProductRunHistoryEntry,
   runProductWorkflow,
+  ProductWorkflowTimeoutRecoveryError,
   type ProductActionPlanEvidenceGap,
   type ProductActionPlanItem,
   type ProductActionPlanView,
@@ -49,6 +50,7 @@ import { ACTION_PLAN_DOCUMENT_LIMIT, findRecommendedDocuments, WORKFLOW_RECOMMEN
 
 import { formatUserDate } from '@/lib/user-time';
 import { aiLabQueryKeys } from '@/lib/ai-lab-data';
+import { refreshWorkflowTimeoutRecoveryQueries } from '@/lib/workflow-timeout-recovery';
 const statusCols: Array<ProductActionPlanItem['status']> = ['open', 'in_progress', 'blocked', 'done'];
 const workflowSteps = [
   { key: 'select', label: 'Select' },
@@ -461,7 +463,12 @@ export default function ActionPlanPage() {
       ]);
       toast.success('Action plan generated from grounded backend output.');
     },
-    onError: (error) => {
+    onError: async (error) => {
+      if (error instanceof ProductWorkflowTimeoutRecoveryError) {
+        await refreshWorkflowTimeoutRecoveryQueries(queryClient);
+        toast.error('Action plan is still taking longer than expected. Check Run History in a moment; the backend may still finish the run.');
+        return;
+      }
       toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Action plan workflow failed.');
     },
   });

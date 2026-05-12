@@ -15,6 +15,7 @@ import {
   getProductGroundingPreview,
   getProductRunHistoryEntry,
   runProductWorkflow,
+  ProductWorkflowTimeoutRecoveryError,
   type ProductDocumentLibraryEntry,
   type ProductDocumentReviewFinding,
   type ProductDocumentReviewView,
@@ -32,6 +33,7 @@ import { findRecommendedDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/
 
 import { formatUserDate } from '@/lib/user-time';
 import { aiLabQueryKeys } from '@/lib/ai-lab-data';
+import { refreshWorkflowTimeoutRecoveryQueries } from '@/lib/workflow-timeout-recovery';
 const workflowSteps = [
   { key: 'select', label: 'Select' },
   { key: 'ground', label: 'Ground' },
@@ -215,7 +217,12 @@ export default function DocumentReviewPage() {
       ]);
       toast.success('Document review completed with grounded output.');
     },
-    onError: (error) => {
+    onError: async (error) => {
+      if (error instanceof ProductWorkflowTimeoutRecoveryError) {
+        await refreshWorkflowTimeoutRecoveryQueries(queryClient);
+        toast.error('Document review is still taking longer than expected. Check Run History in a moment; the backend may still finish the run.');
+        return;
+      }
       toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Document review failed.');
     },
   });
