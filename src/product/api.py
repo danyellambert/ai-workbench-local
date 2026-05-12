@@ -6,7 +6,9 @@ from pathlib import Path
 import re
 import threading
 import time
+import uuid
 from dataclasses import dataclass, replace
+from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
@@ -124,6 +126,230 @@ from src.storage.runtime_paths import (
 class ReusableThreadingHTTPServer(ThreadingHTTPServer):
     allow_reuse_address = True
 
+
+
+_WORKFLOW_JOB_LOCK = threading.Lock()
+_WORKFLOW_JOBS: dict[str, dict[str, Any]] = {}
+_WORKFLOW_JOB_MAX_AGE_SECONDS = 3600
+
+
+def _workflow_utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _workflow_job_owner_payload(identity: object) -> dict[str, Any]:
+    session_id = getattr(identity, "session_id", None)
+    return {
+        "role": str(getattr(identity, "role", "") or ""),
+        "user_id": str(getattr(identity, "user_id", "") or ""),
+        "session_id": str(session_id) if session_id else None,
+        "can_write_global": bool(getattr(identity, "can_write_global", False)),
+    }
+
+
+def _workflow_job_owner_matches(identity: object, owner: dict[str, Any] | None) -> bool:
+    if not isinstance(owner, dict):
+        return False
+
+    current = _workflow_job_owner_payload(identity)
+
+    if bool(owner.get("can_write_global")):
+        return (
+            bool(current.get("can_write_global"))
+            and str(current.get("role") or "") == str(owner.get("role") or "")
+            and str(current.get("user_id") or "") == str(owner.get("user_id") or "")
+        )
+
+    owner_session_id = str(owner.get("session_id") or "").strip()
+    current_session_id = str(current.get("session_id") or "").strip()
+    return (
+        not bool(current.get("can_write_global"))
+        and bool(owner_session_id)
+        and current_session_id == owner_session_id
+    )
+
+
+def _workflow_job_public_payload(job: dict[str, Any]) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "ok": bool(job.get("ok", True)),
+        "job_id": str(job.get("job_id") or ""),
+        "status": str(job.get("status") or "unknown"),
+        "workflow_id": job.get("workflow_id"),
+        "write_scope": job.get("write_scope"),
+        "created_at": job.get("created_at"),
+        "updated_at": job.get("updated_at"),
+        "started_at": job.get("started_at"),
+        "finished_at": job.get("finished_at"),
+        "message": job.get("message"),
+        "poll_after_seconds": int(job.get("poll_after_seconds") or 2),
+    }
+    if job.get("run_id"):
+        payload["run_id"] = job.get("run_id")
+    if job.get("trace_id"):
+        payload["trace_id"] = job.get("trace_id")
+    if job.get("result_status"):
+        payload["result_status"] = job.get("result_status")
+    if job.get("response") is not None:
+        payload["response"] = job.get("response")
+    if job.get("error"):
+        payload["error"] = job.get("error")
+    return payload
+
+
+def _cleanup_workflow_jobs(now: float | None = None) -> None:
+    current_time = float(now if now is not None else time.time())
+    cutoff = current_time - float(_WORKFLOW_JOB_MAX_AGE_SECONDS)
+    with _WORKFLOW_JOB_LOCK:
+        stale_ids = []
+        for job_id, job in _WORKFLOW_JOBS.items():
+            try:
+                created_ts = float(job.get("created_ts") or current_time)
+            except (TypeError, ValueError):
+                created_ts = current_time
+            if created_ts < cutoff and str(job.get("status") or "") in {"completed", "error"}:
+                stale_ids.append(job_id)
+        for job_id in stale_ids:
+            _WORKFLOW_JOBS.pop(job_id, None)
+
+
+def _put_workflow_job(job_id: str, updates: dict[str, Any]) -> None:
+    with _WORKFLOW_JOB_LOCK:
+        existing = _WORKFLOW_JOBS.get(job_id, {})
+        existing.update(updates)
+        existing["updated_at"] = _workflow_utc_now_iso()
+        _WORKFLOW_JOBS[job_id] = existing
+
+
+def _get_workflow_job(job_id: str) -> dict[str, Any] | None:
+    _cleanup_workflow_jobs()
+    with _WORKFLOW_JOB_LOCK:
+        job = _WORKFLOW_JOBS.get(job_id)
+        return dict(job) if isinstance(job, dict) else None
+
+
+def _product_workflow_telemetry_kwargs_for_identity(identity: object) -> dict[str, Any]:
+    if getattr(identity, "can_write_global", False):
+        return {}
+
+    overlay_runs_root = Path(getattr(identity, "overlay_root")) / "runs"
+    return {
+        "workflow_history_path": overlay_runs_root / "workflow_history.json",
+        "runtime_execution_log_path": overlay_runs_root / "runtime_execution_log.json",
+        "lab_workflow_runs_path": overlay_runs_root / "lab_workflow_runs.json",
+        "product_telemetry_path": overlay_runs_root / "telemetry_runs.json",
+        "persist_runtime_evals": False,
+    }
+
+
+def _execute_product_workflow_for_identity(
+    *,
+    bootstrap: ProductBootstrap,
+    request: ProductWorkflowRequest,
+    identity: object,
+    document_lookup: dict[str, str],
+) -> dict[str, Any]:
+    telemetry_execution = execute_product_workflow_with_telemetry(
+        bootstrap=bootstrap,
+        request=request,
+        document_lookup=document_lookup,
+        surface="product_api" if getattr(identity, "can_write_global", False) else "product_api_public_overlay",
+        **_product_workflow_telemetry_kwargs_for_identity(identity),
+    )
+
+    result = telemetry_execution["result"]
+    history_entry = telemetry_execution.get("history_entry") if isinstance(telemetry_execution, dict) else None
+    return _build_product_workflow_response_payload(
+        result=result,
+        run_id=str((history_entry or {}).get("id") or "").strip() or None,
+        extra={
+            "trace_id": str((history_entry or {}).get("trace_id") or "").strip() or None,
+            "surface": str((history_entry or {}).get("surface") or "").strip() or None,
+            "history_entry": history_entry,
+            "write_scope": "global" if getattr(identity, "can_write_global", False) else "session_overlay",
+        },
+    )
+
+
+def _start_product_workflow_job(
+    *,
+    bootstrap: ProductBootstrap,
+    request: ProductWorkflowRequest,
+    identity: object,
+    document_lookup: dict[str, str],
+    execution_gate: dict[str, Any] | None,
+    users_root: Path | None,
+) -> dict[str, Any]:
+    _cleanup_workflow_jobs()
+
+    job_id = f"workflow_job_{uuid.uuid4().hex[:16]}"
+    now = _workflow_utc_now_iso()
+    write_scope = "global" if getattr(identity, "can_write_global", False) else "session_overlay"
+
+    with _WORKFLOW_JOB_LOCK:
+        _WORKFLOW_JOBS[job_id] = {
+            "ok": True,
+            "job_id": job_id,
+            "status": "queued",
+            "workflow_id": request.workflow_id,
+            "write_scope": write_scope,
+            "owner": _workflow_job_owner_payload(identity),
+            "created_ts": time.time(),
+            "created_at": now,
+            "updated_at": now,
+            "message": "Workflow job queued. Poll this endpoint for status.",
+            "poll_after_seconds": 2,
+        }
+
+    def runner() -> None:
+        try:
+            _put_workflow_job(
+                job_id,
+                {
+                    "status": "running",
+                    "started_at": _workflow_utc_now_iso(),
+                    "message": "Workflow is running in the background to avoid Cloudflare timeout limits.",
+                    "poll_after_seconds": 3,
+                },
+            )
+            response_payload = _execute_product_workflow_for_identity(
+                bootstrap=bootstrap,
+                request=request,
+                identity=identity,
+                document_lookup=document_lookup,
+            )
+            result_payload = response_payload.get("result") if isinstance(response_payload, dict) else None
+            history_entry = response_payload.get("history_entry") if isinstance(response_payload, dict) else None
+            _put_workflow_job(
+                job_id,
+                {
+                    "status": "completed",
+                    "finished_at": _workflow_utc_now_iso(),
+                    "message": "Workflow completed.",
+                    "run_id": response_payload.get("run_id") if isinstance(response_payload, dict) else None,
+                    "trace_id": response_payload.get("trace_id") if isinstance(response_payload, dict) else None,
+                    "result_status": result_payload.get("status") if isinstance(result_payload, dict) else None,
+                    "history_entry_id": history_entry.get("id") if isinstance(history_entry, dict) else None,
+                    "response": response_payload,
+                    "poll_after_seconds": 0,
+                },
+            )
+        except Exception as error:  # pragma: no cover - defensive async surface
+            _put_workflow_job(
+                job_id,
+                {
+                    "ok": False,
+                    "status": "error",
+                    "finished_at": _workflow_utc_now_iso(),
+                    "message": str(error),
+                    "error": str(error),
+                    "poll_after_seconds": 0,
+                },
+            )
+        finally:
+            _release_public_execution_gate(execution_gate, users_root=users_root)
+
+    threading.Thread(target=runner, name=f"product-workflow-{job_id}", daemon=True).start()
+    return _workflow_job_public_payload(_get_workflow_job(job_id) or _WORKFLOW_JOBS[job_id])
 
 
 def _lab_overlay_chat_sessions_path(identity: object) -> Path:
@@ -1147,6 +1373,26 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         if path == "/api/auth/session":
             self._send_auth_session_response()
             return
+        if path.startswith("/api/product/workflow-jobs/"):
+            job_id = path.removeprefix("/api/product/workflow-jobs/").strip("/")
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            job = _get_workflow_job(job_id)
+            if job is None:
+                self._send_json_with_cookies(
+                    HTTPStatus.NOT_FOUND,
+                    {"ok": False, "error": "Workflow job not found or expired."},
+                    cookies=[set_cookie] if set_cookie else None,
+                )
+                return
+            if not _workflow_job_owner_matches(identity, job.get("owner")):
+                self._send_json_with_cookies(
+                    HTTPStatus.FORBIDDEN,
+                    {"ok": False, "error": "Workflow job is not available for this session."},
+                    cookies=[set_cookie] if set_cookie else None,
+                )
+                return
+            self._send_json_with_cookies(HTTPStatus.OK, _workflow_job_public_payload(job), cookies=[set_cookie] if set_cookie else None)
+            return
         query = parse_qs(parsed.query)
 
         if path == "/" and self.settings.enable_web_frontend:
@@ -1648,7 +1894,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
 
-        if path == "/api/product/run-workflow":
+        if path in {"/api/product/run-workflow", "/api/product/run-workflow-async"}:
             identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             execution_quota_error = _public_execution_quota_error_payload(
                 identity,
@@ -1663,7 +1909,6 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 )
                 return
 
-            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             try:
                 request = ProductWorkflowRequest.model_validate(payload)
                 request = _resolve_product_workflow_runtime_request(
@@ -1678,7 +1923,7 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                     }
                 except Exception:
                     document_lookup = {}
-                identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+
                 quota_error = _public_session_quota_error_payload(identity)
                 if quota_error is not None:
                     self._send_json_with_cookies(
@@ -1687,16 +1932,6 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                         cookies=[set_cookie] if set_cookie else None,
                     )
                     return
-                telemetry_kwargs = {}
-                if not identity.can_write_global:
-                    overlay_runs_root = identity.overlay_root / "runs"
-                    telemetry_kwargs = {
-                        "workflow_history_path": overlay_runs_root / "workflow_history.json",
-                        "runtime_execution_log_path": overlay_runs_root / "runtime_execution_log.json",
-                        "lab_workflow_runs_path": overlay_runs_root / "lab_workflow_runs.json",
-                        "product_telemetry_path": overlay_runs_root / "telemetry_runs.json",
-                        "persist_runtime_evals": False,
-                    }
 
                 execution_gate = None
                 try:
@@ -1713,34 +1948,40 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                         )
                         return
 
-                    telemetry_execution = execute_product_workflow_with_telemetry(
+                    if path == "/api/product/run-workflow-async":
+                        job_payload = _start_product_workflow_job(
+                            bootstrap=self.bootstrap,
+                            request=request,
+                            identity=identity,
+                            document_lookup=document_lookup,
+                            execution_gate=execution_gate,
+                            users_root=getattr(self, "users_root", None),
+                        )
+                        execution_gate = None  # ownership transferred to the background runner
+                        self._send_json_with_cookies(
+                            HTTPStatus.ACCEPTED,
+                            job_payload,
+                            cookies=[set_cookie] if set_cookie else None,
+                        )
+                        return
+
+                    response_payload = _execute_product_workflow_for_identity(
                         bootstrap=self.bootstrap,
                         request=request,
+                        identity=identity,
                         document_lookup=document_lookup,
-                        surface="product_api" if identity.can_write_global else "product_api_public_overlay",
-                        **telemetry_kwargs,
+                    )
+                    self._send_json_with_cookies(
+                        HTTPStatus.OK,
+                        response_payload,
+                        cookies=[set_cookie] if set_cookie else None,
                     )
                 finally:
                     _release_public_execution_gate(execution_gate, users_root=getattr(self, "users_root", None))
-                result = telemetry_execution["result"]
-                history_entry = telemetry_execution.get("history_entry") if isinstance(telemetry_execution, dict) else None
-                self._send_json_with_cookies(
-                    HTTPStatus.OK,
-                    _build_product_workflow_response_payload(
-                        result=result,
-                        run_id=str((history_entry or {}).get("id") or "").strip() or None,
-                        extra={
-                            "trace_id": str((history_entry or {}).get("trace_id") or "").strip() or None,
-                            "surface": str((history_entry or {}).get("surface") or "").strip() or None,
-                            "history_entry": history_entry,
-                            "write_scope": "global" if identity.can_write_global else "session_overlay",
-                        },
-                    ),
-                    cookies=[set_cookie] if set_cookie else None,
-                )
             except Exception as error:  # pragma: no cover - defensive API surface
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
+
 
         if path.startswith("/api/product/run-history/") and path.endswith("/rerun"):
             try:

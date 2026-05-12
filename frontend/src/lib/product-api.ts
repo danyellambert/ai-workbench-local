@@ -530,6 +530,25 @@ export interface ProductWorkflowResultPayload {
   debug_metadata?: Record<string, unknown>;
 }
 
+export interface ProductWorkflowJobResponse {
+  ok: boolean;
+  job_id: string;
+  status: 'queued' | 'running' | 'completed' | 'error' | string;
+  workflow_id?: string | null;
+  write_scope?: 'global' | 'session_overlay' | string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  started_at?: string | null;
+  finished_at?: string | null;
+  message?: string | null;
+  poll_after_seconds?: number | null;
+  run_id?: string | null;
+  trace_id?: string | null;
+  result_status?: string | null;
+  response?: ProductRunWorkflowResponse | null;
+  error?: string | null;
+}
+
 export interface ProductRunWorkflowResponse {
   ok: boolean;
   run_id?: string;
@@ -1086,6 +1105,62 @@ export async function getProductGroundingPreview(params: {
   return fetchProductApi<ProductGroundingPreviewResponse>(`/api/product/grounding-preview?${query.toString()}`);
 }
 
+async function parseProductApiErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const errorPayload = await response.json() as { error?: string; message?: string };
+    if (errorPayload?.error) return errorPayload.error;
+    if (errorPayload?.message) return errorPayload.message;
+  } catch {
+    // ignore JSON parsing error and keep fallback message
+  }
+  return fallback;
+}
+
+async function pollProductWorkflowJob(jobId: string): Promise<ProductRunWorkflowResponse> {
+  const startedAt = Date.now();
+  const maxPollMs = 15 * 60 * 1000;
+  let pollAfterMs = 2000;
+
+  while (Date.now() - startedAt < maxPollMs) {
+    await new Promise((resolve) => window.setTimeout(resolve, pollAfterMs));
+
+    const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/workflow-jobs/${encodeURIComponent(jobId)}`);
+    if (!response.ok) {
+      if (isProductWorkflowTimeoutStatus(response.status)) {
+        throw new ProductWorkflowTimeoutRecoveryError(
+          response.status,
+          'The workflow is taking longer than expected. Check Run History in a moment; the backend may still finish the run.',
+        );
+      }
+      const message = await parseProductApiErrorMessage(response, `Workflow status check failed: ${response.status}`);
+      throw new Error(message);
+    }
+
+    const job = await response.json() as ProductWorkflowJobResponse;
+    const status = String(job.status || '').toLowerCase();
+    if (status === 'completed') {
+      if (job.response?.result) {
+        return job.response;
+      }
+      throw new Error(job.error || job.message || 'Workflow completed but did not return a workflow response.');
+    }
+    if (status === 'error') {
+      throw new Error(job.error || job.message || 'Workflow failed while running in the background.');
+    }
+
+    const suggestedDelay = Number(job.poll_after_seconds || 0);
+    pollAfterMs = Math.max(
+      1500,
+      Math.min(5000, Number.isFinite(suggestedDelay) && suggestedDelay > 0 ? suggestedDelay * 1000 : 3000),
+    );
+  }
+
+  throw new ProductWorkflowTimeoutRecoveryError(
+    524,
+    'The workflow is still running longer than expected. Check Run History in a moment.',
+  );
+}
+
 export async function runProductWorkflow(payload: {
   workflow_id: string;
   document_ids: string[];
@@ -1099,7 +1174,7 @@ export async function runProductWorkflow(payload: {
   use_document_context?: boolean;
   context_strategy?: 'document_scan' | 'retrieval';
 }): Promise<ProductRunWorkflowResponse> {
-  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/run-workflow`, {
+  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/run-workflow-async`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -1122,7 +1197,21 @@ export async function runProductWorkflow(payload: {
     throw new Error(message);
   }
 
-  return response.json() as Promise<ProductRunWorkflowResponse>;
+  const job = await response.json() as ProductWorkflowJobResponse;
+  const initialStatus = String(job.status || '').toLowerCase();
+  if (initialStatus === 'completed') {
+    if (job.response?.result) return job.response;
+    throw new Error(job.error || job.message || 'Workflow completed but did not return a workflow response.');
+  }
+  if (initialStatus === 'error') {
+    throw new Error(job.error || job.message || 'Workflow failed while running in the background.');
+  }
+  if (!job.job_id) {
+    if (job.response?.result) return job.response;
+    throw new Error(job.error || job.message || 'Product API did not return a workflow job id.');
+  }
+
+  return pollProductWorkflowJob(job.job_id);
 }
 
 export async function generateProductWorkflowDeck(
