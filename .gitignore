@@ -234,6 +234,7 @@ evals/**/.DS_Store
 docs/assets/product/*
 !docs/assets/product/architecture-overview.svg
 !docs/assets/product/readme-header.svg
+!docs/assets/product/operating-model.svg
 # Private credential stores / local secrets
 /secrets/
 /runtime/private_secrets/
@@ -241,3 +242,6 @@ ai_decision_studio_private_secrets/
 **/credential_store.json
 **/*credential*store*.json
 **/*secret*store*.json
+
+README_AI_DECISION_STUDIO_PREMIUM_V2.md
+README_AI_DECISION_STUDIO_PREMIUM.md
