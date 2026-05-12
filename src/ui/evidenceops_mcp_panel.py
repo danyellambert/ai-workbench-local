@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any
 
 import streamlit as st
@@ -58,7 +58,7 @@ def _record_console_operation(console_state: dict[str, Any], *, action_name: str
     history = console_state.get("operation_history") if isinstance(console_state.get("operation_history"), list) else []
     history.append(
         {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "action": action_name,
             "status": status,
             "detail": detail,

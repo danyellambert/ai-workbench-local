@@ -77,6 +77,16 @@ export function formatUserTime(value: DateInput, fallback = '—'): string {
   }).format(date);
 }
 
+export function formatUserCompactDateTime(value: DateInput, fallback = '—'): string {
+  const date = coerceDate(value);
+  if (!date) return value ? String(value) : fallback;
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(date);
+}
+
 export function getUserTimeZoneLabel(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'local time';
 }

@@ -23,7 +23,7 @@ import type { LabRuntimePayload } from '../lib/ai-lab-data';
 import { Input } from '../components/ui/input';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
-import { formatUserDateTime, formatUserTime } from '@/lib/user-time';
+import { formatUserCompactDateTime, formatUserDateTime } from '@/lib/user-time';
 
 const latencyChartConfig = {
   seconds: { label: 'Seconds' },
@@ -167,7 +167,7 @@ export default function RuntimeObservabilityPage() {
   const timeline = useMemo(
     () => (data?.timeline ?? []).map((item) => ({
       ...item,
-      label: item.timestamp ? formatUserTime(item.timestamp) : item.label,
+      browserLabel: item.timestamp ? formatUserCompactDateTime(item.timestamp) : item.label,
     })),
     [data?.timeline],
   );
@@ -551,7 +551,7 @@ export default function RuntimeObservabilityPage() {
               <ChartContainer config={timelineChartConfig} className="w-full h-full">
                 <AreaChart data={timeline} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
-                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <XAxis dataKey="browserLabel" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                   <YAxis yAxisId="latency" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                   <YAxis yAxisId="pressure" orientation="right" domain={[0, 100]} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
