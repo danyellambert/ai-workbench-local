@@ -487,6 +487,10 @@ export interface LabEvalsCase {
   suite: string;
   verdict: LabEvalVerdict;
   score: number;
+  modelQualityScore?: number | null;
+  scoreFactors?: string[] | null;
+  technicalStatus?: string | null;
+  reviewSignal?: string | null;
   needsReview: boolean;
   model: string;
   provider?: string;

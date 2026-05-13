@@ -33,6 +33,50 @@ function formatModelQualityScore(value: unknown): string {
   return `${Math.round(score * 100)}%`;
 }
 
+
+
+function getLiveVerdictWorkflowLabel(value?: string | null): string {
+  const text = String(value ?? '').trim();
+  if (!text) return 'Unknown';
+
+  const normalized = text.toLowerCase();
+
+  if (
+    normalized === 'action_plan' ||
+    normalized === 'action_plan_evidence_review' ||
+    normalized.includes('action plan')
+  ) {
+    return 'Action Plan';
+  }
+
+  if (
+    normalized === 'policy_contract_comparison' ||
+    normalized.includes('policy') && normalized.includes('comparison')
+  ) {
+    return 'Policy Comparison';
+  }
+
+  if (
+    normalized === 'document_review' ||
+    normalized.includes('document review')
+  ) {
+    return 'Document Review';
+  }
+
+  if (
+    normalized === 'candidate_review' ||
+    normalized.includes('candidate review')
+  ) {
+    return 'Candidate Review';
+  }
+
+  return text
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function formatScoreFactors(value: unknown): string {
   if (!Array.isArray(value)) return '';
   return value
@@ -146,7 +190,7 @@ export default function EvalsDiagnosisPage() {
   }));
 
   const liveWorkflowChartData = liveWorkflowBreakdown.map((workflow) => ({
-    name: workflow.shortLabel || workflow.label,
+    name: getLiveVerdictWorkflowLabel(workflow.shortLabel || workflow.label),
     fullName: workflow.label,
     Pass: workflow.pass,
     Warn: workflow.warn,
@@ -268,7 +312,7 @@ export default function EvalsDiagnosisPage() {
               <ChartContainer config={verdictChartConfig} className="w-full h-full">
                 <BarChart data={liveWorkflowChartData} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <XAxis dataKey="name" interval={0} minTickGap={0} tickMargin={8} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                   <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend wrapperStyle={{ fontSize: '10px' }} />
@@ -346,12 +390,12 @@ export default function EvalsDiagnosisPage() {
                   </div>
                   <p className="text-[10px] text-muted-foreground">{item.errorDetail || item.reason || 'Failure details were not persisted for this case.'}</p>
                   <p className="mt-1 text-[10px] text-muted-foreground/80">
-                    Model quality: <span className="text-foreground">{formatModelQualityScore((item as Record<string, unknown>).modelQualityScore ?? item.score)}</span>
-                    {(item as Record<string, unknown>).technicalStatus ? ` · Technical: ${(item as Record<string, unknown>).technicalStatus}` : ''}
-                    {(item as Record<string, unknown>).reviewSignal ? ` · Review: ${(item as Record<string, unknown>).reviewSignal}` : ''}
+                    Model quality: <span className="text-foreground">{formatModelQualityScore(item.modelQualityScore ?? item.score)}</span>
+                    {item.technicalStatus ? ` · Technical: ${item.technicalStatus}` : ''}
+                    {item.reviewSignal ? ` · Review: ${item.reviewSignal}` : ''}
                   </p>
-                  {formatScoreFactors((item as Record<string, unknown>).scoreFactors) ? (
-                    <p className="mt-1 text-[10px] text-muted-foreground/70">{formatScoreFactors((item as Record<string, unknown>).scoreFactors)}</p>
+                  {formatScoreFactors(item.scoreFactors) ? (
+                    <p className="mt-1 text-[10px] text-muted-foreground/70">{formatScoreFactors(item.scoreFactors)}</p>
                   ) : null}
                   <div className="flex items-center gap-3 mt-1.5 text-[9px] text-muted-foreground/60 flex-wrap">
                     <span>{item.suite}</span>
