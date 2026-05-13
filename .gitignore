@@ -235,6 +235,11 @@ docs/assets/product/*
 !docs/assets/product/architecture-overview.svg
 !docs/assets/product/readme-header.svg
 !docs/assets/product/operating-model.svg
+!docs/assets/product/document-review.png
+!docs/assets/product/policy-comparison.png
+!docs/assets/product/action-plan.png
+!docs/assets/product/candidate-review.png
+
 # Private credential stores / local secrets
 /secrets/
 /runtime/private_secrets/
