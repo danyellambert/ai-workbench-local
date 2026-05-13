@@ -298,13 +298,38 @@ export default function ComparisonPage() {
     availableDocuments.length < 2 ||
     runComparisonMutation.isPending;
 
-  const comparisonSteps = comparisonView?.run_state.steps ?? [
+  const deckExportStatus = String(deckExportState?.status || '').toLowerCase();
+  const deckExportCompleted =
+    allArtifacts.length > 0 ||
+    deckExportStatus === 'completed' ||
+    deckExportStatus === 'ready' ||
+    deckExportStatus === 'success';
+
+  const baseComparisonSteps = comparisonView?.run_state.steps ?? [
     { key: 'select', label: 'Select', status: selectedDocumentAId && selectedDocumentBId ? 'completed' : 'pending' },
     { key: 'ground', label: 'Ground', status: workflowResponse?.result?.grounding_preview ? 'completed' : 'pending' },
     { key: 'analyze', label: 'Analyze', status: runComparisonMutation.isPending ? 'running' : workflowResponse?.result ? (workflowResponse.result.status === 'error' ? 'error' : 'completed') : 'pending' },
     { key: 'review', label: 'Review', status: differences.length > 0 ? 'completed' : 'pending' },
-    { key: 'export', label: 'Export', status: generateDeckMutation.isPending ? 'running' : allArtifacts.length > 0 ? 'completed' : 'pending' },
+    { key: 'export', label: 'Export', status: deckExportCompleted ? 'completed' : generateDeckMutation.isPending ? 'running' : deckExportStatus === 'error' ? 'error' : 'pending' },
   ];
+
+  const comparisonSteps = baseComparisonSteps.map((step) => {
+    if (step.key !== 'export') return step;
+
+    if (deckExportCompleted) {
+      return { ...step, status: 'completed' };
+    }
+
+    if (generateDeckMutation.isPending) {
+      return { ...step, status: 'running' };
+    }
+
+    if (deckExportStatus === 'error') {
+      return { ...step, status: 'error' };
+    }
+
+    return step;
+  });
 
   const handleDocumentAChange = (documentId: string) => {
     setSelectedDocumentAId(documentId);
