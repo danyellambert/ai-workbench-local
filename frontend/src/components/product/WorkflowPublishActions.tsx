@@ -842,7 +842,7 @@ export function WorkflowPublishActions({
                 : 'Connect with Danyel and we can run a guided demo using your own Notion database and handoff format.'
             }
             ctaLabel="Connect with Danyel on LinkedIn"
-            ctaHref="https://www.linkedin.com/in/danyel-/"
+            ctaHref="https://www.linkedin.com/in/danyel-"
           />
           <div className="mt-4 flex justify-center">
             <Button type="button" variant="outline" onClick={onClose}>

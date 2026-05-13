@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ExternalLink, Github, Linkedin, Sparkles, X } from 'lucide-react';
 
-const LINKEDIN_URL = 'https://www.linkedin.com/in/danyel-/';
+const LINKEDIN_URL = 'https://www.linkedin.com/in/danyel-';
 const GITHUB_URL = 'https://github.com/danyellambert/ai-workbench-local';
 
 interface MeetDanyelModalProps {

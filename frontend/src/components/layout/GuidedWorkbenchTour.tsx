@@ -49,7 +49,7 @@ type ActiveTourKind = 'document-library' | 'workflow' | 'document-review' | 'pol
 type TourRect = { top: number; left: number; width: number; height: number };
 type PanelCandidate = { placement: TourPlacement; left: number; top: number; maxHeight?: number; visibleHeight?: number; collision?: number; overflow?: number; fits?: boolean };
 
-const DANYEL_LINKEDIN_URL = 'https://www.linkedin.com/in/danyel-/';
+const DANYEL_LINKEDIN_URL = 'https://www.linkedin.com/in/danyel-';
 const TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-document-library-complete';
 const WORKFLOW_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-workflow-complete';
 const DOCUMENT_REVIEW_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-document-review-complete';

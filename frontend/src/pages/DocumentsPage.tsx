@@ -17,7 +17,7 @@ import { formatUserDate } from '@/lib/user-time';
 const stagger = { animate: { transition: { staggerChildren: 0.04 } } };
 const item = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 
-const LINKEDIN_DEMO_URL = 'https://www.linkedin.com/in/danyel-/';
+const LINKEDIN_DEMO_URL = 'https://www.linkedin.com/in/danyel-';
 
 const pipelineSteps = [
   { key: 'extraction', label: 'Extraction', icon: FileText },

@@ -427,7 +427,7 @@ export function NextcloudImportSheet({ open, onOpenChange, onImportStarted, admi
               ]}
               secondaryLabel="Want to connect your own folder?"
               secondaryText="Connect with Danyel and we can run a guided demo using your folder structure, PDFs, and workflow goals."
-              ctaHref="https://www.linkedin.com/in/danyel-/"
+              ctaHref="https://www.linkedin.com/in/danyel-"
               ctaLabel="Connect with Danyel on LinkedIn"
             />
           </div>

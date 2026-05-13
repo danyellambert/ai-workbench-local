@@ -18,7 +18,7 @@ export default function AdminOnlyFeatureCard({
   description,
   valuePoints = [],
   ctaLabel = 'Connect with Danyel on LinkedIn',
-  ctaHref = 'https://www.linkedin.com/in/danyel-/',
+  ctaHref = 'https://www.linkedin.com/in/danyel-',
   secondaryLabel = 'Want to test this with your own workspace?',
   secondaryText = 'Connect with Danyel for a guided demo using private documents, real workflows, and the integrations you care about.',
   compact = false,
