@@ -1,6 +1,6 @@
 # Golden Surface Summary
 
-This document records the reviewed Golden Surface capture for AI Decision Studio.
+This document records the reviewed Golden Surface capture for Axiovance.
 
 Golden Surface is a parity ruler only. It is not the Docker seed source and must not be served as a fake backend.
 

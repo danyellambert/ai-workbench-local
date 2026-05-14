@@ -1,6 +1,6 @@
 # Frontend Surface Provenance Map
 
-This document maps each AI Decision Studio frontend surface to the real backend endpoints and local state sources that power it today.
+This document maps each Axiovance frontend surface to the real backend endpoints and local state sources that power it today.
 
 The goal is to prevent fake/count-only Docker behavior. If a surface shows documents, runs, artifacts, benchmarks, evals, or EvidenceOps state, the Functional Baseline State must include the real backing objects needed for the backend to list, open, retrieve, and mutate through overlay.
 

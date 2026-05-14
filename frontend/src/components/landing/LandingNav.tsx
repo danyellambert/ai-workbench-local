@@ -22,7 +22,7 @@ export default function LandingNav() {
             className="flex items-center gap-2.5 rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/60 focus:ring-offset-2 focus:ring-offset-background"
           >
             <KeystoneLogo size={32} />
-            <span className="text-sm font-semibold text-foreground tracking-tight">AI Decision Studio</span>
+            <span className="text-sm font-semibold text-foreground tracking-tight">Axiovance</span>
           </Link>
           <button
             type="button"

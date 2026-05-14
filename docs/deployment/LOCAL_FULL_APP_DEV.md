@@ -1,6 +1,6 @@
 # Local full app development
 
-This runbook explains how to run the complete AI Decision Studio app locally.
+This runbook explains how to run the complete Axiovance app locally.
 
 Use this mode when you want to test the real product experience on your machine:
 

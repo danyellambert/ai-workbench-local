@@ -1,10 +1,10 @@
-# AI Decision Studio Frontend
+# Axiovance Frontend
 
-This is the **web product surface** for the AI Decision Studio ecosystem.
+This is the **web product surface** for the Axiovance ecosystem.
 
 If the root repository explains the platform as a whole, this folder explains the **product experience the platform is converging toward**.
 
-In the UI, this surface is branded as **AI Decision Studio**. In architectural terms, it should be read as the frontend north star for **AI Decision Studio**.
+In the UI, this surface is branded as **Axiovance**. In architectural terms, it should be read as the frontend north star for **Axiovance**.
 
 ---
 

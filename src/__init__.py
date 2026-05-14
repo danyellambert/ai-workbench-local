@@ -1,1 +1,1 @@
-"""Shared modules for the AI Decision Studio project."""
+"""Shared modules for the Axiovance project."""

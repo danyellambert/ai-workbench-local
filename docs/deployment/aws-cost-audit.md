@@ -1,6 +1,6 @@
 # AWS Cost and Resource Audit
 
-This document records the current AWS deployment resource posture for AI Decision Studio.
+This document records the current AWS deployment resource posture for Axiovance.
 
 ## Current AWS host
 

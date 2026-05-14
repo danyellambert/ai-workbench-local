@@ -39,7 +39,7 @@ Important complementary documents for fully implementing the capability:
 
 The project should now be read like this:
 
-- **AI Decision Studio** = the main applied-AI product
+- **Axiovance** = the main applied-AI product
 - **Executive Deck Generation** = a recurring product capability
 - **`ppt_creator_app`** = the specialized renderer that enables this capability
 
@@ -93,9 +93,9 @@ In practice, this strengthens the reading that you know how to bridge:
 
 This is the decision that best preserves the strength of the project.
 
-### What remains in AI Decision Studio
+### What remains in Axiovance
 
-AI Decision Studio remains the **source of truth** for:
+Axiovance remains the **source of truth** for:
 
 - benchmark
 - evals
@@ -118,15 +118,15 @@ AI Decision Studio remains the **source of truth** for:
 
 The strongest boundary is:
 
-**AI Decision Studio = domain intelligence + orchestration**
+**Axiovance = domain intelligence + orchestration**
 **`ppt_creator_app` = specialized executive rendering**
 
 ### What not to do
 
 To preserve this architecture, the recommended direction is **not** to:
 
-- copy the `ppt_creator_app` code into AI Decision Studio
-- couple AI Decision Studio to the renderer's raw schema too early
+- copy the `ppt_creator_app` code into Axiovance
+- couple Axiovance to the renderer's raw schema too early
 - use the `ppt_creator_ai/` layer for this benchmark/eval slice
 - turn deck export into logic scattered across the UI
 
@@ -142,7 +142,7 @@ This matters because it conveys engineering discipline and reduces the risk of n
 
 ## Current state already in place
 
-### In AI Decision Studio
+### In Axiovance
 
 There is already a concrete foundation for the first slice.
 
@@ -226,11 +226,11 @@ In other words: the main structural compatibility for the first slice already ex
 
 ## The real gap between the current state and the product feature
 
-Although the foundation already exists, important layers are still missing before this becomes a real AI Decision Studio feature.
+Although the foundation already exists, important layers are still missing before this becomes a real Axiovance feature.
 
 ### Gap 1 — HTTP integration does not exist yet
 
-Today AI Decision Studio:
+Today Axiovance:
 
 - generates the contract
 - generates the payload
@@ -287,11 +287,11 @@ The feature has still not been clearly fitted into the path across:
 
 ## Official thesis of the feature
 
-`ppt_creator_app` **must not** appear as a parallel product inside AI Decision Studio.
+`ppt_creator_app` **must not** appear as a parallel product inside Axiovance.
 
 It should be positioned as a product capability:
 
-> AI Decision Studio transforms benchmark, eval, EvidenceOps, and structured-output signals into reproducible executive artifacts.
+> Axiovance transforms benchmark, eval, EvidenceOps, and structured-output signals into reproducible executive artifacts.
 
 In the first slice, that means:
 
@@ -315,7 +315,7 @@ This is the strongest order for product, engineering, and external validation va
 **Status:** already delivered.
 
 - [x] versioned contract
-- [x] builder in AI Decision Studio
+- [x] builder in Axiovance
 - [x] adapter for a `ppt_creator`-compatible payload
 - [x] foundation unit tests
 
@@ -327,11 +327,11 @@ Objective: move from a “ready payload” to an “on-demand generated `.pptx` 
 
 Minimum delivery:
 
-- [x] create `presentation_export_service` in AI Decision Studio
+- [x] create `presentation_export_service` in Axiovance
 - [x] call `GET /health` on `ppt_creator_app` before rendering
 - [x] call `POST /render` with the executive deck payload
 - [x] download the `.pptx` through `GET /artifact`
-- [x] save local export artifacts in AI Decision Studio
+- [x] save local export artifacts in Axiovance
 - [x] return a structured result to the UI
 
 ### Slice 2 — UX in the current app (Streamlit)
@@ -363,7 +363,7 @@ Objective: fit the feature into the HTTP backend and into the Streamlit -> Gradi
 
 Minimum delivery:
 
-- [ ] export endpoint in the AI Decision Studio backend
+- [ ] export endpoint in the Axiovance backend
 - [ ] exposure of the capability in the intermediate UI
 - [ ] explicit action in the future web app
 
@@ -426,7 +426,7 @@ This slice is already enough to demonstrate:
 
 ---
 
-## Recommended integration design in AI Decision Studio
+## Recommended integration design in Axiovance
 
 ## 1. Configuration layer
 
@@ -460,7 +460,7 @@ This turns executive export into **part of the product**, rather than a hardcode
 
 ## 2. Service layer
 
-Create a dedicated service in AI Decision Studio, for example:
+Create a dedicated service in Axiovance, for example:
 
 - `src/services/presentation_export_service.py`
 
@@ -502,10 +502,10 @@ This point is important.
 
 Based on the current behavior of `ppt_creator/api.py`, the most natural flow is:
 
-1. AI Decision Studio requests rendering with a remote `output_path`
+1. Axiovance requests rendering with a remote `output_path`
 2. `ppt_creator_app` saves the file inside its own workspace
-3. AI Decision Studio downloads the artifact through `GET /artifact`
-4. AI Decision Studio persists a local copy as its own artifact
+3. Axiovance downloads the artifact through `GET /artifact`
+4. Axiovance persists a local copy as its own artifact
 
 ### Why this strategy is best for the first slice
 
@@ -525,7 +525,7 @@ outputs/ai_workbench_exports/
     previews/
 ```
 
-### Suggested local structure in AI Decision Studio
+### Suggested local structure in Axiovance
 
 ```text
 artifacts/presentation_exports/
@@ -541,7 +541,7 @@ artifacts/presentation_exports/
 
 ### Result
 
-This gives AI Decision Studio full traceability for the feature without depending on the internal filesystem of the deck service.
+This gives Axiovance full traceability for the feature without depending on the internal filesystem of the deck service.
 
 ---
 
@@ -549,7 +549,7 @@ This gives AI Decision Studio full traceability for the feature without dependin
 
 ### Preflight
 
-First, AI Decision Studio calls:
+First, Axiovance calls:
 
 - `GET /health`
 
@@ -570,12 +570,12 @@ Recommended payload for the first slice:
 {
   "spec": {
     "presentation": {
-      "title": "AI Decision Studio — Benchmark & Eval Review",
+      "title": "Axiovance — Benchmark & Eval Review",
       "subtitle": "Executive summary of the current round",
-      "author": "AI Decision Studio",
+      "author": "Axiovance",
       "date": "2026-04-05",
       "theme": "executive_premium_minimal",
-      "footer_text": "AI Decision Studio • Benchmark & Eval Review"
+      "footer_text": "Axiovance • Benchmark & Eval Review"
     },
     "slides": []
   },
@@ -672,11 +672,11 @@ In the first slice, the UI should allow:
 
 This is an important decision.
 
-`ppt_creator_app` has an optional `ppt_creator_ai/` layer, but **it should not be part of the first AI Decision Studio slice**.
+`ppt_creator_app` has an optional `ppt_creator_ai/` layer, but **it should not be part of the first Axiovance slice**.
 
 ### Reason
 
-In this use case, AI Decision Studio already has the data and the domain intelligence.
+In this use case, Axiovance already has the data and the domain intelligence.
 
 It already knows:
 
@@ -758,7 +758,7 @@ To make this capability feel professional, it is important to instrument the exp
 
 ### Where to record it
 
-These signals can go into a lightweight/versioned AI Decision Studio log, without depending on heavy observability at this phase.
+These signals can go into a lightweight/versioned Axiovance log, without depending on heavy observability at this phase.
 
 ### Why this matters
 
@@ -783,7 +783,7 @@ Executive export fits very well here because it is a cross-cutting interface and
 This feature is strongest when it evolves like this:
 
 1. **first**: export in the current app, with simple and proven UX
-2. **later**: internal AI Decision Studio export endpoint
+2. **later**: internal Axiovance export endpoint
 3. **later**: Gradio/web surface
 4. **only then**: Docker/hybrid deployment of the specialized service
 
@@ -837,7 +837,7 @@ Examples of future blocks:
 
 We can consider the feature technically integrated when the following exist:
 
-- [x] synchronous export working from AI Decision Studio to `ppt_creator_app`
+- [x] synchronous export working from Axiovance to `ppt_creator_app`
 - [x] `.pptx` download
 - [x] local persistence of contract/payload/response
 - [x] service tests
@@ -859,7 +859,7 @@ The feature becomes strong technical validation evidence when the following exis
 - [ ] screenshot/GIF of the export happening
 - [ ] real deck generated from benchmark/eval
 - [ ] architecture diagram for `domain contract -> renderer service`
-- [ ] short write-up explaining why AI Decision Studio and `ppt_creator_app` are separated
+- [ ] short write-up explaining why Axiovance and `ppt_creator_app` are separated
 
 ---
 
@@ -884,7 +884,7 @@ In other words, the desired reading becomes:
 
 The strongest path is to keep what has already been decided:
 
-- **AI Decision Studio** remains the brain and source of truth
+- **Axiovance** remains the brain and source of truth
 - **`ppt_creator_app`** enters as the specialized executive-artifact service
 - the first official slice remains **benchmark/eval -> executive deck**
 - the correct implementation is **HTTP first**, **Docker later**

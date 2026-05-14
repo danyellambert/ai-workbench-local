@@ -104,7 +104,7 @@ export default function TopBar() {
 
   const labRoute = AI_LAB_ROUTE_MAP[location.pathname];
   const productTitle = routeTitles[location.pathname];
-  const title = labRoute?.label || productTitle || 'AI Decision Studio';
+  const title = labRoute?.label || productTitle || 'Axiovance';
   const isLab = !!labRoute;
   const isSystem = !isLab && location.pathname.startsWith('/app/settings/');
   const isProduct = !isLab && !isSystem && !!productTitle;

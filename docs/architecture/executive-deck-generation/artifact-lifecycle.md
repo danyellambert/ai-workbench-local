@@ -29,7 +29,7 @@ outputs/ai_workbench_exports/
 
 ---
 
-## Suggested local structure in AI Decision Studio
+## Suggested local structure in Axiovance
 
 ```text
 artifacts/presentation_exports/

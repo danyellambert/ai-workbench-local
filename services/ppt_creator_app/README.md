@@ -601,14 +601,14 @@ The repository is prepared for a service-first container path, while host-native
 
 ### Mode 1: Dockerized API with host compatibility preserved
 
-Use this when you want `ppt_creator_app` to run in Docker **without changing AI Decision Studio**.
+Use this when you want `ppt_creator_app` to run in Docker **without changing Axiovance**.
 
 The service still binds:
 
 - host `127.0.0.1:8787`
 - container `0.0.0.0:8787`
 
-So AI Decision Studio can keep calling the same base URL:
+So Axiovance can keep calling the same base URL:
 
 - `http://127.0.0.1:8787`
 
@@ -647,9 +647,9 @@ This mode still exposes:
 
 So the caller can keep using port `8787`, but the container workspace is backed by a named Docker volume instead of the local repo checkout.
 
-### Important compatibility note for AI Decision Studio
+### Important compatibility note for Axiovance
 
-If AI Decision Studio only depends on the HTTP contract:
+If Axiovance only depends on the HTTP contract:
 
 - `GET /health`
 - `POST /render`
@@ -657,7 +657,7 @@ If AI Decision Studio only depends on the HTTP contract:
 
 and uses API-returned artifact paths, then the Dockerized setup can stay transparent.
 
-If AI Decision Studio depends on **host absolute filesystem paths** outside the container, then the fully cloud-like mode will not be perfectly transparent, because those host paths do not exist inside the containerized runtime. In that case:
+If Axiovance depends on **host absolute filesystem paths** outside the container, then the fully cloud-like mode will not be perfectly transparent, because those host paths do not exist inside the containerized runtime. In that case:
 
 - use `ppt_creator_api` for the most local compatibility, or
 - update the external client to rely on the API artifact contract rather than host filesystem access.

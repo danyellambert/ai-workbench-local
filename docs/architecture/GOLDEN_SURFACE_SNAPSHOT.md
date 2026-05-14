@@ -1,6 +1,6 @@
 # Golden Surface Snapshot
 
-Golden Surface is a parity ruler for AI Decision Studio.
+Golden Surface is a parity ruler for Axiovance.
 
 It captures read-only API payloads from the current local backend so future Docker/baseline work can prove that the frontend-visible surface still has the same shape and real backing objects.
 

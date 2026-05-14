@@ -1,4 +1,4 @@
-# AI Decision Studio redeploy fast path
+# Axiovance redeploy fast path
 
 This is the short redeploy path for the shared Oracle-like Docker topology.
 

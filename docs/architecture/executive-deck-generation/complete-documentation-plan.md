@@ -2,7 +2,7 @@
 
 ## Objective
 
-Consolidate **absolutely everything that needs to be documented** to fully implement the **Executive Deck Generation** capability in the AI Decision Studio ecosystem.
+Consolidate **absolutely everything that needs to be documented** to fully implement the **Executive Deck Generation** capability in the Axiovance ecosystem.
 
 This document exists to answer, in operational terms, four questions:
 
@@ -33,7 +33,7 @@ This document exists to answer, in operational terms, four questions:
 
 - official catalog of deck types and `export_kind`
 - capability service architecture
-- API contract between AI Decision Studio and `ppt_creator_app`
+- API contract between Axiovance and `ppt_creator_app`
 - artifact lifecycle
 - minimum UX and UI progression
 - test strategy

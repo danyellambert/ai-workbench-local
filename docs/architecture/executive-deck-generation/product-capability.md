@@ -4,7 +4,7 @@
 
 Clearly define the project's new direction: the current ecosystem will no longer have just an isolated **presentation export** feature, but a recurring **Executive Deck Generation** capability.
 
-In practice, this means that AI Decision Studio can continuously generate **grounded executive decks** based on:
+In practice, this means that Axiovance can continuously generate **grounded executive decks** based on:
 
 - documents
 - structured outputs
@@ -18,7 +18,7 @@ This capability should be understood as one of the ecosystem's internal products
 
 ## Official thesis
 
-> AI Decision Studio does not just converse with documents, extract information, and evaluate quality. It also delivers **recurring executive decks** for review, decision-making, operations, and stakeholder communication.
+> Axiovance does not just converse with documents, extract information, and evaluate quality. It also delivers **recurring executive decks** for review, decision-making, operations, and stakeholder communication.
 
 This is the strongest product framing because it brings the project closer to a real business use case:
 
@@ -32,14 +32,14 @@ This is the strongest product framing because it brings the project closer to a 
 
 ### What it is
 
-Executive Deck Generation is the capability of transforming grounded AI Decision Studio outputs into recurring executive presentations.
+Executive Deck Generation is the capability of transforming grounded Axiovance outputs into recurring executive presentations.
 
 ### What it is not
 
 It should **not** be positioned as:
 
 - a generic slide generator with no context
-- a separate product competing with AI Decision Studio
+- a separate product competing with Axiovance
 - a purely cosmetic export layer
 
 The correct positioning is:
@@ -54,7 +54,7 @@ In plain English:
 
 ## Architectural boundary
 
-### AI Decision Studio
+### Axiovance
 
 It remains the source of truth for:
 
@@ -78,7 +78,7 @@ It acts as the specialized layer for:
 
 ### Separation rule
 
-**AI Decision Studio = intelligence, grounding, and orchestration**
+**Axiovance = intelligence, grounding, and orchestration**
 **`ppt_creator_app` = specialized executive rendering**
 
 This separation is important because it demonstrates product and engineering maturity:
@@ -328,7 +328,7 @@ Today the project already has a concrete foundation for the first type of deck.
 ### Already in place
 
 - technical contract for the benchmark/eval slice
-- contract builder in AI Decision Studio
+- contract builder in Axiovance
 - adapter for a payload compatible with `ppt_creator`
 - focused unit tests
 - initial productization documentation for the first slice
@@ -436,7 +436,7 @@ Turn the capability into a real product surface:
 
 In the UI, this should not appear as “use the PPT project.”
 
-It should appear as an AI Decision Studio capability, for example:
+It should appear as an Axiovance capability, for example:
 
 - **Executive Deck Generation**
 - **Generate executive deck**
@@ -479,7 +479,7 @@ This capability will be well defined when the roadmap makes clear:
 
 1. which deck families exist
 2. which are P1, P2, and P3
-3. what the boundary is between AI Decision Studio and `ppt_creator_app`
+3. what the boundary is between Axiovance and `ppt_creator_app`
 4. how contracts grow through `export_kind`
 5. how this becomes a recurring product surface rather than just an isolated export
 

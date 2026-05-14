@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Current Python test gate for AI Decision Studio.
+# Current Python test gate for Axiovance.
 #
 # This is intentionally smaller than `python -m unittest discover`.
 # It covers the current deterministic/offline-ish Python subset that is

@@ -1,8 +1,8 @@
-# AI Decision Studio - Complete Architecture Brief
+# Axiovance - Complete Architecture Brief
 
 ## 1. Product Boundary
 
-AI Decision Studio is a local-first applied AI product for document-grounded decision workflows.
+Axiovance is a local-first applied AI product for document-grounded decision workflows.
 
 The active product is composed of:
 
@@ -974,7 +974,7 @@ User Browser
 
 ## 25. Key Architectural Message
 
-AI Decision Studio is not only a demo UI over an LLM. It is a complete applied AI product architecture:
+Axiovance is not only a demo UI over an LLM. It is a complete applied AI product architecture:
 
 - user-facing workflow product;
 - document-grounded RAG system;

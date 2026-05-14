@@ -20,7 +20,7 @@ spec.loader.exec_module(access_control)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate an AI Decision Studio admin password hash.")
+    parser = argparse.ArgumentParser(description="Generate an Axiovance admin password hash.")
     parser.add_argument("--password", help="Password to hash. Omit to be prompted securely.")
     args = parser.parse_args()
 

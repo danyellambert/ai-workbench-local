@@ -1,6 +1,6 @@
 # Product overview
 
-AI Decision Studio is the current product surface of this repository.
+Axiovance is the current product surface of this repository.
 
 The current product is not the historical Streamlit app and not the old Gradio surface. Those historical entrypoints and demo flows are preserved under legacy/.
 

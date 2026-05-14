@@ -55,7 +55,7 @@ export default function MeetDanyelModal({ isOpen, onClose }: MeetDanyelModalProp
           </p>
 
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            AI Decision Studio is a full-stack product demo designed to show end-to-end execution: product thinking, document intelligence, workflow automation, evaluation, observability, and deployment.
+            Axiovance is a full-stack AI product demo designed to show end-to-end execution: document intelligence, workflow automation, evidence-backed decision support, evaluation, observability, and deployment.
           </p>
 
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">

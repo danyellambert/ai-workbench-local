@@ -1,6 +1,6 @@
 # Local Docker Compose
 
-Use this document when running the current AI Decision Studio product locally through Docker Compose.
+Use this document when running the current Axiovance product locally through Docker Compose.
 
 Official local Docker topology:
 

@@ -54,7 +54,7 @@ def summarize_payload(payload: object) -> dict[str, object]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Capture AI Decision Studio read-only golden surface payloads.")
+    parser = argparse.ArgumentParser(description="Capture Axiovance read-only golden surface payloads.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8011")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()

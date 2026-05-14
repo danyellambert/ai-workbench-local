@@ -51,7 +51,7 @@ def main() -> None:
     settings = _settings_with_product_api_bind(settings, bind_host, bind_port)
 
     server = build_product_api_server(settings=settings)
-    print(f"AI Decision Studio Product API listening on http://{settings.server_name}:{settings.server_port}")
+    print(f"Axiovance Product API listening on http://{settings.server_name}:{settings.server_port}")
     server.serve_forever()
 
 

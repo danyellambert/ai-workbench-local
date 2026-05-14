@@ -1,6 +1,6 @@
 # Python Dependency Contract
 
-The current AI Decision Studio product uses one Python dependency file:
+The current Axiovance product uses one Python dependency file:
 
 - `requirements.txt`
 

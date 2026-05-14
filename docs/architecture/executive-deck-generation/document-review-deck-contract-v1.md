@@ -23,7 +23,7 @@ Define the v1 contract for the **Document Review Deck**, designed to turn docume
 
 ---
 
-## Typical AI Decision Studio sources
+## Typical Axiovance sources
 
 - `summary`
 - `extraction`
@@ -44,10 +44,10 @@ Define the v1 contract for the **Document Review Deck**, designed to turn docume
   "presentation": {
     "title": "Document Review",
     "subtitle": "Executive review of the analyzed document",
-    "author": "AI Decision Studio",
+    "author": "Axiovance",
     "date": "2026-04-05",
     "theme": "executive_premium_minimal",
-    "footer_text": "AI Decision Studio • Document Review"
+    "footer_text": "Axiovance • Document Review"
   },
   "document_context": {
     "document_title": "Supplier Policy 2026",

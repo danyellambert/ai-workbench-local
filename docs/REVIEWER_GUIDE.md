@@ -2,7 +2,7 @@
 
 This guide is the short path for recruiters, interviewers, and technical reviewers.
 
-AI Decision Studio is a product-oriented AI workbench with a React/Vite frontend, a Python product API, Docker/local deployment support, and an AWS deployment path. The repository also contains historical evaluation, benchmark, and legacy UI material. Those are documented, but they are not the primary validation path for the current product.
+Axiovance is a product-oriented AI workbench with a React/Vite frontend, a Python product API, Docker/local deployment support, and an AWS deployment path. The repository also contains historical evaluation, benchmark, and legacy UI material. Those are documented, but they are not the primary validation path for the current product.
 
 ## 5-minute review path
 

@@ -1,6 +1,6 @@
 # Nextcloud Golden Baseline Restore
 
-This document defines the frozen Nextcloud baseline used by AI Decision Studio
+This document defines the frozen Nextcloud baseline used by Axiovance
 AWS and local Docker deployments.
 
 ## Official baseline
@@ -37,7 +37,7 @@ file, such as `.env.aws`, or entered during restore. It must not be committed.
 For future redeploys:
 
 1. Upload app bundle.
-2. Restore AI Decision Studio data root.
+2. Restore Axiovance data root.
 3. Upload nextcloud-golden-baseline-v1.tar.gz from the local baseline folder.
 4. Restore the archive into Docker volume ai-decision-studio_nextcloud_app.
 5. Configure trusted_domains for localhost, 127.0.0.1 and nextcloud.

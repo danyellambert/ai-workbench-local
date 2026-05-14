@@ -166,7 +166,7 @@ export default function RuntimeControlsPage() {
       title="Runtime configuration is protected"
       description="You can explore how the current AI workflow behaves in this curated demo. Changing model routing, retrieval, document processing, or execution settings affects the whole workspace, so saving Runtime Controls requires Admin Mode."
       valuePoints={[
-        'See how AI Decision Studio can be configured for your model stack.',
+        'See how Axiovance can be configured for your model stack.',
         'Review generation, retrieval, embedding, and document processing controls.',
         'Book a guided demo to tune this against your providers and documents.',
       ]}

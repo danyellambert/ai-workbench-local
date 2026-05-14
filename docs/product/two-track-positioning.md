@@ -11,7 +11,7 @@ The repository is best understood through **two complementary tracks**.
 
 ## Official thesis
 
-AI Decision Studio is an applied AI platform with two linked layers:
+Axiovance is an applied AI platform with two linked layers:
 
 1. **Business Workflows**
    - document-grounded workflows that help turn source material into findings, recommendations, actions, and reusable artifacts

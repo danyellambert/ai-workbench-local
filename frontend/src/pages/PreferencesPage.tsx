@@ -423,7 +423,7 @@ export default function PreferencesPage() {
     <AdminOnlyFeatureCard
       eyebrow="Admin-only configuration"
       title="Provider credentials and workspace preferences are protected"
-      description="The public demo never exposes or changes API keys, provider credentials, runtime profiles, or workspace-level preferences. These controls affect the whole AI Decision Studio environment, so they require Admin Mode."
+      description="The public demo never exposes or changes API keys, provider credentials, runtime profiles, or workspace-level preferences. These controls affect the whole Axiovance environment, so they require Admin Mode."
       valuePoints={[
         'Review provider metadata and runtime profile posture safely.',
         'Connect your own providers, keys, and workflow defaults in a guided demo.',

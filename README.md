@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/product/readme-header.svg" alt="AI Decision Studio by Danyel Lambert" width="96%" />
+  <img src="docs/assets/product/readme-header.svg" alt="Axiovance by Danyel Lambert" width="96%" />
 </p>
 
 <p align="center">
@@ -14,7 +14,11 @@
   </a>
 </p>
 
-AI Decision Studio is a local-first applied AI product for document-grounded decision workflows. It turns source documents into reviewable findings, action plans, candidate assessments, run history, and executive artifacts, while keeping the underlying AI system measurable through benchmarks, evals, runtime controls, and observability.
+**Private AI decision intelligence for document-heavy workflows.**
+
+> **Name note:** Axiovance blends **axiom** — a clear principle — with **avance/advance** — forward movement. The product is built around that idea: using grounded evidence to move document-heavy work toward reviewable decisions and execution.
+
+Axiovance is a local-first applied AI product for document-grounded decision workflows. It turns source documents into reviewable findings, action plans, candidate assessments, run history, and executive artifacts, while keeping the underlying AI system measurable through benchmarks, evals, runtime controls, and observability.
 
 The current product is the React/Vite frontend backed by `main_product_api.py`, Docker Compose services, and a versioned runtime payload. Historical Streamlit, Gradio, heavy dependency, and Oracle-specific paths are preserved under `legacy/` so the active product contract stays small and readable.
 
@@ -40,7 +44,7 @@ The current product is the React/Vite frontend backed by `main_product_api.py`, 
 
 ## Product Thesis
 
-Most document AI tools stop at chat. AI Decision Studio is built around a different shape:
+Most document AI tools stop at chat. Axiovance is built around a different shape:
 
 - documents become grounded working context;
 - workflows turn that context into decision artifacts;
@@ -57,7 +61,7 @@ The repository is organized around two complementary layers.
 
 ## What The Product Does
 
-AI Decision Studio combines a document workspace, workflow catalog, AI runtime controls, and artifact delivery layer.
+Axiovance combines a document workspace, workflow catalog, AI runtime controls, and artifact delivery layer.
 
 | Area | Capability | Current implementation |
 | --- | --- | --- |
@@ -91,7 +95,7 @@ The frontend is built as a full product shell rather than a single-page demo. Th
 ## Architecture
 
 <p align="center">
-  <img src="docs/assets/product/architecture-overview.svg" alt="AI Decision Studio product architecture diagram" width="100%" />
+  <img src="docs/assets/product/architecture-overview.svg" alt="Axiovance product architecture diagram" width="100%" />
 </p>
 
 The active architecture is a five-service product stack: React/Vite frontend, Product API, `ppt-creator`, Nextcloud, and Ollama. The Product API owns workflow execution, RAG/indexing, AI Lab payloads, integration adapters, runtime controls, and the mounted data contract.

@@ -227,7 +227,7 @@ restore_product_data_baseline() {
   verify_archive "product_data_baseline" "$archive" "$expected_sha"
 
   echo
-  echo "== restore AI Decision Studio product data baseline =="
+  echo "== restore Axiovance product data baseline =="
   echo "data_root=$data_root"
   echo "owner=$owner"
 

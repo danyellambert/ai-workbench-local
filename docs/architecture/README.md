@@ -1,6 +1,6 @@
 # Architecture
 
-Current architecture documentation for the AI Decision Studio product.
+Current architecture documentation for the Axiovance product.
 
 ## Subdirectories
 

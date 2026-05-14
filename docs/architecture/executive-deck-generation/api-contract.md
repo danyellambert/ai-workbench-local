@@ -4,7 +4,7 @@
 
 Define the integration contract between:
 
-- AI Decision Studio
+- Axiovance
 - `ppt_creator_app`
 
 and anticipate the capability's future internal contract in the product backend.
@@ -19,7 +19,7 @@ Usage:
 
 - verify service availability before rendering
 
-Minimum expectation for AI Decision Studio:
+Minimum expectation for Axiovance:
 
 - HTTP 200 when the service is healthy
 - a clear failure when the service is unavailable
@@ -70,7 +70,7 @@ Future/optional usage:
 
 ---
 
-## Future internal AI Decision Studio contract
+## Future internal Axiovance contract
 
 ### Recommended endpoint
 

@@ -14,7 +14,7 @@ Define the v1 contract for the **Candidate Review Deck**, using the `cv_analysis
 
 ---
 
-## Typical AI Decision Studio sources
+## Typical Axiovance sources
 
 - `cv_analysis`
 - `evidence_cv`
@@ -33,10 +33,10 @@ Define the v1 contract for the **Candidate Review Deck**, using the `cv_analysis
   "presentation": {
     "title": "Candidate Review",
     "subtitle": "Executive profile summary",
-    "author": "AI Decision Studio",
+    "author": "Axiovance",
     "date": "2026-04-05",
     "theme": "executive_premium_minimal",
-    "footer_text": "AI Decision Studio • Candidate Review"
+    "footer_text": "Axiovance • Candidate Review"
   },
   "candidate_profile": {
     "name": "Candidate Name",

@@ -1,6 +1,6 @@
 # Sanitized Functional Baseline
 
-This document records Phase 6B of the AI Decision Studio production-readiness runbook.
+This document records Phase 6B of the Axiovance production-readiness runbook.
 
 The sanitized functional baseline is generated outside Git from the raw functional baseline stage.
 

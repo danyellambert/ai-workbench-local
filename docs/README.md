@@ -1,6 +1,6 @@
-# AI Decision Studio documentation
+# Axiovance documentation
 
-This directory contains documentation for the current AI Decision Studio product.
+This directory contains documentation for the current Axiovance product.
 
 Start here if you are new to the repository:
 

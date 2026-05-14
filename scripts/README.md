@@ -1,6 +1,6 @@
 # Scripts
 
-This directory contains operational commands, readiness checks, evaluation runners, reporting utilities, and maintenance helpers for AI Decision Studio.
+This directory contains operational commands, readiness checks, evaluation runners, reporting utilities, and maintenance helpers for Axiovance.
 
 For reviewers: this is not the main product surface. Start with `../README.md`, `../docs/`, and the current deployment docs first. Use this file when you want to understand how the repository is operated, validated, benchmarked, and packaged.
 

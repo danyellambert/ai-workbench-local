@@ -14,7 +14,7 @@ Define the v1 contract for the **Evidence Pack / Audit Deck**, focused on execut
 
 ---
 
-## Typical AI Decision Studio sources
+## Typical Axiovance sources
 
 - EvidenceOps
 - evidence packs
@@ -35,10 +35,10 @@ Define the v1 contract for the **Evidence Pack / Audit Deck**, focused on execut
   "presentation": {
     "title": "Evidence Pack Review",
     "subtitle": "Audit / compliance executive handoff",
-    "author": "AI Decision Studio",
+    "author": "Axiovance",
     "date": "2026-04-05",
     "theme": "executive_premium_minimal",
-    "footer_text": "AI Decision Studio • Evidence Review"
+    "footer_text": "Axiovance • Evidence Review"
   },
   "executive_summary": "Executive summary of the evidence pack, findings, and required actions.",
   "evidence_snapshot": {

@@ -25,10 +25,10 @@ DEFAULT_PRESENTATION_EXPORT_KIND = "benchmark_eval_executive_deck"
 DEFAULT_EXECUTIVE_DECK_CONTRACT_VERSION = "executive_deck_generation.v1"
 BENCHMARK_EVAL_EXECUTIVE_REVIEW_PRODUCT_EXPORT_KIND = "benchmark_eval_executive_review"
 DEFAULT_PRESENTATION_THEME = "executive_premium_minimal"
-DEFAULT_PRESENTATION_TITLE = "AI Decision Studio — Benchmark & Eval Review"
+DEFAULT_PRESENTATION_TITLE = "Axiovance — Benchmark & Eval Review"
 DEFAULT_PRESENTATION_SUBTITLE = "Executive summary of the current round"
-DEFAULT_PRESENTATION_AUTHOR = "AI Decision Studio"
-DEFAULT_PRESENTATION_FOOTER = "AI Decision Studio • Benchmark & Eval Review"
+DEFAULT_PRESENTATION_AUTHOR = "Axiovance"
+DEFAULT_PRESENTATION_FOOTER = "Axiovance • Benchmark & Eval Review"
 
 DOCUMENT_REVIEW_EXPORT_KIND = "document_review_deck"
 POLICY_CONTRACT_COMPARISON_EXPORT_KIND = "policy_contract_comparison_deck"
@@ -1535,12 +1535,12 @@ def build_document_review_deck_contract(
         export_kind=DOCUMENT_REVIEW_EXPORT_KIND,
         deck_family="review",
         presentation=PresentationExportMetadata(
-            title="AI Decision Studio — Document Review",
+            title="Axiovance — Document Review",
             subtitle="Executive review of the latest grounded document analysis",
             author=DEFAULT_PRESENTATION_AUTHOR,
             date=date.today().isoformat(),
             theme=DEFAULT_PRESENTATION_THEME,
-            footer_text="AI Decision Studio • Document Review",
+            footer_text="Axiovance • Document Review",
         ),
         context=context,
         executive_summary=summary_text,
@@ -1592,12 +1592,12 @@ def build_policy_contract_comparison_deck_contract(
         export_kind=POLICY_CONTRACT_COMPARISON_EXPORT_KIND,
         deck_family="comparison",
         presentation=PresentationExportMetadata(
-            title="AI Decision Studio — Policy / Contract Comparison",
+            title="Axiovance — Policy / Contract Comparison",
             subtitle="Executive comparison review of grounded document differences",
             author=DEFAULT_PRESENTATION_AUTHOR,
             date=date.today().isoformat(),
             theme=DEFAULT_PRESENTATION_THEME,
-            footer_text="AI Decision Studio • Comparison Review",
+            footer_text="Axiovance • Comparison Review",
         ),
         context={
             "task_type": normalized_result.task_type if normalized_result else None,
@@ -1670,12 +1670,12 @@ def build_action_plan_deck_contract(
             export_kind=ACTION_PLAN_EXPORT_KIND,
             deck_family="action_plan",
             presentation=PresentationExportMetadata(
-                title="AI Decision Studio — Action Plan",
+                title="Axiovance — Action Plan",
                 subtitle="Operational action plan grounded in current action backlog",
                 author=DEFAULT_PRESENTATION_AUTHOR,
                 date=date.today().isoformat(),
                 theme=DEFAULT_PRESENTATION_THEME,
-                footer_text="AI Decision Studio • Action Plan",
+                footer_text="Axiovance • Action Plan",
             ),
             context={
                 "review_type_counts": dict(action_summary.get("review_type_counts") or {}),
@@ -1726,12 +1726,12 @@ def build_action_plan_deck_contract(
             export_kind=ACTION_PLAN_EXPORT_KIND,
             deck_family="action_plan",
             presentation=PresentationExportMetadata(
-                title="AI Decision Studio — Action Plan",
+                title="Axiovance — Action Plan",
                 subtitle="Operational plan derived from structured checklist",
                 author=DEFAULT_PRESENTATION_AUTHOR,
                 date=date.today().isoformat(),
                 theme=DEFAULT_PRESENTATION_THEME,
-                footer_text="AI Decision Studio • Checklist Action Plan",
+                footer_text="Axiovance • Checklist Action Plan",
             ),
             context={
                 "task_type": normalized_result.task_type if normalized_result else None,
@@ -1781,12 +1781,12 @@ def build_action_plan_deck_contract(
             export_kind=ACTION_PLAN_EXPORT_KIND,
             deck_family="action_plan",
             presentation=PresentationExportMetadata(
-                title="AI Decision Studio — Action Plan",
+                title="Axiovance — Action Plan",
                 subtitle="Operational plan derived from document-agent outputs",
                 author=DEFAULT_PRESENTATION_AUTHOR,
                 date=date.today().isoformat(),
                 theme=DEFAULT_PRESENTATION_THEME,
-                footer_text="AI Decision Studio • Action Plan",
+                footer_text="Axiovance • Action Plan",
             ),
             context={"task_type": normalized_result.task_type if normalized_result else None, "tool_used": payload.tool_used},
             executive_summary=payload.summary,
@@ -1878,12 +1878,12 @@ def build_candidate_review_deck_contract(
         export_kind=CANDIDATE_REVIEW_EXPORT_KIND,
         deck_family="candidate_review",
         presentation=PresentationExportMetadata(
-            title=f"AI Decision Studio — Candidate Review · {candidate_name}",
+            title=f"Axiovance — Candidate Review · {candidate_name}",
             subtitle="Executive hiring summary grounded in cv_analysis",
             author=DEFAULT_PRESENTATION_AUTHOR,
             date=date.today().isoformat(),
             theme=DEFAULT_PRESENTATION_THEME,
-            footer_text="AI Decision Studio • Candidate Review",
+            footer_text="Axiovance • Candidate Review",
         ),
         context={
             "task_type": normalized_result.task_type if normalized_result else None,
@@ -1983,12 +1983,12 @@ def build_evidence_pack_deck_contract(
         export_kind=EVIDENCE_PACK_EXPORT_KIND,
         deck_family="evidence_audit",
         presentation=PresentationExportMetadata(
-            title="AI Decision Studio — Evidence Pack Review",
+            title="Axiovance — Evidence Pack Review",
             subtitle="Audit / compliance executive handoff grounded in EvidenceOps",
             author=DEFAULT_PRESENTATION_AUTHOR,
             date=date.today().isoformat(),
             theme=DEFAULT_PRESENTATION_THEME,
-            footer_text="AI Decision Studio • Evidence Pack",
+            footer_text="Axiovance • Evidence Pack",
         ),
         context={
             "review_type": latest_entry.get("review_type") if isinstance(latest_entry, dict) else None,

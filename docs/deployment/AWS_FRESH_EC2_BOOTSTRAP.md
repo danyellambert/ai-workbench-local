@@ -1,4 +1,4 @@
-# AI Decision Studio — AWS fresh EC2 bootstrap runbook
+# Axiovance — AWS fresh EC2 bootstrap runbook
 
 ## Current validated AWS contract
 
@@ -568,9 +568,9 @@ Validated starting state:
 ~~~text
 Docker absent
 Docker Compose absent
-No AI Decision Studio containers
-No AI Decision Studio images
-No AI Decision Studio volumes
+No Axiovance containers
+No Axiovance images
+No Axiovance volumes
 No Docker build cache
 /opt/ai-decision-studio empty
 /tmp free of previous deployment artifacts
@@ -603,7 +603,7 @@ Enable/start the Docker service
 Grant the current SSH session temporary Docker socket access when group membership has not refreshed yet
 Render the single AWS compose contract
 Restore the Nextcloud golden baseline when the Nextcloud volume is fresh/missing
-Restore the AI Decision Studio product data baseline when the product data root is fresh/missing
+Restore the Axiovance product data baseline when the product data root is fresh/missing
 Pull the required Ollama embedding model
 Build and start the AWS stack
 Wait for the public health endpoint before cleanup

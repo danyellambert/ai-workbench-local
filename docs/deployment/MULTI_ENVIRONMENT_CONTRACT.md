@@ -1,4 +1,4 @@
-# AI Decision Studio — Multi-environment contract
+# Axiovance — Multi-environment contract
 
 This document separates the four supported execution modes so that local dev,
 local Docker, AWS, and Oracle can coexist without rewriting paths or URLs.

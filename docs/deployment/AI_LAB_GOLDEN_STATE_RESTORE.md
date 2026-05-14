@@ -1,6 +1,6 @@
 # AI Lab Golden State Restore
 
-This document defines the compact AI Lab historical state restore used by AI Decision Studio AWS/Oracle-like deployments.
+This document defines the compact AI Lab historical state restore used by Axiovance AWS/Oracle-like deployments.
 
 ## Official baseline archive
 

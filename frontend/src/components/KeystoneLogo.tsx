@@ -6,7 +6,7 @@ interface KeystoneLogoProps {
 }
 
 /**
- * Keystone — Cut Diamond
+ * Axiovance — Cut Diamond
  * Sculptural diamond-shaped lock with a central core.
  */
 export default function KeystoneLogo({ className, size = 32 }: KeystoneLogoProps) {
@@ -18,7 +18,7 @@ export default function KeystoneLogo({ className, size = 32 }: KeystoneLogoProps
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn('shrink-0', className)}
-      aria-label="AI Decision Studio"
+      aria-label="Axiovance"
     >
       <defs>
         <linearGradient id="ks-outer" x1="20" y1="2" x2="20" y2="38" gradientUnits="userSpaceOnUse">
