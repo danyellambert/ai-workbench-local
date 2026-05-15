@@ -239,6 +239,9 @@ docs/assets/product/*
 !docs/assets/product/policy-comparison.png
 !docs/assets/product/action-plan.png
 !docs/assets/product/candidate-review.png
+!docs/assets/product/hero-decision-loop
+!docs/assets/product/delivery-layer.png
+!docs/assets/product/ai-lab-runtime.webp
 
 # Private credential stores / local secrets
 /secrets/
