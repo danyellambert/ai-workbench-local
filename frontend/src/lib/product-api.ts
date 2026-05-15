@@ -5,6 +5,7 @@ import type {
   RuntimeProfile,
 } from '@/types/settings';
 import { PublicExecutionQuotaError, isPublicExecutionQuotaPayload } from '@/lib/public-demo-limits';
+import { summarizeWorkflowResponse, trackUsageEvent, trackWorkflowFailure, workflowCompletionEvent } from '@/lib/usage-telemetry';
 
 const rawBaseUrl = (import.meta.env.VITE_PRODUCT_API_BASE_URL as string | undefined)?.trim();
 
@@ -1185,124 +1186,224 @@ export async function runProductWorkflow(payload: {
   use_document_context?: boolean;
   context_strategy?: 'document_scan' | 'retrieval';
 }): Promise<ProductRunWorkflowResponse> {
-  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/run-workflow-async`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+  const startedAt = Date.now();
+  trackUsageEvent('workflow_started', {
+    workflow: payload.workflow_id,
+    document_count: payload.document_ids?.length || 0,
+    source: 'product-api-client',
   });
 
-  if (!response.ok) {
-    if (isProductWorkflowTimeoutStatus(response.status)) {
-      throw new ProductWorkflowTimeoutRecoveryError(response.status);
+  try {
+    const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/run-workflow-async`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      if (isProductWorkflowTimeoutStatus(response.status)) {
+        throw new ProductWorkflowTimeoutRecoveryError(response.status);
+      }
+
+      let message = `Product API workflow failed: ${response.status}`;
+      try {
+        const errorPayload = await response.json() as { error?: string; message?: string };
+        if (isPublicExecutionQuotaPayload(errorPayload)) throw new PublicExecutionQuotaError(errorPayload);
+        if (errorPayload?.error) message = errorPayload.error;
+        else if (errorPayload?.message) message = errorPayload.message;
+      } catch (error) {
+        if (error instanceof PublicExecutionQuotaError) throw error;
+      }
+      throw new Error(message);
     }
 
-    let message = `Product API workflow failed: ${response.status}`;
-    try {
-      const errorPayload = await response.json() as { error?: string; message?: string };
-      if (isPublicExecutionQuotaPayload(errorPayload)) throw new PublicExecutionQuotaError(errorPayload);
-      if (errorPayload?.error) message = errorPayload.error;
-      else if (errorPayload?.message) message = errorPayload.message;
-    } catch (error) {
-      if (error instanceof PublicExecutionQuotaError) throw error;
+    const job = await response.json() as ProductWorkflowJobResponse;
+    const initialStatus = String(job.status || '').toLowerCase();
+    if (initialStatus === 'completed') {
+      if (job.response?.result) {
+        trackUsageEvent(workflowCompletionEvent(job.response), {
+          ...summarizeWorkflowResponse(job.response),
+          workflow: payload.workflow_id,
+          duration_ms: Date.now() - startedAt,
+        });
+        return job.response;
+      }
+      throw new Error(job.error || job.message || 'Workflow completed but did not return a workflow response.');
     }
-    throw new Error(message);
-  }
+    if (initialStatus === 'error') {
+      throw new Error(job.error || job.message || 'Workflow failed while running in the background.');
+    }
+    if (!job.job_id) {
+      if (job.response?.result) {
+        trackUsageEvent(workflowCompletionEvent(job.response), {
+          ...summarizeWorkflowResponse(job.response),
+          workflow: payload.workflow_id,
+          duration_ms: Date.now() - startedAt,
+        });
+        return job.response;
+      }
+      throw new Error(job.error || job.message || 'Product API did not return a workflow job id.');
+    }
 
-  const job = await response.json() as ProductWorkflowJobResponse;
-  const initialStatus = String(job.status || '').toLowerCase();
-  if (initialStatus === 'completed') {
-    if (job.response?.result) return job.response;
-    throw new Error(job.error || job.message || 'Workflow completed but did not return a workflow response.');
+    const completedResponse = await pollProductWorkflowJob(job.job_id);
+    trackUsageEvent(workflowCompletionEvent(completedResponse), {
+      ...summarizeWorkflowResponse(completedResponse),
+      workflow: payload.workflow_id,
+      duration_ms: Date.now() - startedAt,
+      job_id: job.job_id,
+    });
+    return completedResponse;
+  } catch (error) {
+    trackWorkflowFailure(payload.workflow_id, error, Date.now() - startedAt);
+    throw error;
   }
-  if (initialStatus === 'error') {
-    throw new Error(job.error || job.message || 'Workflow failed while running in the background.');
-  }
-  if (!job.job_id) {
-    if (job.response?.result) return job.response;
-    throw new Error(job.error || job.message || 'Product API did not return a workflow job id.');
-  }
-
-  return pollProductWorkflowJob(job.job_id);
 }
 
 export async function generateProductWorkflowDeck(
   result: ProductWorkflowResultPayload | Record<string, unknown>,
   options?: { runId?: string | null },
 ): Promise<ProductGenerateDeckResponse> {
-  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/generate-deck`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ result, run_id: options?.runId || undefined }),
-  });
-  if (!response.ok) {
-    let message = `Product API deck generation failed: ${response.status}`;
-    try {
-      const errorPayload = await response.json() as { error?: string };
-      if (errorPayload?.error) message = errorPayload.error;
-    } catch {
-      // ignore JSON parsing error and keep fallback message
+  const startedAt = Date.now();
+  const workflow = String((result as Record<string, unknown>)?.workflow_id || 'unknown');
+  trackUsageEvent('deck_export_requested', { workflow, run_id: options?.runId || undefined });
+  try {
+    const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/generate-deck`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ result, run_id: options?.runId || undefined }),
+    });
+    if (!response.ok) {
+      let message = `Product API deck generation failed: ${response.status}`;
+      try {
+        const errorPayload = await response.json() as { error?: string };
+        if (errorPayload?.error) message = errorPayload.error;
+      } catch {
+        // ignore JSON parsing error and keep fallback message
+      }
+      throw new Error(message);
     }
-    throw new Error(message);
+    const payload = await response.json() as ProductGenerateDeckResponse;
+    trackUsageEvent('deck_export_completed', {
+      workflow,
+      run_id: options?.runId || undefined,
+      duration_ms: Date.now() - startedAt,
+      artifact_count: Array.isArray(payload.artifacts) ? payload.artifacts.length : undefined,
+      write_scope: payload.write_scope,
+    });
+    return payload;
+  } catch (error) {
+    trackUsageEvent('deck_export_failed', {
+      workflow,
+      run_id: options?.runId || undefined,
+      duration_ms: Date.now() - startedAt,
+      error_kind: error instanceof Error ? error.name || error.message : 'unknown',
+    });
+    throw error;
   }
-  return response.json() as Promise<ProductGenerateDeckResponse>;
 }
 
 export async function publishProductWorkflowToTrello(
   result: Record<string, unknown>,
   options?: { runId?: string | null; dryRun?: boolean; previewPayload?: Record<string, unknown> | null; selectedCardIndex?: number | null },
 ): Promise<ProductPublishTrelloResponse> {
-  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-trello`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      result,
-      run_id: options?.runId || undefined,
-      dry_run: options?.dryRun ?? false,
-      preview_payload: options?.previewPayload || undefined,
-      selected_card_index: typeof options?.selectedCardIndex === 'number' ? options.selectedCardIndex : undefined,
-    }),
-  });
-  if (!response.ok) {
-    let message = `Product API Trello publish failed: ${response.status}`;
-    try {
-      const errorPayload = await response.json() as { error?: string; message?: string };
-      if (errorPayload?.error) message = errorPayload.error;
-      else if (errorPayload?.message) message = errorPayload.message;
-    } catch {
-      // ignore JSON parsing error and keep fallback message
+  const workflow = String(result?.workflow_id || 'unknown');
+  const dryRun = options?.dryRun ?? false;
+  const startedAt = Date.now();
+  trackUsageEvent(dryRun ? 'trello_preview_opened' : 'trello_publish_attempted', { workflow, run_id: options?.runId || undefined });
+  try {
+    const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-trello`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        result,
+        run_id: options?.runId || undefined,
+        dry_run: dryRun,
+        preview_payload: options?.previewPayload || undefined,
+        selected_card_index: typeof options?.selectedCardIndex === 'number' ? options.selectedCardIndex : undefined,
+      }),
+    });
+    if (!response.ok) {
+      let message = `Product API Trello publish failed: ${response.status}`;
+      try {
+        const errorPayload = await response.json() as { error?: string; message?: string };
+        if (errorPayload?.error) message = errorPayload.error;
+        else if (errorPayload?.message) message = errorPayload.message;
+      } catch {
+        // ignore JSON parsing error and keep fallback message
+      }
+      if (response.status === 403) trackUsageEvent('trello_publish_blocked_public', { workflow, run_id: options?.runId || undefined });
+      throw new Error(message);
     }
-    throw new Error(message);
+    const payload = await response.json() as ProductPublishTrelloResponse;
+    trackUsageEvent(dryRun ? 'trello_preview_completed' : 'trello_publish_completed_admin', {
+      workflow,
+      run_id: options?.runId || undefined,
+      duration_ms: Date.now() - startedAt,
+      status: payload.ok === false ? 'error' : 'completed',
+    });
+    return payload;
+  } catch (error) {
+    trackUsageEvent(dryRun ? 'api_error_seen' : 'trello_publish_blocked_public', {
+      workflow,
+      run_id: options?.runId || undefined,
+      target: 'trello',
+      duration_ms: Date.now() - startedAt,
+      error_kind: error instanceof Error ? error.name || error.message : 'unknown',
+    });
+    throw error;
   }
-  return response.json() as Promise<ProductPublishTrelloResponse>;
 }
 
 export async function publishProductWorkflowToNotion(
   result: Record<string, unknown>,
   options?: { runId?: string | null; dryRun?: boolean; templateId?: string | null; previewPayload?: Record<string, unknown> | null },
 ): Promise<ProductPublishNotionResponse> {
-  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-notion`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      result,
-      run_id: options?.runId || undefined,
-      dry_run: options?.dryRun ?? false,
-      template_id: options?.templateId || undefined,
-      preview_payload: options?.previewPayload || undefined,
-    }),
-  });
-  if (!response.ok) {
-    let message = `Product API Notion publish failed: ${response.status}`;
-    try {
-      const errorPayload = await response.json() as { error?: string; message?: string };
-      if (errorPayload?.error) message = errorPayload.error;
-      else if (errorPayload?.message) message = errorPayload.message;
-    } catch {
-      // ignore JSON parsing error and keep fallback message
+  const workflow = String(result?.workflow_id || 'unknown');
+  const dryRun = options?.dryRun ?? false;
+  const startedAt = Date.now();
+  trackUsageEvent(dryRun ? 'notion_preview_opened' : 'notion_publish_attempted', { workflow, run_id: options?.runId || undefined });
+  try {
+    const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-notion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        result,
+        run_id: options?.runId || undefined,
+        dry_run: dryRun,
+        template_id: options?.templateId || undefined,
+        preview_payload: options?.previewPayload || undefined,
+      }),
+    });
+    if (!response.ok) {
+      let message = `Product API Notion publish failed: ${response.status}`;
+      try {
+        const errorPayload = await response.json() as { error?: string; message?: string };
+        if (errorPayload?.error) message = errorPayload.error;
+        else if (errorPayload?.message) message = errorPayload.message;
+      } catch {
+        // ignore JSON parsing error and keep fallback message
+      }
+      if (response.status === 403) trackUsageEvent('notion_publish_blocked_public', { workflow, run_id: options?.runId || undefined });
+      throw new Error(message);
     }
-    throw new Error(message);
+    const payload = await response.json() as ProductPublishNotionResponse;
+    trackUsageEvent(dryRun ? 'notion_preview_completed' : 'notion_publish_completed_admin', {
+      workflow,
+      run_id: options?.runId || undefined,
+      duration_ms: Date.now() - startedAt,
+      status: payload.ok === false ? 'error' : 'completed',
+    });
+    return payload;
+  } catch (error) {
+    trackUsageEvent(dryRun ? 'api_error_seen' : 'notion_publish_blocked_public', {
+      workflow,
+      run_id: options?.runId || undefined,
+      target: 'notion',
+      duration_ms: Date.now() - startedAt,
+      error_kind: error instanceof Error ? error.name || error.message : 'unknown',
+    });
+    throw error;
   }
-  return response.json() as Promise<ProductPublishNotionResponse>;
 }
 
 export function getProductIntegrationHub(): Promise<ProductIntegrationHubResponse> {

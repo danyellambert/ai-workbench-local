@@ -122,6 +122,13 @@ from src.storage.runtime_paths import (
     get_lab_workflow_runs_path,
     get_product_workflow_history_path,
 )
+from src.storage.product_usage_events import (
+    append_usage_event,
+    build_usage_event_record,
+    build_usage_summary,
+    get_product_usage_events_path,
+    iter_usage_events,
+)
 
 
 class ReusableThreadingHTTPServer(ThreadingHTTPServer):
@@ -1635,6 +1642,70 @@ class ProductApiHandler(BaseHTTPRequestHandler):
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
             return
 
+        if path == "/api/product/usage-summary":
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            if not getattr(identity, "can_write_global", False):
+                self._send_admin_required_response(
+                    "Usage analytics require admin access.",
+                    set_cookie=set_cookie,
+                    identity=identity,
+                )
+                return
+            try:
+                requested_limit = int((query.get("limit") or ["2000"])[0])
+            except Exception:
+                requested_limit = 2000
+            events_path = get_product_usage_events_path(self.bootstrap.workspace_root)
+            events = iter_usage_events(events_path, limit=requested_limit)
+            events = [
+                item for item in events
+                if str(item.get("role") or "").lower() != "admin"
+                and not str((item.get("details") or {}).get("page") or "").startswith("/app/admin")
+                and not str((item.get("details") or {}).get("route") or "").startswith("/app/admin")
+                and "admin_should_not_track" not in str(item.get("details") or {})
+            ]
+            payload = build_usage_summary(events)
+            payload["read_scope"] = "admin_only"
+            self._send_json_with_cookies(HTTPStatus.OK, payload, cookies=[set_cookie] if set_cookie else None)
+            return
+
+        if path == "/api/product/usage-events":
+            identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+            if not getattr(identity, "can_write_global", False):
+                self._send_admin_required_response(
+                    "Usage event logs require admin access.",
+                    set_cookie=set_cookie,
+                    identity=identity,
+                )
+                return
+            try:
+                requested_limit = int((query.get("limit") or ["1000"])[0])
+            except Exception:
+                requested_limit = 1000
+            session_hash = str((query.get("session_hash") or [""])[0]).strip()
+            events_path = get_product_usage_events_path(self.bootstrap.workspace_root)
+            events = iter_usage_events(events_path, limit=requested_limit)
+            events = [
+                item for item in events
+                if str(item.get("role") or "").lower() != "admin"
+                and not str((item.get("details") or {}).get("page") or "").startswith("/app/admin")
+                and not str((item.get("details") or {}).get("route") or "").startswith("/app/admin")
+                and "admin_should_not_track" not in str(item.get("details") or {})
+            ]
+            if session_hash:
+                events = [item for item in events if str(item.get("session_hash") or "") == session_hash]
+            self._send_json_with_cookies(
+                HTTPStatus.OK,
+                {
+                    "ok": True,
+                    "read_scope": "admin_only",
+                    "count": len(events),
+                    "events": events[::-1],
+                },
+                cookies=[set_cookie] if set_cookie else None,
+            )
+            return
+
         if path == "/api/product/run-history":
             identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
             additional_history_paths = []
@@ -1778,6 +1849,44 @@ class ProductApiHandler(BaseHTTPRequestHandler):
         if path == "/api/auth/admin/logout":
             self._send_admin_logout_response()
             return
+        if path == "/api/product/usage-event":
+            try:
+                payload = _read_json_body(self)
+                identity, set_cookie = request_identity(self.headers, users_root=getattr(self, "users_root", None))
+                if getattr(identity, "can_write_global", False):
+                    self._send_json_with_cookies(
+                        HTTPStatus.OK,
+                        {"ok": True, "stored": False, "ignored": "admin_session"},
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
+                    return
+                payload_route = str(payload.get("route") or payload.get("page") or "")
+                if payload_route.startswith("/app/admin"):
+                    self._send_json_with_cookies(
+                        HTTPStatus.OK,
+                        {"ok": True, "stored": False, "ignored": "admin_route"},
+                        cookies=[set_cookie] if set_cookie else None,
+                    )
+                    return
+                events_path = get_product_usage_events_path(self.bootstrap.workspace_root)
+                record = build_usage_event_record(
+                    base_dir=self.bootstrap.workspace_root,
+                    identity=identity,
+                    headers=self.headers,
+                    payload=payload,
+                )
+                append_usage_event(events_path, record)
+                self._send_json_with_cookies(
+                    HTTPStatus.OK,
+                    {"ok": True, "stored": True},
+                    cookies=[set_cookie] if set_cookie else None,
+                )
+            except ValueError as error:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            except Exception as error:  # pragma: no cover - defensive telemetry surface
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(error)})
+            return
+
         if path.startswith("/api/preferences/connections/") and path.endswith("/test"):
             if not self._require_global_write("Testing provider credentials"):
                 return

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search, Command, Settings, Activity, ShieldCheck, Lock, LogOut, X } from 'lucide-react';
+import { Search, Command, Settings, Activity, ShieldCheck, Lock, LogOut, X, BarChart3 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AI_LAB_ROUTE_MAP } from '@/lib/ai-lab-navigation';
 import { getRuntimeControls } from '@/lib/product-api';
 import { getRuntimeConnection } from '@/lib/runtime-controls-ui';
@@ -252,6 +252,14 @@ export default function TopBar() {
                 <div className="rounded-xl border border-border/50 bg-secondary/30 p-3 text-xs text-muted-foreground">
                   Current role: <span className="font-medium text-foreground">admin</span>
                 </div>
+                <Link
+                  to="/app/admin/usage"
+                  onClick={() => setAdminPanelOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Open Usage Dashboard
+                </Link>
                 <button
                   type="button"
                   onClick={handleAdminLogout}

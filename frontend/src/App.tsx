@@ -26,6 +26,8 @@ import AdvancedExperimentsPage from "@/pages/AdvancedExperimentsPage";
 import EvidenceOpsPage from "@/pages/EvidenceOpsPage";
 import RuntimeControlsPage from "@/pages/RuntimeControlsPage";
 import PreferencesPage from "@/pages/PreferencesPage";
+import AdminUsagePage from "@/pages/AdminUsagePage";
+import UsageTelemetryProvider from "@/components/usage/UsageTelemetryProvider";
 import { getPreferences } from '@/lib/product-api';
 import { useAppStore } from '@/lib/store';
 import NotFound from "./pages/NotFound";
@@ -59,6 +61,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <UsageTelemetryProvider />
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/app" element={<AppShell />}>
@@ -84,6 +87,7 @@ const App = () => {
                 <Route path="lab/models" element={<Navigate to="/app/lab/benchmarks" replace />} />
                 <Route path="settings/runtime" element={<RuntimeControlsPage />} />
                 <Route path="settings/preferences" element={<PreferencesPage />} />
+                <Route path="admin/usage" element={<AdminUsagePage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

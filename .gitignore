@@ -253,3 +253,8 @@ ai_decision_studio_private_secrets/
 
 README_AI_DECISION_STUDIO_PREMIUM_V2.md
 README_AI_DECISION_STUDIO_PREMIUM.md
+README_AXIOVANCE_PREMIUM_V3.md
+
+# Local/private product usage telemetry logs
+runtime/**/usage_events.jsonl
+.runtime/**/usage_events.jsonl
