@@ -148,6 +148,86 @@ function asString(value: unknown): string {
   return '';
 }
 
+function eventDetails(event: UsageEvent): Record<string, any> {
+  const details = event.details;
+  if (details && typeof details === 'object' && !Array.isArray(details)) {
+    return details as Record<string, any>;
+  }
+  return {};
+}
+
+function firstText(...values: unknown[]): string {
+  for (const value of values) {
+    const text = asString(value);
+    if (text) return text;
+  }
+  return '';
+}
+
+function firstNumber(...values: unknown[]): number {
+  for (const value of values) {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string' && value.trim()) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return 0;
+}
+
+function extractUtmSourceFromText(...values: unknown[]): string {
+  for (const value of values) {
+    const text = asString(value);
+    if (!text) continue;
+    try {
+      const query = text.includes('?') ? text.split('?').slice(1).join('?') : text.startsWith('utm_') ? text : '';
+      if (!query) continue;
+      const params = new URLSearchParams(query);
+      const source = params.get('utm_source');
+      if (source) return source.trim().toLowerCase();
+    } catch {
+      // ignore malformed URL/query
+    }
+  }
+  return '';
+}
+
+function normalizeSource(value: unknown): string {
+  const raw = asString(value).trim().toLowerCase();
+  if (!raw) return '';
+  if (raw === '127.0.0.1:5173' || raw === 'localhost' || raw.includes('localhost') || raw.includes('127.0.0.1')) return 'internal';
+  if (raw.includes('linkedin') || raw === 'li') return 'linkedin';
+  if (raw.includes('github')) return 'github';
+  if (raw.includes('google')) return 'google';
+  if (raw.includes('bing')) return 'bing';
+  if (raw.includes('whatsapp')) return 'whatsapp';
+  if (raw.includes('twitter') || raw.includes('x.com')) return 'twitter';
+  if (raw.includes('mail') || raw.includes('email')) return 'email';
+  if (raw.includes('danyel-lambert.com') || raw.includes('axiovance')) return 'internal';
+  return raw.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] || raw;
+}
+
+function inferWorkflowFromPage(value: unknown): string {
+  const page = asString(value);
+  const match = page.match(/\/app\/workflows\/([^/?#]+)/);
+  return match?.[1] || '';
+}
+
+function cleanPageForDisplay(value: unknown): string {
+  const page = asString(value);
+  if (!page) return '';
+  const [pathPart, query] = page.split('?');
+  if (!query) return page;
+
+  const params = new URLSearchParams(query);
+  for (const key of Array.from(params.keys())) {
+    if (key.startsWith('utm_')) params.delete(key);
+  }
+
+  const remaining = params.toString();
+  return remaining ? `${pathPart || '/'}?${remaining}` : (pathPart || '/');
+}
+
 function eventName(event: UsageEvent): string {
   return asString(event.event || event.name || event.type || 'unknown');
 }
@@ -196,12 +276,97 @@ function formatDuration(ms: unknown): string {
   return `${minutes}m ${seconds}s`;
 }
 
+function eventDurationMs(event: UsageEvent): number {
+  const details = eventDetails(event);
+  return firstNumber(
+    details.duration_ms,
+    details.elapsed_ms,
+    event.duration_ms,
+    event.elapsed_ms,
+  );
+}
+
 function eventPage(event: UsageEvent): string {
-  return asString(event.page || event.route || event.path || event.pathname || 'unknown') || 'unknown';
+  const details = eventDetails(event);
+  const page = firstText(
+    details.page,
+    details.route,
+    details.path,
+    details.pathname,
+    event.page,
+    event.route,
+    event.path,
+    event.pathname,
+    'unknown',
+  ) || 'unknown';
+  return cleanPageForDisplay(page);
+}
+
+function eventRoute(event: UsageEvent): string {
+  const details = eventDetails(event);
+  return firstText(
+    details.route,
+    event.route,
+    details.page,
+    event.page,
+    details.path,
+    event.path,
+  );
+}
+
+function eventContext(event: UsageEvent): string {
+  const details = eventDetails(event);
+  const tokens: string[] = [];
+
+  const route = eventRoute(event);
+  const query = route.includes('?') ? route.split('?').slice(1).join('?') : '';
+  if (query) {
+    try {
+      const params = new URLSearchParams(query);
+      const tour = params.get('tour');
+      const utmSource = params.get('utm_source');
+      const utmMedium = params.get('utm_medium');
+      const utmCampaign = params.get('utm_campaign');
+
+      if (tour) tokens.push(`tour=${tour}`);
+      if (utmSource) tokens.push(`utm=${utmSource}`);
+      if (utmMedium) tokens.push(`medium=${utmMedium}`);
+      if (utmCampaign) tokens.push(`campaign=${utmCampaign}`);
+    } catch {
+      tokens.push(query.slice(0, 80));
+    }
+  }
+
+  const button = firstText(details.button_label, details.label, details.text, event.button_label);
+  if (button) tokens.push(`button=${button}`);
+
+  const scroll = firstText(details.scroll_depth, event.scroll_depth);
+  if (scroll) tokens.push(`scroll=${scroll}%`);
+
+  const href = firstText(details.href, event.href);
+  if (href) {
+    try {
+      const url = new URL(href);
+      tokens.push(`href=${url.pathname}`);
+    } catch {
+      tokens.push(`href=${href.slice(0, 60)}`);
+    }
+  }
+
+  return tokens.length ? tokens.slice(0, 4).join(' · ') : '—';
 }
 
 function eventWorkflow(event: UsageEvent): string {
-  return asString(event.workflow || event.workflow_id || event.workflowId || '');
+  const details = eventDetails(event);
+  const explicit = firstText(
+    details.workflow,
+    details.workflow_id,
+    details.workflowId,
+    event.workflow,
+    event.workflow_id,
+    event.workflowId,
+  );
+  return explicit || inferWorkflowFromPage(firstText(details.page, details.route, event.page, event.route));
 }
 
 function eventCountry(event: UsageEvent): string {
@@ -209,7 +374,46 @@ function eventCountry(event: UsageEvent): string {
 }
 
 function eventReferrer(event: UsageEvent): string {
-  return asString(event.referrer_kind || event.referrer || event.raw_referrer || event.utm_source || 'direct') || 'direct';
+  const details = eventDetails(event);
+  const utm = firstText(
+    details.utm_source,
+    event.utm_source,
+    extractUtmSourceFromText(details.page, details.route, details.entry_url, event.page, event.route),
+  );
+  const traffic = firstText(details.traffic_source, event.traffic_source);
+  const firstTouch = firstText(
+    details.first_traffic_source,
+    event.first_traffic_source,
+    details.first_utm_source,
+    event.first_utm_source,
+    details.first_referrer_kind,
+    event.first_referrer_kind,
+  );
+
+  const normalizedTraffic = normalizeSource(traffic);
+  const normalizedFirstTouch = normalizeSource(firstTouch);
+
+  if (utm) return `utm:${normalizeSource(utm)}`;
+
+  // If the current event is internal navigation but the session entered
+  // through a known external/UTM source, keep the original source.
+  if (normalizedTraffic && normalizedTraffic !== 'internal' && normalizedTraffic !== 'direct') {
+    return normalizedTraffic;
+  }
+  if (normalizedFirstTouch && normalizedFirstTouch !== 'internal' && normalizedFirstTouch !== 'direct') {
+    return normalizedFirstTouch;
+  }
+  if (normalizedTraffic) return normalizedTraffic;
+
+  return normalizeSource(firstText(
+    details.referrer_kind,
+    event.referrer_kind,
+    details.referrer,
+    event.referrer,
+    details.raw_referrer,
+    event.raw_referrer,
+    'direct',
+  )) || 'direct';
 }
 
 function eventSession(event: UsageEvent): string {
@@ -217,7 +421,15 @@ function eventSession(event: UsageEvent): string {
 }
 
 function eventStatus(event: UsageEvent): string {
-  return asString(event.status || event.result_status || event.outcome || '');
+  const details = eventDetails(event);
+  return firstText(
+    details.status,
+    details.result_status,
+    details.outcome,
+    event.status,
+    event.result_status,
+    event.outcome,
+  );
 }
 
 function shortSession(value: string): string {
@@ -272,22 +484,20 @@ function getDetails(event: UsageEvent): Record<string, unknown> {
     'country',
     'cf_country',
     'country_code',
-    'route',
-    'page',
-    'path',
-    'pathname',
-    'workflow',
-    'workflow_id',
-    'workflowId',
+    'role',
+    'user_agent_family',
     'referrer_kind',
-    'referrer',
-    'raw_referrer',
-    'duration_ms',
-    'status',
-    'result_status',
-    'outcome',
   ]);
-  const out: Record<string, unknown> = {};
+  const out: Record<string, unknown> = {
+    normalized: {
+      page: eventPage(event),
+      workflow: eventWorkflow(event),
+      status: eventStatus(event),
+      duration_ms: eventDurationMs(event),
+      referrer: eventReferrer(event),
+      country: eventCountry(event),
+    },
+  };
   for (const [key, value] of Object.entries(event)) {
     if (!hidden.has(key)) out[key] = value;
   }
@@ -334,7 +544,7 @@ function buildSessionRows(events: UsageEvent[]) {
       const workflows = uniq(sessionEvents.map(eventWorkflow)).filter(Boolean);
       const countries = uniq(sessionEvents.map(eventCountry)).filter((item) => item !== 'unknown');
       const referrers = uniq(sessionEvents.map(eventReferrer)).filter(Boolean);
-      const totalDuration = sessionEvents.reduce((sum, event) => sum + Number(event.duration_ms || 0), 0);
+      const totalDuration = sessionEvents.reduce((sum, event) => sum + eventDurationMs(event), 0);
       return {
         session,
         events: sessionEvents.length,
@@ -462,6 +672,7 @@ export default function AdminUsagePage() {
   const [events, setEvents] = useState<UsageEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [showRaw, setShowRaw] = useState(true);
   const [selectedSession, setSelectedSession] = useState<string>('');
   const [expandedEvent, setExpandedEvent] = useState<number | null>(null);
@@ -489,7 +700,13 @@ export default function AdminUsagePage() {
       setSummary(summaryPayload);
       setEvents(Array.isArray(eventsPayload.events) ? eventsPayload.events : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.toLowerCase().includes('admin access') || message.toLowerCase().includes('admin')) {
+        setAccessDenied(true);
+        setError(null);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -506,6 +723,45 @@ export default function AdminUsagePage() {
     return map;
   }, [sessionRowsAll]);
 
+  const sourceBySession = useMemo(() => {
+    const score = (source: string) => {
+      const normalized = normalizeSource(source);
+      if (!normalized || normalized === 'unknown') return 0;
+      if (normalized === 'internal') return 1;
+      if (normalized === 'direct') return 2;
+      if (normalized.startsWith('utm:')) return 5;
+      return 4;
+    };
+
+    const map = new Map<string, string>();
+
+    for (const event of [...events].sort((a, b) => (eventTs(a)?.getTime() || 0) - (eventTs(b)?.getTime() || 0))) {
+      const session = eventSession(event);
+      const source = eventReferrer(event);
+      const current = map.get(session) || '';
+
+      if (!current || score(source) > score(current)) {
+        map.set(session, source);
+      }
+    }
+
+    return map;
+  }, [events]);
+
+  const displayReferrer = (event: UsageEvent): string => {
+    const own = eventReferrer(event);
+    const sessionSource = sourceBySession.get(eventSession(event));
+
+    if (sessionSource) {
+      const normalized = normalizeSource(sessionSource);
+      if (normalized && normalized !== 'internal' && normalized !== 'direct') {
+        return sessionSource;
+      }
+    }
+
+    return own;
+  };
+
   const facets = useMemo(() => {
     return {
       events: uniq(events.map(eventName)),
@@ -513,7 +769,7 @@ export default function AdminUsagePage() {
       countries: uniq(events.map(eventCountry)),
       workflows: uniq(events.map(eventWorkflow)).filter(Boolean),
       pages: uniq(events.map(eventPage)),
-      referrers: uniq(events.map(eventReferrer)),
+      referrers: uniq(events.map(displayReferrer)),
       sessions: uniq(events.map(eventSession)),
     };
   }, [events]);
@@ -527,7 +783,7 @@ export default function AdminUsagePage() {
       if (countryFilter && eventCountry(event) !== countryFilter) return false;
       if (workflowFilter && eventWorkflow(event) !== workflowFilter) return false;
       if (pageFilter && eventPage(event) !== pageFilter) return false;
-      if (referrerFilter && eventReferrer(event) !== referrerFilter) return false;
+      if (referrerFilter && displayReferrer(event) !== referrerFilter) return false;
       if (sessionFilter && eventSession(event) !== sessionFilter) return false;
 
       const session = sessionMap.get(eventSession(event));
@@ -573,7 +829,7 @@ export default function AdminUsagePage() {
     const meetClicks = filteredEvents.filter((event) => eventName(event).includes('meet_danyel')).length;
     const previewClicks = filteredEvents.filter((event) => eventName(event).includes('preview')).length;
     const deckExports = filteredEvents.filter((event) => eventName(event).startsWith('deck_export')).length;
-    const durations = filteredEvents.map((event) => Number(event.duration_ms || 0)).filter((value) => Number.isFinite(value) && value > 0);
+    const durations = filteredEvents.map((event) => eventDurationMs(event)).filter((value) => Number.isFinite(value) && value > 0);
     const avgDuration = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
 
     return {
@@ -598,7 +854,7 @@ export default function AdminUsagePage() {
   const topCountries = useMemo(() => countBy(filteredEvents, eventCountry), [filteredEvents]);
   const topPages = useMemo(() => countBy(filteredEvents, eventPage), [filteredEvents]);
   const topWorkflows = useMemo(() => countBy(filteredEvents.filter((event) => eventWorkflow(event)), eventWorkflow), [filteredEvents]);
-  const topReferrers = useMemo(() => countBy(filteredEvents, eventReferrer), [filteredEvents]);
+  const topReferrers = useMemo(() => countBy(filteredEvents, displayReferrer), [filteredEvents, sourceBySession]);
 
   const timelineEvents = useMemo(() => {
     return [...filteredEvents].sort((a, b) => {
@@ -654,6 +910,7 @@ export default function AdminUsagePage() {
       'session_hash',
       'country',
       'page',
+      'context',
       'workflow',
       'referrer',
       'status',
@@ -679,10 +936,11 @@ export default function AdminUsagePage() {
       eventSession(event),
       eventCountry(event),
       eventPage(event),
+      eventContext(event),
       eventWorkflow(event),
-      eventReferrer(event),
+      displayReferrer(event),
       eventStatus(event),
-      asString(event.duration_ms),
+      asString(eventDurationMs(event) || ''),
       asString(event.source),
       asString(event.button_label || event.label || event.text),
       asString(event.utm_source),
@@ -703,6 +961,21 @@ export default function AdminUsagePage() {
 
   async function copyRawJson() {
     await navigator.clipboard.writeText(JSON.stringify(filteredEvents, null, 2));
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
+          <div className="rounded-3xl border border-border/60 bg-card/80 p-8 text-center shadow-sm">
+            <h1 className="text-2xl font-semibold">This page is not available.</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Return to the product workspace or sign in with an authorized admin session.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -959,7 +1232,7 @@ export default function AdminUsagePage() {
                         <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
                           <span className="rounded-full bg-secondary px-2 py-1">{eventGroup(event)}</span>
                           {eventWorkflow(event) ? <span className="rounded-full bg-secondary px-2 py-1">{eventWorkflow(event)}</span> : null}
-                          {event.duration_ms ? <span className="rounded-full bg-secondary px-2 py-1">{formatDuration(event.duration_ms)}</span> : null}
+                          {eventDurationMs(event) ? <span className="rounded-full bg-secondary px-2 py-1">{formatDuration(eventDurationMs(event))}</span> : null}
                           {eventStatus(event) ? <span className="rounded-full bg-secondary px-2 py-1">{eventStatus(event)}</span> : null}
                         </div>
                       </div>
@@ -990,7 +1263,7 @@ export default function AdminUsagePage() {
 
           {showRaw ? (
             <div className="max-h-[680px] overflow-auto rounded-2xl border border-border/60">
-              <table className="w-full min-w-[1180px] text-left text-xs">
+              <table className="w-full min-w-[1320px] text-left text-xs">
                 <thead className="sticky top-0 bg-secondary text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2">Time</th>
@@ -999,6 +1272,7 @@ export default function AdminUsagePage() {
                     <th className="px-3 py-2">Session</th>
                     <th className="px-3 py-2">Country</th>
                     <th className="px-3 py-2">Page</th>
+                    <th className="px-3 py-2">Context</th>
                     <th className="px-3 py-2">Workflow</th>
                     <th className="px-3 py-2">Referrer</th>
                     <th className="px-3 py-2">Status</th>
@@ -1018,10 +1292,11 @@ export default function AdminUsagePage() {
                         <td className="px-3 py-2 font-mono text-[11px]">{shortSession(eventSession(event))}</td>
                         <td className="px-3 py-2">{eventCountry(event)}</td>
                         <td className="px-3 py-2 max-w-[220px] truncate">{eventPage(event)}</td>
+                        <td className="px-3 py-2 max-w-[220px] truncate">{eventContext(event)}</td>
                         <td className="px-3 py-2">{eventWorkflow(event) || '—'}</td>
-                        <td className="px-3 py-2 max-w-[180px] truncate">{eventReferrer(event)}</td>
+                        <td className="px-3 py-2 max-w-[180px] truncate">{displayReferrer(event)}</td>
                         <td className="px-3 py-2">{eventStatus(event) || '—'}</td>
-                        <td className="px-3 py-2">{formatDuration(event.duration_ms)}</td>
+                        <td className="px-3 py-2">{formatDuration(eventDurationMs(event))}</td>
                         <td className="px-3 py-2">
                           <button
                             type="button"
@@ -1042,7 +1317,7 @@ export default function AdminUsagePage() {
                   })}
                   {timelineEvents.length === 0 ? (
                     <tr>
-                      <td colSpan={11} className="px-3 py-8 text-center text-muted-foreground">No raw events match the current filters.</td>
+                      <td colSpan={12} className="px-3 py-8 text-center text-muted-foreground">No raw events match the current filters.</td>
                     </tr>
                   ) : null}
                 </tbody>

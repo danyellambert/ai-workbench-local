@@ -1,5 +1,6 @@
 const rawBaseUrl = (import.meta.env.VITE_PRODUCT_API_BASE_URL as string | undefined)?.trim();
 const PRODUCT_API_BASE_URL = rawBaseUrl ? rawBaseUrl.replace(/\/$/, '') : '';
+const FIRST_TOUCH_STORAGE_KEY = 'axiovance_first_touch_v1';
 
 type UsagePayload = Record<string, unknown>;
 
@@ -18,6 +19,8 @@ function classifyReferrer(referrer?: string | null): string {
   if (!value) return 'direct';
   try {
     const host = new URL(value).hostname.replace(/^www\./, '');
+    if (host === '127.0.0.1' || host === 'localhost') return 'internal';
+    if (typeof window !== 'undefined' && host === window.location.hostname.replace(/^www\./, '')) return 'internal';
     if (host.includes('linkedin')) return 'linkedin';
     if (host.includes('github')) return 'github';
     if (host.includes('google')) return 'google';
@@ -27,6 +30,80 @@ function classifyReferrer(referrer?: string | null): string {
   } catch {
     return value.slice(0, 80);
   }
+}
+
+function normalizeTrafficSource(value?: string | null): string {
+  const text = String(value || '').trim().toLowerCase();
+  if (!text) return '';
+  if (text.includes('linkedin') || text === 'li') return 'linkedin';
+  if (text.includes('github')) return 'github';
+  if (text.includes('google')) return 'google';
+  if (text.includes('bing')) return 'bing';
+  if (text.includes('x.com') || text.includes('twitter')) return 'twitter';
+  if (text.includes('whatsapp')) return 'whatsapp';
+  if (text.includes('email') || text.includes('mail')) return 'email';
+  return text.replace(/[^a-z0-9_.:-]+/g, '-').slice(0, 80);
+}
+
+type FirstTouch = {
+  first_seen_at: string;
+  first_entry_url: string;
+  first_referrer_kind: string;
+  first_raw_referrer?: string;
+  first_utm_source?: string;
+  first_utm_medium?: string;
+  first_utm_campaign?: string;
+  first_traffic_source: string;
+};
+
+function readFirstTouch(): FirstTouch | null {
+  try {
+    const raw = window.sessionStorage.getItem(FIRST_TOUCH_STORAGE_KEY) || window.localStorage.getItem(FIRST_TOUCH_STORAGE_KEY);
+    return raw ? JSON.parse(raw) as FirstTouch : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeFirstTouch(value: FirstTouch) {
+  try {
+    const raw = JSON.stringify(value);
+    window.sessionStorage.setItem(FIRST_TOUCH_STORAGE_KEY, raw);
+    window.localStorage.setItem(FIRST_TOUCH_STORAGE_KEY, raw);
+  } catch {
+    // ignore storage failures
+  }
+}
+
+function getFirstTouch(current: {
+  entryUrl: string;
+  rawReferrer?: string;
+  referrerKind: string;
+  utm: Record<string, string>;
+}): FirstTouch {
+  const existing = readFirstTouch();
+  const utmSource = normalizeTrafficSource(current.utm.utm_source);
+
+  // If an older local/internal first touch exists, allow a real UTM entry
+  // to replace it. This makes tests and real campaign links more reliable.
+  if (existing && (!utmSource || !['direct', 'internal', ''].includes(normalizeTrafficSource(existing.first_traffic_source)))) {
+    return existing;
+  }
+
+  const trafficSource = utmSource || current.referrerKind || 'direct';
+
+  const firstTouch: FirstTouch = {
+    first_seen_at: new Date().toISOString(),
+    first_entry_url: current.entryUrl,
+    first_referrer_kind: current.referrerKind,
+    first_raw_referrer: current.rawReferrer || undefined,
+    first_utm_source: current.utm.utm_source,
+    first_utm_medium: current.utm.utm_medium,
+    first_utm_campaign: current.utm.utm_campaign,
+    first_traffic_source: trafficSource,
+  };
+  writeFirstTouch(firstTouch);
+  return firstTouch;
 }
 
 function browserFamily(userAgent: string): string {
@@ -54,12 +131,30 @@ function getUtmParams(): Record<string, string> {
 function clientContext(): UsagePayload {
   if (typeof window === 'undefined') return {};
   const nav = window.navigator;
+  const utm = getUtmParams();
+  const entryUrl = window.location.href;
+  const rawReferrer = typeof document !== 'undefined' ? document.referrer || undefined : undefined;
+  const referrerKind = typeof document !== 'undefined' ? classifyReferrer(document.referrer) : 'direct';
+  const utmSource = normalizeTrafficSource(utm.utm_source);
+  const trafficSource = utmSource || (referrerKind === 'internal' ? '' : referrerKind) || readFirstTouch()?.first_traffic_source || referrerKind || 'direct';
+  const firstTouch = getFirstTouch({ entryUrl, rawReferrer, referrerKind, utm });
+
   return {
     route: window.location.pathname + window.location.search,
     page: window.location.pathname,
     title: typeof document !== 'undefined' ? document.title : undefined,
-    raw_referrer: typeof document !== 'undefined' ? document.referrer || undefined : undefined,
-    referrer_kind: typeof document !== 'undefined' ? classifyReferrer(document.referrer) : 'direct',
+    raw_referrer: rawReferrer,
+    referrer_kind: utmSource ? `utm:${utmSource}` : referrerKind,
+    traffic_source: trafficSource,
+    entry_url: entryUrl,
+    first_seen_at: firstTouch.first_seen_at,
+    first_entry_url: firstTouch.first_entry_url,
+    first_referrer_kind: firstTouch.first_referrer_kind,
+    first_raw_referrer: firstTouch.first_raw_referrer,
+    first_utm_source: firstTouch.first_utm_source,
+    first_utm_medium: firstTouch.first_utm_medium,
+    first_utm_campaign: firstTouch.first_utm_campaign,
+    first_traffic_source: firstTouch.first_traffic_source,
     language: nav.language,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     browser_family: browserFamily(nav.userAgent || ''),
@@ -69,7 +164,7 @@ function clientContext(): UsagePayload {
     screen_height: window.screen?.height,
     device_pixel_ratio: window.devicePixelRatio,
     source: 'frontend',
-    ...getUtmParams(),
+    ...utm,
   };
 }
 

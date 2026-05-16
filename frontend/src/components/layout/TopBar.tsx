@@ -8,6 +8,7 @@ import { getRuntimeControls } from '@/lib/product-api';
 import { getRuntimeConnection } from '@/lib/runtime-controls-ui';
 
 const routeTitles: Record<string, string> = {
+  '/app/admin/usage': 'Usage Dashboard',
   '/app': 'Command Center',
   '/app/documents': 'Document Library',
   '/app/run': 'Run Surface',
