@@ -242,6 +242,7 @@ docs/assets/product/*
 !docs/assets/product/hero-decision-loop
 !docs/assets/product/delivery-layer.png
 !docs/assets/product/ai-lab-runtime.webp
+frontend/public/favicon2.svg
 
 # Private credential stores / local secrets
 /secrets/

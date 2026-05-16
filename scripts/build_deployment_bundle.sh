@@ -352,6 +352,61 @@ if not report["ok"]:
     raise SystemExit(1)
 PY
 
+echo
+echo "== Prune deployment bundle to Git-tracked files =="
+BUNDLE_ROOT_PATH="${BUNDLE_ROOT:-${bundle_root:-runtime/ai_decision_studio_functional_baseline/deployment_bundle/ai-decision-studio-app-bundle}}"
+
+python3 - "$BUNDLE_ROOT_PATH" <<'BUNDLE_PRUNE_PY'
+import subprocess
+import sys
+from pathlib import Path
+
+bundle_root = Path(sys.argv[1]).resolve()
+
+if not bundle_root.exists():
+    raise SystemExit(f"bundle root does not exist: {bundle_root}")
+
+tracked = set(
+    subprocess.check_output(
+        ["git", "ls-files"],
+        text=True,
+    ).splitlines()
+)
+
+removed = []
+
+for path in sorted(bundle_root.rglob("*")):
+    if not path.is_file():
+        continue
+
+    rel = path.relative_to(bundle_root).as_posix()
+
+    if rel not in tracked:
+        removed.append(rel)
+        path.unlink()
+
+for path in sorted(
+    [p for p in bundle_root.rglob("*") if p.is_dir()],
+    key=lambda item: len(item.parts),
+    reverse=True,
+):
+    try:
+        path.rmdir()
+    except OSError:
+        pass
+
+print(f"removed_untracked_files={len(removed)}")
+
+for rel in removed[:200]:
+    print(f"removed_untracked_file={rel}")
+
+if len(removed) > 200:
+    print(f"removed_untracked_file_count_truncated={len(removed) - 200}")
+
+print("OK: bundle root contains only Git-tracked files after pruning.")
+BUNDLE_PRUNE_PY
+
+
 tar -czf "$ARCHIVE_PATH" -C "$OUT_DIR" "$BUNDLE_NAME"
 
 echo
