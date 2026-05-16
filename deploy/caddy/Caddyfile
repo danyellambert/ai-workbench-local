@@ -20,6 +20,9 @@
 	redir /cv /?utm_source=cv&utm_medium=pdf&utm_campaign=portfolio_demo 302
 	redir /linkedin /?utm_source=linkedin&utm_medium=profile&utm_campaign=portfolio_demo 302
 	redir /github /?utm_source=github&utm_medium=readme&utm_campaign=portfolio_demo 302
+	redir /intro /?utm_source=direct_share&utm_medium=shortlink&utm_campaign=personal_intro 302
+	redir /m /?utm_source=message&utm_medium=dm&utm_campaign=personal_intro 302
+	redir /w /?utm_source=whatsapp&utm_medium=message&utm_campaign=personal_intro 302
 
 	# Clean deep links.
 	redir /tour /app?tour=1&utm_source=direct&utm_medium=shortlink&utm_campaign=guided_tour 302

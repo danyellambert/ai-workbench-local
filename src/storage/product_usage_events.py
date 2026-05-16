@@ -94,6 +94,11 @@ SAFE_DETAIL_KEYS = {
     "scroll_depth",
     "button_label",
     "button_id",
+    "usage_event",
+    "element_tag",
+    "element_role",
+    "href",
+    "link_target",
     "target",
     "target_kind",
     "href_kind",
@@ -154,6 +159,7 @@ NUMERIC_DETAIL_KEYS = {
 }
 
 LONG_DETAIL_KEYS = {
+    "href",
     "entry_url",
     "raw_referrer",
     "first_entry_url",
@@ -562,7 +568,12 @@ def build_usage_summary(events: Iterable[dict[str, Any]]) -> dict[str, Any]:
                 "workflows": workflows[:8],
                 "completed_workflows": sum(1 for item in session_events if str(item.get("event")) == "workflow_completed"),
                 "failed_workflows": sum(1 for item in session_events if str(item.get("event")) == "workflow_failed"),
-                "meet_danyel": any(str(item.get("event")) in {"meet_danyel_opened", "landing_meet_danyel_clicked"} for item in session_events),
+                "meet_danyel": any(
+                    str(item.get("event")) in {"meet_danyel_opened", "landing_meet_danyel_clicked"}
+                    or "meet danyel" in str((item.get("details") or {}).get("button_label") or "").lower()
+                    or "danyel lambert" in str((item.get("details") or {}).get("button_label") or "").lower()
+                    for item in session_events
+                ),
             }
         )
     session_rows.sort(key=lambda item: str(item.get("last_seen") or ""), reverse=True)

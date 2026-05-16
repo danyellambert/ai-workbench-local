@@ -4,11 +4,25 @@ import { trackUsageEvent } from '@/lib/usage-telemetry';
 
 function readableElementLabel(element: Element | null): string | undefined {
   if (!element) return undefined;
+  const usageLabel = element.getAttribute('data-usage-label');
+  const text = element.textContent?.replace(/\s+/g, ' ').trim();
   const aria = element.getAttribute('aria-label');
   const title = element.getAttribute('title');
-  const data = element.getAttribute('data-usage-label') || element.getAttribute('data-testid');
-  const text = element.textContent?.replace(/\s+/g, ' ').trim();
-  return (aria || title || data || text || '').slice(0, 180) || undefined;
+  const testId = element.getAttribute('data-testid');
+
+  // Prefer the visible/user-facing label for the Usage Dashboard context.
+  // aria-label remains a fallback for icon-only controls.
+  return (usageLabel || text || aria || title || testId || '').slice(0, 180) || undefined;
+}
+
+function readableElementId(element: Element | null): string | undefined {
+  if (!element) return undefined;
+  return (
+    element.getAttribute('data-usage-id') ||
+    element.getAttribute('data-testid') ||
+    element.id ||
+    undefined
+  );
 }
 
 function classifyPage(pathname: string): string {
@@ -92,32 +106,26 @@ export default function UsageTelemetryProvider() {
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       const target = event.target instanceof Element ? event.target : null;
-      const clickable = target?.closest('a,button,[role="button"],[data-usage-event]');
+      const clickable = target?.closest('a,button,[role="button"],[data-usage-label],[data-usage-event]');
       if (!clickable) return;
 
       const tag = clickable.tagName.toLowerCase();
+      const role = clickable.getAttribute('role') || undefined;
       const href = clickable instanceof HTMLAnchorElement ? clickable.href : clickable.getAttribute('href') || undefined;
       const label = readableElementLabel(clickable);
-      const explicitEvent = clickable.getAttribute('data-usage-event');
+      const buttonId = readableElementId(clickable);
+      const explicitEvent = clickable.getAttribute('data-usage-event') || undefined;
 
-      let eventName = explicitEvent || 'ui_clicked';
-      const labelLower = (label || '').toLowerCase();
-      const hrefLower = (href || '').toLowerCase();
-
-      if (labelLower.includes('meet danyel') || hrefLower.includes('linkedin')) eventName = 'meet_danyel_clicked';
-      if (labelLower.includes('open app') || labelLower.includes('enter app')) eventName = 'open_app_clicked';
-      if (labelLower.includes('trello') && labelLower.includes('preview')) eventName = 'trello_preview_opened';
-      if (labelLower.includes('notion') && labelLower.includes('preview')) eventName = 'notion_preview_opened';
-      if (labelLower.includes('download') && labelLower.includes('deck')) eventName = 'deck_download_clicked';
-
-      trackUsageEvent(eventName, {
+      trackUsageEvent('ui_clicked', {
         page: location.pathname,
         route: location.pathname + location.search,
         element_tag: tag,
+        element_role: role,
         button_label: label,
+        button_id: buttonId,
+        usage_event: explicitEvent,
         href,
-        click_x: event.clientX,
-        click_y: event.clientY,
+        link_target: clickable.getAttribute('target') || undefined,
       });
     };
 

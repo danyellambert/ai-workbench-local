@@ -314,6 +314,20 @@ function eventRoute(event: UsageEvent): string {
   );
 }
 
+function eventButtonLabel(event: UsageEvent): string {
+  const details = eventDetails(event);
+  return firstText(
+    details.button_label,
+    details.button_id,
+    details.label,
+    details.text,
+    event.button_label,
+    event.button_id,
+    event.label,
+    event.text,
+  );
+}
+
 function eventContext(event: UsageEvent): string {
   const details = eventDetails(event);
   const tokens: string[] = [];
@@ -337,7 +351,7 @@ function eventContext(event: UsageEvent): string {
     }
   }
 
-  const button = firstText(details.button_label, details.label, details.text, event.button_label);
+  const button = eventButtonLabel(event);
   if (button) tokens.push(`button=${button}`);
 
   const scroll = firstText(details.scroll_depth, event.scroll_depth);
@@ -353,7 +367,23 @@ function eventContext(event: UsageEvent): string {
     }
   }
 
-  return tokens.length ? tokens.slice(0, 4).join(' · ') : '—';
+  const target = firstText(details.link_target, details.target, event.link_target, event.target);
+  if (target) tokens.push(`target=${target}`);
+
+  return tokens.length ? tokens.slice(0, 5).join(' · ') : '—';
+}
+
+function shortOption(value: string, maxLength = 72): string {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength - 1)}…`;
+}
+
+function isMeetDanyelClick(event: UsageEvent): boolean {
+  const name = eventName(event);
+  if (name.includes('meet_danyel') || name === 'landing_meet_danyel_clicked') return true;
+  if (name !== 'ui_clicked') return false;
+  const label = eventButtonLabel(event).toLowerCase();
+  return label.includes('meet danyel') || label.includes('danyel lambert');
 }
 
 function eventWorkflow(event: UsageEvent): string {
@@ -685,7 +715,10 @@ export default function AdminUsagePage() {
   const [workflowFilter, setWorkflowFilter] = useState('');
   const [pageFilter, setPageFilter] = useState('');
   const [referrerFilter, setReferrerFilter] = useState('');
+  const [buttonFilter, setButtonFilter] = useState('');
+  const [contextQuery, setContextQuery] = useState('');
   const [sessionFilter, setSessionFilter] = useState('');
+  const [clicksOnly, setClicksOnly] = useState(false);
   const [qualifiedOnly, setQualifiedOnly] = useState(false);
   const [strongOnly, setStrongOnly] = useState(false);
 
@@ -770,12 +803,15 @@ export default function AdminUsagePage() {
       workflows: uniq(events.map(eventWorkflow)).filter(Boolean),
       pages: uniq(events.map(eventPage)),
       referrers: uniq(events.map(displayReferrer)),
+      buttons: uniq(events.map(eventButtonLabel)).filter(Boolean),
+      contexts: uniq(events.map(eventContext)).filter((context) => context !== '—'),
       sessions: uniq(events.map(eventSession)),
     };
   }, [events]);
 
   const filteredEvents = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const contextQ = contextQuery.trim().toLowerCase();
     return events.filter((event) => {
       if (!matchesRange(event, range)) return false;
       if (eventFilter && eventName(event) !== eventFilter) return false;
@@ -784,14 +820,19 @@ export default function AdminUsagePage() {
       if (workflowFilter && eventWorkflow(event) !== workflowFilter) return false;
       if (pageFilter && eventPage(event) !== pageFilter) return false;
       if (referrerFilter && displayReferrer(event) !== referrerFilter) return false;
+      if (buttonFilter && eventButtonLabel(event) !== buttonFilter) return false;
       if (sessionFilter && eventSession(event) !== sessionFilter) return false;
+
+      const context = eventContext(event).toLowerCase();
+      if (contextQ && !context.includes(contextQ)) return false;
+      if (clicksOnly && eventName(event) !== 'ui_clicked' && !eventButtonLabel(event)) return false;
 
       const session = sessionMap.get(eventSession(event));
       if (qualifiedOnly && !session?.qualified) return false;
       if (strongOnly && !session?.strong) return false;
 
       if (!q) return true;
-      const haystack = JSON.stringify(event).toLowerCase();
+      const haystack = `${eventName(event)} ${eventGroup(event)} ${eventPage(event)} ${eventContext(event)} ${displayReferrer(event)} ${JSON.stringify(event)}`.toLowerCase();
       return haystack.includes(q);
     });
   }, [
@@ -803,7 +844,10 @@ export default function AdminUsagePage() {
     workflowFilter,
     pageFilter,
     referrerFilter,
+    buttonFilter,
+    contextQuery,
     sessionFilter,
+    clicksOnly,
     qualifiedOnly,
     strongOnly,
     query,
@@ -826,7 +870,7 @@ export default function AdminUsagePage() {
     const workflowCompleted = filteredEvents.filter((event) => eventName(event) === 'workflow_completed').length;
     const workflowFailed = filteredEvents.filter((event) => eventName(event) === 'workflow_failed').length;
     const emptyResults = filteredEvents.filter((event) => eventName(event) === 'workflow_empty_result').length;
-    const meetClicks = filteredEvents.filter((event) => eventName(event).includes('meet_danyel')).length;
+    const meetClicks = filteredEvents.filter(isMeetDanyelClick).length;
     const previewClicks = filteredEvents.filter((event) => eventName(event).includes('preview')).length;
     const deckExports = filteredEvents.filter((event) => eventName(event).startsWith('deck_export')).length;
     const durations = filteredEvents.map((event) => eventDurationMs(event)).filter((value) => Number.isFinite(value) && value > 0);
@@ -855,6 +899,8 @@ export default function AdminUsagePage() {
   const topPages = useMemo(() => countBy(filteredEvents, eventPage), [filteredEvents]);
   const topWorkflows = useMemo(() => countBy(filteredEvents.filter((event) => eventWorkflow(event)), eventWorkflow), [filteredEvents]);
   const topReferrers = useMemo(() => countBy(filteredEvents, displayReferrer), [filteredEvents, sourceBySession]);
+  const topButtons = useMemo(() => countBy(filteredEvents.filter((event) => eventButtonLabel(event)), eventButtonLabel), [filteredEvents]);
+  const topContexts = useMemo(() => countBy(filteredEvents.filter((event) => eventContext(event) !== '—'), eventContext), [filteredEvents]);
 
   const timelineEvents = useMemo(() => {
     return [...filteredEvents].sort((a, b) => {
@@ -875,7 +921,7 @@ export default function AdminUsagePage() {
       { key: 'Workflow started', count: count(['workflow_started']) },
       { key: 'Workflow completed', count: count(['workflow_completed', 'workflow_warning_result']) },
       { key: 'Preview / deck', count: count(['trello_preview_opened', 'notion_preview_opened', 'deck_export_requested', 'deck_download_clicked']) },
-      { key: 'Meet Danyel', count: count(['meet_danyel_opened', 'meet_danyel_clicked', 'meet_danyel_link_clicked']) },
+      { key: 'Meet Danyel', count: filteredEvents.filter(isMeetDanyelClick).length },
     ];
   }, [filteredEvents]);
 
@@ -888,7 +934,10 @@ export default function AdminUsagePage() {
     setWorkflowFilter('');
     setPageFilter('');
     setReferrerFilter('');
+    setButtonFilter('');
+    setContextQuery('');
     setSessionFilter('');
+    setClicksOnly(false);
     setQualifiedOnly(false);
     setStrongOnly(false);
     setSelectedSession('');
@@ -897,7 +946,7 @@ export default function AdminUsagePage() {
   function exportJson() {
     downloadText(
       `axiovance-usage-events-${new Date().toISOString().slice(0, 10)}.json`,
-      JSON.stringify({ exported_at: new Date().toISOString(), filters: { query, range, eventFilter, groupFilter, countryFilter, workflowFilter, pageFilter, referrerFilter, sessionFilter, qualifiedOnly, strongOnly }, events: filteredEvents }, null, 2),
+      JSON.stringify({ exported_at: new Date().toISOString(), filters: { query, range, eventFilter, groupFilter, countryFilter, workflowFilter, pageFilter, referrerFilter, buttonFilter, contextQuery, sessionFilter, clicksOnly, qualifiedOnly, strongOnly }, events: filteredEvents }, null, 2),
       'application/json;charset=utf-8',
     );
   }
@@ -929,31 +978,34 @@ export default function AdminUsagePage() {
       'timezone',
     ];
 
-    const rows = filteredEvents.map((event) => [
-      asString(event.ts || event.timestamp),
-      eventName(event),
-      eventGroup(event),
-      eventSession(event),
-      eventCountry(event),
-      eventPage(event),
-      eventContext(event),
-      eventWorkflow(event),
-      displayReferrer(event),
-      eventStatus(event),
-      asString(eventDurationMs(event) || ''),
-      asString(event.source),
-      asString(event.button_label || event.label || event.text),
-      asString(event.utm_source),
-      asString(event.utm_medium),
-      asString(event.utm_campaign),
-      asString(event.browser_family),
-      asString(event.viewport_width),
-      asString(event.viewport_height),
-      asString(event.screen_width),
-      asString(event.screen_height),
-      asString(event.language),
-      asString(event.timezone),
-    ]);
+    const rows = filteredEvents.map((event) => {
+      const details = eventDetails(event);
+      return [
+        asString(event.ts || event.timestamp),
+        eventName(event),
+        eventGroup(event),
+        eventSession(event),
+        eventCountry(event),
+        eventPage(event),
+        eventContext(event),
+        eventWorkflow(event),
+        displayReferrer(event),
+        eventStatus(event),
+        asString(eventDurationMs(event) || ''),
+        asString(details.source || event.source),
+        eventButtonLabel(event),
+        asString(details.utm_source || event.utm_source),
+        asString(details.utm_medium || event.utm_medium),
+        asString(details.utm_campaign || event.utm_campaign),
+        asString(details.browser_family || event.browser_family),
+        asString(details.viewport_width || event.viewport_width),
+        asString(details.viewport_height || event.viewport_height),
+        asString(details.screen_width || event.screen_width),
+        asString(details.screen_height || event.screen_height),
+        asString(details.language || event.language),
+        asString(details.timezone || event.timezone),
+      ];
+    });
 
     const csv = [columns.join(','), ...rows.map((row) => row.map(csvEscape).join(','))].join('\n');
     downloadText(`axiovance-usage-events-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv;charset=utf-8');
@@ -1087,6 +1139,16 @@ export default function AdminUsagePage() {
             <SelectFilter label="Workflow" value={workflowFilter} onChange={setWorkflowFilter} options={facets.workflows} />
             <SelectFilter label="Page / route" value={pageFilter} onChange={setPageFilter} options={facets.pages} />
             <SelectFilter label="Referrer" value={referrerFilter} onChange={setReferrerFilter} options={facets.referrers} />
+            <SelectFilter label="Button / CTA" value={buttonFilter} onChange={setButtonFilter} options={facets.buttons} />
+            <label className="space-y-1 text-xs text-muted-foreground">
+              <span>Context contains</span>
+              <input
+                value={contextQuery}
+                onChange={(event) => setContextQuery(event.target.value)}
+                placeholder="button=Meet, href=/cv, utm=google..."
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none"
+              />
+            </label>
             <SelectFilter
               label="Session"
               value={sessionFilter}
@@ -1097,6 +1159,10 @@ export default function AdminUsagePage() {
               }))}
             />
 
+            <label className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm">
+              <input type="checkbox" checked={clicksOnly} onChange={(event) => setClicksOnly(event.target.checked)} />
+              Button/link clicks only
+            </label>
             <label className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm">
               <input type="checkbox" checked={qualifiedOnly} onChange={(event) => setQualifiedOnly(event.target.checked)} />
               Qualified sessions only
@@ -1110,6 +1176,8 @@ export default function AdminUsagePage() {
           <div className="mt-4 text-xs text-muted-foreground">
             Showing <span className="font-medium text-foreground">{filteredEvents.length}</span> of <span className="font-medium text-foreground">{events.length}</span> raw events.
             {summary?.read_scope ? <span> Scope: {summary.read_scope}.</span> : null}
+            {buttonFilter ? <span> Button: {buttonFilter}.</span> : null}
+            {contextQuery ? <span> Context contains: {contextQuery}.</span> : null}
           </div>
         </div>
 
@@ -1138,6 +1206,8 @@ export default function AdminUsagePage() {
           <BarList title="Top pages" items={topPages} />
           <BarList title="Top workflows" items={topWorkflows} />
           <BarList title="Top referrers / sources" items={topReferrers} />
+          <BarList title="Top buttons / CTAs" items={topButtons} />
+          <BarList title="Top contexts" items={topContexts.map((item) => ({ ...item, key: shortOption(item.key) }))} />
         </div>
 
         <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">

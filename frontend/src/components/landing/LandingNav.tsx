@@ -29,6 +29,7 @@ export default function LandingNav() {
             onClick={() => setIsBuilderOpen(true)}
             className="text-[10px] text-muted-foreground transition-colors hover:text-primary focus:outline-none focus:text-primary"
             aria-label="Open Meet Danyel card"
+            data-usage-label="by Danyel Lambert"
           >
             by Danyel Lambert
           </button>
@@ -39,12 +40,14 @@ export default function LandingNav() {
             type="button"
             onClick={() => setIsBuilderOpen(true)}
             className="hidden sm:inline-flex text-xs font-medium text-muted-foreground hover:text-foreground border border-border/50 bg-card/20 hover:bg-card/40 px-4 py-2 rounded-lg transition-colors"
+            data-usage-label="Meet Danyel"
           >
             Meet Danyel
           </button>
           <Link
             to="/app"
             className="text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 px-4 py-2 rounded-lg transition-colors"
+            data-usage-label="Enter Workbench"
           >
             Enter Workbench
           </Link>

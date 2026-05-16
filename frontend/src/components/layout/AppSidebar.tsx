@@ -580,6 +580,7 @@ export default function AppSidebar() {
               onClick={() => setIsBuilderOpen(true)}
               className="block text-left text-[10px] text-muted-foreground transition-colors hover:text-primary focus:outline-none focus:text-primary"
               aria-label="Open Meet Danyel card"
+              data-usage-label="by Danyel Lambert"
             >
               by Danyel Lambert
             </button>

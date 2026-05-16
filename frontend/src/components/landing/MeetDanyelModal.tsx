@@ -36,6 +36,7 @@ export default function MeetDanyelModal({ isOpen, onClose }: MeetDanyelModalProp
           onClick={onClose}
           className="absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-background/50 text-muted-foreground hover:text-foreground hover:bg-background/75 focus:outline-none focus:ring-2 focus:ring-primary/60 focus:ring-offset-2 focus:ring-offset-background transition-colors"
           aria-label="Close builder profile"
+          data-usage-label="Close Meet Danyel"
         >
           <X className="h-4 w-4 pointer-events-none" />
         </button>
@@ -68,6 +69,7 @@ export default function MeetDanyelModal({ isOpen, onClose }: MeetDanyelModalProp
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              data-usage-label="LinkedIn"
             >
               <Linkedin className="h-4 w-4" />
               LinkedIn
@@ -78,6 +80,7 @@ export default function MeetDanyelModal({ isOpen, onClose }: MeetDanyelModalProp
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/60 bg-background/35 px-4 py-3 text-sm font-medium text-foreground hover:bg-background/60 transition-colors"
+              data-usage-label="GitHub"
             >
               <Github className="h-4 w-4" />
               GitHub
