@@ -83,14 +83,18 @@ function getFirstTouch(current: {
 }): FirstTouch {
   const existing = readFirstTouch();
   const utmSource = normalizeTrafficSource(current.utm.utm_source);
+  const currentSource = utmSource || (current.referrerKind === 'internal' ? '' : normalizeTrafficSource(current.referrerKind));
 
-  // If an older local/internal first touch exists, allow a real UTM entry
-  // to replace it. This makes tests and real campaign links more reliable.
-  if (existing && (!utmSource || !['direct', 'internal', ''].includes(normalizeTrafficSource(existing.first_traffic_source)))) {
-    return existing;
+  // If an older local/internal/direct first touch exists, allow the current
+  // external entry source (for example organic Google) to replace it.
+  if (existing) {
+    const existingSource = normalizeTrafficSource(existing.first_traffic_source);
+    if (!currentSource || !['direct', 'internal', ''].includes(existingSource)) {
+      return existing;
+    }
   }
 
-  const trafficSource = utmSource || current.referrerKind || 'direct';
+  const trafficSource = currentSource || current.referrerKind || 'direct';
 
   const firstTouch: FirstTouch = {
     first_seen_at: new Date().toISOString(),

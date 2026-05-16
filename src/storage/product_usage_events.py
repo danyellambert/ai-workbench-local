@@ -112,6 +112,52 @@ SAFE_DETAIL_KEYS = {
     "deck_available",
     "write_scope",
     "source",
+    "entry_url",
+    "raw_referrer",
+    "referrer_kind",
+    "traffic_source",
+    "first_seen_at",
+    "first_entry_url",
+    "first_raw_referrer",
+    "first_referrer_kind",
+    "first_traffic_source",
+    "first_utm_source",
+    "first_utm_medium",
+    "first_utm_campaign",
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_content",
+    "utm_term",
+    "browser_family",
+    "language",
+    "timezone",
+    "viewport_width",
+    "viewport_height",
+    "screen_width",
+    "screen_height",
+    "device_pixel_ratio",
+}
+
+NUMERIC_DETAIL_KEYS = {
+    "duration_ms",
+    "scroll_depth",
+    "document_count",
+    "artifact_count",
+    "finding_count",
+    "warning_count",
+    "error_status",
+    "viewport_width",
+    "viewport_height",
+    "screen_width",
+    "screen_height",
+}
+
+LONG_DETAIL_KEYS = {
+    "entry_url",
+    "raw_referrer",
+    "first_entry_url",
+    "first_raw_referrer",
 }
 
 QUALIFIED_EVENTS = {
@@ -227,6 +273,48 @@ def _classify_referrer(referrer: str | None) -> str | None:
     return host[:80]
 
 
+def _normalize_source(value: Any) -> str | None:
+    text = _clean_string(value, max_length=120)
+    if not text:
+        return None
+    raw = text.lower()
+    if raw.startswith("utm:"):
+        source = _normalize_source(raw.removeprefix("utm:"))
+        return f"utm:{source}" if source else "utm"
+    if raw in {"127.0.0.1", "127.0.0.1:5173", "localhost"} or "localhost" in raw:
+        return "internal"
+    if "danyel-lambert.com" in raw or "axiovance" in raw:
+        return "internal"
+    if "linkedin" in raw or raw == "li":
+        return "linkedin"
+    if "github" in raw:
+        return "github"
+    if "google" in raw:
+        return "google"
+    if "bing" in raw:
+        return "bing"
+    if "chatgpt" in raw or "openai" in raw:
+        return "chatgpt"
+    if "whatsapp" in raw:
+        return "whatsapp"
+    if "twitter" in raw or "x.com" in raw:
+        return "twitter"
+    if "mail" in raw or "email" in raw:
+        return "email"
+    return re.sub(r"[^a-z0-9_.:-]+", "-", raw)[:80]
+
+
+def _preferred_referrer_kind(*values: Any) -> str | None:
+    normalized_values = [_normalize_source(value) for value in values]
+    for value in normalized_values:
+        if value and value not in {"direct", "internal"}:
+            return value
+    for value in normalized_values:
+        if value:
+            return value
+    return None
+
+
 def _classify_user_agent(user_agent: str | None) -> str | None:
     if not user_agent:
         return None
@@ -264,14 +352,21 @@ def sanitize_usage_detail(payload: dict[str, Any]) -> dict[str, Any]:
         if key not in payload:
             continue
         value = payload.get(key)
-        if key in {"duration_ms", "scroll_depth", "document_count", "artifact_count", "finding_count", "warning_count", "error_status"}:
+        if key in NUMERIC_DETAIL_KEYS:
             cleaned_number = _clean_int(value, maximum=100000000 if key == "duration_ms" else 100000)
             if cleaned_number is not None:
                 details[key] = cleaned_number
+        elif key == "device_pixel_ratio":
+            try:
+                ratio = float(value)
+            except Exception:
+                ratio = None
+            if ratio is not None and 0 < ratio <= 20:
+                details[key] = round(ratio, 3)
         elif isinstance(value, bool):
             details[key] = value
         else:
-            cleaned_text = _clean_string(value)
+            cleaned_text = _clean_string(value, max_length=500 if key in LONG_DETAIL_KEYS else _MAX_STRING_LENGTH)
             if cleaned_text is not None:
                 details[key] = cleaned_text
     if "href_host" not in details and payload.get("href"):
@@ -293,6 +388,19 @@ def build_usage_event_record(*, base_dir: Path, identity: object, headers: Any, 
     country = _header_value(headers, "CF-IPCountry")
     user_agent = _header_value(headers, "User-Agent")
     client_ts = _clean_string(payload.get("client_ts"), max_length=80)
+    details = sanitize_usage_detail(payload)
+
+    # Browser telemetry POSTs are same-origin, so the HTTP Referer usually points
+    # back to Axiovance. Prefer the client-captured document.referrer / first-touch
+    # source when it identifies an external source such as Google organic search.
+    referrer_kind = _preferred_referrer_kind(
+        payload.get("referrer_kind"),
+        payload.get("traffic_source"),
+        payload.get("first_traffic_source"),
+        payload.get("first_referrer_kind"),
+        _classify_referrer(_clean_string(payload.get("raw_referrer"), max_length=500)),
+        _classify_referrer(referrer),
+    )
 
     record = {
         "ts": _utc_now_iso(),
@@ -301,9 +409,9 @@ def build_usage_event_record(*, base_dir: Path, identity: object, headers: Any, 
         "session_hash": _event_session_hash(identity),
         "role": str(getattr(identity, "role", "") or "public"),
         "country": country,
-        "referrer_kind": _classify_referrer(referrer),
+        "referrer_kind": referrer_kind,
         "user_agent_family": _classify_user_agent(user_agent),
-        "details": sanitize_usage_detail(payload),
+        "details": details,
     }
     # Keep storage anchored to runtime; included for future migration/debugging but not exposed to visitors.
     get_product_usage_events_path(base_dir).parent.mkdir(parents=True, exist_ok=True)
