@@ -1,4 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/lib/usage-telemetry', () => ({
+  summarizeWorkflowResponse: vi.fn(() => ({})),
+  trackUsageEvent: vi.fn(),
+  trackWorkflowFailure: vi.fn(),
+  workflowCompletionEvent: vi.fn(() => 'workflow_completed'),
+}));
+
 import {
   ProductWorkflowTimeoutRecoveryError,
   runProductWorkflow,

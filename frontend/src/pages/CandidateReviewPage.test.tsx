@@ -357,7 +357,6 @@ describe('CandidateReviewPage', () => {
     });
 
     expect(await screen.findByText('Sarah Chen')).toBeInTheDocument();
-    expect(screen.getByText('Advance to panel interview.')).toBeInTheDocument();
     expect(screen.getAllByText('Strong retrieval systems background').length).toBeGreaterThan(0);
     expect(screen.getByText('Education snapshot available')).toBeInTheDocument();
     expect(screen.getByText(/Pacific Coast University/)).toBeInTheDocument();

@@ -300,9 +300,28 @@ class DocumentAgentHandlerTests(unittest.TestCase):
             handler,
             "_collect_response_text",
             return_value=(
-                "Policy v3.2 introduces broader controls than v3.1.\n"
-                "- MFA now applies to all workforce accounts instead of only admins and remote access.\n"
-                "- Customer-data incidents now require escalation within 24 hours after confirmation."
+                '{'
+                '"executive_summary":"Policy v3.2 introduces broader identity and incident controls than v3.1.",'
+                '"deltas":[{'
+                '"category":"identity_control_delta",'
+                '"title":"MFA expands to all workforce accounts",'
+                '"change_summary":"Policy v3.2 requires MFA for all workforce accounts instead of only administrators and remote access.",'
+                '"doc_a_evidence":"REQ-IDM-05 requires MFA only for administrative and remote access to production systems.",'
+                '"doc_b_evidence":"REQ-IDM-05 applies MFA to all workforce accounts.",'
+                '"risk_or_impact":"Broader authentication coverage changes the compliance scope."'
+                '},{'
+                '"category":"incident_response_delta",'
+                '"title":"Customer-data incidents require 24-hour escalation",'
+                '"change_summary":"Policy v3.2 adds a 24-hour escalation requirement for customer-data incidents.",'
+                '"doc_a_evidence":"Policy v3.1 does not include a 24-hour customer-data escalation rule.",'
+                '"doc_b_evidence":"REQ-IR-09 requires escalation no later than 24 hours after confirmation.",'
+                '"risk_or_impact":"Incident handling has a stricter timing obligation."'
+                '}],'
+                '"recommendation":"Review implementation owners for the expanded MFA and incident escalation requirements.",'
+                '"negotiation_priorities":["Confirm rollout ownership for workforce MFA."],'
+                '"watchouts":["Validate operational readiness for 24-hour escalation."],'
+                '"next_steps":["Update the control mapping and evidence checklist."]'
+                '}'
             ),
         ):
             payload, tool_runs = handler._run_compare_documents_tool(

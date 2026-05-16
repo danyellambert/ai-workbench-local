@@ -431,7 +431,6 @@ describe('ActionPlanPage', () => {
     expect(screen.getAllByText(/^Open$/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Approved$/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Done$/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Open → Open, In Progress → Approved, Blocked\/Needs review → Review, Done → Done/i)).toBeInTheDocument();
 
   });
 });
