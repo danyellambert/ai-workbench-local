@@ -203,9 +203,9 @@ export default function AppSidebar() {
 
   const nextTourCopy = tourShortcutKind === 'lab-evidenceops'
     ? {
-        title: 'Ready to finish with EvidenceOps / MCP?',
+        title: 'Ready to finish with MCP Operations?',
         body: 'This final AI Lab tour explains operations and governance: MCP tools, backlog actions, delivery targets, telemetry, readiness, and repository search.',
-        cta: 'Start EvidenceOps tour',
+        cta: 'Start MCP Operations tour',
       }
     : tourShortcutKind === 'lab-artifacts'
       ? {
@@ -506,7 +506,7 @@ export default function AppSidebar() {
   }, [collapsed, location.pathname, tourShortcutKind]);
 
   const shortcutLabel = tourShortcutKind === 'lab-evidenceops'
-    ? 'EvidenceOps / MCP'
+    ? 'MCP Operations'
     : tourShortcutKind === 'lab-artifacts'
       ? 'Experiments & Artifacts'
       : tourShortcutKind === 'lab-evals'

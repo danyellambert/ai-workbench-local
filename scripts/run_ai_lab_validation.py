@@ -28,7 +28,7 @@ AI_LAB_PAGES: list[dict[str, str]] = [
     {'slug': 'benchmarks', 'route': '/app/lab/benchmarks', 'title': 'Benchmarks', 'file': 'frontend/src/pages/BenchmarksPage.tsx'},
     {'slug': 'evals', 'route': '/app/lab/evals', 'title': 'Evals & Diagnosis', 'file': 'frontend/src/pages/EvalsDiagnosisPage.tsx'},
     {'slug': 'artifacts', 'route': '/app/lab/artifacts', 'title': 'Experiments & Artifacts', 'file': 'frontend/src/pages/AdvancedExperimentsPage.tsx'},
-    {'slug': 'evidenceops', 'route': '/app/lab/evidenceops', 'title': 'EvidenceOps / MCP', 'file': 'frontend/src/pages/EvidenceOpsPage.tsx'},
+    {'slug': 'evidenceops', 'route': '/app/lab/evidenceops', 'title': 'MCP Operations', 'file': 'frontend/src/pages/EvidenceOpsPage.tsx'},
 ]
 
 PRODUCT_ENDPOINTS: list[tuple[str, str]] = [

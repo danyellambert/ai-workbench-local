@@ -28,7 +28,7 @@ PAGE_DEFINITIONS = [
     {'slug': 'document-review', 'route': '/app/workflows/document-review', 'title': 'Document Review', 'file': 'frontend/src/pages/DocumentReviewPage.tsx'},
     {'slug': 'comparison', 'route': '/app/workflows/comparison', 'title': 'Policy & Contract Comparison', 'file': 'frontend/src/pages/ComparisonPage.tsx'},
     {'slug': 'documents', 'route': '/app/documents', 'title': 'Document Library', 'file': 'frontend/src/pages/DocumentsPage.tsx'},
-    {'slug': 'evidenceops', 'route': '/app/lab/evidenceops', 'title': 'EvidenceOps / MCP', 'file': 'frontend/src/pages/EvidenceOpsPage.tsx'},
+    {'slug': 'evidenceops', 'route': '/app/lab/evidenceops', 'title': 'MCP Operations', 'file': 'frontend/src/pages/EvidenceOpsPage.tsx'},
     {'slug': 'history', 'route': '/app/history', 'title': 'Run History', 'file': 'frontend/src/pages/RunHistoryPage.tsx'},
     {'slug': 'deck-center', 'route': '/app/deck-center', 'title': 'Deck Center', 'file': 'frontend/src/pages/DeckCenterPage.tsx'},
 ]

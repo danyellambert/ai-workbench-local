@@ -21,7 +21,7 @@ const pages = [
   { Component: BenchmarksPage, heading: 'Benchmarks' },
   { Component: EvalsDiagnosisPage, heading: 'Evals & Diagnosis' },
   { Component: AdvancedExperimentsPage, heading: 'Experiments & Artifacts' },
-  { Component: EvidenceOpsPage, heading: 'EvidenceOps / MCP' },
+  { Component: EvidenceOpsPage, heading: 'MCP Operations' },
 ];
 
 function mockFetch(url: string) {

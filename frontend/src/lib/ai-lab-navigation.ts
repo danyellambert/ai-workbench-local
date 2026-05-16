@@ -72,7 +72,7 @@ export const AI_LAB_ROUTES: AiLabRoute[] = [
   },
   {
     key: 'evidenceops',
-    label: 'EvidenceOps / MCP',
+    label: 'MCP Operations',
     path: '/app/lab/evidenceops',
     icon: Terminal,
     description: 'Operations, governance and MCP console',

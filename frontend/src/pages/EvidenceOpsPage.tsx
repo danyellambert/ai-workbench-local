@@ -71,7 +71,7 @@ export default function EvidenceOpsPage() {
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div data-tour="lab-evidenceops-header">
         <AiLabSectionIntro
-        title="EvidenceOps / MCP"
+        title="MCP Operations"
         description="Operational governance console — local MCP tool health, automated operations, action tracking and repository readiness."
         operatorQuestion="Is the local operations/governance loop healthy, and are the external delivery targets connected?"
         dataSource={data?.meta.source}
@@ -91,7 +91,7 @@ export default function EvidenceOpsPage() {
         <GlassCard className="mb-6 border border-glow-warning/20 bg-glow-warning/5">
           <div className="flex items-center gap-2 text-xs text-glow-warning">
             <AlertTriangle className="w-4 h-4" />
-            EvidenceOps now reflects repository, action-store and worklog state only. The Product API is unavailable, so mock governance panels are no longer shown.
+            MCP Operations now reflects repository, action-store and worklog state only. The Product API is unavailable, so mock governance panels are no longer shown.
           </div>
         </GlassCard>
       )}
@@ -152,7 +152,7 @@ export default function EvidenceOpsPage() {
 
         <TabsContent value="tools" className="mt-0 space-y-3" data-tour="lab-evidenceops-tools">
           <GlassCard>
-            <p className="text-xs text-muted-foreground">The inventory below shows the actual local MCP server tools exposed by EvidenceOps.</p>
+            <p className="text-xs text-muted-foreground">The inventory below shows the actual local MCP server tools exposed by MCP Operations.</p>
           </GlassCard>
 
           <div className="space-y-3">
@@ -313,7 +313,7 @@ export default function EvidenceOpsPage() {
             </div>
             <div className="space-y-2">
               {timeline.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No persisted EvidenceOps timeline exists yet.</p>
+                <p className="text-xs text-muted-foreground">No persisted MCP Operations timeline exists yet.</p>
               ) : (
                 timeline.map((item) => (
                   <div key={item.id} className="rounded-lg border border-border/30 bg-secondary/20 p-3">
@@ -381,7 +381,7 @@ export default function EvidenceOpsPage() {
           </GlassCard>
 
           <GlassCard className="mt-4" delay={0.1}>
-            <h4 className="text-xs font-medium text-foreground mb-3">EvidenceOps Local State</h4>
+            <h4 className="text-xs font-medium text-foreground mb-3">MCP Operations Local State</h4>
             <div className="bg-secondary/20 rounded-lg p-4 space-y-1 text-[10px] text-muted-foreground font-mono">
               <p>data_source: {data?.meta.source ?? '—'}</p>
               <p>repository_root: {summary?.repositoryRoot ?? '—'}</p>
@@ -415,7 +415,7 @@ export default function EvidenceOpsPage() {
               <Input
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="Search the live EvidenceOps repository…"
+                placeholder="Search the live MCP Operations repository…"
                 className="h-8 text-xs bg-secondary/30 border-border/50"
               />
               <Button size="sm" className="h-8 bg-primary text-primary-foreground hover:bg-primary/90 text-xs px-4" type="submit">

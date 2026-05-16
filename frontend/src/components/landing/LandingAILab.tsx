@@ -6,7 +6,7 @@ const labFeatures = [
   { icon: MessageSquare, title: 'Chat with RAG', desc: 'Conversational interface grounded in your indexed document corpus with citation-linked responses.' },
   { icon: Layers, title: 'Structured Outputs', desc: 'Define schemas and extract typed, validated data from documents with JSON-mode generation.' },
   { icon: BarChart3, title: 'Model Comparison', desc: 'Benchmark models across latency, groundedness, adherence and use-case fit with side-by-side evaluation.' },
-  { icon: Terminal, title: 'EvidenceOps MCP', desc: 'Model Context Protocol server for programmatic access to retrieval, grounding and workflow orchestration.' },
+  { icon: Terminal, title: 'MCP Operations', desc: 'Model Context Protocol server for programmatic access to retrieval, grounding and workflow orchestration.' },
 ];
 
 export default function LandingAILab() {

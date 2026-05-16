@@ -76,7 +76,7 @@ LAB_CROSS_SURFACE_NOTES = [
     'Use Benchmarks for model-vs-model tradeoffs and preset comparisons.',
     'Use Evals & Diagnosis for regression tracking, pass-rate drift and watchlists.',
     'Use Experiments & Artifacts for capture registry and generated evidence bundles.',
-    'Use EvidenceOps / MCP for repository readiness, open actions and delivery operations.',
+    'Use MCP Operations for repository readiness, open actions and delivery operations.',
 ]
 
 LAB_CHAT_AUTOMATED_PROMPTS = {
@@ -942,7 +942,7 @@ def build_lab_runtime_payload(workspace_root: Path, *, additional_runtime_log_pa
             workspace_root,
             notes=[
                 'This surface is intentionally focused on current product runtime posture, throughput, retrieval health and recent trace issues.',
-                'It does not replace Workflow Inspector, Benchmarks, Evals & Diagnosis, Experiments & Artifacts, or EvidenceOps / MCP.',
+                'It does not replace Workflow Inspector, Benchmarks, Evals & Diagnosis, Experiments & Artifacts, or MCP Operations.',
             ],
         ),
         'status': status,
@@ -4326,7 +4326,7 @@ def _build_lab_evidenceops_payload_uncached(workspace_root: Path) -> dict[str, A
         tools.append(
             {
                 'name': str(tool.get('name') or 'tool'),
-                'description': str(tool.get('description') or 'EvidenceOps MCP capability.'),
+                'description': str(tool.get('description') or 'MCP Operations capability.'),
                 'status': status,
                 'lastCall': last_call,
             }
@@ -4437,7 +4437,7 @@ def _build_lab_evidenceops_payload_uncached(workspace_root: Path) -> dict[str, A
 
     return {
         'ok': True,
-        'meta': _runtime_meta(workspace_root, notes=['EvidenceOps / MCP owns delivery readiness, open action governance and repository-backed search.']),
+        'meta': _runtime_meta(workspace_root, notes=['MCP Operations owns delivery readiness, open action governance and repository-backed search.']),
         'status': 'live' if repository_documents else 'derived',
         'degraded_reason': None if worklog else 'Operations telemetry is partly derived-live because no dedicated EvidenceOps worklog was persisted in this workspace.',
         'summary': {
