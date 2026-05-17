@@ -214,7 +214,7 @@ echo "== Ensure Ollama embedding model =="
   compose up -d ollama
 
   for i in $(seq 1 60); do
-    if compose exec -T ollama ollama list >/tmp/ads_aws_ollama_list.txt 2>/dev/null; then
+    if compose exec -T ollama ollama list >/dev/null 2>/dev/null; then
       break
     fi
     if [ "$i" = "60" ]; then
