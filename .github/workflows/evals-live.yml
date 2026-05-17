@@ -1,4 +1,4 @@
-name: historical-phase8-live-evals
+name: evals-live
 
 # Historical live eval workflow for self-hosted/manual environments.
 # This does not run on push/pull_request and should not define the main product CI contract.
@@ -76,7 +76,7 @@ jobs:
       - name: Upload live eval artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: phase8-live-evals
+          name: live-provider-evals
           path: |
             phase5_eval/reports/phase8_live_evals_preflight_ci.json
             phase5_eval/reports/phase8_live_evals_ci.json

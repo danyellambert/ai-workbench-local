@@ -1,6 +1,6 @@
-name: historical-phase8-evals
+name: evals
 
-# Historical deterministic eval workflow for the earlier Phase 8 evaluation layer.
+# Deterministic evaluation workflow for tracked product/eval fixtures.
 # The current push/pull_request product contract lives in product-ci.yml.
 # Run this manually when you specifically want to validate the historical eval suite.
 
