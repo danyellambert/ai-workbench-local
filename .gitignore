@@ -1,8 +1,4 @@
-.env
-.venv/
-__pycache__/
 *.pyc
-.DS_Store
 *.db
 *.sqlite
 *.sqlite3
@@ -16,18 +12,7 @@ __pycache__/
 .phase95_evidenceops_worklog.json
 .runtime_execution_log.json
 .chroma_rag/
-.runtime/
 .runtime_policy_comparison_real/
-node_modules/
-artifacts/
-outputs/
-.vscode/
-benchmark_runs/*
-!benchmark_runs/.gitkeep
-!benchmark_runs/README.md
-benchmark_pdfs/*
-!benchmark_pdfs/.gitkeep
-!benchmark_pdfs/README.md
 diagnostics/
 data/
 docs/deployment/aws-cost-audit.md
@@ -36,12 +21,6 @@ phase5_eval/reports/
 phase5_eval/resume_benchmark_quick/
 phase5_eval/resume_benchmark_full/
 
-data/*
-!data/materials_demo/
-data/materials_demo/*
-historico/
-
-src/structured/s
 screenshots_ai_lab
 screenshots_frontend
 screenshots_gradio
@@ -51,17 +30,11 @@ frontend/.tmp_action_plan_isolated_selected_e2e/
 .tmp_ai_lab_e2e/
 tmp_ai_lab_e2e.zip
 frontend/.tmp_frontend_surface_e2e/
-frontend/playwright-report/
 .tmp_candidate_review_validation/
 runtime-state-diagnosis*.txt
-.tmp_playwright/
 test-results/
 .env.oracle
 .env.docker.local
-# Nextcloud runtime/golden state must stay outside Git
-nextcloud-golden-baseline*.tar.gz
-# AI Lab runtime/golden state must stay outside Git
-ai-lab-golden-state*.tar.gz
 
 # Environment contracts: real env files stay local/host-only.
 .env
@@ -79,12 +52,6 @@ ai-lab-golden-state*.tar.gz
 !.env.local.example
 !.env.docker.example
 !.env.aws.example
-
-# Local host/dev runtime state
-runtime/
-
-# Local functional baseline runtime state
-runtime/ai_decision_studio_functional_baseline/
 
 # >>> AI Decision Studio local/generated hygiene
 
@@ -140,23 +107,10 @@ screenshots_frontend/
 runtime-provider-trace*.log
 runtime-state-diagnosis*.txt
 
-# Generated benchmark/data outputs.
 # Keep tracked fixtures/.gitkeep/public demo assets only.
-benchmark_pdfs/*
-!benchmark_pdfs/.gitkeep
-!benchmark_pdfs/README.md
-benchmark_runs/*
-!benchmark_runs/.gitkeep
-!benchmark_runs/README.md
 phase5_eval/reports/
 phase5_eval/resume_benchmark*/
 phase8_eval/.DS_Store
-
-# Local data outputs.
-# Keep curated public demo assets only.
-data/*
-!data/materials_demo/
-data/materials_demo/*
 
 # Local legacy scratch
 
@@ -220,7 +174,7 @@ docs/assets/product/*
 !docs/assets/product/policy-comparison.png
 !docs/assets/product/action-plan.png
 !docs/assets/product/candidate-review.png
-!docs/assets/product/hero-decision-loop
+!docs/assets/product/hero-decision-loop.webp
 !docs/assets/product/delivery-layer.png
 !docs/assets/product/ai-lab-runtime.webp
 
@@ -230,7 +184,6 @@ docs/assets/product/*
 **/credential_store.json
 **/*credential*store*.json
 **/*secret*store*.json
-
 
 # Local/private product usage telemetry logs
 runtime/**/usage_events.jsonl
