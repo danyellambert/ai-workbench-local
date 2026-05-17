@@ -51,6 +51,7 @@ date -u +%Y-%m-%dT%H:%M:%SZ
 df -h /
 
 command -v curl >/dev/null
+command -v git >/dev/null
 command -v tar >/dev/null
 command -v rsync >/dev/null
 command -v docker >/dev/null
@@ -117,27 +118,25 @@ docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
 section "4. Current health"
 curl -fsS http://127.0.0.1:8071/health || true
 
-section "5. Download release source"
+section "5. Download release source as temporary Git checkout"
 
 rm -rf "$STAGE"
 mkdir -p "$SOURCE_PARENT" "$BUNDLE_PARENT" "$NEW_APP_PARENT" "$APP_BACKUP_ROOT"
 
-SOURCE_TARBALL="$STAGE/source.tar.gz"
-SOURCE_URL="https://github.com/${REPO}/archive/${DEPLOY_SHA}.tar.gz"
+SOURCE_DIR="$SOURCE_PARENT/repo"
+SOURCE_GIT_URL="https://github.com/${REPO}.git"
 
-echo "source_url=$SOURCE_URL"
+echo "source_git_url=$SOURCE_GIT_URL"
 
-curl -fsSL "$SOURCE_URL" -o "$SOURCE_TARBALL"
-tar -xzf "$SOURCE_TARBALL" -C "$SOURCE_PARENT"
-
-SOURCE_DIR="$(find "$SOURCE_PARENT" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
-
-if [ -z "$SOURCE_DIR" ] || [ ! -d "$SOURCE_DIR" ]; then
-  echo "ERROR: could not locate extracted source directory." >&2
-  exit 12
-fi
+git init "$SOURCE_DIR"
+cd "$SOURCE_DIR"
+git remote add origin "$SOURCE_GIT_URL"
+git fetch --depth=1 origin "$DEPLOY_SHA"
+git checkout --detach FETCH_HEAD
 
 echo "source_dir=$SOURCE_DIR"
+git rev-parse HEAD
+test "$(git rev-parse HEAD)" = "$DEPLOY_SHA"
 
 section "6. Build deployment bundle from release source"
 
