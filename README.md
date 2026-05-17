@@ -3,197 +3,368 @@
 </p>
 
 <p align="center">
-  <img alt="Python 3.11" src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" />
+  <a href="https://github.com/danyellambert/ai-workbench-local/actions/workflows/product-ci.yml">
+    <img alt="Product CI" src="https://github.com/danyellambert/ai-workbench-local/actions/workflows/product-ci.yml/badge.svg?branch=main" />
+  </a>
+  <a href="https://github.com/danyellambert/ai-workbench-local/actions/workflows/deploy-aws.yml">
+    <img alt="AWS CD" src="https://github.com/danyellambert/ai-workbench-local/actions/workflows/deploy-aws.yml/badge.svg?branch=main" />
+  </a>
+</p>
+
+<p align="center">
+  <img alt="Decision Intelligence" src="https://img.shields.io/badge/Decision%20Intelligence-Platform-111827" />
+  <img alt="Python 3.12" src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" />
   <img alt="React 18" src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111111" />
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" />
   <img alt="Vite" src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" />
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" />
-  <img alt="AWS deployment" src="https://img.shields.io/badge/AWS-EC2%20deployment-FF9900?logo=amazonaws&logoColor=white" />
+  <img alt="MCP tooling" src="https://img.shields.io/badge/MCP-Tooling-4F46E5" />
+  <img alt="Nextcloud" src="https://img.shields.io/badge/Nextcloud-WebDAV-0082C9?logo=nextcloud&logoColor=white" />
+  <img alt="Ollama compatible" src="https://img.shields.io/badge/Ollama-Compatible-111111?logo=ollama&logoColor=white" />
   <a href="LICENSE">
     <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg" />
   </a>
 </p>
 
-**Private AI decision intelligence for document-heavy workflows.**
+<!-- If the public GitHub repository slug changes, update the Product CI badge URLs above. -->
 
-> **Name note:** Axiovance blends **axiom** — a clear principle — with **avance/advance** — forward movement. The product is built around that idea: using grounded evidence to move document-heavy work toward reviewable decisions and execution.
+<h1 align="center">Axiovance</h1>
 
-Axiovance is a local-first applied AI product for document-grounded decision workflows. It turns source documents into reviewable findings, action plans, candidate assessments, run history, and executive artifacts, while keeping the underlying AI system measurable through benchmarks, evals, runtime controls, and observability.
+<p align="center">
+  <strong>AI workflows that turn enterprise documents into decisions teams can trust, defend and execute.</strong>
+</p>
 
-The current product is the React/Vite frontend backed by `main_product_api.py`, Docker Compose services, and a versioned runtime payload. Historical Streamlit, Gradio, heavy dependency, and Oracle-specific paths are preserved under `legacy/` so the active product contract stays small and readable.
+<p align="center">
+  Axiovance helps organizations turn contracts, policies, reports, CVs and internal documents into traceable decisions, executive artifacts and operational handoffs.
+</p>  
 
-<!-- HERO_MEDIA_SLOT: Add docs/assets/product/hero-workflow-run.gif here. Recommended capture: landing page, guided tour, Nextcloud import, Document Review, evidence-backed output, and Deck Center artifact generation. -->
+<p align="center">
+  <a href="https://axiovance.danyel-lambert.com/github"><strong>Live Product</strong></a>
+  ·
+  <a href="https://axiovance.danyel-lambert.com/github-tour"><strong>Guided Tour</strong></a>
+  ·
+  <a href="#why-it-matters">Why it matters</a>
+  ·
+  <a href="#workflow-showcase">Workflows</a>
+  ·
+  <a href="#architecture">Architecture</a>
+  ·
+  <a href="#quickstart">Run Locally</a>
+</p>
+
+<p align="center">
+  <img src="docs/assets/product/hero-decision-loop.webp" alt="Axiovance decision workflow: private documents to governed decisions and operational delivery" width="100%" />
+</p>
+
+> AI outputs should not die in a chat window. They should become decisions, artifacts and execution.
+
+Axiovance connects business documents to structured AI workflows, helping teams reduce manual review work, improve decision quality and move faster from analysis to execution.
+
+It is designed as a product system, not a one-off prompt demo: documents are managed as workflow context, outputs are reviewable, decisions are traceable, artifacts are generated, and delivery actions can push results into execution tools.
+
+---
+
+## Guided product tour
+
+The public product includes a guided tour from the landing page, so first-time visitors can understand the product flow before reading the code.
+
+It walks through the operating model behind Axiovance: controlled documents, structured AI workflows, reviewable decisions, generated artifacts and operational handoffs.
+
+<p align="center">
+  <a href="https://axiovance.danyel-lambert.com/github-tour"><strong>Open the guided tour</strong></a>
+</p>
+
+---
 
 ## Contents
 
-- [Product Thesis](#product-thesis)
-- [What The Product Does](#what-the-product-does)
-- [Workflow Surface](#workflow-surface)
+- [Guided product tour](#guided-product-tour)
+- [Why it matters](#why-it-matters)
+- [Built from real operating bottlenecks](#built-from-real-operating-bottlenecks)
+- [From documents to execution](#from-documents-to-execution)
+- [Built for high-leverage document work](#built-for-high-leverage-document-work)
+- [Workflow showcase](#workflow-showcase)
+- [Delivery & execution](#delivery--execution)
+- [Trust, privacy and enterprise fit](#trust-privacy-and-enterprise-fit)
 - [Architecture](#architecture)
-- [Runtime Topology](#runtime-topology)
-- [Integrations](#integrations)
 - [AI Engineering Lab](#ai-engineering-lab)
-- [Technology Stack](#technology-stack)
-- [Repository Map](#repository-map)
+- [Engineering depth](#engineering-depth)
+- [Technology stack](#technology-stack)
+- [Repository map](#repository-map)
 - [Quickstart](#quickstart)
 - [Validation](#validation)
-- [API Surface](#api-surface)
-- [Documentation Map](#documentation-map)
-- [Visual Capture Slots](#visual-capture-slots)
+- [API surface](#api-surface)
+- [Further documentation](#further-documentation)
+- [Name](#name)
 - [License](#license)
 
-## Product Thesis
+---
 
-Most document AI tools stop at chat. Axiovance is built around a different shape:
+## Why it matters
 
-- documents become grounded working context;
-- workflows turn that context into decision artifacts;
-- delivery actions send outputs to operational tools;
-- the AI Lab measures model, retrieval, and runtime behavior;
-- deployment contracts keep the same product usable locally, in Docker, and on AWS.
+Enterprise teams already have the knowledge: contracts, policies, reports, procedures, candidate files, vendor documents and internal operating material.
 
-The repository is organized around two complementary layers.
+The problem is that this knowledge is often trapped inside document repositories, manual reviews, meetings, spreadsheets and follow-up tools.
 
-| Layer | Purpose | Product signal |
-| --- | --- | --- |
-| Business Workflows | Document-centered workflows for review, comparison, planning, candidate assessment, and artifact generation. | The product solves concrete work instead of exposing a generic prompt box. |
-| AI Engineering Lab | Benchmarks, evals, runtime controls, model comparison, observability, and EvidenceOps. | The system records why a workflow behaves the way it does and how it can be improved. |
+Axiovance compresses that path into a governed decision workflow: documents become findings, risks, gaps, recommendations, action plans, executive decks and operational handoffs.
 
-## What The Product Does
+| Business problem | Product outcome |
+| --- | --- |
+| Expensive teams spend hours reading and comparing documents | Structured findings, risks, gaps and recommendations |
+| Critical issues are missed during manual review | Source-grounded, reviewable outputs |
+| AI answers stay trapped in chat windows | Decks, Trello cards, Notion records and action plans |
+| Decisions are hard to audit later | Run history, workflow state and artifact lineage |
+| Sensitive documents live in company storage | Nextcloud/WebDAV simulates a private document cloud pattern |
+| Teams work differently across functions | Repeatable workflows for review, comparison, planning and evaluation |
 
-Axiovance combines a document workspace, workflow catalog, AI runtime controls, and artifact delivery layer.
+Axiovance is built for high-leverage document work where speed, traceability and control matter.
 
-| Area | Capability | Current implementation |
-| --- | --- | --- |
-| Document workspace | Upload, import, index, preview, delete, and reuse documents as grounded context. | Product API document library, Nextcloud import sheet, RAG state, preindexed fast-import path. |
-| Workflow catalog | Run document review, policy comparison, action planning, and candidate review flows. | React workflow pages, Product API workflow contracts, presenters, and stored run history. |
-| Evidence-backed outputs | Convert document context into summaries, findings, risks, recommendations, and action items. | Structured Product API responses, workflow history, artifacts, and delivery lineage. |
-| Executive artifacts | Generate presentation-ready decks from workflow outputs. | `ppt-creator` sidecar, deck contracts, artifact lifecycle, and export smoke suite. |
-| Delivery loop | Publish workflow outputs into operational systems. | Trello and Notion publishing adapters, Nextcloud integration, delivery metadata. |
-| Runtime controls | Select and test providers, models, preferences, retrieval behavior, and runtime budget posture. | Preferences page, runtime drawer, provider registry, runtime controls services. |
-| AI Lab | Inspect benchmarks, evals, model comparisons, workflow runs, EvidenceOps state, and observability payloads. | AI Lab pages, eval store, benchmark scripts, runtime snapshots, EvidenceOps MCP tooling. |
+---
 
-## Workflow Surface
+## Built from real operating bottlenecks
 
-The frontend is built as a full product shell rather than a single-page demo. The main surfaces are:
+Axiovance was shaped by recurring problems I faced across strategy, growth operations, partnerships, process improvement, and business analysis work.
 
-| Surface | What it is for | Files to start with |
-| --- | --- | --- |
-| Landing and guided tour | Product narrative, workflow entry points, and guided walkthrough cards. | `frontend/src/pages/LandingPage.tsx`, `frontend/src/components/landing/`, `frontend/src/components/layout/GuidedWorkbenchTour.tsx` |
-| Overview | Product command center and high-level operating context. | `frontend/src/pages/OverviewPage.tsx`, `src/product/command_center.py` |
-| Documents | Document library, Nextcloud import, indexing state, and corpus controls. | `frontend/src/pages/DocumentsPage.tsx`, `frontend/src/components/product/NextcloudImportSheet.tsx`, `src/product/ingestion_jobs.py` |
-| Document Review | Findings, summaries, risks, grounding, and review-ready outputs. | `frontend/src/pages/DocumentReviewPage.tsx`, `src/product/presenters.py` |
-| Policy Comparison | Compare policies or contracts and summarize meaningful differences. | `frontend/src/pages/ComparisonPage.tsx`, `src/product/presenters.py` |
-| Action Plan | Turn findings into operational actions and delivery handoffs. | `frontend/src/pages/ActionPlanPage.tsx`, `src/product/action_plan_presenter.py` |
-| Candidate Review | Evaluate candidate evidence and produce structured review outputs. | `frontend/src/pages/CandidateReviewPage.tsx`, `src/product/candidate_review_presenter.py` |
-| Deck Center | Generate and inspect presentation artifacts. | `frontend/src/pages/DeckCenterPage.tsx`, `src/services/presentation_export_service.py` |
-| Run History | Inspect prior workflow runs, reruns, artifacts, and lineage. | `frontend/src/pages/RunHistoryPage.tsx`, `src/storage/product_workflow_history.py` |
-| Runtime Controls | Tune active runtime behavior and inspect provider readiness. | `frontend/src/pages/RuntimeControlsPage.tsx`, `src/services/runtime_controls.py` |
-| Preferences | Configure connections, credentials, providers, and product preferences. | `frontend/src/pages/PreferencesPage.tsx`, `src/services/preferences.py` |
-| AI Lab | Benchmarks, evals, model comparison, observability, chat, workflow inspector, and EvidenceOps. | `frontend/src/pages/LabOverviewPage.tsx`, `frontend/src/pages/BenchmarksPage.tsx`, `frontend/src/pages/EvalsDiagnosisPage.tsx`, `frontend/src/pages/EvidenceOpsPage.tsx`, `src/product/lab.py` |
+In document-heavy teams, valuable information is often spread across contracts, policies, reports, CRM notes, benchmarks, candidate files and internal procedures. Turning that material into decisions usually requires manual review, synthesis, follow-up meetings, spreadsheets, slide decks and execution tracking.
+
+The product was built around that gap: compressing the path from business documents to structured decisions, executive artifacts and operational handoffs.
+
+<p align="center">
+  <img src="docs/assets/product/operating-model.svg" alt="Axiovance operating model" width="100%" />
+</p>
+
+---
+
+## From documents to execution
+
+Axiovance follows a simple operating loop:
+
+1. **Connect** documents from local files or company-controlled storage.
+2. **Analyze** them through structured AI workflows.
+3. **Review** findings, gaps, risks, recommendations and supporting context.
+4. **Decide** with traceable workflow history and artifact lineage.
+5. **Deliver** outputs as decks, Trello cards, Notion records or action plans.
+
+This makes the product useful beyond summarization. It creates a bridge between enterprise documents and business execution.
+
+---
+
+## Built for high-leverage document work
+
+| Team | What Axiovance helps with |
+| --- | --- |
+| Strategy & consulting | Turn reports, market notes and client materials into recommendations, executive decks and action plans. |
+| Legal & compliance | Compare policies, contracts and obligations with risk-oriented, reviewable outputs. |
+| Procurement & operations | Convert vendor documents, requirements and internal procedures into priorities, gaps and execution plans. |
+| HR & talent teams | Review candidates against role briefs with structured, evidence-based assessments. |
+| AI & data teams | Evaluate model behavior, runtime choices and workflow quality through the AI Engineering Lab. |
+| Executive teams | Move from private document repositories to decision-ready summaries, artifacts and handoffs. |
+
+---
+
+## Workflow showcase
+
+The product is organized around repeatable workflows rather than a generic prompt box. Each workflow turns document context into a structured output that can be reviewed, reused and delivered.
+
+### Document Review
+
+<p align="center">
+  <img src="docs/assets/product/document-review.png" alt="Axiovance Document Review workflow output with findings, gaps, risks and recommendations" width="100%" />
+</p>
+
+Turns long business documents into structured findings, gaps, risks and recommendations.
+
+Useful for reports, internal policies, vendor material, operating procedures and strategic notes.
+
+**Output signal:** executive summary, findings, gaps, risks, recommendations and source-aware review context.
+
+---
+
+### Policy / Contract Comparison
+
+<p align="center">
+  <img src="docs/assets/product/policy-comparison.png" alt="Axiovance Policy Comparison workflow with differences, risks and negotiation priorities" width="100%" />
+</p>
+
+Compares two documents and turns differences into decision-ready priorities, risks and negotiation points.
+
+Useful for legal, compliance, procurement, vendor review and internal policy alignment.
+
+**Output signal:** difference summary, must-fix items, business impact, watchouts and negotiation priorities.
+
+---
+
+### Action Plan
+
+<p align="center">
+  <img src="docs/assets/product/action-plan.png" alt="Axiovance Action Plan workflow with actions, priorities, owners and delivery controls" width="100%" />
+</p>
+
+Converts document findings into execution-ready tasks, priorities, owners and follow-up structure.
+
+Useful for operations, PMO, consulting delivery and internal transformation work.
+
+**Output signal:** action items, owners, priority, status, follow-up structure and delivery controls.
+
+---
+
+### Candidate Review
+
+<p align="center">
+  <img src="docs/assets/product/candidate-review.png" alt="Axiovance Candidate Review workflow with role context, evidence, strengths, gaps and recommendation" width="100%" />
+</p>
+
+Evaluates candidate evidence against a role brief and produces a structured, explainable assessment.
+
+Useful for talent teams, hiring managers and AI-assisted screening workflows.
+
+**Output signal:** role context, candidate strengths, gaps, concerns, recommendation and evidence-backed review notes.
+
+---
+
+## Delivery & execution
+
+Axiovance does not stop at analysis.
+
+Workflow outputs can become executive decks, Trello cards, Notion records and action plans - connecting AI-assisted review to the tools where teams actually execute work.
+
+<p align="center">
+  <img src="docs/assets/product/delivery-layer.png" alt="Axiovance delivery layer showing generated executive decks, Trello cards and Notion records" width="100%" />
+</p>
+
+| Delivery output | Why it matters |
+| --- | --- |
+| Executive decks | Turns analysis into a format that leaders can review, present and act on. |
+| Trello cards | Converts findings into trackable operational work. |
+| Notion records | Preserves structured workflow output in a team knowledge system. |
+| Run history | Keeps decisions inspectable after the workflow runs. |
+| Artifact lineage | Connects generated outputs back to workflow context. |
+
+---
+
+## Trust, privacy and enterprise fit
+
+Axiovance was designed for workflows where documents are sensitive, decisions need to be reviewed and outputs must become operational.
+
+The Nextcloud/WebDAV layer simulates a company-controlled document cloud pattern - similar to the way enterprises centralize documents in internal drives, SharePoint-like systems or private storage.
+
+For privacy-sensitive workflows, the stack can be deployed with company-controlled storage and local model runtimes, helping teams keep document review and workflow execution inside a controlled environment.
+
+This matters because enterprise AI workflows need more than fast answers:
+
+- documents should come from controlled repositories;
+- outputs should remain reviewable;
+- decisions should be traceable;
+- public demos should not mutate global state;
+- sensitive workflows should support private deployment paths;
+- delivery should happen through governed artifacts and operational tools.
+
+| Capability | Why it matters |
+| --- | --- |
+| Company-controlled document access | Nextcloud/WebDAV represents the enterprise document cloud pattern. |
+| Local/private deployment path | The stack can run in controlled environments instead of depending only on public SaaS workflows. |
+| Source-grounded outputs | Teams can review why a recommendation was produced. |
+| Run history | Decisions remain inspectable after the workflow runs. |
+| Artifact lineage | Decks and handoffs stay connected to workflow outputs. |
+| Public/admin session model | Public demos can be interactive without corrupting global state. |
+| Runtime controls | Model and provider behavior can be inspected and adjusted. |
+| AI Lab | Evals and benchmarks make workflow quality measurable. |
+
+Generated artifacts are treated as product objects, not one-off downloads: deck packages can include the presentation file, review metadata, source payload, contract JSON and preview assets, while run history keeps each artifact connected to the workflow context that produced it.
+
+---
 
 ## Architecture
 
+Axiovance runs as a multi-service product stack for document workflows, AI runtime control, artifact generation and operational delivery.
+
 <p align="center">
-  <img src="docs/assets/product/architecture-overview.svg" alt="Axiovance product architecture diagram" width="100%" />
+  <img src="docs/assets/product/architecture-overview.svg" alt="Axiovance architecture overview" width="100%" />
 </p>
 
-The active architecture is a five-service product stack: React/Vite frontend, Product API, `ppt-creator`, Nextcloud, and Ollama. The Product API owns workflow execution, RAG/indexing, AI Lab payloads, integration adapters, runtime controls, and the mounted data contract.
+The system separates the product interface, workflow execution, document state, AI runtime, artifact generation and delivery integrations.
 
-### Runtime data contract
+This makes the product easier to run locally, deploy privately and reason about as a real software system instead of a one-off AI demo.
 
-The frontend does not mount product data directly. It talks to the Product API. The Product API owns the mounted data roots:
-
-| Container path | Purpose | Write behavior |
-| --- | --- | --- |
-| `/app/baseline` | Versioned functional baseline and read-only product payload. | Read-only |
-| `/app/runtime` | Active runtime state, caches, logs, RAG stores, integration state, and AI Lab state. | Read/write |
-| `/app/artifacts` | Generated decks, exported files, thumbnails, and workflow artifacts. | Read/write |
-| `/app/users` | Session/user overlays and public/demo state. | Read/write |
-
-The versioned payload lives under `runtime/ai_decision_studio_functional_baseline/oracle_like_data/`. The directory name is historical; the active Docker contracts are local Docker and AWS.
-
-## Runtime Topology
-
-The Docker product stack runs five services:
-
-| Service | Role |
+| Layer | Responsibility |
 | --- | --- |
-| `frontend` | React/Vite build served by Nginx. |
-| `product-api` | Python backend started from `main_product_api.py`. |
-| `ppt-creator` | Presentation rendering/export sidecar. |
-| `nextcloud` | Document repository sidecar for WebDAV import and EvidenceOps demo material. |
-| `ollama` | Local model provider sidecar for local generation and embeddings where enabled. |
+| Frontend workbench | Product UI, workflow execution, review surfaces and delivery controls. |
+| Product API | Workflow orchestration, document state, run history, runtime controls and integrations. |
+| Nextcloud / WebDAV | Company-controlled document cloud simulation and document import layer. |
+| AI runtime | Local or hosted model lanes through Ollama-compatible providers. |
+| Artifact sidecar | Executive deck generation. |
+| Runtime state | Baseline, runtime, artifacts and user overlays. |
 
-The active Compose contracts are intentionally explicit:
-
-| Target | Env file | Compose file | Entrypoint |
-| --- | --- | --- | --- |
-| Local Docker | `.env.docker` | `docker-compose.local.yml` | `scripts/run_local_docker.sh` |
-| AWS | `.env.aws` | `docker-compose.aws.yml` | `scripts/deploy_aws.sh` |
-| Local host development | `.env.local` | none | `scripts/run_local_dev.sh` |
-
-AWS uses a single Compose file. It is not layered on top of the local Compose file.
-
-## Integrations
-
-| Integration | What it does | Notes |
-| --- | --- | --- |
-| Nextcloud | Supplies the document repository used by the import flow and EvidenceOps demo material. | Local Docker and AWS include a Nextcloud sidecar. Golden-baseline restore notes live in `docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md`. |
-| Preindexed import | Activates prebuilt chunks and embeddings for known Nextcloud documents while preserving the normal ingestion UI stages. | Operational notes live in `docs/operations/preindexed-nextcloud-import.md`. |
-| Ollama | Provides the local model sidecar. | Local Docker and AWS deploy scripts can pre-pull `embeddinggemma:300m` through `AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL`. |
-| Trello | Publishes workflow outputs to an operational board. | Requires target credentials and list IDs in the selected env file. |
-| Notion | Publishes workflow outputs to a database. | Requires a Notion integration token and database ID in the selected env file. |
-| OpenAI-compatible APIs | Optional external generation and embedding lanes. | Configured through env/preferences when used. |
-| Hugging Face lanes | Optional local/server/inference provider paths. | Setup notes live in `docs/guides/huggingface-provider-setup.md`. |
+---
 
 ## AI Engineering Lab
 
-The AI Lab is the engineering layer behind the workflow product. It exists to make runtime behavior observable and repeatable.
+The AI Engineering Lab is the operating layer behind Axiovance.
 
-| Lab capability | What it tracks | Representative files |
-| --- | --- | --- |
-| Benchmarks | Retrieval, extraction, embeddings, rerankers, latency, and quality/cost tradeoffs. | `scripts/run_retrieval_extraction_benchmarks.py`, `scripts/run_embedding_benchmark.py`, `docs/assets/phase_4_5/` |
-| Evals | Structured-output, workflow, live-provider, and Phase 8 evaluation records. | `evals/`, `src/evals/`, `.github/workflows/phase8-evals.yml` |
-| Runtime controls | Provider/model selection, RAG settings, budgets, provider readiness, and preference tests. | `src/services/runtime_controls.py`, `src/services/preferences.py`, `frontend/src/pages/RuntimeControlsPage.tsx` |
-| Observability | Runtime snapshots, execution logs, model comparison logs, run history, and artifact lineage. | `src/services/runtime_snapshot.py`, `src/storage/runtime_execution_log.py`, `src/product/telemetry.py` |
-| EvidenceOps | Worklog state, action store, repository snapshots, MCP server, and external targets. | `src/services/evidenceops_*`, `src/mcp/`, `scripts/run_evidenceops_mcp_server.py` |
-| Deck governance | Deck contracts, routing, artifact lifecycle, quality policy, security notes, and test strategy. | `docs/architecture/executive-deck-generation/` |
+It tracks use-case fit, groundedness, adherence, latency, cost signals, routing decisions, workflow regressions and MCP-based evidence operations so the behavior behind the product can be inspected and improved.
 
-## Technology Stack
+
+<p align="center">
+  <img src="docs/assets/product/ai-lab-runtime.webp" alt="Axiovance AI Engineering Lab with runtime observability, benchmarks, evals and MCP-based evidence operations" width="100%" />
+</p>
+
+This makes the product more than a UI around an LLM. It includes the operational layer needed to inspect, compare and improve AI behavior.
+
+---
+
+## Engineering depth
+
+| Challenge | What was built |
+| --- | --- |
+| Turn unstructured documents into structured business decisions | Workflow-specific presenters for review, comparison, planning and candidate evaluation. |
+| Connect enterprise-style document storage to AI workflows | Nextcloud/WebDAV layer for company-controlled document access patterns. |
+| Move from AI output to execution | Deck generation, Trello handoff and Notion publishing. |
+| Support safe public interaction | Public session overlays and admin-only global controls. |
+| Handle production-style workflow execution | Async jobs, polling, timeout recovery, execution quotas and persisted run history. |
+| Operate across environments | Local, Docker and AWS deployment contracts. |
+| Make AI behavior measurable | Evals, benchmarks, runtime controls and model comparison. |
+| Operate evidence and tool readiness | MCP / evidence operations layer with JSON-RPC stdio tooling, repository readiness checks and operational evidence surfaces. |
+| Preserve reviewability | Run history, artifact lineage and source-grounded outputs. |
+
+---
+
+## Technology stack
 
 | Layer | Technologies |
 | --- | --- |
 | Frontend | React 18, TypeScript 5, Vite 5, Tailwind CSS, React Router, TanStack Query, Radix primitives, Framer Motion, Zustand, Recharts, React Hook Form, Zod, lucide-react, cmdk, Sonner. |
-| Product API | Python 3.11, standard-library HTTP server, Pydantic, python-dotenv, local filesystem state, SQLite-backed stores where needed. |
-| AI and RAG | Ollama, OpenAI/OpenAI-compatible APIs, Hugging Face provider lanes, LangChain Community, LangChain Chroma, LangChain Text Splitters, LangGraph, ChromaDB, PyPDF, Pillow, NumPy. |
-| Artifacts | ppt-creator sidecar, ReportLab, Matplotlib, presentation export services, artifact lineage and generated deck contracts. |
-| Operations | Docker Compose, AWS deployment, readiness scripts, smoke checks, deployment bundle builder, backup/restore notes. |
-| Quality | Vitest, Playwright, ESLint, Python test gate, readiness checks, benchmark runners, eval workflows. |
+| Product API | Python 3.12, Pydantic, python-dotenv, workflow presenters, local filesystem state, runtime services and integration adapters. |
+| AI and RAG | Ollama-compatible providers, OpenAI/OpenAI-compatible APIs, Hugging Face provider lanes, LangChain Community, LangChain Chroma, LangChain Text Splitters, LangGraph, ChromaDB, PyPDF, Pillow, NumPy. |
+| Documents | Product document library, RAG/indexing state, Nextcloud/WebDAV import and preindexed fast-import paths. |
+| Artifacts | `ppt-creator` sidecar, presentation export services, generated deck contracts and artifact lineage. |
+| MCP / evidence operations | JSON-RPC stdio tooling, repository readiness checks and operational evidence surfaces. |
+| Integrations | Nextcloud, Trello, Notion and provider/runtime connection surfaces. |
+| Operations | Docker Compose, AWS EC2 deployment, readiness scripts, smoke checks, deployment bundle builder, backup/restore notes. |
+| Quality | Vitest, Playwright, ESLint, Python test gates, readiness checks, benchmark runners and eval workflows. |
 
-The current deployable Python dependency contract is a single lean `requirements.txt`. Older heavyweight dependency sets for Docling, local Transformers, sentence-transformers, and earlier Evidence CV experiments are preserved under `legacy/requirements/`.
 
-## Repository Map
+---
 
+## Repository map
 ```text
 .
 |-- frontend/                  # React/Vite product frontend
-|-- src/product/               # Product API models, services, presenters, lab payloads
-|-- src/rag/                   # Loaders, chunking, retrieval, vector store, LangChain adapter
-|-- src/providers/             # Ollama, OpenAI-compatible, and Hugging Face provider registry
-|-- src/services/              # Runtime controls, preferences, export, EvidenceOps, snapshots
-|-- src/storage/               # Runtime paths, history, eval stores, logs, secret state
+|-- src/product/               # Product API models, services, presenters and lab payloads
+|-- src/rag/                   # Loaders, chunking, retrieval, vector store and LangChain adapter
+|-- src/providers/             # Ollama, OpenAI-compatible and Hugging Face provider registry
+|-- src/services/              # Runtime controls, preferences, export, evidence operations and snapshots
+|-- src/storage/               # Runtime paths, history, eval stores, logs and secret state
 |-- src/evals/                 # Evaluation logic and thresholds
-|-- src/evidence_cv/           # Historical/current evidence-grounded CV extraction pipeline
-|-- src/mcp/                   # EvidenceOps MCP server and JSON-RPC stdio
-|-- docs/                      # Product, architecture, deployment, operations, reference docs
+|-- src/evidence_cv/           # Evidence-grounded CV extraction and review pipeline
+|-- src/mcp/                   # MCP server, JSON-RPC stdio tooling and operational evidence surfaces
+|-- docs/                      # Product, architecture, deployment, operations and reference docs
 |-- evals/                     # Tracked eval fixtures and benchmark configs
-|-- scripts/                   # Deployment, readiness, eval, benchmark, and reporting commands
-|-- runtime/                   # Versioned functional baseline payload
-|-- legacy/                    # Historical Streamlit, Gradio, Oracle, and heavy dependency material
+|-- scripts/                   # Deployment, readiness, eval, benchmark and reporting commands
+|-- runtime/                   # Sanitized functional baseline used for demo/readiness state
+|-- legacy/                    # Historical prototypes and archived implementation material
 |-- main_product_api.py        # Current backend entrypoint
 |-- docker-compose.local.yml   # Local Docker product stack
-|-- docker-compose.aws.yml # AWS product stack
+|-- docker-compose.aws.yml     # AWS product stack
 |-- Dockerfile.frontend
 |-- Dockerfile.product-api.local
 |-- Dockerfile.product-api.aws
@@ -202,155 +373,181 @@ The current deployable Python dependency contract is a single lean `requirements
 `-- README.md
 ```
 
+---
+
 ## Quickstart
 
-### Prerequisites
-
-- Python 3.11
-- Node.js and npm
-- Docker with the Compose plugin
-- Enough disk for Docker volumes, Nextcloud, Ollama models, and generated artifacts
-
-### 1. Install dependencies
+### 1. Clone and enter the repository
 
 ```bash
-pip install -r requirements.txt
-npm --prefix frontend install
+git clone https://github.com/danyellambert/ai-workbench-local.git
+cd ai-workbench-local
 ```
 
-### 2. Run local host development
+### 2. Install prerequisites
+
+Axiovance can be run either through Docker or directly on the host.
+
+For the Docker path, install Docker and make sure it is running. The Docker build installs the backend and frontend dependencies inside the containers.
+
+For host local development, prepare the Python and frontend dependencies first:
 
 ```bash
-cp .env.local.example .env.local
+python3 -m venv .venv
+source .venv/bin/activate
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+npm --prefix frontend ci
+```
+The local development script starts the backend and frontend together, but it does not install dependencies automatically.
+
+### 3. Prepare environment files
+
+Start from the example files and create local/private environment files as needed.
+
+```bash
+cp .env.local.example .env.local 2>/dev/null || true
+cp .env.docker.example .env.docker 2>/dev/null || true
+```
+
+Keep real secrets out of Git. Only `.example` files should be committed.
+
+### 4. Configure private runtime settings
+
+The public repository intentionally does not include private credentials, external account identifiers or runtime state.
+
+The Quickstart starts the product stack, but full local feature coverage requires user-owned configuration for admin access, session signing, Nextcloud/WebDAV, hosted model providers, Trello publishing and Notion publishing.
+
+For the complete setup, see:
+
+```text
+docs/deployment/FULL_LOCAL_PRODUCT_SETUP.md
+```
+
+At minimum, keep real values only in uncommitted .env.local, .env.docker or .env.aws files. Only .example files should be committed.
+
+
+### 5. Run in local development mode
+
+```bash
 ENV_FILE=.env.local scripts/run_local_dev.sh
 ```
 
-For a non-blocking contract check:
+This starts the Product API at:
 
-```bash
-ENV_FILE=.env.local.example scripts/run_local_dev.sh --check
+```text
+http://127.0.0.1:8011/health
 ```
 
-### 3. Run the local Docker product stack
+and the Vite frontend at:
 
-```bash
-cp .env.docker.example .env.docker
-ENV_FILE=.env.docker scripts/run_local_docker.sh --config-only
-ENV_FILE=.env.docker scripts/run_local_docker.sh
+```text
+http://127.0.0.1:5173
 ```
 
-The local Docker script resolves local data roots, starts the five-service stack, and ensures the configured Ollama embedding model is available unless disabled with `SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1`.
+### 6. Run the local Docker product stack
 
-### 4. Deploy the AWS stack
+The Docker path does not require a local Python virtual environment or local frontend dependencies.
 
-Use the AWS runbooks for a fresh host or redeploy:
+For a fresh public clone without the private Nextcloud golden-baseline archive, skip the private baseline restore and configure your own Nextcloud workspace through the full setup guide.
 
-- `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`
-- `docs/deployment/aws-deploy.md`
-- `docs/deployment/REDEPLOY_FAST_PATH.md`
-- `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md`
-
-The operational contract is:
 
 ```bash
-cp .env.aws.example .env.aws
-scripts/deploy_aws.sh
-scripts/smoke_aws.sh
+ENV_FILE=.env.docker scripts/run_local_docker.sh --down
+SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE=1 ENV_FILE=.env.docker scripts/run_local_docker.sh
 ```
 
-Run those commands on the prepared deployment host after the bundle and env file are in place.
+Then open:
+
+```text
+http://127.0.0.1:8071
+```
+
+### 7. Check product health
+
+```bash
+BASE_URL="http://127.0.0.1:8071"
+curl -fsS "$BASE_URL/health" | python3 -m json.tool
+```
+
+---
 
 ## Validation
 
-The fastest current confidence path is:
+Use these checks to confirm that the product builds and the local service is reachable.
+
+### Backend syntax check
 
 ```bash
-npm --prefix frontend run test
-npm --prefix frontend run build
-scripts/run_current_test_gate.sh
-scripts/readiness_multi_environment_contract_check.sh
-ENV_FILE=.env.docker.example scripts/run_local_docker.sh --config-only
-docker compose --env-file .env.aws.example -p ai-decision-studio-contract-aws -f docker-compose.aws.yml config
+python3 -m py_compile main_product_api.py src/product/api.py src/product/service.py
 ```
 
-Additional focused checks are available for AWS env contracts, Nextcloud golden baseline assumptions, required integrations, required providers, AI Lab content, EvidenceOps cache, Candidate Review, presentation export, and frontend surface parity. See `scripts/README.md` for the complete catalog.
+### Frontend build check
 
-### CI workflows
+```bash
+npm --prefix frontend run build
+```
 
-| Workflow | File | Purpose |
-| --- | --- | --- |
-| Product CI | `.github/workflows/product-ci.yml` | Validates the current Product API, frontend test/build path, and Docker/AWS compose contracts. |
-| Phase 8 evals | `.github/workflows/phase8-evals.yml` | Runs tracked evaluation fixtures without live provider dependencies. |
-| Phase 8 live evals | `.github/workflows/phase8-evals-live.yml` | Preserves the live-provider eval lane for intentional provider-backed runs. |
+### Product health check
 
-## API Surface
+After starting the local or Docker stack:
 
-The active Product API is intentionally workflow-oriented. The most important routes are:
+```bash
+BASE_URL="http://127.0.0.1:8071"
+curl -fsS "$BASE_URL/health" | python3 -m json.tool
+```
 
-| Route | Purpose |
+### Optional frontend test suite
+
+```bash
+npm --prefix frontend run test -- --run
+```
+
+Deeper readiness checks for public/admin session isolation, deployment contracts, overlays and runtime policy belong in the operational documentation under `docs/ops/`.
+
+---
+
+## API surface
+
+Core product endpoints include:
+
+| Area | Endpoint pattern |
 | --- | --- |
-| `GET /health` | Service health. |
-| `GET /api/product/workflows` | Workflow catalog contract. |
-| `GET /api/product/documents` | Indexed document catalog. |
-| `GET /api/product/document-library` | Aggregated document library payload. |
-| `POST /api/product/upload-documents` | Upload and index documents into the product corpus. |
-| `POST /api/product/delete-documents` | Remove indexed documents. |
-| `GET /api/product/command-center` | Aggregated command-center payload. |
-| `GET /api/product/run-history` | Recent workflow execution history. |
-| `GET /api/product/artifacts` | Recent generated artifacts. |
-| `GET /api/product/grounding-preview` | Grounded context preview. |
-| `POST /api/product/run-workflow` | Execute a product workflow. |
-| `POST /api/product/generate-deck` | Generate a workflow executive deck. |
-| `POST /api/product/publish-to-trello` | Publish workflow output to Trello. |
-| `POST /api/product/publish-to-notion` | Publish workflow output to Notion. |
-| `GET /api/lab/overview` | AI Lab overview payload. |
-| `GET /api/lab/runtime` | Runtime observability payload. |
-| `GET /api/lab/benchmarks` | Benchmark payloads. |
-| `GET /api/lab/evals` | Eval diagnosis payloads. |
-| `GET /api/lab/evidenceops` | EvidenceOps state. |
-| `GET /api/runtime/controls` | Runtime controls payload. |
-| `GET /api/preferences` | Preferences and connection configuration payload. |
+| Health | `/health` |
+| Auth/session | `/api/auth/session`, `/api/auth/admin/login`, `/api/auth/logout` |
+| Documents | `/api/product/documents`, document upload/import routes |
+| Workflows | `/api/product/run-workflow`, `/api/product/run-history` |
+| Runtime | provider/runtime preference and readiness routes |
+| Artifacts | deck/artifact generation and retrieval routes |
+| Integrations | Trello, Notion and Nextcloud/WebDAV routes |
 
-## Documentation Map
+The API is designed around product workflows rather than one-off prompt calls.
 
-| Topic | Start here |
+---
+
+## Further documentation
+
+| Document | Purpose |
 | --- | --- |
-| Product overview | `docs/product/overview.md` |
-| Product vs AI Lab framing | `docs/product/two-track-positioning.md` |
-| Current product surface | `docs/architecture/current-product-surface.md` |
-| Data payload and mounted roots | `docs/architecture/data-payload.md` |
-| Local Docker | `docs/deployment/local-docker-compose.md` |
-| AWS deployment | `docs/deployment/aws-deploy.md` |
-| Fresh AWS EC2 bootstrap | `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md` |
-| Multi-environment contract | `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md` |
-| Python dependency contract | `docs/deployment/python-dependencies.md` |
-| Nextcloud golden baseline | `docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md` |
-| Preindexed Nextcloud import | `docs/operations/preindexed-nextcloud-import.md` |
-| Backup and restore | `docs/operations/backup-and-restore.md` |
-| Executive deck generation | `docs/architecture/executive-deck-generation/README.md` |
-| EvidenceOps architecture | `docs/architecture/evidenceops/README.md` |
-| Evals and benchmarks | `docs/architecture/evals/README.md` |
-| Script catalog | `scripts/README.md` |
-| Eval workspace | `evals/README.md` |
-| Project chronology | `ROADMAP.md` |
+| `docs/REVIEWER_GUIDE.md` | Short path for reviewing the product, architecture and validation quickly. |
+| `docs/architecture/COMPLETE_ARCHITECTURE_BRIEF.md` | Detailed architecture and service responsibilities. |
+| `docs/deploy/` | Deployment notes and environment contracts. |
+| `docs/ops/` | Operational checks, readiness and runbooks. |
+| `docs/assets/product/` | Product visuals used by this README. |
+| `docs/deployment/FULL_LOCAL_PRODUCT_SETUP.md` | Complete local setup for private env values, Nextcloud/WebDAV, admin access, hosted providers, Trello and Notion. |
 
-## Visual Capture Slots
+---
 
-Recommended product media assets:
+## Name
 
-| Slot | Suggested path | Recommended capture |
-| --- | --- | --- |
-| Hero workflow GIF | `docs/assets/product/hero-workflow-run.gif` | Landing page, guided tour, document import, Document Review run, generated evidence output, and Deck Center artifact. |
-| Product shell screenshot | `docs/assets/product/product-shell.png` | Sidebar, command palette or runtime drawer, and the main workbench layout. |
-| Document Review screenshot | `docs/assets/product/document-review.png` | Grounded findings, risks, recommendations, and source context. |
-| Policy Comparison screenshot | `docs/assets/product/policy-comparison.png` | Difference summary, impact notes, and evidence-backed findings. |
-| Action Plan screenshot | `docs/assets/product/action-plan.png` | Action items, owners/status language, and publish controls. |
-| Candidate Review screenshot | `docs/assets/product/candidate-review.png` | Candidate signal, evidence, strengths, gaps, and recommendation output. |
-| Nextcloud import GIF | `docs/assets/product/nextcloud-import.gif` | Import from Nextcloud, staged ingestion progress, and indexed document appearing in the library. |
-| Deck generation GIF | `docs/assets/product/deck-generation.gif` | Generate deck, artifact appears, preview/download path. |
-| AI Lab screenshot | `docs/assets/product/ai-lab-overview.png` | Benchmark/eval summary, runtime controls, and observability cards. |
-| Integration screenshots | `docs/assets/product/trello-notion-delivery.png` | Published Trello card and Notion database entry generated from a workflow output. |
+Axiovance combines **axiom** - a principle that can be reasoned from - with **avance**, the French word for forward movement and progress.
+
+The name reflects the product’s core idea: using grounded evidence to help teams move from document-heavy analysis to decisions they can review, defend and execute.
+
+---
 
 ## License
 
-This project is released under the [MIT License](LICENSE).
+MIT License. See [`LICENSE`](LICENSE).
