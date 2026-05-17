@@ -21,16 +21,13 @@ __pycache__/
 node_modules/
 artifacts/
 outputs/
-materials_local/
 .vscode/
-old/auxiliar.py
 benchmark_runs/*
 !benchmark_runs/.gitkeep
 !benchmark_runs/README.md
 benchmark_pdfs/*
 !benchmark_pdfs/.gitkeep
 !benchmark_pdfs/README.md
-old/
 diagnostics/
 data/
 docs/deployment/aws-cost-audit.md
@@ -43,13 +40,8 @@ data/*
 !data/materials_demo/
 data/materials_demo/*
 historico/
-.clinerules
 
 src/structured/s
-s.txt
-proximos_passos.md
-implementation_plan.md
-implementation_task_draft.md
 screenshots_ai_lab
 screenshots_frontend
 screenshots_gradio
@@ -66,14 +58,10 @@ runtime-state-diagnosis*.txt
 test-results/
 .env.oracle
 .env.docker.local
-ads-local-restore.override.yml
 # Nextcloud runtime/golden state must stay outside Git
 nextcloud-golden-baseline*.tar.gz
-nextcloud_golden_baseline/
-nextcloud_volume_backups/
 # AI Lab runtime/golden state must stay outside Git
 ai-lab-golden-state*.tar.gz
-ai_lab_golden_state/
 
 # Environment contracts: real env files stay local/host-only.
 .env
@@ -135,16 +123,11 @@ runtime/
 .chroma_rag/
 artifacts/
 outputs/
-materials_local/
 
 # Local screenshots and scratch notes
 screenshots_ai_lab/
 screenshots_gradio/
 screenshots_frontend/
-implementation_plan.md
-implementation_task_draft.md
-proximos_passos.md
-s.txt
 
 # Local provider/eval/debug databases and logs
 .chat_history.json
@@ -176,7 +159,6 @@ data/*
 data/materials_demo/*
 
 # Local legacy scratch
-old/auxiliar.py
 
 # Diagnostics caches
 diagnostics/__pycache__/
@@ -204,7 +186,6 @@ runtime/ai_decision_studio_functional_baseline/oracle_like_data/*
 
 # Keep local noise and backup archives out even inside the deploy payload.
 runtime/ai_decision_studio_functional_baseline/oracle_like_data/**/.DS_Store
-runtime/ai_decision_studio_functional_baseline/oracle_like_data/backups/
 runtime/ai_decision_studio_functional_baseline/oracle_like_data/backups/**
 
 # Local eval and benchmark workspaces kept out of the public repo root
@@ -242,19 +223,14 @@ docs/assets/product/*
 !docs/assets/product/hero-decision-loop
 !docs/assets/product/delivery-layer.png
 !docs/assets/product/ai-lab-runtime.webp
-frontend/public/favicon2.svg
 
 # Private credential stores / local secrets
 /secrets/
 /runtime/private_secrets/
-ai_decision_studio_private_secrets/
 **/credential_store.json
 **/*credential*store*.json
 **/*secret*store*.json
 
-README_AI_DECISION_STUDIO_PREMIUM_V2.md
-README_AI_DECISION_STUDIO_PREMIUM.md
-README_AXIOVANCE_PREMIUM_V3.md
 
 # Local/private product usage telemetry logs
 runtime/**/usage_events.jsonl
