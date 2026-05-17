@@ -24,7 +24,7 @@ from src.structured.envelope import TaskExecutionRequest
 from src.structured.service import structured_service
 
 
-FIXTURE_DEFAULT = PROJECT_ROOT / "phase5_eval" / "fixtures" / "06_checklist_who_surgical_gold.json"
+FIXTURE_DEFAULT = PROJECT_ROOT / "evals" / "phase5" / "fixtures" / "06_checklist_who_surgical_gold.json"
 REPORTS_DIR = PROJECT_ROOT / "phase5_eval" / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 EVAL_DB_PATH = get_phase8_eval_db_path(PROJECT_ROOT)
