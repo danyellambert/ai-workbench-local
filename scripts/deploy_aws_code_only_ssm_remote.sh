@@ -27,6 +27,8 @@ NEW_APP_PARENT="$STAGE/new_app"
 APP_BACKUP_ROOT="$DEPLOY_ROOT/backups"
 APP_BACKUP="$APP_BACKUP_ROOT/app_before_${RELEASE_ID}.tar.gz"
 
+trap 'rm -rf "$STAGE"' EXIT
+
 ARCHIVE_PATH="$BUNDLE_PARENT/ai-decision-studio-app-bundle.tar.gz"
 BUNDLE_ROOT="$BUNDLE_PARENT/ai-decision-studio-app-bundle"
 
@@ -45,6 +47,10 @@ echo "app_dir=$APP_DIR"
 echo "stage=$STAGE"
 
 section "1. Host preflight"
+
+section "1a. Clean previous SSM staging leftovers"
+rm -rf /tmp/ads_ssm_code_only_* || true
+
 hostname
 whoami
 date -u +%Y-%m-%dT%H:%M:%SZ
@@ -58,7 +64,12 @@ command -v docker >/dev/null
 docker compose version
 
 FREE_KB="$(df --output=avail -k / | tail -n 1 | tr -d ' ')"
-MIN_FREE_KB="${AWS_CODE_ONLY_MIN_FREE_KB:-3000000}"
+
+if [ "$MODE" = "--dry-run" ]; then
+  MIN_FREE_KB="${AWS_CODE_ONLY_MIN_FREE_KB:-1572864}"
+else
+  MIN_FREE_KB="${AWS_CODE_ONLY_MIN_FREE_KB:-3000000}"
+fi
 
 echo "free_kb=$FREE_KB"
 echo "min_free_kb=$MIN_FREE_KB"
