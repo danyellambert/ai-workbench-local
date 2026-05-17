@@ -71,6 +71,15 @@ command -v rsync >/dev/null
 command -v docker >/dev/null
 docker compose version
 
+echo
+echo "== 1b. Preflight Docker cleanup, no volumes =="
+docker builder prune -af || true
+docker container prune -f || true
+docker image prune -a -f || true
+
+df -h /
+docker system df || true
+
 FREE_KB="$(df --output=avail -k / | tail -n 1 | tr -d ' ')"
 
 if [ "$MODE" = "--dry-run" ]; then
