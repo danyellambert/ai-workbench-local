@@ -231,6 +231,15 @@ echo "== Ensure Ollama embedding model =="
 
 ensure_ollama_embedding_model
 
+echo
+echo "== Pre-build Docker cleanup =="
+docker builder prune -af || true
+docker container prune -f || true
+docker image prune -a -f || true
+
+df -h /
+docker system df || true
+
 DOCKER_BUILDKIT=1 docker compose \
   --env-file "$ENV_FILE" \
   -p "$PROJECT_NAME" \
