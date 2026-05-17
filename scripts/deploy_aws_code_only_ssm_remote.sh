@@ -12,6 +12,11 @@ REPO="${REPO:-danyellambert/ai-workbench-local}"
 DEPLOY_SHA="${DEPLOY_SHA:?DEPLOY_SHA is required}"
 APP_DIR="${APP_DIR:-/opt/ai-decision-studio/app}"
 APP_USER="${APP_USER:-ubuntu}"
+SSM_DEPLOY_VERBOSE="${SSM_DEPLOY_VERBOSE:-0}"
+
+verbose() {
+  [ "$SSM_DEPLOY_VERBOSE" = "1" ]
+}
 
 DEPLOY_ROOT="$(dirname "$APP_DIR")"
 DATA_ROOT="${DATA_ROOT:-$DEPLOY_ROOT/data}"
@@ -51,8 +56,11 @@ section "1. Host preflight"
 section "1a. Clean previous SSM staging leftovers"
 rm -rf /tmp/ads_ssm_code_only_* || true
 
-hostname
-whoami
+if verbose; then
+  hostname
+fi
+
+echo "user=$(whoami)"
 date -u +%Y-%m-%dT%H:%M:%SZ
 df -h /
 
@@ -95,7 +103,7 @@ for p in \
   "$APP_DIR/.env.aws"
 do
   if [ -e "$p" ]; then
-    echo "OK $p"
+    echo "OK persistent path"
   else
     echo "MISSING $p" >&2
     exit 10
@@ -104,8 +112,8 @@ done
 
 echo
 echo "-- permissions --"
-stat -c "%a %U:%G %n" "$SECRET_ROOT"
-stat -c "%a %U:%G %n" "$APP_DIR/.env.aws"
+echo "secret_root_permissions=$(stat -c "%a %U:%G" "$SECRET_ROOT")"
+echo "env_aws_permissions=$(stat -c "%a %U:%G" "$APP_DIR/.env.aws")"
 
 test "$(stat -c %a "$SECRET_ROOT")" = "700"
 test "$(stat -c %a "$APP_DIR/.env.aws")" = "600"
@@ -120,11 +128,15 @@ for v in \
   ai-decision-studio_ppt_creator_workspace
 do
   docker volume inspect "$v" >/dev/null
-  echo "OK $v"
+  echo "OK docker volume"
 done
 
 echo
-docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+if verbose; then
+  docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+else
+  echo "Docker container listing hidden. Set SSM_DEPLOY_VERBOSE=1 for detailed diagnostics."
+fi
 
 section "4. Current health"
 curl -fsS http://127.0.0.1:8071/health || true

@@ -13,6 +13,7 @@ AWS_EC2_INSTANCE_ID="${AWS_EC2_INSTANCE_ID:?AWS_EC2_INSTANCE_ID is required}"
 AWS_DEPLOY_APP_DIR="${AWS_DEPLOY_APP_DIR:?AWS_DEPLOY_APP_DIR is required}"
 REPO="${REPO:-danyellambert/ai-workbench-local}"
 DEPLOY_SHA="${DEPLOY_SHA:-$(git rev-parse HEAD)}"
+SSM_DEPLOY_VERBOSE="${SSM_DEPLOY_VERBOSE:-0}"
 
 REMOTE_SCRIPT="/tmp/axiovance_ssm_deploy_${DEPLOY_SHA:0:12}.sh"
 REMOTE_SCRIPT_URL="https://raw.githubusercontent.com/${REPO}/${DEPLOY_SHA}/scripts/deploy_aws_code_only_ssm_remote.sh"
@@ -37,6 +38,7 @@ repo = "$REPO"
 deploy_sha = "$DEPLOY_SHA"
 app_dir = "$AWS_DEPLOY_APP_DIR"
 mode = "$MODE"
+ssm_deploy_verbose = "$SSM_DEPLOY_VERBOSE"
 remote_script = "$REMOTE_SCRIPT"
 remote_script_url = "$REMOTE_SCRIPT_URL"
 
@@ -51,6 +53,7 @@ echo "Running SSM remote deploy script"
 REPO="{repo}" \\
 DEPLOY_SHA="{deploy_sha}" \\
 APP_DIR="{app_dir}" \\
+SSM_DEPLOY_VERBOSE="{ssm_deploy_verbose}" \\
 bash "{remote_script}" "{mode}"
 '''.strip()
 
