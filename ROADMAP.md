@@ -1029,6 +1029,242 @@ Current open work:
 - optional public domain/HTTPS decision for demo;
 - final proof that preindexed Nextcloud fast import works end to end with the prepared corpus.
 
+### Phase 15 - Public Product Identity, Branding, and Repository Presentation
+
+Purpose:
+
+- make the public repository surface read like the current product rather than a collection of earlier experiments.
+
+Completed work:
+
+- promoted the current Axiovance product identity while preserving the AI Decision Studio engineering identity where it explains the system architecture;
+- rebuilt the README around a product-first narrative, current stack badges, Keystone header, architecture overview, workflow screenshots, and current validation paths;
+- curated canonical product assets under `docs/assets/product`, keeping only the active architecture overview and README header in the public asset set;
+- added workflow screenshots for the current React/Vite product surface;
+- added complete architecture notes for the five-service Docker contract, external providers, delivery integrations, and runtime boundaries;
+- aligned README and docs language with the active product surface instead of historical Streamlit, Gradio, Oracle-only, or heavy-requirements paths;
+- added public site metadata, robots, sitemap, Open Graph assets, favicon variants, and product tagline updates for the deployed web surface.
+
+Current status:
+
+- the repository now has a coherent product entry point, public visual identity, and current architecture narrative;
+- legacy research and old runtime paths remain preserved without being presented as the active product contract.
+
+Primary references:
+
+- `README.md`;
+- `docs/product/overview.md`;
+- `docs/architecture/current-product-surface.md`;
+- `docs/architecture/COMPLETE_ARCHITECTURE_BRIEF.md`;
+- `docs/assets/product/architecture-overview.svg`;
+- `docs/assets/product/readme-header.svg`;
+- `legacy/docs/phases/publication-and-positioning.md`.
+
+### Phase 16 - Public/Admin Runtime Policy and Demo Safety
+
+Purpose:
+
+- separate public demo behavior from admin behavior so the product can be demonstrated safely without changing the core workflows.
+
+Completed work:
+
+- added public session overlays so public visitors write only to isolated session state instead of global runtime state;
+- added admin boundaries for credential changes, publishing actions, private analytics, and global runtime operations;
+- introduced public execution quotas and rolling quota UI so long-running workflows are controlled from the product surface;
+- added an in-flight execution gate to prevent overlapping public workflow submissions;
+- added deck-generation rate limiting for public sessions;
+- preserved admin-mode access to global run history, private analytics, runtime controls, delivery credentials, and publish operations;
+- documented the split between baseline data, runtime state, artifacts, and user/session overlays.
+
+Current status:
+
+- public use is constrained by session, quota, and publish boundaries;
+- admin use keeps the full operational surface for validation, analytics, and delivery workflows.
+
+Primary references:
+
+- `docs/product/overview.md`;
+- `docs/architecture/current-product-surface.md`;
+- `docs/ops/PUBLIC_EXECUTION_QUOTA.md`;
+- `docs/ops/PUBLIC_EXECUTION_GATE.md`;
+- `docs/ops/PUBLIC_DECK_RATE_LIMIT.md`;
+- `docs/operations/engineering-controls.md`;
+- `src/product/public_execution_quota.py`;
+- `src/product/public_execution_gate.py`;
+- `src/product/deck_rate_limit.py`;
+- `src/storage/product_usage_events.py`.
+
+### Phase 17 - Cloud Deployment Hardening and Domain-Ready AWS Operation
+
+Purpose:
+
+- make the AWS deployment path a first-class product deployment rather than an inherited local override.
+
+Completed work:
+
+- renamed the inherited AWS deployment path and aligned it with the current product dependency contract;
+- moved AWS to a single compose file, `docker-compose.aws.yml`, with no local compose layering;
+- added Caddy as the domain-ready reverse proxy and TLS termination layer for AWS operation;
+- attached Caddy to the private Docker network so the frontend remains the only public application entry point;
+- added deployment-bundle checks so deploy archives do not contain local runtime, backups, secrets, or ignored state;
+- added AWS baseline restore automation for Nextcloud, runtime payloads, and mounted product data;
+- added Docker socket access checks and remote cleanup steps to improve EC2 redeploy reliability;
+- added credential-store mounting so secrets can live in private runtime storage instead of source control;
+- kept local Docker and AWS on separate compose contracts while preserving the same five-service architecture.
+
+Current status:
+
+- local Docker and AWS use parallel deployment contracts with the same product services and a separate public ingress story for AWS;
+- custom domain and TLS operation are prepared through Caddy and DNS, while the domain itself remains an environment decision.
+
+Primary references:
+
+- `docs/deployment/local-docker-compose.md`;
+- `docs/deployment/aws-deploy.md`;
+- `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`;
+- `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md`;
+- `docs/deployment/deployment-evolution.md`;
+- `docker-compose.local.yml`;
+- `docker-compose.aws.yml`;
+- `deploy/caddy/Caddyfile`;
+- `scripts/deploy_aws.sh`;
+- `scripts/smoke_aws.sh`.
+
+### Phase 18 - Product Workflow Reliability and Long-running Execution
+
+Purpose:
+
+- make long-running AI workflows behave like product operations with visible progress, recoverable polling, and durable outputs.
+
+Completed work:
+
+- added async workflow polling for long-running workflow execution;
+- added timeout recovery so the UI can continue tracking a run instead of treating slow provider calls as lost work;
+- improved export progress for deck generation and Policy Comparison deck readiness;
+- refined Workflow Publish actions so Trello, Notion, and artifact delivery previews fit the current workflow result surface;
+- added browser-local timestamp rendering for runtime history while keeping persisted timestamps canonical;
+- added current workflow screenshots and visual documentation for Product pages and AI Lab pages;
+- continued to separate grounded context inspection from normal workflow review so users can inspect evidence without overloading the default flow.
+
+Current status:
+
+- workflows now expose a more reliable run lifecycle from selection through grounding, analysis, review, export, and publish;
+- old runs remain available through compatibility paths, while current runs use the newer product presenters and delivery contracts where available.
+
+Primary references:
+
+- `docs/product/product-evolution.md`;
+- `docs/architecture/current-product-surface.md`;
+- `src/product/service.py`;
+- `src/product/presenters.py`;
+- `src/product/action_plan_presenter.py`;
+- `src/product/candidate_review_presenter.py`;
+- `frontend/src/pages/ComparisonPage.tsx`;
+- `frontend/src/pages/ActionPlanPage.tsx`;
+- `frontend/src/pages/CandidateReviewPage.tsx`;
+- `frontend/src/components/product/WorkflowPublishActions.tsx`.
+
+### Phase 19 - Delivery Layer and External Integration Productization
+
+Purpose:
+
+- turn document repositories, handoff tools, and deck generation into integrated product delivery paths.
+
+Completed work:
+
+- productized Nextcloud/WebDAV import and sync paths for the demo document repository;
+- documented preindexed Nextcloud and golden-baseline restore behavior;
+- improved Trello preview and publish flows so planned cards can be inspected before external delivery;
+- improved Notion preview and publish flows so memo/register sections can be reviewed before publishing;
+- added a PPT Creator sidecar so deck contracts become PPTX files, previews, and export metadata without bloating the Product API container;
+- added delivery contracts connecting workflow results to Trello, Notion, Nextcloud, and generated artifacts;
+- renamed EvidenceOps MCP labels to MCP Operations where the UI refers to operational actions rather than the old project label.
+
+Current status:
+
+- delivery remains optional and credential-gated;
+- the active product can run without external publish credentials, then publish to configured targets when admin credentials are present.
+
+Primary references:
+
+- `docs/architecture/evidenceops/integration-trajectory.md`;
+- `docs/operations/preindexed-nextcloud-import.md`;
+- `docs/deployment/NEXTCLOUD_GOLDEN_BASELINE_RESTORE.md`;
+- `docs/architecture/executive-deck-generation/README.md`;
+- `services/ppt_creator_app/ppt_creator/api.py`;
+- `src/product/integration_hub.py`;
+- `frontend/src/components/product/WorkflowPublishActions.tsx`.
+
+### Phase 20 - AI Lab, Provider Controls, Evals, and Runtime Observability
+
+Purpose:
+
+- preserve the AI-engineering layer that explains how provider choices, evals, benchmarks, diagnostics, and runtime state are measured.
+
+Completed work:
+
+- added Ollama Hosted discovery so hosted Ollama-compatible models can be listed dynamically;
+- kept local Ollama as the embedding sidecar path for `embeddinggemma` while allowing hosted generation providers through Runtime Controls;
+- improved provider diagnostics and model comparison surfaces;
+- added eval typing and live verdict labels for clearer evaluation status;
+- kept benchmarks, evals, workflow inspector, experiment artifacts, Actions DB, and telemetry logs under the AI Lab surface;
+- added private usage analytics for admin visibility into sessions, sources, referrers, clicks, and usage attribution;
+- improved runtime timeline timestamps so stored UTC values render in the browser-local view.
+
+Current status:
+
+- AI Lab is the engineering and observability surface for understanding what ran, with which model/provider, against which documents, and what artifacts were produced;
+- historical eval and benchmark research remains preserved under legacy/reference documentation.
+
+Primary references:
+
+- `docs/architecture/evals/ai-engineering-trajectory.md`;
+- `docs/architecture/evals/README.md`;
+- `docs/architecture/evidenceops/README.md`;
+- `docs/product/overview.md`;
+- `frontend/src/pages/RuntimeObservabilityPage.tsx`;
+- `frontend/src/pages/EvalsDiagnosisPage.tsx`;
+- `frontend/src/pages/BenchmarksPage.tsx`;
+- `frontend/src/pages/ModelComparisonPage.tsx`;
+- `frontend/src/pages/AdminUsagePage.tsx`;
+- `src/providers/ollama_provider.py`;
+- `src/providers/registry.py`;
+- `src/product/telemetry.py`;
+- `src/storage/product_usage_events.py`.
+
+### Phase 21 - Publication Readiness and Current Product Gate
+
+Purpose:
+
+- consolidate the current repository into a clear, validated, public-ready product state.
+
+Completed work:
+
+- stabilized the current product test gate in CI;
+- kept broad legacy tests separate from the current product validation path;
+- unified current product dependencies under root `requirements.txt` and moved historical heavy requirements to `legacy/requirements`;
+- documented scripts, tests, dependency boundaries, local Docker, AWS deployment, backups, readiness checks, and restore flows;
+- curated current product docs indexes so active docs and historical reference material are separated;
+- kept architecture diagrams and README visuals focused on the current product contract;
+- added validation commands that confirm the local Docker and AWS compose contracts without changing runtime state.
+
+Current status:
+
+- the repository has a documented current-product gate and a preserved historical trail;
+- remaining readiness work is focused on final media, optional domain/TLS activation, and final release tagging.
+
+Primary references:
+
+- `README.md`;
+- `tests/README.md`;
+- `scripts/README.md`;
+- `docs/README.md`;
+- `docs/deployment/python-dependencies.md`;
+- `docs/reference/legacy-research-and-experiments.md`;
+- `docs/operations/engineering-controls.md`;
+- `.github/workflows/product-ci.yml`;
+- `scripts/run_current_test_gate.sh`.
+
 ---
 
 ## 5. Current Integrations and Their Status

@@ -12,6 +12,7 @@ Current architecture documentation for the Axiovance product.
 ## Files
 
 - [BACKEND_BASELINE_SMOKE.md](BACKEND_BASELINE_SMOKE.md) — Backend Baseline Smoke
+- [capability-map.md](capability-map.md) — Capability map across product, backend, runtime, deployment, and AI engineering
 - [current-product-surface.md](current-product-surface.md) — Current product surface
 - [data-payload.md](data-payload.md) — Docker and AWS data payload
 - [FRONTEND_SURFACE_PROVENANCE.md](FRONTEND_SURFACE_PROVENANCE.md) — Frontend Surface Provenance Map
