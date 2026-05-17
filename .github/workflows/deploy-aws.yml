@@ -11,6 +11,7 @@ on:
         options:
           - dry-run
           - execute
+
   workflow_run:
     workflows:
       - product-ci
@@ -23,11 +24,18 @@ concurrency:
   group: deploy-aws-production
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   deploy:
-    name: Deploy AWS code-only
+    name: Deploy AWS code-only via SSM
     runs-on: ubuntu-latest
-    environment: production
+
+    environment:
+      name: aws-production
+      url: ${{ vars.AWS_PRODUCTION_URL }}
 
     if: >
       github.event_name == 'workflow_dispatch' ||
@@ -39,49 +47,33 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Configure SSH
-        env:
-          AWS_EC2_HOST: ${{ secrets.AWS_EC2_HOST }}
-          AWS_EC2_SSH_KEY: ${{ secrets.AWS_EC2_SSH_KEY }}
-        run: |
-          set -euo pipefail
+      - name: Configure AWS credentials through OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-          if [ -z "${AWS_EC2_HOST}" ]; then
-            echo "ERROR: missing secret AWS_EC2_HOST" >&2
-            exit 1
-          fi
-
-          if [ -z "${AWS_EC2_SSH_KEY}" ]; then
-            echo "ERROR: missing secret AWS_EC2_SSH_KEY" >&2
-            exit 1
-          fi
-
-          mkdir -p "$HOME/.ssh"
-          chmod 700 "$HOME/.ssh"
-
-          printf '%s\n' "$AWS_EC2_SSH_KEY" > "$HOME/.ssh/ai-decision-studio-aws.pem"
-          chmod 600 "$HOME/.ssh/ai-decision-studio-aws.pem"
-
-          ssh-keyscan -H "$AWS_EC2_HOST" >> "$HOME/.ssh/known_hosts"
-          chmod 644 "$HOME/.ssh/known_hosts"
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
 
       - name: Validate deploy scripts
         run: |
           set -euo pipefail
           bash -n scripts/build_deployment_bundle.sh
-          bash -n scripts/deploy_aws_code_only.sh
+          bash -n scripts/deploy_aws_code_only_ssm.sh
+          bash -n scripts/deploy_aws_code_only_ssm_remote.sh
           bash -n scripts/deploy_aws.sh
           bash -n scripts/smoke_aws.sh
 
-      - name: Run AWS code-only deploy
+      - name: Run AWS code-only deploy through SSM
         env:
-          EC2_IP: ${{ secrets.AWS_EC2_HOST }}
-          EC2_USER: ${{ secrets.AWS_EC2_USER || 'ubuntu' }}
-          SSH_KEY: ${{ github.workspace }}/../.ssh-placeholder
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_EC2_INSTANCE_ID: ${{ vars.AWS_EC2_INSTANCE_ID }}
+          AWS_DEPLOY_APP_DIR: ${{ vars.AWS_DEPLOY_APP_DIR }}
+          REPO: danyellambert/ai-workbench-local
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           set -euo pipefail
-
-          export SSH_KEY="$HOME/.ssh/ai-decision-studio-aws.pem"
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             MODE="--${{ inputs.mode }}"
@@ -90,4 +82,4 @@ jobs:
           fi
 
           echo "deploy_mode=$MODE"
-          scripts/deploy_aws_code_only.sh "$MODE"
+          scripts/deploy_aws_code_only_ssm.sh "$MODE"
