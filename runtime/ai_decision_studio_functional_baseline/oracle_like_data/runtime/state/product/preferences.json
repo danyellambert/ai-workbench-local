@@ -1,0 +1,215 @@
+{
+  "contract_version": "preferences.state.v1",
+  "updated_at": "2026-05-04T22:57:14.169608+00:00",
+  "active_profile_id": "current-product-runtime",
+  "runtime_profiles": [
+    {
+      "id": "current-product-runtime",
+      "name": "Current Product Runtime",
+      "primaryConnectionId": "ollama_hosted",
+      "primaryModel": "nemotron-3-super:cloud",
+      "fallbackEnabled": false,
+      "fallbackChain": [],
+      "executionPolicy": "hosted_generation_local_embeddings",
+      "retrievalStrategy": "hybrid",
+      "embeddingConnectionId": "ollama",
+      "embeddingModel": "embeddinggemma:300m",
+      "rerankingEnabled": true,
+      "docProcessingPreset": "standard",
+      "qualityPosture": "low_latency",
+      "intendedWorkflows": [
+        "document-review",
+        "comparison",
+        "action-plan",
+        "candidate-review",
+        "chat-experiments",
+        "workflow-inspector"
+      ],
+      "isActive": true,
+      "isDefault": true,
+      "summary": "Hosted Ollama generation profile using Nemotron 3 Super Cloud with local Ollama embeddings and the standard document processing stack.",
+      "generation": {
+        "temperature": 0.2,
+        "contextWindow": "auto",
+        "promptProfile": "neutro",
+        "streaming": true,
+        "maxOutputTokens": 4352,
+        "topP": 0.95,
+        "structuredOutput": false
+      },
+      "retrieval": {
+        "topK": 4,
+        "chunkSize": 1200,
+        "chunkOverlap": 80,
+        "rerankPoolSize": 8,
+        "rerankLexicalWeight": 0.35,
+        "groundingStrictness": "balanced"
+      },
+      "docProcessing": {
+        "pdfExtractionMode": "hybrid",
+        "ocrBackend": "ocrmypdf",
+        "vlmEnhancement": false,
+        "tableExtractionMode": "auto",
+        "ocrFailoverEnabled": true,
+        "scannedDocumentThreshold": 0.8
+      },
+      "workflowFit": []
+    },
+    {
+      "id": "deep-review",
+      "name": "Demo Profile",
+      "primaryConnectionId": "ollama_hosted",
+      "primaryModel": "nemotron-3-nano:30b-cloud",
+      "fallbackEnabled": false,
+      "fallbackChain": [],
+      "executionPolicy": "hosted_only",
+      "retrievalStrategy": "hybrid",
+      "embeddingConnectionId": "huggingface_inference",
+      "embeddingModel": "BAAI/bge-small-en-v1.5",
+      "rerankingEnabled": true,
+      "docProcessingPreset": "standard",
+      "qualityPosture": "low_latency",
+      "intendedWorkflows": [
+        "document-review",
+        "comparison",
+        "action-plan",
+        "candidate-review",
+        "chat-experiments",
+        "workflow-inspector"
+      ],
+      "isActive": false,
+      "isDefault": true,
+      "summary": "Live demo profile using hosted Ollama Nemotron 3 Nano 30B Cloud with Hugging Face BGE-small embeddings for predictable low-latency runs.",
+      "generation": {
+        "temperature": 0.2,
+        "contextWindow": "auto",
+        "promptProfile": "neutro",
+        "streaming": true,
+        "maxOutputTokens": 4352,
+        "topP": 0.95,
+        "structuredOutput": false
+      },
+      "retrieval": {
+        "topK": 4,
+        "chunkSize": 1200,
+        "chunkOverlap": 80,
+        "rerankPoolSize": 8,
+        "rerankLexicalWeight": 0.35,
+        "groundingStrictness": "balanced"
+      },
+      "docProcessing": {
+        "pdfExtractionMode": "hybrid",
+        "ocrBackend": "ocrmypdf",
+        "vlmEnhancement": false,
+        "tableExtractionMode": "auto",
+        "ocrFailoverEnabled": true,
+        "scannedDocumentThreshold": 0.8
+      },
+      "workflowFit": []
+    },
+    {
+      "id": "local-only",
+      "name": "Local Only",
+      "primaryConnectionId": "ollama",
+      "primaryModel": "qwen2.5:7b",
+      "fallbackEnabled": false,
+      "fallbackChain": [],
+      "executionPolicy": "local_only",
+      "retrievalStrategy": "hybrid",
+      "embeddingConnectionId": "ollama",
+      "embeddingModel": "embeddinggemma:300m",
+      "rerankingEnabled": true,
+      "docProcessingPreset": "standard",
+      "qualityPosture": "privacy_first",
+      "intendedWorkflows": [
+        "document-review",
+        "comparison",
+        "action-plan",
+        "candidate-review",
+        "chat-experiments",
+        "workflow-inspector"
+      ],
+      "isActive": false,
+      "isDefault": true,
+      "summary": "Fully local profile for privacy-first runs. Keeps prompts, retrieval, and document context on the local Ollama runtime.",
+      "generation": {
+        "temperature": 0.2,
+        "contextWindow": "auto",
+        "promptProfile": "neutro",
+        "streaming": true,
+        "maxOutputTokens": 4352,
+        "topP": 0.95,
+        "structuredOutput": false
+      },
+      "retrieval": {
+        "topK": 4,
+        "chunkSize": 1200,
+        "chunkOverlap": 80,
+        "rerankPoolSize": 8,
+        "rerankLexicalWeight": 0.35,
+        "groundingStrictness": "balanced"
+      },
+      "docProcessing": {
+        "pdfExtractionMode": "hybrid",
+        "ocrBackend": "ocrmypdf",
+        "vlmEnhancement": false,
+        "tableExtractionMode": "auto",
+        "ocrFailoverEnabled": true,
+        "scannedDocumentThreshold": 0.8
+      },
+      "workflowFit": []
+    }
+  ],
+  "connection_policy_rules": [
+    {
+      "id": "allow-hosted-overflow",
+      "label": "Allow hosted burst overflow",
+      "description": "When local GPU is unavailable, production profiles may burst to hosted capacity.",
+      "enabled": true
+    },
+    {
+      "id": "require-evidence-strict",
+      "label": "Require evidence-safe review defaults",
+      "description": "Document Review and Comparison should stay within balanced or strict grounding defaults.",
+      "enabled": true
+    }
+  ],
+  "operator_preferences": {
+    "reducedMotion": true,
+    "defaultEvidencePanelOpen": true,
+    "defaultExportFormat": "pptx",
+    "defaultBenchmarkBaseline": "current-product-runtime",
+    "showSourceBadges": true,
+    "autoOpenInspectorDetails": false
+  },
+  "connection_overlays": {},
+  "connection_test_results": {
+    "ollama": {
+      "status": "connected",
+      "checked_at": "2026-05-04T22:57:09.212403+00:00",
+      "latency_ms": 16.78,
+      "error_message": null,
+      "baseUrl": "http://ollama:11434/v1"
+    },
+    "huggingface_server": {
+      "status": "connected",
+      "checked_at": "2026-04-16T19:31:20.196584+00:00",
+      "latency_ms": 0.02,
+      "error_message": null
+    },
+    "huggingface_inference": {
+      "status": "connected",
+      "checked_at": "2026-05-04T22:57:10.925298+00:00",
+      "latency_ms": 1549.0,
+      "error_message": null,
+      "baseUrl": "https://router.huggingface.co/v1"
+    },
+    "ollama_hosted": {
+      "status": "connected",
+      "checked_at": "2026-05-04T22:57:13.907271+00:00",
+      "latency_ms": 261.32,
+      "error_message": null,
+      "baseUrl": "https://ollama.com/api"
+    }
+  }
+}

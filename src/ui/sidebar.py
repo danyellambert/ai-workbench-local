@@ -1,5 +1,14 @@
 import streamlit as st
 
+from .ai_lab_common import (
+    compact_rows,
+    humanize_eval_recommendation,
+    humanize_priority,
+    humanize_reason_text,
+    humanize_suite_name,
+    humanize_task_type,
+)
+
 
 def _format_ratio(value: object) -> str:
     if isinstance(value, (int, float)):
@@ -8,30 +17,11 @@ def _format_ratio(value: object) -> str:
 
 
 def _humanize_eval_recommendation(value: object) -> str:
-    normalized = str(value or "").strip().lower()
-    mapping = {
-        "consider_targeted_adaptation_only_for_specific_tasks": "Consider targeted adaptation only for specific tasks.",
-        "prompt_rag_schema_iteration_still_sufficient_globally": "Prompt + RAG + schema still seem sufficient overall.",
-        "prompt_rag_stack_currently_sufficient": "Current prompt + RAG seem sufficient for this task.",
-        "improve_checklist_decomposition_and_source_alignment": "Improve checklist decomposition and alignment with the source text.",
-        "improve_ocr_router_contact_postprocessing_before_model_adaptation": "Improve OCR/router/contact post-processing before adapting the model.",
-        "improve_grounding_and_field_resolution_before_model_adaptation": "Improve grounding and field resolution before adapting the model.",
-        "consider_task_specific_model_adaptation_after_more_eval_cases": "Consider task-specific adaptation after expanding the eval cases.",
-        "continue_prompt_grounding_and_schema_iteration": "Continue iterating on prompt, grounding, and schema.",
-        "expand_eval_cases_and_iterate_prompt_rag_schema": "Expand the eval cases and keep iterating on prompt + RAG + schema.",
-        "insufficient_eval_data": "There is still not enough eval data.",
-    }
-    return mapping.get(normalized, str(value or ""))
+    return humanize_eval_recommendation(value)
 
 
 def _humanize_adaptation_priority(value: object) -> str:
-    normalized = str(value or "").strip().lower()
-    mapping = {
-        "high": "High",
-        "medium": "Medium",
-        "low": "Low",
-    }
-    return mapping.get(normalized, str(value or ""))
+    return humanize_priority(value)
 
 
 def render_chat_sidebar(
@@ -80,338 +70,349 @@ def render_chat_sidebar(
     default_pdf_mode = default_pdf_extraction_mode if default_pdf_extraction_mode in pdf_mode_options else "hybrid"
 
     with st.sidebar:
-        st.header("Operational settings")
-        st.subheader("Generation")
-        provider_state_key = "phase5_sidebar_provider"
-        provider_current = st.session_state.get(provider_state_key, default_provider)
-        if provider_current not in provider_keys:
-            provider_current = provider_keys[default_provider_index] if provider_keys else default_provider
-        selected_provider = st.selectbox(
-            "Generation provider",
-            provider_keys,
-            index=provider_keys.index(provider_current) if provider_current in provider_keys else default_provider_index,
-            key=provider_state_key,
-            format_func=lambda key: provider_options[key],
+        st.header("Configurações operacionais")
+        st.caption(
+            "A sidebar segue um fluxo progressivo: primeiro os controles essenciais, depois embeddings, retrieval, processamento documental e por fim a leitura avançada da sessão."
         )
 
-        provider_models = models_by_provider.get(selected_provider, [])
-        default_model = default_model_by_provider.get(selected_provider, provider_models[0] if provider_models else "")
-        default_model_index = provider_models.index(default_model) if default_model in provider_models else 0
-        model_state_key = "phase5_sidebar_model"
-        model_current = st.session_state.get(model_state_key, default_model)
-        if model_current not in provider_models:
-            model_current = default_model if default_model in provider_models else (provider_models[0] if provider_models else "")
-
-        selected_model = st.selectbox(
-            "Generation model",
-            provider_models,
-            index=provider_models.index(model_current) if model_current in provider_models else default_model_index,
-            key=model_state_key,
-        )
-
-        prompt_profile_keys = list(prompt_profiles.keys())
-        default_profile_index = (
-            prompt_profile_keys.index(default_prompt_profile)
-            if default_prompt_profile in prompt_profile_keys
-            else 0
-        )
-        selected_prompt_profile = st.selectbox(
-            "Prompt profile",
-            prompt_profile_keys,
-            index=default_profile_index,
-            key="phase5_sidebar_prompt_profile",
-            format_func=lambda key: prompt_profiles[key]["label"],
-        )
-
-        context_window = default_context_window_by_provider.get(selected_provider, 8192)
-        context_window_mode = "manual"
-        if selected_provider in context_window_supported_providers:
-            context_window_mode = st.radio(
-                "Context window mode",
-                options=["auto", "manual"],
-                index=0,
-                key="phase5_sidebar_context_window_mode",
-                format_func=lambda value: "Automatic" if value == "auto" else "Manual",
-                help="In automatic mode, the app chooses an operational context budget based on the task and document size. In manual mode, it uses the slider value.",
+        with st.expander("Essencial · geração", expanded=True):
+            st.caption("Escolha o runtime principal, modelo, perfil de prompt e budget de contexto da sessão atual.")
+            provider_state_key = "phase5_sidebar_provider"
+            provider_current = st.session_state.get(provider_state_key, default_provider)
+            if provider_current not in provider_keys:
+                provider_current = provider_keys[default_provider_index] if provider_keys else default_provider
+            selected_provider = st.selectbox(
+                "Provider de geração",
+                provider_keys,
+                index=provider_keys.index(provider_current) if provider_current in provider_keys else default_provider_index,
+                key=provider_state_key,
+                format_func=lambda key: provider_options[key],
             )
-            if context_window_mode == "manual":
-                context_window = int(
-                    st.slider(
-                        "Generation context window",
-                        min_value=1000,
-                        max_value=256000,
-                        value=max(int(context_window), 1024),
-                        step=100,
-                        key="phase5_sidebar_context_window_value",
-                        help="Controls the operational context budget used in this execution.",
-                    )
+
+            provider_models = models_by_provider.get(selected_provider, [])
+            default_model = default_model_by_provider.get(selected_provider, provider_models[0] if provider_models else "")
+            default_model_index = provider_models.index(default_model) if default_model in provider_models else 0
+            model_state_key = "phase5_sidebar_model"
+            model_current = st.session_state.get(model_state_key, default_model)
+            if model_current not in provider_models:
+                model_current = default_model if default_model in provider_models else (provider_models[0] if provider_models else "")
+
+            selected_model = st.selectbox(
+                "Modelo de geração",
+                provider_models,
+                index=provider_models.index(model_current) if model_current in provider_models else default_model_index,
+                key=model_state_key,
+            )
+
+            prompt_profile_keys = list(prompt_profiles.keys())
+            default_profile_index = (
+                prompt_profile_keys.index(default_prompt_profile)
+                if default_prompt_profile in prompt_profile_keys
+                else 0
+            )
+            selected_prompt_profile = st.selectbox(
+                "Perfil de prompt",
+                prompt_profile_keys,
+                index=default_profile_index,
+                key="phase5_sidebar_prompt_profile",
+                format_func=lambda key: prompt_profiles[key]["label"],
+            )
+
+            context_window = default_context_window_by_provider.get(selected_provider, 8192)
+            context_window_mode = "manual"
+            if selected_provider in context_window_supported_providers:
+                context_window_mode = st.radio(
+                    "Modo da janela de contexto",
+                    options=["auto", "manual"],
+                    index=0,
+                    key="phase5_sidebar_context_window_mode",
+                    format_func=lambda value: "Automático" if value == "auto" else "Manual",
+                    help="In automatic mode, the app chooses an operational context budget based on the task and document size. In manual mode, it uses the slider value.",
                 )
+                if context_window_mode == "manual":
+                    context_window = int(
+                        st.slider(
+                            "Janela de contexto da geração",
+                            min_value=1000,
+                            max_value=256000,
+                            value=max(int(context_window), 1024),
+                            step=100,
+                            key="phase5_sidebar_context_window_value",
+                            help="Controls the operational context budget used in this execution.",
+                        )
+                    )
 
-        temperature = st.slider(
-            "Temperature",
-            min_value=0.0,
-            max_value=1.5,
-            value=min(max(default_temperature, 0.0), 1.5),
-            step=0.1,
-            key="phase5_sidebar_temperature",
-        )
-
-        st.divider()
-        st.subheader("Embeddings")
-        embedding_provider_keys = list(embedding_provider_options.keys())
-        default_embedding_provider_index = (
-            embedding_provider_keys.index(default_embedding_provider)
-            if default_embedding_provider in embedding_provider_keys
-            else 0
-        )
-        embedding_provider_state_key = "phase5_sidebar_embedding_provider"
-        embedding_provider_current = st.session_state.get(embedding_provider_state_key, default_embedding_provider)
-        if embedding_provider_current not in embedding_provider_keys:
-            embedding_provider_current = (
-                embedding_provider_keys[default_embedding_provider_index]
-                if embedding_provider_keys
-                else default_embedding_provider
-            )
-        selected_embedding_provider = st.selectbox(
-            "Embedding provider",
-            embedding_provider_keys,
-            index=(
-                embedding_provider_keys.index(embedding_provider_current)
-                if embedding_provider_current in embedding_provider_keys
-                else default_embedding_provider_index
-            ),
-            key=embedding_provider_state_key,
-            format_func=lambda key: embedding_provider_options[key],
-            help="Lets you separate the generation provider from the provider used for embeddings and retrieval.",
-        )
-
-        embedding_options = embedding_models_by_provider.get(selected_embedding_provider, [])
-        default_embedding_model = default_embedding_model_by_provider.get(
-            selected_embedding_provider,
-            embedding_options[0] if embedding_options else "",
-        )
-        default_embedding_index = embedding_options.index(default_embedding_model) if default_embedding_model in embedding_options else 0
-        embedding_model_state_key = "phase5_sidebar_embedding_model"
-        embedding_model_current = st.session_state.get(embedding_model_state_key, default_embedding_model)
-        if embedding_model_current not in embedding_options:
-            embedding_model_current = default_embedding_model if default_embedding_model in embedding_options else (embedding_options[0] if embedding_options else "")
-        selected_embedding_model = st.selectbox(
-            "Embedding model",
-            embedding_options,
-            index=embedding_options.index(embedding_model_current) if embedding_model_current in embedding_options else default_embedding_index,
-            key=embedding_model_state_key,
-            help="Changing the embedding model requires reindexing to keep the vector space consistent.",
-        )
-        selected_embedding_context_window = int(
-            st.slider(
-                "Embedding context window",
-                min_value=256,
-                max_value=65536,
-                value=max(int(default_embedding_context_window), 256),
-                step=256,
-                key="phase5_sidebar_embedding_context_window",
-                help="Value sent to Ollama's native embedding endpoint via `options.num_ctx`. If it changes, reindex to keep the index consistent.",
-            )
-        )
-        selected_embedding_truncate = st.checkbox(
-            "Allow truncation in embeddings",
-            value=bool(default_embedding_truncate),
-            key="phase5_sidebar_embedding_truncate",
-            help="When enabled, the embedding provider may truncate long inputs if the backend supports it.",
-        )
-        if embedding_provider_unavailable_items:
-            with st.expander("Embedding providers currently unavailable", expanded=False):
-                for item in embedding_provider_unavailable_items:
-                    provider_label = str(item.get("label") or item.get("provider_key") or "provider")
-                    reason = str(item.get("reason") or "unavailable")
-                    st.caption(f"- **{provider_label}** · disabled: {reason}")
-
-        st.divider()
-        st.subheader("Retrieval / RAG")
-        rag_chunk_size = int(
-            st.slider(
-                "Chunk size",
-                min_value=300,
-                max_value=4000,
-                value=max(int(default_rag_chunk_size), 300),
-                step=100,
-                key="phase5_sidebar_rag_chunk_size",
-                help="Controls chunk size for the next indexing run.",
-            )
-        )
-        rag_chunk_overlap = int(
-            st.slider(
-                "Chunk overlap",
-                min_value=0,
-                max_value=max(0, rag_chunk_size // 2),
-                value=min(int(default_rag_chunk_overlap), max(0, rag_chunk_size // 2)),
-                step=50,
-                key="phase5_sidebar_rag_chunk_overlap",
-                help="Controls chunk overlap for the next indexing run.",
-            )
-        )
-        rag_top_k = int(
-            st.slider(
-                "Retrieval top-k",
-                min_value=1,
-                max_value=12,
-                value=max(int(default_rag_top_k), 1),
-                step=1,
-                key="phase5_sidebar_rag_top_k",
-                help="Number of chunks retrieved for each question.",
-            )
-        )
-        selected_rerank_pool_size = int(
-            st.slider(
-                "Reranking pool",
-                min_value=max(2, rag_top_k),
-                max_value=32,
-                value=max(int(default_rerank_pool_size), rag_top_k),
-                step=1,
-                key="phase5_sidebar_rerank_pool_size",
-                help="Number of candidates considered before the final top-k cut after hybrid reranking.",
-            )
-        )
-        selected_rerank_lexical_weight = float(
-            st.slider(
-                "Lexical weight in reranking",
+            temperature = st.slider(
+                "Temperatura",
                 min_value=0.0,
-                max_value=0.9,
-                value=min(max(float(default_rerank_lexical_weight), 0.0), 0.9),
-                step=0.05,
-                key="phase5_sidebar_rerank_lexical_weight",
-                help="Mix between vector score and lexical score in hybrid reranking. Higher values give more weight to textual matching.",
+                max_value=1.5,
+                value=min(max(default_temperature, 0.0), 1.5),
+                step=0.1,
+                key="phase5_sidebar_temperature",
             )
-        )
-        loader_strategy_options = ["manual", "langchain_basic"]
-        loader_strategy_labels = {
-            "manual": "Local manual",
-            "langchain_basic": "LangChain loaders (experimental)",
-        }
-        default_loader_strategy = (
-            default_rag_loader_strategy
-            if default_rag_loader_strategy in loader_strategy_options
-            else "manual"
-        )
-        selected_loader_strategy = st.selectbox(
-            "Loader strategy",
-            loader_strategy_options,
-            index=loader_strategy_options.index(default_loader_strategy),
-            key="phase5_sidebar_loader_strategy",
-            format_func=lambda key: loader_strategy_labels[key],
-            help="Phase 5.5 micro-slice: uses basic LangChain ecosystem loaders for TXT/CSV/MD/PY when the optional package is available. PDFs still use the project's custom pipeline.",
-        )
-        chunking_strategy_options = ["manual", "langchain_recursive"]
-        chunking_strategy_labels = {
-            "manual": "Local manual",
-            "langchain_recursive": "LangChain Recursive (experimental)",
-        }
-        default_chunking_strategy = (
-            default_rag_chunking_strategy
-            if default_rag_chunking_strategy in chunking_strategy_options
-            else "manual"
-        )
-        selected_chunking_strategy = st.selectbox(
-            "Chunking strategy",
-            chunking_strategy_options,
-            index=chunking_strategy_options.index(default_chunking_strategy),
-            key="phase5_sidebar_chunking_strategy",
-            format_func=lambda key: chunking_strategy_labels[key],
-            help="First Phase 5.5 slice: lets you test manual chunking vs a LangChain-compatible splitter when the optional package is available.",
-        )
-        retrieval_strategy_options = ["manual_hybrid", "langchain_chroma"]
-        retrieval_strategy_labels = {
-            "manual_hybrid": "Manual hybrid",
-            "langchain_chroma": "LangChain + Chroma (experimental)",
-        }
-        default_retrieval_strategy = (
-            default_rag_retrieval_strategy
-            if default_rag_retrieval_strategy in retrieval_strategy_options
-            else "manual_hybrid"
-        )
-        selected_retrieval_strategy = st.selectbox(
-            "Retrieval strategy",
-            retrieval_strategy_options,
-            index=retrieval_strategy_options.index(default_retrieval_strategy),
-            key="phase5_sidebar_retrieval_strategy",
-            format_func=lambda key: retrieval_strategy_labels[key],
-            help="Second Phase 5.5 slice: lets you compare the current manual retrieval path with an experimental LangChain + Chroma route.",
-        )
 
         st.divider()
-        st.subheader("PDF / OCR / Vision")
-        selected_pdf_extraction_mode = st.selectbox(
-            "PDF extraction",
-            pdf_mode_options,
-            index=pdf_mode_options.index(default_pdf_mode),
-            key="phase5_sidebar_pdf_extraction_mode",
-            format_func=lambda key: pdf_mode_labels[key],
-            help="Basic = pypdf. Hybrid = fast with selective enrichment. Complete = page-by-page Docling/OCR with maximum coverage and higher cost.",
-        )
-        ocr_backend_options = ["ocrmypdf", "docling"]
-        ocr_backend_labels = {
-            "ocrmypdf": "OCRMyPDF",
-            "docling": "Docling",
-        }
-        selected_ocr_backend = st.selectbox(
-            "Document OCR backend",
-            ocr_backend_options,
-            index=ocr_backend_options.index(default_ocr_backend) if default_ocr_backend in ocr_backend_options else 0,
-            key="phase5_sidebar_ocr_backend",
-            format_func=lambda key: ocr_backend_labels.get(key, key),
-            help="Preferred backend for the document/evidence path when OCR is needed.",
-        )
-        selected_vl_model = (
-            st.text_input(
-                "Document VLM model",
-                value=default_vl_model,
-                key="phase5_sidebar_vlm_model",
-                help="Vision model used by the document path in cases that require visual/regional document reading.",
-            ).strip()
-            or default_vl_model
-        )
-        debug_retrieval = st.checkbox(
-            "Show retrieval debug",
-            value=False,
-            key="phase5_sidebar_debug_retrieval",
-            help="Shows details about retrieved chunks, scores, active RAG parameters, and a shadow comparison with the alternative retrieval strategy.",
-        )
+        with st.expander("Embeddings", expanded=False):
+            st.caption("Abra este bloco quando precisar separar geração de embeddings e revisar compatibilidade do índice vetorial.")
+            embedding_provider_keys = list(embedding_provider_options.keys())
+            default_embedding_provider_index = (
+                embedding_provider_keys.index(default_embedding_provider)
+                if default_embedding_provider in embedding_provider_keys
+                else 0
+            )
+            embedding_provider_state_key = "phase5_sidebar_embedding_provider"
+            embedding_provider_current = st.session_state.get(embedding_provider_state_key, default_embedding_provider)
+            if embedding_provider_current not in embedding_provider_keys:
+                embedding_provider_current = (
+                    embedding_provider_keys[default_embedding_provider_index]
+                    if embedding_provider_keys
+                    else default_embedding_provider
+                )
+            selected_embedding_provider = st.selectbox(
+                "Provider de embeddings",
+                embedding_provider_keys,
+                index=(
+                    embedding_provider_keys.index(embedding_provider_current)
+                    if embedding_provider_current in embedding_provider_keys
+                    else default_embedding_provider_index
+                ),
+                key=embedding_provider_state_key,
+                format_func=lambda key: embedding_provider_options[key],
+                help="Lets you separate the generation provider from the provider used for embeddings and retrieval.",
+            )
 
-        clear_requested = st.button("🧹 Clear conversation", width="stretch")
+            embedding_options = embedding_models_by_provider.get(selected_embedding_provider, [])
+            default_embedding_model = default_embedding_model_by_provider.get(
+                selected_embedding_provider,
+                embedding_options[0] if embedding_options else "",
+            )
+            default_embedding_index = embedding_options.index(default_embedding_model) if default_embedding_model in embedding_options else 0
+            embedding_model_state_key = "phase5_sidebar_embedding_model"
+            embedding_model_current = st.session_state.get(embedding_model_state_key, default_embedding_model)
+            if embedding_model_current not in embedding_options:
+                embedding_model_current = default_embedding_model if default_embedding_model in embedding_options else (embedding_options[0] if embedding_options else "")
+            selected_embedding_model = st.selectbox(
+                "Modelo de embeddings",
+                embedding_options,
+                index=embedding_options.index(embedding_model_current) if embedding_model_current in embedding_options else default_embedding_index,
+                key=embedding_model_state_key,
+                help="Changing the embedding model requires reindexing to keep the vector space consistent.",
+            )
+            selected_embedding_context_window = int(
+                st.slider(
+                    "Janela de contexto do embedding",
+                    min_value=256,
+                    max_value=65536,
+                    value=max(int(default_embedding_context_window), 256),
+                    step=256,
+                    key="phase5_sidebar_embedding_context_window",
+                    help="Value sent to Ollama's native embedding endpoint via `options.num_ctx`. If it changes, reindex to keep the index consistent.",
+                )
+            )
+            selected_embedding_truncate = st.checkbox(
+                "Permitir truncamento em embeddings",
+                value=bool(default_embedding_truncate),
+                key="phase5_sidebar_embedding_truncate",
+                help="When enabled, the embedding provider may truncate long inputs if the backend supports it.",
+            )
+            if embedding_provider_unavailable_items:
+                with st.expander("Providers de embedding indisponíveis no momento", expanded=False):
+                    for item in embedding_provider_unavailable_items:
+                        provider_label = str(item.get("label") or item.get("provider_key") or "provider")
+                        reason = str(item.get("reason") or "unavailable")
+                        st.caption(f"- **{provider_label}** · disabled: {reason}")
 
         st.divider()
-        st.metric("Messages in conversation", messages_count)
-        if last_latency is not None:
-            st.metric("Last response", f"{last_latency:.2f}s")
+        with st.expander("Retrieval / RAG", expanded=False):
+            st.caption("Abra este bloco para tuning de chunking, retrieval e reranking. Ele fica recolhido por padrão para reduzir ruído durante a operação cotidiana.")
+            rag_chunk_size = int(
+                st.slider(
+                    "Chunk size",
+                    min_value=300,
+                    max_value=4000,
+                    value=max(int(default_rag_chunk_size), 300),
+                    step=100,
+                    key="phase5_sidebar_rag_chunk_size",
+                    help="Controls chunk size for the next indexing run.",
+                )
+            )
+            rag_chunk_overlap = int(
+                st.slider(
+                    "Chunk overlap",
+                    min_value=0,
+                    max_value=max(0, rag_chunk_size // 2),
+                    value=min(int(default_rag_chunk_overlap), max(0, rag_chunk_size // 2)),
+                    step=50,
+                    key="phase5_sidebar_rag_chunk_overlap",
+                    help="Controls chunk overlap for the next indexing run.",
+                )
+            )
+            rag_top_k = int(
+                st.slider(
+                    "Retrieval top-k",
+                    min_value=1,
+                    max_value=12,
+                    value=max(int(default_rag_top_k), 1),
+                    step=1,
+                    key="phase5_sidebar_rag_top_k",
+                    help="Number of chunks retrieved for each question.",
+                )
+            )
+            selected_rerank_pool_size = int(
+                st.slider(
+                    "Reranking pool",
+                    min_value=max(2, rag_top_k),
+                    max_value=32,
+                    value=max(int(default_rerank_pool_size), rag_top_k),
+                    step=1,
+                    key="phase5_sidebar_rerank_pool_size",
+                    help="Number of candidates considered before the final top-k cut after hybrid reranking.",
+                )
+            )
+            selected_rerank_lexical_weight = float(
+                st.slider(
+                    "Lexical weight in reranking",
+                    min_value=0.0,
+                    max_value=0.9,
+                    value=min(max(float(default_rerank_lexical_weight), 0.0), 0.9),
+                    step=0.05,
+                    key="phase5_sidebar_rerank_lexical_weight",
+                    help="Mix between vector score and lexical score in hybrid reranking. Higher values give more weight to textual matching.",
+                )
+            )
+            loader_strategy_options = ["manual", "langchain_basic"]
+            loader_strategy_labels = {
+                "manual": "Local manual",
+                "langchain_basic": "LangChain loaders (experimental)",
+            }
+            default_loader_strategy = (
+                default_rag_loader_strategy
+                if default_rag_loader_strategy in loader_strategy_options
+                else "manual"
+            )
+            selected_loader_strategy = st.selectbox(
+                "Loader strategy",
+                loader_strategy_options,
+                index=loader_strategy_options.index(default_loader_strategy),
+                key="phase5_sidebar_loader_strategy",
+                format_func=lambda key: loader_strategy_labels[key],
+                help="Phase 5.5 micro-slice: uses basic LangChain ecosystem loaders for TXT/CSV/MD/PY when the optional package is available. PDFs still use the project's custom pipeline.",
+            )
+            chunking_strategy_options = ["manual", "langchain_recursive"]
+            chunking_strategy_labels = {
+                "manual": "Local manual",
+                "langchain_recursive": "LangChain Recursive (experimental)",
+            }
+            default_chunking_strategy = (
+                default_rag_chunking_strategy
+                if default_rag_chunking_strategy in chunking_strategy_options
+                else "manual"
+            )
+            selected_chunking_strategy = st.selectbox(
+                "Chunking strategy",
+                chunking_strategy_options,
+                index=chunking_strategy_options.index(default_chunking_strategy),
+                key="phase5_sidebar_chunking_strategy",
+                format_func=lambda key: chunking_strategy_labels[key],
+                help="First Phase 5.5 slice: lets you test manual chunking vs a LangChain-compatible splitter when the optional package is available.",
+            )
+            retrieval_strategy_options = ["manual_hybrid", "langchain_chroma"]
+            retrieval_strategy_labels = {
+                "manual_hybrid": "Manual hybrid",
+                "langchain_chroma": "LangChain + Chroma (experimental)",
+            }
+            default_retrieval_strategy = (
+                default_rag_retrieval_strategy
+                if default_rag_retrieval_strategy in retrieval_strategy_options
+                else "manual_hybrid"
+            )
+            selected_retrieval_strategy = st.selectbox(
+                "Retrieval strategy",
+                retrieval_strategy_options,
+                index=retrieval_strategy_options.index(default_retrieval_strategy),
+                key="phase5_sidebar_retrieval_strategy",
+                format_func=lambda key: retrieval_strategy_labels[key],
+                help="Second Phase 5.5 slice: lets you compare the current manual retrieval path with an experimental LangChain + Chroma route.",
+            )
+            debug_retrieval = st.checkbox(
+                "Show retrieval debug",
+                value=False,
+                key="phase5_sidebar_debug_retrieval",
+                help="Shows details about retrieved chunks, scores, active RAG parameters, and a shadow comparison with the alternative retrieval strategy.",
+            )
 
-        detail = provider_details.get(selected_provider)
-        if detail:
-            st.caption(detail)
-        if selected_provider == "huggingface_server":
+        st.divider()
+        with st.expander("Document processing · PDF / OCR / Vision", expanded=False):
+            st.caption("Abra este bloco para controlar parsing documental avançado, OCR fallback e leitura visual da pipeline documental.")
+            selected_pdf_extraction_mode = st.selectbox(
+                "Extração de PDF",
+                pdf_mode_options,
+                index=pdf_mode_options.index(default_pdf_mode),
+                key="phase5_sidebar_pdf_extraction_mode",
+                format_func=lambda key: pdf_mode_labels[key],
+                help="Basic = pypdf. Hybrid = fast with selective enrichment. Complete = page-by-page Docling/OCR with maximum coverage and higher cost.",
+            )
+            ocr_backend_options = ["ocrmypdf", "docling"]
+            ocr_backend_labels = {
+                "ocrmypdf": "OCRMyPDF",
+                "docling": "Docling",
+            }
+            selected_ocr_backend = st.selectbox(
+                "Backend de OCR documental",
+                ocr_backend_options,
+                index=ocr_backend_options.index(default_ocr_backend) if default_ocr_backend in ocr_backend_options else 0,
+                key="phase5_sidebar_ocr_backend",
+                format_func=lambda key: ocr_backend_labels.get(key, key),
+                help="Preferred backend for the document/evidence path when OCR is needed.",
+            )
+            selected_vl_model = (
+                st.text_input(
+                    "Modelo VLM documental",
+                    value=default_vl_model,
+                    key="phase5_sidebar_vlm_model",
+                    help="Vision model used by the document path in cases that require visual/regional document reading.",
+                ).strip()
+                or default_vl_model
+            )
+
+        st.divider()
+        clear_requested = False
+        with st.expander("Avançado / sessão", expanded=False):
+            st.caption("Resumo operacional da sessão, histórico local e detalhes do runtime efetivo. Este bloco fica recolhido para reduzir ruído visual inicial.")
+            clear_requested = st.button("🧹 Clear conversation", width="stretch")
+
+            session_col_1, session_col_2 = st.columns(2)
+            session_col_1.metric("Mensagens", messages_count)
+            session_col_2.metric("Última resposta", f"{last_latency:.2f}s" if last_latency is not None else "n/a")
+
+            detail = provider_details.get(selected_provider)
+            if detail:
+                st.caption(detail)
+            if selected_provider == "huggingface_server":
+                st.caption(
+                    "The models shown for this provider are aliases published by the service. The real backend may be Ollama, MLX, GGUF, OpenAI, or another runtime supported by the hub."
+                )
+            if selected_provider in context_window_supported_providers:
+                if context_window_mode == "auto":
+                    st.caption(f"Active context in {provider_options.get(selected_provider, selected_provider)}: `auto`")
+                else:
+                    st.caption(f"Active context in {provider_options.get(selected_provider, selected_provider)}: `{context_window}`")
             st.caption(
-                "The models shown for this provider are aliases published by the service. The real backend may be Ollama, MLX, GGUF, OpenAI, or another runtime supported by the hub."
+                f"Active embeddings: {embedding_provider_options.get(selected_embedding_provider, selected_embedding_provider)} · {selected_embedding_model} · num_ctx={selected_embedding_context_window} · truncate={selected_embedding_truncate}"
             )
-        if selected_provider in context_window_supported_providers:
-            if context_window_mode == "auto":
-                st.caption(f"Active context in {provider_options.get(selected_provider, selected_provider)}: `auto`")
-            else:
-                st.caption(f"Active context in {provider_options.get(selected_provider, selected_provider)}: `{context_window}`")
-        st.caption(
-            f"Active embeddings: {embedding_provider_options.get(selected_embedding_provider, selected_embedding_provider)} · {selected_embedding_model} · num_ctx={selected_embedding_context_window} · truncate={selected_embedding_truncate}"
-        )
-        st.caption(
-            f"Current RAG: {indexed_documents_count} document(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap} · rerank_pool={selected_rerank_pool_size} · lexical_weight={selected_rerank_lexical_weight:.2f}"
-        )
-        st.caption(f"Active loader: {loader_strategy_labels[selected_loader_strategy]}")
-        st.caption(f"Active chunking: {chunking_strategy_labels[selected_chunking_strategy]}")
-        st.caption(f"Active retrieval: {retrieval_strategy_labels[selected_retrieval_strategy]}")
-        st.caption(f"Active PDF extraction: {pdf_mode_labels[selected_pdf_extraction_mode]}")
-        st.caption(f"Document OCR: {ocr_backend_labels.get(selected_ocr_backend, selected_ocr_backend)}")
-        st.caption(f"Document VLM: {selected_vl_model}")
-        st.caption("Active pipeline: vector retrieval + hybrid reranking + prompt context budget.")
-        st.caption(f"Local history: `{history_filename}`")
-        st.caption(prompt_profiles[selected_prompt_profile]["description"])
-        st.info("Advanced RAG (Document Base): Phase 4.5 active.")
+            st.caption(
+                f"Current RAG: {indexed_documents_count} document(s) · {indexed_chunks_count} chunks · top-k={rag_top_k} · overlap={rag_chunk_overlap} · rerank_pool={selected_rerank_pool_size} · lexical_weight={selected_rerank_lexical_weight:.2f}"
+            )
+            st.caption(f"Active loader: {loader_strategy_labels[selected_loader_strategy]}")
+            st.caption(f"Active chunking: {chunking_strategy_labels[selected_chunking_strategy]}")
+            st.caption(f"Active retrieval: {retrieval_strategy_labels[selected_retrieval_strategy]}")
+            st.caption(f"Active PDF extraction: {pdf_mode_labels[selected_pdf_extraction_mode]}")
+            st.caption(f"Document OCR: {ocr_backend_labels.get(selected_ocr_backend, selected_ocr_backend)}")
+            st.caption(f"Document VLM: {selected_vl_model}")
+            st.caption("Active pipeline: vector retrieval + hybrid reranking + prompt context budget.")
+            st.caption(f"Local history: `{history_filename}`")
+            st.caption(prompt_profiles[selected_prompt_profile]["description"])
+            st.info("Advanced RAG (Document Base): Phase 4.5 active.")
 
     return (
         selected_provider,
@@ -979,10 +980,13 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     if isinstance(suite_counts, dict) and suite_counts:
                         st.caption("Coverage by suite")
                         st.dataframe(
-                            [
-                                {"suite_name": name, "runs": count}
-                                for name, count in suite_counts.items()
-                            ],
+                            compact_rows(
+                                [
+                                    {"suite_name": humanize_suite_name(name), "runs": count}
+                                    for name, count in suite_counts.items()
+                                ],
+                                field_limits={"suite_name": 42},
+                            ),
                             width="stretch",
                         )
 
@@ -990,33 +994,49 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     if isinstance(task_counts, dict) and task_counts:
                         st.caption("Coverage by task")
                         st.dataframe(
-                            [
-                                {"task_type": name, "runs": count}
-                                for name, count in task_counts.items()
-                            ],
+                            compact_rows(
+                                [
+                                    {"task_type": humanize_task_type(name), "runs": count}
+                                    for name, count in task_counts.items()
+                                ],
+                                field_limits={"task_type": 42},
+                            ),
                             width="stretch",
                         )
 
                     top_failure_reasons = evals.get("top_failure_reasons")
                     if isinstance(top_failure_reasons, list) and top_failure_reasons:
                         st.caption("Top failure reasons")
-                        st.dataframe(top_failure_reasons, width="stretch")
+                        st.dataframe(
+                            compact_rows(
+                                [
+                                    {**item, "reason": humanize_reason_text(item.get("reason"))}
+                                    for item in top_failure_reasons
+                                    if isinstance(item, dict)
+                                ],
+                                field_limits={"reason": 72},
+                            ),
+                            width="stretch",
+                        )
 
                     adaptation_candidates = evals.get("adaptation_candidates")
                     if isinstance(adaptation_candidates, list) and adaptation_candidates:
                         st.caption("Adaptation candidates")
                         st.dataframe(
-                            [
-                                {
-                                    "task_type": item.get("task_type"),
-                                    "priority": _humanize_adaptation_priority(item.get("adaptation_priority")),
-                                    "fail_rate": _format_ratio(item.get("fail_rate")),
-                                    "avg_score_ratio": _format_ratio(item.get("avg_score_ratio")),
-                                    "recommended_action": _humanize_eval_recommendation(item.get("recommended_action")),
-                                }
-                                for item in adaptation_candidates
-                                if isinstance(item, dict)
-                            ],
+                            compact_rows(
+                                [
+                                    {
+                                        "task_type": humanize_task_type(item.get("task_type")),
+                                        "priority": _humanize_adaptation_priority(item.get("adaptation_priority")),
+                                        "fail_rate": _format_ratio(item.get("fail_rate")),
+                                        "avg_score_ratio": _format_ratio(item.get("avg_score_ratio")),
+                                        "recommended_action": _humanize_eval_recommendation(item.get("recommended_action")),
+                                    }
+                                    for item in adaptation_candidates
+                                    if isinstance(item, dict)
+                                ],
+                                field_limits={"task_type": 36, "recommended_action": 76},
+                            ),
                             width="stretch",
                         )
 
@@ -1024,16 +1044,19 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     if isinstance(next_eval_priorities, list) and next_eval_priorities:
                         st.caption("Next eval priorities")
                         st.dataframe(
-                            [
-                                {
-                                    "task_type": item.get("task_type"),
-                                    "fail_rate": _format_ratio(item.get("fail_rate")),
-                                    "recent_fail_rate": _format_ratio(item.get("recent_fail_rate")),
-                                    "recommended_action": _humanize_eval_recommendation(item.get("recommended_action")),
-                                }
-                                for item in next_eval_priorities
-                                if isinstance(item, dict)
-                            ],
+                            compact_rows(
+                                [
+                                    {
+                                        "task_type": humanize_task_type(item.get("task_type")),
+                                        "fail_rate": _format_ratio(item.get("fail_rate")),
+                                        "recent_fail_rate": _format_ratio(item.get("recent_fail_rate")),
+                                        "recommended_action": _humanize_eval_recommendation(item.get("recommended_action")),
+                                    }
+                                    for item in next_eval_priorities
+                                    if isinstance(item, dict)
+                                ],
+                                field_limits={"task_type": 36, "recommended_action": 76},
+                            ),
                             width="stretch",
                         )
 
@@ -1041,14 +1064,17 @@ def render_runtime_sidebar_panel(snapshot: dict[str, object] | None) -> None:
                     if isinstance(healthy_tasks, list) and healthy_tasks:
                         st.caption("Healthy tasks (prompt + RAG seem sufficient)")
                         st.dataframe(
-                            [
-                                {
-                                    "task_type": item.get("task_type"),
-                                    "pass_rate": _format_ratio(item.get("pass_rate")),
-                                    "avg_score_ratio": _format_ratio(item.get("avg_score_ratio")),
-                                }
-                                for item in healthy_tasks
-                                if isinstance(item, dict)
-                            ],
+                            compact_rows(
+                                [
+                                    {
+                                        "task_type": humanize_task_type(item.get("task_type")),
+                                        "pass_rate": _format_ratio(item.get("pass_rate")),
+                                        "avg_score_ratio": _format_ratio(item.get("avg_score_ratio")),
+                                    }
+                                    for item in healthy_tasks
+                                    if isinstance(item, dict)
+                                ],
+                                field_limits={"task_type": 36},
+                            ),
                             width="stretch",
                         )

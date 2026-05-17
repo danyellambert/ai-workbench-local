@@ -1,0 +1,65 @@
+{
+  "presentation": {
+    "title": "Consulting engagement review",
+    "subtitle": "Client situation, options, and recommendation",
+    "client_name": "Advisory Team",
+    "author": "PPT Creator",
+    "date": "2026-03-26",
+    "theme": "consulting_clean",
+    "footer_text": "Consulting brand pack",
+    "primary_color": "0E5A8A",
+    "secondary_color": "7A8C99"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "Consulting engagement review",
+      "subtitle": "Client situation, options, and recommendation",
+      "layout_variant": "hero_cover",
+      "eyebrow": "Advisory review"
+    },
+    {
+      "type": "agenda",
+      "title": "Discussion flow",
+      "bullets": [
+        "Situation",
+        "Diagnosis",
+        "Options",
+        "Recommendation"
+      ]
+    },
+    {
+      "type": "comparison",
+      "title": "Option framing",
+      "comparison_columns": [
+        {
+          "title": "Current approach",
+          "body": "The organization keeps absorbing unnecessary complexity."
+        },
+        {
+          "title": "Recommended approach",
+          "bullets": [
+            "Simplify priorities",
+            "Clarify ownership",
+            "Sequence execution"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "summary",
+      "title": "Recommendation",
+      "body": "The recommended path reduces complexity first, then scales only after decision clarity improves.",
+      "bullets": [
+        "Narrow scope",
+        "Clarify decisions",
+        "Measure progress monthly"
+      ]
+    },
+    {
+      "type": "closing",
+      "title": "Closing thought",
+      "quote": "A stronger operating model is usually the result of fewer, clearer choices."
+    }
+  ]
+}

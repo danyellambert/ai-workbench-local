@@ -1,0 +1,207 @@
+{
+  "generated_at": "2026-03-29T17:33:22.548151",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "summary",
+      "mode": "indexed_document",
+      "status": "FAIL",
+      "score": 6,
+      "max_score": 31,
+      "reasons": [
+        "gold:topic coverage too low: 3",
+        "gold:required fact coverage too low: 1",
+        "gold:key insight coverage too low: 0",
+        "gold:executive summary is too weak against expected report signals: 1"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e",
+        "name": "fy25-afr-final-tagged.pdf",
+        "file_type": "pdf",
+        "chunk_count": 208
+      },
+      "gold_fixture_path": "baseline://external_files/59b08f4e22a2b3b3_10_summary_fy25_afr_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "FAIL",
+        "score": 6,
+        "max_score": 31,
+        "reasons": [
+          "topic coverage too low: 3",
+          "required fact coverage too low: 1",
+          "key insight coverage too low: 0",
+          "executive summary is too weak against expected report signals: 1"
+        ],
+        "metrics": {
+          "topic_hits": 3,
+          "fact_hits": 1,
+          "exec_signal_hits": 1,
+          "key_insight_hits": 0,
+          "number_hits": 1
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "FY 2025 Financial Highlights and Audit Status",
+            "key_points": [
+              "NASA received an unmodified 'clean' audit opinion for FY 2025, marking the 15th consecutive year of clean audits with no material weaknesses in internal controls.",
+              "$35.6B total funding reported, comprising $24.838B discretionary appropriations, $740.2M disaster relief, $14.1M spectrum relocation, and $9.995B mandatory special appropriations."
+            ],
+            "relevance_score": 0.95,
+            "supporting_evidence": [
+              "NASA has once again received an unmodified “clean” audit opinion on its 2025 financial statements for the 15th consecutive year, with no reported material weaknesses.",
+              "$35.6 billion reflects all funding appropriated in FY 2025 that includes $24.838 billion of Discretionary Appropriations, $740.2 million of Disaster Relief Supplemental Appropriations, $14.1 million of Spectrum Relocation Fund, and $9.995 billion of Mandatory Special Appropriations."
+            ]
+          },
+          {
+            "title": "Artemis Program and Lunar Exploration Initiatives",
+            "key_points": [
+              "Artemis II mission preparation on track for April 2026 launch, representing the next crewed lunar mission milestone.",
+              "July 2025 directive to develop lunar nuclear power by 2030 as part of sustainable lunar exploration strategy."
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "NASA announced its 2025 Astronaut Candidate Class on Sept. 22, 2025, including astronauts for Artemis missions; Artemis campaign achieved critical milestones, including fully assembling the Space Launch System rocket, keeping Artemis II’s crewed lunar mission on schedule for no later than April 2026;",
+              "Under the leadership of the Office of the Chief Financial Officer, NASA has once again received an unmodified “clean” audit opinion on its 2025 financial statements for the 15th consecutive year, with no reported material weaknesses.; Letter from the Inspector General on Audit 62"
+            ]
+          },
+          {
+            "title": "Enterprise Risk Management and Financial Systems Modernization",
+            "key_points": [
+              "NASA's UNICORN Enterprise Risk Management framework institutionalizes risk-informed decisions with no material weaknesses found in FY 2025 controls.",
+              "SAP Enterprise Central Component (ECC) modernization underway to replace end-of-life technology by 2027, enhancing real-time reporting and budget planning."
+            ],
+            "relevance_score": 0.88,
+            "supporting_evidence": [
+              "The ARMO works in concert with Mission Directorates, Centers, Technical Authorities and Offices to increase awareness, understanding, and consideration of risks to NASA's strategic goals and objectives as well as opportunities to support risk-informed decision-making.;",
+              "The NASA Unified Comprehensive Operational Risk Network (UNICORN), NASA's ERM framework, is the framework for the communication and exchange of risk information between NASA's functional organizations and the Agency leadership (see Figure 2).;",
+              "Based on the results of this evaluation, NASA provides reasonable assurance that its system of internal control was operating effectively as of September 30, 2025;",
+              "The SAP Enterprise Central Component (ECC) is NASA’s core financial system and functions as the central hub for the Agency’s business operations; With SAP ECC reaching its end-of-life in December 2027, the Chief Information Officer is exploring options to modernize the current centralized core financial system"
+            ]
+          },
+          {
+            "title": "Earth Science Data Modernization and Mission Success",
+            "key_points": [
+              "NASA migrated key data archives to the centralized Earthdata cloud platform, improving efficiency and cost effectiveness of data management.",
+              "Successful mission outcomes including OSIRIS-Rex asteroid sample return and Parker Solar Probe solar orbit achievements."
+            ],
+            "relevance_score": 0.85,
+            "supporting_evidence": [
+              "migrating several data archives to the centralized Earthdata cloud platform; improving the efficiency and cost effectiveness of data management;",
+              "OSIRIS-Rex was the first U.S. mission to collect a sample from an asteroid and return it to Earth; Parker Solar Probe is orbiting the Sun closer than any ever before, collecting measurements and images;",
+              "Critical testing and demos with industry have begun; leveraging public-private partnerships, reducing development costs, accelerating infusion of new technologies"
+            ]
+          },
+          {
+            "title": "Lease Accounting, Public-Private Partnerships, and Undelivered Orders",
+            "key_points": [
+              "NASA recognized $49.1M lease revenue under SFFAS 54 across 13 leases ($2.35B total value) with lease receivable net at $2.48B and no allowance for credit losses.",
+              "Only ESPCs and real estate arrangements meet SFFAS 49 disclosure requirements; variable lease payments excluded from receivable are recognized upon receipt.",
+              "$14.9B in undelivered orders outstanding as of September 30, 2025."
+            ],
+            "relevance_score": 0.82,
+            "supporting_evidence": [
+              "NASA recognized $49.1 million of annual lease revenue in FY 2025 associated with leases under SFFAS 54; NASA has 13 lease arrangements under SFFAS 54, Leases, that includes $643 million of Principal and $1.7 billion of Interest totaling $2.35 billion;",
+              "Lease Receivable, Net $ 698 $ 1,781 $ 2,479; Allowance — — —;",
+              "NASA has determined two other categories as meeting the P3 disclosure requirements: energy savings performance/utility energy service contracts and leases; NASA engages in various relationships with private entities... do not otherwise meet SFFAS 49 requirements;",
+              "The interest/discount rates ranged from 1.7% to 8.35%; Undelivered Orders at the end of the period totaled $14.9 billion as of September 30, 2025"
+            ]
+          },
+          {
+            "title": "Environmental Liabilities, Heritage Assets, and PP&E Composition",
+            "key_points": [
+              "Environmental liabilities reported at $2.39B; heritage assets recorded in physical units without depreciation reflecting cultural and mission value;",
+              "PP&E net value $10,474M with structures, facilities, and leasehold improvements depreciated over 15-40 years."
+            ],
+            "relevance_score": 0.8,
+            "supporting_evidence": [
+              "Total $ 36,219 $ (25,745) $ 10,474; Structures, Facilities and Leasehold Improvements Straight-Line 15-40 Years $ 12,720 $ (9,855) $ 2,865; Balance End of Y ear $ 10,474;",
+              "Heritage assets are reported in physical units, rather than with assigned dollar values; Environmental Liabilities $ 2,390;",
+              "Asbestos 188; Total Liability $ 27; Right-to-Use Lease Assets – Real Property Straight-Line N/A 30 (8) 22"
+            ]
+          },
+          {
+            "title": "Budgetary Resources, Trust Funds, and Accounting Compliance",
+            "key_points": [
+              "NASA's FY 2025 financial structure includes five mission directorates and $28.155B Fund Balance with Treasury (FBWT); strict adherence to federal accounting standards with clear budgetary vs. proprietary distinctions.",
+              "Trust fund sustainability managed through congressional appropriations when investment returns fall short; $1M provision enabled use of Safety, Security, and Mission Services appropriation for Challenger Center disbursement."
+            ],
+            "relevance_score": 0.78,
+            "supporting_evidence": [
+              "NASA's financial statements reflect strict adherence to federal accounting standards, with clear distinctions between budgetary and proprietary accounting.;",
+              "Trust fund sustainability is proactively managed through congressional appropriations when investment returns fall short of obligations.;",
+              "In anticipation of insufficient interest earnings... the Committees on Appropriations included a provision... enabling NASA to utilize up to $1 million from the Safety, Security, and Mission Services appropriation for disbursement to the Challenger Center."
+            ]
+          },
+          {
+            "title": "Audit Findings, Control Deficiencies, and Corrective Actions",
+            "key_points": [
+              "Auditors identified a significant deficiency in accrual posting oversight but issued an unmodified opinion; no material noncompliance found; management implemented corrective responses.",
+              "Significant deficiency noted in documented accounting policy changes and monthly accrual logic, though overall control effectiveness remained sufficient for clean opinion."
+            ],
+            "relevance_score": 0.75,
+            "supporting_evidence": [
+              "Our consideration of internal control... we did not identify any deficiencies... we identified certain deficiencies... a significant deficiency.;",
+              "NASA records monthly accrued expenses... The Agency uses vendor prepared monthly estimates... NASA updated its monthly accrual posting logic to include the proprietary entry reflecting the accrued expense, but exclude the corresponding budgetary entry... The USSGL defines a delivered order... NASA did not supply sufficient documented evidence...; Such measures could have resulted in a clarified position that is supported by authoritative guidance. As such, EY concluded that NASA does not have an effective financial reporting oversight process...;",
+              "In connection with our audit... we performed tests of its compliance... disclosed no instances of noncompliance..."
+            ]
+          },
+          {
+            "title": "Zero Trust Architecture, Infrastructure Modernization, and Grant Oversight",
+            "key_points": [
+              "OCIO leads Zero Trust architecture implementation tracking 300+ requirements; workforce planning aligned with mission-critical needs; infrastructure strategy uses Agency Master Plan for asset prioritization and divestiture.",
+              "Space Communications transitioning to commercial providers; grant closeout automation reduced expired grant backlog from 8 to 2 cases while monitoring $9.8M pending balances."
+            ],
+            "relevance_score": 0.72,
+            "supporting_evidence": [
+              "OCIO manages scope, cost, schedule, performance, and risk for projects and initiatives and tracks nearly 300 Zero Trust requirements and a dozen federal mandates.;",
+              "Workshops with Mission organizations help identify gaps and establish a whole-of-Agency approach.;",
+              "NASA refines its workforce planning process to align institutional operations with priority mission needs. Centers and Mission Support Enterprise Organizations work closely with Mission Directorates, the Office of the Chief Financial Officer, and program offices to plan workforce levels based on estimated workload and budget.;",
+              "In response to workforce reductions, NASA implements targeted talent development strategies focusing on supervisory development and technical training to maintain frontline leadership capability and specialized expertise.;",
+              "NASA takes a disciplined, data-driven approach to modernize and right-size infrastructure... Guided by Administration priorities, the Agency focuses investments on facilities with the highest demand and mission relevance... while rapidly divesting assets with little or no mission demand.;",
+              "The Space Communications and Navigation (SCaN) program is executing National policy guidance to transition services to the commercial sector where practicable, leveraging private-sector innovation while maintaining essential government-unique capabilities.; Nearly half of mission direct-to-ground service minutes are delivered by commercial providers, with opportunities to scale for routine services.;",
+              "NASA monitors and tracks grants’ undisbursed balances in expired accounts through a monthly review of internal control activities designed to identify undisbursed balances in expired accounts.; The number of expired grants with undisbursed balances closely correlates to the total number of awards that expired each year... Currently, NASA does not have undisbursed balances in expired accounts that may be returned to the Treasury of the United States."
+            ]
+          },
+          {
+            "title": "Commercial Crew Program and ISS Mission Activities",
+            "key_points": [
+              "Crew-10 mission launched March 11, 2025, carrying NASA astronauts and international partners to the ISS for a four-month science mission.",
+              "FY 2025 audit and financial reporting made electronically available via NASA website."
+            ],
+            "relevance_score": 0.65,
+            "supporting_evidence": [
+              "NASA continues to advance human spaceflight through public-private partnerships, exemplified by the Crew-10 mission launch on March 11, 2025.;",
+              "- facebook.com/NASA; - x.com/NASA; Electronic copies of this report are available on the Agency's website.;",
+              "A SpaceX Falcon 9 rocket with the company's Dragon spacecraft on top is seen during sunrise on the launch pad at Launch Complex 39A at NASA's Kennedy Space Center in Florida on Tuesday, March 11, 2025, ahead of the agency's SpaceX Crew-10 launch.;",
+              "Crew10 is the 10th crew rotation mission with SpaceX to the International Space Station as part of the agency's Commercial Crew Program, sending NASA astronauts Anne McClain and Nichole Ayers, along with JAXA (Japan Aerospace Exploration Agency) astronaut Takuya Onishi and Roscosmos cosmonaut Kirill Peskov to the orbiting laboratory for about a four-month science mission."
+            ]
+          }
+        ],
+        "executive_summary": "NASA achieved a clean audit opinion for FY 2025, its 15th consecutive year, with $35.6B in total funding and no material weaknesses in internal controls. The agency advanced the Artemis program, targeting an April 2026 crewed lunar mission and a July 2025 directive to develop lunar nuclear power by 2030. Enterprise Risk Management via the UNICORN framework ensured risk-informed decisions, while SAP financial system modernization prepares for 2027 end-of-life replacement. Earth science data modernization, successful missions like OSIRIS-Rex and Parker Solar Probe, and robust public-private partnerships underscored scientific and operational progress. Lease revenue reached $49.1M under SFFAS 54 with $2.48B receivable and no allowance; $14.9B in undelivered orders remain. Environmental and heritage asset accounting highlighted stewardship of physical infrastructure, with $2.39B in environmental liabilities and PP&E net at $10,474M. Budgetary compliance was maintained across five mission directorates and trust funds, including $28.155B FBWT. A significant deficiency in accrual posting oversight was identified but did not affect the clean audit opinion. Zero Trust architecture implementation, infrastructure modernization, and grant closeout automation reflect ongoing operational resilience. The Crew-10 mission, launched March 11, 2025, exemplifies continued leadership in human spaceflight through commercial partnerships.",
+        "key_insights": [
+          "NASA's financial accountability is exceptionally strong, with 15 consecutive clean audits and no material weaknesses, reflecting robust internal controls and compliance with federal standards.",
+          "Strategic investments in lunar exploration, data infrastructure, and risk-informed decision-making position NASA for sustained leadership in space science and human exploration.",
+          "Operational resilience is demonstrated through modernization of financial systems, Zero Trust security, infrastructure optimization, and effective management of public-private partnerships and grant oversight."
+        ],
+        "reading_time_minutes": 4,
+        "completeness_score": 0.93
+      }
+    }
+  ]
+}

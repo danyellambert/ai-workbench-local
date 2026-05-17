@@ -1,0 +1,204 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Document Review",
+      "subtitle": "Executive review of the latest grounded document analysis",
+      "author": "AI Workbench Local",
+      "date": "2026-04-26",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Document Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Document Review",
+        "subtitle": "Executive review of the latest grounded document analysis",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: document_review_deck. Deck family: review. Sources: structured_result, document_agent."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Master Service Agreement v4.2 risk and obligation analysis: 3 risk(s), 0 gap(s) and 4 mitigation action(s) identified. Top risk: Uncapped financial exposure for general commercial claims",
+        "bullets": [
+          "Uncapped financial exposure for general commercial claims",
+          "Shortened claim window to 12 months",
+          "Automatic renewal without explicit consent"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "6",
+            "label": "Source count"
+          },
+          {
+            "value": "3",
+            "label": "Findings"
+          },
+          {
+            "value": "4",
+            "label": "Actions"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Top findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Evidence",
+          "Owner"
+        ],
+        "table_rows": [
+          [
+            "risk",
+            "Uncapped financial exposure for general comme…",
+            "Section 7.3 creates uncapped financial exposure bec…",
+            "-"
+          ],
+          [
+            "risk",
+            "Shortened claim window to 12 months",
+            "Section 7.8 shortens the claim window to 12 months,…",
+            "-"
+          ],
+          [
+            "risk",
+            "Automatic renewal without explicit consent",
+            "Automatic 12-month renewals unless notice is delive…",
+            "-"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Findings grounded in the structured/document-agent payload."
+      },
+      {
+        "type": "table",
+        "title": "Action plan",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Action",
+          "Owner",
+          "Due",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "Review and negotiate liability cap",
+            "Legal",
+            "-",
+            "pending"
+          ],
+          [
+            "Extend claim limitation period to 24 months",
+            "Legal",
+            "Extend claim limitation period to 24 months",
+            "pending"
+          ],
+          [
+            "Confirm renewal notice procedure",
+            "Procurement",
+            "-",
+            "pending"
+          ],
+          [
+            "Validate joint IP ownership terms",
+            "Legal",
+            "-",
+            "pending"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Review and negotiate liability cap",
+            "bullets": [
+              "Review and negotiate liability cap",
+              "Extend claim limitation period to 24 months"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "Open-ended questions may require additional human reading when the document has contextual ambiguity.",
+            "bullets": []
+          }
+        ],
+        "speaker_notes": "Decision framing for the grounded document review."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Review and negotiate liability cap",
+          "Extend claim limitation period to 24 months",
+          "Confirm renewal notice procedure",
+          "Validate joint IP ownership terms"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260426_070528_d41cc84b/document_review_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

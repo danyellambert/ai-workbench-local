@@ -1,0 +1,208 @@
+{
+  "mode": "review",
+  "presentation_title": "AI Workbench Local — Action Plan",
+  "theme": "executive_premium_minimal",
+  "slide_count": 7,
+  "slides": [
+    {
+      "slide_number": 1,
+      "slide_type": "title",
+      "title": "AI Workbench Local — Action Plan",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 1.8,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 2,
+      "slide_type": "summary",
+      "title": "Executive summary",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 2.77,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 3,
+      "slide_type": "metrics",
+      "title": "Executive snapshot",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.14,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 4,
+      "slide_type": "cards",
+      "title": "Priority workstreams",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.82,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 5,
+      "slide_type": "table",
+      "title": "Action backlog",
+      "score": 93,
+      "status": "ok",
+      "content_weight": 4.23,
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "medium",
+      "likely_overflow_regions": [
+        "table"
+      ],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 1,
+        "low": 0
+      },
+      "issues": [
+        {
+          "severity": "medium",
+          "message": "some table cells are likely too long"
+        }
+      ]
+    },
+    {
+      "slide_number": 6,
+      "slide_type": "timeline",
+      "title": "Execution timeline",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 6.87,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    },
+    {
+      "slide_number": 7,
+      "slide_type": "two_column",
+      "title": "Blockers vs mitigations",
+      "score": 100,
+      "status": "ok",
+      "content_weight": 5.07,
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0,
+      "risk_level": "low",
+      "likely_overflow_regions": [],
+      "likely_collision_regions": [],
+      "layout_pressure_signals": [],
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "issues": []
+    }
+  ],
+  "missing_assets": [],
+  "average_score": 99,
+  "status": "ok",
+  "issue_count": 1,
+  "warning_count": 1,
+  "severity_counts": {
+    "high": 0,
+    "medium": 1,
+    "low": 0
+  },
+  "overflow_risk_count": 1,
+  "clipping_risk_count": 1,
+  "collision_risk_count": 0,
+  "balance_warning_count": 0,
+  "top_risk_slides": [
+    {
+      "slide_number": 5,
+      "title": "Action backlog",
+      "risk_level": "medium",
+      "overflow_risk_count": 1,
+      "clipping_risk_count": 1,
+      "collision_risk_count": 0,
+      "balance_warning_count": 0,
+      "layout_pressure_score": 0
+    }
+  ],
+  "issues": [
+    "slide 05 (Action backlog): some table cells are likely too long"
+  ],
+  "warnings": [
+    "slide 05 (Action backlog): some table cells are likely too long"
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "candidate_review_deck",
+  "deck_family": "candidate_review",
+  "presentation": {
+    "title": "AI Workbench Local — Candidate Review · Sarah Chen",
+    "subtitle": "Executive hiring summary grounded in cv_analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-19",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Candidate Review"
+  },
+  "context": {
+    "task_type": "cv_analysis",
+    "candidate_name": "Sarah Chen",
+    "headline": "Senior ML Engineer · Transformer architectures, Instruction tuning",
+    "location": "San Francisco, CA",
+    "experience_entries": 3
+  },
+  "candidate_profile": {
+    "name": "Sarah Chen",
+    "headline": "Senior ML Engineer · Transformer architectures, Instruction tuning",
+    "location": "San Francisco, CA"
+  },
+  "executive_summary": "Sarah Chen presents as a hiring profile centered on Senior ML Engineer · Transformer architectures, Instruction tuning from San Francisco, CA. Grounded evidence suggests about 5.0 year(s) of experience across 3 structured role(s). Top strengths: Execution quality; Technical depth. Primary watchout: Validate leadership scope and production depth.",
+  "key_highlights": [
+    "Execution quality",
+    "Technical depth",
+    "Leadership",
+    "Ownership",
+    "Transformer architectures",
+    "Instruction tuning"
+  ],
+  "strengths": [
+    "Execution quality",
+    "Technical depth",
+    "Leadership",
+    "Ownership"
+  ],
+  "gaps": [
+    "Validate leadership scope and production depth"
+  ],
+  "evidence_highlights": [
+    {
+      "label": "Experience",
+      "value": "5.0 years",
+      "detail": "3 structured role(s)"
+    },
+    {
+      "label": "Core skills",
+      "value": "Transformer architectures, Instruction tuning, Evaluation design",
+      "detail": "29 mapped skill(s)"
+    },
+    {
+      "label": "Recent anchor",
+      "value": "Senior ML Engineer",
+      "detail": "Aurora AI Systems"
+    }
+  ],
+  "key_metrics": [
+    {
+      "label": "Experience years",
+      "value": "5.0"
+    },
+    {
+      "label": "Skills",
+      "value": "29"
+    },
+    {
+      "label": "Languages",
+      "value": "0"
+    },
+    {
+      "label": "Experience entries",
+      "value": "3"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Experience highlights",
+      "columns": [
+        "Role",
+        "Organization",
+        "Date",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "Senior ML Engineer",
+          "Aurora AI Systems",
+          "2022 — Present",
+          "Led RLHF and evaluation pipeline improvements for enterprise language-assistance products; reduced training and evaluat…"
+        ],
+        [
+          "ML Engineer",
+          "Atlas Data Robotics",
+          "2020 — 2022",
+          "Built data quality scoring and annotation automation for large-scale ML workflows; supported high-throughput inference…"
+        ],
+        [
+          "Research Engineer",
+          "Northstar Research Labs",
+          "2018 — 2020",
+          "Contributed to transformer-model experiments, published two peer-reviewed papers on attention mechanisms, and mentored…"
+        ]
+      ]
+    },
+    {
+      "title": "Education snapshot",
+      "columns": [
+        "Degree",
+        "Institution",
+        "Date",
+        "Location"
+      ],
+      "rows": [
+        [
+          "M.S.",
+          "Pacific Coast University",
+          "2018",
+          "-"
+        ],
+        [
+          "B.S.",
+          "Bay City Institute",
+          "2016",
+          "-"
+        ],
+        [
+          "-",
+          "-",
+          "-",
+          "-"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Advance to the next stage with focused validation of leadership, scope and business impact.",
+  "watchouts": [
+    "Validate leadership scope and production depth"
+  ],
+  "next_steps": [
+    "Validate leadership scope and production depth",
+    "Probe measurable scope, business impact and cross-functional ownership in interview.",
+    "Validate delivery depth with concrete examples of architecture, execution and business outcomes."
+  ],
+  "data_sources": [
+    "structured_result",
+    "cv_analysis"
+  ]
+}

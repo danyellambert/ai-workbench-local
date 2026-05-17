@@ -153,6 +153,23 @@ def _classify_document_agent_intent(state: StructuredWorkflowState) -> Structure
     request = state["request"]
     effective_request = state.get("effective_request") or request
     context_strategy = (effective_request.context_strategy or "document_scan").strip().lower() or "document_scan"
+    telemetry = dict(effective_request.telemetry or {})
+    explicit_intent = str(telemetry.get("agent_intent") or "").strip()
+    explicit_reason = str(telemetry.get("agent_intent_reason") or "").strip()
+    if explicit_intent:
+        intent = explicit_intent
+        reason = explicit_reason or "explicit_agent_intent_from_request_telemetry"
+        return {
+            "agent_intent": intent,
+            "agent_intent_reason": reason,
+            "workflow_trace": _append_trace(
+                state.get("workflow_trace"),
+                node="classify_intent",
+                detail=f"Using explicit agent intent from telemetry: {reason}",
+                attempt=int(state.get("attempt", 1)),
+                context_strategy=context_strategy,
+            ),
+        }
     intent, reason = classify_document_agent_intent(
         request.input_text,
         document_count=len(request.source_document_ids or []),
@@ -176,12 +193,45 @@ def _select_document_agent_tool_node(state: StructuredWorkflowState) -> Structur
     request = state["request"]
     effective_request = state.get("effective_request") or request
     context_strategy = (effective_request.context_strategy or "document_scan").strip().lower() or "document_scan"
+    existing_telemetry = dict(effective_request.telemetry or {})
+    explicit_tool = str(existing_telemetry.get("agent_tool") or "").strip()
+    explicit_answer_mode = str(existing_telemetry.get("agent_answer_mode") or "").strip()
+    explicit_tool_reason = str(existing_telemetry.get("agent_tool_reason") or "").strip()
+    if explicit_tool:
+        tool_name = explicit_tool
+        answer_mode = explicit_answer_mode or "friendly"
+        tool_reason = explicit_tool_reason or "explicit_agent_tool_from_request_telemetry"
+        telemetry = dict(existing_telemetry)
+        telemetry.update(
+            {
+                "agent_intent": state.get("agent_intent"),
+                "agent_intent_reason": state.get("agent_intent_reason"),
+                "agent_tool": tool_name,
+                "agent_tool_reason": tool_reason,
+                "agent_answer_mode": answer_mode,
+            }
+        )
+        updated_request = effective_request.model_copy(update={"telemetry": telemetry})
+        return {
+            "effective_request": updated_request,
+            "agent_tool": tool_name,
+            "agent_tool_reason": tool_reason,
+            "agent_answer_mode": answer_mode,
+            "route_decision": f"{state.get('agent_intent') or 'document_question'}->{tool_name}",
+            "workflow_trace": _append_trace(
+                state.get("workflow_trace"),
+                node="select_tool",
+                detail=f"Using explicit agent tool from telemetry: {tool_reason}",
+                attempt=int(state.get("attempt", 1)),
+                context_strategy=context_strategy,
+            ),
+        }
     intent = str(state.get("agent_intent") or "document_question")
     tool_name, answer_mode, tool_reason = select_document_agent_tool(
         intent,
         document_count=len(request.source_document_ids or []),
     )
-    telemetry = dict(effective_request.telemetry or {})
+    telemetry = dict(existing_telemetry)
     telemetry.update(
         {
             "agent_intent": intent,

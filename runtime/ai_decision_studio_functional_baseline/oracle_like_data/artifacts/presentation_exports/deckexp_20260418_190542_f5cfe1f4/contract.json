@@ -1,0 +1,87 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "action_plan_deck",
+  "deck_family": "action_plan",
+  "presentation": {
+    "title": "AI Workbench Local — Action Plan",
+    "subtitle": "Operational action plan grounded in current action backlog",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Action Plan"
+  },
+  "context": {
+    "review_type_counts": {
+      "action_plan_evidence_review": 2
+    }
+  },
+  "executive_summary": "The current run identified 2 tracked action(s), with 2 still open, 0 overdue and 0 requiring formal approval follow-up.",
+  "key_highlights": [
+    "Archive approval with Q1 access-review evidence pack",
+    "Revalidate approval if named administrator changes"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Total actions",
+      "value": "2"
+    },
+    {
+      "label": "Open",
+      "value": "2"
+    },
+    {
+      "label": "Overdue",
+      "value": "0"
+    },
+    {
+      "label": "Approval required",
+      "value": "0"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Action backlog",
+      "columns": [
+        "Ref",
+        "Action",
+        "Owner",
+        "Due",
+        "Status",
+        "Source",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "EVIDENCE",
+          "Archive approval with Q1 access-review evidence pack",
+          "Priya Nair",
+          "-",
+          "open",
+          "Privileged Account Approval Email.pdf",
+          "Please archive this approval with the Q1 access-review evidence pack"
+        ],
+        [
+          "A02",
+          "Revalidate approval if named administrator changes",
+          "Compliance Operations",
+          "-",
+          "open",
+          "Privileged Account Approval Email.pdf",
+          "If either named administrator changes, this approval must be revalidated before access is retained"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Archive approval with Q1 access-review evidence pack",
+  "watchouts": [],
+  "next_steps": [
+    "Archive approval with Q1 access-review evidence pack",
+    "Revalidate approval if named administrator changes"
+  ],
+  "data_sources": [
+    "action_plan_run_current"
+  ]
+}

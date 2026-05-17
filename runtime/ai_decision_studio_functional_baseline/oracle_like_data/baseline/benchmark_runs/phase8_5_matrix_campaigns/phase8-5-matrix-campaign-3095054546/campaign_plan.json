@@ -1,0 +1,306 @@
+{
+  "campaign_id": "phase8-5-matrix-campaign-3095054546",
+  "campaign_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546",
+  "selected_groups": [
+    "generation",
+    "embeddings",
+    "rerankers",
+    "ocr_vlm"
+  ],
+  "smoke": true,
+  "provider_filter": null,
+  "model_filter": null,
+  "resume": true,
+  "stages": [
+    {
+      "stage_index": 1,
+      "group": "generation",
+      "run_id": "phase8-5-matrix-6cb155e297",
+      "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/01_generation_phase8-5-matrix-6cb155e297",
+      "preflight": {
+        "run_id": "phase8-5-matrix-6cb155e297",
+        "output_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/01_generation_phase8-5-matrix-6cb155e297",
+        "selected_groups": [
+          "generation"
+        ],
+        "smoke": true,
+        "provider_filter": null,
+        "model_filter": null,
+        "resume_requested": true,
+        "planned_case_count": 2,
+        "resume_success_case_count": 0,
+        "groups": {
+          "generation": {
+            "planned_cases": 2,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_885e1539d5d21b4c",
+              "case_e9203d1597ec9ca2"
+            ]
+          },
+          "embeddings": {
+            "planned_cases": 2,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_14b8511fa7c7b3b8",
+              "case_721751b68a63b919"
+            ]
+          },
+          "rerankers": {
+            "planned_cases": 1,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_67cbdc91648f61a7"
+            ]
+          },
+          "ocr_vlm": {
+            "planned_cases": 1,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_85bde34a52093a17"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "stage_index": 2,
+      "group": "embeddings",
+      "run_id": "phase8-5-matrix-55ad0ae59e",
+      "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/02_embeddings_phase8-5-matrix-55ad0ae59e",
+      "preflight": {
+        "run_id": "phase8-5-matrix-55ad0ae59e",
+        "output_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/02_embeddings_phase8-5-matrix-55ad0ae59e",
+        "selected_groups": [
+          "embeddings"
+        ],
+        "smoke": true,
+        "provider_filter": null,
+        "model_filter": null,
+        "resume_requested": true,
+        "planned_case_count": 2,
+        "resume_success_case_count": 0,
+        "groups": {
+          "generation": {
+            "planned_cases": 2,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_885e1539d5d21b4c",
+              "case_e9203d1597ec9ca2"
+            ]
+          },
+          "embeddings": {
+            "planned_cases": 2,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_14b8511fa7c7b3b8",
+              "case_721751b68a63b919"
+            ]
+          },
+          "rerankers": {
+            "planned_cases": 1,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_67cbdc91648f61a7"
+            ]
+          },
+          "ocr_vlm": {
+            "planned_cases": 1,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_85bde34a52093a17"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "stage_index": 3,
+      "group": "rerankers",
+      "run_id": "phase8-5-matrix-3ba8070849",
+      "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/03_rerankers_phase8-5-matrix-3ba8070849",
+      "preflight": {
+        "run_id": "phase8-5-matrix-3ba8070849",
+        "output_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/03_rerankers_phase8-5-matrix-3ba8070849",
+        "selected_groups": [
+          "rerankers"
+        ],
+        "smoke": true,
+        "provider_filter": null,
+        "model_filter": null,
+        "resume_requested": true,
+        "planned_case_count": 1,
+        "resume_success_case_count": 0,
+        "groups": {
+          "generation": {
+            "planned_cases": 2,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_885e1539d5d21b4c",
+              "case_e9203d1597ec9ca2"
+            ]
+          },
+          "embeddings": {
+            "planned_cases": 2,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_14b8511fa7c7b3b8",
+              "case_721751b68a63b919"
+            ]
+          },
+          "rerankers": {
+            "planned_cases": 1,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_67cbdc91648f61a7"
+            ]
+          },
+          "ocr_vlm": {
+            "planned_cases": 1,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_85bde34a52093a17"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "stage_index": 4,
+      "group": "ocr_vlm",
+      "run_id": "phase8-5-matrix-2f56deefd1",
+      "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/04_ocr_vlm_phase8-5-matrix-2f56deefd1",
+      "preflight": {
+        "run_id": "phase8-5-matrix-2f56deefd1",
+        "output_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/04_ocr_vlm_phase8-5-matrix-2f56deefd1",
+        "selected_groups": [
+          "ocr_vlm"
+        ],
+        "smoke": true,
+        "provider_filter": null,
+        "model_filter": null,
+        "resume_requested": true,
+        "planned_case_count": 1,
+        "resume_success_case_count": 0,
+        "groups": {
+          "generation": {
+            "planned_cases": 2,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_885e1539d5d21b4c",
+              "case_e9203d1597ec9ca2"
+            ]
+          },
+          "embeddings": {
+            "planned_cases": 2,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_14b8511fa7c7b3b8",
+              "case_721751b68a63b919"
+            ]
+          },
+          "rerankers": {
+            "planned_cases": 1,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_67cbdc91648f61a7"
+            ]
+          },
+          "ocr_vlm": {
+            "planned_cases": 1,
+            "skipped_candidates": [],
+            "sample_case_ids": [
+              "case_85bde34a52093a17"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "phase8-5-matrix-campaign-3095054546",
+    "output_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546",
+    "selected_groups": [
+      "generation",
+      "embeddings",
+      "rerankers",
+      "ocr_vlm"
+    ],
+    "smoke": true,
+    "provider_filter": null,
+    "model_filter": null,
+    "resume_requested": true,
+    "planned_case_count": 6,
+    "resume_success_case_count": 0,
+    "groups": {
+      "generation": {
+        "planned_cases": 2,
+        "skipped_candidates": [],
+        "sample_case_ids": [
+          "case_885e1539d5d21b4c",
+          "case_e9203d1597ec9ca2"
+        ]
+      },
+      "embeddings": {
+        "planned_cases": 2,
+        "skipped_candidates": [],
+        "sample_case_ids": [
+          "case_14b8511fa7c7b3b8",
+          "case_721751b68a63b919"
+        ]
+      },
+      "rerankers": {
+        "planned_cases": 1,
+        "skipped_candidates": [],
+        "sample_case_ids": [
+          "case_67cbdc91648f61a7"
+        ]
+      },
+      "ocr_vlm": {
+        "planned_cases": 1,
+        "skipped_candidates": [],
+        "sample_case_ids": [
+          "case_85bde34a52093a17"
+        ]
+      }
+    },
+    "campaign_mode": "staged_full_matrix",
+    "campaign_id": "phase8-5-matrix-campaign-3095054546",
+    "stage_order": [
+      "generation",
+      "embeddings",
+      "rerankers",
+      "ocr_vlm"
+    ],
+    "stages": [
+      {
+        "stage_index": 1,
+        "group": "generation",
+        "run_id": "phase8-5-matrix-6cb155e297",
+        "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/01_generation_phase8-5-matrix-6cb155e297",
+        "planned_case_count": 2
+      },
+      {
+        "stage_index": 2,
+        "group": "embeddings",
+        "run_id": "phase8-5-matrix-55ad0ae59e",
+        "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/02_embeddings_phase8-5-matrix-55ad0ae59e",
+        "planned_case_count": 2
+      },
+      {
+        "stage_index": 3,
+        "group": "rerankers",
+        "run_id": "phase8-5-matrix-3ba8070849",
+        "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/03_rerankers_phase8-5-matrix-3ba8070849",
+        "planned_case_count": 1
+      },
+      {
+        "stage_index": 4,
+        "group": "ocr_vlm",
+        "run_id": "phase8-5-matrix-2f56deefd1",
+        "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-3095054546/group_runs/04_ocr_vlm_phase8-5-matrix-2f56deefd1",
+        "planned_case_count": 1
+      }
+    ]
+  }
+}

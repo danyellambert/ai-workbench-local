@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "document_review_deck",
+  "output_dir": "baseline://outputs/ai_workbench_export_previews/deckexp_20260405_183217_b2728e1b",
+  "presentation_title": "document_review_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/3b0e435e00e84d84_document_review_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "document_review_deck-01.png",
+      "path": "baseline://external_files/fedbac6bebc13eee_document_review_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "document_review_deck-02.png",
+      "path": "baseline://external_files/4419d6f78c7cfe0c_document_review_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "document_review_deck-03.png",
+      "path": "baseline://external_files/fbbd9186ce845a8f_document_review_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "document_review_deck-04.png",
+      "path": "baseline://external_files/a82345550145f40e_document_review_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "document_review_deck-05.png",
+      "path": "baseline://external_files/643fb0f49d4cc14e_document_review_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "document_review_deck-06.png",
+      "path": "baseline://external_files/0e0d3c7681b20353_document_review_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "document_review_deck-07.png",
+      "path": "baseline://external_files/97415b09741a0b3c_document_review_deck-07.png"
+    }
+  ]
+}

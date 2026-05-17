@@ -1,0 +1,175 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-16",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Document Review",
+      "subtitle": "Executive review of the latest grounded document analysis",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Export kind: document_review_deck. Deck family: review. Sources: structured_result, document_agent."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "Risks, gaps and red flags in selected documents: 1 risk(s), 1 gap(s) and 1 mitigation action(s) identified. Top risk: Potential rollout delay due to vendor dependency Main evidence gap: No owner is named for the migration task",
+      "bullets": [
+        "Potential rollout delay due to vendor dependency",
+        "No owner is named for the migration task",
+        "Finalize integration plan"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "cards": [],
+      "metrics": [
+        {
+          "value": "0",
+          "label": "Source count"
+        },
+        {
+          "value": "2",
+          "label": "Findings"
+        },
+        {
+          "value": "1",
+          "label": "Actions"
+        },
+        {
+          "value": "Yes",
+          "label": "Needs review"
+        }
+      ],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Top findings",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Type",
+        "Finding",
+        "Evidence",
+        "Owner"
+      ],
+      "table_rows": [
+        [
+          "risk",
+          "Potential rollout delay due to vendor depende…",
+          "vendor dependency may delay rollout",
+          "-"
+        ],
+        [
+          "gap",
+          "No owner is named for the migration task",
+          "-",
+          "-"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Findings grounded in the structured/document-agent payload."
+    },
+    {
+      "type": "table",
+      "title": "Action plan",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "table_rows": [
+        [
+          "Finalize integration plan",
+          "Platform team",
+          "Friday",
+          "pending"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "two_column",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Finalize integration plan",
+          "bullets": [
+            "Finalize integration plan",
+            "Mitigate delay by securing alternative vendor pathways."
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "No grounded sources available",
+          "bullets": [
+            "No owner is named for the migration task",
+            "Not enough sources were found to fully support the response."
+          ]
+        }
+      ],
+      "speaker_notes": "Decision framing for the grounded document review."
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Finalize integration plan",
+        "Mitigate delay by securing alternative vendor pathways.",
+        "Manually review the selected documents before using this response in an operati…",
+        "Forward the result for human review before making a final decision."
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    }
+  ]
+}

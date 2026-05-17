@@ -1,0 +1,207 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Document Review",
+      "subtitle": "Executive review of the latest grounded document analysis",
+      "author": "AI Workbench Local",
+      "date": "2026-04-18",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Document Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Document Review",
+        "subtitle": "Executive review of the latest grounded document analysis",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: document_review_deck. Deck family: review. Sources: structured_result, document_agent."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Q1 2024 Northwind vendor-control review evidence log: 2 risk(s), 2 gap(s) and 3 mitigation action(s) identified. Top risk: Missing evidence blocks control closure until provenance is verified Main evidence gap: Owner for missing evidence verification not explicitly named",
+        "bullets": [
+          "Missing evidence blocks control closure until provenance is verified",
+          "In-progress items may remain unresolved",
+          "Owner for missing evidence verification not explicitly named"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Source count"
+          },
+          {
+            "value": "4",
+            "label": "Findings"
+          },
+          {
+            "value": "3",
+            "label": "Actions"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Top findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Evidence",
+          "Owner"
+        ],
+        "table_rows": [
+          [
+            "risk",
+            "Missing evidence blocks control closure until…",
+            "Missing or in-progress items block control closure…",
+            "-"
+          ],
+          [
+            "risk",
+            "In-progress items may remain unresolved",
+            "Missing or in-progress items block control closure…",
+            "-"
+          ],
+          [
+            "gap",
+            "Owner for missing evidence verification not e…",
+            "-",
+            "-"
+          ],
+          [
+            "gap",
+            "Exact due date for missing evidence verificat…",
+            "-",
+            "-"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Findings grounded in the structured/document-agent payload."
+      },
+      {
+        "type": "table",
+        "title": "Action plan",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Action",
+          "Owner",
+          "Due",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "Archive EV-002 email-export artifact in approved repository",
+            "Platform team",
+            "Friday",
+            "pending"
+          ],
+          [
+            "Verify provenance of missing evidence",
+            "Compliance Operations",
+            "-",
+            "pending"
+          ],
+          [
+            "Confirm receipt of all required evidence",
+            "Compliance Operations",
+            "-",
+            "pending"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Archive EV-002 email-export artifact in approved repository",
+            "bullets": [
+              "Archive EV-002 email-export artifact in approved repository",
+              "Verify provenance of missing evidence"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "Owner for missing evidence verification not explicitly named",
+            "bullets": [
+              "Exact due date for missing evidence verification not provided",
+              "Open-ended questions may require additional human reading when the docu…"
+            ]
+          }
+        ],
+        "speaker_notes": "Decision framing for the grounded document review."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Archive EV-002 email-export artifact in approved repository",
+          "Verify provenance of missing evidence",
+          "Confirm receipt of all required evidence",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_140230_a5489264/document_review_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_140230_a5489264",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

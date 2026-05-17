@@ -1,0 +1,190 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "author": "AI Workbench Local",
+      "date": "2026-04-16",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Comparison Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "subtitle": "Executive comparison review of grounded document differences",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Meridian Holdings' Information Security Policy v3.2 represents a significant evolution from v3.1, addressing critical gaps in incident response timeliness and vendor oversight while introducing stronger preventive controls and extended log retention. The update shifts the organization from a reactive to a proactive security posture, directly improving regulatory compliance readiness—particularly under GDPR and CCPA—by mandating 24-hour incident notification for customer-data breaches and extending log retention to 12 months. However, these enhancements come with immediate operational demands, requiring IT and security teams to revalidate privileged access and close vendor evidence gaps within a 30-day transition window, creating a short-term workload burden.\n\n- v3.2 mandates MFA for all workforce accounts, whereas v3.1 only established foundational MFA controls without universal enforcement.  \n- v3.2 introduces quarterly privileged access revalidation and a 30-day transition requirement for managers to revalidate access, absent in v3.1.  \n- v3.2 requires pre-onboarding and periodic reassessments for critical vendors, strengthening vendor risk management beyond v3.1’s annual evidence requirements.  \n- v3.2 tightens incident escalation to 24 hours for customer-data breaches, resolving v3.1’s critical gap in undefined notification timelines.  \n- v3.2 extends log retention to 12 months in tamper-evident storage, up from v3.1’s 180-day baseline, enhancing forensic and audit readiness.  \n- The 30-day transition period in v3.2 creates urgent operational workload for IT and security teams, a temporary but significant implementation burden not present in v3.1.  \n\nRecommendation: Prioritize execution of the 30-day transition tasks to revalidate privileged access and remediate vendor documentation, as this enables immediate realization of v3.2’s improved compliance and risk reduction benefits; monitor team capacity during this window to avoid burnout or oversight.",
+        "bullets": [
+          "Meridian Holdings' Information Security Policy v3.2 represents a significan…",
+          "v3.2 mandates MFA for all workforce accounts, whereas v3.1 only established…",
+          "v3.2 introduces quarterly privileged access revalidation and a 30-day trans…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Compared docs"
+          },
+          {
+            "value": "8",
+            "label": "Findings"
+          },
+          {
+            "value": "4",
+            "label": "Sources"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Comparison findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Documents",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "document_summary",
+            "Summary of Information Security Policy v3.1.pdf (pdf)",
+            "Information Security Policy v3.1.pdf (pdf)",
+            "The policy enforces strong preventive controls (MFA, approval workflows) but lacks prescriptive timing for incident res…"
+          ],
+          [
+            "document_summary",
+            "Summary of Information Security Policy v3.2.pdf (pdf)",
+            "Information Security Policy v3.2.pdf (pdf)",
+            "The policy shifts from reactive to proactive security controls, emphasizing prevention through stricter access validati…"
+          ],
+          [
+            "incident_response_delta",
+            "Meridian Holdings' Information Security Policy v3.2 represents a…",
+            "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+            "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+          ],
+          [
+            "identity_control_delta",
+            "v3.2 mandates MFA for all workforce accounts, whereas…",
+            "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+            "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+          ],
+          [
+            "approval_change",
+            "v3.2 introduces quarterly privileged access revalidation and a…",
+            "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+            "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+          ],
+          [
+            "vendor_oversight_delta",
+            "v3.2 requires pre-onboarding and periodic reassessments for critical…",
+            "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+            "Information Security Policy v3.1.pdf (pdf): Annual vendor evidence requirements and 180-day log retention align with in…"
+          ],
+          [
+            "incident_response_delta",
+            "v3.2 tightens incident escalation to 24 hours for…",
+            "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+            "Information Security Policy v3.1.pdf (pdf): Meridian Holdings' Information Security Policy v3.1 establishes foundationa…"
+          ],
+          [
+            "retention_delta",
+            "v3.2 extends log retention to 12 months in…",
+            "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+            "Information Security Policy v3.1.pdf (pdf): Annual vendor evidence requirements and 180-day log retention align with in…"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Open the cited source excerpts to confirm the interpretation before acting.",
+            "bullets": [
+              "Open the cited source excerpts to confirm the interpretation before act…",
+              "Validate critical differences directly in the compared documents before…"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "Retrieval backend note: retrieval served by local fallback from the canonical json..",
+            "bullets": []
+          }
+        ],
+        "speaker_notes": "Executive decision framing for this slice."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Open the cited source excerpts to confirm the interpretation before acting.",
+          "Validate critical differences directly in the compared documents before consoli…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260416_183342_e37f9827/policy_contract_comparison_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260416_183342_e37f9827",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

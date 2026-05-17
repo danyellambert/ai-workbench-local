@@ -1,0 +1,221 @@
+{
+  "generated_at": "2026-03-30T18:53:15.937963",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "summary",
+      "suite_name": "structured_real_document_eval",
+      "mode": "indexed_document",
+      "status": "PASS",
+      "score": 28,
+      "max_score": 31,
+      "reasons": [],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e",
+        "name": "fy25-afr-final-tagged.pdf",
+        "file_type": "pdf",
+        "chunk_count": 208
+      },
+      "gold_fixture_path": "baseline://external_files/59b08f4e22a2b3b3_10_summary_fy25_afr_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "PASS",
+        "score": 28,
+        "max_score": 31,
+        "reasons": [],
+        "thresholds": {
+          "pass_ratio": 0.58,
+          "warn_ratio": 0.4,
+          "notes": "Summary real-document privilegia cobertura factual e sinais executivos, não matching textual exato."
+        },
+        "metrics": {
+          "topic_hits": 6,
+          "fact_hits": 7,
+          "exec_signal_hits": 6,
+          "key_insight_hits": 4,
+          "number_hits": 5
+        }
+      },
+      "thresholds": {
+        "pass_ratio": 0.58,
+        "warn_ratio": 0.4,
+        "notes": "Summary real-document privilegia cobertura factual e sinais executivos, não matching textual exato."
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "Mission Performance and Key Programs",
+            "key_points": [
+              "Successful Artemis II test flight on schedule for April 2026",
+              "NASA's mission success with OSIRIS-Rex and Parker Solar Probe"
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "The successful completion of the Artemis II test flight will demonstrate the capabilities necessary to advance human exploration.",
+              "OSIRIS-Rex was the first U.S. mission to collect a sample from an asteroid and return it to Earth."
+            ]
+          },
+          {
+            "title": "Financial Performance",
+            "key_points": [
+              "Unmodified “clean” audit opinion for 2025 financial statements",
+              "Total assets of $39.6 billion, net position of $32 billion"
+            ],
+            "relevance_score": 0.85,
+            "supporting_evidence": [
+              "NASA has received an unmodified “clean” audit opinion on its 2025 financial statements for the 15th consecutive year, with no reported material weaknesses.",
+              "NASA's total asset balance, as of September 30, 2025, was $39.6 billion; Total Net Position comprised of Unexpended Appropriations and Cumulative Results of Operations (“net worth”), were $32 billion."
+            ]
+          },
+          {
+            "title": "Controls/Compliance",
+            "key_points": [
+              "Effective internal controls with no material weaknesses",
+              "Annual Statement of Assurance processes"
+            ],
+            "relevance_score": 0.8,
+            "supporting_evidence": [
+              "Based on the results of this evaluation, NASA provides reasonable assurance that its system of internal control was operating effectively as of September 30, 2025, to ensure the effectiveness and efficiency of operations and compliance with laws, regulations, and policies.",
+              "NASA complies with the Office of Management and Budget’s (OMB) Circular A-123, which provides Government-wide requirements for internal control and accountability."
+            ]
+          },
+          {
+            "title": "Enterprise Risk Management",
+            "key_points": [
+              "Robust ERM program led by ARMO",
+              "Effective internal controls ensure compliance and operational efficiency"
+            ],
+            "relevance_score": 0.75,
+            "supporting_evidence": [
+              "The Agency’s Risk Management Officer (ARMO), within the Headquarters Office of Safety and Mission Assurance (OSMA), oversees risk related functions and serves as the primary steward on risk policy, practices, and capabilities.",
+              "Based on the results of this evaluation, NASA provides reasonable assurance that its system of internal control was operating effectively as of September 30, 2025, to ensure the effectiveness and efficiency of operations and compliance with laws, regulations, and policies."
+            ]
+          },
+          {
+            "title": "Agency Overview and Financial Summary",
+            "key_points": [
+              "Independent agency established in 1958",
+              "Net Agency Outlays of $24,576 million for FY 2025"
+            ],
+            "relevance_score": 0.7,
+            "supporting_evidence": [
+              "The National Aeronautics and Space Administration (NASA) is an independent agency established by Congress on October 1, 1958 by the National Aeronautics and Space Act of 1958.",
+              "Agency Outlays, Net $24,576; These consolidated financial statements are prepared in accordance with FASAB standards in the format prescribed by the Office of Management and Budget (OMB) Circular A-136, Financial Reporting Requirements, Revised (July 2025)."
+            ]
+          },
+          {
+            "title": "Investments",
+            "key_points": [
+              "Intragovernmental non-marketable securities",
+              "Use of funds for disbursement to the Challenger Center"
+            ],
+            "relevance_score": 0.6,
+            "supporting_evidence": [
+              "NASA investments include the following intragovernmental non-marketable securities:",
+              "In anticipation of insufficient interest earnings that will not meet NASA’s requirement to make quarterly disbursements, the Committees on Appropriations included a provision in the FY 2025 Consolidated Appropriations Act (P.L. 119-4), enabling NASA to utilize up to $1 million from the Safety, Security, and Mission Services appropriation for disbursement to the Challenger Center."
+            ]
+          },
+          {
+            "title": "Accounts Receivable and Property, Plant, and Equipment",
+            "key_points": [
+              "Allowance for uncollectible accounts",
+              "Significant heritage assets not depreciated"
+            ],
+            "relevance_score": 0.65,
+            "supporting_evidence": [
+              "An allowance for uncollectible accounts is recorded to reduce Accounts Receivable to its net realizable value.",
+              "Heritage assets are PP&E with historical or cultural significance, not depreciated."
+            ]
+          },
+          {
+            "title": "Lease Arrangements and Revenue",
+            "key_points": [
+              "Significant lease receivables",
+              "Substantial annual lease revenue"
+            ],
+            "relevance_score": 0.6,
+            "supporting_evidence": [
+              "NASA recognized $49.1 million of annual lease revenue in FY 2025 associated with leases under SFFAS 54.",
+              "Lease Receivable, Net $ 698 $ 1,781 $ 2,479"
+            ]
+          },
+          {
+            "title": "Public-Private Partnerships and Leases",
+            "key_points": [
+              "Revenue through public-private partnership leases",
+              "Budgetary resources across various mission areas"
+            ],
+            "relevance_score": 0.55,
+            "supporting_evidence": [
+              "Title 51 U.S.C. § 20145, Lease of Non-Excess Property, authorizes NASA to lease real property under NASA’s control or jurisdiction to other public and private entities on a long-term basis in return for cash consideration at fair market value.",
+              "Spending Authority from Offsetting Collections — — — — 1,866 —"
+            ]
+          },
+          {
+            "title": "Auditor's Responsibilities and Significant Deficiency",
+            "key_points": [
+              "Significant deficiency in financial reporting oversight controls",
+              "Compliance with authoritative budgetary accounting guidance"
+            ],
+            "relevance_score": 0.5,
+            "supporting_evidence": [
+              "NASA made the change in posting logic based on its interpretation that an estimate could not serve as the basis for recording a budgetary entry for the recognition of a delivered order to the agency; however, authoritative budgetary accounting guidance does not support this interpretation.",
+              "The Agency is committed to addressing key management challenges including returning humans to the Moon, sustaining a human presence in low Earth orbit, managing major programs and projects, and cybersecurity risks."
+            ]
+          },
+          {
+            "title": "Mission Performance and Financial Management",
+            "key_points": [
+              "Implementation of AI guidelines",
+              "Advanced Zero Trust architecture for cybersecurity"
+            ],
+            "relevance_score": 0.45,
+            "supporting_evidence": [
+              "NASA has issued generative AI guidance encouraging responsible AI use and published a list of approved AI tools.",
+              "NASA’s move to Zero Trust is a necessity for strengthening cybersecurity against motivated adversaries."
+            ]
+          },
+          {
+            "title": "Mission Highlights",
+            "key_points": [
+              "Launch of SpaceX Crew-10",
+              "Continued focus on commercial partnerships"
+            ],
+            "relevance_score": 0.4,
+            "supporting_evidence": [
+              "NASA launched SpaceX Crew-10, the 10th crew rotation mission under its Commercial Crew Program.",
+              "A SpaceX Falcon 9 rocket with the company's Dragon spacecraft on top is seen during sunrise on the launch pad at Launch Complex 39A at NASA's Kennedy Space Center in Florida on Tuesday, March 11, 2025, ahead of the agency's SpaceX Crew-10 launch."
+            ]
+          }
+        ],
+        "executive_summary": "NASA achieved significant mission success with programs like Artemis and OSIRIS-Rex while maintaining a robust financial position. The agency received an unmodified ‘clean’ audit opinion for its FY 2025 financial statements, with no material weaknesses found. Effective internal controls ensure compliance and operational efficiency. NASA is committed to addressing key management challenges including returning humans to the Moon and managing major programs and projects.",
+        "key_insights": [
+          "Mission performance was tracked across four key performance goals, with two rated Green and two rated Yellow.",
+          "NASA reported total net position of $32,074 million for FY 2025.",
+          "FY 2025 net cost of operations was $23,699 million.",
+          "Grant oversight remained material, with 1,134 expired grants and $14,938 million in undisbursed balances.",
+          "The report emphasizes NASA’s commitment to transparency and presenting integrated performance and financial information under OMB Circular A-136.",
+          "Successful Artemis II test flight on schedule for April 2026",
+          "Unmodified ‘clean’ audit opinion for FY 2025 financial statements with no material weaknesses",
+          "Effective internal controls ensure compliance and operational efficiency"
+        ],
+        "reading_time_minutes": 2,
+        "completeness_score": 0.93
+      }
+    }
+  ]
+}

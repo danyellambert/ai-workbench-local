@@ -1,0 +1,247 @@
+{
+  "generated_at": "2026-04-16T20:13:59.957342",
+  "status": "running",
+  "documents": [
+    "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf"
+  ],
+  "configs": [
+    {
+      "key": "qwen2.5_7b_hybrid",
+      "label": "qwen2.5:7b hybrid",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "qwen2.5:7b",
+      "prompt_style": "hybrid",
+      "synthesis_enabled": true
+    },
+    {
+      "key": "nemotron_extractive",
+      "label": "nemotron-3-super:cloud extractive",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "extractive",
+      "synthesis_enabled": true
+    },
+    {
+      "key": "nemotron_executive",
+      "label": "nemotron-3-super:cloud executive",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "executive",
+      "synthesis_enabled": true
+    },
+    {
+      "key": "nemotron_hybrid",
+      "label": "nemotron-3-super:cloud hybrid",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "hybrid",
+      "synthesis_enabled": true
+    }
+  ],
+  "completed_runs": 1,
+  "total_runs": 4,
+  "runs": [
+    {
+      "document": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "config": {
+        "key": "qwen2.5_7b_hybrid",
+        "label": "qwen2.5:7b hybrid",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "qwen2.5:7b",
+        "prompt_style": "hybrid",
+        "synthesis_enabled": true
+      },
+      "duration_s": 539.439,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Master Services Agreement - Vendor Draft: 4 risk(s), 1 gap(s) and 4 mitigation action(s) identified. Top risk: Delayed service due to provider's discretion in sharing audit rights Main evidence gap: No specific owner is mentioned for any action items",
+      "warnings": [
+        "No specific owner is mentioned for any action items",
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": {
+        "success": true,
+        "model": "qwen2.5:7b",
+        "prompt_style": "hybrid",
+        "finding_count": 3,
+        "attempts": 1
+      },
+      "synthesis_success": true,
+      "promotion_score": 0.95,
+      "scores": {
+        "risk_coverage": 0.8333,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 1.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 3,
+        "top_blocker_count": 1,
+        "total_score": 0.95
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Renegotiate",
+          "status": "Requires Legal Review",
+          "summary": "Master Services Agreement - Vendor Draft: 4 risk(s), 1 gap(s) and 4 mitigation action(s) identified. Top risk: Delayed service due to provider's discretion in sharing audit rights Main evidence gap: No specific owner is mentioned for any action items",
+          "severity_counts": {
+            "critical": 0,
+            "high": 2,
+            "medium": 1,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": "within 10 business days after determining that a material incident occurred"
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "No specific owner is mentioned for any action items",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Review and negotiate security incident notice clause",
+          "Ensure customer audit rights are included in final agreement",
+          "Clarify data deletion obligations post-termination",
+          "Review and negotiate data usage clause"
+        ],
+        "top_blockers": [
+          {
+            "title": "Limited liability cap",
+            "severity": "high",
+            "recommendation": "Review and negotiate data usage clause"
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Impact 1",
+            "detail": "Customer's claims may be capped at a lower amount than expected, leading to potential financial loss."
+          },
+          {
+            "label": "Impact 2",
+            "detail": "Delayed service due to provider's discretion in sharing audit rights could result in customer dissatisfaction and operational disruptions."
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "category": "Legal Risk",
+            "title": "Limited liability cap",
+            "description": "Limited liability cap",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.81,
+            "recommendation": "Review and negotiate data usage clause",
+            "snippet": "Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims.",
+            "source_document_id": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+          },
+          {
+            "id": "finding-2",
+            "severity": "medium",
+            "category": "Grounded Finding",
+            "title": "Potential misuse of service data for product development and model improvement without customer consent",
+            "description": "Potential misuse of service data for product development and model improvement without customer consent",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.81,
+            "recommendation": "Clarify data deletion obligations post-termination",
+            "snippet": "Provider may use de-identified service data for product development and model improvement.",
+            "source_document_id": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+          },
+          {
+            "id": "finding-3",
+            "severity": "high",
+            "category": "Grounded Finding",
+            "title": "Delayed service due to provider's discretion in sharing audit rights",
+            "description": "Delayed service due to provider's discretion in sharing audit rights",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.81,
+            "recommendation": "Review and negotiate security incident notice clause",
+            "snippet": "No customer audit right. Provider may instead share a summary letter or certification at its discretion.",
+            "source_document_id": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "title": "Limited liability cap",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims."
+          },
+          {
+            "id": "finding-2",
+            "severity": "medium",
+            "title": "Potential misuse of service data for product development and model improvement without customer consent",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "Provider may use de-identified service data for product development and model improvement."
+          },
+          {
+            "id": "finding-3",
+            "severity": "high",
+            "title": "Delayed service due to provider's discretion in sharing audit rights",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "No customer audit right. Provider may instead share a summary letter or certification at its discretion."
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nMaster Services Agreement - Vendor Draft\nCounterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing\nprotections.\nNotic"
+          ],
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "2",
+            "-",
+            "mercially reasonable efforts to delete Customer Data following termination.\nNo deletion deadline is stated.\nUse of data\nProvider may use de-identified service data for product development and model improvement.\nLiability"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

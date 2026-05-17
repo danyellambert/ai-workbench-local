@@ -1,0 +1,317 @@
+## AppSidebar
+import { useEffect, useState } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import {
+  LayoutDashboard, FileText, Workflow, FileOutput, History,
+  Palette, Server, ChevronLeft, ChevronRight,
+  Sparkles, Shield, GitCompare, ClipboardList, UserCheck,
+  LayoutGrid, MessageSquare, BarChart3, ShieldCheck, Archive, Terminal,
+} from 'lucide-react';
+import { useAppStore } from '@/lib/store';
+import { cn } from '@/lib/utils';
+import { AI_LAB_ROUTES } from '@/lib/ai-lab-navigation';
+import { APP_CONFIG } from '@/lib/app-config';
+import KeystoneLogo from '@/components/KeystoneLogo';
+import MeetDanyelModal from '@/components/landing/MeetDanyelModal';
+
+const productNav = [
+  { label: 'Command Center', path: '/app', icon: LayoutDashboard, tourId: 'nav-command-center' },
+  { label: 'Document Library', path: '/app/documents', icon: FileText, tourId: 'nav-documents' },
+  { label: 'Workflows', path: '/app/workflows', icon: Workflow, tourId: 'nav-workflows', children: [
+    { label: 'Document Review', path: '/app/workflows/document-review', icon: Shield },
+    { label: 'Policy Comparison', path: '/app/workflows/comparison', icon: GitCompare },
+    { label: 'Action Plan', path: '/app/workflows/action-plan', icon: ClipboardList },
+    { label: 'Candidate Review', path: '/app/workflows/candidate-review', icon: UserCheck },
+  ]},
+  { label: 'Deck Center', path: '/app/deck-center', icon: FileOutput, tourId: 'nav-deck-center' },
+  { label: 'Run History', path: '/app/history', icon: History, tourId: 'nav-history' },
+];
+
+const labNav = AI_LAB_ROUTES.map((route) => ({ label: route.label, path: route.path, icon: route.icon, tourId: `nav-lab-${route.key}` }));
+
+const systemNav = [
+  { label: 'Runtime Controls', path: '/app/settings/runtime', icon: Server, tourId: 'nav-runtime-controls' },
+  { label: 'Preferences', path: '/app/settings/preferences', icon: Palette, tourId: 'nav-preferences' },
+];
+
+interface NavItemProps {
+  item: { label: string; path: string; icon: React.ElementType; tourId?: string; children?: { label: string; path: string; icon: React.ElementType }[] };
+  collapsed: boolean;
+  currentPath: string;
+}
+
+type WorkflowTourCueRect = { top: number; left: number; height: number; width: number };
+type TourShortcutKind = 'workflow' | 'document-review' | 'policy-comparison' | 'action-plan' | 'candidate-review' | 'deck-center' | 'run-history' | 'runtime-controls' | 'preferences' | 'lab-overview' | 'lab-runtime' | 'lab-document-experiments' | 'lab-workflow-inspector' | 'lab-benchmarks' | 'lab-evals' | 'lab-artifacts' | 'lab-evidenceops';
+
+function NavItem({ item, collapsed, currentPath }: NavItemProps) {
+  const isActive = currentPath === item.path || item.children?.some(c => currentPath === c.path);
+  const Icon = item.icon;
+
+  return (
+    <div className="relative">
+      <Link to={item.children ? item.children[0].path : item.path}
+        data-tour={item.tourId}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group relative",
+          isActive
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+        )}>
+        {isActive && (
+          <motion.div layoutId="sidebar-active" className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary" />
+        )}
+        <Icon className="w-4 h-4 shrink-0" />
+        {!collapsed && <span className="truncate">{item.label}</span>}
+      </Link>
+      {!collapsed && item.children && isActive && (
+        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="ml-7 mt-1 space-y-0.5 overflow-hidden">
+          {item.children.map(child => (
+            <Link key={child.path} to={child.path}
+              className={cn("flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors",
+                currentPath === child.path ? "text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground"
+              )}>
+              <child.icon className="w-3.5 h-3.5" />
+              <span>{child.label}</span>
+            </Link>
+          ))}
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+export default function AppSidebar() {
+  const { sidebarOpen, toggleSidebar } = useAppStore();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const collapsed = !sidebarOpen;
+  const [workflowCueRect, setWorkflowCueRect] = useState<WorkflowTourCueRect | null>(null);
+  const [showWorkflowTourPrompt, setShowWorkflowTourPrompt] = useState(false);
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [tourShortcutKind, setTourShortcutKind] = useState<TourShortcutKind | null>(() => {
+    try {
+      if (window.localStorage.getItem('workbench-tour-lab-artifacts-complete') === '1') return 'lab-evidenceops';
+      if (window.localStorage.getItem('workbench-tour-lab-evals-complete') === '1') return 'lab-artifacts';
+      if (window.localStorage.getItem('workbench-tour-lab-benchmarks-complete') === '1') return 'lab-evals';
+      if (window.localStorage.getItem('workbench-tour-lab-workflow-inspector-complete') === '1') return 'lab-benchmarks';
+      if (window.localStorage.getItem('workbench-tour-lab-document-experiments-complete') === '1') return 'lab-workflow-inspector';
+      if (window.localStorage.getItem('workbench-tour-lab-runtime-complete') === '1') return 'lab-document-experiments';
+      if (window.localStorage.getItem('workbench-tour-lab-overview-complete') === '1') return 'lab-runtime';
+      if (window.localStorage.getItem('workbench-tour-preferences-complete') === '1') return 'lab-overview';
+      if (window.localStorage.getItem('workbench-tour-runtime-controls-complete') === '1') return 'preferences';
+      if (window.localStorage.getItem('workbench-tour-run-history-complete') === '1') return 'runtime-controls';
+      if (window.localStorage.getItem('workbench-tour-deck-center-complete') === '1') return 'run-history';
+      if (window.localStorage.getItem('workbench-tour-candidate-review-complete') === '1') return 'deck-center';
+      if (window.localStorage.getItem('workbench-tour-action-plan-complete') === '1') return 'candidate-review';
+      if (window.localStorage.getItem('workbench-tour-policy-comparison-complete') === '1') return 'action-plan';
+      if (window.localStorage.getItem('workbench-tour-document-review-complete') === '1') return 'policy-comparison';
+      if (window.localStorage.getItem('workbench-tour-workflow-complete') === '1') return 'document-review';
+      if (window.localStorage.getItem('workbench-tour-document-library-complete') === '1') return 'workflow';
+      return null;
+    } catch {
+      return null;
+    }
+  });
+
+  const clearTourShortcut = (kind: TourShortcutKind | null = tourShortcutKind) => {
+    try {
+      if (kind === 'lab-evidenceops') {
+        window.localStorage.removeItem('workbench-tour-lab-artifacts-complete');
+      } else if (kind === 'lab-artifacts') {
+        window.localStorage.removeItem('workbench-tour-lab-evals-complete');
+      } else if (kind === 'lab-evals') {
+        window.localStorage.removeItem('workbench-tour-lab-benchmarks-complete');
+      } else if (kind === 'lab-benchmarks') {
+        window.localStorage.removeItem('workbench-tour-lab-workflow-inspector-complete');
+      } else if (kind === 'lab-workflow-inspector') {
+        window.localStorage.removeItem('workbench-tour-lab-document-experiments-complete');
+      } else if (kind === 'lab-document-experiments') {
+        window.localStorage.removeItem('workbench-tour-lab-runtime-complete');
+      } else if (kind === 'lab-runtime') {
+        window.localStorage.removeItem('workbench-tour-lab-overview-complete');
+      } else if (kind === 'lab-overview') {
+        window.localStorage.removeItem('workbench-tour-preferences-complete');
+      } else if (kind === 'preferences') {
+        window.localStorage.removeItem('workbench-tour-runtime-controls-complete');
+      } else if (kind === 'runtime-controls') {
+        window.localStorage.removeItem('workbench-tour-run-history-complete');
+      } else if (kind === 'run-history') {
+        window.localStorage.removeItem('workbench-tour-deck-center-complete');
+      } else if (kind === 'deck-center') {
+
+## AI Lab navigation
+import {
+  LayoutGrid, Server, MessageSquare, Workflow, BarChart3,
+  ShieldCheck, Archive, Terminal
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+export interface AiLabRoute {
+  key: string;
+  label: string;
+  path: string;
+  icon: LucideIcon;
+  description: string;
+  operatorQuestion: string;
+}
+
+export const AI_LAB_ROUTES: AiLabRoute[] = [
+  {
+    key: 'overview',
+    label: 'Overview',
+    path: '/app/lab/overview',
+    icon: LayoutGrid,
+    description: 'AI Engineering Operating Console',
+    operatorQuestion: 'What needs attention right now?',
+  },
+  {
+    key: 'runtime',
+    label: 'Runtime & Observability',
+    path: '/app/lab/runtime',
+    icon: Server,
+    description: 'Runtime health, configuration and diagnostics',
+    operatorQuestion: 'Is the runtime healthy and cost-controlled?',
+  },
+  {
+    key: 'chat',
+    label: 'Document Experiments',
+    path: '/app/lab/chat',
+    icon: MessageSquare,
+    description: 'RAG and document interaction diagnostics',
+    operatorQuestion: 'Is RAG helping or just adding noise and cost?',
+  },
+  {
+    key: 'workflow-inspector',
+    label: 'Workflow Inspector',
+    path: '/app/lab/workflow-inspector',
+    icon: Workflow,
+    description: 'Structured execution, routing and auditability',
+    operatorQuestion: 'Why did the workflow choose this route, and what triggered review?',
+  },
+  {
+    key: 'benchmarks',
+    label: 'Benchmarks',
+    path: '/app/lab/benchmarks',
+    icon: BarChart3,
+    description: 'Model and strategy comparison hub',
+    operatorQuestion: 'Which model/provider setup is strongest for which use case?',
+  },
+  {
+    key: 'evals',
+    label: 'Evals & Diagnosis',
+    path: '/app/lab/evals',
+    icon: ShieldCheck,
+    description: 'Quality measurement and regression control',
+    operatorQuestion: 'Where has quality regressed?',
+  },
+  {
+    key: 'artifacts',
+    label: 'Experiments & Artifacts',
+    path: '/app/lab/artifacts',
+    icon: Archive,
+    description: 'Technical evidence and experimentation archive',
+    operatorQuestion: 'Where is the technical evidence that explains current behavior?',
+  },
+  {
+    key: 'evidenceops',
+    label: 'EvidenceOps / MCP',
+    path: '/app/lab/evidenceops',
+    icon: Terminal,
+    description: 'Operations, governance and MCP console',
+    operatorQuestion: 'Is operations/governance healthy and controllable?',
+  },
+];
+
+export const AI_LAB_ROUTE_MAP: Record<string, AiLabRoute> = Object.fromEntries(
+  AI_LAB_ROUTES.map(r => [r.path, r])
+);
+
+// Legacy aliases
+export const AI_LAB_REDIRECTS: Record<string, string> = {
+  '/app/lab/structured': '/app/lab/workflow-inspector',
+  '/app/lab/models': '/app/lab/benchmarks',
+};
+
+## Command Palette
+import { useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppStore } from '@/lib/store';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command';
+import {
+  LayoutDashboard, FileText, Workflow, FileOutput,
+  Settings, Shield, GitCompare, ClipboardList, UserCheck, Play,
+} from 'lucide-react';
+import { AI_LAB_ROUTES } from '@/lib/ai-lab-navigation';
+
+const commands = [
+  {
+    group: 'Product',
+    items: [
+      { label: 'Command Center', path: '/app', icon: LayoutDashboard },
+      { label: 'Document Library', path: '/app/documents', icon: FileText },
+      { label: 'Run Surface', path: '/app/run', icon: Workflow },
+      { label: 'Document Review', path: '/app/workflows/document-review', icon: Shield },
+      { label: 'Policy Comparison', path: '/app/workflows/comparison', icon: GitCompare },
+      { label: 'Action Plan', path: '/app/workflows/action-plan', icon: ClipboardList },
+      { label: 'Candidate Review', path: '/app/workflows/candidate-review', icon: UserCheck },
+      { label: 'Deck Center', path: '/app/deck-center', icon: FileOutput },
+    ],
+  },
+  {
+    group: 'AI Lab',
+    items: AI_LAB_ROUTES.map((route) => ({ label: route.label, path: route.path, icon: route.icon })),
+  },
+  {
+    group: 'Quick Actions',
+    items: [
+      { label: 'Run Document Risk Review', path: '/app/workflows/document-review', icon: Play },
+      { label: 'Compare Contract Versions', path: '/app/workflows/comparison', icon: GitCompare },
+      { label: 'Open Runtime Controls', path: '/app/settings/runtime', icon: Settings },
+    ],
+  },
+];
+
+export default function CommandPalette() {
+  const { commandPaletteOpen, setCommandPaletteOpen } = useAppStore();
+  const navigate = useNavigate();
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      setCommandPaletteOpen(true);
+    }
+  }, [setCommandPaletteOpen]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  const handleSelect = (path: string) => {
+    navigate(path);
+    setCommandPaletteOpen(false);
+  };
+
+  return (
+    <CommandDialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
+      <CommandInput placeholder="Search pages, workflows, AI Lab..." />
+      <CommandList>
+        <CommandEmpty>No results found.</CommandEmpty>
+        {commands.map((group, i) => (
+          <div key={group.group}>
+            {i > 0 && <CommandSeparator />}
+            <CommandGroup heading={group.group}>
+              {group.items.map(item => (
+                <CommandItem key={item.label + item.path} onSelect={() => handleSelect(item.path)} className="gap-3 cursor-pointer">
+                  <item.icon className="w-4 h-4 text-muted-foreground" />
+                  <span>{item.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </div>
+        ))}
+      </CommandList>
+    </CommandDialog>
+  );
+}

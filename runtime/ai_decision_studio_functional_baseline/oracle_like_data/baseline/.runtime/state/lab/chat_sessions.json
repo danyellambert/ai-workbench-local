@@ -1,0 +1,99 @@
+[
+  {
+    "session_id": "session_a5f799ec1daa",
+    "title": "What appears risky, unsupported or contradictory in these documents?",
+    "created_at": "2026-04-27T11:23:28.113577+00:00",
+    "updated_at": "2026-04-27T11:28:27.544450+00:00",
+    "status": "completed",
+    "document_ids": [
+      "7ecfe260bb0c381b51a3f5c30dc9460164b344856203153fa9d2e66e0dd30424"
+    ],
+    "messages": [
+      {
+        "id": "msg_9d67bc6748b7",
+        "role": "assistant",
+        "content": "Third Party & Vendor Management Policy of Grambling State University Information Technology: 2 risk(s), 6 gap(s) and 6 mitigation action(s) identified. Top risk: Violation of this Policy may result in disciplinary action which may include termination for employees, termination of business relationships for contractors or consultants Main evidence gap: Effective date of the policy\n\nHighlights:\n- Violation of this Policy may result in disciplinary action which may include termination for employees, termination of business relationships for contractors or consultants\n- Individuals are subject to loss of Grambling State University information resources, access privileges, and potential civil and criminal prosecution\n- Effective date of the policy\n- Revision date for version 1.0\n\nRecommendation: Each third party user with access to Grambling State University sensitive information must be cleared to handle that information",
+        "timestamp": "2026-04-27T11:25:15.006613+00:00",
+        "sources": [
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "4 source block(s) · 4611 context chars",
+            "score": 0.9
+          }
+        ],
+        "diagnostics": {
+          "workflow_id": "document_review",
+          "workflow_label": "Document Review",
+          "warning_count": 7,
+          "artifact_count": 0,
+          "artifact_path": null,
+          "artifact_label": null,
+          "latency_s": 0.0,
+          "total_tokens": 0.0,
+          "context_chars": 4611,
+          "source_count": 1
+        }
+      },
+      {
+        "id": "msg_da7b05465186",
+        "role": "user",
+        "content": "What must third party personnel do if they identify a security incident?",
+        "timestamp": "2026-04-27T11:28:20.898748+00:00"
+      },
+      {
+        "id": "msg_0b242fc2a583",
+        "role": "assistant",
+        "content": "Third party personnel must report all security incidents directly to their assigned point of contact.",
+        "timestamp": "2026-04-27T11:28:27.543463+00:00",
+        "sources": [
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Policy\nThird party access to Grambling State University’s network and system resources must comply\nwith all University’s applicable rules, policies, standards, and agreements.\nGrambling State University will provide a point of contact for…",
+            "score": 0.5382
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "contractors with\nwhom it is authorized to share the data, to share only the minimum information necessary, to\nsecurely return or destroy the data upon expiration of the contract, and to provide immediate\nnotification to the campus, wheneve…",
+            "score": 0.4544
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "Grambling State University’s password procedures and policies.\n6. Upon termination of a contract or at the request of Grambling State University, the third\nparty must surrender all equipment and supplies immediately.\n7. Third parties are r…",
+            "score": 0.45
+          },
+          {
+            "label": "grambling_third_party_vendor_management_policy.pdf",
+            "detail": "[Page 1]\nThird Party & Vendor Management Policy\nGrambling State University Information Technology\nJay Ellis, Chief Information Officer\nRevision History:\nVersion Number Revision Date\n1.0\nIntroduction\nThird party entities play an important r…",
+            "score": 0.45
+          }
+        ],
+        "diagnostics": {
+          "workflow_id": "lab_document_qa",
+          "workflow_label": "Grounded Document Q&A",
+          "provider": "ollama_hosted",
+          "model": "nemotron-3-super:cloud",
+          "context_strategy": "retrieval",
+          "structured_execution_id": "05790c62-70f5-4203-b75f-7b788afc2cb7",
+          "tool_used": "consult_documents",
+          "answer_mode": "friendly",
+          "confidence": 0.84,
+          "source_count": 4,
+          "latency_s": 6.641
+        }
+      }
+    ],
+    "runtime": {
+      "provider": "ollama_hosted",
+      "model": "nemotron-3-super:cloud",
+      "workflow_id": "lab_document_qa",
+      "avg_latency_s": 6.641,
+      "total_tokens": 0.0,
+      "warning_count": 1,
+      "context_chars": 0,
+      "source_count": 4,
+      "grounded_documents": [
+        "7ecfe260bb0c381b51a3f5c30dc9460164b344856203153fa9d2e66e0dd30424"
+      ]
+    }
+  }
+]

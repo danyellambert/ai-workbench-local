@@ -1,0 +1,87 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "action_plan_deck",
+  "deck_family": "action_plan",
+  "presentation": {
+    "title": "AI Workbench Local — Action Plan",
+    "subtitle": "Operational action plan grounded in current action backlog",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Action Plan"
+  },
+  "context": {
+    "review_type_counts": {
+      "risk_gap_review": 3
+    }
+  },
+  "executive_summary": "O action backlog atual contém 3 ação(ões), com 3 aberta(s), 0 sensível(is) e 0 em atraso.",
+  "key_highlights": [
+    "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+    "Abra os trechos-fonte citados para confirmar a interpretação antes de agir."
+  ],
+  "key_metrics": [
+    {
+      "label": "Total actions",
+      "value": "3"
+    },
+    {
+      "label": "Open",
+      "value": "3"
+    },
+    {
+      "label": "Overdue",
+      "value": "0"
+    },
+    {
+      "label": "Approval required",
+      "value": "0"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Action backlog",
+      "columns": [
+        "Type",
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "recommended_action",
+          "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+          "-",
+          "-",
+          "recommended"
+        ],
+        [
+          "recommended_action",
+          "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+          "-",
+          "-",
+          "recommended"
+        ],
+        [
+          "recommended_action",
+          "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+          "-",
+          "-",
+          "recommended"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+  "watchouts": [
+    "Há ações abertas sem owner definido."
+  ],
+  "next_steps": [
+    "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+    "Abra os trechos-fonte citados para confirmar a interpretação antes de agir."
+  ],
+  "data_sources": [
+    "evidenceops_action_store"
+  ]
+}

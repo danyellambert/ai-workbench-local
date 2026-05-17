@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "- The Access Review Evidence Log is a synthetic test artifact used to simulate incomplete evidence in a pilot review, while the Privileged Account Approval Email documents an actual governance action with enforceable compliance controls.  \n- The Evidence Log highlights gaps in control closure due to missing provenance, whereas the Email specifies active access granted under defined operational and audit requirements.  \n- Evidence Log is not a real compliance record but a testing tool; the Email is a formal governance artifact requiring archiving and revalidation.  \n- The Evidence Log involves unresolved evidence items, while the Email mandates ongoing vendor and personnel verification for access continuity.  \n- The Evidence Log’s purpose is to test process readiness; the Email operationalizes access controls within a compliance framework.  \n- Control closure in the Evidence Log depends on provenance verification; compliance in the Email depends on sustained governance and audit readiness.",
+  "key_highlights": [
+    "The Access Review Evidence Log is a synthetic test artifact used to simulate incomplete evidence in a pilot review, while the Privileged Account Approval Email documents an actual governance action with enforceable compliance controls.",
+    "The Evidence Log highlights gaps in control closure due to missing provenance, whereas the Email specifies active access granted under defined operational and audit requirements.",
+    "Evidence Log is not a real compliance record but a testing tool; the Email is a formal governance artifact requiring archiving and revalidation.",
+    "The Evidence Log involves unresolved evidence items, while the Email mandates ongoing vendor and personnel verification for access continuity.",
+    "The Evidence Log’s purpose is to test process readiness; the Email operationalizes access controls within a compliance framework.",
+    "Control closure in the Evidence Log depends on provenance verification; compliance in the Email depends on sustained governance and audit readiness."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Missing or incomplete evidence items prevent control closure until their provenance is verified. | The synthetic nature…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on operational constraints and audit trail integration. | Governance requires ongoing vendor and…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log is a synthetic…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) serves as a test artifact for…"
+        ],
+        [
+          "auditability_delta",
+          "The Evidence Log highlights gaps in control closure…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) serves as a test artifact for…"
+        ],
+        [
+          "approval_change",
+          "Evidence Log is not a real compliance record…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic nature of the document indicates it is intended solely for testing…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "The Evidence Log involves unresolved evidence items, while…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) serves as a test artifact for…"
+        ],
+        [
+          "auditability_delta",
+          "The Evidence Log’s purpose is to test process…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) serves as a test artifact for…"
+        ],
+        [
+          "auditability_delta",
+          "Control closure in the Evidence Log depends on…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): Missing or incomplete evidence items prevent control closure until their provenan…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

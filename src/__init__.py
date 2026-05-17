@@ -1,1 +1,1 @@
-"""Shared modules for the AI Workbench Local project."""
+"""Shared modules for the Axiovance project."""

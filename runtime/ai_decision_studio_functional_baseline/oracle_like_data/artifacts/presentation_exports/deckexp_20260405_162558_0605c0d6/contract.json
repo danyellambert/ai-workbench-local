@@ -1,0 +1,161 @@
+{
+  "contract_version": "presentation_export.v1",
+  "export_kind": "benchmark_eval_executive_deck",
+  "presentation": {
+    "title": "AI Workbench Local — Benchmark & Eval Review",
+    "subtitle": "Resumo executivo da rodada atual",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Benchmark & Eval Review"
+  },
+  "model_comparison_snapshot": {
+    "total_runs": 6,
+    "total_candidates": 15,
+    "success_rate": 1.0,
+    "avg_latency_s": 4.329,
+    "avg_format_adherence": 0.983,
+    "avg_use_case_fit_score": 0.994,
+    "top_model": "nemotron-3-super:cloud",
+    "top_runtime_bucket": "cloud"
+  },
+  "eval_snapshot": {
+    "total_runs": 168,
+    "pass_rate": 0.571,
+    "warn_rate": 0.155,
+    "fail_rate": 0.274,
+    "avg_score_ratio": 0.746,
+    "avg_latency_s": 64.784,
+    "needs_review_rate": 0.018,
+    "top_suite_name": "langgraph_workflow_eval"
+  },
+  "executive_summary": "15 candidatos foram consolidados no benchmark, com success rate médio de 100% e liderança atual de nemotron-3-super:cloud. A camada de eval registrou 168 runs, com PASS rate de 57.1% e needs review de 1.8%.",
+  "key_highlights": [
+    "Top benchmark candidate atual: nemotron-3-super:cloud.",
+    "Benchmark success rate agregado em 100%.",
+    "Use-case fit médio de benchmark em 99.4%.",
+    "Suite líder de eval atual: langgraph_workflow_eval.",
+    "PASS rate de eval em 57.1%.",
+    "Needs review rate atual em 1.8%."
+  ],
+  "key_metrics": [
+    {
+      "label": "Benchmark candidates",
+      "value": "15",
+      "detail": "Top model: nemotron-3-super:cloud"
+    },
+    {
+      "label": "Benchmark success",
+      "value": "100%",
+      "detail": "Avg latency: 4.33s"
+    },
+    {
+      "label": "Eval runs",
+      "value": "168",
+      "detail": "Top suite: langgraph_workflow_eval"
+    },
+    {
+      "label": "Eval PASS rate",
+      "value": "57.1%",
+      "detail": "Avg score: 74.6%"
+    }
+  ],
+  "model_leaderboard": [
+    {
+      "rank": 1,
+      "model": "nemotron-3-super:cloud",
+      "avg_latency_s": 1.479,
+      "format_adherence": 1.0,
+      "use_case_fit_score": 1.0,
+      "success_rate": 1.0
+    },
+    {
+      "rank": 2,
+      "model": "nemotron-3-nano:30b-cloud",
+      "avg_latency_s": 2.033,
+      "format_adherence": 1.0,
+      "use_case_fit_score": 1.0,
+      "success_rate": 1.0
+    },
+    {
+      "rank": 3,
+      "model": "qwen3.5:397b-cloud",
+      "avg_latency_s": 7.301,
+      "format_adherence": 1.0,
+      "use_case_fit_score": 0.0,
+      "success_rate": 1.0
+    },
+    {
+      "rank": 4,
+      "model": "deepseek-v3.1:671b-cloud",
+      "avg_latency_s": 14.708,
+      "format_adherence": 1.0,
+      "use_case_fit_score": 0.0,
+      "success_rate": 1.0
+    },
+    {
+      "rank": 5,
+      "model": "minimax-m2.7:cloud",
+      "avg_latency_s": 13.322,
+      "format_adherence": 0.957,
+      "use_case_fit_score": 0.983,
+      "success_rate": 1.0
+    }
+  ],
+  "eval_suite_leaderboard": [
+    {
+      "rank": 1,
+      "suite_name": "langgraph_workflow_eval",
+      "pass_rate": 1.0,
+      "avg_score_ratio": 1.0,
+      "avg_latency_s": 0.0,
+      "total_runs": 8
+    },
+    {
+      "rank": 2,
+      "suite_name": "document_agent_routing_eval",
+      "pass_rate": 1.0,
+      "avg_score_ratio": 1.0,
+      "avg_latency_s": 0.0,
+      "total_runs": 9
+    },
+    {
+      "rank": 3,
+      "suite_name": "structured_smoke_eval",
+      "pass_rate": 0.76,
+      "avg_score_ratio": 0.778,
+      "avg_latency_s": 32.811,
+      "total_runs": 50
+    },
+    {
+      "rank": 4,
+      "suite_name": "structured_real_document_eval",
+      "pass_rate": 0.531,
+      "avg_score_ratio": 0.597,
+      "avg_latency_s": 89.727,
+      "total_runs": 32
+    },
+    {
+      "rank": 5,
+      "suite_name": "evidence_cv_gold_eval",
+      "pass_rate": 0.35,
+      "avg_score_ratio": 0.707,
+      "avg_latency_s": 0.0,
+      "total_runs": 60
+    }
+  ],
+  "recommendation": "Promover nemotron-3-super:cloud como candidato principal da próxima rodada controlada, mantendo o quality gate apoiado no PASS rate atual de 57.1%.",
+  "watchouts": [
+    "Ainda existem runs em FAIL (27.4%)."
+  ],
+  "next_steps": [
+    "Promover nemotron-3-super:cloud para uma rodada shadow/controlada como candidato default.",
+    "Revisar suites em FAIL/WARN e transformar os achados em gates repetíveis.",
+    "Reduzir backlog de needs_review antes de ampliar o escopo da rodada seguinte.",
+    "Serializar este contrato e chamar o `ppt_creator_app` por API HTTP no próximo slice."
+  ],
+  "data_sources": [
+    "phase7_model_comparison_log",
+    "phase8_eval_store"
+  ]
+}

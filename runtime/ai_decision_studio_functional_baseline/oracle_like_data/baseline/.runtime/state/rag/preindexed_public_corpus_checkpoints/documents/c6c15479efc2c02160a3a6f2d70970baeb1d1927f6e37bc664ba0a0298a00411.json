@@ -1,0 +1,112 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Legal Redline Summary - MSA v4.2.pdf",
+  "file_type": "pdf",
+  "file_hash": "c6c15479efc2c02160a3a6f2d70970baeb1d1927f6e37bc664ba0a0298a00411",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nLEG-001  Legal Redline Summary\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nLegal Redline Summary — MSA v4.2\nNegotiation memo showing partial movement by the vendor and unresolved residual risk.\nDocument ID\nLEG-001\nPrepared By\nJames Park, Privacy Counsel\nPrepared For\nMaria Santos, VP Procurement\nMeeting\nGovernance review — 2024-03-15\nStatus\nOpen / partial vendor movement\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nSummary\nThis memo captures Meridian’s negotiation position against Master Service Agreement v4.2. The vendor moved on\nseveral commercial points after the first review cycle, but the package remains unsuitable for execution without additional\nchanges.\nClause-by-Clause Redline Status\nClause Area\nVendor Draft 4.2\nMeridian Baseline\nLatest Vendor Reply\nResidual\nRisk\nLiability Cap\nUnlimited liability for both\nparties.\nGeneral cap at 2×\nannual value.\nVendor proposed cap at 12\nmonths of fees paid;\nMeridian position not\naccepted.\nCritical\nTermination\nNotice\n90 days before\nauto-renewal.\n30 days before renewal.\nVendor accepted 30-day\nnotice for future drafts.\nLow\nDerivative IP\nJoint ownership of\nderivatives and\nimprovements.\nCustomer retains\nderivative IP.\nVendor accepted Meridian\nlanguage, subject to final\nscrub.\nLow\nCross-Border\nTransfers\nNo residency commitment;\nSCCs deferred.\nEEA residency or SCC\nAppendix C.\nVendor agreed to attach\nSCC Appendix C; draft not\nyet executed.\nMedium\nIncident Notice\nCommercially reasonable\nefforts only.\n24 hours for critical\ncustomer-data incidents.\nVendor countered with 72\nhours after confirmation.\nHigh\nHard-case behavior: the vendor accepted some improvements, but the liability and incident-notification\npositions remain materially weaker than Meridian’s baseline. This document should not be treated as a\nclean approval.\nRecommendation\n●\nDo not execute the package until liability is capped and incident-notification timing is clarified.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nLEG-001  Legal Redline Summary\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\n●\nIf business timing requires pilot launch, isolate the launch under a written risk acceptance tied only to uptime during the\npilot window; do not waive liability or transfer-mechanism gaps.\n●\nUse this document together with the approved baseline and the current SLA when generating comparison decks or\nexecutive recommendations.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 2649,
+    "final_text_chars": 2649,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2137,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "table"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 506,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 87,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 5987,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nLEG-001  Legal Redline Summary\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nLegal Redline Summary — MSA v4.2\nNegotiation memo showing partial movement by the vendor and unresolved residual risk.\nDocument ID\nLEG-001\nPrepared By\nJames Park, Privacy Counsel\nPrepared For\nMaria Santos, VP Procurement\nMeeting\nGovernance review — 2024-03-15\nStatus\nOpen / partial vendor movement\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nSummary\nThis memo captures Meridian’s negotiation position against Master Service Agreement v4.2. The vendor moved on\nseveral commercial points after the first review cycle, but the package remains unsuitable for execution without additional\nchanges.\nClause-by-Clause Redline Status\nClause Area\nVendor Draft 4.2\nMeridian Baseline\nLatest Vendor Reply\nResidual\nRisk\nLiability Cap\nUnlimited liability for both\nparties.\nGeneral cap at 2×\nannual value.\nVendor proposed cap at 12\nmonths of fees paid;\nMeridian position not\naccepted.\nCritical\nTermination\nNotice\n90 days before\nauto-renewal.\n30 days before renewal.\nVendor accepted 30-day\nnotice for future drafts.\nLow\nDerivative IP\nJoint ownership of\nderivatives and\nimprovements.\nCustomer retains\nderivative IP.\nVendor accepted Meridian\nlanguage, subject to final\nscrub.\nLow\nCross-Border\nTransfers\nNo residency commitment;\nSCCs deferred.\nEEA residency or SCC\nAppendix C.\nVendor agreed to attach\nSCC Appendix C; draft not\nyet executed.\nMedium\nIncident Notice\nCommercially reasonable\nefforts only.\n24 hours for critical\ncustomer-data incidents.\nVendor countered with 72\nhours after confirmation.\nHigh\nHard-case behavior: the vendor accepted some improvements, but the liability and incident-notification\npositions remain materially weaker than Meridian’s baseline. This document should not be treated as a\nclean approval.\nRecommendation\n●\nDo not execute the package until liability is capped and incident-notification timing is clarified.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nLEG-001  Legal Redline Summary\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\n●\nIf business timing requires pilot launch, isolate the launch under a written risk acceptance tied only to uptime during the\npilot window; do not waive liability or transfer-mechanism gaps.\n●\nUse this document together with the approved baseline and the current SLA when generating comparison decks or\nexecutive recommendations.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic legal redline summary is text-first; Docling/text extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "legal/Legal Redline Summary - MSA v4.2.pdf",
+    "nextcloud_relative_path": "legal/Legal Redline Summary - MSA v4.2.pdf",
+    "source_relative_path": "legal/Legal Redline Summary - MSA v4.2.pdf",
+    "filename": "Legal Redline Summary - MSA v4.2.pdf",
+    "title": "Legal Redline Summary - MSA v4.2",
+    "category": "legal",
+    "preindex": {
+      "relative_path": "legal/Legal Redline Summary - MSA v4.2.pdf",
+      "filename": "Legal Redline Summary - MSA v4.2.pdf",
+      "title": "Legal Redline Summary - MSA v4.2",
+      "category": "legal",
+      "document_id": "Legal Redline Summary - MSA v4.2",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:26"
+}

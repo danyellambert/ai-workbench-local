@@ -46,6 +46,120 @@ def _compute_latency_stage_breakdown(entry: dict[str, object]) -> dict[str, floa
     }
 
 
+def _build_runtime_window_summary(entries: list[dict[str, object]]) -> dict[str, float | int]:
+    total_runs = len(entries)
+    if total_runs == 0:
+        return {
+            "total_runs": 0,
+            "success_rate": 0.0,
+            "error_rate": 0.0,
+            "needs_review_rate": 0.0,
+            "avg_latency_s": 0.0,
+            "avg_total_tokens": 0.0,
+            "avg_cost_usd": 0.0,
+            "avg_context_pressure_ratio": 0.0,
+            "mcp_error_rate": 0.0,
+        }
+
+    success_count = sum(1 for item in entries if bool(item.get("success")))
+    error_count = sum(1 for item in entries if str(item.get("error_message") or "").strip())
+    needs_review_count = sum(1 for item in entries if bool(item.get("needs_review")))
+    latencies = [
+        float(item.get("latency_s"))
+        for item in entries
+        if isinstance(item.get("latency_s"), (int, float))
+    ]
+    total_tokens = [
+        int(item.get("total_tokens"))
+        for item in entries
+        if isinstance(item.get("total_tokens"), (int, float))
+    ]
+    cost_values = [
+        float(item.get("cost_usd"))
+        for item in entries
+        if isinstance(item.get("cost_usd"), (int, float))
+    ]
+    context_pressure_ratios = [
+        float(item.get("context_pressure_ratio"))
+        for item in entries
+        if isinstance(item.get("context_pressure_ratio"), (int, float))
+    ]
+    total_mcp_tool_calls = sum(int(item.get("mcp_tool_call_count") or 0) for item in entries)
+    total_mcp_error_calls = sum(int(item.get("mcp_error_call_count") or 0) for item in entries)
+
+    return {
+        "total_runs": total_runs,
+        "success_rate": round(success_count / max(total_runs, 1), 3),
+        "error_rate": round(error_count / max(total_runs, 1), 3),
+        "needs_review_rate": round(needs_review_count / max(total_runs, 1), 3),
+        "avg_latency_s": round(sum(latencies) / max(len(latencies), 1), 3) if latencies else 0.0,
+        "avg_total_tokens": round(sum(total_tokens) / max(len(total_tokens), 1), 3) if total_tokens else 0.0,
+        "avg_cost_usd": round(sum(cost_values) / max(len(cost_values), 1), 6) if cost_values else 0.0,
+        "avg_context_pressure_ratio": round(sum(context_pressure_ratios) / max(len(context_pressure_ratios), 1), 3) if context_pressure_ratios else 0.0,
+        "mcp_error_rate": round(total_mcp_error_calls / max(total_mcp_tool_calls, 1), 3) if total_mcp_tool_calls else 0.0,
+    }
+
+
+def _build_flow_metric_rows(entries: list[dict[str, object]]) -> list[dict[str, float | int | str]]:
+    grouped: dict[str, dict[str, object]] = {}
+    for entry in entries:
+        flow = str(entry.get("flow_type") or "").strip()
+        if not flow:
+            continue
+        bucket = grouped.setdefault(
+            flow,
+            {
+                "runs": 0,
+                "success_count": 0,
+                "needs_review_count": 0,
+                "error_count": 0,
+                "latencies": [],
+                "total_tokens": [],
+                "costs": [],
+            },
+        )
+        bucket["runs"] = int(bucket.get("runs") or 0) + 1
+        if bool(entry.get("success")):
+            bucket["success_count"] = int(bucket.get("success_count") or 0) + 1
+        if bool(entry.get("needs_review")):
+            bucket["needs_review_count"] = int(bucket.get("needs_review_count") or 0) + 1
+        if str(entry.get("error_message") or "").strip():
+            bucket["error_count"] = int(bucket.get("error_count") or 0) + 1
+        if isinstance(entry.get("latency_s"), (int, float)):
+            latencies = bucket.get("latencies") if isinstance(bucket.get("latencies"), list) else []
+            latencies.append(float(entry.get("latency_s") or 0.0))
+            bucket["latencies"] = latencies
+        if isinstance(entry.get("total_tokens"), (int, float)):
+            tokens = bucket.get("total_tokens") if isinstance(bucket.get("total_tokens"), list) else []
+            tokens.append(float(entry.get("total_tokens") or 0.0))
+            bucket["total_tokens"] = tokens
+        if isinstance(entry.get("cost_usd"), (int, float)):
+            costs = bucket.get("costs") if isinstance(bucket.get("costs"), list) else []
+            costs.append(float(entry.get("cost_usd") or 0.0))
+            bucket["costs"] = costs
+
+    rows: list[dict[str, float | int | str]] = []
+    for flow, bucket in grouped.items():
+        runs = int(bucket.get("runs") or 0)
+        latencies = bucket.get("latencies") if isinstance(bucket.get("latencies"), list) else []
+        total_tokens = bucket.get("total_tokens") if isinstance(bucket.get("total_tokens"), list) else []
+        costs = bucket.get("costs") if isinstance(bucket.get("costs"), list) else []
+        rows.append(
+            {
+                "flow": flow,
+                "runs": runs,
+                "success_rate": round(int(bucket.get("success_count") or 0) / max(runs, 1), 3),
+                "error_rate": round(int(bucket.get("error_count") or 0) / max(runs, 1), 3),
+                "needs_review_rate": round(int(bucket.get("needs_review_count") or 0) / max(runs, 1), 3),
+                "avg_latency_s": round(sum(latencies) / max(len(latencies), 1), 3) if latencies else 0.0,
+                "avg_total_tokens": round(sum(total_tokens) / max(len(total_tokens), 1), 3) if total_tokens else 0.0,
+                "total_cost_usd": round(sum(costs), 6) if costs else 0.0,
+                "avg_cost_usd": round(sum(costs) / max(len(costs), 1), 6) if costs else 0.0,
+            }
+        )
+    return sorted(rows, key=lambda item: (-int(item.get("runs") or 0), str(item.get("flow") or "")))
+
+
 def load_runtime_execution_log(path: Path) -> list[dict[str, object]]:
     if not path.exists():
         return []
@@ -138,6 +252,9 @@ def summarize_runtime_execution_log(entries: list[dict[str, object]]) -> dict[st
             "task_counts": {},
             "provider_counts": {},
             "model_counts": {},
+            "recent_window_summary": {},
+            "previous_window_summary": {},
+            "window_deltas": {},
             "latest_timestamp": None,
         }
 
@@ -345,6 +462,68 @@ def summarize_runtime_execution_log(entries: list[dict[str, object]]) -> dict[st
             bottleneck_stage_counter[bottleneck_stage] += 1
             bottleneck_shares.append(bottleneck_share)
 
+    ordered_entries = sorted(
+        [item for item in entries if isinstance(item, dict)],
+        key=lambda item: str(item.get("timestamp") or ""),
+        reverse=True,
+    )
+    recent_window_summary = _build_runtime_window_summary(ordered_entries[:10])
+    previous_window_summary = _build_runtime_window_summary(ordered_entries[10:20])
+    window_deltas: dict[str, float] = {}
+    if int(previous_window_summary.get("total_runs") or 0) > 0:
+        window_deltas = {
+            "success_rate_delta": round(
+                float(recent_window_summary.get("success_rate") or 0.0)
+                - float(previous_window_summary.get("success_rate") or 0.0),
+                3,
+            ),
+            "error_rate_delta": round(
+                float(recent_window_summary.get("error_rate") or 0.0)
+                - float(previous_window_summary.get("error_rate") or 0.0),
+                3,
+            ),
+            "needs_review_rate_delta": round(
+                float(recent_window_summary.get("needs_review_rate") or 0.0)
+                - float(previous_window_summary.get("needs_review_rate") or 0.0),
+                3,
+            ),
+            "avg_latency_delta_s": round(
+                float(recent_window_summary.get("avg_latency_s") or 0.0)
+                - float(previous_window_summary.get("avg_latency_s") or 0.0),
+                3,
+            ),
+            "avg_total_tokens_delta": round(
+                float(recent_window_summary.get("avg_total_tokens") or 0.0)
+                - float(previous_window_summary.get("avg_total_tokens") or 0.0),
+                3,
+            ),
+            "avg_cost_delta_usd": round(
+                float(recent_window_summary.get("avg_cost_usd") or 0.0)
+                - float(previous_window_summary.get("avg_cost_usd") or 0.0),
+                6,
+            ),
+            "avg_context_pressure_ratio_delta": round(
+                float(recent_window_summary.get("avg_context_pressure_ratio") or 0.0)
+                - float(previous_window_summary.get("avg_context_pressure_ratio") or 0.0),
+                3,
+            ),
+            "mcp_error_rate_delta": round(
+                float(recent_window_summary.get("mcp_error_rate") or 0.0)
+                - float(previous_window_summary.get("mcp_error_rate") or 0.0),
+                3,
+            ),
+        }
+
+    problematic_entries = [
+        item
+        for item in ordered_entries
+        if not bool(item.get("success"))
+        or bool(item.get("needs_review"))
+        or str(item.get("error_message") or "").strip()
+        or str(item.get("budget_alert_status") or "").strip().lower() == "warn"
+        or int(item.get("mcp_error_call_count") or 0) > 0
+    ]
+
     return {
         "total_runs": total_runs,
         "success_rate": round(success_count / max(total_runs, 1), 3),
@@ -402,8 +581,14 @@ def summarize_runtime_execution_log(entries: list[dict[str, object]]) -> dict[st
         "avg_other_latency_share": round(sum(other_latency_shares) / max(len(other_latency_shares), 1), 3) if other_latency_shares else 0.0,
         "avg_bottleneck_share": round(sum(bottleneck_shares) / max(len(bottleneck_shares), 1), 3) if bottleneck_shares else 0.0,
         "flow_counts": dict(flow_counter),
+        "flow_metric_rows": _build_flow_metric_rows(entries),
         "task_counts": dict(task_counter),
         "provider_counts": dict(provider_counter),
         "model_counts": dict(model_counter),
+        "recent_window_summary": recent_window_summary,
+        "previous_window_summary": previous_window_summary,
+        "window_deltas": window_deltas,
+        "recent_entries": ordered_entries[:10],
+        "problematic_entries": problematic_entries[:10],
         "latest_timestamp": entries[-1].get("timestamp"),
     }

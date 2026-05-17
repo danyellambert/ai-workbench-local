@@ -1,0 +1,215 @@
+{
+  "generated_at": "2026-03-29T18:27:18.925439",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "extraction",
+      "mode": "indexed_document",
+      "status": "FAIL",
+      "score": 15,
+      "max_score": 39,
+      "reasons": [
+        "gold:entity coverage too low: 2",
+        "gold:field coverage too low: 4",
+        "gold:action-item coverage too low: 1",
+        "gold:risk coverage too low: 0",
+        "gold:clause coverage too low: 1"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "566ac85b61bdd056f7b784f3ede220451608ca811550035a6e53747fd0d93e86",
+        "name": "exhib101.pdf",
+        "file_type": "pdf",
+        "chunk_count": 44
+      },
+      "gold_fixture_path": "baseline://external_files/4f10b7b6bd7f6bc0_09_extraction_exhib101_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "FAIL",
+        "score": 15,
+        "max_score": 39,
+        "reasons": [
+          "entity coverage too low: 2",
+          "field coverage too low: 4",
+          "action-item coverage too low: 1",
+          "risk coverage too low: 0",
+          "clause coverage too low: 1"
+        ],
+        "metrics": {
+          "main_subject_hit": 1,
+          "category_hits": 1,
+          "entity_hits": 2,
+          "field_hits": 4,
+          "relationship_hits": 0,
+          "clause_hits": 1,
+          "risk_hits": 0,
+          "action_hits": 1,
+          "restriction_hits": 1,
+          "date_hits": 1,
+          "number_hits": 3
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "extraction",
+        "schema_version": "1.0",
+        "main_subject": "Separation Agreement between Enron Corp. and Portland General Electric Company",
+        "entities": [
+          {
+            "type": "organization",
+            "value": "Enron Corp.",
+            "confidence": 1.0,
+            "source_text": "Enron Corp.",
+            "position_start": 0,
+            "position_end": 10
+          },
+          {
+            "type": "organization",
+            "value": "Portland General Electric Company",
+            "confidence": 1.0,
+            "source_text": "Portland General Electric Company",
+            "position_start": 12,
+            "position_end": 38
+          }
+        ],
+        "categories": [
+          "Separation Agreement"
+        ],
+        "relationships": [
+          {
+            "from_entity": "Enron Corp.",
+            "to_entity": "Portland General Electric Company",
+            "relationship": "signatory of",
+            "confidence": 1.0,
+            "evidence": "SEPARATION AGREEMENT BETWEEN ENRON CORP. AND PORTLAND GENERAL ELECTRIC COMPANY"
+          }
+        ],
+        "extracted_fields": [
+          {
+            "name": "effective_date",
+            "value": "April 3, 2006",
+            "evidence": "dated as of April 3, 2006"
+          },
+          {
+            "name": "governing_law",
+            "value": "Texas",
+            "evidence": "governed by and construed in accordance with ... the internal laws of the State of Texas"
+          },
+          {
+            "name": "jurisdiction",
+            "value": "Southern District of New York",
+            "evidence": "Bankruptcy Court shall retain exclusive jurisdiction ... Southern District of New York"
+          },
+          {
+            "name": "notice_period",
+            "value": "90 days",
+            "evidence": "at least ninety (90) days' prior notice"
+          },
+          {
+            "name": "stock_issuance_shares",
+            "value": "62,500,000",
+            "evidence": "62,500,000 shares of common stock"
+          },
+          {
+            "name": "tax_allocation_agreement_termination",
+            "value": "effective as of April 3, 2006",
+            "evidence": "The Tax Allocation Agreement is hereby terminated effective as of the date hereof"
+          }
+        ],
+        "important_dates": [
+          "April 3, 2006",
+          "December 2, 2001"
+        ],
+        "important_numbers": [
+          "7 years",
+          "$20,000"
+        ],
+        "risks": [
+          {
+            "description": "Potential breach of confidentiality obligations",
+            "impact": "May trigger legal or regulatory penalties",
+            "owner": null,
+            "due_date": null,
+            "evidence": "disclosure of which would cause the Enron Group or the PGE Group ... to breach a confidentiality obligation"
+          },
+          {
+            "description": "Expiration of retention period without proper notice",
+            "impact": "Failure to provide notice could result in unlawful disposal of records",
+            "owner": null,
+            "due_date": "at least ninety (90) days' prior notice",
+            "evidence": "After the expiration of any applicable retention period, before any party shall dispose of any of such records, at least ninety (90) days' prior notice ... shall be given"
+          },
+          {
+            "description": "Waiver of jury trial limits legal recourse",
+            "impact": "Parties cannot pursue jury trial for disputes arising under the agreement",
+            "owner": null,
+            "due_date": null,
+            "evidence": "THE PARTIES HEREBY IRREVOCABLY AND UNCONDITIONALLY WAIVE ... ANY RIGHT THAT THEY MAY HAVE TO TRIAL BY JURY"
+          }
+        ],
+        "action_items": [
+          {
+            "description": "Preserve records and provide cooperation",
+            "owner": "Enron Corp.; Portland General Electric Company",
+            "due_date": "seven (7) years from April 3, 2006 or until closing of Bankruptcy Cases",
+            "status": "ongoing",
+            "evidence": "Each of Enron and PGE shall preserve and keep in its possession all records ... until the earlier of (x) seven (7) years from the date of this Agreement or (y) the closing of the Bankruptcy Cases"
+          },
+          {
+            "description": "Provide notice of governmental inquiries",
+            "owner": "Enron Corp.; Portland General Electric Company",
+            "due_date": "ongoing",
+            "status": "ongoing",
+            "evidence": "each of Enron and PGE shall, and shall cause each of its Subsidiaries to, provide the other party with notice of any governmental inquiries or investigations ... which may relate to the business, assets or operations"
+          },
+          {
+            "description": "Deliver required documents",
+            "owner": "Enron Corp.; Portland General Electric Company",
+            "due_date": "Concurrently with the execution and delivery of this Agreement, Enron is delivering",
+            "status": "completed",
+            "evidence": "Concurrently with the execution and delivery of this Agreement, Enron is delivering ... Documents Delivered by the Enron Group; PGE is delivering ... Documents to Be Delivered by PGE"
+          },
+          {
+            "description": "Amend organizational documents to remove names",
+            "owner": "Portland General Electric Company",
+            "due_date": "within 365 days of April 3, 2006",
+            "status": "pending",
+            "evidence": "PGE shall, to the extent applicable, amend its organizational documents ... to remove the \"Enron\" name ... within three hundred sixty five (365) days thereafter"
+          },
+          {
+            "description": "Terminate intercompany amounts and agreements",
+            "owner": "Enron Corp.; Portland General Electric Company",
+            "due_date": null,
+            "status": "completed",
+            "evidence": "Immediately prior to the execution and delivery of this Agreement, PGE has caused any amounts owed ... to be released, divided or otherwise distributed to Enron ... this Agreement constitutes a full release thereof"
+          },
+          {
+            "description": "Cancel and issue shares in Stock Issuance",
+            "owner": "Portland General Electric Company",
+            "due_date": null,
+            "status": "completed",
+            "evidence": "PGE is canceling all shares of PGE Common Stock heretofore owned by Enron ... issuing the New PGE Common Stock to Stephen Forbes Cooper LLC and to other Persons pursuant to the Plan"
+          },
+          {
+            "description": "Provide written notice of governmental requests",
+            "owner": "Enron Corp.; Portland General Electric Company",
+            "due_date": null,
+            "status": "ongoing",
+            "evidence": "the Person receiving such request or demand shall use all reasonable efforts to provide the other party with written notice of such request or demand as promptly as practicable"
+          }
+        ],
+        "missing_information": []
+      }
+    }
+  ]
+}

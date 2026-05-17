@@ -1,0 +1,186 @@
+{
+  "name": "Real document gold set - summary asap-2025-annual-report-tagged.pdf",
+  "task_type": "summary",
+  "document_name": "asap-2025-annual-report-tagged.pdf",
+  "document_path": "data/materials_demo/summary/asap-2025-annual-report-tagged.pdf",
+  "input_text": "Summarize the selected report for an executive reader. Preserve the human-spaceflight risk view, Artemis and Commercial Crew concerns, acquisition/contracting findings, workforce and technical-authority concerns, and ISS transition risk.",
+  "gold_type": "rubric",
+  "notes": "Manual gold set prepared from the ASAP 2025 Annual Report. The evaluator should prefer substantive executive coverage over table-of-contents paraphrase.",
+  "expected": {
+    "evaluation_guidance": {
+      "core_required_fields": [
+        "topics",
+        "executive_summary",
+        "key_insights"
+      ],
+      "secondary_but_expected_fields": [
+        "recommendations",
+        "workforce_signal",
+        "technical_authority_signal",
+        "iss_transition_signal"
+      ],
+      "minimum_topic_hits": 4,
+      "minimum_required_fact_hits": 5,
+      "minimum_key_insight_hits": 4,
+      "threshold_overrides": {
+        "pass_ratio": 0.6,
+        "warn_ratio": 0.42
+      }
+    },
+    "expected_executive_summary_signals": [
+      "Aerospace Safety Advisory Panel Annual Report for 2025",
+      "human spaceflight risk",
+      "Artemis III and subsequent missions",
+      "contracting or acquisition strategy",
+      "technical authority",
+      "International Space Station transition or deorbit"
+    ],
+    "expected_key_insights_any": [
+      "Artemis III was assessed as carrying too many first-time objectives or an unbalanced risk posture",
+      "commercial contracting and acquisition strategy were framed as an emerging determinant of safety outcomes",
+      "technical authority and workforce attrition were raised as significant safety concerns",
+      "the ISS was characterized as entering the riskiest period of its operational life",
+      "NASA was urged to strengthen the transition to commercial LEO destinations and maintain safe ISS deorbit planning"
+    ],
+    "expected_topics": [
+      {
+        "id": "human_spaceflight_risk",
+        "aliases": [
+          "Human spaceflight risk",
+          "Moon to Mars and Commercial Crew risks",
+          "Artemis and Commercial Crew"
+        ],
+        "required_terms": [
+          "human",
+          "spaceflight",
+          "risk"
+        ]
+      },
+      {
+        "id": "artemis_program_risk",
+        "aliases": [
+          "Artemis III risk posture",
+          "Artemis II and Artemis III",
+          "Moon to Mars management"
+        ],
+        "required_terms": [
+          "Artemis",
+          "risk",
+          "mission"
+        ]
+      },
+      {
+        "id": "acquisition_and_contracting",
+        "aliases": [
+          "contracting, procurement, and acquisition sophistication",
+          "make manage buy",
+          "commercial contracts"
+        ],
+        "required_terms": [
+          "contract",
+          "acquisition",
+          "safety"
+        ]
+      },
+      {
+        "id": "workforce_and_technical_authority",
+        "aliases": [
+          "human capital",
+          "technical authority",
+          "workforce attrition"
+        ],
+        "required_terms": [
+          "workforce",
+          "technical authority"
+        ]
+      },
+      {
+        "id": "iss_and_commercial_leo_transition",
+        "aliases": [
+          "International Space Station",
+          "commercial LEO destinations",
+          "ISS transition"
+        ],
+        "required_terms": [
+          "ISS",
+          "commercial",
+          "LEO"
+        ]
+      }
+    ],
+    "required_facts": [
+      {
+        "id": "artemis_iii_unbalanced_risk",
+        "aliases": [
+          "Artemis III cannot be accomplished with appropriate margins of safety as baselined",
+          "too many first-of-a-kind objectives are stacked into Artemis III",
+          "the panel recommended redistributing objectives across missions"
+        ],
+        "required_terms": [
+          "Artemis III",
+          "risk",
+          "objectives"
+        ]
+      },
+      {
+        "id": "commercial_contracting_as_safety_driver",
+        "aliases": [
+          "acquisition strategy was identified as an emerging determinant of safety outcomes",
+          "fixed-price and commercial business models can affect risk and oversight",
+          "NASA should realign governance of acquisition strategies for human spaceflight"
+        ],
+        "required_terms": [
+          "acquisition",
+          "safety",
+          "contract"
+        ]
+      },
+      {
+        "id": "technical_authority_workforce_pressure",
+        "aliases": [
+          "technical authorities could be eroded by workforce attrition and budget reductions",
+          "the panel highlighted the need for independent technical authorities",
+          "human capital reductions were treated as a risk to safe execution"
+        ],
+        "required_terms": [
+          "technical authority",
+          "workforce"
+        ]
+      },
+      {
+        "id": "iss_riskiest_period",
+        "aliases": [
+          "the ISS is entering the riskiest period of its operational life",
+          "ISS deorbit in 2030 and transition to commercial destinations require early action",
+          "safe ISS deorbit planning is a major concern"
+        ],
+        "required_terms": [
+          "ISS",
+          "riskiest",
+          "2030"
+        ]
+      },
+      {
+        "id": "starliner_and_ccp_lessons",
+        "aliases": [
+          "the panel remained concerned about Boeing Starliner anomalies and mishap declaration ambiguity",
+          "commercial crew and Starliner highlighted governance and risk-accountability issues",
+          "NASA was urged to refine anomalous flight event declaration guidance"
+        ],
+        "required_terms": [
+          "Starliner",
+          "Commercial Crew",
+          "mishap"
+        ]
+      }
+    ],
+    "important_numbers_any": [
+      "2025",
+      "2026",
+      "2030",
+      "2025-05-01",
+      "2025-05-02",
+      "2025-05-03"
+    ]
+  }
+}

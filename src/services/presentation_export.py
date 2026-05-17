@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, Literal
+import re
+from typing import Any, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -24,10 +25,10 @@ DEFAULT_PRESENTATION_EXPORT_KIND = "benchmark_eval_executive_deck"
 DEFAULT_EXECUTIVE_DECK_CONTRACT_VERSION = "executive_deck_generation.v1"
 BENCHMARK_EVAL_EXECUTIVE_REVIEW_PRODUCT_EXPORT_KIND = "benchmark_eval_executive_review"
 DEFAULT_PRESENTATION_THEME = "executive_premium_minimal"
-DEFAULT_PRESENTATION_TITLE = "AI Workbench Local — Benchmark & Eval Review"
+DEFAULT_PRESENTATION_TITLE = "Axiovance — Benchmark & Eval Review"
 DEFAULT_PRESENTATION_SUBTITLE = "Executive summary of the current round"
-DEFAULT_PRESENTATION_AUTHOR = "AI Workbench Local"
-DEFAULT_PRESENTATION_FOOTER = "AI Workbench Local • Benchmark & Eval Review"
+DEFAULT_PRESENTATION_AUTHOR = "Axiovance"
+DEFAULT_PRESENTATION_FOOTER = "Axiovance • Benchmark & Eval Review"
 
 DOCUMENT_REVIEW_EXPORT_KIND = "document_review_deck"
 POLICY_CONTRACT_COMPARISON_EXPORT_KIND = "policy_contract_comparison_deck"
@@ -49,6 +50,9 @@ SUPPORTED_EXECUTIVE_DECK_EXPORT_KINDS = list(EXECUTIVE_DECK_EXPORT_KIND_LABELS.k
 EXECUTIVE_DECK_EXPORT_KIND_ALIASES = {
     BENCHMARK_EVAL_EXECUTIVE_REVIEW_PRODUCT_EXPORT_KIND: DEFAULT_PRESENTATION_EXPORT_KIND,
 }
+
+
+T = TypeVar("T")
 
 
 def _clean_text(value: object) -> str | None:
@@ -173,10 +177,8 @@ class EvalSuiteLeaderboardEntry(BaseModel):
 class BenchmarkEvalExecutiveDeckContract(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    contract_version: Literal[DEFAULT_PRESENTATION_EXPORT_CONTRACT_VERSION] = (
-        DEFAULT_PRESENTATION_EXPORT_CONTRACT_VERSION
-    )
-    export_kind: Literal[DEFAULT_PRESENTATION_EXPORT_KIND] = DEFAULT_PRESENTATION_EXPORT_KIND
+    contract_version: Literal["presentation_export.v1"] = DEFAULT_PRESENTATION_EXPORT_CONTRACT_VERSION
+    export_kind: Literal["benchmark_eval_executive_deck"] = DEFAULT_PRESENTATION_EXPORT_KIND
     presentation: PresentationExportMetadata
     model_comparison_snapshot: ModelComparisonSnapshot
     eval_snapshot: EvalSnapshot
@@ -916,6 +918,139 @@ def _compact_text_list(values: list[object], *, limit: int = 4, max_chars: int =
     return [_truncate_cell(value, max_chars=max_chars) for value in _dedupe_texts(values, limit=limit)]
 
 
+def _chunk_list(values: list[T], *, chunk_size: int) -> list[list[T]]:
+    if chunk_size <= 0:
+        return [values]
+    return [values[index : index + chunk_size] for index in range(0, len(values), chunk_size)]
+
+
+def _extract_action_reference(*values: object) -> str | None:
+    pattern = re.compile(r"\b(?:CTR|POL|NCR|EV|GOV|RISK|ACT)-?[A-Z0-9]+(?:-[A-Z0-9]+)*\b", re.IGNORECASE)
+    for value in values:
+        cleaned = _clean_text(value)
+        if not cleaned:
+            continue
+        match = pattern.search(cleaned)
+        if match:
+            return match.group(0).upper()
+    return None
+
+
+def _humanize_action_status(value: object) -> str:
+    cleaned = _clean_text(value) or "Open"
+    return cleaned.replace("_", " ").replace("-", " ").title()
+
+
+def _normalize_due_label(value: object) -> str:
+    cleaned = _clean_text(value)
+    return cleaned or "No due date"
+
+
+def _short_action_label(value: object, *, max_chars: int = 64) -> str:
+    cleaned = _clean_text(value) or "Action pending description"
+    return _truncate_cell(cleaned, max_chars=max_chars)
+
+
+def _source_footer_label(value: object) -> str | None:
+    cleaned = _clean_text(value)
+    if not cleaned:
+        return None
+    cleaned = cleaned.removesuffix('.pdf').removesuffix('.docx').removesuffix('.pptx')
+    return _truncate_cell(cleaned, max_chars=48)
+
+
+def _build_action_detail_line(action: dict[str, str]) -> str:
+    prefix = f"{action['ref']} — " if action.get('ref') else ""
+    return f"{prefix}{action.get('action') or 'Action pending description'}"
+
+
+def _build_action_detail_meta_line(action: dict[str, str]) -> str:
+    parts = [
+        f"Owner: {action.get('owner') or 'Unassigned'}",
+        f"Due: {_normalize_due_label(action.get('due'))}",
+        f"Status: {_humanize_action_status(action.get('status'))}",
+    ]
+    source_label = _source_footer_label(action.get('source'))
+    if source_label:
+        parts.append(f"Source: {source_label}")
+    return " • ".join(parts)
+
+
+def _extract_action_backlog_entries(rows: list[list[object]]) -> list[dict[str, str]]:
+    entries: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, list) or len(row) < 5:
+            continue
+        ref = _extract_action_reference(row[0], row[1], row[5] if len(row) > 5 else None)
+        action = _clean_text(row[1]) or "Action pending description"
+        owner = _clean_text(row[2]) or "Unassigned"
+        due = _clean_text(row[3]) or "No due date"
+        status = _clean_text(row[4]) or "Open"
+        source = _clean_text(row[5] if len(row) > 5 else None)
+        evidence = _clean_text(row[6] if len(row) > 6 else None)
+        key = f"{action.casefold()}::{owner.casefold()}::{due.casefold()}::{status.casefold()}"
+        if key in seen:
+            continue
+        seen.add(key)
+        entries.append({
+            "ref": ref or f"A{len(entries) + 1:02d}",
+            "action": action,
+            "owner": owner,
+            "due": due,
+            "status": status,
+            "source": source or "",
+            "evidence": evidence or "",
+        })
+    return entries
+
+
+def _build_action_table_slides(actions: list[dict[str, str]]) -> list[PptCreatorSlide]:
+    slides: list[PptCreatorSlide] = []
+    for index, batch in enumerate(_chunk_list(actions, chunk_size=4), start=1):
+        slides.append(
+            PptCreatorSlide(
+                type="table",
+                title="Action backlog" if index == 1 else f"Action backlog ({index})",
+                table_columns=["Ref", "Owner", "Due", "Status"],
+                table_rows=[
+                    [
+                        item.get("ref") or f"A{row_index + 1:02d}",
+                        item.get("owner") or "Unassigned",
+                        _normalize_due_label(item.get("due")),
+                        _humanize_action_status(item.get("status")),
+                    ]
+                    for row_index, item in enumerate(batch)
+                ],
+                speaker_notes="Use the paired action-detail slide for full task wording and source references.",
+            )
+        )
+    return slides
+
+
+def _build_action_detail_slides(actions: list[dict[str, str]]) -> list[PptCreatorSlide]:
+    slides: list[PptCreatorSlide] = []
+    for index, batch in enumerate(_chunk_list(actions, chunk_size=2), start=1):
+        bullets: list[str] = []
+        notes: list[str] = []
+        for item in batch:
+            bullets.append(_build_action_detail_line(item))
+            bullets.append(_build_action_detail_meta_line(item))
+            source = item.get("source") or "Grounded workflow evidence"
+            evidence = item.get("evidence") or ""
+            notes.append(f"[{item.get('ref')}] Source: {source}" + (f" | Evidence: {evidence}" if evidence else ""))
+        slides.append(
+            PptCreatorSlide(
+                type="bullets",
+                title="Action details appendix" if index == 1 else f"Action details appendix ({index})",
+                body="Full task wording, accountable owner, due date and source traceability.",
+                bullets=bullets,
+                speaker_notes="\n".join(notes),
+            )
+        )
+    return slides
+
+
 def _humanize_watchout(value: object) -> str | None:
     cleaned = _clean_text(value)
     if not cleaned:
@@ -1400,12 +1535,12 @@ def build_document_review_deck_contract(
         export_kind=DOCUMENT_REVIEW_EXPORT_KIND,
         deck_family="review",
         presentation=PresentationExportMetadata(
-            title="AI Workbench Local — Document Review",
+            title="Axiovance — Document Review",
             subtitle="Executive review of the latest grounded document analysis",
             author=DEFAULT_PRESENTATION_AUTHOR,
             date=date.today().isoformat(),
             theme=DEFAULT_PRESENTATION_THEME,
-            footer_text="AI Workbench Local • Document Review",
+            footer_text="Axiovance • Document Review",
         ),
         context=context,
         executive_summary=summary_text,
@@ -1457,12 +1592,12 @@ def build_policy_contract_comparison_deck_contract(
         export_kind=POLICY_CONTRACT_COMPARISON_EXPORT_KIND,
         deck_family="comparison",
         presentation=PresentationExportMetadata(
-            title="AI Workbench Local — Policy / Contract Comparison",
+            title="Axiovance — Policy / Contract Comparison",
             subtitle="Executive comparison review of grounded document differences",
             author=DEFAULT_PRESENTATION_AUTHOR,
             date=date.today().isoformat(),
             theme=DEFAULT_PRESENTATION_THEME,
-            footer_text="AI Workbench Local • Comparison Review",
+            footer_text="Axiovance • Comparison Review",
         ),
         context={
             "task_type": normalized_result.task_type if normalized_result else None,
@@ -1500,13 +1635,20 @@ def build_action_plan_deck_contract(
         action_summary = summarize_evidenceops_actions(evidenceops_action_entries)
         action_rows = [
             [
-                entry.get("action_type") or "action",
-                entry.get("description"),
+                _extract_action_reference(
+                    entry.get("action_type"),
+                    entry.get("description"),
+                    entry.get("evidence"),
+                    entry.get("source"),
+                ) or f"A{index + 1:02d}",
+                _short_action_label(entry.get("description"), max_chars=56),
                 entry.get("owner") or "-",
                 entry.get("due_date") or "-",
                 entry.get("status") or "-",
+                entry.get("source") or "-",
+                entry.get("evidence") or entry.get("rationale") or entry.get("notes") or "-",
             ]
-            for entry in evidenceops_action_entries[:8]
+            for index, entry in enumerate(evidenceops_action_entries[:8])
             if isinstance(entry, dict)
         ]
         watchouts = []
@@ -1528,21 +1670,21 @@ def build_action_plan_deck_contract(
             export_kind=ACTION_PLAN_EXPORT_KIND,
             deck_family="action_plan",
             presentation=PresentationExportMetadata(
-                title="AI Workbench Local — Action Plan",
+                title="Axiovance — Action Plan",
                 subtitle="Operational action plan grounded in current action backlog",
                 author=DEFAULT_PRESENTATION_AUTHOR,
                 date=date.today().isoformat(),
                 theme=DEFAULT_PRESENTATION_THEME,
-                footer_text="AI Workbench Local • Action Plan",
+                footer_text="Axiovance • Action Plan",
             ),
             context={
                 "review_type_counts": dict(action_summary.get("review_type_counts") or {}),
             },
             executive_summary=(
-                f"The current action backlog contains {int(action_summary.get('total_actions') or 0)} action(s), "
-                f"with {int(action_summary.get('open_actions') or 0)} open, "
-                f"{int(action_summary.get('review_required_actions') or 0)} sensitive, and "
-                f"{int(action_summary.get('overdue_actions') or 0)} overdue."
+                f"The current run identified {int(action_summary.get('total_actions') or 0)} tracked action(s), "
+                f"with {int(action_summary.get('open_actions') or 0)} still open, "
+                f"{int(action_summary.get('overdue_actions') or 0)} overdue and "
+                f"{int(action_summary.get('review_required_actions') or 0)} requiring formal approval follow-up."
             ),
             key_highlights=_dedupe_texts(next_steps, limit=6),
             key_metrics=[
@@ -1554,17 +1696,17 @@ def build_action_plan_deck_contract(
             tables=[
                 GenericDeckTableSection(
                     title="Action backlog",
-                    columns=["Type", "Action", "Owner", "Due", "Status"],
+                    columns=["Ref", "Action", "Owner", "Due", "Status", "Source", "Evidence"],
                     rows=_normalize_table_rows(action_rows),
                 )
             ],
             recommendation=_recommended_action_or_fallback(
                 next_steps,
-                "Prioritize closing the open actions with the highest criticality and the lowest operational clarity.",
+                "Confirm named ownership, close the evidence gaps and sequence the highest-risk actions into the next operating review.",
             ),
             watchouts=_dedupe_texts(watchouts, limit=4),
             next_steps=next_steps,
-            data_sources=["evidenceops_action_store"],
+            data_sources=["action_plan_run_current"],
         )
 
     normalized_result, payload = _extract_structured_payload(structured_result)
@@ -1584,12 +1726,12 @@ def build_action_plan_deck_contract(
             export_kind=ACTION_PLAN_EXPORT_KIND,
             deck_family="action_plan",
             presentation=PresentationExportMetadata(
-                title="AI Workbench Local — Action Plan",
+                title="Axiovance — Action Plan",
                 subtitle="Operational plan derived from structured checklist",
                 author=DEFAULT_PRESENTATION_AUTHOR,
                 date=date.today().isoformat(),
                 theme=DEFAULT_PRESENTATION_THEME,
-                footer_text="AI Workbench Local • Checklist Action Plan",
+                footer_text="Axiovance • Checklist Action Plan",
             ),
             context={
                 "task_type": normalized_result.task_type if normalized_result else None,
@@ -1639,12 +1781,12 @@ def build_action_plan_deck_contract(
             export_kind=ACTION_PLAN_EXPORT_KIND,
             deck_family="action_plan",
             presentation=PresentationExportMetadata(
-                title="AI Workbench Local — Action Plan",
+                title="Axiovance — Action Plan",
                 subtitle="Operational plan derived from document-agent outputs",
                 author=DEFAULT_PRESENTATION_AUTHOR,
                 date=date.today().isoformat(),
                 theme=DEFAULT_PRESENTATION_THEME,
-                footer_text="AI Workbench Local • Action Plan",
+                footer_text="Axiovance • Action Plan",
             ),
             context={"task_type": normalized_result.task_type if normalized_result else None, "tool_used": payload.tool_used},
             executive_summary=payload.summary,
@@ -1736,12 +1878,12 @@ def build_candidate_review_deck_contract(
         export_kind=CANDIDATE_REVIEW_EXPORT_KIND,
         deck_family="candidate_review",
         presentation=PresentationExportMetadata(
-            title=f"AI Workbench Local — Candidate Review · {candidate_name}",
+            title=f"Axiovance — Candidate Review · {candidate_name}",
             subtitle="Executive hiring summary grounded in cv_analysis",
             author=DEFAULT_PRESENTATION_AUTHOR,
             date=date.today().isoformat(),
             theme=DEFAULT_PRESENTATION_THEME,
-            footer_text="AI Workbench Local • Candidate Review",
+            footer_text="Axiovance • Candidate Review",
         ),
         context={
             "task_type": normalized_result.task_type if normalized_result else None,
@@ -1841,12 +1983,12 @@ def build_evidence_pack_deck_contract(
         export_kind=EVIDENCE_PACK_EXPORT_KIND,
         deck_family="evidence_audit",
         presentation=PresentationExportMetadata(
-            title="AI Workbench Local — Evidence Pack Review",
+            title="Axiovance — Evidence Pack Review",
             subtitle="Audit / compliance executive handoff grounded in EvidenceOps",
             author=DEFAULT_PRESENTATION_AUTHOR,
             date=date.today().isoformat(),
             theme=DEFAULT_PRESENTATION_THEME,
-            footer_text="AI Workbench Local • Evidence Pack",
+            footer_text="Axiovance • Evidence Pack",
         ),
         context={
             "review_type": latest_entry.get("review_type") if isinstance(latest_entry, dict) else None,
@@ -1943,12 +2085,17 @@ def build_ppt_creator_payload_from_executive_deck_contract(
     )
     data_sources_text = ", ".join(normalized.data_sources) if normalized.data_sources else "n/a"
     metric_map = {str(item.label): str(item.value) for item in normalized.key_metrics}
+    title_speaker_notes = (
+        "Grounded in the current Action Plan run and cited document evidence."
+        if normalized.export_kind == ACTION_PLAN_EXPORT_KIND
+        else f"Export kind: {normalized.export_kind}. Deck family: {normalized.deck_family}. Sources: {data_sources_text}."
+    )
     slides: list[PptCreatorSlide] = [
         PptCreatorSlide(
             type="title",
             title=normalized.presentation.title,
             subtitle=normalized.presentation.subtitle,
-            speaker_notes=f"Export kind: {normalized.export_kind}. Deck family: {normalized.deck_family}. Sources: {data_sources_text}.",
+            speaker_notes=title_speaker_notes,
         ),
         PptCreatorSlide(
             type="summary",
@@ -1979,93 +2126,92 @@ def build_ppt_creator_payload_from_executive_deck_contract(
         open_actions = metric_map.get("Open", "0")
         overdue_actions = metric_map.get("Overdue", "0")
         approval_required = metric_map.get("Approval required", "0")
-        action_execution_steps = _compact_text_list(
-            [
-                f"Assign owners to the {open_actions} open action(s)",
-                "Validate cited evidence before acting on the backlog",
-                "Close the human-review gate before final decision",
-                "Reprioritize overdue actions" if overdue_actions != "0" else None,
-                "Escalate approval-required items" if approval_required != "0" else None,
-            ],
-            limit=3,
-            max_chars=70,
+        action_table = normalized.tables[0] if normalized.tables else None
+        action_entries = _extract_action_backlog_entries(action_table.rows if action_table else [])
+        priority_cards: list[PptCreatorCardItem] = []
+        for index, item in enumerate(action_entries[:2], start=1):
+            priority_cards.append(
+                PptCreatorCardItem(
+                    title=f"Priority {index}",
+                    body=_short_action_label(item.get("action"), max_chars=74),
+                    footer=" • ".join(
+                        part for part in [
+                            item.get('owner') or 'Unassigned',
+                            _normalize_due_label(item.get('due')),
+                            _humanize_action_status(item.get('status')),
+                        ] if part
+                    ),
+                )
+            )
+        if not priority_cards:
+            for index, item in enumerate(_compact_text_list(normalized.next_steps or normalized.key_highlights, limit=2, max_chars=78), start=1):
+                priority_cards.append(PptCreatorCardItem(title=f"Priority {index}", body=item, footer="Current run"))
+        priority_cards.append(
+            PptCreatorCardItem(
+                title="Evidence posture",
+                body=(
+                    _humanize_watchout(normalized.watchouts[0])
+                    if normalized.watchouts
+                    else "Backlog requires evidence closure and sequence confirmation before close-out."
+                ),
+                footer="Grounded review signal",
+            )
+        )
+        action_execution_steps = (
+            [f"{item.get('ref')} · {_short_action_label(item.get('action'), max_chars=72)}" for item in action_entries[:3]]
+            or _compact_text_list(normalized.next_steps or normalized.key_highlights, limit=3, max_chars=96)
         )
         slides[1] = PptCreatorSlide(
             type="summary",
             title="Executive summary",
             body=(
-                f"{open_actions} open action(s) remain in the backlog and require owner assignment plus execution sequencing before closure."
+                f"{open_actions} open action(s) remain in the current plan and now require explicit owner follow-through, evidence closure and sequencing into the next operating review."
             ),
             bullets=_compact_text_list(
                 [
-                    f"{metric_map.get('Total actions', open_actions)} total actions are tracked in this backlog",
+                    f"{metric_map.get('Total actions', open_actions)} total actions are tracked in the current plan",
                     _humanize_watchout(normalized.watchouts[0]) if normalized.watchouts else None,
-                    "Human review remains the final decision gate",
+                    f"{len(action_entries)} action(s) include owner, due date or status context" if action_entries else None,
+                    "Use the appendix for full task wording and source traceability." if action_entries else None,
                 ],
-                limit=2,
-                max_chars=68,
+                limit=3,
+                max_chars=86,
             ),
-            speaker_notes="Short executive framing for the backlog state and required execution posture.",
+            speaker_notes="Concise executive framing for the grounded action plan and execution posture.",
         )
-        action_table = normalized.tables[0] if normalized.tables else None
-        compact_action_rows: list[list[str]] = []
-        seen_actions: set[str] = set()
-        if action_table:
-            for row in action_table.rows:
-                if len(row) < 5:
-                    continue
-                action_label = str(row[1]).strip()
-                key = action_label.casefold()
-                if key in seen_actions:
-                    continue
-                seen_actions.add(key)
-                compact_action_rows.append([
-                    _truncate_cell(action_label, max_chars=44),
-                    row[2] if row[2] and row[2] != "-" else "Unassigned",
-                    str(row[4]).strip().title() or "Open",
-                ])
-        priority_signals = action_execution_steps[:2] or _compact_text_list(normalized.next_steps or normalized.key_highlights, limit=2, max_chars=68)
-        priority_cards = [
-            PptCreatorCardItem(title=f"Priority {index}", body=item, footer="Open")
-            for index, item in enumerate(priority_signals, start=1)
-        ]
-        priority_cards.append(
-            PptCreatorCardItem(
-                title="Execution posture",
-                body=(_humanize_watchout(normalized.watchouts[0]) if normalized.watchouts else "Backlog requires owners and sequencing before execution."),
-                footer="Risk signal",
-            )
-        )
-        slides.append(_build_cards_slide("Priority workstreams", priority_cards, speaker_notes="Priority actions grouped as execution workstreams."))
-        if compact_action_rows:
-            slides.append(
-                PptCreatorSlide(
-                    type="table",
-                    title="Action backlog",
-                    table_columns=["Action", "Owner", "Status"],
-                    table_rows=compact_action_rows[:8],
-                )
-            )
-        timeline_slide = _build_timeline_slide("Execution timeline", action_execution_steps, speaker_notes="Condensed execution sequence.")
+        slides.append(_build_cards_slide("Priority workstreams", priority_cards, speaker_notes="Priority actions grouped from the current grounded run."))
+        if action_entries:
+            slides.extend(_build_action_table_slides(action_entries))
+            slides.extend(_build_action_detail_slides(action_entries))
+        timeline_slide = _build_timeline_slide("Execution timeline", action_execution_steps, speaker_notes="Execution sequence derived from the current action plan items.")
         if timeline_slide is not None:
             slides.append(timeline_slide)
+        blocker_bullets = _compact_text_list(
+            [
+                _build_action_detail_line(item) for item in action_entries if _humanize_action_status(item.get("status")) in {"Blocked", "Open"}
+            ]
+            + [
+                "Overdue actions require reprioritization" if overdue_actions != "0" else None,
+                "Formal approval is still required for some items" if approval_required != "0" else None,
+            ],
+            limit=2,
+            max_chars=120,
+        )
+        mitigation_bullets = _compact_text_list(
+            [_build_action_detail_line(item) for item in action_entries[:2]] or action_execution_steps,
+            limit=2,
+            max_chars=120,
+        )
         slides.append(
             _build_two_column_slide(
                 "Blockers vs mitigations",
                 left_title="Blockers",
-                left_body=_humanize_watchout(normalized.watchouts[0]) if normalized.watchouts else "No major blocker flagged in the backlog.",
-                left_bullets=_compact_text_list(
-                    [
-                        "Overdue actions require reprioritization" if overdue_actions != "0" else None,
-                        "Formal approval is still required for some items" if approval_required != "0" else None,
-                    ],
-                    limit=1,
-                    max_chars=66,
-                ),
+                left_body=_humanize_watchout(normalized.watchouts[0]) if normalized.watchouts else "No major blocker flagged in the current run.",
+                left_bullets=blocker_bullets,
                 right_title="Mitigations",
-                right_body="Assign owners, validate evidence and close the human-review gate before execution.",
-                right_bullets=_compact_text_list(action_execution_steps, limit=1, max_chars=66),
-                speaker_notes="Execution blockers versus mitigation actions.",
+                right_body="Execute the named actions in order, close cited evidence gaps and confirm approval dependencies before closure.",
+                right_bullets=mitigation_bullets,
+                speaker_notes="Execution blockers and concrete mitigation actions from the current run.",
             )
         )
     elif normalized.export_kind == EVIDENCE_PACK_EXPORT_KIND:

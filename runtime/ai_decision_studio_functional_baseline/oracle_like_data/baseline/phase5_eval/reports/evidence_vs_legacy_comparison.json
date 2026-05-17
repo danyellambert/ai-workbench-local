@@ -1,0 +1,200 @@
+{
+  "aggregate": {
+    "files": 4,
+    "legacy_total_chars": 4523,
+    "evidence_total_chars": 4501,
+    "with_vl_email_total": 6,
+    "with_vl_phone_total": 5,
+    "without_vl_email_total": 3,
+    "without_vl_phone_total": 3
+  },
+  "comparisons": [
+    {
+      "file": "data/synthetic/resumes_ui_test/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "legacy": {
+        "chars": 2024,
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid",
+        "strategy_label": "Híbrido inteligente · pypdf + Docling seletivo",
+        "final_text_chars": 2024,
+        "suspicious_pages": 0,
+        "ocr_backend": null,
+        "image_first_ocr_applied": false
+      },
+      "evidence": {
+        "chars": 2013,
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "source_type": "digital_pdf",
+        "warnings": [],
+        "without_vl": {
+          "source_type": "digital_pdf",
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "warnings": []
+        },
+        "summary": {
+          "document_id": "c9d998ee804d9fb52cf2551bab157438b3e4768e7c630c801e2a7396fee0fbb5",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "vl_name_status": "not_found",
+        "duplicates_or_noise": {
+          "emails_minus_baseline": 0,
+          "phones_minus_baseline": 0
+        },
+        "error": null
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0002_hard_compact_sidebar_marina.gomes.ribeiro.pdf",
+      "legacy": {
+        "chars": 1635,
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid",
+        "strategy_label": "Híbrido inteligente · pypdf + Docling seletivo",
+        "final_text_chars": 1635,
+        "suspicious_pages": 0,
+        "ocr_backend": null,
+        "image_first_ocr_applied": false
+      },
+      "evidence": {
+        "chars": 1624,
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "source_type": "digital_pdf",
+        "warnings": [],
+        "without_vl": {
+          "source_type": "digital_pdf",
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "warnings": []
+        },
+        "summary": {
+          "document_id": "396f18a409db4bd7474f78486ae93abc2ca5029ca887eea2d8ec509efc77e984",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "vl_name_status": "not_found",
+        "duplicates_or_noise": {
+          "emails_minus_baseline": 0,
+          "phones_minus_baseline": 0
+        },
+        "error": null
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "legacy": {
+        "chars": 574,
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid",
+        "strategy_label": "Híbrido inteligente · pypdf + Docling seletivo",
+        "final_text_chars": 574,
+        "suspicious_pages": 1,
+        "ocr_backend": null,
+        "image_first_ocr_applied": false
+      },
+      "evidence": {
+        "chars": 574,
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective helped confirm header/contact information"
+        ],
+        "without_vl": {
+          "source_type": "scanned_pdf",
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "warnings": []
+        },
+        "summary": {
+          "document_id": "182d6a91cf04a3c373661d3dc298fc2b486f613faee7a6c1b1b5adde035bf207",
+          "source_type": "scanned_pdf",
+          "warnings": [
+            "VL selective helped confirm header/contact information"
+          ],
+          "emails_found": 2,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "confirmed"
+        },
+        "vl_name_status": "confirmed",
+        "duplicates_or_noise": {
+          "emails_minus_baseline": 1,
+          "phones_minus_baseline": 0
+        },
+        "error": null
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+      "legacy": {
+        "chars": 290,
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid",
+        "strategy_label": "Híbrido inteligente · pypdf + Docling seletivo",
+        "final_text_chars": 290,
+        "suspicious_pages": 1,
+        "ocr_backend": null,
+        "image_first_ocr_applied": false
+      },
+      "evidence": {
+        "chars": 290,
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "No confirmed email found",
+          "No confirmed phone found",
+          "VL selective added visual candidates that still need review"
+        ],
+        "without_vl": {
+          "source_type": "scanned_pdf",
+          "emails_found": 0,
+          "phones_found": 0,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "warnings": [
+            "No confirmed email found",
+            "No confirmed phone found"
+          ]
+        },
+        "summary": {
+          "document_id": "c7f253ea14f13a097e64c35911f6a80cf21905247b3e990ede60713f6c03b442",
+          "source_type": "scanned_pdf",
+          "warnings": [
+            "No confirmed email found",
+            "No confirmed phone found",
+            "VL selective added visual candidates that still need review"
+          ],
+          "emails_found": 2,
+          "phones_found": 2,
+          "name_status": "visual_candidate",
+          "location_status": "visual_candidate"
+        },
+        "vl_name_status": "visual_candidate",
+        "duplicates_or_noise": {
+          "emails_minus_baseline": 2,
+          "phones_minus_baseline": 2
+        },
+        "error": null
+      }
+    }
+  ]
+}

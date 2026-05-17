@@ -185,6 +185,7 @@ def summarize_model_comparison_log(entries: list[dict[str, object]]) -> dict[str
             "prompt_profile_leaderboard": [],
             "document_usage_leaderboard": [],
             "benchmark_use_case_leaderboard": [],
+            "latest_timestamp": None,
         }
 
     provider_counter: Counter[str] = Counter()
@@ -418,4 +419,5 @@ def summarize_model_comparison_log(entries: list[dict[str, object]]) -> dict[str
         "top_runtime_bucket": _leaderboard_top_entry(runtime_bucket_leaderboard),
         "top_quantization_family": _leaderboard_top_entry(quantization_family_leaderboard),
         "top_benchmark_use_case": _leaderboard_top_entry(benchmark_use_case_leaderboard),
+        "latest_timestamp": entries[-1].get("timestamp"),
     }

@@ -1,0 +1,216 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Action Plan",
+      "subtitle": "Grounded execution plan for the current document-backed run",
+      "author": "AI Workbench Local",
+      "date": "2026-04-17",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Action Plan"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Action Plan",
+        "subtitle": "Grounded execution plan for the current document-backed run",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: action_plan_deck. Deck family: action_plan. Sources: action_plan_run, grounding_preview, document_agent_action_plan."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "4 grounded action(s) span contract redlines, privacy transfer controls, incident-response commitments and evidence closure. Immediate focus: Set up auto-renewal calendar alerts; Draft SCC Appendix for data residency.",
+        "bullets": [
+          "Set up auto-renewal calendar alerts",
+          "Draft SCC Appendix for data residency"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive framing for the grounded execution plan and current blockers."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "4",
+            "label": "Grounded actions"
+          },
+          {
+            "value": "4",
+            "label": "Owners assigned"
+          },
+          {
+            "value": "4",
+            "label": "Dated actions"
+          },
+          {
+            "value": "0",
+            "label": "Blocked"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "cards",
+        "title": "Priority workstreams",
+        "bullets": [],
+        "cards": [
+          {
+            "title": "Priority 1",
+            "body": "[Governance Committee Minutes and Action Items] Set up…",
+            "footer": "Operations • 2024-03-18 • Governance Committee Minutes and Action Items"
+          },
+          {
+            "title": "Priority 2",
+            "body": "[Governance Committee Minutes and Action Items] Draft S…",
+            "footer": "James Park • 2024-03-25 • Governance Committee Minutes and Action Items"
+          },
+          {
+            "title": "Priority 3",
+            "body": "[Governance Committee Minutes and Action Items] Define…",
+            "footer": "Alex Rivera • 2024-03-28 • Governance Committee Minutes and Action Items"
+          }
+        ],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Priority actions grouped from the grounded action backlog."
+      },
+      {
+        "type": "table",
+        "title": "Action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Action",
+          "Owner",
+          "Due",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "[Governance Committee Minutes and Action It…",
+            "Operations",
+            "2024-03-18",
+            "In Progress"
+          ],
+          [
+            "[Governance Committee Minutes and Action It…",
+            "James Park",
+            "2024-03-25",
+            "Open"
+          ],
+          [
+            "[Governance Committee Minutes and Action It…",
+            "Alex Rivera",
+            "2024-03-28",
+            "Open"
+          ],
+          [
+            "[Privileged Account Approval Email] Negotia…",
+            "Maria Santos",
+            "2024-03-22",
+            "In Progress"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Governance Committee Minutes and Action Items — Governance Committee Minutes and Action Items.pdf: Set up auto-renewal calendar alerts | Set up auto-renewal calendar alerts; Governance Committee Minutes and Action Items — Governance Committee Minutes and Action Items.pdf: Draft SCC Appendix for data residency | Draft SCC Appendix for data residency; Governance Committee Minutes and Action Items — Governance Committee Minutes and Action Items.pdf: Define incident response SLOs | Define incident response SLOs; Privileged Account Approval Email — Privileged Account Approval Email.pdf: Negotiate liability cap with vendor legal | Negotiate liability cap with vendor legal"
+      },
+      {
+        "type": "timeline",
+        "title": "Execution timeline",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [
+          {
+            "title": "Step 1",
+            "body": "2024-03-18 · Operations — Set up auto-renewal calendar alerts • Governance Comm…",
+            "tag": "P1"
+          },
+          {
+            "title": "Step 2",
+            "body": "2024-03-25 · James Park — Draft SCC Appendix for data residency • Governance Co…",
+            "tag": "P2"
+          },
+          {
+            "title": "Step 3",
+            "body": "2024-03-28 · Alex Rivera — Define incident response SLOs • Governance Committee…",
+            "tag": "P3"
+          },
+          {
+            "title": "Step 4",
+            "body": "2024-03-22 · Maria Santos — Negotiate liability cap with vendor legal • Privile…",
+            "tag": "P4"
+          }
+        ],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Execution sequence ordered from the grounded due dates and owners."
+      },
+      {
+        "type": "two_column",
+        "title": "Blockers vs mitigations",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Blockers",
+            "body": "Liability cap remains unresolved in the contract redline.",
+            "bullets": [
+              "Cross-border transfer and data residency wording still require a…",
+              "Incident-response commitments are still underspecified for produc…"
+            ]
+          },
+          {
+            "title": "Mitigations",
+            "body": "Set up auto-renewal calendar alerts (Operations, due 2024-03-18) • Governance Committee Minutes and Action Items",
+            "bullets": [
+              "Set up auto-renewal calendar alerts (Operations, due 2024-03-18)…",
+              "Draft SCC Appendix for data residency (James Park, due 2024-03-25…"
+            ]
+          }
+        ],
+        "speaker_notes": "Grounded blockers and mitigation path derived from the current action-plan run."
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260417_182725_85c10d36/action_plan_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260417_182725_85c10d36",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

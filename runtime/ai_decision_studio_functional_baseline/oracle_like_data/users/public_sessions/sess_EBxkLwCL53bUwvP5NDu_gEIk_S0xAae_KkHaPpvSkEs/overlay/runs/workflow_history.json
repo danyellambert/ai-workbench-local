@@ -1,0 +1,1403 @@
+[
+  {
+    "id": "run_policy_contract_comparison_fbe9460dc7a0",
+    "timestamp": "2026-05-03T21:15:32.877685",
+    "workflow_id": "policy_contract_comparison",
+    "workflow_label": "Policy / Contract Comparison",
+    "status": "warning",
+    "provider": "ollama_hosted",
+    "model": "nemotron-3-nano:30b-cloud",
+    "duration_s": 57.7026,
+    "duration_label": "57.7s",
+    "document_ids": [
+      "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+      "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+    ],
+    "documents": [
+      "Information Security Policy v3.1.pdf",
+      "Information Security Policy v3.2.pdf"
+    ],
+    "document_count": 2,
+    "findings_count": 8,
+    "warning_count": 1,
+    "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+    "artifacts": [],
+    "artifact_items": [],
+    "request_payload": {
+      "workflow_id": "policy_contract_comparison",
+      "document_ids": [
+        "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+        "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+      ],
+      "input_text": "Compare these documents for approval risks, differences, watchouts, must-fix issues, negotiation priorities, and business impact.",
+      "provider": "ollama_hosted",
+      "model": "nemotron-3-nano:30b-cloud",
+      "prompt_profile": "neutro",
+      "temperature": 0.2,
+      "top_p": 0.95,
+      "max_tokens": 4352,
+      "context_window_mode": "auto",
+      "context_window": null,
+      "use_document_context": true,
+      "context_strategy": "document_scan"
+    },
+    "response_payload": {
+      "workflow_id": "policy_contract_comparison",
+      "workflow_label": "Policy / Contract Comparison",
+      "status": "warning",
+      "summary": "**Executive Comparison**  \nBoth policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.\n\n- v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.  \n- v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.  \n- v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.  \n- v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.  \n- The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.  \n- Negotiation priorities should address defining the incident‑notification timeframe in v3.1 and allocating resources for the new MFA and revalidation processes to mitigate approval and operational risks.",
+      "highlights": [
+        "Both policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.",
+        "v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.",
+        "v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.",
+        "v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.",
+        "v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.",
+        "The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties."
+      ],
+      "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "structured_result": {
+        "success": true,
+        "task_type": "document_agent",
+        "execution_id": "bd273b4f-59f5-411f-8795-8c933ccd4f74",
+        "executed_at": "2026-05-03T21:15:32.787593",
+        "raw_output_text": null,
+        "parsed_json": {
+          "task_type": "document_agent",
+          "schema_version": "1.0",
+          "agent_label": "Document Operations Copilot",
+          "user_intent": "document_comparison",
+          "intent_reason": "product_workflow_default:policy_contract_comparison",
+          "answer_mode": "comparison_structured",
+          "tool_used": "compare_documents",
+          "summary": "**Executive Comparison**  \nBoth policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.\n\n- v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.  \n- v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.  \n- v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.  \n- v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.  \n- The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.  \n- Negotiation priorities should address defining the incident‑notification timeframe in v3.1 and allocating resources for the new MFA and revalidation processes to mitigate approval and operational risks.",
+          "key_points": [
+            "Both policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.",
+            "v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.",
+            "v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.",
+            "v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.",
+            "v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.",
+            "The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties."
+          ],
+          "limitations": [
+            "Retrieval backend note: Retrieval served by local fallback from the canonical JSON.."
+          ],
+          "recommended_actions": [
+            "Open the cited source excerpts to confirm the interpretation before acting.",
+            "Validate critical differences directly in the compared documents before consolidating a decision."
+          ],
+          "guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled via retrieval to prioritize excerpts most relevant to the question.",
+            "The response includes traceable sources for manual auditing."
+          ],
+          "available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "compared_documents": [
+            "Information Security Policy v3.1.pdf (pdf)",
+            "Information Security Policy v3.2.pdf (pdf)"
+          ],
+          "comparison_findings": [
+            {
+              "finding_type": "document_summary",
+              "title": "Summary of Information Security Policy v3.1.pdf (pdf)",
+              "description": "The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)"
+              ],
+              "evidence": [
+                "The lack of a specific incident notification window introduces ambiguity and could delay stakeholder awareness.",
+                "Version 3.1 improves clarity on vendor security evidence and log‑retention, addressing prior gaps."
+              ]
+            },
+            {
+              "finding_type": "document_summary",
+              "title": "Summary of Information Security Policy v3.2.pdf (pdf)",
+              "description": "Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date.",
+              "documents": [
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "The policy introduces stricter identity and access controls, increasing compliance workload across the organization.",
+                "A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed."
+              ]
+            },
+            {
+              "finding_type": "approval_change",
+              "title": "Both policies aim to tighten security governance, but…",
+              "description": "Both policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "incident_response_delta",
+              "title": "v3.2 mandates a 24‑hour escalation window for critical…",
+              "description": "v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "identity_control_delta",
+              "title": "v3.2 requires multi‑factor authentication for all workforce accounts,…",
+              "description": "v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): This policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and critical third parties that access Meridian data, systems, or production support environments.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "approval_change",
+              "title": "v3.2 enforces quarterly revalidation of privileged access and…",
+              "description": "v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "vendor_oversight_delta",
+              "title": "v3.2 extends log retention to 12 months and…",
+              "description": "v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "cross_document_observation",
+              "title": "The 30‑day remediation window in v3.2 is a…",
+              "description": "The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed."
+              ]
+            }
+          ],
+          "document_review_decision_summary": null,
+          "document_review_findings": [],
+          "document_review_top_blockers": [],
+          "document_review_business_impact": [],
+          "checklist_preview": [],
+          "structured_response": {
+            "document_summaries": [
+              {
+                "document_id": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+                "label": "Information Security Policy v3.1.pdf (pdf)",
+                "summary": "The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "key_points": [
+                  "The lack of a specific incident notification window introduces ambiguity and could delay stakeholder awareness.",
+                  "Version 3.1 improves clarity on vendor security evidence and log‑retention, addressing prior gaps."
+                ],
+                "evidence_lines": [
+                  "The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                  "The lack of a specific incident notification window introduces ambiguity and could delay stakeholder awareness.",
+                  "Version 3.1 improves clarity on vendor security evidence and log‑retention, addressing prior gaps.",
+                  "This policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and critical third parties that access Meridian data, systems, or production support environments.",
+                  "Defines minimum security requirements for Meridian Holdings Ltd., its workforce, contractors, and critical third parties",
+                  "Applies to access to Meridian data, systems, or production support environments",
+                  "Chief Information Security Officer Maintains the security program, approves exceptions, and reports material risks to executive leadership.",
+                  "System Owners Ensure systems meet baseline controls and remediate findings in a timely manner.",
+                  "Chief Information Security Officer maintains the security program, approves exceptions, and reports material risks",
+                  "System Owners ensure baseline controls and remediate findings"
+                ],
+                "quality_score": 0.92
+              },
+              {
+                "document_id": "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745",
+                "label": "Information Security Policy v3.2.pdf (pdf)",
+                "summary": "Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date.",
+                "key_points": [
+                  "The policy introduces stricter identity and access controls, increasing compliance workload across the organization.",
+                  "A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed."
+                ],
+                "evidence_lines": [
+                  "Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date.",
+                  "The policy introduces stricter identity and access controls, increasing compliance workload across the organization.",
+                  "A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed.",
+                  "REQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or on-premises.",
+                  "MFA now mandatory for all workforce accounts (cloud and on-premises)",
+                  "REQ-IDM-08. Privileged access to production systems must be revalidated quarterly by the system owner and Security.",
+                  "Privileged access must be revalidated quarterly by system owner and Security",
+                  "REQ-IR-09. Suspected incidents involving customer data, privileged misuse, or unauthorized third-party access must be escalated immediately and in no event later than 24 hours after confirmation.",
+                  "Critical customer-data incidents must be escalated within 24 hours of confirmation",
+                  "REQ-LOG-05. Production and security telemetry must be retained for at least 12 months in tamper-evident storage."
+                ],
+                "quality_score": 0.87
+              }
+            ],
+            "comparison_text": "**Executive Comparison**  \nBoth policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.\n\n- v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.  \n- v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.  \n- v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.  \n- v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.  \n- The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.  \n- Negotiation priorities should address defining the incident‑notification timeframe in v3.1 and allocating resources for the new MFA and revalidation processes to mitigate approval and operational risks.",
+            "truncated_document_count": 0
+          },
+          "sources": [
+            {
+              "source": "Information Security Policy v3.1.pdf",
+              "document_id": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "file_type": "pdf",
+              "chunk_id": 2,
+              "score": 0.3507,
+              "vector_score": 0.36,
+              "lexical_score": 0.3333,
+              "snippet": "s in a timely manner.\nManagers\nApprove access based on business need and review privileged access at least every six\nmonths.\nWorkforce Members\nComplete required training and report suspicious activity promptly.\n3. Control Requirements\n●\nREQ-IDM-03. Privileged access requires manager approval and ticket-based provisioning.\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for administrative ac"
+            },
+            {
+              "source": "Information Security Policy v3.1.pdf",
+              "document_id": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "file_type": "pdf",
+              "chunk_id": 3,
+              "score": 0.3248,
+              "vector_score": 0.392,
+              "lexical_score": 0.2,
+              "snippet": "cy does\nnot define an explicit notification window for critical customer-data incidents.\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nReview signal: REQ-IR-07 is intentionally vague and lacks a defined number of hours. This supports the\n“weak incid"
+            },
+            {
+              "source": "Information Security Policy v3.1.pdf",
+              "document_id": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "file_type": "pdf",
+              "chunk_id": 1,
+              "score": 0.2956,
+              "vector_score": 0.3112,
+              "lexical_score": 0.2667,
+              "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.1\nApproved internal policy in force during the March 2024 vendor review cycle.\nDocument ID\nPOL-031\nOwner\nChief Information Security Officer\nVersion\n3.1\nEff"
+            },
+            {
+              "source": "Information Security Policy v3.2.pdf",
+              "document_id": "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745",
+              "file_type": "pdf",
+              "chunk_id": 2,
+              "score": 0.2797,
+              "vector_score": 0.3585,
+              "lexical_score": 0.1333,
+              "snippet": "days\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or\non-premises.\n●\nREQ-IDM-08. Privileged access to production systems must be revalidated quarterly by the system owner and Security.\n●\nREQ-VND-07. Critical vendors must complete a security review before onboarding and "
+            }
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "summarize_document:dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "status": "success",
+              "detail": "Summary generated for Information Security Policy v3.1.pdf (pdf)."
+            },
+            {
+              "tool_name": "summarize_document:9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745",
+              "status": "success",
+              "detail": "Summary generated for Information Security Policy v3.2.pdf (pdf)."
+            },
+            {
+              "tool_name": "compare_documents",
+              "status": "success",
+              "detail": "Document comparison synthesized from the individual summaries."
+            }
+          ],
+          "confidence": 0.895,
+          "needs_review": false,
+          "needs_review_reason": null
+        },
+        "validated_output": {
+          "task_type": "document_agent",
+          "schema_version": "1.0",
+          "agent_label": "Document Operations Copilot",
+          "user_intent": "document_comparison",
+          "intent_reason": "product_workflow_default:policy_contract_comparison",
+          "answer_mode": "comparison_structured",
+          "tool_used": "compare_documents",
+          "summary": "**Executive Comparison**  \nBoth policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.\n\n- v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.  \n- v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.  \n- v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.  \n- v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.  \n- The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.  \n- Negotiation priorities should address defining the incident‑notification timeframe in v3.1 and allocating resources for the new MFA and revalidation processes to mitigate approval and operational risks.",
+          "key_points": [
+            "Both policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.",
+            "v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.",
+            "v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.",
+            "v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.",
+            "v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.",
+            "The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties."
+          ],
+          "limitations": [
+            "Retrieval backend note: Retrieval served by local fallback from the canonical JSON.."
+          ],
+          "recommended_actions": [
+            "Open the cited source excerpts to confirm the interpretation before acting.",
+            "Validate critical differences directly in the compared documents before consolidating a decision."
+          ],
+          "guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled via retrieval to prioritize excerpts most relevant to the question.",
+            "The response includes traceable sources for manual auditing."
+          ],
+          "available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "compared_documents": [
+            "Information Security Policy v3.1.pdf (pdf)",
+            "Information Security Policy v3.2.pdf (pdf)"
+          ],
+          "comparison_findings": [
+            {
+              "finding_type": "document_summary",
+              "title": "Summary of Information Security Policy v3.1.pdf (pdf)",
+              "description": "The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)"
+              ],
+              "evidence": [
+                "The lack of a specific incident notification window introduces ambiguity and could delay stakeholder awareness.",
+                "Version 3.1 improves clarity on vendor security evidence and log‑retention, addressing prior gaps."
+              ]
+            },
+            {
+              "finding_type": "document_summary",
+              "title": "Summary of Information Security Policy v3.2.pdf (pdf)",
+              "description": "Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date.",
+              "documents": [
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "The policy introduces stricter identity and access controls, increasing compliance workload across the organization.",
+                "A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed."
+              ]
+            },
+            {
+              "finding_type": "approval_change",
+              "title": "Both policies aim to tighten security governance, but…",
+              "description": "Both policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "incident_response_delta",
+              "title": "v3.2 mandates a 24‑hour escalation window for critical…",
+              "description": "v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "identity_control_delta",
+              "title": "v3.2 requires multi‑factor authentication for all workforce accounts,…",
+              "description": "v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): This policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and critical third parties that access Meridian data, systems, or production support environments.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "approval_change",
+              "title": "v3.2 enforces quarterly revalidation of privileged access and…",
+              "description": "v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "vendor_oversight_delta",
+              "title": "v3.2 extends log retention to 12 months and…",
+              "description": "v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+              ]
+            },
+            {
+              "finding_type": "cross_document_observation",
+              "title": "The 30‑day remediation window in v3.2 is a…",
+              "description": "The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.",
+              "documents": [
+                "Information Security Policy v3.1.pdf (pdf)",
+                "Information Security Policy v3.2.pdf (pdf)"
+              ],
+              "evidence": [
+                "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "Information Security Policy v3.2.pdf (pdf): A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed."
+              ]
+            }
+          ],
+          "document_review_decision_summary": null,
+          "document_review_findings": [],
+          "document_review_top_blockers": [],
+          "document_review_business_impact": [],
+          "checklist_preview": [],
+          "structured_response": {
+            "document_summaries": [
+              {
+                "document_id": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+                "label": "Information Security Policy v3.1.pdf (pdf)",
+                "summary": "The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                "key_points": [
+                  "The lack of a specific incident notification window introduces ambiguity and could delay stakeholder awareness.",
+                  "Version 3.1 improves clarity on vendor security evidence and log‑retention, addressing prior gaps."
+                ],
+                "evidence_lines": [
+                  "The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area.",
+                  "The lack of a specific incident notification window introduces ambiguity and could delay stakeholder awareness.",
+                  "Version 3.1 improves clarity on vendor security evidence and log‑retention, addressing prior gaps.",
+                  "This policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and critical third parties that access Meridian data, systems, or production support environments.",
+                  "Defines minimum security requirements for Meridian Holdings Ltd., its workforce, contractors, and critical third parties",
+                  "Applies to access to Meridian data, systems, or production support environments",
+                  "Chief Information Security Officer Maintains the security program, approves exceptions, and reports material risks to executive leadership.",
+                  "System Owners Ensure systems meet baseline controls and remediate findings in a timely manner.",
+                  "Chief Information Security Officer maintains the security program, approves exceptions, and reports material risks",
+                  "System Owners ensure baseline controls and remediate findings"
+                ],
+                "quality_score": 0.92
+              },
+              {
+                "document_id": "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745",
+                "label": "Information Security Policy v3.2.pdf (pdf)",
+                "summary": "Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date.",
+                "key_points": [
+                  "The policy introduces stricter identity and access controls, increasing compliance workload across the organization.",
+                  "A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed."
+                ],
+                "evidence_lines": [
+                  "Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date.",
+                  "The policy introduces stricter identity and access controls, increasing compliance workload across the organization.",
+                  "A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed.",
+                  "REQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or on-premises.",
+                  "MFA now mandatory for all workforce accounts (cloud and on-premises)",
+                  "REQ-IDM-08. Privileged access to production systems must be revalidated quarterly by the system owner and Security.",
+                  "Privileged access must be revalidated quarterly by system owner and Security",
+                  "REQ-IR-09. Suspected incidents involving customer data, privileged misuse, or unauthorized third-party access must be escalated immediately and in no event later than 24 hours after confirmation.",
+                  "Critical customer-data incidents must be escalated within 24 hours of confirmation",
+                  "REQ-LOG-05. Production and security telemetry must be retained for at least 12 months in tamper-evident storage."
+                ],
+                "quality_score": 0.87
+              }
+            ],
+            "comparison_text": "**Executive Comparison**  \nBoth policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.\n\n- v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.  \n- v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.  \n- v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.  \n- v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.  \n- The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.  \n- Negotiation priorities should address defining the incident‑notification timeframe in v3.1 and allocating resources for the new MFA and revalidation processes to mitigate approval and operational risks.",
+            "truncated_document_count": 0
+          },
+          "sources": [
+            {
+              "source": "Information Security Policy v3.1.pdf",
+              "document_id": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "file_type": "pdf",
+              "chunk_id": 2,
+              "score": 0.3507,
+              "vector_score": 0.36,
+              "lexical_score": 0.3333,
+              "snippet": "s in a timely manner.\nManagers\nApprove access based on business need and review privileged access at least every six\nmonths.\nWorkforce Members\nComplete required training and report suspicious activity promptly.\n3. Control Requirements\n●\nREQ-IDM-03. Privileged access requires manager approval and ticket-based provisioning.\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for administrative ac"
+            },
+            {
+              "source": "Information Security Policy v3.1.pdf",
+              "document_id": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "file_type": "pdf",
+              "chunk_id": 3,
+              "score": 0.3248,
+              "vector_score": 0.392,
+              "lexical_score": 0.2,
+              "snippet": "cy does\nnot define an explicit notification window for critical customer-data incidents.\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nReview signal: REQ-IR-07 is intentionally vague and lacks a defined number of hours. This supports the\n“weak incid"
+            },
+            {
+              "source": "Information Security Policy v3.1.pdf",
+              "document_id": "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "file_type": "pdf",
+              "chunk_id": 1,
+              "score": 0.2956,
+              "vector_score": 0.3112,
+              "lexical_score": 0.2667,
+              "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.1\nApproved internal policy in force during the March 2024 vendor review cycle.\nDocument ID\nPOL-031\nOwner\nChief Information Security Officer\nVersion\n3.1\nEff"
+            },
+            {
+              "source": "Information Security Policy v3.2.pdf",
+              "document_id": "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745",
+              "file_type": "pdf",
+              "chunk_id": 2,
+              "score": 0.2797,
+              "vector_score": 0.3585,
+              "lexical_score": 0.1333,
+              "snippet": "days\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or\non-premises.\n●\nREQ-IDM-08. Privileged access to production systems must be revalidated quarterly by the system owner and Security.\n●\nREQ-VND-07. Critical vendors must complete a security review before onboarding and "
+            }
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "summarize_document:dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "status": "success",
+              "detail": "Summary generated for Information Security Policy v3.1.pdf (pdf)."
+            },
+            {
+              "tool_name": "summarize_document:9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745",
+              "status": "success",
+              "detail": "Summary generated for Information Security Policy v3.2.pdf (pdf)."
+            },
+            {
+              "tool_name": "compare_documents",
+              "status": "success",
+              "detail": "Document comparison synthesized from the individual summaries."
+            }
+          ],
+          "confidence": 0.895,
+          "needs_review": false,
+          "needs_review_reason": null
+        },
+        "error": null,
+        "validation_error": null,
+        "parsing_error": null,
+        "repair_applied": false,
+        "source_documents": [
+          "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+          "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+        ],
+        "context_used": true,
+        "execution_metadata": {
+          "agent_intent": "document_comparison",
+          "agent_intent_label": "Document comparison",
+          "agent_intent_reason": "product_workflow_default:policy_contract_comparison",
+          "agent_tool": "compare_documents",
+          "agent_tool_label": "Compare documents",
+          "agent_tool_reason": "product_workflow_default:policy_contract_comparison",
+          "agent_answer_mode": "comparison_structured",
+          "agent_context_strategy": "retrieval",
+          "agent_document_count": 2,
+          "agent_source_count": 4,
+          "agent_available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "needs_review": false,
+          "needs_review_reason": null,
+          "agent_limitations": [
+            "Retrieval backend note: Retrieval served by local fallback from the canonical JSON.."
+          ],
+          "agent_recommended_actions": [
+            "Open the cited source excerpts to confirm the interpretation before acting.",
+            "Validate critical differences directly in the compared documents before consolidating a decision."
+          ],
+          "agent_guardrails_applied": [
+            "Response restricted to documents selected in the document base.",
+            "Grounding assembled via retrieval to prioritize excerpts most relevant to the question.",
+            "The response includes traceable sources for manual auditing."
+          ],
+          "tool_runs": [
+            {
+              "tool_name": "summarize_document:dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+              "status": "success",
+              "detail": "Summary generated for Information Security Policy v3.1.pdf (pdf)."
+            },
+            {
+              "tool_name": "summarize_document:9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745",
+              "status": "success",
+              "detail": "Summary generated for Information Security Policy v3.2.pdf (pdf)."
+            },
+            {
+              "tool_name": "compare_documents",
+              "status": "success",
+              "detail": "Document comparison synthesized from the individual summaries."
+            }
+          ],
+          "retrieval_backend_used": "local_fallback",
+          "retrieval_backend_message": "Retrieval served by local fallback from the canonical JSON.",
+          "retrieval_strategy_used": "manual_hybrid",
+          "retrieval_strategy_requested": "manual_hybrid",
+          "execution_strategy_requested": "langgraph_context_retry",
+          "execution_strategy_used": "langgraph_context_retry",
+          "execution_strategy_fallback_reason": null,
+          "workflow_id": "lgw-000356f0",
+          "workflow_route_decision": "comparison_prefers_retrieval_when_document_count_is_small",
+          "workflow_guardrail_decision": "finish_ok",
+          "provider": "ollama_hosted",
+          "provider_requested": "ollama_hosted",
+          "provider_effective": "ollama_hosted",
+          "model": "nemotron-3-nano:30b-cloud",
+          "resolved_context_window": 8192,
+          "context_window_cap": 8192,
+          "document_chars_estimate": 5373,
+          "telemetry": {
+            "product_workflow_id": "policy_contract_comparison",
+            "product_workflow_label": "Policy / Contract Comparison",
+            "product_surface": "gradio",
+            "product_workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md",
+            "product_workflow_expected_outputs": [
+              "Comparison findings",
+              "Business impact and watchouts",
+              "Decision-ready recommendation",
+              "Comparison deck artifact"
+            ],
+            "product_deck_export_kind": "policy_contract_comparison_deck",
+            "agent_intent": "document_comparison",
+            "agent_tool": "compare_documents",
+            "agent_answer_mode": "comparison_structured",
+            "agent_intent_reason": "product_workflow_default:policy_contract_comparison",
+            "agent_tool_reason": "product_workflow_default:policy_contract_comparison",
+            "agent_context_strategy": "retrieval",
+            "provider_requested": "ollama_hosted",
+            "provider_effective": "ollama_hosted",
+            "agent_available_tools": [
+              {
+                "name": "consult_documents",
+                "label": "Consult indexed documents",
+                "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "summarize_document",
+                "label": "Summarize document",
+                "description": "Generate a grounded executive summary for the selected document or document set.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "draft_business_response",
+                "label": "Draft document-grounded response",
+                "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "extract_structured_data",
+                "label": "Extract structured information",
+                "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+                "answer_mode": "json",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "compare_documents",
+                "label": "Compare documents",
+                "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+                "answer_mode": "comparison_structured",
+                "min_document_count": 2,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "generate_operational_checklist",
+                "label": "Generate operational checklist",
+                "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+                "answer_mode": "checklist",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "review_policy_compliance",
+                "label": "Review policy/compliance",
+                "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "review_document_risks",
+                "label": "Review risks and gaps",
+                "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "extract_operational_tasks",
+                "label": "Extract operational tasks",
+                "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              },
+              {
+                "name": "assist_technical_document",
+                "label": "Assist technical document",
+                "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+                "answer_mode": "friendly",
+                "min_document_count": 1,
+                "available": true,
+                "availability_reason": "ready"
+              }
+            ],
+            "provider_calls": [
+              {
+                "stage": "summary_single_pass",
+                "provider": "ollama_hosted",
+                "provider_requested": "ollama_hosted",
+                "model": "nemotron-3-nano:30b-cloud",
+                "duration_s": 19.7702,
+                "prompt_chars": 4699,
+                "context_window": 8192,
+                "temperature": 0.2,
+                "top_p": 0.95,
+                "max_tokens": 4352,
+                "prompt_profile": "neutro",
+                "success": true,
+                "native_usage": {
+                  "usage_source": "ollama_native_usage",
+                  "cost_source": "provider_native_usage_unpriced",
+                  "prompt_tokens": 1132,
+                  "completion_tokens": 2907,
+                  "total_tokens": 4039
+                }
+              },
+              {
+                "stage": "summary_single_pass",
+                "provider": "ollama_hosted",
+                "provider_requested": "ollama_hosted",
+                "model": "nemotron-3-nano:30b-cloud",
+                "duration_s": 14.4176,
+                "prompt_chars": 3570,
+                "context_window": 8192,
+                "temperature": 0.2,
+                "top_p": 0.95,
+                "max_tokens": 4352,
+                "prompt_profile": "neutro",
+                "success": true,
+                "native_usage": {
+                  "usage_source": "ollama_native_usage",
+                  "cost_source": "provider_native_usage_unpriced",
+                  "prompt_tokens": 896,
+                  "completion_tokens": 2345,
+                  "total_tokens": 3241
+                }
+              },
+              {
+                "stage": "summary_single_pass_repair_json",
+                "provider": "ollama_hosted",
+                "provider_requested": "ollama_hosted",
+                "model": "nemotron-3-nano:30b-cloud",
+                "duration_s": 10.5738,
+                "prompt_chars": 6750,
+                "context_window": 8192,
+                "temperature": 0.2,
+                "top_p": 0.95,
+                "max_tokens": 4352,
+                "prompt_profile": "neutro",
+                "success": true,
+                "native_usage": {
+                  "usage_source": "ollama_native_usage",
+                  "cost_source": "provider_native_usage_unpriced",
+                  "prompt_tokens": 1761,
+                  "completion_tokens": 1644,
+                  "total_tokens": 3405
+                }
+              },
+              {
+                "stage": "document_agent_compare_documents",
+                "provider": "ollama_hosted",
+                "provider_requested": "ollama_hosted",
+                "model": "nemotron-3-nano:30b-cloud",
+                "duration_s": 4.952,
+                "prompt_chars": 1827,
+                "context_window": 8192,
+                "temperature": 0.2,
+                "top_p": 0.95,
+                "max_tokens": 4352,
+                "prompt_profile": "neutro",
+                "success": true,
+                "native_usage": {
+                  "usage_source": "ollama_native_usage",
+                  "cost_source": "provider_native_usage_unpriced",
+                  "prompt_tokens": 409,
+                  "completion_tokens": 859,
+                  "total_tokens": 1268
+                }
+              }
+            ],
+            "timings_s": {
+              "document_load_s": 0.1462,
+              "context_build_s": 0.2939,
+              "provider_total_s": 49.7136,
+              "parsing_s": 10.5815,
+              "total_s": 56.9631
+            },
+            "parse_attempts": [
+              {
+                "stage": "summary_single_pass",
+                "strategy": "initial",
+                "success": true
+              },
+              {
+                "stage": "summary_single_pass",
+                "strategy": "initial",
+                "success": false,
+                "error": "Validation failed for SummaryPayload: 5 validation errors for SummaryPayload\ntopics.0.supporting_evidence\n  Input should be a valid list [type=list_type, input_value='REQ-IDM-05. Multi-factor...r cloud or on-premises.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/list_type\ntopics.1.supporting_evidence\n  Input should be a valid list [type=list_type, input_value='REQ-IDM-08. Privileged a...tem owner and Security.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/list_type\ntopics.2.supporting_evidence\n  Input should be a valid list [type=list_type, input_value='REQ-IR-09. Suspected inc...urs after confirmation.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/list_type\ntopics.3.supporting_evidence\n  Input should be a valid list [type=list_type, input_value='REQ-LOG-05. Production a...tamper-evident storage.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/list_type\ntopics.4.supporting_evidence\n  Input should be a valid list [type=list_type, input_value='REQ-VND-07. Critical ven...aterial control change.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/list_type"
+              },
+              {
+                "stage": "summary_single_pass_repair_json",
+                "strategy": "repair_json",
+                "success": true
+              }
+            ],
+            "current_stage": "document_agent_compare_documents"
+          },
+          "workflow_total_s": 57.3432,
+          "workflow_attempts": 1,
+          "workflow_context_strategies": [
+            "retrieval"
+          ],
+          "workflow_trace": [
+            {
+              "node": "prepare_agent_request",
+              "detail": "Preparing initial request for the document agent",
+              "attempt": 1,
+              "context_strategy": "document_scan"
+            },
+            {
+              "node": "classify_intent",
+              "detail": "Using explicit agent intent from telemetry: product_workflow_default:policy_contract_comparison",
+              "attempt": 1,
+              "context_strategy": "document_scan"
+            },
+            {
+              "node": "select_tool",
+              "detail": "Using explicit agent tool from telemetry: product_workflow_default:policy_contract_comparison",
+              "attempt": 1,
+              "context_strategy": "document_scan"
+            },
+            {
+              "node": "route_agent_context_strategy",
+              "detail": "Selecting agent context strategy: comparison_prefers_retrieval_when_document_count_is_small",
+              "attempt": 1,
+              "context_strategy": "retrieval"
+            },
+            {
+              "node": "execute_task",
+              "detail": "Executing structured_service within the LangGraph workflow",
+              "attempt": 1,
+              "context_strategy": "retrieval",
+              "success": true
+            },
+            {
+              "node": "evaluate_agent_guardrails",
+              "detail": "Agent response accepted with no additional guardrail",
+              "attempt": 1,
+              "context_strategy": "retrieval",
+              "success": true
+            }
+          ],
+          "workflow_node_count": 6
+        },
+        "available_render_modes": [
+          {
+            "mode": "json",
+            "label": "JSON",
+            "available": true,
+            "priority": 1
+          },
+          {
+            "mode": "friendly",
+            "label": "Friendly view",
+            "available": true,
+            "priority": 0
+          }
+        ],
+        "primary_render_mode": "friendly",
+        "overall_confidence": 0.895,
+        "quality_score": 0.895
+      },
+      "grounding_preview": {
+        "strategy": "document_scan",
+        "document_ids": [
+          "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+          "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+        ],
+        "context_chars": 5593,
+        "source_block_count": 5,
+        "preview_text": "[Source: Information Security Policy v3.2.pdf]\n[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-032  Information Security Policy v3.2\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.2\nRevised policy introducing explicit incident timing and stronger identity controls.\nDocument ID\nPOL-032\nOwner\nChief Information Security Officer\nVersion\n3.2\nEffective Date\n2024-04-01\nSupersedes\nPOL-031 v3.1\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nRevision Summary\nArea\nVersion 3.1\nVersion 3.2\nMFA\nAdmins and remote access only\nAll workforce accounts and all privileged actions\nPrivileged Reviews\nEvery six months\nQuarterly for privileged users; semiannual for standard\nusers\nVendor Oversight\nAnnual evidence expectation\nPre-onboarding review plus annual reassessment for\ncritical vendors\nIncident Notice\nReasonable efforts / no hours defined\nCritical customer-data incidents escalated within 24 hours\nof confirmation\nLog Retention\n180 days\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05\n\n[Source: Information Security Policy v3.2.pdf]\ndays\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or\non-premises.\nREQ-IDM-08. Privileged access to production systems must be revalidated quarterly by the system owner and Security.\nREQ-VND-07. Critical vendors must complete a security review before onboarding and after any material control\nchange.\nREQ-IR-09. Suspected incidents involving customer data, privileged misuse, or unauthorized third-party access must be\nescalated immediately and in no event later than 24 hours after confirmation.\nREQ-LOG-05. Production and security telemetry must be retained for at least 12 months in tamper-evident storage.\nTransition Requirement\nManagers must complete revalidation of all standing privileged access and close any open vendor-evidence gaps within\nthirty (30) days of the effective date of this version.\n\n[Source: Information Security Policy v3.1.pdf]\n[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInformation Security Policy v3.1\nApproved internal policy in force during the March 2024 vendor review cycle.\nDocument ID\nPOL-031\nOwner\nChief Information Security Officer\nVersion\n3.1\nEffective Date\n2024-01-05\nReview Cycle\nAnnual\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Purpose and Scope\nThis policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and\ncritical third parties that access Meridian data, systems, or production support environments.\n2. Governance Roles\nRole\nCore Responsibilities\nChief Information Security\nOfficer\nMaintains the security program, approves exceptions, and reports material risks to executive\nleadership.\nSystem Owners\nEnsure systems meet baseline controls and remediate findings in a timely manner.\nManagers\nApprove access based on business need and review\n\n[Source: Information Security Policy v3.1.pdf]\ns in a timely manner.\nManagers\nApprove access based on business need and review privileged access at least every six\nmonths.\nWorkforce Members\nComplete required training and report suspicious activity promptly.\n3. Control Requirements\n●\nREQ-IDM-03. Privileged access requires manager approval and ticket-based provisioning.\nREQ-IDM-05. Multi-factor authentication is mandatory for administrative access and remote access to production\nsystems.\nREQ-LOG-02. Production security logs must be retained for at least 180 days and reviewed for anomalous activity.\nREQ-VND-04. Critical service providers must provide annual security evidence and notify Meridian of material control\nchanges.\n4. Incident Management\nREQ-IR-07. The Security Team will use reasonable efforts to notify affected executive stakeholders, control owners, and\nlegal counsel in a timely manner once material facts are confirmed. External notification timing will be determined based on\nfacts, contractual commitments, and business impact.\nThe policy requires incidents to be documented, triaged, and preserved in the case-management system. The policy does\nnot define an explicit notification window for critical customer-data in\n\n[Source: Information Security Policy v3.1.pdf]\ncy does\nnot define an explicit notification window for critical customer-data incidents.\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nReview signal: REQ-IR-07 is intentionally vague and lacks a defined number of hours. This supports the\n“weak incident response timeframe” finding in the frontend.\nApproval and Revision History\nRole\nName\nStatus / Date\nChief Information Security Officer\nElena Petrov\nApproved — 2024-01-05\nGeneral Counsel\nDaniel Brooks\nReviewed — 2024-01-04\nVersion\nDate\nOwner\nSummary\n3.0\n2023-06-01\nSecurity\nProgram refresh for identity, logging, and vendor-risk coverage.\n3.1\n2024-01-05\nClarified annual evidence expectations and log-retention language.",
+        "warnings": []
+      },
+      "artifacts": [],
+      "deck_export_kind": "policy_contract_comparison_deck",
+      "deck_available": true,
+      "warnings": [
+        "Retrieval backend note: Retrieval served by local fallback from the canonical JSON.."
+      ],
+      "debug_metadata": {
+        "task_type": "document_agent",
+        "provider": "ollama_hosted",
+        "model": "nemotron-3-nano:30b-cloud",
+        "prompt_profile": "neutro",
+        "top_p": 0.95,
+        "max_tokens": 4352,
+        "context_strategy": "document_scan",
+        "source_documents": [
+          "dbe21de1c729ce1223f658ec387ea395a23b91359bacf2d846401f26f64afd61",
+          "9948df6b1c8f22291735a624803ead7fb5080f2e0e7507ce7c63a54aabc7b745"
+        ],
+        "workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md",
+        "expected_outputs": [
+          "Comparison findings",
+          "Business impact and watchouts",
+          "Decision-ready recommendation",
+          "Comparison deck artifact"
+        ],
+        "preferred_context_strategy": "retrieval",
+        "deck_export_label": "Policy / Contract Comparison Deck",
+        "run_id": "run_policy_contract_comparison_fbe9460dc7a0",
+        "trace_id": "trace_policy_contract_comparison_3cfe1b64da52",
+        "surface": "product_api_public_overlay",
+        "latency_s": 57.7026,
+        "total_tokens": 11953,
+        "prompt_tokens": 4198,
+        "completion_tokens": 7755,
+        "cost_usd": null,
+        "source_count": 5,
+        "context_chars": 5593
+      }
+    },
+    "result_sections": {
+      "summary": "**Executive Comparison**  \nBoth policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.\n\n- v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.  \n- v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.  \n- v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.  \n- v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.  \n- The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties.  \n- Negotiation priorities should address defining the incident‑notification timeframe in v3.1 and allocating resources for the new MFA and revalidation processes to mitigate approval and operational risks.",
+      "highlights": [
+        "Both policies aim to tighten security governance, but v3.2 introduces concrete controls — such as a 24‑hour critical‑incident escalation deadline, mandatory multi‑factor authentication, quarterly privileged‑access revalidation, and a 30‑day remediation window — that create higher compliance workload and short‑term risk of non‑compliance if not met. v3.1 improves vendor evidence and log‑retention clarity but leaves the incident‑notification timeframe undefined, generating ambiguity that could delay stakeholder awareness. The key differences revolve around added identity‑and‑access requirements, stricter timelines, and expanded vendor oversight, all of which affect approval risk, negotiation focus, and overall business impact.",
+        "v3.2 mandates a 24‑hour escalation window for critical incidents, whereas v3.1 leaves the notification period undefined, creating ambiguity.",
+        "v3.2 requires multi‑factor authentication for all workforce accounts, adding implementation effort not present in v3.1.",
+        "v3.2 enforces quarterly revalidation of privileged access and a 30‑day remediation deadline for managers, introducing a short‑term compliance risk if delays occur.",
+        "v3.2 extends log retention to 12 months and adds pre‑onboarding/post‑change vendor reviews, tightening oversight beyond v3.1’s clarified but less specific vendor evidence rules.",
+        "The 30‑day remediation window in v3.2 is a must‑fix focus area to avoid non‑compliance penalties."
+      ],
+      "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+      "warnings": [
+        "Retrieval backend note: Retrieval served by local fallback from the canonical JSON.."
+      ],
+      "tables": [
+        {
+          "title": "Comparison findings",
+          "headers": [
+            "Type",
+            "Finding",
+            "Documents",
+            "Evidence"
+          ],
+          "rows": [
+            [
+              "document_summary",
+              "Summary of Information Security Policy v3.1.pdf (pdf)",
+              "Information Security Policy v3.1.pdf (pdf)",
+              "The lack of a specific incident notification window introduces ambiguity and could delay stakeholder awareness. | Version 3.1 improves clarity on vendor security evidence and log‑retention, addressing prior gaps."
+            ],
+            [
+              "document_summary",
+              "Summary of Information Security Policy v3.2.pdf (pdf)",
+              "Information Security Policy v3.2.pdf (pdf)",
+              "The policy introduces stricter identity and access controls, increasing compliance workload across the organization. | A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed."
+            ],
+            [
+              "approval_change",
+              "Both policies aim to tighten security governance, but…",
+              "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+              "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area. | Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+            ],
+            [
+              "incident_response_delta",
+              "v3.2 mandates a 24‑hour escalation window for critical…",
+              "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+              "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area. | Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+            ],
+            [
+              "identity_control_delta",
+              "v3.2 requires multi‑factor authentication for all workforce accounts,…",
+              "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+              "Information Security Policy v3.1.pdf (pdf): This policy defines the minimum security requirements for Meridian Holdings Ltd., its workforce members, contractors, and critical third parties that access Meridian data, systems, or production support environments. | Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+            ],
+            [
+              "approval_change",
+              "v3.2 enforces quarterly revalidation of privileged access and…",
+              "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+              "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area. | Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+            ],
+            [
+              "vendor_oversight_delta",
+              "v3.2 extends log retention to 12 months and…",
+              "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+              "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area. | Information Security Policy v3.2.pdf (pdf): Version 3.2 of the Information Security Policy expands multi‑factor authentication to all workforce accounts, mandates quarterly revalidation of privileged access, requires escalation of critical incidents within 24 hours, extends log retention to 12 months, and tightens vendor oversight with pre‑onboarding and post‑change reviews. Managers must complete revalidation and close vendor gaps within 30 days of the April 1, 2024 effective date."
+            ],
+            [
+              "cross_document_observation",
+              "The 30‑day remediation window in v3.2 is a…",
+              "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+              "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls, governance roles, and incident response expectations for Meridian Holdings. It clarifies vendor evidence requirements and log‑retention in version 3.1, but leaves the incident notification timeframe undefined, creating a potential risk area. | Information Security Policy v3.2.pdf (pdf): A 30‑day remediation window creates a short‑term risk of non‑compliance if remediation activities are delayed."
+            ]
+          ]
+        }
+      ],
+      "sources": [
+        [
+          "Information Security Policy v3.1.pdf",
+          "2",
+          "0.3507",
+          "s in a timely manner.\nManagers\nApprove access based on business need and review privileged access at least every six\nmonths.\nWorkforce Members\nComplete required training and report suspicious activity promptly.\n3. Contro"
+        ],
+        [
+          "Information Security Policy v3.1.pdf",
+          "3",
+          "0.3248",
+          "cy does\nnot define an explicit notification window for critical customer-data incidents.\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterpri"
+        ],
+        [
+          "Information Security Policy v3.1.pdf",
+          "1",
+          "0.2956",
+          "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInform"
+        ],
+        [
+          "Information Security Policy v3.2.pdf",
+          "2",
+          "0.2797",
+          "days\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or\non-premises.\n●\nREQ-IDM-08. Privilege"
+        ]
+      ],
+      "artifacts": [],
+      "candidate_profile": null,
+      "strengths": [],
+      "watchouts": [
+        "Retrieval backend note: Retrieval served by local fallback from the canonical JSON.."
+      ],
+      "next_steps": [
+        "Open the cited source excerpts to confirm the interpretation before acting.",
+        "Validate critical differences directly in the compared documents before consolidating a decision."
+      ],
+      "evidence_highlights": [
+        [
+          "Information Security Policy v3.1.pdf",
+          "2",
+          "0.3507",
+          "s in a timely manner.\nManagers\nApprove access based on business need and review privileged access at least every six\nmonths.\nWorkforce Members\nComplete required training and report suspicious activity promptly.\n3. Contro"
+        ],
+        [
+          "Information Security Policy v3.1.pdf",
+          "3",
+          "0.3248",
+          "cy does\nnot define an explicit notification window for critical customer-data incidents.\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterpri"
+        ],
+        [
+          "Information Security Policy v3.1.pdf",
+          "1",
+          "0.2956",
+          "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-031  Information Security Policy v3.1\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInform"
+        ],
+        [
+          "Information Security Policy v3.2.pdf",
+          "2",
+          "0.2797",
+          "days\n12 months in tamper-evident storage\nUpdated Policy Statements\n●\nREQ-IDM-05. Multi-factor authentication is mandatory for all Meridian-managed workforce accounts, whether cloud or\non-premises.\n●\nREQ-IDM-08. Privilege"
+        ]
+      ]
+    },
+    "deck_export_kind": "policy_contract_comparison_deck",
+    "error_message": null,
+    "trace_id": "trace_policy_contract_comparison_3cfe1b64da52",
+    "surface": "product_api_public_overlay",
+    "reran_from_run_id": null,
+    "status_classification": "live"
+  }
+]

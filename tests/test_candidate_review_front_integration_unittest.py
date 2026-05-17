@@ -23,7 +23,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REAL_RESUME_1_PATH = PROJECT_ROOT / "data" / "materials_demo" / "cv_analysis" / "Sample-Resume-1-07262023.pdf"
 SYNTHETIC_TXT_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "04_cv_sample.txt"
 GOLD_RESUME_1_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "14_cv_sample_resume_1_gold.json"
-EVAL_SCRIPT_PATH = PROJECT_ROOT / "scripts" / "run_phase5_structured_eval.py"
+EVAL_SCRIPT_PATH = PROJECT_ROOT / "scripts" / "run_structured_output_eval.py"
 
 
 def _load_eval_module():

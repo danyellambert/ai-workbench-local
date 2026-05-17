@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from ..structured.base import ComparisonFinding, DocumentAgentPayload
@@ -51,6 +51,8 @@ def _extract_action_items(structured_response: dict[str, Any]) -> list[dict[str,
         normalized.append(
             {
                 "description": description,
+                "card_summary": _clean_text(item.get("card_summary") or item.get("summary")),
+                "summary": _clean_text(item.get("summary") or item.get("card_summary")),
                 "owner": owner,
                 "due_date": due_date,
                 "status": status,
@@ -238,7 +240,7 @@ def build_evidenceops_worklog_entry(
     )
 
     return {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "query": _clean_text(query),
         "task_type": "document_agent",
         "review_type": review_type,

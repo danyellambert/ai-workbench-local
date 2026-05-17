@@ -7,7 +7,7 @@ from src.app.bootstrap import build_app_bootstrap
 
 class AppBootstrapSmokeTests(unittest.TestCase):
     def test_build_app_bootstrap_wires_core_runtime_objects(self) -> None:
-        fake_settings = SimpleNamespace(project_name="AI Workbench Local")
+        fake_settings = SimpleNamespace(project_name="AI Decision Studio")
         fake_rag_settings = SimpleNamespace(chunk_size=1200)
         fake_evidence_config = SimpleNamespace(vl_model="demo-vlm", ocr_backend="ocrmypdf")
         fake_registry = {

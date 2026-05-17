@@ -1,0 +1,98 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Interview Feedback Memo - Sarah Chen.pdf",
+  "file_type": "pdf",
+  "file_hash": "86af195b6f8f736bf64b7ba0f8826511f912aae05e91ea7476c81d2fa38c5701",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nHR-004  Interview Feedback Memo\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInterview Feedback Memo — Sarah Chen\nPanel memo summarising strengths, gaps, and recommendation.\nDocument ID\nHR-004\nOwner\nHiring Panel\nCandidate\nSarah Chen\nPanel Date\n2024-03-15\nStatus\nPanel recommendation complete\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nPanel Summary\nSarah Chen demonstrates clear senior-level ownership in ML systems design, experimentation, and operational delivery.\nPanel members consistently noted strong communication, crisp trade-off reasoning, and the ability to move between\nmodel-level detail and platform-level thinking.\nStrengths Observed\n●\nDeep familiarity with transformer-based systems and model-evaluation trade-offs.\n●\nDemonstrated ownership of production ML pipelines with observable cost and reliability impact.\n●\nCredible leadership signals through mentoring, technical influence, and cross-functional delivery.\nGaps / Focus Areas\n●\nDirect retrieval / RAG architecture ownership is not strongly evidenced in the resume and should be probed in the final\nsystem-design interview.\n●\nRegulated workload familiarity appears limited; ask specifically about control design and auditability in ML systems.\n●\nEdge / on-prem deployment depth remains unclear and is not yet a demonstrated strength.\nRecommendation\nAdvance Sarah Chen to final interviews with a Strong Hire recommendation. The panel believes the missing items are\nnarrower than the demonstrated strengths and can be de-risked through targeted technical questioning.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 1771,
+    "final_text_chars": 1771,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1762,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 20,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 3773,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nHR-004  Interview Feedback Memo\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nInterview Feedback Memo — Sarah Chen\nPanel memo summarising strengths, gaps, and recommendation.\nDocument ID\nHR-004\nOwner\nHiring Panel\nCandidate\nSarah Chen\nPanel Date\n2024-03-15\nStatus\nPanel recommendation complete\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nPanel Summary\nSarah Chen demonstrates clear senior-level ownership in ML systems design, experimentation, and operational delivery.\nPanel members consistently noted strong communication, crisp trade-off reasoning, and the ability to move between\nmodel-level detail and platform-level thinking.\nStrengths Observed\n●\nDeep familiarity with transformer-based systems and model-evaluation trade-offs.\n●\nDemonstrated ownership of production ML pipelines with observable cost and reliability impact.\n●\nCredible leadership signals through mentoring, technical influence, and cross-functional delivery.\nGaps / Focus Areas\n●\nDirect retrieval / RAG architecture ownership is not strongly evidenced in the resume and should be probed in the final\nsystem-design interview.\n●\nRegulated workload familiarity appears limited; ask specifically about control design and auditability in ML systems.\n●\nEdge / on-prem deployment depth remains unclear and is not yet a demonstrated strength.\nRecommendation\nAdvance Sarah Chen to final interviews with a Strong Hire recommendation. The panel believes the missing items are\nnarrower than the demonstrated strengths and can be de-risked through targeted technical questioning.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic interview memo is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "hiring/Interview Feedback Memo - Sarah Chen.pdf",
+    "nextcloud_relative_path": "hiring/Interview Feedback Memo - Sarah Chen.pdf",
+    "source_relative_path": "hiring/Interview Feedback Memo - Sarah Chen.pdf",
+    "filename": "Interview Feedback Memo - Sarah Chen.pdf",
+    "title": "Interview Feedback Memo - Sarah Chen",
+    "category": "hiring",
+    "preindex": {
+      "relative_path": "hiring/Interview Feedback Memo - Sarah Chen.pdf",
+      "filename": "Interview Feedback Memo - Sarah Chen.pdf",
+      "title": "Interview Feedback Memo - Sarah Chen",
+      "category": "hiring",
+      "document_id": "hiring/Interview Feedback Memo - Sarah Chen.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:15"
+}

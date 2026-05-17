@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-20",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Information Security Policy v3.1.pdf (pdf)",
+      "Information Security Policy v3.2.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "The latest version of the Information Security Policy introduces tighter controls and clearer timelines, while the earlier version leaves several critical gaps.\n\n- Version 3.2 mandates MFA for all accounts; version 3.1 only requires MFA for privileged access.  \n- Version 3.2 requires quarterly revalidation of privileged access; version 3.1 does not specify a review frequency.  \n- Version 3.2 enforces a 24‑hour incident escalation window; version 3.1 lacks a defined notification timeframe for critical incidents.  \n- Version 3.2 extends log retention to 12 months and requires ongoing vendor reassessment; version 3.1 retains logs for an unspecified period and relies on annual vendor checks.  \n- Version 3.2 sets a 30‑day remediation deadline for access and vendor‑evidence gaps; version 3.1 provides no remediation timeline.  \n- Version 3.2 is effective immediately with a defined annual review cycle; version 3.1 was effective as of January 5, 2024, with a generic annual review.  \n\nRecommendation: Adopt version 3.2 promptly to close the identified gaps, especially the missing incident‑notification window and the lack of remediation timelines, to mitigate security and compliance risks.",
+  "key_highlights": [
+    "The latest version of the Information Security Policy introduces tighter controls and clearer timelines, while the earlier version leaves several critical gaps.",
+    "Version 3.2 mandates MFA for all accounts; version 3.1 only requires MFA for privileged access.",
+    "Version 3.2 requires quarterly revalidation of privileged access; version 3.1 does not specify a review frequency.",
+    "Version 3.2 enforces a 24‑hour incident escalation window; version 3.1 lacks a defined notification timeframe for critical incidents.",
+    "Version 3.2 extends log retention to 12 months and requires ongoing vendor reassessment; version 3.1 retains logs for an unspecified period and relies on annual vendor checks.",
+    "Version 3.2 sets a 30‑day remediation deadline for access and vendor‑evidence gaps; version 3.1 provides no remediation timeline."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Information Security Policy v3.1.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf)",
+          "The policy is formally approved and effective as of January 5, 2024, with an annual review cycle. | Governance roles ar…"
+        ],
+        [
+          "document_summary",
+          "Summary of Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.2.pdf (pdf)",
+          "The policy tightens identity and access management by expanding MFA and tightening privileged access reviews. | Vendor…"
+        ],
+        [
+          "cross_document_observation",
+          "The latest version of the Information Security Policy…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls…"
+        ],
+        [
+          "identity_control_delta",
+          "Version 3.2 mandates MFA for all accounts; version…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Control requirements cover privileged access, MFA, log retention, and vendo…"
+        ],
+        [
+          "approval_change",
+          "Version 3.2 requires quarterly revalidation of privileged access;…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Control requirements cover privileged access, MFA, log retention, and vendo…"
+        ],
+        [
+          "incident_response_delta",
+          "Version 3.2 enforces a 24‑hour incident escalation window;…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Version 3.2 extends log retention to 12 months…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): The Information Security Policy v3.1 establishes baseline security controls…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Version 3.2 sets a 30‑day remediation deadline for…",
+          "Information Security Policy v3.1.pdf (pdf), Information Security Policy v3.2.pdf (pdf)",
+          "Information Security Policy v3.1.pdf (pdf): Control requirements cover privileged access, MFA, log retention, and vendo…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

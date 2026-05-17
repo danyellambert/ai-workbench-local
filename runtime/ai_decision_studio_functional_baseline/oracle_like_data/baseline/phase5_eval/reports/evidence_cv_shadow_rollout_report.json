@@ -1,0 +1,304 @@
+{
+  "aggregate": {
+    "files": 4,
+    "files_failed": 0,
+    "agreements": 2,
+    "email_complements": 4,
+    "phone_complements": 3,
+    "email_conflicts": 0,
+    "phone_conflicts": 0,
+    "vl_timeouts": 0,
+    "vl_regions_failed": 8
+  },
+  "per_file": [
+    {
+      "file": "data/synthetic/resumes_ui_test/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "source_type": "digital_pdf",
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "c9d998ee804d9fb52cf2551bab157438b3e4768e7c630c801e2a7396fee0fbb5",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "+55 11 92878-8327"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "gabriel.gomes.almeida@example.com"
+        ],
+        "phones": [
+          "+55 11 92878-8327"
+        ],
+        "name": null,
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0002_hard_compact_sidebar_marina.gomes.ribeiro.pdf",
+      "source_type": "digital_pdf",
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "396f18a409db4bd7474f78486ae93abc2ca5029ca887eea2d8ec509efc77e984",
+          "source_type": "digital_pdf",
+          "warnings": [],
+          "emails_found": 1,
+          "phones_found": 1,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [
+            "marina.gomes.ribeiro@example.com"
+          ],
+          "phones": [
+            "+55 11 92891-2991"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 0,
+          "regions_succeeded": 0,
+          "regions_failed": 0,
+          "timeouts": 0,
+          "fallback_used": false,
+          "warnings": []
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "marina.gomes.ribeiro@example.com"
+        ],
+        "phones": [
+          "+55 11 92891-2991"
+        ],
+        "name": null,
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 1,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "source_type": "scanned_pdf",
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "182d6a91cf04a3c373661d3dc298fc2b486f613faee7a6c1b1b5adde035bf207",
+          "source_type": "scanned_pdf",
+          "warnings": [
+            "VL selective helped confirm header/contact information",
+            "sidebar: VL unexpected error: Remote end closed connection without response",
+            "contact_block: VL URL error: <urlopen error [Errno 61] Connection refused>"
+          ],
+          "emails_found": 2,
+          "phones_found": 1,
+          "name_status": "confirmed",
+          "location_status": "confirmed",
+          "name_value": "Beatriz Barbosa Martins",
+          "location_value": "Grenoble, France",
+          "emails": [
+            "barbosa.martins@example.com",
+            "beatriz.barbosa.martins@example.com"
+          ],
+          "phones": [
+            "+55 11 98242-5650"
+          ]
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 6,
+          "regions_succeeded": 4,
+          "regions_failed": 2,
+          "timeouts": 0,
+          "fallback_used": true,
+          "warnings": [
+            "sidebar: VL unexpected error: Remote end closed connection without response",
+            "contact_block: VL URL error: <urlopen error [Errno 61] Connection refused>"
+          ]
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [
+          "barbosa.martins@example.com",
+          "beatriz.barbosa.martins@example.com"
+        ],
+        "phones": [
+          "+55 11 98242-5650"
+        ],
+        "name": "Beatriz Barbosa Martins",
+        "location": "Grenoble, France",
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 2,
+          "phone_complements": 1,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 0,
+        "email_complements": 2,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+      "source_type": "scanned_pdf",
+      "legacy": {
+        "extractor": "pdf_hybrid",
+        "strategy": "hybrid"
+      },
+      "evidence": {
+        "extractor": "evidence_cv_pipeline",
+        "strategy": "evidence_parallel",
+        "summary": {
+          "document_id": "c7f253ea14f13a097e64c35911f6a80cf21905247b3e990ede60713f6c03b442",
+          "source_type": "scanned_pdf",
+          "warnings": [
+            "No confirmed email found",
+            "No confirmed phone found",
+            "header_top_block: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "top_left: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "top_center: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "top_right: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "sidebar: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "contact_block: VL URL error: <urlopen error [Errno 61] Connection refused>"
+          ],
+          "emails_found": 0,
+          "phones_found": 0,
+          "name_status": "not_found",
+          "location_status": "not_found",
+          "name_value": null,
+          "location_value": null,
+          "emails": [],
+          "phones": []
+        },
+        "vl_runtime": {
+          "enabled": true,
+          "model": "sorc/qwen3.5-instruct:2b",
+          "regions_attempted": 6,
+          "regions_succeeded": 0,
+          "regions_failed": 6,
+          "timeouts": 0,
+          "fallback_used": true,
+          "warnings": [
+            "header_top_block: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "top_left: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "top_center: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "top_right: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "sidebar: VL URL error: <urlopen error [Errno 61] Connection refused>",
+            "contact_block: VL URL error: <urlopen error [Errno 61] Connection refused>"
+          ]
+        }
+      },
+      "hybrid_contact_policy": {
+        "emails": [],
+        "phones": [],
+        "name": null,
+        "location": null,
+        "policy": {
+          "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+          "name": "use_evidence_confirmed_only",
+          "location": "use_evidence_confirmed_only"
+        },
+        "stats": {
+          "email_complements": 0,
+          "phone_complements": 0,
+          "email_conflicts": 0,
+          "phone_conflicts": 0
+        }
+      },
+      "shadow_rollout": {
+        "agreements": 2,
+        "email_complements": 0,
+        "phone_complements": 0,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    }
+  ]
+}

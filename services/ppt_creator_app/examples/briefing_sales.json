@@ -1,0 +1,94 @@
+{
+  "title": "AI copilots for sales teams",
+  "subtitle": "Briefing to executive narrative",
+  "audience": "Revenue leadership",
+  "objective": "Translate the sales copilot concept into an executive decision-ready deck.",
+  "context": "Commercial teams want measurable productivity lift without adding more workflow complexity.",
+  "client_name": "Acme Revenue Team",
+  "author": "PPT Creator AI",
+  "date": "2026-03-26",
+  "theme": "executive_premium_minimal",
+  "outline": [
+    "Situation overview",
+    "Performance signals",
+    "Execution timeline",
+    "Option framing",
+    "Recommendation"
+  ],
+  "key_messages": [
+    "Sales teams lose time in repetitive drafting and follow-up work.",
+    "Managers need better visibility into execution quality.",
+    "A narrow workflow-first deployment reduces risk.",
+    "Measured adoption should come before broad expansion."
+  ],
+  "metrics": [
+    {
+      "label": "seller time recovered",
+      "value": "+18%",
+      "trend": "Operational efficiency"
+    },
+    {
+      "label": "meeting-to-opportunity conversion",
+      "value": "+11%",
+      "trend": "Pipeline quality"
+    },
+    {
+      "label": "manager coaching coverage",
+      "value": "2.3x",
+      "trend": "Coaching scalability"
+    }
+  ],
+  "milestones": [
+    {
+      "title": "Diagnose workflow friction",
+      "detail": "Choose the narrow workflow that already has strong executive pull.",
+      "phase": "Month 1"
+    },
+    {
+      "title": "Pilot with controls",
+      "detail": "Test quality, adoption, and management visibility in a constrained rollout.",
+      "phase": "Month 2"
+    },
+    {
+      "title": "Scale with confidence",
+      "detail": "Expand only after usage and outcome signals are strong enough.",
+      "phase": "Month 3"
+    }
+  ],
+  "options": [
+    {
+      "title": "Broad rollout immediately",
+      "body": "This creates more noise and weakens the ability to measure real value.",
+      "bullets": [
+        "Harder change management",
+        "Lower process discipline"
+      ],
+      "footer": "Higher execution risk"
+    },
+    {
+      "title": "Narrow rollout first",
+      "body": "This keeps the workflow measurable and easier to govern.",
+      "bullets": [
+        "Cleaner adoption signals",
+        "Faster learning cycles"
+      ],
+      "footer": "Higher decision quality"
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Where should rollout begin?",
+      "answer": "Start where workflow friction is already visible and where outcomes can be measured quickly."
+    },
+    {
+      "question": "How should success be measured?",
+      "answer": "Use a mix of adoption, productivity lift, and execution quality improvements."
+    }
+  ],
+  "recommendations": [
+    "Keep the initial scope tight",
+    "Measure usage and outcomes before scaling",
+    "Focus leadership attention on execution quality rather than AI novelty"
+  ],
+  "closing_quote": "A strong briefing becomes more valuable when it is translated into a clear, decision-useful narrative."
+}

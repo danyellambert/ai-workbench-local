@@ -1,0 +1,1181 @@
+{
+  "request": {
+    "workflow_id": "action_plan_evidence_review",
+    "document_ids": [
+      "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+    ],
+    "input_text": "Execute the selected workflow and surface the most material risk or blocker.",
+    "provider": "ollama",
+    "model": "nemotron-3-nano:30b-cloud",
+    "prompt_profile": "neutro",
+    "temperature": 0.2,
+    "top_p": 0.95,
+    "max_tokens": 4096,
+    "context_window_mode": "auto",
+    "context_window": null,
+    "use_document_context": true,
+    "context_strategy": null
+  },
+  "result": {
+    "workflow_id": "action_plan_evidence_review",
+    "workflow_label": "Action Plan / Evidence Review",
+    "status": "warning",
+    "summary": "EVD-101 Access Review Evidence Log: 3 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+    "highlights": [
+      "Archive EV-002 artifact in approved repository",
+      "Verify provenance of missing evidence",
+      "Complete review of all evidence items",
+      "Q1 2024",
+      "Missing evidence blocks control closure"
+    ],
+    "recommendation": "Archive EV-002 artifact in approved repository",
+    "structured_result": {
+      "success": true,
+      "task_type": "document_agent",
+      "execution_id": "c04bf19a-866e-4087-8cfc-b2d10905ba8d",
+      "executed_at": "2026-04-18T20:12:09.137047",
+      "raw_output_text": null,
+      "parsed_json": {
+        "task_type": "document_agent",
+        "schema_version": "1.0",
+        "agent_label": "Document Operations Copilot",
+        "user_intent": "operational_task_extraction",
+        "intent_reason": "product_workflow_default:action_plan_evidence_review",
+        "answer_mode": "friendly",
+        "tool_used": "extract_operational_tasks",
+        "summary": "EVD-101 Access Review Evidence Log: 3 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+        "key_points": [
+          "Archive EV-002 artifact in approved repository",
+          "Verify provenance of missing evidence",
+          "Complete review of all evidence items",
+          "Q1 2024",
+          "Missing evidence blocks control closure"
+        ],
+        "limitations": [
+          "No explicit effective date is provided for the control period beyond Q1 2024",
+          "No explicit governing law or jurisdiction is mentioned",
+          "No monetary amounts or percentages are referenced",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "recommended_actions": [
+          "Archive EV-002 artifact in approved repository",
+          "Verify provenance of missing evidence",
+          "Complete review of all evidence items",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "guardrails_applied": [
+          "Response restricted to documents selected in the document base.",
+          "Grounding assembled by document scan to prioritize broader document coverage.",
+          "The response includes traceable sources for manual auditing.",
+          "The agent avoids stating facts without strong grounding in the selected documents."
+        ],
+        "available_tools": [
+          {
+            "name": "consult_documents",
+            "label": "Consult indexed documents",
+            "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "summarize_document",
+            "label": "Summarize document",
+            "description": "Generate a grounded executive summary for the selected document or document set.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "draft_business_response",
+            "label": "Draft document-grounded response",
+            "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_structured_data",
+            "label": "Extract structured information",
+            "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+            "answer_mode": "json",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "compare_documents",
+            "label": "Compare documents",
+            "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+            "answer_mode": "comparison_structured",
+            "min_document_count": 2,
+            "available": false,
+            "availability_reason": "requires_at_least_2_documents"
+          },
+          {
+            "name": "generate_operational_checklist",
+            "label": "Generate operational checklist",
+            "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+            "answer_mode": "checklist",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_policy_compliance",
+            "label": "Review policy/compliance",
+            "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_document_risks",
+            "label": "Review risks and gaps",
+            "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_operational_tasks",
+            "label": "Extract operational tasks",
+            "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "assist_technical_document",
+            "label": "Assist technical document",
+            "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          }
+        ],
+        "compared_documents": [],
+        "comparison_findings": [],
+        "document_review_decision_summary": null,
+        "document_review_findings": [],
+        "document_review_top_blockers": [],
+        "document_review_business_impact": [],
+        "checklist_preview": [
+          "Archive EV-002 artifact in approved repository",
+          "Verify provenance of missing evidence",
+          "Complete review of all evidence items"
+        ],
+        "structured_response": {
+          "review_type": "operational_extraction",
+          "actions": [
+            "Archive EV-002 artifact in approved repository",
+            "Verify provenance of missing evidence",
+            "Complete review of all evidence items"
+          ],
+          "deadlines": [
+            "Q1 2024"
+          ],
+          "risks": [
+            "Missing evidence blocks control closure",
+            "In-progress evidence may not be verified"
+          ],
+          "extraction_payload": {
+            "task_type": "extraction",
+            "schema_version": "1.0",
+            "main_subject": "EVD-101 Access Review Evidence Log",
+            "entities": [
+              {
+                "type": "organization",
+                "value": "Meridian Holdings",
+                "confidence": 0.95,
+                "source_text": "Meridian Holdings",
+                "position_start": 0,
+                "position_end": 14
+              },
+              {
+                "type": "organization",
+                "value": "Compliance Operations",
+                "confidence": 0.95,
+                "source_text": "Owner",
+                "position_start": 15,
+                "position_end": 27
+              },
+              {
+                "type": "organization",
+                "value": "GRC",
+                "confidence": 0.95,
+                "source_text": "GRC / Vendor Controls / 2024-Q1",
+                "position_start": 30,
+                "position_end": 33
+              },
+              {
+                "type": "organization",
+                "value": "IT Operations",
+                "confidence": 0.95,
+                "source_text": "IT Operations",
+                "position_start": 35,
+                "position_end": 44
+              },
+              {
+                "type": "organization",
+                "value": "Security Engineering",
+                "confidence": 0.95,
+                "source_text": "Security Engineering",
+                "position_start": 46,
+                "position_end": 58
+              },
+              {
+                "type": "organization",
+                "value": "Vendor Management",
+                "confidence": 0.95,
+                "source_text": "Vendor Management",
+                "position_start": 59,
+                "position_end": 70
+              },
+              {
+                "type": "location",
+                "value": "GRC/VendorControls/2024-Q1",
+                "confidence": 0.95,
+                "source_text": "Repository",
+                "position_start": 71,
+                "position_end": 87
+              }
+            ],
+            "categories": [
+              "evidence register",
+              "access review",
+              "vendor control",
+              "synthetic corporate document"
+            ],
+            "relationships": [
+              {
+                "from_entity": "Meridian Holdings",
+                "to_entity": "Compliance Operations",
+                "relationship": "owner",
+                "confidence": 0.95,
+                "evidence": "Owner"
+              },
+              {
+                "from_entity": "Meridian Holdings",
+                "to_entity": "GRC",
+                "relationship": "repository",
+                "confidence": 0.95,
+                "evidence": "Repository"
+              },
+              {
+                "from_entity": "IT Operations",
+                "to_entity": "EV-002",
+                "relationship": "responsible for",
+                "confidence": 0.95,
+                "evidence": "EV-002"
+              },
+              {
+                "from_entity": "Security Engineering",
+                "to_entity": "EV-004",
+                "relationship": "responsible for",
+                "confidence": 0.95,
+                "evidence": "EV-004"
+              },
+              {
+                "from_entity": "Vendor Management",
+                "to_entity": "EV-003",
+                "relationship": "responsible for",
+                "confidence": 0.95,
+                "evidence": "EV-003"
+              }
+            ],
+            "extracted_fields": [
+              {
+                "name": "document_id",
+                "value": "EVD-101",
+                "evidence": "Document ID"
+              },
+              {
+                "name": "control_period",
+                "value": "Q1 2024",
+                "evidence": "Control Period"
+              },
+              {
+                "name": "related_issue",
+                "value": "NCR-2024-011",
+                "evidence": "Related Issue"
+              },
+              {
+                "name": "repository_path",
+                "value": "GRC/VendorControls/2024-Q1",
+                "evidence": "Repository"
+              },
+              {
+                "name": "evidence_status",
+                "value": "Received; Missing; In progress",
+                "evidence": "Status"
+              },
+              {
+                "name": "document_type",
+                "value": "evidence register",
+                "evidence": "EVD-101 Access Review Evidence Log"
+              },
+              {
+                "name": "counterparties",
+                "value": "Meridian Holdings; Compliance Operations; GRC; IT Operations",
+                "evidence": "EVD-101 Access Review Evidence Log"
+              }
+            ],
+            "important_dates": [
+              "Q1 2024"
+            ],
+            "important_numbers": [
+              "1",
+              "4"
+            ],
+            "risks": [
+              {
+                "description": "Missing evidence blocks control closure",
+                "impact": "Control closure delayed",
+                "owner": null,
+                "due_date": null,
+                "evidence": "Missing or in-progress items block control closure until provenance is verified."
+              },
+              {
+                "description": "In-progress evidence may not be verified",
+                "impact": "Potential incomplete verification",
+                "owner": null,
+                "due_date": null,
+                "evidence": "EV-005 is in progress"
+              }
+            ],
+            "action_items": [
+              {
+                "description": "Archive EV-002 artifact in approved repository",
+                "owner": "IT Operations",
+                "due_date": null,
+                "status": "pending",
+                "evidence": "EV-002 is satisfied by the attached email-export artifact once archived in the approved repository."
+              },
+              {
+                "description": "Verify provenance of missing evidence",
+                "owner": "Compliance Operations",
+                "due_date": null,
+                "status": "pending",
+                "evidence": "Missing or in-progress items block control closure until provenance is verified."
+              },
+              {
+                "description": "Complete review of all evidence items",
+                "owner": "Compliance Operations",
+                "due_date": null,
+                "status": "pending",
+                "evidence": "All evidence must carry owner, review date, and relationship to the tested control period."
+              }
+            ],
+            "missing_information": [
+              "No explicit effective date is provided for the control period beyond Q1 2024",
+              "No explicit governing law or jurisdiction is mentioned",
+              "No monetary amounts or percentages are referenced"
+            ]
+          }
+        },
+        "sources": [
+          {
+            "source": "Access Review Evidence Log.pdf",
+            "document_id": "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+            "file_type": "pdf",
+            "chunk_id": 1,
+            "score": null,
+            "vector_score": null,
+            "lexical_score": null,
+            "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-101  Access Review Evidence Log\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nAccess Review Evidence Log\nEvidence register supporting the Q1 2024 Northwind vendor-control review.\nDocument ID\nEVD-101\nOwner\nCompliance Operations\nControl Period\nQ1 2024\nRelated Issue\nNCR-20"
+          },
+          {
+            "source": "Access Review Evidence Log.pdf",
+            "document_id": "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+            "file_type": "pdf",
+            "chunk_id": 2,
+            "score": null,
+            "vector_score": null,
+            "lexical_score": null,
+            "snippet": "-Q1/EV-\n003\nEV-004\nPrivileged activity log for Jan-Mar\n2024\nMonitoring /\noversight\nSecurity\nEngineering\nReceived\nGRC/VendorControls/2024-Q1/EV-\n004\nEV-005\nTicket showing dormant-account\nremoval\nAccess\nremediation\nIT Operations\nIn progress\nGRC/VendorControls/2024-Q1/EV-\n005\n●\nAll evidence must carry owner, review date, and relationship to the tested control period.\n●\nMissing or in-progress items bl"
+          }
+        ],
+        "tool_runs": [
+          {
+            "tool_name": "extract_operational_tasks",
+            "status": "success",
+            "detail": "Operational extraction completed."
+          }
+        ],
+        "confidence": 0.9,
+        "needs_review": false,
+        "needs_review_reason": null
+      },
+      "validated_output": {
+        "task_type": "document_agent",
+        "schema_version": "1.0",
+        "agent_label": "Document Operations Copilot",
+        "user_intent": "operational_task_extraction",
+        "intent_reason": "product_workflow_default:action_plan_evidence_review",
+        "answer_mode": "friendly",
+        "tool_used": "extract_operational_tasks",
+        "summary": "EVD-101 Access Review Evidence Log: 3 actionable task(s), 1 deadline(s) and 2 operational risk(s) identified.",
+        "key_points": [
+          "Archive EV-002 artifact in approved repository",
+          "Verify provenance of missing evidence",
+          "Complete review of all evidence items",
+          "Q1 2024",
+          "Missing evidence blocks control closure"
+        ],
+        "limitations": [
+          "No explicit effective date is provided for the control period beyond Q1 2024",
+          "No explicit governing law or jurisdiction is mentioned",
+          "No monetary amounts or percentages are referenced",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "recommended_actions": [
+          "Archive EV-002 artifact in approved repository",
+          "Verify provenance of missing evidence",
+          "Complete review of all evidence items",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "guardrails_applied": [
+          "Response restricted to documents selected in the document base.",
+          "Grounding assembled by document scan to prioritize broader document coverage.",
+          "The response includes traceable sources for manual auditing.",
+          "The agent avoids stating facts without strong grounding in the selected documents."
+        ],
+        "available_tools": [
+          {
+            "name": "consult_documents",
+            "label": "Consult indexed documents",
+            "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "summarize_document",
+            "label": "Summarize document",
+            "description": "Generate a grounded executive summary for the selected document or document set.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "draft_business_response",
+            "label": "Draft document-grounded response",
+            "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_structured_data",
+            "label": "Extract structured information",
+            "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+            "answer_mode": "json",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "compare_documents",
+            "label": "Compare documents",
+            "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+            "answer_mode": "comparison_structured",
+            "min_document_count": 2,
+            "available": false,
+            "availability_reason": "requires_at_least_2_documents"
+          },
+          {
+            "name": "generate_operational_checklist",
+            "label": "Generate operational checklist",
+            "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+            "answer_mode": "checklist",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_policy_compliance",
+            "label": "Review policy/compliance",
+            "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_document_risks",
+            "label": "Review risks and gaps",
+            "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_operational_tasks",
+            "label": "Extract operational tasks",
+            "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "assist_technical_document",
+            "label": "Assist technical document",
+            "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          }
+        ],
+        "compared_documents": [],
+        "comparison_findings": [],
+        "document_review_decision_summary": null,
+        "document_review_findings": [],
+        "document_review_top_blockers": [],
+        "document_review_business_impact": [],
+        "checklist_preview": [
+          "Archive EV-002 artifact in approved repository",
+          "Verify provenance of missing evidence",
+          "Complete review of all evidence items"
+        ],
+        "structured_response": {
+          "review_type": "operational_extraction",
+          "actions": [
+            "Archive EV-002 artifact in approved repository",
+            "Verify provenance of missing evidence",
+            "Complete review of all evidence items"
+          ],
+          "deadlines": [
+            "Q1 2024"
+          ],
+          "risks": [
+            "Missing evidence blocks control closure",
+            "In-progress evidence may not be verified"
+          ],
+          "extraction_payload": {
+            "task_type": "extraction",
+            "schema_version": "1.0",
+            "main_subject": "EVD-101 Access Review Evidence Log",
+            "entities": [
+              {
+                "type": "organization",
+                "value": "Meridian Holdings",
+                "confidence": 0.95,
+                "source_text": "Meridian Holdings",
+                "position_start": 0,
+                "position_end": 14
+              },
+              {
+                "type": "organization",
+                "value": "Compliance Operations",
+                "confidence": 0.95,
+                "source_text": "Owner",
+                "position_start": 15,
+                "position_end": 27
+              },
+              {
+                "type": "organization",
+                "value": "GRC",
+                "confidence": 0.95,
+                "source_text": "GRC / Vendor Controls / 2024-Q1",
+                "position_start": 30,
+                "position_end": 33
+              },
+              {
+                "type": "organization",
+                "value": "IT Operations",
+                "confidence": 0.95,
+                "source_text": "IT Operations",
+                "position_start": 35,
+                "position_end": 44
+              },
+              {
+                "type": "organization",
+                "value": "Security Engineering",
+                "confidence": 0.95,
+                "source_text": "Security Engineering",
+                "position_start": 46,
+                "position_end": 58
+              },
+              {
+                "type": "organization",
+                "value": "Vendor Management",
+                "confidence": 0.95,
+                "source_text": "Vendor Management",
+                "position_start": 59,
+                "position_end": 70
+              },
+              {
+                "type": "location",
+                "value": "GRC/VendorControls/2024-Q1",
+                "confidence": 0.95,
+                "source_text": "Repository",
+                "position_start": 71,
+                "position_end": 87
+              }
+            ],
+            "categories": [
+              "evidence register",
+              "access review",
+              "vendor control",
+              "synthetic corporate document"
+            ],
+            "relationships": [
+              {
+                "from_entity": "Meridian Holdings",
+                "to_entity": "Compliance Operations",
+                "relationship": "owner",
+                "confidence": 0.95,
+                "evidence": "Owner"
+              },
+              {
+                "from_entity": "Meridian Holdings",
+                "to_entity": "GRC",
+                "relationship": "repository",
+                "confidence": 0.95,
+                "evidence": "Repository"
+              },
+              {
+                "from_entity": "IT Operations",
+                "to_entity": "EV-002",
+                "relationship": "responsible for",
+                "confidence": 0.95,
+                "evidence": "EV-002"
+              },
+              {
+                "from_entity": "Security Engineering",
+                "to_entity": "EV-004",
+                "relationship": "responsible for",
+                "confidence": 0.95,
+                "evidence": "EV-004"
+              },
+              {
+                "from_entity": "Vendor Management",
+                "to_entity": "EV-003",
+                "relationship": "responsible for",
+                "confidence": 0.95,
+                "evidence": "EV-003"
+              }
+            ],
+            "extracted_fields": [
+              {
+                "name": "document_id",
+                "value": "EVD-101",
+                "evidence": "Document ID"
+              },
+              {
+                "name": "control_period",
+                "value": "Q1 2024",
+                "evidence": "Control Period"
+              },
+              {
+                "name": "related_issue",
+                "value": "NCR-2024-011",
+                "evidence": "Related Issue"
+              },
+              {
+                "name": "repository_path",
+                "value": "GRC/VendorControls/2024-Q1",
+                "evidence": "Repository"
+              },
+              {
+                "name": "evidence_status",
+                "value": "Received; Missing; In progress",
+                "evidence": "Status"
+              },
+              {
+                "name": "document_type",
+                "value": "evidence register",
+                "evidence": "EVD-101 Access Review Evidence Log"
+              },
+              {
+                "name": "counterparties",
+                "value": "Meridian Holdings; Compliance Operations; GRC; IT Operations",
+                "evidence": "EVD-101 Access Review Evidence Log"
+              }
+            ],
+            "important_dates": [
+              "Q1 2024"
+            ],
+            "important_numbers": [
+              "1",
+              "4"
+            ],
+            "risks": [
+              {
+                "description": "Missing evidence blocks control closure",
+                "impact": "Control closure delayed",
+                "owner": null,
+                "due_date": null,
+                "evidence": "Missing or in-progress items block control closure until provenance is verified."
+              },
+              {
+                "description": "In-progress evidence may not be verified",
+                "impact": "Potential incomplete verification",
+                "owner": null,
+                "due_date": null,
+                "evidence": "EV-005 is in progress"
+              }
+            ],
+            "action_items": [
+              {
+                "description": "Archive EV-002 artifact in approved repository",
+                "owner": "IT Operations",
+                "due_date": null,
+                "status": "pending",
+                "evidence": "EV-002 is satisfied by the attached email-export artifact once archived in the approved repository."
+              },
+              {
+                "description": "Verify provenance of missing evidence",
+                "owner": "Compliance Operations",
+                "due_date": null,
+                "status": "pending",
+                "evidence": "Missing or in-progress items block control closure until provenance is verified."
+              },
+              {
+                "description": "Complete review of all evidence items",
+                "owner": "Compliance Operations",
+                "due_date": null,
+                "status": "pending",
+                "evidence": "All evidence must carry owner, review date, and relationship to the tested control period."
+              }
+            ],
+            "missing_information": [
+              "No explicit effective date is provided for the control period beyond Q1 2024",
+              "No explicit governing law or jurisdiction is mentioned",
+              "No monetary amounts or percentages are referenced"
+            ]
+          }
+        },
+        "sources": [
+          {
+            "source": "Access Review Evidence Log.pdf",
+            "document_id": "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+            "file_type": "pdf",
+            "chunk_id": 1,
+            "score": null,
+            "vector_score": null,
+            "lexical_score": null,
+            "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-101  Access Review Evidence Log\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nAccess Review Evidence Log\nEvidence register supporting the Q1 2024 Northwind vendor-control review.\nDocument ID\nEVD-101\nOwner\nCompliance Operations\nControl Period\nQ1 2024\nRelated Issue\nNCR-20"
+          },
+          {
+            "source": "Access Review Evidence Log.pdf",
+            "document_id": "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827",
+            "file_type": "pdf",
+            "chunk_id": 2,
+            "score": null,
+            "vector_score": null,
+            "lexical_score": null,
+            "snippet": "-Q1/EV-\n003\nEV-004\nPrivileged activity log for Jan-Mar\n2024\nMonitoring /\noversight\nSecurity\nEngineering\nReceived\nGRC/VendorControls/2024-Q1/EV-\n004\nEV-005\nTicket showing dormant-account\nremoval\nAccess\nremediation\nIT Operations\nIn progress\nGRC/VendorControls/2024-Q1/EV-\n005\n●\nAll evidence must carry owner, review date, and relationship to the tested control period.\n●\nMissing or in-progress items bl"
+          }
+        ],
+        "tool_runs": [
+          {
+            "tool_name": "extract_operational_tasks",
+            "status": "success",
+            "detail": "Operational extraction completed."
+          }
+        ],
+        "confidence": 0.9,
+        "needs_review": false,
+        "needs_review_reason": null
+      },
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "repair_applied": false,
+      "source_documents": [
+        "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+      ],
+      "context_used": true,
+      "execution_metadata": {
+        "agent_intent": "operational_task_extraction",
+        "agent_intent_label": "Operational task extraction",
+        "agent_intent_reason": "product_workflow_default:action_plan_evidence_review",
+        "agent_tool": "extract_operational_tasks",
+        "agent_tool_label": "Extract operational tasks",
+        "agent_tool_reason": "product_workflow_default:action_plan_evidence_review",
+        "agent_answer_mode": "friendly",
+        "agent_context_strategy": "document_scan",
+        "agent_document_count": 1,
+        "agent_source_count": 2,
+        "agent_available_tools": [
+          {
+            "name": "consult_documents",
+            "label": "Consult indexed documents",
+            "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "summarize_document",
+            "label": "Summarize document",
+            "description": "Generate a grounded executive summary for the selected document or document set.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "draft_business_response",
+            "label": "Draft document-grounded response",
+            "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_structured_data",
+            "label": "Extract structured information",
+            "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+            "answer_mode": "json",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "compare_documents",
+            "label": "Compare documents",
+            "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+            "answer_mode": "comparison_structured",
+            "min_document_count": 2,
+            "available": false,
+            "availability_reason": "requires_at_least_2_documents"
+          },
+          {
+            "name": "generate_operational_checklist",
+            "label": "Generate operational checklist",
+            "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+            "answer_mode": "checklist",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_policy_compliance",
+            "label": "Review policy/compliance",
+            "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_document_risks",
+            "label": "Review risks and gaps",
+            "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_operational_tasks",
+            "label": "Extract operational tasks",
+            "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "assist_technical_document",
+            "label": "Assist technical document",
+            "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          }
+        ],
+        "needs_review": false,
+        "needs_review_reason": null,
+        "agent_limitations": [
+          "No explicit effective date is provided for the control period beyond Q1 2024",
+          "No explicit governing law or jurisdiction is mentioned",
+          "No monetary amounts or percentages are referenced",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "agent_recommended_actions": [
+          "Archive EV-002 artifact in approved repository",
+          "Verify provenance of missing evidence",
+          "Complete review of all evidence items",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "agent_guardrails_applied": [
+          "Response restricted to documents selected in the document base.",
+          "Grounding assembled by document scan to prioritize broader document coverage.",
+          "The response includes traceable sources for manual auditing.",
+          "The agent avoids stating facts without strong grounding in the selected documents."
+        ],
+        "tool_runs": [
+          {
+            "tool_name": "extract_operational_tasks",
+            "status": "success",
+            "detail": "Operational extraction completed."
+          }
+        ],
+        "retrieval_backend_used": null,
+        "retrieval_backend_message": null,
+        "retrieval_strategy_used": null,
+        "retrieval_strategy_requested": null,
+        "execution_strategy_requested": "langgraph_context_retry",
+        "execution_strategy_used": "langgraph_context_retry",
+        "execution_strategy_fallback_reason": null,
+        "workflow_id": "lgw-eaf89ed4",
+        "workflow_route_decision": "coverage_first_document_agent",
+        "workflow_guardrail_decision": "finish_ok",
+        "provider": "ollama",
+        "provider_requested": "ollama",
+        "provider_effective": "ollama",
+        "model": "nemotron-3-nano:30b-cloud",
+        "resolved_context_window": 16384,
+        "context_window_cap": 256000,
+        "document_chars_estimate": 1751,
+        "telemetry": {
+          "product_workflow_id": "action_plan_evidence_review",
+          "product_workflow_label": "Action Plan / Evidence Review",
+          "product_surface": "gradio",
+          "product_workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md",
+          "product_workflow_expected_outputs": [
+            "Operational backlog",
+            "Owners and due dates",
+            "Evidence gaps and blockers",
+            "Action Plan deck artifact"
+          ],
+          "product_deck_export_kind": "action_plan_deck",
+          "agent_intent": "operational_task_extraction",
+          "agent_tool": "extract_operational_tasks",
+          "agent_answer_mode": "friendly",
+          "agent_intent_reason": "product_workflow_default:action_plan_evidence_review",
+          "agent_tool_reason": "product_workflow_default:action_plan_evidence_review",
+          "agent_context_strategy": "document_scan",
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "agent_available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": false,
+              "availability_reason": "requires_at_least_2_documents"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "timings_s": {
+            "total_s": 12.8346
+          }
+        },
+        "workflow_total_s": 12.9698,
+        "workflow_attempts": 1,
+        "workflow_context_strategies": [
+          "document_scan"
+        ],
+        "workflow_trace": [
+          {
+            "node": "prepare_agent_request",
+            "detail": "Preparing initial request for the document agent",
+            "attempt": 1,
+            "context_strategy": "document_scan"
+          },
+          {
+            "node": "classify_intent",
+            "detail": "Using explicit agent intent from telemetry: product_workflow_default:action_plan_evidence_review",
+            "attempt": 1,
+            "context_strategy": "document_scan"
+          },
+          {
+            "node": "select_tool",
+            "detail": "Using explicit agent tool from telemetry: product_workflow_default:action_plan_evidence_review",
+            "attempt": 1,
+            "context_strategy": "document_scan"
+          },
+          {
+            "node": "route_agent_context_strategy",
+            "detail": "Selecting agent context strategy: coverage_first_document_agent",
+            "attempt": 1,
+            "context_strategy": "document_scan"
+          },
+          {
+            "node": "execute_task",
+            "detail": "Executing structured_service within the LangGraph workflow",
+            "attempt": 1,
+            "context_strategy": "document_scan",
+            "success": true
+          },
+          {
+            "node": "evaluate_agent_guardrails",
+            "detail": "Agent response accepted with no additional guardrail",
+            "attempt": 1,
+            "context_strategy": "document_scan",
+            "success": true
+          }
+        ],
+        "workflow_node_count": 6
+      },
+      "available_render_modes": [
+        {
+          "mode": "json",
+          "label": "JSON",
+          "available": true,
+          "priority": 1
+        },
+        {
+          "mode": "friendly",
+          "label": "Friendly view",
+          "available": true,
+          "priority": 0
+        }
+      ],
+      "primary_render_mode": "friendly",
+      "overall_confidence": 0.9,
+      "quality_score": 0.9
+    },
+    "grounding_preview": {
+      "strategy": "document_scan",
+      "document_ids": [
+        "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+      ],
+      "context_chars": 1730,
+      "source_block_count": 2,
+      "preview_text": "[Source: Access Review Evidence Log.pdf]\n[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-101  Access Review Evidence Log\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nAccess Review Evidence Log\nEvidence register supporting the Q1 2024 Northwind vendor-control review.\nDocument ID\nEVD-101\nOwner\nCompliance Operations\nControl Period\nQ1 2024\nRelated Issue\nNCR-2024-011\nRepository\nGRC / Vendor Controls / 2024-Q1\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nEvidence Inventory\nEvidence\nID\nArtifact Description\nControl\nMapping\nStatus\nRepository Path\nEV-001\nQ1 user export from Northwind admin\nconsole\nQuarterly access\nreview\nIT Operations\nReceived\nGRC/VendorControls/2024-Q1/EV-\n001\nEV-002\nSystem owner approval email for\nprivileged vendor accounts\nOperations\nDirector\nMissing\nExpected under GRC/VendorContr\nols/2024-Q1/EV-002\nEV-003\nVendor attestation of active support\npersonnel\nVendor oversight\nVendor\nManagement\n003\nEV-004\nPrivileged activity log for Jan-Mar\n2024\nMonitoring /\noversig\n\n[Source: Access Review Evidence Log.pdf]\n-Q1/EV-\n003\nEV-004\nPrivileged activity log for Jan-Mar\n2024\nMonitoring /\noversight\nSecurity\nEngineering\nReceived\nGRC/VendorControls/2024-Q1/EV-\n004\nEV-005\nTicket showing dormant-account\nremoval\nAccess\nremediation\nIT Operations\nIn progress\n005\n●\nAll evidence must carry owner, review date, and relationship to the tested control period.\nMissing or in-progress items block control closure until provenance is verified.\nEV-002 is satisfied by the attached email-export artifact once archived in the approved repository.",
+      "warnings": []
+    },
+    "artifacts": [],
+    "deck_export_kind": "action_plan_deck",
+    "deck_available": true,
+    "warnings": [
+      "No explicit effective date is provided for the control period beyond Q1 2024",
+      "No explicit governing law or jurisdiction is mentioned",
+      "No monetary amounts or percentages are referenced",
+      "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+    ],
+    "debug_metadata": {
+      "task_type": "document_agent",
+      "provider": "ollama",
+      "model": "nemotron-3-nano:30b-cloud",
+      "prompt_profile": "neutro",
+      "top_p": 0.95,
+      "max_tokens": 4096,
+      "context_strategy": "document_scan",
+      "source_documents": [
+        "59daeb9c101be02c29afb4a9f8b3dcdde0362b2fcec244082bae01e7d75ac827"
+      ],
+      "workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md",
+      "expected_outputs": [
+        "Operational backlog",
+        "Owners and due dates",
+        "Evidence gaps and blockers",
+        "Action Plan deck artifact"
+      ],
+      "preferred_context_strategy": "document_scan",
+      "deck_export_label": "Action Plan Deck"
+    }
+  },
+  "summary": {
+    "task_id": "extract_operational_tasks",
+    "workflow_id": "action_plan_evidence_review",
+    "duration_s": 12.9787,
+    "confidence": 0.9,
+    "needs_review": false,
+    "review_reason": null
+  }
+}

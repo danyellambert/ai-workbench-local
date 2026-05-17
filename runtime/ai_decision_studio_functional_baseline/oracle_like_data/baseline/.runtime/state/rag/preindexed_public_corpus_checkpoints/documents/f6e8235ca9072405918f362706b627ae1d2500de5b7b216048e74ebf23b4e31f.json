@@ -1,0 +1,123 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "cbiac-september-10-2025-meeting-summary-and-action-items.pdf",
+  "file_type": "pdf",
+  "file_hash": "f6e8235ca9072405918f362706b627ae1d2500de5b7b216048e74ebf23b4e31f",
+  "text": "[Page 1]\nCharlotte Business INClusion\nAdvisory Committee Meeting Minutes\nWednesday, September 10, 2025\n10:00 a.m. – 11:30 a.m.\nI. Attendance: Zahn Patin, Candice Gaddy, Christina Jarrett, Lakesha Womack, Jerome Marez,\nJoaquin Soria, Jason Deans, *Jeremy Johnson, Raghu Koth, Gary Beal, Kim Lam, Kym\nGardner,\nAbsent: Erlan Martinez\nII. Welcome: President Patin opened the meeting at 10:01 Candice Gaddy motioned, and\nChristina Jarrett seconded the motion.  Zahn also welcomed the newest member Jeremy\nJohnson who joins us from the Black Chamber.\nIII. Stephanie Ayers: Focus Group; CBI staff left  the call and Jasmine the Liaison stayed on to\nrecord. This meeting will be dedicated to the focus group with BBC. The history on the\nproject between BBC Research and Consulting and the City of Charlotte: BBC is working with\nInfrastructure Strategies and the City of Charlotte to assess the capacity of local businesses\nand the local workforce in anticipation of an increase in transportation-related work in the\nCity over the coming years. The BBC is speaking with business owners, representatives of\ntrade organizations and workforce development programs, and City leadership to\nunderstand the current marketplace and provide re commendations on how the City can\nclose any gaps or address needs to support equitable and sustainable development. The\npurpose of the focus group is to discuss what it is like to start or grow a business, the\nchallenges and barriers firms like yours face, and your firm's experiences, if relevant,\nworking with or attempting to work with the City of Charlotte. These insights will contribute\nto the BBC's understanding of and documentation on marketplace conditions, as well as\nrecommendations for the City to consider.\nIV. CBI Updates:\n• Welcomed Jeremy Johnson as the newest member of CBIAC\n• Appreciated Zahn and her willingness and eagerness to step up as\nPresident.\n• Still waiting on House Bill 171 and SB 257- which would abolish the HUB.\nBut we have a basis to continue through the SBE program and will continue\n\n[Page 2]\nto serve Minority Business Enterprise (MBE) and Woman Business\nEnterprise (WBE). In the process of tweaking who would be considered.\n• Annual report is completed but dependent on leadership reviewing it, then\ncouncil and then we can share it with CBIAC.\n• CBI has two positions that are open- Still deciding if CBI Coordinator\nposition will be hired for, but ideally by next meeting we will have a new\nCBI Compliance position filled.\n• We are still CBI but now under the department of Contracting and\nProcurement and newly managed by Cheryl Wright who comes to us from\nunion county will be our new assistant manager. Steve has a good feeling\nabout her!\n• CBI BluPrint is moving smoothy. 8 participating business are really enjoying\nand finding value in the program. The launch also went well.\n• Contractor development program- impactful but expensive- we are\nconsidering how to move forward to next year- understanding our\nlimitations but also understanding that the bonding challenges are real.\no Zahn shared that these firms may not understand how these bills\nare impacting them! How can we help them be aware of how it\nmay affect them in real time.\no Julius is meeting with Candice on a weekly meeting and will be\npushing a marketing statedly with CC&M(Charlotte\nCommunications & Marketing) to make folks aware of this issue\n& how this information impacts them.\nSubcommittee Share outs\n• Economic Development -Christina: The team will be meeting with Danielle Frazier given her\npresentation last week.\n• Outreach & Engagement -Candice:  A main focus is to make sure that Julius is no longer a team\nof 1- Julius has been asked to share his list of upcoming events.\n• Impact and Accountability- Jerome met with Steve, Nyema and Jasmine requesting data and\ninformation to support evidence that our work is needed and justified.\nV. Adjournment: There being no additional business, Chairman Patin called for a motion\nto adjourn. At 11:25 Candice Gaddy motioned & Kim Lam 2nd.\nAction Items Assigned To  Due Date\n1. Invite Cheryl to next CBIAC Steve & Jasmine  10/8\n\n[Page 3]\n2. Julius & Candice keep us updated on the\nstrategy to support vendors to understand\nhow these bills impact them.\nJulius & Candice 10/8\n3. Lina will provide slides and work with Steve &\nNyema to provide more information about\nthe bills.\nLina/ Steve/ Nyema 10/8\n4.  Zahn shared- If you get this question--Is it\nstill beneficial to get NC HUB certified?\nYes, if you are not certified, please work\nto get your NC HUB M/W certifications\nfor your business. At this time there have\nbeen no official changes to the HUB or CBI\nprogram.\nALL ASAP\n5. Utilize CBIAC to host a virtual event to\nhelp vendors understand how these\npotential bills affect them and how\ncertifying as a SBE is beneficial.\nALL ASAP\nThe action items captured from the Sep 10th, 2025, CBIAC Committee Meeting are as follows:\nSep 10th, 2025, CBIAC Meeting Summary and Action Items submitted by:\nJasmine Timmons   09/10/2025",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 3,
+    "baseline_text_chars": 5012,
+    "final_text_chars": 5012,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2082,
+        "image_count": 1,
+        "image_area_ratio_estimate": 0.0999,
+        "caption_markers": [
+          "table"
+        ],
+        "suspicious_score": 0.58,
+        "suspicious_reasons": [
+          "contains images",
+          "figure/table markers",
+          "mixed text+figure page"
+        ],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 2109,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 3,
+        "text_chars": 912,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 11,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 196126,
+    "grounding_text_excerpt": "[Page 1]\nCharlotte Business INClusion\nAdvisory Committee Meeting Minutes\nWednesday, September 10, 2025\n10:00 a.m. – 11:30 a.m.\nI. Attendance: Zahn Patin, Candice Gaddy, Christina Jarrett, Lakesha Womack, Jerome Marez,\nJoaquin Soria, Jason Deans, *Jeremy Johnson, Raghu Koth, Gary Beal, Kim Lam, Kym\nGardner,\nAbsent: Erlan Martinez\nII. Welcome: President Patin opened the meeting at 10:01 Candice Gaddy motioned, and\nChristina Jarrett seconded the motion.  Zahn also welcomed the newest member Jeremy\nJohnson who joins us from the Black Chamber.\nIII. Stephanie Ayers: Focus Group; CBI staff left  the call and Jasmine the Liaison stayed on to\nrecord. This meeting will be dedicated to the focus group with BBC. The history on the\nproject between BBC Research and Consulting and the City of Charlotte: BBC is working with\nInfrastructure Strategies and the City of Charlotte to assess the capacity of local businesses\nand the local workforce in anticipation of an increase in transportation-related work in the\nCity over the coming years. The BBC is speaking with business owners, representatives of\ntrade organizations and workforce development programs, and City leadership to\nunderstand the current marketplace and provide re commendations on how the City can\nclose any gaps or address needs to support equitable and sustainable development. The\npurpose of the focus group is to discuss what it is like to start or grow a business, the\nchallenges and barriers firms like yours face, and your firm's experiences, if relevant,\nworking with or attempting to work with the City of Charlotte. These insights will contribute\nto the BBC's understanding of and documentation on marketplace conditions, as well as\nrecommendations for the City to consider.\nIV. CBI Updates:\n• Welcomed Jeremy Johnson as the newest member of CBIAC\n• Appreciated Zahn and her willingness and eagerness to step up as\nPresident.\n• Still waiting on House Bill 171 and SB 257- which would abolish the HUB.\nBut we have a basis to continue through the SBE program and will continue\n\n[Page 2]\nto serve Minority Business Enterprise (MBE) and Woman Business\nEnterprise (WBE). In the process of tweaking who would be considered.\n• Annual report is completed but dependent on leadership reviewing it, then\ncouncil and then we can share it with CBIAC.\n• CBI has two positions that are open- Still deciding if CBI Coordinator\nposition will be hired for, but ideally by next meeting we will have a new\nCBI Compliance position filled.\n• We are still CBI but now under the department of Contracting and\nProcurement and newly managed by Cheryl Wright who comes to us from\nunion county will be our new assistant manager. Steve has a good feeling\nabout her!\n• CBI BluPrint is moving smoothy. 8 participating business are really enjoying\nand finding value in the program. The launch also went well.\n• Contractor development program- impactful but expensive- we are\nconsidering how to move forward to next year- understanding our\nlimitations but also understanding that the bonding challenges are real.\no Zahn shared that these firms may not understand how these bills\nare impacting them! How can we help them be aware of how it\nmay affect them in real time.\no Julius is meeting with Candice on a weekly meeting and will be\npushing a marketing statedly with CC&M(Charlotte\nCommunications & Marketing) to make folks aware of this issue\n& how this information impacts them.\nSubcommittee Share outs\n• Economic Development -Christina: The team will be meeting with Danielle Frazier given her\npresentation last week.\n• Outreach & Engagement -Candice:  A main focus is to make sure that Julius is no longer a team\nof 1- Julius has been asked to share his list of upcoming events.\n• Impact and Accountability- Jerome met with Steve, Nyema and Jasmine requesting data and\ninformation to support evidence that our work is needed and justified.\nV. Adjournment: There being no additional business, Chairman Patin called for a motion\nto adjourn. At 11:25 Candice Gaddy motioned & Kim Lam 2nd.\nAction Items Assigned To  Due Date\n1. Invite Cheryl to next CBIAC Steve & Jasmine  10/8\n\n[Page 3]\n2. Julius & Candice keep us updated on the\nstrategy to support vendors to understand\nhow these bills impact them.\nJulius & Candice 10/8\n3. Lina will provide slides and work with Steve &\nNyema to provide more information about\nthe bills.\nLina/ Steve/ Nyema 10/8\n4.  Zahn shared- If you get this question--Is it\nstill beneficial to get NC HUB certified?\nYes, if you are not certified, please work\nto get your NC HUB M/W certifications\nfor your business. At this time there have\nbeen no official changes to the HUB or CBI\nprogram.\nALL ASAP\n5. Utilize CBIAC to host a virtual event to\nhelp vendors understand how these\npotential bills affect them and how\ncertifying as a SBE is beneficial.\nALL ASAP\nThe action items captured from the Sep 10th, 2025, CBIAC Committee Meeting are as follows:\nSep 10th, 2025, CBIAC Meeting Summary and Action Items submitted by:\nJasmine Timmons   09/10/2025",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Text-based meeting summary/action items; Docling extraction is sufficient.",
+      "page_count": 3
+    },
+    "source_type": "nextcloud",
+    "relative_path": "incident and action tracking/cbiac-september-10-2025-meeting-summary-and-action-items.pdf",
+    "nextcloud_relative_path": "incident and action tracking/cbiac-september-10-2025-meeting-summary-and-action-items.pdf",
+    "source_relative_path": "incident and action tracking/cbiac-september-10-2025-meeting-summary-and-action-items.pdf",
+    "filename": "cbiac-september-10-2025-meeting-summary-and-action-items.pdf",
+    "title": "cbiac-september-10-2025-meeting-summary-and-action-items",
+    "category": "incident and action tracking",
+    "preindex": {
+      "relative_path": "incident and action tracking/cbiac-september-10-2025-meeting-summary-and-action-items.pdf",
+      "filename": "cbiac-september-10-2025-meeting-summary-and-action-items.pdf",
+      "title": "cbiac-september-10-2025-meeting-summary-and-action-items",
+      "category": "incident and action tracking",
+      "document_id": "cbiac-september-10-2025-meeting-summary-and-action-items",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:18:53"
+}

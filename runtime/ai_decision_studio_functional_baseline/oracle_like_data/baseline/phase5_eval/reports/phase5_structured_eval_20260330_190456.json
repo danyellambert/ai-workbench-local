@@ -1,0 +1,206 @@
+{
+  "generated_at": "2026-03-30T19:04:56.979179",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "extraction",
+      "suite_name": "structured_real_document_eval",
+      "mode": "indexed_document",
+      "status": "FAIL",
+      "score": 16,
+      "max_score": 43,
+      "reasons": [
+        "gold:entity coverage too low: 2",
+        "gold:field coverage too low: 4",
+        "gold:action-item coverage too low: 2",
+        "gold:risk coverage too low: 1",
+        "gold:clause coverage too low: 1"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "10c1c1e3e384b1d7dea5e0bef9ae647b763dd273ff5b892b80926719bf0c6fb2",
+        "name": "exhibit10-3.pdf",
+        "file_type": "pdf",
+        "chunk_count": 201
+      },
+      "gold_fixture_path": "baseline://external_files/f9a99ecdd7df31fb_13_extraction_exhibit10_3_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "FAIL",
+        "score": 16,
+        "max_score": 43,
+        "reasons": [
+          "entity coverage too low: 2",
+          "field coverage too low: 4",
+          "action-item coverage too low: 2",
+          "risk coverage too low: 1",
+          "clause coverage too low: 1"
+        ],
+        "thresholds": {
+          "pass_ratio": 0.64,
+          "warn_ratio": 0.42,
+          "notes": "Extraction real-document privilegia fields, entities, obligations, risks e clause coverage grounded."
+        },
+        "metrics": {
+          "main_subject_hit": 1,
+          "category_hits": 2,
+          "entity_hits": 2,
+          "field_hits": 4,
+          "relationship_hits": 2,
+          "clause_hits": 1,
+          "risk_hits": 1,
+          "action_hits": 2,
+          "restriction_hits": 0,
+          "date_hits": 1,
+          "number_hits": 0
+        }
+      },
+      "thresholds": {
+        "pass_ratio": 0.64,
+        "warn_ratio": 0.42,
+        "notes": "Extraction real-document privilegia fields, entities, obligations, risks e clause coverage grounded."
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "extraction",
+        "schema_version": "1.0",
+        "main_subject": "Seller’s Purchase, Warranties and Interim Servicing Agreement",
+        "entities": [
+          {
+            "type": "organization",
+            "value": "DLJ Mortgage Capital, Inc.",
+            "confidence": 0.95,
+            "source_text": "DLJ Mortgage Capital, Inc., as purchaser (the “Purchaser”), and E-LOAN, Inc., as seller (in such capacity, the “Seller”) and as servicer (in such capacity, the “Servicer”)",
+            "position_start": 10,
+            "position_end": 38
+          },
+          {
+            "type": "organization",
+            "value": "E-LOAN, Inc.",
+            "confidence": 0.95,
+            "source_text": "DLJ Mortgage Capital, Inc., as purchaser (the “Purchaser”), and E-LOAN, Inc., as seller (in such capacity, the “Seller”) and as servicer (in such capacity, the “Servicer”)",
+            "position_start": 49,
+            "position_end": 62
+          },
+          {
+            "type": "organization",
+            "value": "o Credit Suisse First Boston LLC",
+            "confidence": 0.7,
+            "source_text": "o Credit Suisse First Boston LLC",
+            "position_start": 0,
+            "position_end": 0
+          },
+          {
+            "type": "organization",
+            "value": "authorization or order of any court",
+            "confidence": 0.7,
+            "source_text": "authorization or order of any court",
+            "position_start": 0,
+            "position_end": 0
+          },
+          {
+            "type": "organization",
+            "value": "including court",
+            "confidence": 0.7,
+            "source_text": "including court",
+            "position_start": 0,
+            "position_end": 0
+          },
+          {
+            "type": "organization",
+            "value": "a decree or order of a court",
+            "confidence": 0.7,
+            "source_text": "a decree or order of a court",
+            "position_start": 0,
+            "position_end": 0
+          }
+        ],
+        "categories": [
+          "seller-purchaser agreement",
+          "Agreement",
+          "Contract",
+          "Legal Agreement"
+        ],
+        "relationships": [
+          {
+            "from_entity": "DLJ Mortgage Capital, Inc.",
+            "to_entity": "E-LOAN, Inc.",
+            "relationship": "purchaser-seller",
+            "confidence": 0.95,
+            "evidence": "DLJ Mortgage Capital, Inc., as purchaser (the “Purchaser”), and E-LOAN, Inc., as seller (in such capacity, the “Seller”) and as servicer (in such capacity, the “Servicer”)"
+          }
+        ],
+        "extracted_fields": [
+          {
+            "name": "agreement_type",
+            "value": "Seller’s Purchase, Warranties and Interim Servicing Agreement",
+            "evidence": "This is a Seller’s Purchase, Warranties and Interim Servicing Agreement, dated as April 1, 2003"
+          },
+          {
+            "name": "agreement_date",
+            "value": "April 1, 2003",
+            "evidence": "dated as of April 1, 2003"
+          },
+          {
+            "name": "counterparties",
+            "value": "DLJ Mortgage Capital, Inc.; E-LOAN, Inc.",
+            "evidence": "Seller’s Purchase, Warranties and Interim Servicing Agreement"
+          },
+          {
+            "name": "jurisdiction",
+            "value": "authorization or order of any court",
+            "evidence": "Seller’s Purchase, Warranties and Interim Servicing Agreement"
+          },
+          {
+            "name": "covered_clauses",
+            "value": "Confidentiality; Governing Law",
+            "evidence": "Seller’s Purchase, Warranties and Interim Servicing Agreement"
+          }
+        ],
+        "important_dates": [
+          "2003-04-01",
+          "April 1, 2003",
+          "October 1, 2002",
+          "February 28, 2004"
+        ],
+        "important_numbers": [],
+        "risks": [
+          {
+            "description": "Repurchase obligations may arise due to breaches in warranties",
+            "impact": null,
+            "owner": null,
+            "due_date": null,
+            "evidence": "Section 3.02 Representations and Warranties as to Individual Mortgage Loans; Section 3.03 Repurchase; Substitution"
+          }
+        ],
+        "action_items": [
+          {
+            "description": "Maintain servicing files according to accepted practices",
+            "owner": null,
+            "due_date": null,
+            "status": null,
+            "evidence": "Section 2.04 Servicing of Mortgage Loans; Record Title and Possession of Mortgage Files; Maintenance of Servicing Files"
+          },
+          {
+            "description": "Ensure timely payment of taxes, insurance, and charges",
+            "owner": null,
+            "due_date": null,
+            "status": null,
+            "evidence": "Section 4.08 Payment of Taxes, Insurance and Charges; Maintenance of Primary Mortgage Insurance or LPMI Policies; Collections Thereunder"
+          }
+        ],
+        "missing_information": []
+      }
+    }
+  ]
+}

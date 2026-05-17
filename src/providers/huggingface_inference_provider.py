@@ -1,18 +1,36 @@
 from __future__ import annotations
 
+from typing import Iterable
+
+from huggingface_hub import InferenceClient
 from openai import OpenAI
 
 from src.config import HuggingFaceInferenceSettings
 
 
 class HuggingFaceInferenceProvider:
+    EMBEDDING_FALLBACK_MODELS = (
+        "BAAI/bge-small-en-v1.5",
+        "sentence-transformers/all-MiniLM-L6-v2",
+        "thenlper/gte-large",
+        "google/embeddinggemma-300m",
+    )
+
     def __init__(self, settings: HuggingFaceInferenceSettings):
         self.settings = settings
         self.client = OpenAI(
             base_url=settings.base_url,
             api_key=settings.api_key,
         )
+        self.embedding_client = self._build_embedding_client(settings.api_key)
         self._last_usage_metrics: dict[str, object] = {}
+
+    @staticmethod
+    def _build_embedding_client(api_key: str | None) -> InferenceClient:
+        try:
+            return InferenceClient(provider="hf-inference", api_key=api_key)
+        except TypeError:
+            return InferenceClient(api_key=api_key)
 
     def reset_last_usage_metrics(self) -> None:
         self._last_usage_metrics = {}
@@ -29,7 +47,7 @@ class HuggingFaceInferenceProvider:
 
     def list_available_embedding_models(self) -> list[str]:
         ordered_models: list[str] = []
-        for model in [self.settings.embedding_model, *self.settings.available_embedding_models_env]:
+        for model in [self.settings.embedding_model, *self.settings.available_embedding_models_env, *self.EMBEDDING_FALLBACK_MODELS]:
             if model and model not in ordered_models:
                 ordered_models.append(model)
         return ordered_models
@@ -56,6 +74,87 @@ class HuggingFaceInferenceProvider:
                 "Embeddings through Hugging Face Inference depend on the configured endpoint/model. "
                 "The app records this value as operational metadata and only uses embeddings if you explicitly configure that path."
             ),
+        }
+
+    def _iter_embedding_candidates(self, requested_model: str | None = None) -> Iterable[str]:
+        ordered: list[str] = []
+        for model in [requested_model, self.settings.embedding_model, *self.settings.available_embedding_models_env, *self.EMBEDDING_FALLBACK_MODELS]:
+            normalized = str(model or "").strip()
+            if normalized and normalized not in ordered:
+                ordered.append(normalized)
+        return ordered
+
+    def _create_embedding_once(self, text: str, model: str, *, truncate: bool = True) -> list[float]:
+        embedding = self.embedding_client.feature_extraction(
+            text,
+            model=model,
+            truncate=truncate,
+        )
+        if hasattr(embedding, "tolist"):
+            embedding = embedding.tolist()
+        if isinstance(embedding, list) and embedding and isinstance(embedding[0], list):
+            embedding = embedding[0]
+        return [float(value) for value in embedding]
+
+    @staticmethod
+    def _looks_like_missing_embedding_route(error: Exception) -> bool:
+        message = str(error).lower()
+        return (
+            "404" in message
+            or "not found" in message
+            or "feature-extraction" in message
+            or "does not seem to support" in message
+            or "task not found" in message
+        )
+
+    def probe_connection(self) -> dict[str, object]:
+        if not self.settings.api_key:
+            return {"status": "not_configured", "last_error_message": "A Hugging Face token is required for this connection."}
+
+        embedding_errors: list[str] = []
+        for index, embedding_model in enumerate(self._iter_embedding_candidates()):
+            try:
+                self._create_embedding_once("health check", embedding_model)
+                if index == 0:
+                    return {"status": "connected", "last_error_message": None}
+                return {
+                    "status": "connected",
+                    "last_error_message": f"Preferred embedding model was unavailable; using `{embedding_model}` as the first working fallback for probe/embedding routing.",
+                }
+            except Exception as error:
+                embedding_errors.append(f"`{embedding_model}`: {error}")
+                if not self._looks_like_missing_embedding_route(error):
+                    break
+
+        chat_model = self.settings.model or (self.settings.available_models_env[0] if self.settings.available_models_env else "")
+        if chat_model:
+            try:
+                self.client.chat.completions.create(
+                    model=chat_model,
+                    messages=[{"role": "user", "content": "ping"}],
+                    max_tokens=1,
+                    temperature=0,
+                    stream=False,
+                )
+                return {
+                    "status": "degraded",
+                    "last_error_message": "Chat is reachable, but no embedding model probe succeeded. " + (" Last embedding error: " + embedding_errors[-1] if embedding_errors else ""),
+                }
+            except Exception as error:
+                return {
+                    "status": "degraded",
+                    "last_error_message": f"Chat probe failed for `{chat_model}`. Details: {error}",
+                }
+
+        if embedding_errors:
+            return {
+                "status": "degraded",
+                "last_error_message": "No Hugging Face Inference embedding model probe succeeded. " + " Last tried: " + embedding_errors[-1],
+            }
+
+        return {
+            "status": "degraded",
+            "last_error_message": "Token saved, but no chat or embedding model is configured for Hugging Face Inference yet.",
         }
 
     def stream_chat_completion(
@@ -91,8 +190,32 @@ class HuggingFaceInferenceProvider:
         context_window: int | None = None,
         truncate: bool = True,
     ) -> list[list[float]]:
-        response = self.client.embeddings.create(model=model, input=texts)
-        return [item.embedding for item in response.data]
+        normalized_model = str(model or self.settings.embedding_model or "").strip()
+        candidates = list(self._iter_embedding_candidates(normalized_model))
+        if not candidates:
+            raise ValueError("No Hugging Face Inference embedding model is configured.")
+
+        errors: list[str] = []
+        for candidate in candidates:
+            try:
+                vectors = [self._create_embedding_once(text, candidate, truncate=truncate) for text in texts]
+                self._last_usage_metrics = {
+                    "embedding_model_requested": normalized_model or candidate,
+                    "embedding_model_used": candidate,
+                    "usage_source": "huggingface_inference_feature_extraction",
+                    "embedding_model_fallback_applied": candidate != (normalized_model or candidate),
+                }
+                return vectors
+            except Exception as error:
+                errors.append(f"`{candidate}`: {error}")
+                if not self._looks_like_missing_embedding_route(error):
+                    break
+
+        requested_label = normalized_model or candidates[0]
+        detail = errors[-1] if errors else "unknown embedding error"
+        raise RuntimeError(
+            f"No Hugging Face Inference embedding model could be used. Requested `{requested_label}`. Last error: {detail}"
+        )
 
     def iter_stream_text(self, stream):
         for chunk in stream:

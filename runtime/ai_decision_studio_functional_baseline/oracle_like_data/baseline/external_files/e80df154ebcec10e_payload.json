@@ -1,0 +1,152 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Document Review",
+      "subtitle": "Executive review of the latest grounded document analysis",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "speaker_notes": "Export kind: document_review_deck. Deck family: review. Sources: structured_result, document_agent."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "A política revisada introduz novas obrigações operacionais e ainda pede validação jurídica final.",
+      "bullets": [
+        "Aprovação formal agora é mandatória.",
+        "Ainda falta owner explícito do controle anual."
+      ],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "speaker_notes": "Resumo executivo consolidado a partir dos sinais grounded do produto."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "metrics": [
+        {
+          "value": "1",
+          "label": "Source count"
+        },
+        {
+          "value": "2",
+          "label": "Findings"
+        },
+        {
+          "value": "1",
+          "label": "Actions"
+        },
+        {
+          "value": "Yes",
+          "label": "Needs review"
+        }
+      ],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Top findings",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [
+        "Type",
+        "Finding",
+        "Owner",
+        "Due",
+        "Evidence"
+      ],
+      "table_rows": [
+        [
+          "risk",
+          "Owner não definido para o controle anual",
+          "Compliance",
+          "2026-04-10",
+          "Policy 2026 / page 12"
+        ],
+        [
+          "gap",
+          "Legal sign-off still missing",
+          "-",
+          "-",
+          "-"
+        ]
+      ],
+      "comparison_columns": [],
+      "speaker_notes": "Findings grounded no payload estruturado/document agent."
+    },
+    {
+      "type": "table",
+      "title": "Action plan",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "table_rows": [
+        [
+          "Definir owner do controle anual",
+          "Compliance",
+          "2026-04-10",
+          "open"
+        ]
+      ],
+      "comparison_columns": []
+    },
+    {
+      "type": "comparison",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Definir owner do controle anual.",
+          "bullets": [
+            "Definir owner do controle anual.",
+            "Revisar cláusulas críticas com jurídico."
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "legal_signoff_missing",
+          "bullets": [
+            "Validação jurídica final ainda pendente."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Definir owner do controle anual.",
+        "Revisar cláusulas críticas com jurídico."
+      ],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": []
+    }
+  ]
+}

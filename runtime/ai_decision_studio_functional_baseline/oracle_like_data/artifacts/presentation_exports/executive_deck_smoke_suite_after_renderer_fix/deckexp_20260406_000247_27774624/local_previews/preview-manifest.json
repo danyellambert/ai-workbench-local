@@ -1,0 +1,48 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "policy_contract_comparison_deck",
+  "output_dir": "baseline://artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000247_27774624/local_previews",
+  "presentation_title": "policy_contract_comparison_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 6,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/ed0578c6d54c9c7f_policy_contract_comparison_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "policy_contract_comparison_deck-01.png",
+      "path": "baseline://external_files/ca96af0df47a6c3c_policy_contract_comparison_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "policy_contract_comparison_deck-02.png",
+      "path": "baseline://external_files/7db7092b1a1e7f92_policy_contract_comparison_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "policy_contract_comparison_deck-03.png",
+      "path": "baseline://external_files/fbcba5ccb8869677_policy_contract_comparison_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "policy_contract_comparison_deck-04.png",
+      "path": "baseline://external_files/6a6f3f9845671b81_policy_contract_comparison_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "policy_contract_comparison_deck-05.png",
+      "path": "baseline://external_files/b52dd0efdf6c9c65_policy_contract_comparison_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "policy_contract_comparison_deck-06.png",
+      "path": "baseline://external_files/2263ef7b570d9b76_policy_contract_comparison_deck-06.png"
+    }
+  ]
+}

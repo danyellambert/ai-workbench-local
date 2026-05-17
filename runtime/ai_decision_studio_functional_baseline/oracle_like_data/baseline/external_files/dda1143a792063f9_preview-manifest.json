@@ -1,0 +1,63 @@
+{
+  "manifest_version": 1,
+  "mode": "preview",
+  "basename": "action_plan_deck",
+  "output_dir": "baseline://external/Users_danyellambert_ppt_creator_app_outputs_ai_workbench_export_previews/deckexp_20260418_194244_a14bfd52",
+  "presentation_title": "AI Workbench Local — Action Plan",
+  "theme": "executive_premium_minimal",
+  "preview_count": 9,
+  "preview_source": "spec",
+  "real_preview": false,
+  "backend_requested": "synthetic",
+  "backend_used": "synthetic",
+  "office_runtime": null,
+  "office_conversion_strategy": null,
+  "input_pptx": null,
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "action_plan_deck-01.png",
+      "path": "baseline://external_files/6c467b327c4005f4_action_plan_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "action_plan_deck-02.png",
+      "path": "baseline://external_files/09ff43648b0cc1ae_action_plan_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "action_plan_deck-03.png",
+      "path": "baseline://external_files/6dc0ba23d2ec86ea_action_plan_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "action_plan_deck-04.png",
+      "path": "baseline://external_files/51387b827f689c6c_action_plan_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "action_plan_deck-05.png",
+      "path": "baseline://external_files/12c9b118d8eb7866_action_plan_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "action_plan_deck-06.png",
+      "path": "baseline://external_files/9d51252bcd8806a8_action_plan_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "action_plan_deck-07.png",
+      "path": "baseline://external_files/120c77b519a81232_action_plan_deck-07.png"
+    },
+    {
+      "slide_number": 8,
+      "filename": "action_plan_deck-08.png",
+      "path": "baseline://external_files/5d9ee9c89b88ad32_action_plan_deck-08.png"
+    },
+    {
+      "slide_number": 9,
+      "filename": "action_plan_deck-09.png",
+      "path": "baseline://external_files/8dbc404ad78fafb1_action_plan_deck-09.png"
+    }
+  ]
+}

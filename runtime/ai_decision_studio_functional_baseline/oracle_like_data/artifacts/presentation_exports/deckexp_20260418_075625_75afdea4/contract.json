@@ -1,0 +1,96 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "action_plan_deck",
+  "deck_family": "action_plan",
+  "presentation": {
+    "title": "AI Workbench Local — Action Plan",
+    "subtitle": "Operational action plan grounded in current action backlog",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Action Plan"
+  },
+  "context": {
+    "review_type_counts": {
+      "action_plan_evidence_review": 3
+    }
+  },
+  "executive_summary": "The current run identified 3 tracked action(s), with 3 still open, 0 overdue and 0 requiring formal approval follow-up.",
+  "key_highlights": [
+    "Archive approval email with Q1 access-review evidence pack",
+    "Verify vendor confirmation of personnel list before each quarter"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Total actions",
+      "value": "3"
+    },
+    {
+      "label": "Open",
+      "value": "3"
+    },
+    {
+      "label": "Overdue",
+      "value": "0"
+    },
+    {
+      "label": "Approval required",
+      "value": "0"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Action backlog",
+      "columns": [
+        "Ref",
+        "Action",
+        "Owner",
+        "Due",
+        "Status",
+        "Source",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "EVIDENCE",
+          "Archive approval email with Q1 access-review evidence p…",
+          "Priya Nair",
+          "-",
+          "open",
+          "Privileged Account Approval Email.pdf",
+          "Please archive this approval with the Q1 access-review evidence pack"
+        ],
+        [
+          "A02",
+          "Monitor for changes to named administrators",
+          "Compliance Operations",
+          "-",
+          "in_progress",
+          "Privileged Account Approval Email.pdf",
+          "If either named administrator changes, this approval must be revalidated before access is retained"
+        ],
+        [
+          "A03",
+          "Verify vendor confirmation of personnel list before eac…",
+          "Vendor Management",
+          "-",
+          "open",
+          "Privileged Account Approval Email.pdf",
+          "the vendor confirms the named personnel list before each quarter begins"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Archive approval email with Q1 access-review evidence pack",
+  "watchouts": [],
+  "next_steps": [
+    "Archive approval email with Q1 access-review evidence pack",
+    "Verify vendor confirmation of personnel list before each quarter"
+  ],
+  "data_sources": [
+    "action_plan_run_current"
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Document Review",
+      "subtitle": "Executive review of the latest grounded document analysis",
+      "author": "AI Workbench Local",
+      "date": "2026-04-18",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Document Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Document Review",
+        "subtitle": "Executive review of the latest grounded document analysis",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: document_review_deck. Deck family: review. Sources: structured_result, document_agent."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "Q1 2024 Northwind vendor-control review evidence log: 2 risk(s), 0 gap(s) and 3 mitigation action(s) identified. Top risk: Missing evidence blocks control closure",
+        "bullets": [
+          "Missing evidence blocks control closure",
+          "In-progress evidence may delay closure",
+          "Archive EV-002 email-export artifact"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Source count"
+          },
+          {
+            "value": "2",
+            "label": "Findings"
+          },
+          {
+            "value": "3",
+            "label": "Actions"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Top findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Evidence",
+          "Owner"
+        ],
+        "table_rows": [
+          [
+            "risk",
+            "Missing evidence blocks control closure",
+            "Missing or in-progress items block control closure…",
+            "-"
+          ],
+          [
+            "risk",
+            "In-progress evidence may delay closure",
+            "EV-005 is In progress",
+            "-"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Findings grounded in the structured/document-agent payload."
+      },
+      {
+        "type": "table",
+        "title": "Action plan",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Action",
+          "Owner",
+          "Due",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "Archive EV-002 email-export artifact",
+            "IT Operations",
+            "-",
+            "pending"
+          ],
+          [
+            "Verify provenance of missing evidence",
+            "Compliance Operations",
+            "-",
+            "pending"
+          ],
+          [
+            "Complete provenance verification for all items",
+            "Compliance Operations",
+            "-",
+            "pending"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Archive EV-002 email-export artifact",
+            "bullets": [
+              "Archive EV-002 email-export artifact",
+              "Verify provenance of missing evidence"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "Open-ended questions may require additional human reading when the document has contextual ambiguity.",
+            "bullets": []
+          }
+        ],
+        "speaker_notes": "Decision framing for the grounded document review."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Archive EV-002 email-export artifact",
+          "Verify provenance of missing evidence",
+          "Complete provenance verification for all items",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_173757_0c1e7ec0/document_review_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_173757_0c1e7ec0",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

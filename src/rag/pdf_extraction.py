@@ -5,8 +5,11 @@ import logging
 import shutil
 import subprocess
 import tempfile
+import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import IndirectObject
@@ -258,6 +261,40 @@ def _join_pages(page_texts: list[tuple[int, str]]) -> str:
             continue
         sections.append(f"{_build_page_heading(page_number)}\n{normalized}")
     return "\n\n".join(sections).strip()
+
+
+def _start_progress_pulse(
+    emit_progress: Callable[..., None],
+    *,
+    start_pct: float,
+    end_pct: float,
+    detail: str,
+    processed_pages: int | None = None,
+    total_pages: int | None = None,
+    subphase: str | None = None,
+    interval_seconds: float = 0.35,
+) -> tuple[threading.Event, threading.Thread]:
+    stop_event = threading.Event()
+    initial_pct = int(max(0, min(100, round(start_pct))))
+    target_pct = int(max(initial_pct, min(100, round(end_pct))))
+
+    def worker() -> None:
+        current_pct = initial_pct
+        while not stop_event.wait(interval_seconds):
+            if current_pct >= target_pct:
+                continue
+            current_pct += 1
+            emit_progress(
+                detail,
+                progress_pct=current_pct,
+                processed_pages=processed_pages,
+                total_pages=total_pages,
+                subphase=subphase,
+            )
+
+    thread = threading.Thread(target=worker, daemon=True)
+    thread.start()
+    return stop_event, thread
 
 
 def _docling_components() -> _DoclingAvailability:
@@ -553,13 +590,19 @@ def _rasterize_pdf_with_ghostscript(file_bytes: bytes, settings: PdfHybridSettin
         return image_bytes, None
 
 
-def _ocrmypdf_extract_images_text(image_bytes_list: list[bytes], settings: PdfHybridSettings) -> tuple[str, str | None]:
+def _ocrmypdf_extract_images_text(
+    image_bytes_list: list[bytes],
+    settings: PdfHybridSettings,
+    *,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
+) -> tuple[str, str | None]:
     if not image_bytes_list:
         return "", "no image available for OCR"
 
     pages: list[str] = []
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir)
+        total_pages = len(image_bytes_list)
         for index, image_bytes in enumerate(image_bytes_list, start=1):
             image_path = temp_dir_path / f"page_{index:04d}.png"
             image_path.write_bytes(image_bytes)
@@ -592,6 +635,15 @@ def _ocrmypdf_extract_images_text(image_bytes_list: list[bytes], settings: PdfHy
                 )
                 page_text = sidecar_path.read_text(encoding="utf-8", errors="ignore").strip() if sidecar_path.exists() else ""
                 pages.append((_build_page_heading(index) + "\n" + page_text).strip() if page_text else "")
+                if progress_callback is not None:
+                    progress_callback(
+                        {
+                            "processed_pages": index,
+                            "total_pages": total_pages,
+                            "progress_pct": round((index / total_pages) * 100, 1) if total_pages else 100.0,
+                            "detail": f"OCR image-first progress: page {index}/{total_pages} processed.",
+                        }
+                    )
             except FileNotFoundError as error:
                 return "", f"ocrmypdf unavailable: {error}"
             except subprocess.TimeoutExpired as error:
@@ -605,17 +657,54 @@ def _ocrmypdf_extract_images_text(image_bytes_list: list[bytes], settings: PdfHy
     joined = "\n\n".join(page for page in pages if page).strip()
     return joined, None
 
-def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> PdfExtractionResult:
+def extract_pdf_text_hybrid(
+    file_bytes: bytes,
+    settings: PdfHybridSettings,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
+) -> PdfExtractionResult:
     resolved_mode = normalize_pdf_extraction_mode(settings.extraction_mode)
     effective_settings = _build_complete_docling_settings(settings) if resolved_mode == "complete" else settings
+
+    def emit_progress(
+        detail: str,
+        *,
+        progress_pct: float,
+        processed_pages: int | None = None,
+        total_pages: int | None = None,
+        subphase: str | None = None,
+        **metadata: object,
+    ) -> None:
+        if progress_callback is None:
+            return
+        payload: dict[str, object] = {
+            "detail": detail,
+            "progress_pct": max(0.0, min(100.0, round(progress_pct, 1))),
+        }
+        if processed_pages is not None:
+            payload["processed_pages"] = processed_pages
+        if total_pages is not None:
+            payload["total_pages"] = total_pages
+        if subphase:
+            payload["subphase"] = subphase
+        payload.update(metadata)
+        progress_callback(payload)
 
     prepared_file_bytes, pdf_security_metadata = _prepare_pdf_bytes_for_processing(file_bytes)
 
     reader = PdfReader(io.BytesIO(prepared_file_bytes), strict=False)
+    total_pages = len(reader.pages)
     page_analyses: list[PdfPageAnalysis] = []
     baseline_pages: list[tuple[int, str]] = []
 
     baseline_page_errors: list[dict[str, object]] = []
+
+    emit_progress(
+        "Starting PDF extraction.",
+        progress_pct=0.0,
+        processed_pages=0,
+        total_pages=total_pages,
+        subphase="baseline",
+    )
 
     for page_index, page in enumerate(reader.pages, start=1):
         text, baseline_error = _safe_extract_page_text(page)
@@ -638,6 +727,13 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
                 'page_number': page_index,
                 'error': baseline_error,
             })
+        emit_progress(
+            f"Baseline extraction: page {page_index}/{total_pages} analyzed.",
+            progress_pct=(page_index / max(total_pages, 1)) * 60,
+            processed_pages=page_index,
+            total_pages=total_pages,
+            subphase="baseline",
+        )
 
     baseline_text = _join_pages(baseline_pages)
     coverage_ratio = sum(1 for page in page_analyses if page.text_chars >= effective_settings.baseline_chars_per_page_threshold) / max(len(page_analyses), 1)
@@ -653,8 +749,15 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
             if resolved_mode == "complete":
                 docling_attempted = True
                 docling_mode = "page_complete"
+                emit_progress(
+                    "Starting complete Docling/OCR refinement.",
+                    progress_pct=60.0,
+                    processed_pages=0,
+                    total_pages=total_pages,
+                    subphase="docling_complete",
+                )
                 complete_docling_text = _docling_extract_pdf_text(prepared_file_bytes, effective_settings).strip()
-                for page in page_analyses:
+                for processed_count, page in enumerate(page_analyses, start=1):
                     enriched = _docling_extract_page(prepared_file_bytes, page.page_number - 1, effective_settings).strip()
                     merged_text, changed = _merge_page_texts(
                         base_text=merged_pages.get(page.page_number, ""),
@@ -664,6 +767,13 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
                     merged_pages[page.page_number] = merged_text
                     if changed:
                         page.used_docling = True
+                    emit_progress(
+                        f"Docling refinement: page {processed_count}/{total_pages} processed.",
+                        progress_pct=60.0 + ((processed_count / max(total_pages, 1)) * 30),
+                        processed_pages=processed_count,
+                        total_pages=total_pages,
+                        subphase="docling_complete",
+                    )
                 baseline_text = _join_pages(sorted(merged_pages.items()))
                 normalized_complete = _normalize_page_text(complete_docling_text)
                 normalized_baseline = _normalize_page_text(baseline_text)
@@ -674,7 +784,34 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
             elif resolved_mode == "docling" or _should_run_full_docling(page_analyses, effective_settings):
                 docling_attempted = True
                 docling_mode = "full_document"
-                docling_text = _docling_extract_pdf_text(prepared_file_bytes, effective_settings).strip()
+                emit_progress(
+                    "Running full-document Docling extraction.",
+                    progress_pct=60.0,
+                    processed_pages=0,
+                    total_pages=total_pages,
+                    subphase="docling_full_document",
+                )
+                pulse_stop, pulse_thread = _start_progress_pulse(
+                    emit_progress,
+                    start_pct=60.0,
+                    end_pct=89.0,
+                    detail="Running full-document Docling extraction.",
+                    processed_pages=0,
+                    total_pages=total_pages,
+                    subphase="docling_full_document",
+                )
+                try:
+                    docling_text = _docling_extract_pdf_text(prepared_file_bytes, effective_settings).strip()
+                finally:
+                    pulse_stop.set()
+                    pulse_thread.join(timeout=0.1)
+                emit_progress(
+                    "Full-document Docling extraction completed.",
+                    progress_pct=90.0,
+                    processed_pages=total_pages,
+                    total_pages=total_pages,
+                    subphase="docling_full_document",
+                )
                 if len(docling_text) > len(baseline_text) * 0.7:
                     baseline_text = docling_text
                     for page in page_analyses:
@@ -685,7 +822,15 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
                 docling_attempted = True
                 docling_mode = "selective_pages"
                 pages_to_enrich = suspicious_pages[: effective_settings.max_selective_docling_pages]
-                for page in pages_to_enrich:
+                total_selective_pages = len(pages_to_enrich)
+                emit_progress(
+                    f"Starting selective Docling enrichment for {total_selective_pages} page(s).",
+                    progress_pct=60.0,
+                    processed_pages=0,
+                    total_pages=total_selective_pages,
+                    subphase="docling_selective",
+                )
+                for processed_count, page in enumerate(pages_to_enrich, start=1):
                     enriched = _docling_extract_page(prepared_file_bytes, page.page_number - 1, effective_settings).strip()
                     merged_text, changed = _merge_page_texts(
                         base_text=merged_pages.get(page.page_number, ""),
@@ -695,6 +840,13 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
                     merged_pages[page.page_number] = merged_text
                     if changed:
                         page.used_docling = True
+                    emit_progress(
+                        f"Selective Docling enrichment: page {processed_count}/{total_selective_pages} processed.",
+                        progress_pct=60.0 + ((processed_count / max(total_selective_pages, 1)) * 30),
+                        processed_pages=processed_count,
+                        total_pages=total_selective_pages,
+                        subphase="docling_selective",
+                    )
                 baseline_text = _join_pages(sorted(merged_pages.items()))
         except Exception as error:
             docling_error = str(error)
@@ -719,11 +871,42 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
             image_first_ocr_attempted = True
             image_first_ocr_reason = image_first_reason
             ocr_backend = "ocrmypdf_image_first"
-            rasterized_images, raster_error = _rasterize_pdf_with_ghostscript(prepared_file_bytes, effective_settings)
+            emit_progress(
+                "Rasterizing pages for image-first OCR.",
+                progress_pct=90.0,
+                processed_pages=0,
+                total_pages=total_pages,
+                subphase="ocr_image_first",
+            )
+            raster_pulse_stop, raster_pulse_thread = _start_progress_pulse(
+                emit_progress,
+                start_pct=90.0,
+                end_pct=93.0,
+                detail="Rasterizing pages for image-first OCR.",
+                processed_pages=0,
+                total_pages=total_pages,
+                subphase="ocr_image_first",
+                interval_seconds=0.4,
+            )
+            try:
+                rasterized_images, raster_error = _rasterize_pdf_with_ghostscript(prepared_file_bytes, effective_settings)
+            finally:
+                raster_pulse_stop.set()
+                raster_pulse_thread.join(timeout=0.1)
             if raster_error:
                 image_first_ocr_error = raster_error
             else:
-                ocr_text, ocr_error = _ocrmypdf_extract_images_text(rasterized_images, effective_settings)
+                ocr_text, ocr_error = _ocrmypdf_extract_images_text(
+                    rasterized_images,
+                    effective_settings,
+                    progress_callback=lambda payload: emit_progress(
+                        str(payload.get("detail") or "OCR image-first progress."),
+                        progress_pct=93.0 + (float(payload.get("progress_pct") or 0.0) * 0.06),
+                        processed_pages=int(payload.get("processed_pages") or 0),
+                        total_pages=int(payload.get("total_pages") or max(total_pages, 1)),
+                        subphase="ocr_image_first",
+                    ),
+                )
                 image_first_ocr_error = ocr_error
                 normalized_ocr = _normalize_page_text(ocr_text)
                 normalized_base = _normalize_page_text(baseline_text)
@@ -734,7 +917,28 @@ def extract_pdf_text_hybrid(file_bytes: bytes, settings: PdfHybridSettings) -> P
 
         if not ocr_fallback_applied and _ocrmypdf_available():
             ocr_backend = "ocrmypdf"
-            ocr_text, ocr_error = _ocrmypdf_extract_pdf_text(prepared_file_bytes, effective_settings)
+            emit_progress(
+                "Running PDF OCR fallback.",
+                progress_pct=93.0,
+                processed_pages=0,
+                total_pages=total_pages,
+                subphase="ocr_pdf_fallback",
+            )
+            ocr_pulse_stop, ocr_pulse_thread = _start_progress_pulse(
+                emit_progress,
+                start_pct=93.0,
+                end_pct=99.0,
+                detail="Running PDF OCR fallback.",
+                processed_pages=0,
+                total_pages=total_pages,
+                subphase="ocr_pdf_fallback",
+                interval_seconds=0.45,
+            )
+            try:
+                ocr_text, ocr_error = _ocrmypdf_extract_pdf_text(prepared_file_bytes, effective_settings)
+            finally:
+                ocr_pulse_stop.set()
+                ocr_pulse_thread.join(timeout=0.1)
             ocr_fallback_error = ocr_error
             normalized_ocr = _normalize_page_text(ocr_text)
             normalized_base = _normalize_page_text(baseline_text)

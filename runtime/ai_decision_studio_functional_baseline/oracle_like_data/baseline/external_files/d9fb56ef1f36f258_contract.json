@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe Access Review Evidence Log (EVD-101) documents a completed Q1 2024 vendor-control review with a focus on closing a control by verifying missing evidence, while the Privileged Account Approval Email outlines a conditional, time-bound access approval requiring quarterly recertification and vendor confirmation for ongoing compliance. The former is a synthetic artifact for testing evidence completeness, whereas the latter is a synthetic template for a recurring, review-dependent approval process.\n\n- Access Review Evidence Log (EVD-101) is a synthetic artifact for testing evidence completeness in a completed Q1 2024 review.  \n- Privileged Account Approval Email is a synthetic template for a conditional, time-bound access approval requiring quarterly recertification.  \n- Evidence Log closure depends on verifying missing evidence; Approval Email hinges on vendor confirmation before each quarter.  \n- Evidence Log is tied to a specific completed review; Approval Email is tied to ongoing, quarterly conditional approvals.  \n- Evidence Log involves archival of an email-export artifact; Approval Email mandates vendor confirmation of personnel before each quarter.  \n- Both documents are explicitly synthetic and intended solely for testing purposes.",
+  "key_highlights": [
+    "The Access Review Evidence Log (EVD-101) documents a completed Q1 2024 vendor-control review with a focus on closing a control by verifying missing evidence, while the Privileged Account Approval Email outlines a conditional, time-bound access approval requiring quarterly recertification and vendor confirmation for ongoing compliance. The former is a synthetic artifact for testing evidence completeness, whereas the latter is a synthetic template for a recurring, review-dependent approval process.",
+    "Access Review Evidence Log (EVD-101) is a synthetic artifact for testing evidence completeness in a completed Q1 2024 review.",
+    "Privileged Account Approval Email is a synthetic template for a conditional, time-bound access approval requiring quarterly recertification.",
+    "Evidence Log closure depends on verifying missing evidence; Approval Email hinges on vendor confirmation before each quarter.",
+    "Evidence Log is tied to a specific completed review; Approval Email is tied to ongoing, quarterly conditional approvals.",
+    "Evidence Log involves archival of an email-export artifact; Approval Email mandates vendor confirmation of personnel before each quarter."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "The log is intentionally synthetic and labeled for demo and testing purposes only. | Control closure hinges on verifica…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "The approval is conditional and tied to quarterly recertification and vendor confirmation, making it time-bound and rev…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log (EVD-101) documents a…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents a Q1 2024 vendor-con…"
+        ],
+        [
+          "auditability_delta",
+          "Access Review Evidence Log (EVD-101) is a synthetic…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents a Q1 2024 vendor-con…"
+        ],
+        [
+          "approval_change",
+          "Privileged Account Approval Email is a synthetic template…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents a Q1 2024 vendor-con…"
+        ],
+        [
+          "approval_change",
+          "Evidence Log closure depends on verifying missing evidence;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents a Q1 2024 vendor-con…"
+        ],
+        [
+          "approval_change",
+          "Evidence Log is tied to a specific completed…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents a Q1 2024 vendor-con…"
+        ],
+        [
+          "approval_change",
+          "Evidence Log involves archival of an email-export artifact;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents a Q1 2024 vendor-con…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

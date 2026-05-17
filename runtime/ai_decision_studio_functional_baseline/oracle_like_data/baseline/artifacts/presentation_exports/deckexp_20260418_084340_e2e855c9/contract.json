@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe Access Review Evidence Log (EVD-101) establishes a formal, audit-driven framework for validating control closure through complete, properly archived evidence tied to vendor reviews, with critical gaps directly blocking closure. In contrast, the Privileged Account Approval Email enforces a narrowly scoped, time-bound access grant for specific support roles, contingent on active logging, quarterly recertification, and vendor confirmation, with revalidation triggered by personnel changes. While EVD-101 ensures evidence completeness for control closure across the vendor ecosystem, the email approval is a tactical, personnel-specific authorization requiring ongoing compliance checks rather than a holistic evidence register.\n\n-   EVD-101 mandates complete evidence archiving and repository path consistency for audit readiness; the email approval requires mandatory logging integration for access justification.  \n-   EVD-101 requires resolution of critical evidence gaps before control closure; the email approval mandates quarterly recertification and vendor confirmation to maintain standing access.  \n-   EVD-101 is a structured register for Q1 2024 vendor-control evidence mapping; the email approval is a one-time pilot authorization for two named administrators.  \n-   EVD-101 failure to archive evidence delays control closure; the email approval requires revalidation if personnel change, creating a dynamic compliance trigger.  \n-   EVD-101 emphasizes provenance and traceability for audit purposes; the email approval emphasizes strict task scoping (ticketed support/break-fix) and access limitation.  \n-   EVD-101 governs evidence completeness for control closure across the vendor ecosystem; the email approval governs temporary, role-specific privileged access with built-in expiration conditions.",
+  "key_highlights": [
+    "The Access Review Evidence Log (EVD-101) establishes a formal, audit-driven framework for validating control closure through complete, properly archived evidence tied to vendor reviews, with critical gaps directly blocking closure. In contrast, the Privileged Account Approval Email enforces a narrowly scoped, time-bound access grant for specific support roles, contingent on active logging, quarterly recertification, and vendor confirmation, with revalidation triggered by personnel changes. While EVD-101 ensures evidence completeness for control closure across the vendor ecosystem, the email approval is a tactical, personnel-specific authorization requiring ongoing compliance checks rather than a holistic evidence register.",
+    "EVD-101 mandates complete evidence archiving and repository path consistency for audit readiness; the email approval requires mandatory logging integration for access justification.",
+    "EVD-101 requires resolution of critical evidence gaps before control closure; the email approval mandates quarterly recertification and vendor confirmation to maintain standing access.",
+    "EVD-101 is a structured register for Q1 2024 vendor-control evidence mapping; the email approval is a one-time pilot authorization for two named administrators.",
+    "EVD-101 failure to archive evidence delays control closure; the email approval requires revalidation if personnel change, creating a dynamic compliance trigger.",
+    "EVD-101 emphasizes provenance and traceability for audit purposes; the email approval emphasizes strict task scoping (ticketed support/break-fix) and access limitation."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Critical evidence gaps must be resolved before control closure, highlighting dependency on artifact completeness. | Rep…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is strictly limited to ticketed support and break-fix tasks with mandatory logging integration. | Quarterly rece…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log (EVD-101) establishes a…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a structured register for Q1 2…"
+        ],
+        [
+          "approval_change",
+          "EVD-101 mandates complete evidence archiving and repository path…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): Repository path consistency and proper archiving are essential for audit readines…"
+        ],
+        [
+          "approval_change",
+          "EVD-101 requires resolution of critical evidence gaps before…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): Critical evidence gaps must be resolved before control closure, highlighting depe…"
+        ],
+        [
+          "approval_change",
+          "EVD-101 is a structured register for Q1 2024…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a structured register for Q1 2…"
+        ],
+        [
+          "approval_change",
+          "EVD-101 failure to archive evidence delays control closure;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a structured register for Q1 2…"
+        ],
+        [
+          "approval_change",
+          "EVD-101 emphasizes provenance and traceability for audit purposes;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as a structured register for Q1 2…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

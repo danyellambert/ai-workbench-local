@@ -1,0 +1,144 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Candidate Review · Jane Doe",
+    "subtitle": "Executive hiring summary grounded in cv_analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Candidate Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Candidate Review · Jane Doe",
+      "subtitle": "Executive hiring summary grounded in cv_analysis",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "speaker_notes": "Export kind: candidate_review_deck. Deck family: candidate_review. Sources: structured_result, cv_analysis."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "Jane Doe (São Paulo) apresenta 3.5 ano(s) de experiência estimada, 3 skill(s) mapeadas e 1 experiência(s) estruturada(s).",
+      "bullets": [
+        "Strong applied AI execution",
+        "Good product + engineering bridge",
+        "Python",
+        "RAG",
+        "Structured outputs"
+      ],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "speaker_notes": "Resumo executivo consolidado a partir dos sinais grounded do produto."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "metrics": [
+        {
+          "value": "3.5",
+          "label": "Experience years"
+        },
+        {
+          "value": "3",
+          "label": "Skills"
+        },
+        {
+          "value": "2",
+          "label": "Languages"
+        },
+        {
+          "value": "1",
+          "label": "Experience entries"
+        }
+      ],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Experience highlights",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [
+        "Role",
+        "Organization",
+        "Date",
+        "Evidence"
+      ],
+      "table_rows": [
+        [
+          "Applied AI Engineer",
+          "Acme",
+          "2022-2025",
+          "Built RAG pipelines | Shipped eval-driven AI features"
+        ]
+      ],
+      "comparison_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Education snapshot",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [
+        "Degree",
+        "Institution",
+        "Date",
+        "Location"
+      ],
+      "table_rows": [
+        [
+          "BSc Computer Science",
+          "USP",
+          "2018-2022",
+          "São Paulo"
+        ]
+      ],
+      "comparison_columns": []
+    },
+    {
+      "type": "comparison",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Advance to the next stage with focused validation of leadership, scope and business ownership.",
+          "bullets": [
+            "Agendar entrevista técnica focada em product thinking e delivery.",
+            "Validar senioridade, liderança e ownership em cenários reais."
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "Validate scale/production depth",
+          "bullets": []
+        }
+      ]
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Agendar entrevista técnica focada em product thinking e delivery.",
+        "Validar senioridade, liderança e ownership em cenários reais.",
+        "Validate scale/production depth"
+      ],
+      "metrics": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": []
+    }
+  ]
+}

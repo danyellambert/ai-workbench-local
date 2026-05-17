@@ -1,0 +1,469 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "CV_Francis_Taylor.pdf",
+  "file_type": "pdf",
+  "file_hash": "01055dd735831b1395021195082d017d683178573e27843945cdb9b5c73755d1",
+  "text": "[CV CONFIRMED FIELDS]\nName: Francis B. Taylor\nLocation: 67 Richdale Ave, Cincinatti, OH 45201\nEmails: francisjtaylor@gmail.com\nPhones: 617-343-0338\n\n[CV EDUCATION]\n- Bachelor of Science | Creighton University, Omaha, NE May 2019 | Creighton University, Omaha, NE May 2019 | Bachelor of Science, Biochemistry\n  • Awards: Phi Beta Kappa, Magna Cum Laude\n- Bachelor of Science | Biochemistry | Awards: Phi Beta Kappa, Magna Cum Laude\n  • Bachelor of Science, Biochemistry\n- Creighton University Department of Chemistry, Omaha, NE August 2016— May 2019 | Creighton University Department of Chemistry, Omaha, NE August 2016— May 2019 | Teaching Assistant\n  • Assisted in the design of lectures, assignments, quizzes, and laboratory manuals for General\n- Creighton University Admissions Office, Omaha, NE Summer 2016, 2017, 2018 | Creighton University Admissions Office, Omaha, NE Summer 2016, 2017, 2018 | Admissions Fellow\n  • Conducted interviews with prospective applicants and produced written evaluations for the\n  • admissions committee.\n\n[CV RAW TEXT]\nFrancis B. Taylor 67 Richdale Ave, Cincinatti, OH 45201 617-343-0338 francisjtaylor@gmail.com EDUCATION Creighton University, Omaha, NE May 2019 Bachelor of Science, Biochemistry Awards: Phi Beta Kappa, Magna Cum Laude WORK EXPERIENCE Johnson & Johnson, Cincinnati, OH July 2019— Present Scientist (2019— Present) • Provide scientific support to project leaders during studies conducted in preclinical research facilities. • Offer surgical support during research and development of animate and inanimate models. • Perform testing to aid in the development of new medical devices. • Demonstrated flexibility and team-oriented mindset during Covid-19 pandemic. Creighton University Department of Chemistry, Omaha, NE August 2016— May 2019 Teaching Assistant • Assisted in the design of lectures, assignments, quizzes, and laboratory manuals for General Chemistry I, General Chemistry II Lab, and Organic Chemistry Lab. • Served as grader and primary point of contact for over 150 students; supported 30 students in individual research projects. Creighton University Admissions Office, Omaha, NE Summer 2016, 2017, 2018 Admissions Fellow • Conducted interviews with prospective applicants and produced written evaluations for the admissions committee. • Led tours and information sessions to prospective students, families, and other visitors. CAMPUS ENGAGEMENT AND LEADERSHIP Creighton Residential Life, Omaha, NE August 2016— May 2019 Proctor • Lived in first-year residence hall and provided emotional and academic support to 24 students. • Attended weekly trainings focused on conflict mediation and community building. Creighton Women’s Varsity Soccer, Omaha, NE August 2015— Nov 2018 Forward , Co-Captain • Competed in Division I women’s soccer for four years; trained for 10 hours/week in the off-season, and competed against Big East peers during the fall semester. • Served as co-captain for the 2018 season. INTERESTS Bollywood movies, nature documentaries, hiking, boxing, gardening",
+  "metadata": {
+    "extractor": "evidence_cv_pipeline",
+    "strategy": "evidence_parallel",
+    "strategy_label": "Evidence CV pipeline",
+    "evidence_pipeline_used": true,
+    "evidence_summary": {
+      "document_id": "01055dd735831b1395021195082d017d683178573e27843945cdb9b5c73755d1",
+      "source_type": "digital_pdf",
+      "warnings": [],
+      "emails_found": 1,
+      "phones_found": 1,
+      "name_status": "confirmed",
+      "location_status": "confirmed",
+      "name_value": "Francis B. Taylor",
+      "location_value": "67 Richdale Ave, Cincinatti, OH 45201",
+      "emails": [
+        "francisjtaylor@gmail.com"
+      ],
+      "phones": [
+        "617-343-0338"
+      ]
+    },
+    "source_type": "nextcloud",
+    "warnings": [],
+    "page_count": 1,
+    "product_consumption": {
+      "policy": {
+        "confirmed": "usable",
+        "visual_candidate": "review_required",
+        "needs_review": "review_required",
+        "not_found": "missing"
+      },
+      "name": {
+        "status": "confirmed",
+        "directly_usable": true,
+        "value": "Francis B. Taylor"
+      },
+      "location": {
+        "status": "confirmed",
+        "directly_usable": true,
+        "value": "67 Richdale Ave, Cincinatti, OH 45201"
+      },
+      "emails": [
+        {
+          "status": "confirmed",
+          "directly_usable": true,
+          "value": "francisjtaylor@gmail.com"
+        }
+      ],
+      "phones": [
+        {
+          "status": "confirmed",
+          "directly_usable": true,
+          "value": "617-343-0338"
+        }
+      ],
+      "vl_runtime": {
+        "enabled": true,
+        "model": "qwen3-vl:235b-cloud",
+        "regions_attempted": 0,
+        "regions_succeeded": 0,
+        "regions_failed": 0,
+        "timeouts": 0,
+        "fallback_used": false,
+        "warnings": []
+      }
+    },
+    "vl_runtime": {
+      "enabled": true,
+      "model": "qwen3-vl:235b-cloud",
+      "regions_attempted": 0,
+      "regions_succeeded": 0,
+      "regions_failed": 0,
+      "timeouts": 0,
+      "fallback_used": false,
+      "warnings": []
+    },
+    "vl_router": {
+      "enabled": false,
+      "decision": "skip_vl",
+      "reasons": [],
+      "document_signals": {
+        "source_type": "digital_pdf",
+        "low_text_pages": 0,
+        "contacts_found_after_ocr": 2,
+        "name_missing": false,
+        "location_missing": false,
+        "header_missing": false,
+        "top_fragmented": false,
+        "header_contact_hits": 1,
+        "strong_header_structure_problem": false
+      },
+      "regions_selected": [],
+      "skipped_because": [
+        "digital_pdf_with_good_ocr_skip_vl"
+      ]
+    },
+    "indexing_payload": {
+      "document_id": "01055dd735831b1395021195082d017d683178573e27843945cdb9b5c73755d1",
+      "raw_text": "Francis B. Taylor\n\n67 Richdale Ave, Cincinatti, OH 45201\n617-343-0338\n\nfrancisjtaylor@gmail.com\n\nEDUCATION\n\nCreighton University, Omaha, NE                                                                                                                      May 2019\n\nBachelor of Science, Biochemistry\n\nAwards: Phi Beta Kappa, Magna Cum Laude\n\nWORK EXPERIENCE\n\nJohnson & Johnson, Cincinnati, OH                              July 2019— Present\n\nScientist (2019— Present)\n• Provide scientific support to project leaders during studies conducted in preclinical research facilities.\n\n• Offer surgical support during research and development of animate and inanimate models.\n• Perform testing to aid in the development of new medical devices.\n\n• Demonstrated flexibility and team-oriented mindset during Covid-19 pandemic.\n\nCreighton University Department of Chemistry, Omaha, NE                  August 2016— May 2019\n\nTeaching Assistant\n\n• Assisted in the design of lectures, assignments, quizzes, and laboratory manuals for General\n\nChemistry I, General Chemistry II Lab, and Organic Chemistry Lab.\n\n• Served as grader and primary point of contact for over 150 students; supported 30 students in\nindividual research projects.\n\nCreighton University Admissions Office, Omaha, NE                Summer 2016, 2017, 2018\n\nAdmissions Fellow\n• Conducted interviews with prospective applicants and produced written evaluations for the\n\nadmissions committee.\n\n• Led tours and information sessions to prospective students, families, and other visitors.\n\nCAMPUS ENGAGEMENT AND LEADERSHIP\n\nCreighton Residential Life, Omaha, NE      August 2016— May 2019\n\nProctor\n• Lived in first-year residence hall and provided emotional and academic support to 24 students.\n\n• Attended weekly trainings focused on conflict mediation and community building.\n\nCreighton Women’s Varsity Soccer, Omaha, NE      August 2015— Nov 2018\n\nForward , Co-Captain\n\n• Competed in Division I women’s soccer for four years; trained for 10 hours/week in the off-season,\nand competed against Big East peers during the fall semester.\n\n• Served as co-captain for the 2018 season.\n\nINTERESTS\n\nBollywood movies, nature documentaries, hiking, boxing, gardening",
+      "confirmed_fields": {
+        "name": "Francis B. Taylor",
+        "location": "67 Richdale Ave, Cincinatti, OH 45201",
+        "emails": [
+          "francisjtaylor@gmail.com"
+        ],
+        "phones": [
+          "617-343-0338"
+        ]
+      },
+      "structured": {
+        "experience": [],
+        "education": [
+          {
+            "institution": {
+              "value": "Creighton University, Omaha, NE May 2019",
+              "status": "confirmed",
+              "evidence_text": "Creighton University, Omaha, NE                                                                                                                      May 2019",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_5",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": "First-pass institution guess"
+            },
+            "degree": {
+              "value": "Bachelor of Science",
+              "status": "needs_review",
+              "evidence_text": "Creighton University, Omaha, NE                                                                                                                      May 2019",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_5",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "date_range": {
+              "value": "Creighton University, Omaha, NE                                                                                                                      May 2019",
+              "status": "needs_review",
+              "evidence_text": "Creighton University, Omaha, NE                                                                                                                      May 2019",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_5",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "location": {
+              "value": "Bachelor of Science, Biochemistry",
+              "status": "needs_review",
+              "evidence_text": "Creighton University, Omaha, NE                                                                                                                      May 2019",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_5",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "notes": [
+              {
+                "value": "Awards: Phi Beta Kappa, Magna Cum Laude",
+                "status": "confirmed",
+                "evidence_text": "Creighton University, Omaha, NE                                                                                                                      May 2019",
+                "page": 1,
+                "bbox": null,
+                "block_ref": "p1_fallback_5",
+                "source_type": "native_text+ocr",
+                "confidence": null,
+                "notes": null
+              }
+            ]
+          },
+          {
+            "institution": {
+              "value": "Biochemistry",
+              "status": "confirmed",
+              "evidence_text": "Bachelor of Science, Biochemistry",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_6",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": "First-pass institution guess"
+            },
+            "degree": {
+              "value": "Bachelor of Science",
+              "status": "needs_review",
+              "evidence_text": "Bachelor of Science, Biochemistry",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_6",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "date_range": {
+              "value": null,
+              "status": "not_found",
+              "evidence_text": null,
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_6",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "location": {
+              "value": "Awards: Phi Beta Kappa, Magna Cum Laude",
+              "status": "needs_review",
+              "evidence_text": "Bachelor of Science, Biochemistry",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_6",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "notes": [
+              {
+                "value": "Bachelor of Science, Biochemistry",
+                "status": "confirmed",
+                "evidence_text": "Bachelor of Science, Biochemistry",
+                "page": 1,
+                "bbox": null,
+                "block_ref": "p1_fallback_6",
+                "source_type": "native_text+ocr",
+                "confidence": null,
+                "notes": null
+              }
+            ]
+          },
+          {
+            "institution": {
+              "value": "Creighton University Department of Chemistry, Omaha, NE August 2016— May 2019",
+              "status": "confirmed",
+              "evidence_text": "Creighton University Department of Chemistry, Omaha, NE                  August 2016— May 2019",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_13",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": "First-pass institution guess"
+            },
+            "degree": {
+              "value": null,
+              "status": "not_found",
+              "evidence_text": null,
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_13",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "date_range": {
+              "value": "Creighton University Department of Chemistry, Omaha, NE                  August 2016— May 2019",
+              "status": "needs_review",
+              "evidence_text": "Creighton University Department of Chemistry, Omaha, NE                  August 2016— May 2019",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_13",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "location": {
+              "value": "Teaching Assistant",
+              "status": "needs_review",
+              "evidence_text": "Creighton University Department of Chemistry, Omaha, NE                  August 2016— May 2019",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_13",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "notes": [
+              {
+                "value": "Assisted in the design of lectures, assignments, quizzes, and laboratory manuals for General",
+                "status": "confirmed",
+                "evidence_text": "Creighton University Department of Chemistry, Omaha, NE                  August 2016— May 2019",
+                "page": 1,
+                "bbox": null,
+                "block_ref": "p1_fallback_13",
+                "source_type": "native_text+ocr",
+                "confidence": null,
+                "notes": null
+              }
+            ]
+          },
+          {
+            "institution": {
+              "value": "Creighton University Admissions Office, Omaha, NE Summer 2016, 2017, 2018",
+              "status": "confirmed",
+              "evidence_text": "Creighton University Admissions Office, Omaha, NE                Summer 2016, 2017, 2018",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_18",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": "First-pass institution guess"
+            },
+            "degree": {
+              "value": null,
+              "status": "not_found",
+              "evidence_text": null,
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_18",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "date_range": {
+              "value": "Creighton University Admissions Office, Omaha, NE                Summer 2016, 2017, 2018",
+              "status": "needs_review",
+              "evidence_text": "Creighton University Admissions Office, Omaha, NE                Summer 2016, 2017, 2018",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_18",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "location": {
+              "value": "Admissions Fellow",
+              "status": "needs_review",
+              "evidence_text": "Creighton University Admissions Office, Omaha, NE                Summer 2016, 2017, 2018",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_18",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "notes": [
+              {
+                "value": "Conducted interviews with prospective applicants and produced written evaluations for the",
+                "status": "confirmed",
+                "evidence_text": "Creighton University Admissions Office, Omaha, NE                Summer 2016, 2017, 2018",
+                "page": 1,
+                "bbox": null,
+                "block_ref": "p1_fallback_18",
+                "source_type": "native_text+ocr",
+                "confidence": null,
+                "notes": null
+              },
+              {
+                "value": "admissions committee.",
+                "status": "confirmed",
+                "evidence_text": "Creighton University Admissions Office, Omaha, NE                Summer 2016, 2017, 2018",
+                "page": 1,
+                "bbox": null,
+                "block_ref": "p1_fallback_18",
+                "source_type": "native_text+ocr",
+                "confidence": null,
+                "notes": null
+              }
+            ]
+          }
+        ],
+        "skills": [],
+        "languages": []
+      }
+    },
+    "indexing_text_strategy": "structured_payload",
+    "indexing_payload_quality": {
+      "confirmed_fields_usable": true,
+      "included_structured_sections": [
+        "confirmed_fields",
+        "education"
+      ],
+      "dropped_structured_sections": [],
+      "dropped_section_reasons": [],
+      "raw_text_present": true,
+      "structured_payload_usable": true
+    },
+    "included_structured_sections": [
+      "confirmed_fields",
+      "education"
+    ],
+    "dropped_structured_sections": [],
+    "dropped_section_reasons": [],
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": true,
+      "cv_like_content_detected": true,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "cv_like_sections_detected",
+        "resume_like_date_ranges",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 47,
+      "rollout_selected": true,
+      "decision": "evidence_path",
+      "reason": "cv_like_match"
+    },
+    "hybrid_contact_policy": {
+      "emails": [
+        "francisjtaylor@gmail.com"
+      ],
+      "phones": [
+        "617-343-0338"
+      ],
+      "name": "Francis B. Taylor",
+      "location": "67 Richdale Ave, Cincinatti, OH 45201",
+      "policy": {
+        "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+        "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+        "name": "use_evidence_confirmed_only",
+        "location": "use_evidence_confirmed_only"
+      },
+      "stats": {
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    "shadow_rollout": {
+      "agreements": 0,
+      "email_complements": 1,
+      "phone_complements": 1,
+      "email_conflicts": 0,
+      "phone_conflicts": 0
+    },
+    "legacy_shadow_reference": {
+      "extractor": "pdf_hybrid",
+      "strategy": "hybrid"
+    },
+    "fallback_available": true,
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 140330,
+    "grounding_text_excerpt": "[CV CONFIRMED FIELDS]\nName: Francis B. Taylor\nLocation: 67 Richdale Ave, Cincinatti, OH 45201\nEmails: francisjtaylor@gmail.com\nPhones: 617-343-0338\n\n[CV EDUCATION]\n- Bachelor of Science | Creighton University, Omaha, NE May 2019 | Creighton University, Omaha, NE May 2019 | Bachelor of Science, Biochemistry\n  • Awards: Phi Beta Kappa, Magna Cum Laude\n- Bachelor of Science | Biochemistry | Awards: Phi Beta Kappa, Magna Cum Laude\n  • Bachelor of Science, Biochemistry\n- Creighton University Department of Chemistry, Omaha, NE August 2016— May 2019 | Creighton University Department of Chemistry, Omaha, NE August 2016— May 2019 | Teaching Assistant\n  • Assisted in the design of lectures, assignments, quizzes, and laboratory manuals for General\n- Creighton University Admissions Office, Omaha, NE Summer 2016, 2017, 2018 | Creighton University Admissions Office, Omaha, NE Summer 2016, 2017, 2018 | Admissions Fellow\n  • Conducted interviews with prospective applicants and produced written evaluations for the\n  • admissions committee.\n\n[CV RAW TEXT]\nFrancis B. Taylor 67 Richdale Ave, Cincinatti, OH 45201 617-343-0338 francisjtaylor@gmail.com EDUCATION Creighton University, Omaha, NE May 2019 Bachelor of Science, Biochemistry Awards: Phi Beta Kappa, Magna Cum Laude WORK EXPERIENCE Johnson & Johnson, Cincinnati, OH July 2019— Present Scientist (2019— Present) • Provide scientific support to project leaders during studies conducted in preclinical research facilities. • Offer surgical support during research and development of animate and inanimate models. • Perform testing to aid in the development of new medical devices. • Demonstrated flexibility and team-oriented mindset during Covid-19 pandemic. Creighton University Department of Chemistry, Omaha, NE August 2016— May 2019 Teaching Assistant • Assisted in the design of lectures, assignments, quizzes, and laboratory manuals for General Chemistry I, General Chemistry II Lab, and Organic Chemistry Lab. • Served as grader and primary point of contact for over 150 students; supported 30 students in individual research projects. Creighton University Admissions Office, Omaha, NE Summer 2016, 2017, 2018 Admissions Fellow • Conducted interviews with prospective applicants and produced written evaluations for the admissions committee. • Led tours and information sessions to prospective students, families, and other visitors. CAMPUS ENGAGEMENT AND LEADERSHIP Creighton Residential Life, Omaha, NE August 2016— May 2019 Proctor • Lived in first-year residence hall and provided emotional and academic support to 24 students. • Attended weekly trainings focused on conflict mediation and community building. Creighton Women’s Varsity Soccer, Omaha, NE August 2015— Nov 2018 Forward , Co-Captain • Competed in Division I women’s soccer for four years; trained for 10 hours/week in the off-season, and competed against Big East peers during the fall semester. • Served as co-captain for the 2018 season. INTERESTS Bollywood movies, nature documentaries, hiking, boxing, gardening",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Text-based CV; Docling extraction is sufficient and avoids unnecessary cloud VLM use.",
+      "page_count": 1
+    },
+    "relative_path": "human resources/CV_Francis_Taylor.pdf",
+    "nextcloud_relative_path": "human resources/CV_Francis_Taylor.pdf",
+    "source_relative_path": "human resources/CV_Francis_Taylor.pdf",
+    "filename": "CV_Francis_Taylor.pdf",
+    "title": "CV Francis Taylor",
+    "category": "human resources",
+    "preindex": {
+      "relative_path": "human resources/CV_Francis_Taylor.pdf",
+      "filename": "CV_Francis_Taylor.pdf",
+      "title": "CV Francis Taylor",
+      "category": "human resources",
+      "document_id": "human resources/CV_Francis_Taylor.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:18:50"
+}

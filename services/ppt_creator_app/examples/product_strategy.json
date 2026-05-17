@@ -1,0 +1,79 @@
+{
+  "presentation": {
+    "title": "Product strategy priorities",
+    "subtitle": "Executive portfolio view",
+    "client_name": "Northstar Product Group",
+    "author": "PPT Creator",
+    "date": "2026-03-23",
+    "footer_text": "Northstar Product Group • Strategy Review",
+    "theme": "consulting_clean",
+    "primary_color": "17324A",
+    "secondary_color": "7C97AF"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "Product strategy priorities",
+      "subtitle": "Where focus creates the clearest strategic advantage",
+      "eyebrow": "Portfolio review",
+      "layout_variant": "hero_cover"
+    },
+    {
+      "type": "bullets",
+      "title": "The roadmap should concentrate on fewer, more compounding bets",
+      "subtitle": "Focus is a strategic quality decision",
+      "layout_variant": "full_width",
+      "bullets": [
+        "Reduce initiative spread across too many low-conviction themes.",
+        "Increase sequencing discipline between platform, growth, and customer-facing work.",
+        "Create clearer executive decision points around investments and trade-offs."
+      ]
+    },
+    {
+      "type": "cards",
+      "title": "Three strategic priorities",
+      "cards": [
+        {
+          "title": "Platform reliability",
+          "body": "Protect trust and operational efficiency by investing in stability before expanding surface area."
+        },
+        {
+          "title": "Workflow adoption",
+          "body": "Prioritize features that increase repeat usage in the core daily workflow."
+        },
+        {
+          "title": "Decision visibility",
+          "body": "Improve instrumentation so leadership can see product performance earlier and more clearly."
+        }
+      ]
+    },
+    {
+      "type": "timeline",
+      "title": "90-day execution sequence",
+      "subtitle": "A tighter roadmap needs deliberate sequencing",
+      "eyebrow": "Delivery cadence",
+      "timeline_items": [
+        {
+          "title": "Stabilize the foundation",
+          "body": "Resolve the reliability gaps that keep slowing down roadmap confidence.",
+          "tag": "Month 1"
+        },
+        {
+          "title": "Concentrate adoption work",
+          "body": "Prioritize the workflow surfaces that create repeat usage in the core product loop.",
+          "tag": "Month 2"
+        },
+        {
+          "title": "Instrument decisions",
+          "body": "Improve visibility so leadership can judge product bets faster and with less ambiguity.",
+          "tag": "Month 3"
+        }
+      ]
+    },
+    {
+      "type": "closing",
+      "title": "Recommendation",
+      "quote": "A strong roadmap is not a list of ideas — it is a sequence of deliberate choices that compounds over time."
+    }
+  ]
+}

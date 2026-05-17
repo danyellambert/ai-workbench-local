@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-03-29T18:26:24.682223",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "code_analysis",
+      "mode": "indexed_document",
+      "status": "WARN",
+      "score": 9,
+      "max_score": 14,
+      "reasons": [
+        "gold:snippet summary did not match the expected grounded purpose",
+        "gold:refactor-plan coverage too low: 2"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218",
+        "name": "demo_code_analysis.py",
+        "file_type": "py",
+        "chunk_count": 1
+      },
+      "gold_fixture_path": "baseline://external_files/3f5fd09ed6527416_07_code_analysis_demo_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "WARN",
+        "score": 9,
+        "max_score": 14,
+        "reasons": [
+          "snippet summary did not match the expected grounded purpose",
+          "refactor-plan coverage too low: 2"
+        ],
+        "metrics": {
+          "snippet_summary_hit": 0,
+          "main_purpose_hit": 1,
+          "issue_hits": 3,
+          "refactor_hits": 2,
+          "test_hits": 3,
+          "maintainability_hits": 0,
+          "risk_hits": 0
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "code_analysis",
+        "schema_version": "1.0",
+        "snippet_summary": "Função normalize_scores ajusta pontuações e processa uma lista de itens, calculando média.",
+        "main_purpose": "Normalizar pontuações de itens e calcular a média das pontuações normalizadas.",
+        "detected_issues": [
+          {
+            "severity": "high",
+            "category": "runtime_failure",
+            "title": "Divisão por zero quando a lista está vazia",
+            "description": "A média é calculada dividindo por len(values) sem verificar se a lista pode estar vazia, o que causará ZeroDivisionError.",
+            "evidence": "average = total / len(values) sem proteção contra lista vazia.",
+            "recommendation": "Adicione verificação para lista vazia antes da divisão e defina `average = 0.0` quando não houver valores para agregar."
+          },
+          {
+            "severity": "medium",
+            "category": "shared_reference",
+            "title": "Mutação in‑place de itens na lista original",
+            "description": "A função append adiciona o mesmo objeto dict passado em items, mantendo referência compartilhada.",
+            "evidence": "result.append(item) quando a condição if \"score\" in item não é satisfeita.",
+            "recommendation": "Criar uma cópia rasa do item antes de adicioná‑lo ao resultado para evitar mutação in‑place da lista de entrada."
+          }
+        ],
+        "readability_improvements": [
+          "Usar nomes mais descritivos como normalize_item ou ajustar_pontuacao.",
+          "Separar a lógica de normalização em uma função auxiliar."
+        ],
+        "maintainability_improvements": [
+          "Extrair a regra de clamping de pontuação para uma função dedicada.",
+          "Evitar lógica duplicada entre os caminhos if/else."
+        ],
+        "refactor_plan": [
+          "Passo 1: Criar função clamp_score(score) que devolve score limitado entre 0 e 100.",
+          "Passo 2: Modificar normalize_scores para usar clamp_score e sempre retornar um novo dict com 'name' e 'score'.",
+          "Passo 3: Garantir que items sem 'score' sejam copiados antes de serem adicionados ao resultado.",
+          "Passo 4: Atualizar process para lidar com lista vazia antes de calcular a média."
+        ],
+        "test_suggestions": [
+          "Teste unitário que envia items = [] e verifica que a função retorna {'items': [], 'average': 0.0} sem levantar exceção.",
+          "Teste que fornece um item sem a chave 'score' e confirma que o resultado contém o mesmo item (cópia) sem alterar o original.",
+          "Teste que inclui um item com score = 150 e verifica que o score normalizado é 100.",
+          "Teste que inclui um item com score = -5 e verifica que o score normalizado é 0."
+        ],
+        "risk_notes": [
+          "Se a lista de entrada for vazia, a divisão por zero causará RuntimeError, interrompendo a execução.",
+          "A mutação in‑place pode afetar chamadores que esperam que a lista original permaneça inalterada."
+        ]
+      }
+    }
+  ]
+}

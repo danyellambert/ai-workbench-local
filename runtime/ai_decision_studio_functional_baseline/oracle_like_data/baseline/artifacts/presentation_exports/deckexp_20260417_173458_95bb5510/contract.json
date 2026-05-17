@@ -1,0 +1,97 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "action_plan_deck",
+  "deck_family": "action_plan",
+  "presentation": {
+    "title": "AI Workbench Local — Action Plan",
+    "subtitle": "Operational action plan grounded in current action backlog",
+    "author": "AI Workbench Local",
+    "date": "2026-04-17",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Action Plan"
+  },
+  "context": {
+    "review_type_counts": {
+      "action_plan_evidence_review": 4
+    }
+  },
+  "executive_summary": "The current action backlog contains 4 action(s), with 4 open, 0 sensitive, and 4 overdue.",
+  "key_highlights": [
+    "Draft SCC Appendix for data residency",
+    "Define incident response SLOs"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Total actions",
+      "value": "4"
+    },
+    {
+      "label": "Open",
+      "value": "4"
+    },
+    {
+      "label": "Overdue",
+      "value": "4"
+    },
+    {
+      "label": "Approval required",
+      "value": "0"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Action backlog",
+      "columns": [
+        "Type",
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "action_item",
+          "Negotiate liability cap with vendor legal",
+          "Maria Santos",
+          "2024-03-22",
+          "in_progress"
+        ],
+        [
+          "action_item",
+          "Draft SCC Appendix for data residency",
+          "James Park",
+          "2024-03-25",
+          "open"
+        ],
+        [
+          "action_item",
+          "Define incident response SLOs",
+          "Alex Rivera",
+          "2024-03-28",
+          "open"
+        ],
+        [
+          "action_item",
+          "Set up auto-renewal calendar alerts",
+          "Operations",
+          "2024-03-18",
+          "in_progress"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Draft SCC Appendix for data residency",
+  "watchouts": [
+    "There are overdue actions that require immediate reprioritization."
+  ],
+  "next_steps": [
+    "Draft SCC Appendix for data residency",
+    "Define incident response SLOs"
+  ],
+  "data_sources": [
+    "evidenceops_action_store"
+  ]
+}

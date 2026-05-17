@@ -1,0 +1,81 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "policy_compliance",
+    "compared_documents": [
+      "Policy 2025",
+      "Policy 2026"
+    ]
+  },
+  "executive_summary": "A política adiciona obrigações novas e ainda depende de validação jurídica final.",
+  "key_highlights": [
+    "Nova obrigação de aprovação formal.",
+    "Owner do controle anual ainda não foi definido.",
+    "Formal approval became mandatory"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "1"
+    },
+    {
+      "label": "Sources",
+      "value": "1"
+    },
+    {
+      "label": "Needs review",
+      "value": "Yes"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "obligation_change",
+          "Formal approval became mandatory",
+          "Policy 2025, Policy 2026",
+          "Page 4 - approval formal required"
+        ]
+      ],
+      "speaker_notes": "Diferenças e impactos extraídos do fluxo de comparação documental."
+    }
+  ],
+  "recommendation": "Definir owner do controle.",
+  "watchouts": [
+    "Validação jurídica final ainda pendente.",
+    "legal_signoff_missing"
+  ],
+  "next_steps": [
+    "Definir owner do controle.",
+    "Revisar cláusulas críticas com jurídico."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

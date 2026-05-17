@@ -1,0 +1,97 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "osha_near_miss_incident_report_form.pdf",
+  "file_type": "pdf",
+  "file_hash": "7a3be632a577e4229a2ef65797fa83edd4b011fffa50b1766bcbf2fd87f1619d",
+  "text": "[Page 1]\nNear-Miss Incident Report Form\nA\nnear-miss is a potential hazard or incident in which no property was damaged and no\npersonal injury was sustained, but where, given a slight shift in time or position, damage or\ninjury easily could have occurred. Near misses also may be referred to as close calls, near\naccidents, or injury-free events. For the sake of a safe work environment, the company asks\nthat all employees report and correct any of these potential hazards immediately.\nP\nlease use this form to report near-misses and assist us in preventing future incidents and\nmaking the Company a safer workplace.\nDepartment: Building/Work Area:\nDate and Time of Incident:\nWitnesses (optional):\nType of Near Miss:\n\u0000 Near-Miss\n\u0000 Safety Concern\n\u0000 Safety Idea/Suggestion\n\u0000 Other (describe):\nType of Concern:\n\u0000 Unsafe Act\n\u0000 Unsafe Condition of Area\n\u0000 Unsafe Condition of Equipment\n\u0000 Unsafe Use of Equipment\n\u0000 Safety Policy Violation\n\u0000 Other (describe):\nDescribe the potential incident/hazard/concern and possible outcome (be detailed):\nWere safety procedures violated? (describe):\nIncident site inspection – Why was an unsafe act committed, or why was the unsafe condition\npresent?:\nRecommendations/steps to take to prevent a similar incident:\nName (optional): Date Reported:\nSupervisor or Office Signature: Date:\nPlease submit this form to the main office or your supervisor. For questions or cases deemed\nimmediately dangerous, call the main office at 555-555-5555.\nT\nhis material was produced under grant SH-05031-SH8 from the Occupational Safety and Health Administration,\nU.S. Department of Labor. It does not necessarily reflect the views or policies of the U.S. Department of Labor, nor\ndoes mention of trade names, commercial products, or organizations imply endorsement by the U.S. Government.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 1801,
+    "final_text_chars": 1801,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1828,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 5,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 117139,
+    "grounding_text_excerpt": "[Page 1]\nNear-Miss Incident Report Form\nA\nnear-miss is a potential hazard or incident in which no property was damaged and no\npersonal injury was sustained, but where, given a slight shift in time or position, damage or\ninjury easily could have occurred. Near misses also may be referred to as close calls, near\naccidents, or injury-free events. For the sake of a safe work environment, the company asks\nthat all employees report and correct any of these potential hazards immediately.\nP\nlease use this form to report near-misses and assist us in preventing future incidents and\nmaking the Company a safer workplace.\nDepartment: Building/Work Area:\nDate and Time of Incident:\nWitnesses (optional):\nType of Near Miss:\n\u0000 Near-Miss\n\u0000 Safety Concern\n\u0000 Safety Idea/Suggestion\n\u0000 Other (describe):\nType of Concern:\n\u0000 Unsafe Act\n\u0000 Unsafe Condition of Area\n\u0000 Unsafe Condition of Equipment\n\u0000 Unsafe Use of Equipment\n\u0000 Safety Policy Violation\n\u0000 Other (describe):\nDescribe the potential incident/hazard/concern and possible outcome (be detailed):\nWere safety procedures violated? (describe):\nIncident site inspection – Why was an unsafe act committed, or why was the unsafe condition\npresent?:\nRecommendations/steps to take to prevent a similar incident:\nName (optional): Date Reported:\nSupervisor or Office Signature: Date:\nPlease submit this form to the main office or your supervisor. For questions or cases deemed\nimmediately dangerous, call the main office at 555-555-5555.\nT\nhis material was produced under grant SH-05031-SH8 from the Occupational Safety and Health Administration,\nU.S. Department of Labor. It does not necessarily reflect the views or policies of the U.S. Department of Labor, nor\ndoes mention of trade names, commercial products, or organizations imply endorsement by the U.S. Government.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Simple one-page form with extractable text; Docling extraction is enough.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "incident and action tracking/osha_near_miss_incident_report_form.pdf",
+    "nextcloud_relative_path": "incident and action tracking/osha_near_miss_incident_report_form.pdf",
+    "source_relative_path": "incident and action tracking/osha_near_miss_incident_report_form.pdf",
+    "filename": "osha_near_miss_incident_report_form.pdf",
+    "title": "osha near miss incident report form",
+    "category": "incident and action tracking",
+    "preindex": {
+      "relative_path": "incident and action tracking/osha_near_miss_incident_report_form.pdf",
+      "filename": "osha_near_miss_incident_report_form.pdf",
+      "title": "osha near miss incident report form",
+      "category": "incident and action tracking",
+      "document_id": "incident and action tracking/osha_near_miss_incident_report_form.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:20:34"
+}

@@ -1,9 +1,34 @@
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { GitCompare, ArrowRight, Sparkles, AlertTriangle, Play, ArrowLeftRight } from 'lucide-react';
-import { PageHeader, SeverityBadge, GlassCard } from '@/components/shared/ui-components';
-import { comparisonDiffs, documents } from '@/lib/mock-data';
+import { useSearchParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Sparkles, AlertTriangle, Play, ArrowLeftRight, CheckCircle2, Shield, Loader2, AlertCircle, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { PageHeader, GlassCard, StatusPill, WorkflowProgressHeader } from '@/components/shared/ui-components';
+import { WorkflowPublishActions } from '@/components/product/WorkflowPublishActions';
+import {
+  buildProductArtifactUrl,
+  buildWorkflowResponseFromRunHistory,
+  PRODUCT_API_BASE_URL,
+  generateProductWorkflowDeck,
+  getProductDocumentLibrary,
+  getProductGroundingPreview,
+  getProductRunHistoryEntry,
+  runProductWorkflow,
+  ProductWorkflowTimeoutRecoveryError,
+  type ProductPolicyComparisonDiff,
+  type ProductPublishNotionResponse,
+  type ProductPublishTrelloResponse,
+  type ProductRunWorkflowResponse,
+  type ProductWorkflowArtifact,
+} from '@/lib/product-api';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/components/ui/sonner';
+import { useAppStore } from '@/lib/store';
+import { findRecommendedDocument, normalizeDemoDocumentName, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
+import { PublicExecutionQuotaError, formatPublicExecutionQuotaMessage } from '@/lib/public-demo-limits';
+import { aiLabQueryKeys } from '@/lib/ai-lab-data';
+import { refreshWorkflowTimeoutRecoveryQueries } from '@/lib/workflow-timeout-recovery';
 
 const impactColors = {
   breaking: 'bg-glow-error/10 text-glow-error border-glow-error/20',
@@ -11,67 +36,533 @@ const impactColors = {
   minor: 'bg-muted text-muted-foreground border-border',
 };
 
+function dedupeArtifacts(artifacts: ProductWorkflowArtifact[]): ProductWorkflowArtifact[] {
+  const seen = new Set<string>();
+  const normalized: ProductWorkflowArtifact[] = [];
+  for (const artifact of artifacts) {
+    const key = `${artifact.artifact_type}:${artifact.path || artifact.download_name || artifact.label}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(artifact);
+  }
+  return normalized;
+}
+
 export default function ComparisonPage() {
+  const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const historyRunId = searchParams.get('historyRunId') || searchParams.get('runId') || '';
+  const showSourceBadges = useAppStore((state) => state.operatorPreferences.showSourceBadges);
+  const [selectedDocumentAId, setSelectedDocumentAId] = useState('');
+  const [selectedDocumentBId, setSelectedDocumentBId] = useState('');
+  const [workflowResponse, setWorkflowResponse] = useState<ProductRunWorkflowResponse | null>(null);
+  const [generatedArtifacts, setGeneratedArtifacts] = useState<ProductWorkflowArtifact[]>([]);
+  const [deckExportState, setDeckExportState] = useState<{ status: string; message: string } | null>(null);
+  const [showGroundingPreview, setShowGroundingPreview] = useState(false);
+  const [trelloPublishResult, setTrelloPublishResult] = useState<ProductPublishTrelloResponse | null>(null);
+  const [notionPublishResult, setNotionPublishResult] = useState<ProductPublishNotionResponse | null>(null);
+
+  const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
+    queryKey: ['product-document-library'],
+    queryFn: getProductDocumentLibrary,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const historyDetailQuery = useQuery({
+    queryKey: ['product-run-history-entry', historyRunId, 'workflow-hydration'],
+    queryFn: () => getProductRunHistoryEntry(historyRunId),
+    enabled: Boolean(historyRunId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const availableDocuments = useMemo(
+    () => (documentLibrary?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
+    [documentLibrary],
+  );
+
+  const policyComparisonCandidates = useMemo(
+    () =>
+      availableDocuments.filter((document) => {
+        const normalizedName = normalizeDemoDocumentName(document.name);
+        return normalizedName.includes('information security policy') || normalizedName.includes('security policy');
+      }),
+    [availableDocuments],
+  );
+
+  const recommendedDocumentA = useMemo(
+    () =>
+      findRecommendedDocument(availableDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.policyComparison[0]) ??
+      policyComparisonCandidates.find((document) => normalizeDemoDocumentName(document.name).includes('v3 1')) ??
+      policyComparisonCandidates[0] ??
+      availableDocuments[0],
+    [availableDocuments, policyComparisonCandidates],
+  );
+  const recommendedDocumentB = useMemo(
+    () =>
+      findRecommendedDocument(availableDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS.policyComparison[1]) ??
+      policyComparisonCandidates.find((document) => normalizeDemoDocumentName(document.name).includes('v3 2')) ??
+      policyComparisonCandidates.find((document) => document.document_id !== recommendedDocumentA?.document_id) ??
+      availableDocuments.find((document) => document.document_id !== recommendedDocumentA?.document_id),
+    [availableDocuments, policyComparisonCandidates, recommendedDocumentA],
+  );
+
+  useEffect(() => {
+    if (!availableDocuments.length) {
+      setSelectedDocumentAId('');
+      setSelectedDocumentBId('');
+      return;
+    }
+
+    const nextPrimaryId = availableDocuments.some((document) => document.document_id === selectedDocumentAId)
+      ? selectedDocumentAId
+      : recommendedDocumentA?.document_id ?? '';
+    const nextSecondaryId =
+      selectedDocumentBId &&
+      selectedDocumentBId !== nextPrimaryId &&
+      availableDocuments.some((document) => document.document_id === selectedDocumentBId)
+        ? selectedDocumentBId
+        : recommendedDocumentB && recommendedDocumentB.document_id !== nextPrimaryId
+          ? recommendedDocumentB.document_id
+          : policyComparisonCandidates.find((document) => document.document_id !== nextPrimaryId)?.document_id ??
+            availableDocuments.find((document) => document.document_id !== nextPrimaryId)?.document_id ??
+            '';
+
+    if (nextPrimaryId !== selectedDocumentAId) setSelectedDocumentAId(nextPrimaryId);
+    if (nextSecondaryId !== selectedDocumentBId) setSelectedDocumentBId(nextSecondaryId);
+  }, [availableDocuments, policyComparisonCandidates, recommendedDocumentA, recommendedDocumentB, selectedDocumentAId, selectedDocumentBId]);
+
+  const selectedDocumentA = useMemo(
+    () => availableDocuments.find((document) => document.document_id === selectedDocumentAId),
+    [availableDocuments, selectedDocumentAId],
+  );
+  const selectedDocumentB = useMemo(
+    () => availableDocuments.find((document) => document.document_id === selectedDocumentBId),
+    [availableDocuments, selectedDocumentBId],
+  );
+
+
+  const previewQuery = useQuery({
+    queryKey: ['product-policy-comparison-preview', selectedDocumentAId, selectedDocumentBId],
+    enabled: showGroundingPreview && Boolean(selectedDocumentAId && selectedDocumentBId && selectedDocumentAId !== selectedDocumentBId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    queryFn: () =>
+      getProductGroundingPreview({
+        workflowId: 'policy_contract_comparison',
+        strategy: 'retrieval',
+        documentIds: [selectedDocumentAId, selectedDocumentBId].filter(Boolean),
+      }),
+  });
+
+  useEffect(() => {
+    const run = historyDetailQuery.data?.run;
+    const hydratedWorkflowResponse = buildWorkflowResponseFromRunHistory(historyDetailQuery.data);
+    if (!historyRunId || !run || !hydratedWorkflowResponse?.result || hydratedWorkflowResponse.result.workflow_id !== 'policy_contract_comparison') return;
+
+    const requestPayload = run.request_payload && typeof run.request_payload === 'object' ? run.request_payload : null;
+    const requestDocumentIds = Array.isArray(requestPayload?.document_ids)
+      ? requestPayload.document_ids.map((item) => String(item || '').trim()).filter(Boolean)
+      : [];
+    const groundingDocumentIds = hydratedWorkflowResponse.result.grounding_preview?.document_ids ?? [];
+    const historyDocumentIds = [
+      ...(run.document_ids?.length ? run.document_ids : requestDocumentIds),
+      ...groundingDocumentIds,
+    ]
+      .map((item) => String(item || '').trim())
+      .filter(Boolean);
+    const uniqueDocumentIds = Array.from(new Set(historyDocumentIds)).slice(0, 2);
+
+    if (uniqueDocumentIds[0]) setSelectedDocumentAId(uniqueDocumentIds[0]);
+    if (uniqueDocumentIds[1]) setSelectedDocumentBId(uniqueDocumentIds[1]);
+    setWorkflowResponse(hydratedWorkflowResponse);
+    setGeneratedArtifacts(run.artifact_items?.length ? run.artifact_items : hydratedWorkflowResponse.result.artifacts ?? []);
+    setDeckExportState(null);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
+  }, [historyDetailQuery.data, historyRunId]);
+
+  const runComparisonMutation = useMutation({
+    mutationFn: () =>
+      runProductWorkflow({
+        workflow_id: 'policy_contract_comparison',
+        document_ids: [selectedDocumentAId, selectedDocumentBId].filter(Boolean),
+        context_strategy: 'retrieval',
+        use_document_context: true,
+      }),
+    onSuccess: async (payload) => {
+      setWorkflowResponse(payload);
+      setGeneratedArtifacts([]);
+      setDeckExportState(null);
+      setTrelloPublishResult(null);
+      setNotionPublishResult(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
+      ]);
+      toast.success('Policy comparison completed with grounded output.');
+    },
+    onError: async (error) => {
+      if (error instanceof ProductWorkflowTimeoutRecoveryError) {
+        await refreshWorkflowTimeoutRecoveryQueries(queryClient);
+        toast.error('Policy comparison is still taking longer than expected. Check Run History in a moment; the backend may still finish the run.');
+        return;
+      }
+      toast.error(error instanceof PublicExecutionQuotaError ? formatPublicExecutionQuotaMessage(error) : error instanceof Error ? error.message : 'Policy comparison failed.');
+    },
+  });
+
+  const generateDeckMutation = useMutation({
+    mutationFn: () => {
+      if (!workflowResponse?.result) {
+        throw new Error('Run the policy comparison before generating the executive deck.');
+      }
+      return generateProductWorkflowDeck(workflowResponse.result, { runId: workflowResponse.run_id });
+    },
+    onSuccess: async (payload) => {
+      setGeneratedArtifacts(payload.artifacts);
+      const rawStatus = String(payload.export_result?.status || '').trim().toLowerCase();
+      const hasArtifacts = payload.artifacts.length > 0;
+      const normalizedStatus = hasArtifacts
+        ? 'completed'
+        : rawStatus.includes('fail')
+          ? 'error'
+          : rawStatus.includes('disabled') || rawStatus.includes('unavailable')
+            ? 'warning'
+            : 'warning';
+      const statusMessage = hasArtifacts
+        ? 'Comparison artifacts were generated and are ready for review.'
+        : rawStatus.includes('disabled')
+          ? 'Deck export is currently disabled in the Product API configuration. The workflow ran correctly, but no downloadable artifact was produced.'
+          : rawStatus.includes('unavailable')
+            ? 'The comparison deck renderer is unavailable right now. Check the presentation export service before retrying.'
+            : 'The deck generation request completed, but no downloadable artifact was returned.';
+      setDeckExportState({ status: normalizedStatus, message: statusMessage });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+        queryClient.invalidateQueries({ queryKey: ['product-run-history'] }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.evals }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.overview }),
+        queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime }),
+        queryClient.invalidateQueries({ queryKey: ['product-command-center'] }),
+      ]);
+      if (hasArtifacts) {
+        toast.success('Policy comparison deck artifacts generated successfully.');
+      } else {
+        toast.error(statusMessage);
+      }
+    },
+    onError: (error) => {
+      setDeckExportState({ status: 'error', message: error instanceof Error ? error.message : 'Deck generation failed.' });
+      toast.error(error instanceof Error ? error.message : 'Deck generation failed.');
+    },
+  });
+
+  const comparisonView = workflowResponse?.comparison_view ?? null;
+  const impactCounts = comparisonView?.executive_summary.counts ?? { breaking: 0, significant: 0, minor: 0 };
+  const differences: ProductPolicyComparisonDiff[] = comparisonView?.differences ?? [];
+  const mustFixItems = comparisonView?.must_fix_items ?? [];
+  const negotiationPriorities = comparisonView?.negotiation_priorities ?? [];
+  const comparisonWatchouts = useMemo(() => {
+    const directWatchouts = comparisonView?.watchouts?.filter((item) => item && !/retrieval backend note|canonical json|local fallback/i.test(item)) ?? [];
+    if (directWatchouts.length > 0) return directWatchouts;
+
+    const mustFixWatchouts = mustFixItems
+      .map((item) => item.title || item.detail || item.recommendation || '')
+      .filter(Boolean)
+      .map((item) => `Validate before approval: ${item}`);
+
+    if (mustFixWatchouts.length > 0) return mustFixWatchouts.slice(0, 4);
+
+    return differences
+      .filter((item) => item.impact === 'breaking' || item.impact === 'significant')
+      .map((item) => item.business_impact || item.recommendation || item.clause)
+      .filter(Boolean)
+      .slice(0, 4);
+  }, [comparisonView?.watchouts, differences, mustFixItems]);
+
+  const allArtifacts = useMemo(
+    () => dedupeArtifacts([...(comparisonView?.artifacts ?? []), ...generatedArtifacts]),
+    [comparisonView?.artifacts, generatedArtifacts],
+  );
+  const groundingPreview = workflowResponse?.result?.grounding_preview ?? previewQuery.data?.preview ?? null;
+
+  const runDisabled =
+    !selectedDocumentAId ||
+    !selectedDocumentBId ||
+    selectedDocumentAId === selectedDocumentBId ||
+    availableDocuments.length < 2 ||
+    runComparisonMutation.isPending;
+
+  const deckExportStatus = String(deckExportState?.status || '').toLowerCase();
+  const deckExportCompleted =
+    allArtifacts.length > 0 ||
+    deckExportStatus === 'completed' ||
+    deckExportStatus === 'ready' ||
+    deckExportStatus === 'success';
+
+  const baseComparisonSteps = comparisonView?.run_state.steps ?? [
+    { key: 'select', label: 'Select', status: selectedDocumentAId && selectedDocumentBId ? 'completed' : 'pending' },
+    { key: 'ground', label: 'Ground', status: workflowResponse?.result?.grounding_preview ? 'completed' : 'pending' },
+    { key: 'analyze', label: 'Analyze', status: runComparisonMutation.isPending ? 'running' : workflowResponse?.result ? (workflowResponse.result.status === 'error' ? 'error' : 'completed') : 'pending' },
+    { key: 'review', label: 'Review', status: differences.length > 0 ? 'completed' : 'pending' },
+    { key: 'export', label: 'Export', status: deckExportCompleted ? 'completed' : generateDeckMutation.isPending ? 'running' : deckExportStatus === 'error' ? 'error' : 'pending' },
+  ];
+
+  const comparisonSteps = baseComparisonSteps.map((step) => {
+    if (step.key !== 'export') return step;
+
+    if (deckExportCompleted) {
+      return { ...step, status: 'completed' };
+    }
+
+    if (generateDeckMutation.isPending) {
+      return { ...step, status: 'running' };
+    }
+
+    if (deckExportStatus === 'error') {
+      return { ...step, status: 'error' };
+    }
+
+    return step;
+  });
+
+  const handleDocumentAChange = (documentId: string) => {
+    setSelectedDocumentAId(documentId);
+    if (documentId === selectedDocumentBId) {
+      setSelectedDocumentBId(getDefaultSecondaryDocument(availableDocuments, documentId));
+    }
+    setWorkflowResponse(null);
+    setGeneratedArtifacts([]);
+    setDeckExportState(null);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
+  };
+
+  const handleDocumentBChange = (documentId: string) => {
+    setSelectedDocumentBId(documentId);
+    setWorkflowResponse(null);
+    setGeneratedArtifacts([]);
+    setDeckExportState(null);
+    setTrelloPublishResult(null);
+    setNotionPublishResult(null);
+  };
+
+  const handleOpenArtifact = (artifact: ProductWorkflowArtifact) => {
+    if (!artifact.path) {
+      toast.error(`${artifact.label} is registered, but no local path is available yet.`);
+      return;
+    }
+    window.open(buildProductArtifactUrl(artifact.path), '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <motion.div className="p-6 lg:p-8 max-w-[1400px] mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <PageHeader title="Policy & Contract Comparison" description="Compare documents side-by-side with impact analysis and grounded recommendations.">
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"><Play className="w-3.5 h-3.5 mr-2" /> Run Comparison</Button>
-        <Button variant="outline" className="h-9 px-4 text-xs border-border/50"><Sparkles className="w-3.5 h-3.5 mr-2" /> Generate Deck</Button>
-      </PageHeader>
+      <div data-tour="policy-comparison-header"><PageHeader title="Policy & Contract Comparison" description="Compare two documents side by side and surface grounded deltas.">
+        <Button
+          className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs"
+          disabled={runDisabled}
+          onClick={() => runComparisonMutation.mutate()}
+        >
+          {runComparisonMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />}
+          {runComparisonMutation.isPending ? 'Running Comparison' : 'Run Comparison'}
+        </Button>
+        <Button
+          variant="outline"
+          className="h-9 px-4 text-xs border-border/50"
+          disabled={!workflowResponse?.result?.deck_available || generateDeckMutation.isPending}
+          onClick={() => generateDeckMutation.mutate()}
+        >
+          {generateDeckMutation.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />}
+          {generateDeckMutation.isPending ? 'Generating Deck' : 'Generate Deck'}
+        </Button>
+      </PageHeader></div>
+
+      {documentsError && (
+        <div className="glass rounded-xl p-4 mb-6 border border-glow-warning/20 text-xs text-glow-warning flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          Product API unavailable. The comparison surface cannot load the document library right now.
+        </div>
+      )}
+
+      {!documentsLoading && availableDocuments.length < 2 && (
+        <div className="glass rounded-xl p-4 mb-6 border border-glow-warning/20 text-xs text-glow-warning flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4" />
+          At least two indexed documents are required to run a grounded policy comparison.
+        </div>
+      )}
+      <div data-tour="policy-comparison-progress">
+        <WorkflowProgressHeader
+          steps={comparisonSteps}
+          title="Workflow progress"
+          description="Track how the grounded comparison moves from document selection to export-ready outputs."
+        />
+      </div>
+
 
       {/* Document Selection */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+        data-tour="policy-comparison-selection"
         className="glass rounded-xl p-5 mb-6">
         <div className="grid md:grid-cols-2 gap-4 items-end">
           <div>
             <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Document A</label>
-            <Select defaultValue="d1">
-              <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue /></SelectTrigger>
-              <SelectContent>{documents.filter(d => d.status === 'indexed').map(d => (<SelectItem key={d.id} value={d.id} className="text-xs">{d.name}</SelectItem>))}</SelectContent>
+            <Select value={selectedDocumentAId} onValueChange={handleDocumentAChange}>
+              <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue placeholder="Select indexed document" /></SelectTrigger>
+              <SelectContent>
+                {availableDocuments.map(document => (
+                  <SelectItem key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div>
             <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1.5 block">Document B</label>
-            <Select defaultValue="d4">
-              <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue /></SelectTrigger>
-              <SelectContent>{documents.filter(d => d.status === 'indexed').map(d => (<SelectItem key={d.id} value={d.id} className="text-xs">{d.name}</SelectItem>))}</SelectContent>
+            <Select value={selectedDocumentBId} onValueChange={handleDocumentBChange}>
+              <SelectTrigger className="h-9 text-xs bg-secondary/30"><SelectValue placeholder="Select indexed document" /></SelectTrigger>
+              <SelectContent>
+                {availableDocuments.map(document => (
+                  <SelectItem key={document.document_id} value={document.document_id} className="text-xs">{document.name}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>
+          <div className="mt-4 border-t border-border/40 pt-4">
+            <div className="rounded-xl border border-border/40 bg-background/20" data-tour="policy-comparison-grounding">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-background/30"
+                onClick={() => setShowGroundingPreview((value) => !value)}
+                aria-expanded={showGroundingPreview}
+                aria-label={showGroundingPreview ? 'Hide grounding preview' : 'Show grounding preview'}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 rounded-full border border-primary/20 bg-primary/10 p-2">
+                    <ArrowLeftRight className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Grounding Preview</h3>
+                    <p className="mt-1 text-[11px] text-muted-foreground">Hidden by default. Open it only when you want to inspect the retrieved context behind the comparison.</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full border border-border/50 bg-background/50 px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {showGroundingPreview ? 'Visible' : 'Hidden'}
+                  </span>
+                  {showGroundingPreview ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </button>
+
+              {showGroundingPreview ? (
+                <div className="grid gap-3 border-t border-border/40 px-4 py-4 lg:grid-cols-[0.9fr_1.1fr]">
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Selected docs</div>
+                      <div className="mt-1 text-sm font-medium text-foreground">{[selectedDocumentAId, selectedDocumentBId].filter(Boolean).length}</div>
+                    </div>
+                    <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Source blocks</div>
+                      <div className="mt-1 text-sm font-medium text-foreground">{groundingPreview?.source_block_count ?? 0}</div>
+                    </div>
+                    <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context size</div>
+                      <div className="mt-1 text-sm font-medium text-foreground">{(groundingPreview?.context_chars ?? 0).toLocaleString()} chars</div>
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-secondary/20 px-3 py-3">
+                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
+                      {previewQuery.isLoading
+                        ? 'Loading comparison grounding preview...'
+                        : groundingPreview?.preview_text || 'Select two different indexed documents to preview the grounded comparison context before running the workflow.'}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
       </motion.div>
 
       {/* Executive Summary */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} data-tour="policy-comparison-summary">
         <GlassCard className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-glow-warning" />
             <h3 className="text-sm font-medium text-foreground">Executive Summary</h3>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-            Analysis of 5 clause differences between <span className="text-foreground">MSA v4.2</span> and <span className="text-foreground">Cloud Infrastructure SLA</span> reveals
-            <span className="text-glow-error font-medium"> 2 breaking</span> and
-            <span className="text-glow-warning font-medium"> 2 significant</span> differences requiring immediate attention.
+            {comparisonView ? (
+              <>
+                Analysis between <span className="text-foreground">{comparisonView.executive_summary.documents[0] || selectedDocumentA?.name || 'Document A'}</span> and <span className="text-foreground">{comparisonView.executive_summary.documents[1] || selectedDocumentB?.name || 'Document B'}</span> reveals
+                <span className="text-glow-error font-medium"> {impactCounts.breaking} breaking</span> and
+                <span className="text-glow-warning font-medium"> {impactCounts.significant} significant</span> differences requiring attention. {comparisonView.executive_summary.narrative}
+              </>
+            ) : (
+              'Select two indexed documents and run the comparison to populate grounded deltas, must-fix items and negotiation priorities.'
+            )}
           </p>
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-glow-error/20 border border-glow-error/30" />
-              <span className="text-muted-foreground">2 Breaking</span>
+              <span className="text-muted-foreground">{impactCounts.breaking} Breaking</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-glow-warning/20 border border-glow-warning/30" />
-              <span className="text-muted-foreground">2 Significant</span>
+              <span className="text-muted-foreground">{impactCounts.significant} Significant</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-muted border border-border" />
-              <span className="text-muted-foreground">1 Minor</span>
+              <span className="text-muted-foreground">{impactCounts.minor} Minor</span>
             </div>
           </div>
         </GlassCard>
       </motion.div>
 
+      {/* Must-Fix & Negotiation Priorities */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}
+        data-tour="policy-comparison-priorities"
+        className="grid md:grid-cols-2 gap-4 mb-6">
+        <GlassCard>
+          <div className="flex items-center gap-2 mb-3">
+            <Shield className="w-4 h-4 text-glow-error" />
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Must-Fix Before Approval</h4>
+          </div>
+          <div className="space-y-2">
+            {mustFixItems.length > 0 ? mustFixItems.map((item, index) => (
+              <div key={`${item.title}-${index}`} className="flex items-start gap-2 text-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-glow-error mt-1.5 shrink-0" />
+                <div>
+                  <p className="text-foreground font-medium">{item.title}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.detail}</p>
+                </div>
+              </div>
+            )) : <p className="text-xs text-muted-foreground">Run the grounded comparison to identify the highest-priority blockers before approval.</p>}
+          </div>
+        </GlassCard>
+        <GlassCard>
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-4 h-4 text-glow-warning" />
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Negotiation Priorities</h4>
+          </div>
+          <div className="space-y-2 text-xs text-muted-foreground leading-relaxed">
+            {negotiationPriorities.length > 0 ? negotiationPriorities.map((priority, index) => (
+              <p key={priority}><span className="text-foreground font-medium">{index + 1}.</span> {priority}</p>
+            )) : <p>Negotiation priorities will appear here after the grounded comparison runs.</p>}
+          </div>
+        </GlassCard>
+      </motion.div>
+
       {/* Comparison Diffs */}
-      <div className="space-y-3">
-        {comparisonDiffs.map((diff, i) => (
+      <div className="space-y-3" data-tour="policy-comparison-diffs">
+        {differences.length > 0 ? differences.map((diff, i) => (
           <motion.div key={diff.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + i * 0.06 }}
             className="glass rounded-xl p-5 hover:border-primary/20 transition-all duration-300">
@@ -82,38 +573,152 @@ export default function ComparisonPage() {
                 <span className="text-[10px] px-2 py-0.5 rounded-md bg-secondary/50 text-muted-foreground">{diff.category}</span>
               </div>
             </div>
+            <div className="flex items-start gap-2 bg-secondary/20 rounded-lg p-3 mb-3">
+              <ArrowLeftRight className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground leading-relaxed">{diff.business_impact}</p>
+            </div>
             <div className="grid md:grid-cols-2 gap-4 mb-3">
               <div className="bg-glow-error/5 border border-glow-error/10 rounded-lg p-3">
-                <span className="text-[10px] uppercase tracking-wider text-glow-error/60 font-medium block mb-1">Document A</span>
-                <p className="text-xs text-foreground/80 leading-relaxed">{diff.docA}</p>
+                <span className="text-[10px] uppercase tracking-wider text-glow-error/60 font-medium block mb-1">{diff.doc_a_label}</span>
+                <p className="text-xs text-foreground/80 leading-relaxed">{diff.doc_a_text}</p>
               </div>
               <div className="bg-glow-success/5 border border-glow-success/10 rounded-lg p-3">
-                <span className="text-[10px] uppercase tracking-wider text-glow-success/60 font-medium block mb-1">Document B</span>
-                <p className="text-xs text-foreground/80 leading-relaxed">{diff.docB}</p>
+                <span className="text-[10px] uppercase tracking-wider text-glow-success/60 font-medium block mb-1">{diff.doc_b_label}</span>
+                <p className="text-xs text-foreground/80 leading-relaxed">{diff.doc_b_text}</p>
               </div>
             </div>
-            <div className="flex items-start gap-2 bg-secondary/20 rounded-lg p-3">
-              <ArrowLeftRight className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground leading-relaxed">{diff.businessImpact}</p>
-            </div>
+
           </motion.div>
-        ))}
+        )) : (
+          <GlassCard>
+            <div className="text-xs text-muted-foreground">Run the comparison to populate grounded differences, category tags and bilateral document evidence.</div>
+          </GlassCard>
+        )}
       </div>
 
       {/* Recommendation */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+        data-tour="policy-comparison-recommendation"
         className="mt-6">
         <GlassCard>
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-primary" />
+            <CheckCircle2 className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-medium text-foreground">Recommendation</h3>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Proceed with Document B's terms as baseline. The liability cap and IP ownership clauses in Document A present unacceptable risk.
-            Negotiate Document A's data residency and incident response terms into Document B's framework. Generate a decision deck for stakeholder review.
+          <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+            {comparisonView ? (
+              comparisonView.recommendation.summary
+            ) : (
+              'Run the grounded comparison to generate a decision-ready recommendation and executive handoff note.'
+            )}
           </p>
+          <div className="flex items-center gap-3 text-[10px] text-muted-foreground pt-2 border-t border-border/30">
+            <span><span className="text-foreground font-medium">Handoff:</span> {comparisonView?.recommendation.handoff || 'Human review pending'}</span>
+            <span>·</span>
+            <span><span className="text-foreground font-medium">Artifact:</span> {comparisonView?.recommendation.artifact_label || 'Generate the comparison deck to create a local artifact.'}</span>
+          </div>
         </GlassCard>
       </motion.div>
+
+      <div className="grid lg:grid-cols-2 gap-4 mt-6" data-tour="policy-comparison-watchouts-artifacts">
+        <GlassCard>
+          <h3 className="text-sm font-medium text-foreground mb-3">Watchouts</h3>
+          <div className="space-y-2 text-xs text-muted-foreground">
+            {comparisonWatchouts.length > 0 ? comparisonWatchouts.map((item) => (
+              <p key={item}>• {item}</p>
+            )) : <p>Watchouts will appear here after the workflow runs.</p>}
+          </div>
+        </GlassCard>
+
+        <div data-tour="policy-comparison-artifacts">
+          <GlassCard>
+          <h3 className="text-sm font-medium text-foreground mb-3">Generated Artifacts</h3>
+          {(trelloPublishResult || notionPublishResult) ? (
+            <div className="mb-4 grid gap-3 md:grid-cols-2">
+              {trelloPublishResult ? (
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Trello publish</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground">{trelloPublishResult.message || 'The current comparison was sent to Trello.'}</p>
+                    </div>
+                    <StatusPill status={trelloPublishResult.status || 'completed'} />
+                  </div>
+                </div>
+              ) : null}
+              {notionPublishResult ? (
+                <div className="rounded-lg border border-border/40 bg-secondary/20 px-3 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Notion memo</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground">{notionPublishResult.message || notionPublishResult.page_title || 'The current comparison was published to Notion.'}</p>
+                    </div>
+                    <StatusPill status={notionPublishResult.status || 'completed'} />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          {deckExportState && (
+            <div className="mb-3 rounded-lg bg-secondary/20 border border-border/40 px-3 py-2">
+              <div className="flex items-center gap-2 mb-1">
+                <StatusPill status={deckExportState.status} />
+                <span className="text-xs font-medium text-foreground">Deck export status</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">{deckExportState.message}</p>
+            </div>
+          )}
+          <div className="space-y-2">
+            {allArtifacts.length > 0 ? allArtifacts.map((artifact) => (
+              <div key={`${artifact.artifact_type}-${artifact.path || artifact.label}`} className="flex items-center justify-between py-2 px-3 rounded-lg bg-secondary/20 hover:bg-secondary/30 transition-colors">
+                <div className="flex items-center gap-2 min-w-0">
+                  <StatusPill status={artifact.available ? 'ready' : 'pending'} />
+                  <div className="min-w-0">
+                    <span className="block text-xs text-foreground truncate">{artifact.download_name || artifact.label}</span>
+                    <span className="block text-[10px] text-muted-foreground truncate">{artifact.artifact_type}{artifact.path ? ` • ${artifact.path}` : ''}</span>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="h-7 text-[10px] text-muted-foreground hover:text-foreground" disabled={!artifact.available || !artifact.path} onClick={() => handleOpenArtifact(artifact)}>
+                  Open <ExternalLink className="w-3 h-3 ml-1" />
+                </Button>
+              </div>
+            )) : <div className="text-xs text-muted-foreground">Run the workflow and generate the deck to populate comparison artifacts.</div>}
+          </div>
+          </GlassCard>
+        </div>
+      </div>
+
+      <div className="mt-6" data-tour="policy-comparison-publish" data-testid="workflow-publish-actions-surface" data-workflow="policy-comparison">
+        <WorkflowPublishActions
+          workflowId="policy_contract_comparison"
+          result={workflowResponse?.result ?? null}
+          runId={workflowResponse?.run_id ?? null}
+          title="Publish outputs"
+          description="After reviewing the comparison summary, deltas and artifacts, preview the remediation cards or Notion memo before publishing."
+          notionPreviewPayload={{
+            product_api_base_url: PRODUCT_API_BASE_URL,
+            title: comparisonView?.executive_summary.documents?.join(' vs ') || 'Policy comparison',
+            summary: comparisonView?.executive_summary.narrative || workflowResponse?.result.summary,
+            recommendation: comparisonView?.recommendation.summary || workflowResponse?.result.recommendation,
+            must_fix_items: mustFixItems,
+            negotiation_priorities: negotiationPriorities,
+            differences: differences.map((item) => ({
+              clause: item.clause,
+              impact: item.impact,
+              business_impact: item.business_impact,
+            })),
+            documents: comparisonView?.compared_documents || [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+            primary_documents: [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+            source_document_name: selectedDocumentA?.name || null,
+            source_document_title: selectedDocumentA?.name || null,
+            source_document_filename: selectedDocumentA?.name || null,
+            source_document_category: 'comparison',
+          }}
+          onTrelloPublished={setTrelloPublishResult}
+          onNotionPublished={setNotionPublishResult}
+        />
+      </div>
+
     </motion.div>
   );
 }

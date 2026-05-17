@@ -1,0 +1,30 @@
+{
+  "embedding_models": [
+    "bge-m3",
+    "embeddinggemma:300m",
+    "jina-code-embeddings-0.5b-mlx"
+  ],
+  "questions": [
+    {
+      "question": "Which file defines the function `hybrid_rerank_chunks` and calculates a combined rerank score using vector and lexical weights?",
+      "expected_document_names": [
+        "reranking.py"
+      ],
+      "subset": "code"
+    },
+    {
+      "question": "Which file defines `run_model_comparison_candidate` and the `MODEL_COMPARISON_USE_CASE_PRESETS` constants for benchmark generation use cases?",
+      "expected_document_names": [
+        "model_comparison.py"
+      ],
+      "subset": "code"
+    },
+    {
+      "question": "Which code sample should be inspected to find a mutation bug involving shared references and unsafe in-place edits?",
+      "expected_document_names": [
+        "05_code_sample.py"
+      ],
+      "subset": "code"
+    }
+  ]
+}

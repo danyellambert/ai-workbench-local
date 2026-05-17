@@ -1,0 +1,31 @@
+{
+  "run_id": "phase8-5-round1-aad950d5b8",
+  "output_dir": "baseline://workspace/benchmark_runs/phase8_5_round1/phase8-5-round1-aad950d5b8",
+  "selected_groups": [
+    "generation",
+    "embeddings"
+  ],
+  "smoke": true,
+  "provider_filter": "ollama",
+  "model_filter": null,
+  "resume_requested": false,
+  "planned_case_count": 3,
+  "resume_success_case_count": 0,
+  "groups": {
+    "generation": {
+      "planned_cases": 2,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_55f5a96bc75722f0",
+        "case_c00eb27b288d2a23"
+      ]
+    },
+    "embeddings": {
+      "planned_cases": 1,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_ea4034ab8139c53f"
+      ]
+    }
+  }
+}

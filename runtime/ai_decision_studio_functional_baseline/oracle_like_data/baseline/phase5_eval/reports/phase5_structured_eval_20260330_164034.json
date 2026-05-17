@@ -1,0 +1,127 @@
+{
+  "generated_at": "2026-03-30T16:40:34.077772",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "code_analysis",
+      "suite_name": "structured_real_document_eval",
+      "mode": "indexed_document",
+      "status": "PASS",
+      "score": 13,
+      "max_score": 14,
+      "reasons": [],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218",
+        "name": "demo_code_analysis.py",
+        "file_type": "py",
+        "chunk_count": 1
+      },
+      "gold_fixture_path": "baseline://external_files/3f5fd09ed6527416_07_code_analysis_demo_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "PASS",
+        "score": 13,
+        "max_score": 14,
+        "reasons": [],
+        "thresholds": {
+          "pass_ratio": 0.72,
+          "warn_ratio": 0.48,
+          "notes": "Code analysis privilegia cobertura semântica de issues, refactor plan e test suggestions grounded."
+        },
+        "metrics": {
+          "snippet_summary_hit": 1,
+          "main_purpose_hit": 1,
+          "issue_hits": 3,
+          "refactor_hits": 3,
+          "test_hits": 3,
+          "maintainability_hits": 1,
+          "risk_hits": 1
+        }
+      },
+      "thresholds": {
+        "pass_ratio": 0.72,
+        "warn_ratio": 0.48,
+        "notes": "Code analysis privilegia cobertura semântica de issues, refactor plan e test suggestions grounded."
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "code_analysis",
+        "schema_version": "1.0",
+        "snippet_summary": "A função `normalize_scores` normaliza os valores de 'score' em um conjunto de itens, garantindo que eles estejam entre 0 e 100. A função `process` processa esses itens para calcular a média.",
+        "main_purpose": "Normalizar scores e calcular a média dos items",
+        "detected_issues": [
+          {
+            "severity": "medium",
+            "category": "maintainability",
+            "title": "Lógica duplicada",
+            "description": "Uma mesma regra aparece repetida em mais de um ponto do código.",
+            "evidence": "Repeated conditional branches in two methods.",
+            "recommendation": "Extraia a lógica comum para uma função auxiliar."
+          },
+          {
+            "severity": "high",
+            "category": "runtime_failure",
+            "title": "Division by zero on empty input",
+            "description": "A divisão por `len(...)` pode falhar quando a coleção processada estiver vazia.",
+            "evidence": "average = total / len(values)",
+            "recommendation": "Adicione verificação para lista vazia antes da divisão e defina `average = 0.0` quando não houver valores para agregar."
+          },
+          {
+            "severity": "medium",
+            "category": "input_mutation",
+            "title": "Mutates caller-provided items in place",
+            "description": "O código altera objetos recebidos do chamador diretamente durante a normalização.",
+            "evidence": "item[\"score\"] = ...",
+            "recommendation": "Construir um novo objeto normalizado em vez de mutar o objeto original."
+          },
+          {
+            "severity": "medium",
+            "category": "api_contract",
+            "title": "Output structure is inconsistent",
+            "description": "Ramos diferentes retornam itens com formatos diferentes, o que fragiliza o contrato da API.",
+            "evidence": "result.append({\"name\": ...}) / result.append(item)",
+            "recommendation": "Padronizar a estrutura de saída para que todos os itens retornem o mesmo shape."
+          }
+        ],
+        "readability_improvements": [
+          "Renomear variáveis pouco claras",
+          "Documentar claramente o schema esperado de entrada e saída."
+        ],
+        "maintainability_improvements": [
+          "Extrair lógica compartilhada",
+          "Explicitar o contrato de imutabilidade da entrada e preservar esse contrato na implementação.",
+          "Separar a etapa de normalização da etapa de agregação para simplificar o fluxo e o contrato da API."
+        ],
+        "refactor_plan": [
+          "Passo 1: Definir uma função auxiliar para normalizar o score.",
+          "Passo 2: Chamar essa função no lugar das condicionais duplicadas.",
+          "Tratar entrada vazia antes do cálculo da média e retornar `0.0` quando não houver itens.",
+          "Evitar mutação in-place construindo novos objetos normalizados para a saída.",
+          "Normalizar o schema de saída para que todos os itens retornem a mesma estrutura."
+        ],
+        "test_suggestions": [
+          "Adicionar teste unitário específico para o caso crítico identificado",
+          "Adicionar teste para entrada vazia verificando que a média retorna `0.0` sem exceção.",
+          "Adicionar teste para garantir que os objetos de entrada não sejam modificados in-place.",
+          "Adicionar teste cobrindo itens sem `score` e verificando que o formato de saída continua consistente."
+        ],
+        "risk_notes": [
+          "Risco concreto observado no comportamento atual",
+          "Uma entrada vazia pode causar falha em tempo de execução por divisão por zero.",
+          "Saídas com formatos mistos podem quebrar consumidores que esperam uma estrutura estável."
+        ]
+      }
+    }
+  ]
+}

@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://axiovance.danyel-lambert.com/sitemap.xml

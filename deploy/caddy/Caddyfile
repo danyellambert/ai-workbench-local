@@ -1,0 +1,41 @@
+{$AI_DECISION_STUDIO_PUBLIC_DOMAIN} {
+	encode gzip zstd
+
+	@dynamic path /api/* /health
+	header @dynamic Cache-Control "no-store, max-age=0"
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+	}
+
+	log {
+		output stdout
+		format json
+	}
+
+	# Clean public tracking links.
+	redir /cv /?utm_source=cv&utm_medium=pdf&utm_campaign=portfolio_demo 302
+	redir /linkedin /?utm_source=linkedin&utm_medium=profile&utm_campaign=portfolio_demo 302
+	redir /github /?utm_source=github&utm_medium=readme&utm_campaign=portfolio_demo 302
+	redir /intro /?utm_source=direct_share&utm_medium=shortlink&utm_campaign=personal_intro 302
+	redir /m /?utm_source=message&utm_medium=dm&utm_campaign=personal_intro 302
+	redir /w /?utm_source=whatsapp&utm_medium=message&utm_campaign=personal_intro 302
+
+	# Clean deep links.
+	redir /tour /app?tour=1&utm_source=direct&utm_medium=shortlink&utm_campaign=guided_tour 302
+	redir /github-tour /app?tour=1&utm_source=github&utm_medium=readme&utm_campaign=guided_tour 302
+	redir /cv-tour /app?tour=1&utm_source=cv&utm_medium=pdf&utm_campaign=guided_tour 302
+	redir /github-document-review /app/workflows/document-review?utm_source=github&utm_medium=readme&utm_campaign=document_review_deep_link 302
+	redir /linkedin-tour /app?tour=1&utm_source=linkedin&utm_medium=profile&utm_campaign=guided_tour 302
+	redir /linkedin-document-review /app/workflows/document-review?utm_source=linkedin&utm_medium=profile&utm_campaign=document_review_deep_link 302
+	redir /cv-document-review /app/workflows/document-review?utm_source=cv&utm_medium=pdf&utm_campaign=document_review_deep_link 302
+
+	reverse_proxy frontend:8080
+}
+
+{$AI_DECISION_STUDIO_LEGACY_PUBLIC_DOMAIN} {
+	redir https://{$AI_DECISION_STUDIO_PUBLIC_DOMAIN}{uri} permanent
+}

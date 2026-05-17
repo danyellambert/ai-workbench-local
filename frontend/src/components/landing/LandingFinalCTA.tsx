@@ -48,7 +48,7 @@ export default function LandingFinalCTA() {
         className="relative z-10 mt-24 text-center"
       >
         <p className="text-[11px] text-muted-foreground/50">
-          AI Decision Studio · Document intelligence for decision workflows
+          Axiovance · Private AI Decision Intelligence
         </p>
       </motion.div>
     </section>

@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "06_benchmark_full_deck_collision_audit",
+  "output_dir": "baseline://artifacts/presentation_exports/manual_title_readability_suite_v3/06_benchmark_full_deck_collision_audit_previews",
+  "presentation_title": "06_benchmark_full_deck_collision_audit",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/080241541fc90b30_06_benchmark_full_deck_collision_audit.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "06_benchmark_full_deck_collision_audit-01.png",
+      "path": "baseline://external_files/f4abc10b20cf8ee9_06_benchmark_full_deck_collision_audit-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "06_benchmark_full_deck_collision_audit-02.png",
+      "path": "baseline://external_files/897be089b08b7884_06_benchmark_full_deck_collision_audit-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "06_benchmark_full_deck_collision_audit-03.png",
+      "path": "baseline://external_files/86225afe11962a03_06_benchmark_full_deck_collision_audit-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "06_benchmark_full_deck_collision_audit-04.png",
+      "path": "baseline://external_files/ac0044321a463412_06_benchmark_full_deck_collision_audit-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "06_benchmark_full_deck_collision_audit-05.png",
+      "path": "baseline://external_files/d9bf3150c96a1628_06_benchmark_full_deck_collision_audit-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "06_benchmark_full_deck_collision_audit-06.png",
+      "path": "baseline://external_files/f5d5828d1d5693a8_06_benchmark_full_deck_collision_audit-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "06_benchmark_full_deck_collision_audit-07.png",
+      "path": "baseline://external_files/c32fcaf65c71f2ae_06_benchmark_full_deck_collision_audit-07.png"
+    }
+  ]
+}

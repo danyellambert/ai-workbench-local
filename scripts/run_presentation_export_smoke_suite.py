@@ -443,7 +443,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--ppt-creator-root",
-        default="/Users/danyellambert/ppt_creator_app",
+        default="services/ppt_creator_app",
         help="Absolute path to the ppt_creator_app repository used to generate local previews from PPTX artifacts.",
     )
     args = parser.parse_args()

@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-03-15 10:59:36",
+  "test_mode": false,
+  "pdfs": [
+    "2025-HB-44-20250106-Final-508.pdf",
+    "kaur-2016-ijca-911367.pdf",
+    "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+    "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+  ],
+  "suite_config_path": "baseline://external_files/3fc9b397e882daed_suite_config_full.json",
+  "steps": [
+    {
+      "step": "01_pdf_extraction",
+      "status": "ok",
+      "returncode": 0,
+      "duration_seconds": 9247.9417,
+      "command": [
+        "baseline://external_files/adc9c571d706b7ab_python",
+        "scripts/run_pdf_extraction_benchmark_en.py",
+        "--pdfs",
+        "baseline://workspace/2025-HB-44-20250106-Final-508.pdf",
+        "baseline://workspace/kaur-2016-ijca-911367.pdf",
+        "baseline://workspace/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+        "baseline://workspace/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+        "--output-dir",
+        "baseline://workspace/benchmark_runs/20260315_011241_phase_4_5_all/01_pdf_extraction"
+      ],
+      "log_path": "baseline://external_files/f5d12473a9c12335_01_pdf_extraction.log"
+    },
+    {
+      "step": "02_embedding_models",
+      "status": "ok",
+      "returncode": 0,
+      "duration_seconds": 2723.1781,
+      "command": [
+        "baseline://external_files/adc9c571d706b7ab_python",
+        "scripts/run_phase_4_5_benchmark_suite.py",
+        "--pdfs",
+        "baseline://workspace/2025-HB-44-20250106-Final-508.pdf",
+        "baseline://workspace/kaur-2016-ijca-911367.pdf",
+        "baseline://workspace/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+        "baseline://workspace/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+        "--suite-config",
+        "baseline://external_files/3fc9b397e882daed_suite_config_full.json",
+        "--groups",
+        "embedding_models",
+        "--output-dir",
+        "baseline://workspace/benchmark_runs/20260315_011241_phase_4_5_all/02_embedding_models"
+      ],
+      "log_path": "baseline://external_files/d00f27dc1acc9050_02_embedding_models.log"
+    },
+    {
+      "step": "03_embedding_context_windows",
+      "status": "ok",
+      "returncode": 0,
+      "duration_seconds": 21952.0178,
+      "command": [
+        "baseline://external_files/adc9c571d706b7ab_python",
+        "scripts/run_phase_4_5_benchmark_suite.py",
+        "--pdfs",
+        "baseline://workspace/2025-HB-44-20250106-Final-508.pdf",
+        "baseline://workspace/kaur-2016-ijca-911367.pdf",
+        "baseline://workspace/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+        "baseline://workspace/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+        "--suite-config",
+        "baseline://external_files/3fc9b397e882daed_suite_config_full.json",
+        "--groups",
+        "embedding_context_window",
+        "--output-dir",
+        "baseline://workspace/benchmark_runs/20260315_011241_phase_4_5_all/03_embedding_context_windows"
+      ],
+      "log_path": "baseline://external_files/693663769bfbd064_03_embedding_context_windows.log"
+    },
+    {
+      "step": "04_retrieval_tuning",
+      "status": "ok",
+      "returncode": 0,
+      "duration_seconds": 1290.2863,
+      "command": [
+        "baseline://external_files/adc9c571d706b7ab_python",
+        "scripts/run_phase_4_5_benchmark_suite.py",
+        "--pdfs",
+        "baseline://workspace/2025-HB-44-20250106-Final-508.pdf",
+        "baseline://workspace/kaur-2016-ijca-911367.pdf",
+        "baseline://workspace/Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+        "baseline://workspace/c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+        "--suite-config",
+        "baseline://external_files/3fc9b397e882daed_suite_config_full.json",
+        "--groups",
+        "retrieval_tuning",
+        "--output-dir",
+        "baseline://workspace/benchmark_runs/20260315_011241_phase_4_5_all/04_retrieval_tuning"
+      ],
+      "log_path": "baseline://external_files/66230202fa817161_04_retrieval_tuning.log"
+    }
+  ]
+}

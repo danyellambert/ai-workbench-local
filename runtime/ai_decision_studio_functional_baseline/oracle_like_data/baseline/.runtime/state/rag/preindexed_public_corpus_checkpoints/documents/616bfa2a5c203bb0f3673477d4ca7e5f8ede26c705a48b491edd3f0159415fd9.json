@@ -1,0 +1,108 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Data Processing Addendum 2024.pdf",
+  "file_type": "pdf",
+  "file_hash": "616bfa2a5c203bb0f3673477d4ca7e5f8ede26c705a48b491edd3f0159415fd9",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-013  Data Processing Addendum 2024\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nData Processing Addendum 2024\nPersonal-data terms attached to the Northwind cloud-services engagement.\nDocument ID\nCTR-013\nOwner\nPrivacy Counsel\nVersion\n1.0\nEffective Date\n2024-01-15\nController\nMeridian Holdings Ltd.\nProcessor\nNorthwind Cloud Systems LLC\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Roles and Processing\n●\nMeridian acts as Controller for Customer Personal Data processed through the managed retrieval and analytics services.\n●\nNorthwind acts as Processor except where applicable law requires Northwind to act independently.\n●\nProcessor personnel with access to Customer Personal Data must be subject to confidentiality obligations and\nbackground screening appropriate to role sensitivity.\n2. Security Measures\nControl Area\nRequirement\nAccess Management\nLeast-privilege access, MFA for privileged users, quarterly recertification of production\nadministrators.\nEncryption\nEncryption in transit and at rest for production data stores and backups.\nMonitoring\nSecurity events and privileged actions retained for at least 12 months.\nDeletion / Return\nReturn or delete Customer Personal Data within 30 days after termination unless retention is\nrequired by law.\n3. International Transfers and Data Location\nClause 5.2 — Data Location. Processor may process Customer Personal Data in any jurisdiction where Processor, its\nAffiliates, or its approved subprocessors maintain facilities, support personnel, or technical infrastructure reasonably\nrequired to deliver the Services.\nClause 5.3 — Applicable-Law Compliance. Processor shall implement reasonable measures intended to support lawful\ninternational transfers and shall cooperate with Customer where supplemental documentation is materially necessary.\nClause 5.4 — Transfer Mechanism. As of the Effective Date, the parties acknowledge that specific transfer appendices,\nincluding any standard contractual clauses, may be added later if requested by Customer and agreed in writing.\nGap intentionally preserved: the DPA does not require EU-only residency and does not attach an SCC\nappendix. This supports the compliance finding and checklist action.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-013  Data Processing Addendum 2024\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\n4. Subprocessors and Assistance\nClause 6.1 — Subprocessors. Processor will maintain a current subprocessor list and will make updates available through\nits supplier portal. Processor will consider commercially reasonable objections received within fifteen (15) days of\npublication of a material change.\nClause 7.2 — Audit Assistance. Processor will provide reasonable information and assistance needed to demonstrate\ncompliance, including current certifications, summary reports, and targeted responses for material diligence matters.\nAppendix Status\nAppendix\nStatus\nComment\nAppendix A — Processing Details\nAttached\nService scope, categories of data, and subject groups included.\nAppendix B — Security Measures\nAttached\nHigh-level control summary only.\nAppendix C — Standard\nContractual Clauses\nReserved / not\nattached\nNo executed SCC package included in the current file.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 3499,
+    "final_text_chars": 3499,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2428,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 1060,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 5,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 6615,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-013  Data Processing Addendum 2024\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nData Processing Addendum 2024\nPersonal-data terms attached to the Northwind cloud-services engagement.\nDocument ID\nCTR-013\nOwner\nPrivacy Counsel\nVersion\n1.0\nEffective Date\n2024-01-15\nController\nMeridian Holdings Ltd.\nProcessor\nNorthwind Cloud Systems LLC\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\n1. Roles and Processing\n●\nMeridian acts as Controller for Customer Personal Data processed through the managed retrieval and analytics services.\n●\nNorthwind acts as Processor except where applicable law requires Northwind to act independently.\n●\nProcessor personnel with access to Customer Personal Data must be subject to confidentiality obligations and\nbackground screening appropriate to role sensitivity.\n2. Security Measures\nControl Area\nRequirement\nAccess Management\nLeast-privilege access, MFA for privileged users, quarterly recertification of production\nadministrators.\nEncryption\nEncryption in transit and at rest for production data stores and backups.\nMonitoring\nSecurity events and privileged actions retained for at least 12 months.\nDeletion / Return\nReturn or delete Customer Personal Data within 30 days after termination unless retention is\nrequired by law.\n3. International Transfers and Data Location\nClause 5.2 — Data Location. Processor may process Customer Personal Data in any jurisdiction where Processor, its\nAffiliates, or its approved subprocessors maintain facilities, support personnel, or technical infrastructure reasonably\nrequired to deliver the Services.\nClause 5.3 — Applicable-Law Compliance. Processor shall implement reasonable measures intended to support lawful\ninternational transfers and shall cooperate with Customer where supplemental documentation is materially necessary.\nClause 5.4 — Transfer Mechanism. As of the Effective Date, the parties acknowledge that specific transfer appendices,\nincluding any standard contractual clauses, may be added later if requested by Customer and agreed in writing.\nGap intentionally preserved: the DPA does not require EU-only residency and does not attach an SCC\nappendix. This supports the compliance finding and checklist action.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-013  Data Processing Addendum 2024\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\n4. Subprocessors and Assistance\nClause 6.1 — Subprocessors. Processor will maintain a current subprocessor list and will make updates available through\nits supplier portal. Processor will consider commercially reasonable objections received within fifteen (15) days of\npublication of a material change.\nClause 7.2 — Audit Assistance. Processor will provide reasonable information and assistance needed to demonstrate\ncompliance, including current certifications, summary reports, and targeted responses for material diligence matters.\nAppendix Status\nAppendix\nStatus\nComment\nAppendix A — Processing Details\nAttached\nService scope, categories of data, and subject groups included.\nAppendix B — Security Measures\nAttached\nHigh-level control summary only.\nAppendix C — Standard\nContractual Clauses\nReserved / not\nattached\nNo executed SCC package included in the current file.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic DPA is text-first; Docling/text extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "contracts/Data Processing Addendum 2024.pdf",
+    "nextcloud_relative_path": "contracts/Data Processing Addendum 2024.pdf",
+    "source_relative_path": "contracts/Data Processing Addendum 2024.pdf",
+    "filename": "Data Processing Addendum 2024.pdf",
+    "title": "Data Processing Addendum 2024",
+    "category": "contracts",
+    "preindex": {
+      "relative_path": "contracts/Data Processing Addendum 2024.pdf",
+      "filename": "Data Processing Addendum 2024.pdf",
+      "title": "Data Processing Addendum 2024",
+      "category": "contracts",
+      "document_id": "contracts/Data Processing Addendum 2024.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:48:50"
+}

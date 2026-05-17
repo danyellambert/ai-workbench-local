@@ -52,6 +52,7 @@ def summarize_document_agent_log(entries: list[dict[str, object]]) -> dict[str, 
             "workflow_route_decision_counts": {},
             "workflow_guardrail_decision_counts": {},
             "review_reasons": {},
+            "latest_timestamp": None,
         }
 
     total_runs = len(entries)
@@ -123,4 +124,5 @@ def summarize_document_agent_log(entries: list[dict[str, object]]) -> dict[str, 
         "workflow_route_decision_counts": dict(route_decision_counter),
         "workflow_guardrail_decision_counts": dict(guardrail_decision_counter),
         "review_reasons": dict(review_reason_counter),
+        "latest_timestamp": entries[-1].get("timestamp"),
     }

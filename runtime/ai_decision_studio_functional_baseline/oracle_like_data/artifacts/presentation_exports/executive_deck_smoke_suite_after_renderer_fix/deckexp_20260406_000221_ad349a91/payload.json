@@ -1,0 +1,187 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Benchmark & Eval Review",
+    "subtitle": "Resumo executivo da rodada atual",
+    "author": "AI Workbench Local",
+    "date": "2026-04-06",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Benchmark & Eval Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Benchmark & Eval Review",
+      "subtitle": "Resumo executivo da rodada atual",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Export kind: benchmark_eval_executive_deck. Sources: phase7_model_comparison_log, phase8_eval_store."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "2 candidatos foram consolidados no benchmark, com success rate médio de 100% e liderança atual de qwen2.5:7b. A camada de eval registrou 2 runs, com PASS rate de 50% e needs review de 50%.",
+      "bullets": [
+        "Top benchmark candidate atual: qwen2.5:7b.",
+        "Benchmark success rate agregado em 100%.",
+        "Use-case fit médio de benchmark em 89%."
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Resumo executivo consolidado a partir dos agregados de benchmark/eval."
+    },
+    {
+      "type": "metrics",
+      "title": "Benchmark and eval snapshot",
+      "bullets": [],
+      "cards": [],
+      "metrics": [
+        {
+          "value": "2",
+          "label": "Benchmark candidates",
+          "detail": "Top model: qwen2.5:7b"
+        },
+        {
+          "value": "100%",
+          "label": "Benchmark success",
+          "detail": "Avg latency: 0.95s"
+        },
+        {
+          "value": "2",
+          "label": "Eval runs",
+          "detail": "Top suite: structured_smoke_eval"
+        },
+        {
+          "value": "50%",
+          "label": "Eval PASS rate",
+          "detail": "Avg score: 90%"
+        }
+      ],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Métricas executivas consolidadas para leitura rápida."
+    },
+    {
+      "type": "table",
+      "title": "Model leaderboard",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Model",
+        "Signal",
+        "Latency (s)",
+        "Fit"
+      ],
+      "table_rows": [
+        [
+          "qwen2.5:7b",
+          "0.900",
+          "1.10",
+          "90%"
+        ],
+        [
+          "gpt-4o-mini",
+          "0.880",
+          "0.80",
+          "88%"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Leaderboard agregado de modelos para o slice benchmark/eval."
+    },
+    {
+      "type": "table",
+      "title": "Eval suite leaderboard",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Suite",
+        "Pass rate",
+        "Avg score",
+        "Latency (s)"
+      ],
+      "table_rows": [
+        [
+          "structured_smoke_eval",
+          "100%",
+          "100%",
+          "1.20"
+        ],
+        [
+          "checklist_regression",
+          "0%",
+          "80%",
+          "2.40"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Suites de eval ordenadas por qualidade agregada."
+    },
+    {
+      "type": "two_column",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Promover qwen2.5:7b como candidato principal da próxima rodada controlada, mantendo o quality gate apoiado no PASS rate atual de 50%.",
+          "bullets": [
+            "Promover qwen2.5:7b para uma rodada shadow/controlada como candidato de…",
+            "Reduzir backlog de needs_review antes de ampliar o escopo da rodada seg…"
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "Needs review rate acima do conforto operacional (50%).",
+          "bullets": [
+            "Fail rate: 0%",
+            "Avg eval latency: 1.80s"
+          ]
+        }
+      ],
+      "speaker_notes": "Comparação entre decisão recomendada e pontos de atenção operacionais."
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Promover qwen2.5:7b para uma rodada shadow/controlada como candidato default.",
+        "Reduzir backlog de needs_review antes de ampliar o escopo da rodada seguinte.",
+        "Serializar este contrato e chamar o `ppt_creator_app` por API HTTP no próximo s…"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Próximos passos sugeridos para o próximo slice da integração."
+    }
+  ]
+}

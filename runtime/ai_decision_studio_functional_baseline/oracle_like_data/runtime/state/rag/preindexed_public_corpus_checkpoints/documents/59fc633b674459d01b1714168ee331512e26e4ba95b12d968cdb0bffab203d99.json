@@ -1,0 +1,108 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Employee Handbook 2024.pdf",
+  "file_type": "pdf",
+  "file_hash": "59fc633b674459d01b1714168ee331512e26e4ba95b12d968cdb0bffab203d99",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nOPS-001  Employee Handbook 2024\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nEmployee Handbook 2024\nGeneral workforce handbook included for document-library realism and additional policy routing.\nDocument ID\nOPS-001\nOwner\nPeople Operations\nVersion\n2024.1\nEffective Date\n2024-01-02\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nWelcome and Working Principles\nThis handbook summarises Meridian’s workforce standards, employee responsibilities, and operating expectations. It is not\na contract of employment, but it does describe mandatory rules for information security, use of systems, and ethical\nconduct.\nCore Policies\n●\nUse Meridian systems only for authorised business purposes and follow least-privilege access principles.\n●\nProtect confidential customer, employee, and partner information and report suspected security events immediately.\n●\nDo not upload regulated or confidential data to unsanctioned AI tools or personal cloud services.\n●\nRemote work requires use of approved devices, VPN or secure access tooling, and device encryption.\n●\nManagers are responsible for timely onboarding, offboarding, and review of elevated access.\nPeople and Conduct\nMeridian expects respectful conduct, timely completion of mandatory training, and use of established channels for legal,\ncompliance, and security concerns. Retaliation for good-faith reporting is prohibited.\nData and AI Usage\n●\nOnly approved datasets may be used in AI experiments or demonstrations.\n●\nSynthetic or anonymised data must be used for training, prompt testing, and user-facing demos unless explicit approval\nexists.\n●\nArtifacts shared outside Meridian must be reviewed for confidential information, contractual restrictions, and branding\ncompliance.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nOPS-001  Employee Handbook 2024\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nOperational Reference Appendix\nTopic\nReference Owner\nPointer\nAccess requests and reviews\nIT Operations\nJoiner / mover / leaver runbook and quarterly review\nschedule\nIncident reporting\nSecurity Engineering\nSecurity hotline, case portal, and after-hours escalation\nThird-party onboarding\nProcurement\nVendor review intake form and contract checklist\nRecords retention\nLegal\nCorporate records and evidence retention policy",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 2,
+    "baseline_text_chars": 2587,
+    "final_text_chars": 2587,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1971,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 600,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 71,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 5520,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nOPS-001  Employee Handbook 2024\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nEmployee Handbook 2024\nGeneral workforce handbook included for document-library realism and additional policy routing.\nDocument ID\nOPS-001\nOwner\nPeople Operations\nVersion\n2024.1\nEffective Date\n2024-01-02\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nWelcome and Working Principles\nThis handbook summarises Meridian’s workforce standards, employee responsibilities, and operating expectations. It is not\na contract of employment, but it does describe mandatory rules for information security, use of systems, and ethical\nconduct.\nCore Policies\n●\nUse Meridian systems only for authorised business purposes and follow least-privilege access principles.\n●\nProtect confidential customer, employee, and partner information and report suspected security events immediately.\n●\nDo not upload regulated or confidential data to unsanctioned AI tools or personal cloud services.\n●\nRemote work requires use of approved devices, VPN or secure access tooling, and device encryption.\n●\nManagers are responsible for timely onboarding, offboarding, and review of elevated access.\nPeople and Conduct\nMeridian expects respectful conduct, timely completion of mandatory training, and use of established channels for legal,\ncompliance, and security concerns. Retaliation for good-faith reporting is prohibited.\nData and AI Usage\n●\nOnly approved datasets may be used in AI experiments or demonstrations.\n●\nSynthetic or anonymised data must be used for training, prompt testing, and user-facing demos unless explicit approval\nexists.\n●\nArtifacts shared outside Meridian must be reviewed for confidential information, contractual restrictions, and branding\ncompliance.\n\n[Page 2]\nMeridian Holdings  Frontend Demo Grounded Corpus\nOPS-001  Employee Handbook 2024\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 2\nOperational Reference Appendix\nTopic\nReference Owner\nPointer\nAccess requests and reviews\nIT Operations\nJoiner / mover / leaver runbook and quarterly review\nschedule\nIncident reporting\nSecurity Engineering\nSecurity hotline, case portal, and after-hours escalation\nThird-party onboarding\nProcurement\nVendor review intake form and contract checklist\nRecords retention\nLegal\nCorporate records and evidence retention policy",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic handbook excerpt is text-first; Docling/text extraction is sufficient.",
+      "page_count": 2
+    },
+    "source_type": "nextcloud",
+    "relative_path": "operations/Employee Handbook 2024.pdf",
+    "nextcloud_relative_path": "operations/Employee Handbook 2024.pdf",
+    "source_relative_path": "operations/Employee Handbook 2024.pdf",
+    "filename": "Employee Handbook 2024.pdf",
+    "title": "Employee Handbook 2024",
+    "category": "operations",
+    "preindex": {
+      "relative_path": "operations/Employee Handbook 2024.pdf",
+      "filename": "Employee Handbook 2024.pdf",
+      "title": "Employee Handbook 2024",
+      "category": "operations",
+      "document_id": "operations/Employee Handbook 2024.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:29"
+}

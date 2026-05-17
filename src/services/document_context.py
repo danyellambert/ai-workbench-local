@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import Any, Optional
 
 from ..config import get_rag_settings
-from ..rag.service import retrieve_relevant_chunks_detailed
+from ..rag.service import inspect_embedding_configuration_compatibility, retrieve_relevant_chunks_detailed
 
 
 DEFAULT_DOCUMENT_SCAN_CHUNKS = 14
@@ -596,13 +597,31 @@ def _build_cv_grounding_bundle(indexing_payload: dict[str, Any]) -> dict[str, An
 
 def _get_rag_index() -> dict[str, Any] | None:
     disk_index: dict[str, Any] | None = None
+    settings = _get_effective_rag_settings()
     try:
-        from ..storage.rag_store import load_rag_store
-        from ..storage.runtime_paths import get_rag_store_path
+        from ..rag.service import normalize_rag_index
+        from ..storage.rag_store import load_rag_document_catalog, load_rag_store
 
-        disk_index = load_rag_store(get_rag_store_path(get_rag_settings().store_path.parent))
-        if isinstance(disk_index, dict):
-            return disk_index
+        # RagSettings.store_path already points to the fully resolved rag_store.json.
+        # Passing store_path.parent into get_rag_store_path() duplicated the runtime
+        # root segments and caused document grounding to read from a non-existent path,
+        # which zeroed Action Plan grounding even when the selected documents were
+        # correctly indexed.
+        raw_disk_index = load_rag_store(settings.store_path)
+        if isinstance(raw_disk_index, dict):
+            normalized_disk_index = normalize_rag_index(raw_disk_index, settings)
+            if isinstance(normalized_disk_index, dict):
+                return normalized_disk_index
+            return raw_disk_index
+
+        document_catalog = load_rag_document_catalog(settings.store_path)
+        if isinstance(document_catalog, list):
+            disk_index = {
+                "documents": [item for item in document_catalog if isinstance(item, dict)],
+                "chunks": [],
+                "settings": {"store_path": str(settings.store_path)},
+                "updated_at": None,
+            }
     except Exception:
         disk_index = None
     try:
@@ -619,6 +638,31 @@ def _get_rag_index() -> dict[str, Any] | None:
     return disk_index
 
 
+
+
+class _BoundEmbeddingProvider:
+    def __init__(self, provider: Any, forced_model: str | None = None):
+        self._provider = provider
+        self._forced_model = str(forced_model or "").strip() or None
+
+    def create_embeddings(
+        self,
+        texts: list[str],
+        model: str,
+        context_window: int | None = None,
+        truncate: bool = True,
+    ) -> list[list[float]]:
+        effective_model = self._forced_model or str(model or "").strip()
+        return self._provider.create_embeddings(
+            texts,
+            model=effective_model,
+            context_window=context_window,
+            truncate=truncate,
+        )
+
+    def __getattr__(self, name: str):
+        return getattr(self._provider, name)
+
 def _get_effective_rag_settings():
     try:
         from .rag_state import get_rag_runtime_settings
@@ -628,23 +672,42 @@ def _get_effective_rag_settings():
             return runtime_settings
     except Exception:
         pass
-    return get_rag_settings()
+    try:
+        from .runtime_controls import build_effective_rag_settings
+
+        return build_effective_rag_settings(default_settings=get_rag_settings())
+    except Exception:
+        return get_rag_settings()
 
 
 def _get_embedding_provider():
     try:
         from ..providers.registry import build_provider_registry, resolve_provider_runtime_profile
+        from .runtime_controls import resolve_runtime_fallback_provider, resolve_runtime_fallback_step
     except Exception:
         return None
     registry = build_provider_registry()
     rag_settings = _get_effective_rag_settings()
+    fallback_provider = resolve_runtime_fallback_provider("embeddings")
     runtime_profile = resolve_provider_runtime_profile(
         registry,
         rag_settings.embedding_provider,
         capability="embeddings",
-        fallback_provider="ollama",
+        fallback_provider=fallback_provider,
     )
-    return runtime_profile.get("provider_instance")
+    provider_instance = runtime_profile.get("provider_instance")
+    if provider_instance is None:
+        return None
+
+    forced_model = str(rag_settings.embedding_model or "").strip()
+    effective_provider = str(runtime_profile.get("effective_provider") or "").strip()
+    requested_provider = str(rag_settings.embedding_provider or "").strip()
+    if effective_provider and requested_provider and effective_provider != requested_provider:
+        fallback_step = resolve_runtime_fallback_step("embeddings")
+        fallback_model = str((fallback_step or {}).get("model") or runtime_profile.get("default_model") or "").strip()
+        if fallback_model:
+            forced_model = fallback_model
+    return _BoundEmbeddingProvider(provider_instance, forced_model)
 
 
 def _filtered_chunks(rag_index: dict[str, Any], document_ids: list[str] | None = None) -> list[dict[str, Any]]:
@@ -748,49 +811,176 @@ def _join_chunk_context(chunks: list[dict[str, Any]], max_chars: int) -> str:
     return "\n\n".join(parts)
 
 
+def _build_document_fallback_context(documents: list[dict[str, Any]], max_chars: int) -> str:
+    pseudo_chunks: list[dict[str, Any]] = []
+    for position, document in enumerate(documents, start=1):
+        if not isinstance(document, dict):
+            continue
+        metadata = document.get("loader_metadata") if isinstance(document.get("loader_metadata"), dict) else {}
+        indexing_payload = metadata.get("indexing_payload") if isinstance(metadata.get("indexing_payload"), dict) else {}
+
+        block_text = ""
+        if indexing_payload:
+            block_text = _serialize_indexing_payload(indexing_payload)
+            if not block_text:
+                block_text = _clean_context_block_text(str(indexing_payload.get("raw_text") or ""))
+        if not block_text:
+            block_text = _clean_context_block_text(
+                str(
+                    metadata.get("grounding_text_excerpt")
+                    or metadata.get("raw_text")
+                    or metadata.get("text")
+                    or ""
+                )
+            )
+        if not block_text and isinstance(metadata.get("evidence_summary"), dict):
+            evidence_summary = metadata.get("evidence_summary") or {}
+            summary_lines: list[str] = []
+            for label, key in (
+                ("Document ID", "document_id"),
+                ("Source Type", "source_type"),
+                ("Name", "name_value"),
+                ("Location", "location_value"),
+            ):
+                value = _normalize_whitespace(str(evidence_summary.get(key) or ""))
+                if value:
+                    summary_lines.append(f"{label}: {value}")
+            warnings = evidence_summary.get("warnings")
+            if isinstance(warnings, list) and warnings:
+                summary_lines.append("Warnings: " + "; ".join(_normalize_whitespace(str(item)) for item in warnings if _normalize_whitespace(str(item))))
+            emails = evidence_summary.get("emails")
+            if isinstance(emails, list) and emails:
+                summary_lines.append("Emails: " + ", ".join(_normalize_whitespace(str(item)) for item in emails if _normalize_whitespace(str(item))))
+            phones = evidence_summary.get("phones")
+            if isinstance(phones, list) and phones:
+                summary_lines.append("Phones: " + ", ".join(_normalize_whitespace(str(item)) for item in phones if _normalize_whitespace(str(item))))
+            block_text = _clean_context_block_text("\n".join(summary_lines))
+        if not block_text:
+            continue
+        pseudo_chunks.append(
+            {
+                "document_id": str(document.get("document_id") or document.get("file_hash") or position),
+                "source": str(document.get("name") or document.get("document_id") or f"document-{position}"),
+                "chunk_id": position,
+                "text": block_text,
+            }
+        )
+    if not pseudo_chunks:
+        return ""
+    return _join_chunk_context(pseudo_chunks, max_chars=max_chars)
+
+
+def _load_chroma_chunks(document_ids: list[str] | None = None) -> list[dict[str, Any]]:
+    try:
+        from ..rag.vector_store import ChromaVectorStore
+    except Exception:
+        return []
+
+    try:
+        settings = _get_effective_rag_settings()
+        chroma_path = Path(getattr(settings, "chroma_path", get_rag_settings().chroma_path))
+        store = ChromaVectorStore(chroma_path)
+        collection = store._get_collection()
+
+        where: dict[str, object] | None = None
+        if document_ids:
+            normalized_ids = [str(item) for item in document_ids if item]
+            if normalized_ids:
+                where = {"document_id": {"$in": normalized_ids}}
+
+        get_kwargs: dict[str, object] = {"include": ["metadatas", "documents"]}
+        if where is not None:
+            get_kwargs["where"] = where
+        results = collection.get(**get_kwargs)
+    except Exception:
+        return []
+
+    ids = results.get("ids") or []
+    metadatas = results.get("metadatas") or []
+    documents = results.get("documents") or []
+    output: list[dict[str, Any]] = []
+    for index, (chunk_id, metadata, document_text) in enumerate(zip(ids, metadatas, documents), start=1):
+        metadata = metadata if isinstance(metadata, dict) else {}
+        text_value = str(document_text or "").strip()
+        if not text_value:
+            continue
+        output.append(
+            {
+                "document_id": str(metadata.get("document_id") or chunk_id or index),
+                "file_hash": str(metadata.get("document_id") or chunk_id or index),
+                "source": str(metadata.get("source") or metadata.get("document_id") or f"document-{index}"),
+                "file_type": str(metadata.get("file_type") or ""),
+                "chunk_id": int(metadata.get("chunk_id") or index),
+                "start_char": int(metadata.get("start_char") or 0),
+                "end_char": int(metadata.get("end_char") or 0),
+                "snippet": str(metadata.get("snippet") or ""),
+                "text": text_value,
+            }
+        )
+    return _ordered_chunks(output)
+
+
 def build_document_scan_context(
     document_ids: list[str] | None = None,
     max_chunks: int = DEFAULT_DOCUMENT_SCAN_CHUNKS,
     max_chars: int = DEFAULT_DOCUMENT_SCAN_CHARS,
 ) -> str:
     rag_index = _get_rag_index()
-    if not isinstance(rag_index, dict):
-        return ""
-    chunks = _ordered_chunks(_filtered_chunks(rag_index, document_ids))
-    if not chunks:
-        return ""
-    return _join_chunk_context(chunks[:max_chunks], max_chars=max_chars)
+    documents: list[dict[str, Any]] = []
+    if isinstance(rag_index, dict):
+        chunks = _ordered_chunks(_filtered_chunks(rag_index, document_ids))
+        if chunks:
+            joined = _join_chunk_context(chunks[:max_chunks], max_chars=max_chars)
+            if joined:
+                return joined
+        documents = _find_documents(rag_index, document_ids)
+
+    chroma_chunks = _load_chroma_chunks(document_ids)
+    if chroma_chunks:
+        joined = _join_chunk_context(chroma_chunks[:max_chunks], max_chars=max_chars)
+        if joined:
+            return joined
+
+    return _build_document_fallback_context(documents, max_chars=max_chars)
 
 
 def build_retrieval_context(
     query: str,
     document_ids: list[str] | None = None,
-    max_chunks: int = DEFAULT_RETRIEVAL_CHUNKS,
+    max_chunks: int | None = None,
     max_chars: int = DEFAULT_RETRIEVAL_CHARS,
 ) -> str:
     rag_settings = _get_effective_rag_settings()
+    effective_max_chunks = int(max_chunks) if max_chunks is not None else int(getattr(rag_settings, "top_k", DEFAULT_RETRIEVAL_CHUNKS) or DEFAULT_RETRIEVAL_CHUNKS)
     rag_index = _get_rag_index()
     if not isinstance(rag_index, dict):
         return ""
     cleaned_query = (query or "").strip()
     if not cleaned_query:
-        return build_document_scan_context(document_ids=document_ids, max_chunks=max_chunks, max_chars=max_chars)
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
 
     embedding_provider = _get_embedding_provider()
     if embedding_provider is None:
-        return build_document_scan_context(document_ids=document_ids, max_chunks=max_chunks, max_chars=max_chars)
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
 
-    retrieval = retrieve_relevant_chunks_detailed(
-        query=cleaned_query,
-        rag_index=rag_index,
-        settings=rag_settings,
-        embedding_provider=embedding_provider,
-        document_ids=document_ids,
-    )
+    compatibility = inspect_embedding_configuration_compatibility(rag_index, rag_settings)
+    if isinstance(compatibility, dict) and not bool(compatibility.get("compatible", True)):
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
+
+    try:
+        retrieval = retrieve_relevant_chunks_detailed(
+            query=cleaned_query,
+            rag_index=rag_index,
+            settings=rag_settings,
+            embedding_provider=embedding_provider,
+            document_ids=document_ids,
+        )
+    except Exception:
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
     chunks = retrieval.get("chunks", []) if isinstance(retrieval, dict) else []
     if not chunks:
-        return build_document_scan_context(document_ids=document_ids, max_chunks=max_chunks, max_chars=max_chars)
-    return _join_chunk_context(chunks[:max_chunks], max_chars=max_chars)
+        return build_document_scan_context(document_ids=document_ids, max_chunks=effective_max_chunks, max_chars=max_chars)
+    return _join_chunk_context(chunks[:effective_max_chunks], max_chars=max_chars)
 
 
 def build_structured_document_context(
@@ -824,7 +1014,7 @@ def build_structured_document_context(
         return build_retrieval_context(
             query=query,
             document_ids=document_ids,
-            max_chunks=max_chunks or DEFAULT_RETRIEVAL_CHUNKS,
+            max_chunks=max_chunks,
             max_chars=max_chars or DEFAULT_RETRIEVAL_CHARS,
         )
     return build_document_scan_context(

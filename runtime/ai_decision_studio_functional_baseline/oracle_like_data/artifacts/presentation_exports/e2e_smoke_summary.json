@@ -1,0 +1,80 @@
+{
+  "benchmark_eval": {
+    "status": "completed",
+    "export_kind": "benchmark_eval_executive_deck",
+    "export_id": "deckexp_20260405_183210_8ce9ca86",
+    "pptx_exists": true,
+    "contract_exists": true,
+    "payload_exists": true,
+    "review_exists": true,
+    "preview_manifest_exists": true,
+    "thumbnail_exists": true,
+    "error_message": null,
+    "local_artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_183210_8ce9ca86"
+  },
+  "document_review": {
+    "status": "completed",
+    "export_kind": "document_review_deck",
+    "export_id": "deckexp_20260405_183217_b2728e1b",
+    "pptx_exists": true,
+    "contract_exists": true,
+    "payload_exists": true,
+    "review_exists": true,
+    "preview_manifest_exists": true,
+    "thumbnail_exists": true,
+    "error_message": null,
+    "local_artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_183217_b2728e1b"
+  },
+  "policy_contract_comparison": {
+    "status": "completed",
+    "export_kind": "policy_contract_comparison_deck",
+    "export_id": "deckexp_20260405_183221_b38ba9e2",
+    "pptx_exists": true,
+    "contract_exists": true,
+    "payload_exists": true,
+    "review_exists": true,
+    "preview_manifest_exists": true,
+    "thumbnail_exists": true,
+    "error_message": null,
+    "local_artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_183221_b38ba9e2"
+  },
+  "action_plan": {
+    "status": "completed",
+    "export_kind": "action_plan_deck",
+    "export_id": "deckexp_20260405_183225_ecaff168",
+    "pptx_exists": true,
+    "contract_exists": true,
+    "payload_exists": true,
+    "review_exists": true,
+    "preview_manifest_exists": true,
+    "thumbnail_exists": true,
+    "error_message": null,
+    "local_artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_183225_ecaff168"
+  },
+  "candidate_review": {
+    "status": "completed",
+    "export_kind": "candidate_review_deck",
+    "export_id": "deckexp_20260405_183229_6e5ac53b",
+    "pptx_exists": true,
+    "contract_exists": true,
+    "payload_exists": true,
+    "review_exists": true,
+    "preview_manifest_exists": true,
+    "thumbnail_exists": true,
+    "error_message": null,
+    "local_artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_183229_6e5ac53b"
+  },
+  "evidence_pack": {
+    "status": "completed",
+    "export_kind": "evidence_pack_deck",
+    "export_id": "deckexp_20260405_183233_97d5f92e",
+    "pptx_exists": true,
+    "contract_exists": true,
+    "payload_exists": true,
+    "review_exists": true,
+    "preview_manifest_exists": true,
+    "thumbnail_exists": true,
+    "error_message": null,
+    "local_artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_183233_97d5f92e"
+  }
+}

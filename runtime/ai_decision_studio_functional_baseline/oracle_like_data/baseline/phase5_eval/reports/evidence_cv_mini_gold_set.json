@@ -1,0 +1,46 @@
+{
+  "documents": [
+    {
+      "file": "data/synthetic/resumes_ui_test/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "name": null,
+      "emails": ["gabriel.gomes.almeida@example.com"],
+      "phones": ["+55 11 92878-8327"],
+      "location": null
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0002_hard_compact_sidebar_marina.gomes.ribeiro.pdf",
+      "name": null,
+      "emails": ["marina.gomes.ribeiro@example.com"],
+      "phones": ["+55 11 92891-2991"],
+      "location": null
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "name": "Beatriz Barbosa Martins",
+      "emails": ["barbosa.martins@example.com"],
+      "phones": ["+55 11 98242-5650"],
+      "location": "Belo Horizonte"
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+      "name": null,
+      "emails": [],
+      "phones": [],
+      "location": null
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "name": null,
+      "emails": ["gabriel.gomes.almeida@example.com"],
+      "phones": ["+55 11 92878-8327"],
+      "location": null
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "name": "Beatriz Barbosa Martins",
+      "emails": ["barbosa.martins@example.com"],
+      "phones": ["+55 11 98242-5650"],
+      "location": "Belo Horizonte"
+    }
+  ]
+}

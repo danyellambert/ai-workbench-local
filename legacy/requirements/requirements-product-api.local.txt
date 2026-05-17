@@ -1,0 +1,17 @@
+streamlit
+gradio
+openai
+python-dotenv
+pydantic
+pypdf
+Pillow
+numpy
+chromadb
+langchain-community
+langchain-chroma
+langchain-text-splitters
+langgraph
+docling
+cryptography>=3.1
+matplotlib
+reportlab

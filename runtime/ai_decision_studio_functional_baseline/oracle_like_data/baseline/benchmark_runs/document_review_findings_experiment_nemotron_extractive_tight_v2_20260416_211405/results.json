@@ -1,0 +1,276 @@
+{
+  "generated_at": "2026-04-16T21:16:12.761052",
+  "documents": [
+    "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf"
+  ],
+  "configs": [
+    {
+      "key": "nemotron_extractive",
+      "label": "nemotron-3-super:cloud extractive",
+      "base_model": "qwen2.5:7b",
+      "findings_model": "nemotron-3-super:cloud",
+      "prompt_style": "extractive",
+      "synthesis_enabled": true
+    }
+  ],
+  "ranking": [
+    {
+      "config_key": "nemotron_extractive",
+      "avg_total_score": 1.0,
+      "runs": 1
+    }
+  ],
+  "promotion_ranking": [
+    {
+      "config_key": "nemotron_extractive",
+      "avg_promotion_score": 0.0,
+      "runs": 1
+    }
+  ],
+  "synthesis_ranking": [
+    {
+      "config_key": "nemotron_extractive",
+      "avg_promotion_score": 0.0,
+      "runs": 1
+    }
+  ],
+  "winner": {
+    "config_key": "nemotron_extractive",
+    "avg_promotion_score": 0.0,
+    "runs": 1
+  },
+  "runs": [
+    {
+      "document": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "document_path": "data/corpus_revisado/option_b_synthetic_premium/contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+      "config": {
+        "key": "nemotron_extractive",
+        "label": "nemotron-3-super:cloud extractive",
+        "base_model": "qwen2.5:7b",
+        "findings_model": "nemotron-3-super:cloud",
+        "prompt_style": "extractive",
+        "synthesis_enabled": true
+      },
+      "duration_s": 124.87,
+      "structured_success": true,
+      "status": "warning",
+      "summary": "Master Services Agreement - Vendor Draft: 4 risk(s), 0 gap(s) and 4 mitigation action(s) identified. Top risk: Potential delay in service due to provider's discretion on audit rights",
+      "warnings": [
+        "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+      ],
+      "findings_synthesis_metadata": {
+        "success": false,
+        "error": "No valid JSON object could be extracted from the model response.",
+        "model": "nemotron-3-super:cloud",
+        "attempt": 2,
+        "attempts": 2
+      },
+      "synthesis_success": false,
+      "promotion_score": 0.0,
+      "scores": {
+        "risk_coverage": 1.0,
+        "action_coverage": 1.0,
+        "gap_coverage": 1.0,
+        "grounding_ratio": 1.0,
+        "decision_score": 1.0,
+        "blocker_alignment": 1.0,
+        "dedupe_score": 1.0,
+        "business_impact_score": 1.0,
+        "finding_count": 4,
+        "top_blocker_count": 4,
+        "total_score": 1.0
+      },
+      "view": {
+        "decision_summary": {
+          "label": "Renegotiate",
+          "status": "Requires Legal Review",
+          "summary": "Master Services Agreement - Vendor Draft: 4 risk(s), 0 gap(s) and 4 mitigation action(s) identified. Top risk: Potential delay in service due to provider's discretion on audit rights",
+          "severity_counts": {
+            "critical": 0,
+            "high": 4,
+            "medium": 0,
+            "low": 0
+          },
+          "next_owner": null,
+          "due_date": null
+        },
+        "document_metrics": {
+          "strategy": null,
+          "document_ids": [],
+          "context_chars": 0,
+          "source_block_count": 0
+        },
+        "watchouts": [
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+        ],
+        "next_steps": [
+          "Clarify audit rights with provider",
+          "Define data deletion timeline post-termination",
+          "Establish explicit subcontractor approval process",
+          "Review and negotiate liability cap with provider"
+        ],
+        "top_blockers": [
+          {
+            "title": "Potential delay in service due to provider's discretion on audit rights",
+            "severity": "high",
+            "recommendation": "Clarify audit rights with provider"
+          },
+          {
+            "title": "Unclear data deletion timeline post-termination",
+            "severity": "high",
+            "recommendation": "Define data deletion timeline post-termination"
+          },
+          {
+            "title": "Lack of explicit subcontractor approval process",
+            "severity": "high",
+            "recommendation": "Establish explicit subcontractor approval process"
+          },
+          {
+            "title": "Limited liability cap for data security claims",
+            "severity": "high",
+            "recommendation": "Review and negotiate liability cap with provider"
+          }
+        ],
+        "business_impact": [
+          {
+            "label": "Compliance",
+            "detail": "Customer may not have full visibility into the provider’s operations, potentially leading to compliance issues"
+          },
+          {
+            "label": "Legal Risk",
+            "detail": "Subcontractors could be added without customer consent, potentially impacting service quality and compliance"
+          }
+        ],
+        "findings": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "category": "Compliance",
+            "title": "Potential delay in service due to provider's discretion on audit rights",
+            "description": "Customer may not have full visibility into the provider’s operations, potentially leading to compliance issues",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Clarify audit rights with provider",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "category": "Compliance",
+            "title": "Unclear data deletion timeline post-termination",
+            "description": "Customer may retain data longer than expected, leading to potential compliance and security risks",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Define data deletion timeline post-termination",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-3",
+            "severity": "high",
+            "category": "Legal Risk",
+            "title": "Lack of explicit subcontractor approval process",
+            "description": "Subcontractors could be added without customer consent, potentially impacting service quality and compliance",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_1",
+            "confidence": 0.95,
+            "recommendation": "Establish explicit subcontractor approval process",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          },
+          {
+            "id": "finding-4",
+            "severity": "high",
+            "category": "Legal Risk",
+            "title": "Limited liability cap for data security claims",
+            "description": "Customer may face significant financial risk if a major breach occurs within the last year of service",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "chunkId": "chunk_2",
+            "confidence": 0.95,
+            "recommendation": "Review and negotiate liability cap with provider",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          }
+        ],
+        "evidence_trail": [
+          {
+            "id": "finding-1",
+            "severity": "high",
+            "title": "Potential delay in service due to provider's discretion on audit rights",
+            "chunkId": "chunk_2",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-2",
+            "severity": "high",
+            "title": "Unclear data deletion timeline post-termination",
+            "chunkId": "chunk_2",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          },
+          {
+            "id": "finding-3",
+            "severity": "high",
+            "title": "Lack of explicit subcontractor approval process",
+            "chunkId": "chunk_1",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "[Page 1] HarborView Analytics - Controlled Demo Corpus Page 1 Master Services Agreement - Vendor Draft Counterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing protections. Notice: Synthetic business document for demo use only. All names, parties, systems, and events are fictional. Document ID CTR-002 Owner Legal / Procurement Status Counterparty Draft Rec"
+          },
+          {
+            "id": "finding-4",
+            "severity": "high",
+            "title": "Limited liability cap for data security claims",
+            "chunkId": "chunk_2",
+            "source": "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "snippet": "mercially reasonable efforts to delete Customer Data following termination. No deletion deadline is stated. Use of data Provider may use de-identified service data for product development and model improvement. Liability cap Aggregate liability limited to fees paid in prior 12 months, including for confidentiality and data-security claims. 2. Additional Draft Terms ● Provider may suspend service f"
+          }
+        ],
+        "artifacts": [],
+        "sources": [
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "1",
+            "-",
+            "[Page 1]\nHarborView Analytics - Controlled Demo Corpus\nPage 1\nMaster Services Agreement - Vendor Draft\nCounterparty Draft 0.9 - same transaction as CTR-001, but with weaker control language and missing\nprotections.\nNotic"
+          ],
+          [
+            "CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+            "2",
+            "-",
+            "mercially reasonable efforts to delete Customer Data following termination.\nNo deletion deadline is stated.\nUse of data\nProvider may use de-identified service data for product development and model improvement.\nLiability"
+          ]
+        ],
+        "run_state": {
+          "current_step": "review",
+          "steps": [
+            {
+              "key": "select",
+              "label": "Select",
+              "status": "completed"
+            },
+            {
+              "key": "ground",
+              "label": "Ground",
+              "status": "pending"
+            },
+            {
+              "key": "analyze",
+              "label": "Analyze",
+              "status": "completed"
+            },
+            {
+              "key": "review",
+              "label": "Review",
+              "status": "completed"
+            },
+            {
+              "key": "export",
+              "label": "Export",
+              "status": "pending"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

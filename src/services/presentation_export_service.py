@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib import parse as urllib_parse
@@ -35,7 +35,7 @@ def _write_json(path: Path, payload: object) -> None:
 
 
 def _build_export_id() -> str:
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     return f"deckexp_{timestamp}_{uuid4().hex[:8]}"
 
 
@@ -316,14 +316,14 @@ def generate_executive_deck(
         _write_json(render_request_path, render_request_payload)
         result["local_render_request_path"] = str(render_request_path)
 
-        render_started_at = datetime.now().timestamp()
+        render_started_at = datetime.now(timezone.utc).timestamp()
         raw_render_response = _http_json_request(
             method="POST",
             url=f"{resolved_settings.base_url.rstrip('/')}/render",
             timeout_seconds=resolved_settings.timeout_seconds,
             json_payload=render_request_payload,
         )
-        result["render_latency_s"] = round(datetime.now().timestamp() - render_started_at, 4)
+        result["render_latency_s"] = round(datetime.now(timezone.utc).timestamp() - render_started_at, 4)
         render_response = _normalize_json_response(raw_render_response)
         render_response_path = artifact_dir / "render_response.json"
         _write_json(render_response_path, render_response)
@@ -337,13 +337,13 @@ def generate_executive_deck(
 
         output_path = str(render_response.get("output_path") or remote_output_path)
         try:
-            artifact_download_started_at = datetime.now().timestamp()
+            artifact_download_started_at = datetime.now(timezone.utc).timestamp()
             deck_bytes = _download_artifact(
                 base_url=resolved_settings.base_url,
                 remote_path=output_path,
                 timeout_seconds=resolved_settings.timeout_seconds,
             )
-            result["artifact_download_latency_s"] = round(datetime.now().timestamp() - artifact_download_started_at, 4)
+            result["artifact_download_latency_s"] = round(datetime.now(timezone.utc).timestamp() - artifact_download_started_at, 4)
             local_pptx_path = artifact_dir / Path(output_path).name
             local_pptx_path.write_bytes(deck_bytes)
             result["local_pptx_path"] = str(local_pptx_path)

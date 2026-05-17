@@ -376,6 +376,47 @@ class PresentationExportTests(unittest.TestCase):
         sparse_slide_titles = [slide.get("title") for slide in sparse_payload["slides"]]
         self.assertIn("Evidence highlights", sparse_slide_titles)
 
+
+    def test_action_plan_payload_uses_compact_table_and_full_detail_slide(self) -> None:
+        contract = build_action_plan_deck_contract(
+            evidenceops_action_entries=[
+                {
+                    "action_type": "CTR-010",
+                    "description": "Reconstruct access-review evidence and obtain system-owner sign-off before committee escalation",
+                    "owner": "Priya Nair",
+                    "due_date": "2026-04-22",
+                    "status": "in_progress",
+                    "source": "Governance Committee Minutes and Action Items.pdf",
+                    "evidence": "EV-002 remediation packet still lacks final sign-off",
+                },
+                {
+                    "action_type": "CTR-013",
+                    "description": "Set up auto-renewal calendar alerts for the vendor control review cycle",
+                    "owner": "Operations",
+                    "due_date": "2026-04-24",
+                    "status": "open",
+                    "source": "Access Review Evidence Log.pdf",
+                },
+            ]
+        )
+
+        self.assertIn("action_plan_run_current", contract.data_sources)
+
+        payload = build_ppt_creator_payload_from_executive_deck_contract(contract)
+        slide_titles = [slide.get("title") for slide in payload["slides"]]
+        self.assertIn("Action backlog", slide_titles)
+        self.assertIn("Action details appendix", slide_titles)
+
+        backlog_slide = next(slide for slide in payload["slides"] if slide.get("title") == "Action backlog")
+        self.assertEqual(backlog_slide["table_columns"], ["Ref", "Owner", "Due", "Status"])
+        self.assertEqual(backlog_slide["table_rows"][0][0], "CTR-010")
+        self.assertEqual(backlog_slide["table_rows"][0][1], "Priya Nair")
+        self.assertNotIn("evidenceops_action_store", payload["slides"][0].get("speaker_notes") or "")
+
+        detail_slide = next(slide for slide in payload["slides"] if slide.get("title") == "Action details appendix")
+        self.assertTrue(any("Reconstruct access-review evidence" in bullet for bullet in detail_slide["bullets"]))
+        self.assertIn("CTR-010", detail_slide.get("speaker_notes") or "")
+
     def test_normalize_executive_deck_export_kind_accepts_product_alias(self) -> None:
         self.assertEqual(
             normalize_executive_deck_export_kind(BENCHMARK_EVAL_EXECUTIVE_REVIEW_PRODUCT_EXPORT_KIND),

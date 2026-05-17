@@ -1,0 +1,98 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "MSA Negotiation Baseline - Approved Position.pdf",
+  "file_type": "pdf",
+  "file_hash": "3c22d3911e394aa802d18a8e19cfc68877b9996df970a69fa9bd7bdcc4459569",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-011  MSA Negotiation Baseline\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMSA Negotiation Baseline — Approved Position\nClause baseline used by Meridian Legal and Procurement when reviewing strategic vendor contracts.\nDocument ID\nCTR-011\nOwner\nGeneral Counsel\nStatus\nApproved Baseline\nEffective Date\n2024-01-05\nApplies To\nStrategic cloud and managed AI vendors\nClassification\nConfidential\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nPurpose\nThis baseline captures Meridian’s non-negotiable fallback language for strategic software and managed-services\ntransactions. It is used as the approved comparator for contract redlining, automated comparison, and executive escalation.\nApproved Position Summary\nClause Topic\nApproved Meridian Baseline\nLiability Cap\nGeneral cap equal to 2× annual contract value; unlimited liability only for fraud or willful\nmisconduct.\nTermination Notice\nEither party may decline renewal with 30 days written notice.\nDerivative IP\nCustomer retains all rights to derivative works, playbooks, schemas, and outputs generated\nfrom Customer content.\nIncident Notification\nCritical incidents involving Customer Data must be notified within 24 hours of confirmation;\nmaterial service incidents within 48 hours.\nAudit Rights\nCustomer may perform a remote control review for material concerns and receive evidence\npackages annually.\nCross-Border Transfers\nEU personal data remains in the EEA unless SCC Appendix C is attached and approved.\nThis document is the main “Document B” reference for comparison diffs. It resolves the same clause\nareas that are weak in the vendor draft.\nApproval Chain\nRole\nName\nStatus / Date\nGeneral Counsel\nDaniel Brooks\nApproved — 2024-01-05\nVP, Procurement\nMaria Santos\nApproved — 2024-01-05\nChief Information Security Officer\nElena Petrov\nApproved — 2024-01-06",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 2045,
+    "final_text_chars": 2045,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 2046,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 38,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 4591,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nCTR-011  MSA Negotiation Baseline\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nMSA Negotiation Baseline — Approved Position\nClause baseline used by Meridian Legal and Procurement when reviewing strategic vendor contracts.\nDocument ID\nCTR-011\nOwner\nGeneral Counsel\nStatus\nApproved Baseline\nEffective Date\n2024-01-05\nApplies To\nStrategic cloud and managed AI vendors\nClassification\nConfidential\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nPurpose\nThis baseline captures Meridian’s non-negotiable fallback language for strategic software and managed-services\ntransactions. It is used as the approved comparator for contract redlining, automated comparison, and executive escalation.\nApproved Position Summary\nClause Topic\nApproved Meridian Baseline\nLiability Cap\nGeneral cap equal to 2× annual contract value; unlimited liability only for fraud or willful\nmisconduct.\nTermination Notice\nEither party may decline renewal with 30 days written notice.\nDerivative IP\nCustomer retains all rights to derivative works, playbooks, schemas, and outputs generated\nfrom Customer content.\nIncident Notification\nCritical incidents involving Customer Data must be notified within 24 hours of confirmation;\nmaterial service incidents within 48 hours.\nAudit Rights\nCustomer may perform a remote control review for material concerns and receive evidence\npackages annually.\nCross-Border Transfers\nEU personal data remains in the EEA unless SCC Appendix C is attached and approved.\nThis document is the main “Document B” reference for comparison diffs. It resolves the same clause\nareas that are weak in the vendor draft.\nApproval Chain\nRole\nName\nStatus / Date\nGeneral Counsel\nDaniel Brooks\nApproved — 2024-01-05\nVP, Procurement\nMaria Santos\nApproved — 2024-01-05\nChief Information Security Officer\nElena Petrov\nApproved — 2024-01-06",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic negotiation baseline is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "contracts/MSA Negotiation Baseline - Approved Position.pdf",
+    "nextcloud_relative_path": "contracts/MSA Negotiation Baseline - Approved Position.pdf",
+    "source_relative_path": "contracts/MSA Negotiation Baseline - Approved Position.pdf",
+    "filename": "MSA Negotiation Baseline - Approved Position.pdf",
+    "title": "MSA Negotiation Baseline - Approved Position",
+    "category": "contracts",
+    "preindex": {
+      "relative_path": "contracts/MSA Negotiation Baseline - Approved Position.pdf",
+      "filename": "MSA Negotiation Baseline - Approved Position.pdf",
+      "title": "MSA Negotiation Baseline - Approved Position",
+      "category": "contracts",
+      "document_id": "contracts/MSA Negotiation Baseline - Approved Position.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:48:52"
+}

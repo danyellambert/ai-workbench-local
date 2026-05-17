@@ -7,7 +7,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CHECKLIST_SCRIPT_PATH = PROJECT_ROOT / "scripts" / "evaluate_checklist_regression.py"
 EVIDENCE_SCRIPT_PATH = PROJECT_ROOT / "scripts" / "evaluate_evidence_cv_gold_set.py"
-CHECKLIST_FIXTURE_PATH = PROJECT_ROOT / "phase5_eval" / "fixtures" / "06_checklist_who_surgical_gold.json"
+CHECKLIST_FIXTURE_PATH = PROJECT_ROOT / "evals" / "phase5" / "fixtures" / "06_checklist_who_surgical_gold.json"
 
 
 def _load_module(name: str, path: Path):

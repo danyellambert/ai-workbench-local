@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "1. Executive Comparison:  \nThe Access Review Evidence Log highlights gaps in documentation that must be resolved to close a control review, emphasizing verification of missing or incomplete evidence. In contrast, the Privileged Account Approval Email governs ongoing access permissions through formal approvals, strict usage scoping, and mandatory quarterly recertification and vendor confirmation to maintain compliance.\n\n- Access Review Evidence Log requires resolution of missing evidence to close a control; Privileged Account Approval mandates ongoing vendor confirmation and quarterly reviews to sustain access.  \n- Evidence Log focuses on documentation gaps; Privileged Account Approval emphasizes access governance through scoping, logging, and recertification.  \n- Control closure in the Evidence Log depends on evidence completeness; Privileged Access requires proactive renewal and oversight to remain compliant.  \n- Evidence Log involves five items with mixed statuses; Privileged Access applies to two named administrators under a pilot framework.  \n- Evidence Log is retrospective (verifying past gaps); Privileged Access is prospective (governing future access conditions).  \n- Evidence Log is tied to a specific control review; Privileged Access is part of a broader vendor access management process.",
+  "key_highlights": [
+    "1. Executive Comparison:",
+    "The Access Review Evidence Log highlights gaps in documentation that must be resolved to close a control review, emphasizing verification of missing or incomplete evidence. In contrast, the Privileged Account Approval Email governs ongoing access permissions through formal approvals, strict usage scoping, and mandatory quarterly recertification and vendor confirmation to maintain compliance.",
+    "Access Review Evidence Log requires resolution of missing evidence to close a control; Privileged Account Approval mandates ongoing vendor confirmation and quarterly reviews to sustain access.",
+    "Evidence Log focuses on documentation gaps; Privileged Account Approval emphasizes access governance through scoping, logging, and recertification.",
+    "Control closure in the Evidence Log depends on evidence completeness; Privileged Access requires proactive renewal and oversight to remain compliant.",
+    "Evidence Log involves five items with mixed statuses; Privileged Access applies to two named administrators under a pilot framework."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Control closure hinges on verifying provenance of missing or incomplete evidence. | Status updates directly affect the…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access must be strictly limited to ticketed support and break-fix tasks to maintain compliance. | Quarterly recertifica…"
+        ],
+        [
+          "cross_document_observation",
+          "1. Executive Comparison:",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) supports the Q1 2024 Northwind…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log highlights gaps in…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) supports the Q1 2024 Northwind…"
+        ],
+        [
+          "approval_change",
+          "Access Review Evidence Log requires resolution of missing…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) supports the Q1 2024 Northwind…"
+        ],
+        [
+          "approval_change",
+          "Evidence Log focuses on documentation gaps; Privileged Account…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) supports the Q1 2024 Northwind…"
+        ],
+        [
+          "identity_control_delta",
+          "Control closure in the Evidence Log depends on…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) supports the Q1 2024 Northwind…"
+        ],
+        [
+          "identity_control_delta",
+          "Evidence Log involves five items with mixed statuses;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) supports the Q1 2024 Northwind…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

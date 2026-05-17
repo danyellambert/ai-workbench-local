@@ -1,0 +1,1365 @@
+{
+  "gold_set": "phase5_eval/reports/evidence_cv_mini_gold_set.json",
+  "aggregate": {
+    "legacy": {
+      "emails": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "predicted_total": 5,
+        "gold_total": 5,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "phones": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "predicted_total": 5,
+        "gold_total": 5,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "name": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1.0,
+        "recall": 0.0
+      },
+      "location": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1.0,
+        "recall": 0.0
+      }
+    },
+    "evidence_no_vl": {
+      "emails": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 2,
+        "predicted_total": 3,
+        "gold_total": 5,
+        "precision": 1.0,
+        "recall": 0.6
+      },
+      "phones": {
+        "tp": 3,
+        "fp": 8,
+        "fn": 2,
+        "predicted_total": 11,
+        "gold_total": 5,
+        "precision": 0.2727,
+        "recall": 0.6
+      },
+      "name": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1.0,
+        "recall": 0.0
+      },
+      "location": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1.0,
+        "recall": 0.0
+      }
+    },
+    "evidence_with_vl": {
+      "emails": {
+        "tp": 5,
+        "fp": 3,
+        "fn": 0,
+        "predicted_total": 8,
+        "gold_total": 5,
+        "precision": 0.625,
+        "recall": 1.0
+      },
+      "phones": {
+        "tp": 5,
+        "fp": 1,
+        "fn": 0,
+        "predicted_total": 6,
+        "gold_total": 5,
+        "precision": 0.8333,
+        "recall": 1.0
+      },
+      "name": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.6667,
+        "recall": 1.0
+      },
+      "location": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    }
+  },
+  "per_file": [
+    {
+      "file": "data/synthetic/resumes_ui_test/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "gold": {
+        "file": "data/synthetic/resumes_ui_test/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+        "name": null,
+        "emails": [
+          "gabriel.gomes.almeida@example.com"
+        ],
+        "phones": [
+          "+55 11 92878-8327"
+        ],
+        "location": null,
+        "emails_normalized": [
+          "gabriel.gomes.almeida@example.com"
+        ],
+        "phones_normalized": [
+          "5511928788327"
+        ]
+      },
+      "predictions": {
+        "legacy": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "5511928788327"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_no_vl": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "5511928788327"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_with_vl": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "5511928788327"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        }
+      },
+      "scores": {
+        "legacy": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "gabriel.gomes.almeida@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928788327"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "evidence_no_vl": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "gabriel.gomes.almeida@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928788327"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "evidence_with_vl": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "gabriel.gomes.almeida@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928788327"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        }
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0002_hard_compact_sidebar_marina.gomes.ribeiro.pdf",
+      "gold": {
+        "file": "data/synthetic/resumes_ui_test/0002_hard_compact_sidebar_marina.gomes.ribeiro.pdf",
+        "name": null,
+        "emails": [
+          "marina.gomes.ribeiro@example.com"
+        ],
+        "phones": [
+          "+55 11 92891-2991"
+        ],
+        "location": null,
+        "emails_normalized": [
+          "marina.gomes.ribeiro@example.com"
+        ],
+        "phones_normalized": [
+          "5511928912991"
+        ]
+      },
+      "predictions": {
+        "legacy": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "marina.gomes.ribeiro@example.com"
+          ],
+          "phones": [
+            "5511928912991"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_no_vl": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "marina.gomes.ribeiro@example.com"
+          ],
+          "phones": [
+            "5511928912991"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_with_vl": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "marina.gomes.ribeiro@example.com"
+          ],
+          "phones": [
+            "5511928912991"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        }
+      },
+      "scores": {
+        "legacy": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "marina.gomes.ribeiro@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928912991"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "evidence_no_vl": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "marina.gomes.ribeiro@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928912991"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "evidence_with_vl": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "marina.gomes.ribeiro@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928912991"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        }
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "gold": {
+        "file": "data/synthetic/resumes_ui_test/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+        "name": "Beatriz Barbosa Martins",
+        "emails": [
+          "barbosa.martins@example.com"
+        ],
+        "phones": [
+          "+55 11 98242-5650"
+        ],
+        "location": "Belo Horizonte",
+        "emails_normalized": [
+          "barbosa.martins@example.com"
+        ],
+        "phones_normalized": [
+          "5511982425650"
+        ]
+      },
+      "predictions": {
+        "legacy": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "barbosa.martins@example.com"
+          ],
+          "phones": [
+            "5511982425650"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_no_vl": {
+          "name": null,
+          "location": null,
+          "emails": [],
+          "phones": [
+            "201701202112",
+            "202001202212",
+            "45511982425850"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_with_vl": {
+          "name": "Beatriz Barbosa Martins",
+          "location": "Grenoble, France",
+          "emails": [
+            "barbosa.martins@example.com",
+            "beatriz.barbosa.martins@example.com"
+          ],
+          "phones": [
+            "5511982425650"
+          ],
+          "name_status": "confirmed",
+          "location_status": "confirmed"
+        }
+      },
+      "scores": {
+        "legacy": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "barbosa.martins@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511982425650"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": "Beatriz Barbosa Martins",
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": "Belo Horizonte",
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.0
+          }
+        },
+        "evidence_no_vl": {
+          "emails": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "predicted_total": 0,
+            "gold_total": 1,
+            "true_positives": [],
+            "false_positives": [],
+            "false_negatives": [
+              "barbosa.martins@example.com"
+            ],
+            "precision": 1.0,
+            "recall": 0.0
+          },
+          "phones": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 1,
+            "predicted_total": 3,
+            "gold_total": 1,
+            "true_positives": [],
+            "false_positives": [
+              "201701202112",
+              "202001202212",
+              "45511982425850"
+            ],
+            "false_negatives": [
+              "5511982425650"
+            ],
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": "Beatriz Barbosa Martins",
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": "Belo Horizonte",
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.0
+          }
+        },
+        "evidence_with_vl": {
+          "emails": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 0,
+            "predicted_total": 2,
+            "gold_total": 1,
+            "true_positives": [
+              "barbosa.martins@example.com"
+            ],
+            "false_positives": [
+              "beatriz.barbosa.martins@example.com"
+            ],
+            "false_negatives": [],
+            "precision": 0.5,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511982425650"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": "Beatriz Barbosa Martins",
+            "expected": "Beatriz Barbosa Martins",
+            "status": "confirmed",
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": "Grenoble, France",
+            "expected": "Belo Horizonte",
+            "status": "confirmed",
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        }
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_ui_test/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+      "gold": {
+        "file": "data/synthetic/resumes_ui_test/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+        "name": null,
+        "emails": [],
+        "phones": [],
+        "location": null,
+        "emails_normalized": [],
+        "phones_normalized": []
+      },
+      "predictions": {
+        "legacy": {
+          "name": null,
+          "location": null,
+          "emails": [],
+          "phones": [],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_no_vl": {
+          "name": null,
+          "location": null,
+          "emails": [],
+          "phones": [
+            "20200110202112",
+            "5511994896586"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_with_vl": {
+          "name": "Matheus Araujo Carvalho",
+          "location": "Campinas, Brazil",
+          "emails": [
+            "matheususaraujo.carvalho@example.com"
+          ],
+          "phones": [
+            "5511994898568"
+          ],
+          "name_status": "visual_candidate",
+          "location_status": "visual_candidate"
+        }
+      },
+      "scores": {
+        "legacy": {
+          "emails": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 0,
+            "gold_total": 0,
+            "true_positives": [],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 0,
+            "gold_total": 0,
+            "true_positives": [],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "evidence_no_vl": {
+          "emails": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 0,
+            "gold_total": 0,
+            "true_positives": [],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 0,
+            "predicted_total": 2,
+            "gold_total": 0,
+            "true_positives": [],
+            "false_positives": [
+              "20200110202112",
+              "5511994896586"
+            ],
+            "false_negatives": [],
+            "precision": 0.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "evidence_with_vl": {
+          "emails": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 0,
+            "true_positives": [],
+            "false_positives": [
+              "matheususaraujo.carvalho@example.com"
+            ],
+            "false_negatives": [],
+            "precision": 0.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 0,
+            "true_positives": [],
+            "false_positives": [
+              "5511994898568"
+            ],
+            "false_negatives": [],
+            "precision": 0.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": "Matheus Araujo Carvalho",
+            "expected": null,
+            "status": "visual_candidate",
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": "Campinas, Brazil",
+            "expected": null,
+            "status": "visual_candidate",
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 1.0
+          }
+        }
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "gold": {
+        "file": "data/synthetic/resumes_multilayout/pdf/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+        "name": null,
+        "emails": [
+          "gabriel.gomes.almeida@example.com"
+        ],
+        "phones": [
+          "+55 11 92878-8327"
+        ],
+        "location": null,
+        "emails_normalized": [
+          "gabriel.gomes.almeida@example.com"
+        ],
+        "phones_normalized": [
+          "5511928788327"
+        ]
+      },
+      "predictions": {
+        "legacy": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "5511928788327"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_no_vl": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "5511928788327"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_with_vl": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "5511928788327"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        }
+      },
+      "scores": {
+        "legacy": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "gabriel.gomes.almeida@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928788327"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "evidence_no_vl": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "gabriel.gomes.almeida@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928788327"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "evidence_with_vl": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "gabriel.gomes.almeida@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511928788327"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": null,
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        }
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "gold": {
+        "file": "data/synthetic/resumes_multilayout/pdf/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+        "name": "Beatriz Barbosa Martins",
+        "emails": [
+          "barbosa.martins@example.com"
+        ],
+        "phones": [
+          "+55 11 98242-5650"
+        ],
+        "location": "Belo Horizonte",
+        "emails_normalized": [
+          "barbosa.martins@example.com"
+        ],
+        "phones_normalized": [
+          "5511982425650"
+        ]
+      },
+      "predictions": {
+        "legacy": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "barbosa.martins@example.com"
+          ],
+          "phones": [
+            "5511982425650"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_no_vl": {
+          "name": null,
+          "location": null,
+          "emails": [],
+          "phones": [
+            "201701202112",
+            "202001202212",
+            "45511982425850"
+          ],
+          "name_status": "not_found",
+          "location_status": "not_found"
+        },
+        "evidence_with_vl": {
+          "name": "Beatriz Barbosa Martins",
+          "location": "Grenoble, France",
+          "emails": [
+            "barbosa.martins@example.com",
+            "beatriz.barbosa.martins@example.com"
+          ],
+          "phones": [
+            "5511982425650"
+          ],
+          "name_status": "confirmed",
+          "location_status": "confirmed"
+        }
+      },
+      "scores": {
+        "legacy": {
+          "emails": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "barbosa.martins@example.com"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511982425650"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": "Beatriz Barbosa Martins",
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": "Belo Horizonte",
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.0
+          }
+        },
+        "evidence_no_vl": {
+          "emails": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "predicted_total": 0,
+            "gold_total": 1,
+            "true_positives": [],
+            "false_positives": [],
+            "false_negatives": [
+              "barbosa.martins@example.com"
+            ],
+            "precision": 1.0,
+            "recall": 0.0
+          },
+          "phones": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 1,
+            "predicted_total": 3,
+            "gold_total": 1,
+            "true_positives": [],
+            "false_positives": [
+              "201701202112",
+              "202001202212",
+              "45511982425850"
+            ],
+            "false_negatives": [
+              "5511982425650"
+            ],
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "name": {
+            "predicted": null,
+            "expected": "Beatriz Barbosa Martins",
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.0
+          },
+          "location": {
+            "predicted": null,
+            "expected": "Belo Horizonte",
+            "status": "not_found",
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.0
+          }
+        },
+        "evidence_with_vl": {
+          "emails": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 0,
+            "predicted_total": 2,
+            "gold_total": 1,
+            "true_positives": [
+              "barbosa.martins@example.com"
+            ],
+            "false_positives": [
+              "beatriz.barbosa.martins@example.com"
+            ],
+            "false_negatives": [],
+            "precision": 0.5,
+            "recall": 1.0
+          },
+          "phones": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "predicted_total": 1,
+            "gold_total": 1,
+            "true_positives": [
+              "5511982425650"
+            ],
+            "false_positives": [],
+            "false_negatives": [],
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "name": {
+            "predicted": "Beatriz Barbosa Martins",
+            "expected": "Beatriz Barbosa Martins",
+            "status": "confirmed",
+            "tp": 1,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "location": {
+            "predicted": "Grenoble, France",
+            "expected": "Belo Horizonte",
+            "status": "confirmed",
+            "tp": 0,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        }
+      }
+    }
+  ]
+}

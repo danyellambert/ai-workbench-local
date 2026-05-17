@@ -1,0 +1,25 @@
+Ana Ribeiro
+São Paulo, Brazil
+ana.ribeiro@example.com
++55 11 98888-7777
+https://www.linkedin.com/in/anaribeiro
+
+Professional Summary
+AI engineer focused on retrieval-augmented generation, document intelligence, and local LLM applications.
+
+Experience
+AI Engineer - Orion Labs - Jan 2024 to Present
+Built a local RAG assistant for internal technical documentation using Python, Ollama, Chroma, and Streamlit.
+Designed structured output pipelines for extraction, summary, and checklist generation.
+
+Data Science Intern - Vento Analytics - Jul 2023 to Dec 2023
+Created dashboards, evaluated classification models, and automated reporting workflows.
+
+Education
+B.Sc. in Computer Engineering - Federal University of Minas Gerais - 2020 to 2024
+
+Skills
+Python, Streamlit, Ollama, Chroma, Pydantic, SQL, Git
+
+Languages
+Portuguese (native), English (advanced), French (intermediate)

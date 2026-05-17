@@ -1,0 +1,102 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Data Retention Policy.pdf",
+  "file_type": "pdf",
+  "file_hash": "3a7530a4e279e164911bac5c56c29a937ee22db4298c601a032c6581bec96948",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-033  Data Retention Policy\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nData Retention Policy\nRetention schedule for legal, audit, and control-evidence records.\nDocument ID\nPOL-033\nOwner\nGeneral Counsel\nVersion\n2.0\nEffective Date\n2024-01-08\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nPurpose\nThis policy sets minimum retention periods for corporate records, compliance evidence, audit artifacts, contract files, and\nsystem-operational data required to support internal governance and regulatory obligations.\nRetention Schedule\nRecord Category\nMinimum Retention\nRepository Expectation\nExecuted contracts and DPAs\n7 years after expiration or\ntermination\nLegal contract repository\nAccess-review evidence and\napprovals\n3 years after review\ncompletion\nGRC evidence vault with owner and review date\nInternal audit reports and NCRs\n5 years after closure\nAudit repository with linked corrective actions\nSecurity telemetry\n12 months unless stricter\nrequirement applies\nCentral SIEM / immutable archive\nBoard and committee minutes\nPermanent corporate\nrecord\nBoard portal and secretary archive\nEvidence Handling Rules\n●\nEvidence packages must preserve provenance, owner, review date, and relation to the control period being tested.\n●\nDeletion or purge of auditable evidence must be documented and approved by the control owner and Legal.\n●\nDocuments transmitted by email remain evidence only if exported or archived into the approved repository.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 1702,
+    "final_text_chars": 1702,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1696,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [
+          "table"
+        ],
+        "suspicious_score": 0.2,
+        "suspicious_reasons": [
+          "figure/table markers"
+        ],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 5,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 4033,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nPOL-033  Data Retention Policy\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nData Retention Policy\nRetention schedule for legal, audit, and control-evidence records.\nDocument ID\nPOL-033\nOwner\nGeneral Counsel\nVersion\n2.0\nEffective Date\n2024-01-08\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nPurpose\nThis policy sets minimum retention periods for corporate records, compliance evidence, audit artifacts, contract files, and\nsystem-operational data required to support internal governance and regulatory obligations.\nRetention Schedule\nRecord Category\nMinimum Retention\nRepository Expectation\nExecuted contracts and DPAs\n7 years after expiration or\ntermination\nLegal contract repository\nAccess-review evidence and\napprovals\n3 years after review\ncompletion\nGRC evidence vault with owner and review date\nInternal audit reports and NCRs\n5 years after closure\nAudit repository with linked corrective actions\nSecurity telemetry\n12 months unless stricter\nrequirement applies\nCentral SIEM / immutable archive\nBoard and committee minutes\nPermanent corporate\nrecord\nBoard portal and secretary archive\nEvidence Handling Rules\n●\nEvidence packages must preserve provenance, owner, review date, and relation to the control period being tested.\n●\nDeletion or purge of auditable evidence must be documented and approved by the control owner and Legal.\n●\nDocuments transmitted by email remain evidence only if exported or archived into the approved repository.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic policy is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "policies/Data Retention Policy.pdf",
+    "nextcloud_relative_path": "policies/Data Retention Policy.pdf",
+    "source_relative_path": "policies/Data Retention Policy.pdf",
+    "filename": "Data Retention Policy.pdf",
+    "title": "Data Retention Policy",
+    "category": "policies",
+    "preindex": {
+      "relative_path": "policies/Data Retention Policy.pdf",
+      "filename": "Data Retention Policy.pdf",
+      "title": "Data Retention Policy",
+      "category": "policies",
+      "document_id": "policies/Data Retention Policy.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:33"
+}

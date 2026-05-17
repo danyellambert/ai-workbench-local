@@ -121,6 +121,14 @@ class ActionItem(BaseModel):
     """A structured action item identified in the source."""
 
     description: str = Field(description="Action description")
+    card_summary: Optional[str] = Field(
+        default=None,
+        description="Short explanatory subtitle for an action card; explains what the action means, why it matters, and what outcome it should unblock",
+    )
+    summary: Optional[str] = Field(
+        default=None,
+        description="Optional longer explanation for the action item; may mirror card_summary",
+    )
     owner: Optional[str] = Field(default=None, description="Assigned owner if mentioned")
     due_date: Optional[str] = Field(default=None, description="Due date if mentioned")
     status: Optional[str] = Field(default=None, description="Optional action status")
@@ -617,6 +625,54 @@ class ComparisonFinding(BaseModel):
     evidence: List[str] = Field(default_factory=list, description="Short grounded evidence snippets")
 
 
+class DocumentReviewDecisionSummary(BaseModel):
+    """Decision summary produced for the Document Review workflow."""
+
+    label: Optional[str] = Field(default=None, description="Decision label such as Renegotiate or Approve with changes")
+    status: Optional[str] = Field(default=None, description="Operational status such as Requires Legal Review")
+    rationale: Optional[str] = Field(default=None, description="Short rationale supporting the decision")
+
+
+class DocumentReviewFinding(BaseModel):
+    """Native finding produced for the Document Review workflow."""
+
+    severity: Literal["critical", "high", "medium", "low"] = Field(description="Finding severity")
+    category: str = Field(description="Finding category such as Legal Risk, Compliance or Operational Risk")
+    title: str = Field(description="Short finding title")
+    description: str = Field(description="Detailed explanation of the finding")
+    recommendation: Optional[str] = Field(default=None, description="Recommended mitigation or next action")
+    confidence: float = Field(default=0.75, ge=0.0, le=1.0, description="Confidence score for the finding")
+    evidence: str = Field(description="Grounded evidence supporting the finding")
+    impact: Optional[str] = Field(default=None, description="Business or operational impact when explicit")
+    source_document_id: Optional[str] = Field(default=None, description="Grounded source document identifier when known")
+    source_label: Optional[str] = Field(default=None, description="Grounded source label when known")
+    chunk_id: Optional[int] = Field(default=None, description="Grounded chunk identifier when known")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_item(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+        data = dict(value)
+        for field_name in ("category", "title", "description", "recommendation", "evidence", "impact", "source_document_id", "source_label"):
+            if field_name in data and data[field_name] is not None:
+                data[field_name] = " ".join(str(data[field_name]).split()).strip() or None
+        chunk_id = data.get("chunk_id")
+        if isinstance(chunk_id, str) and chunk_id.strip().isdigit():
+            data["chunk_id"] = int(chunk_id.strip())
+        return data
+
+
+class DocumentReviewFindingsPayload(BaseTaskPayload):
+    """Structured payload used to synthesize native findings for Document Review."""
+
+    task_type: Literal["document_review_findings"] = "document_review_findings"
+    decision_summary: Optional[DocumentReviewDecisionSummary] = Field(default=None, description="Optional decision summary derived from the grounded inputs")
+    findings: List[DocumentReviewFinding] = Field(default_factory=list, description="Native document review findings")
+    top_blockers: List[str] = Field(default_factory=list, description="Highest-priority blockers before approval/signature")
+    business_impact: List[str] = Field(default_factory=list, description="Business impact statements derived from grounded findings")
+
+
 class DocumentAgentPayload(BaseTaskPayload):
     """Payload for the Phase 6 document operations copilot."""
 
@@ -634,6 +690,10 @@ class DocumentAgentPayload(BaseTaskPayload):
     available_tools: List[Dict[str, Any]] = Field(default_factory=list, description="Available tools considered by the agent for the current request")
     compared_documents: List[str] = Field(default_factory=list, description="Documents compared when comparison mode is used")
     comparison_findings: List[ComparisonFinding] = Field(default_factory=list, description="Structured document comparison findings")
+    document_review_decision_summary: Optional[DocumentReviewDecisionSummary] = Field(default=None, description="Optional native decision summary for the Document Review workflow")
+    document_review_findings: List[DocumentReviewFinding] = Field(default_factory=list, description="Optional native findings for the Document Review workflow")
+    document_review_top_blockers: List[str] = Field(default_factory=list, description="Optional blocker list for the Document Review workflow")
+    document_review_business_impact: List[str] = Field(default_factory=list, description="Optional business impact summary for the Document Review workflow")
     checklist_preview: List[str] = Field(default_factory=list, description="Checklist item preview when checklist mode is used")
     structured_response: Dict[str, Any] = Field(default_factory=dict, description="Nested structured payload or tool output for downstream inspection")
     sources: List[AgentSource] = Field(default_factory=list, description="Grounded sources consulted by the agent")
@@ -649,5 +709,6 @@ TaskPayload = Union[
     ChecklistPayload,
     CVAnalysisPayload,
     CodeAnalysisPayload,
+    DocumentReviewFindingsPayload,
     DocumentAgentPayload,
 ]

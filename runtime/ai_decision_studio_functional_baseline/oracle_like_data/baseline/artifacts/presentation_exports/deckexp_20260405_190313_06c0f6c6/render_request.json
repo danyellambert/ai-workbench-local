@@ -1,0 +1,187 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Action Plan",
+      "subtitle": "Operational action plan grounded in current action backlog",
+      "author": "AI Workbench Local",
+      "date": "2026-04-05",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Action Plan"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Action Plan",
+        "subtitle": "Operational action plan grounded in current action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: action_plan_deck. Deck family: action_plan. Sources: evidenceops_action_store."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "O action backlog atual contém 3 ação(ões), com 3 aberta(s), 0 sensível(is) e 0 em atraso.",
+        "bullets": [
+          "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+          "Abra os trechos-fonte citados para confirmar a interpretação antes de agir."
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Resumo executivo consolidado a partir dos sinais grounded do produto."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "3",
+            "label": "Total actions"
+          },
+          {
+            "value": "3",
+            "label": "Open"
+          },
+          {
+            "value": "0",
+            "label": "Overdue"
+          },
+          {
+            "value": "0",
+            "label": "Approval required"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "cards",
+        "title": "Priority workstreams",
+        "bullets": [],
+        "cards": [
+          {
+            "title": "Priority 1",
+            "body": "Encaminhe o resultado para revisão humana antes de tomar uma decisão fi…",
+            "footer": "Open"
+          },
+          {
+            "title": "Priority 2",
+            "body": "Abra os trechos-fonte citados para confirmar a interpretação antes de a…",
+            "footer": "Open"
+          },
+          {
+            "title": "Execution posture",
+            "body": "Há ações abertas sem owner definido.",
+            "footer": "Risk signal"
+          }
+        ],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Priority actions grouped as execution workstreams."
+      },
+      {
+        "type": "table",
+        "title": "Action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Action",
+          "Owner",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "Encaminhe o resultado para revisão humana antes de toma…",
+            "-",
+            "Recommended"
+          ],
+          [
+            "Abra os trechos-fonte citados para confirmar a interpre…",
+            "-",
+            "Recommended"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "timeline",
+        "title": "Execution timeline",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [
+          {
+            "title": "Step 1",
+            "body": "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+            "tag": "P1"
+          },
+          {
+            "title": "Step 2",
+            "body": "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+            "tag": "P2"
+          }
+        ],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Condensed execution sequence."
+      },
+      {
+        "type": "two_column",
+        "title": "Blockers vs mitigations",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Blockers",
+            "body": "Há ações abertas sem owner definido.",
+            "bullets": []
+          },
+          {
+            "title": "Mitigations",
+            "body": "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+            "bullets": [
+              "Encaminhe o resultado para revisão humana antes de tomar uma decisão fi…",
+              "Abra os trechos-fonte citados para confirmar a interpretação antes de a…"
+            ]
+          }
+        ],
+        "speaker_notes": "Execution blockers versus mitigation actions."
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260405_190313_06c0f6c6/action_plan_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260405_190313_06c0f6c6",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

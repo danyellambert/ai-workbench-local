@@ -3,32 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/lib/store';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command';
 import {
-  LayoutDashboard, FileText, Workflow, FileOutput, MessageSquare,
-  Layers, BarChart3, Terminal, Settings, Shield, GitCompare,
-  ClipboardList, UserCheck, Zap, Play
+  LayoutDashboard, FileText, Workflow, FileOutput,
+  Settings, Shield, GitCompare, ClipboardList, UserCheck, Play,
 } from 'lucide-react';
+import { AI_LAB_ROUTES } from '@/lib/ai-lab-navigation';
 
 const commands = [
-  { group: 'Navigate', items: [
-    { label: 'Command Center', path: '/app', icon: LayoutDashboard },
-    { label: 'Document Library', path: '/app/documents', icon: FileText },
-    { label: 'Document Review', path: '/app/workflows/document-review', icon: Shield },
-    { label: 'Policy Comparison', path: '/app/workflows/comparison', icon: GitCompare },
-    { label: 'Action Plan', path: '/app/workflows/action-plan', icon: ClipboardList },
-    { label: 'Candidate Review', path: '/app/workflows/candidate-review', icon: UserCheck },
-    { label: 'Deck Center', path: '/app/deck-center', icon: FileOutput },
-    { label: 'Chat with RAG', path: '/app/lab/chat', icon: MessageSquare },
-    { label: 'Structured Outputs', path: '/app/lab/structured', icon: Layers },
-    { label: 'Model Comparison', path: '/app/lab/models', icon: BarChart3 },
-    { label: 'EvidenceOps MCP', path: '/app/lab/evidenceops', icon: Terminal },
-  ]},
-  { group: 'Quick Actions', items: [
-    { label: 'Run Document Risk Review', path: '/app/workflows/document-review', icon: Play },
-    { label: 'Compare Contract Versions', path: '/app/workflows/comparison', icon: GitCompare },
-    { label: 'Build Action Plan', path: '/app/workflows/action-plan', icon: ClipboardList },
-    { label: 'Review Candidate CV', path: '/app/workflows/candidate-review', icon: UserCheck },
-    { label: 'Open Runtime Controls', path: '/app/settings/runtime', icon: Settings },
-  ]},
+  {
+    group: 'Product',
+    items: [
+      { label: 'Command Center', path: '/app', icon: LayoutDashboard },
+      { label: 'Document Library', path: '/app/documents', icon: FileText },
+      { label: 'Run Surface', path: '/app/run', icon: Workflow },
+      { label: 'Document Review', path: '/app/workflows/document-review', icon: Shield },
+      { label: 'Policy Comparison', path: '/app/workflows/comparison', icon: GitCompare },
+      { label: 'Action Plan', path: '/app/workflows/action-plan', icon: ClipboardList },
+      { label: 'Candidate Review', path: '/app/workflows/candidate-review', icon: UserCheck },
+      { label: 'Deck Center', path: '/app/deck-center', icon: FileOutput },
+    ],
+  },
+  {
+    group: 'AI Lab',
+    items: AI_LAB_ROUTES.map((route) => ({ label: route.label, path: route.path, icon: route.icon })),
+  },
+  {
+    group: 'Quick Actions',
+    items: [
+      { label: 'Run Document Risk Review', path: '/app/workflows/document-review', icon: Play },
+      { label: 'Compare Contract Versions', path: '/app/workflows/comparison', icon: GitCompare },
+      { label: 'Open Runtime Controls', path: '/app/settings/runtime', icon: Settings },
+    ],
+  },
 ];
 
 export default function CommandPalette() {
@@ -54,7 +59,7 @@ export default function CommandPalette() {
 
   return (
     <CommandDialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
-      <CommandInput placeholder="Search pages, workflows, actions..." />
+      <CommandInput placeholder="Search pages, workflows, AI Lab..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         {commands.map((group, i) => (
@@ -62,7 +67,7 @@ export default function CommandPalette() {
             {i > 0 && <CommandSeparator />}
             <CommandGroup heading={group.group}>
               {group.items.map(item => (
-                <CommandItem key={item.label} onSelect={() => handleSelect(item.path)} className="gap-3 cursor-pointer">
+                <CommandItem key={item.label + item.path} onSelect={() => handleSelect(item.path)} className="gap-3 cursor-pointer">
                   <item.icon className="w-4 h-4 text-muted-foreground" />
                   <span>{item.label}</span>
                 </CommandItem>

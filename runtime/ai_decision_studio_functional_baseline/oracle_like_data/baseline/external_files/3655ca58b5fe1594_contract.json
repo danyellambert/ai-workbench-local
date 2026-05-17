@@ -1,0 +1,244 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "action_plan_deck",
+  "deck_family": "action_plan",
+  "presentation": {
+    "title": "AI Workbench Local — Action Plan",
+    "subtitle": "Grounded execution plan for the current document-backed run",
+    "author": "AI Workbench Local",
+    "date": "2026-04-17",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Action Plan"
+  },
+  "context": {
+    "review_type_counts": {
+      "action_plan_evidence_review": 5
+    },
+    "action_backlog": [
+      {
+        "action": "[CTR-010 Section 8.2] CTR-010 Section 7.3 unlimited lia…",
+        "owner": "James Park",
+        "due": "2024-03-25",
+        "status": "Open",
+        "source_ref": "CTR-010 Section 8.2",
+        "source_title": "Governance Committee Minutes and Action Items.pdf"
+      },
+      {
+        "action": "[NCR-2024-011] Reconstruct access-review evidence and o…",
+        "owner": "Priya Nair",
+        "due": "2024-03-18",
+        "status": "In Progress",
+        "source_ref": "NCR-2024-011",
+        "source_title": "Governance Committee Minutes and Action Items.pdf"
+      },
+      {
+        "action": "[Privileged Account Approval Email] Negotiate liability…",
+        "owner": "Maria Santos",
+        "due": "2024-03-22",
+        "status": "In Progress",
+        "source_ref": "Privileged Account Approval Email",
+        "source_title": "Privileged Account Approval Email.pdf"
+      },
+      {
+        "action": "[Nonconformance Report - Vendor Access Review] Negotiat…",
+        "owner": "James Park",
+        "due": "2024-03-25",
+        "status": "Open",
+        "source_ref": "Nonconformance Report - Vendor Access Review",
+        "source_title": "Nonconformance Report - Vendor Access Review.pdf"
+      },
+      {
+        "action": "[CTR-012] CTR-013 transfer mechanism gap / GOV-001 Requ…",
+        "owner": "Owner TBD",
+        "due": "2024-03-20",
+        "status": "Done",
+        "source_ref": "CTR-012",
+        "source_title": "Governance Committee Minutes and Action Items.pdf"
+      }
+    ],
+    "attribution_lines": [
+      "CTR-010 Section 8.2 — Governance Committee Minutes and Action Items.pdf: CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency | -renewal calendar alerts Operations 2024-03-18 In progress CTR-010 Section 8.2 90-day notice risk Next committee checkp…",
+      "NCR-2024-011 — Governance Committee Minutes and Action Items.pdf: Reconstruct access-review evidence and obtain system-owner sign-off | nsfer mechanism, and incident-notification language are strengthened. ● The committee accepted opening NCR-2024-011 and…",
+      "Privileged Account Approval Email — Privileged Account Approval Email.pdf: Negotiate liability cap with vendor legal | d activity continues to feed the Meridian logging pipeline; ● the accounts are reviewed again at the next quarterly acc…",
+      "Nonconformance Report - Vendor Access Review — Nonconformance Report - Vendor Access Review.pdf: Negotiate liability cap with vendor legal Maria Santos 2024-03-22 Draft SCC Appendix C and transfer rationale memo | Define explicit incident response SLOs in policy and contract package Alex Rivera 2024-03-28",
+      "CTR-012 — Governance Committee Minutes and Action Items.pdf: CTR-013 transfer mechanism gap / GOV-001 Request revised SLA with 99.95% target | CTR-012 current SLA at 99.5% Define incident response SLOs Alex Rivera 2024-03-28 POL-031 REQ-IR-07 “reasonable efforts…"
+    ],
+    "timeline_steps": [
+      "2024-03-25 · James Park — CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency • CTR-010 Section 8.2",
+      "2024-03-18 · Priya Nair — Reconstruct access-review evidence and obtain system-owner sign-off • NCR-2024-011",
+      "2024-03-22 · Maria Santos — Negotiate liability cap with vendor legal • Privileged Account Approval Email",
+      "2024-03-25 · James Park — Negotiate liability cap with vendor legal Maria Santos 2024-03-22 Draft SCC Appendix C and transfer rationale memo • Nonconformance Report - Vendor Access Review"
+    ],
+    "top_watchouts": [
+      "Liability cap remains unresolved in the contract redline.",
+      "Cross-border transfer and data residency wording still require a finalized appendix.",
+      "Incident-response commitments are still underspecified for production launch.",
+      "Access-review closure still depends on evidence reconstruction and formal sign-off."
+    ],
+    "kanban_seed": [
+      {
+        "title": "CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency",
+        "list": "To do",
+        "owner": "James Park",
+        "due_date": "2024-03-25",
+        "labels": [
+          "Priority: Critical",
+          "Status: Open",
+          "Source: Governance Committee Minutes and Action Items.pdf"
+        ],
+        "source_ref": "CTR-010 Section 8.2"
+      },
+      {
+        "title": "Reconstruct access-review evidence and obtain system-owner sign-off",
+        "list": "Doing",
+        "owner": "Priya Nair",
+        "due_date": "2024-03-18",
+        "labels": [
+          "Priority: High",
+          "Status: In Progress",
+          "Source: Governance Committee Minutes and Action Items.pdf"
+        ],
+        "source_ref": "NCR-2024-011"
+      },
+      {
+        "title": "Negotiate liability cap with vendor legal",
+        "list": "Doing",
+        "owner": "Maria Santos",
+        "due_date": "2024-03-22",
+        "labels": [
+          "Priority: Medium",
+          "Status: In Progress",
+          "Source: Privileged Account Approval Email.pdf"
+        ],
+        "source_ref": "Privileged Account Approval Email"
+      },
+      {
+        "title": "Negotiate liability cap with vendor legal Maria Santos 2024-03-22 Draft SCC Appendix C and transfer rationale memo",
+        "list": "To do",
+        "owner": "James Park",
+        "due_date": "2024-03-25",
+        "labels": [
+          "Priority: Medium",
+          "Status: Open",
+          "Source: Nonconformance Report - Vendor Access Review.pdf"
+        ],
+        "source_ref": "Nonconformance Report - Vendor Access Review"
+      },
+      {
+        "title": "CTR-013 transfer mechanism gap / GOV-001 Request revised SLA with 99.95% target",
+        "list": "Done",
+        "owner": "Owner TBD",
+        "due_date": "2024-03-20",
+        "labels": [
+          "Priority: Medium",
+          "Status: Done",
+          "Source: Governance Committee Minutes and Action Items.pdf"
+        ],
+        "source_ref": "CTR-012"
+      }
+    ],
+    "summary_metrics": {
+      "owners_assigned": 4,
+      "with_due_dates": 5,
+      "blocked": 0,
+      "sources_covered": 5
+    }
+  },
+  "executive_summary": "5 grounded action(s) span contract redlines, privacy transfer controls, incident-response commitments and evidence closure. Immediate focus: CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency; Reconstruct access-review evidence and obtain system-owner sign-off.",
+  "key_highlights": [
+    "CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency",
+    "Reconstruct access-review evidence and obtain system-owner sign-off",
+    "Negotiate liability cap with vendor legal",
+    "Liability cap remains unresolved in the contract redline.",
+    "Cross-border transfer and data residency wording still require a finalized appendix."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Grounded actions",
+      "value": "5"
+    },
+    {
+      "label": "Owners assigned",
+      "value": "4"
+    },
+    {
+      "label": "Dated actions",
+      "value": "5"
+    },
+    {
+      "label": "Blocked",
+      "value": "0"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Action backlog",
+      "columns": [
+        "Ref",
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "CTR-010 Section 8.2",
+          "CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency",
+          "James Park",
+          "2024-03-25",
+          "Open"
+        ],
+        [
+          "NCR-2024-011",
+          "Reconstruct access-review evidence and obtain system-owner sign-off",
+          "Priya Nair",
+          "2024-03-18",
+          "In Progress"
+        ],
+        [
+          "Privileged Account Approval Email",
+          "Negotiate liability cap with vendor legal",
+          "Maria Santos",
+          "2024-03-22",
+          "In Progress"
+        ],
+        [
+          "Nonconformance Report - Vendor Access Review",
+          "Negotiate liability cap with vendor legal Maria Santos 2024-03-22 Draft SCC Appendix C and transfer rationale memo",
+          "James Park",
+          "2024-03-25",
+          "Open"
+        ],
+        [
+          "CTR-012",
+          "CTR-013 transfer mechanism gap / GOV-001 Request revised SLA with 99.95% target",
+          "Owner TBD",
+          "2024-03-20",
+          "Done"
+        ]
+      ],
+      "speaker_notes": "CTR-010 Section 8.2 — Governance Committee Minutes and Action Items.pdf: CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency | -renewal calendar alerts Operations 2024-03-18 In progress CTR-010 Section 8.2 90-day notice risk Next committee checkp…; NCR-2024-011 — Governance Committee Minutes and Action Items.pdf: Reconstruct access-review evidence and obtain system-owner sign-off | nsfer mechanism, and incident-notification language are strengthened. ● The committee accepted opening NCR-2024-011 and…; Privileged Account Approval Email — Privileged Account Approval Email.pdf: Negotiate liability cap with vendor legal | d activity continues to feed the Meridian logging pipeline; ● the accounts are reviewed again at the next quarterly acc…; Nonconformance Report - Vendor Access Review — Nonconformance Report - Vendor Access Review.pdf: Negotiate liability cap with vendor legal Maria Santos 2024-03-22 Draft SCC Appendix C and transfer rationale memo | Define explicit incident response SLOs in policy and contract package Alex Rivera 2024-03-28; CTR-012 — Governance Committee Minutes and Action Items.pdf: CTR-013 transfer mechanism gap / GOV-001 Request revised SLA with 99.95% target | CTR-012 current SLA at 99.5% Define incident response SLOs Alex Rivera 2024-03-28 POL-031 REQ-IR-07 “reasonable efforts…"
+    }
+  ],
+  "recommendation": "CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency (James Park, due 2024-03-25) • CTR-010 Section 8.2",
+  "watchouts": [
+    "Liability cap remains unresolved in the contract redline.",
+    "Cross-border transfer and data residency wording still require a finalized appendix.",
+    "Incident-response commitments are still underspecified for production launch.",
+    "Access-review closure still depends on evidence reconstruction and formal sign-off."
+  ],
+  "next_steps": [
+    "CTR-010 Section 7.3 unlimited liability clause Draft SCC Appendix for data residency (James Park, due 2024-03-25) • CTR-010 Section 8.2",
+    "Reconstruct access-review evidence and obtain system-owner sign-off (Priya Nair, due 2024-03-18) • NCR-2024-011",
+    "Negotiate liability cap with vendor legal (Maria Santos, due 2024-03-22) • Privileged Account Approval Email",
+    "Negotiate liability cap with vendor legal Maria Santos 2024-03-22 Draft SCC Appendix C and transfer rationale memo (James Park, due 2024-03-25) • Nonconformance Report - Vendor Access Review"
+  ],
+  "data_sources": [
+    "action_plan_run",
+    "grounding_preview",
+    "document_agent_action_plan"
+  ]
+}

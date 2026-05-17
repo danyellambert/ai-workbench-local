@@ -1,0 +1,2167 @@
+[
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-8bd1c776d7",
+    "case_id": "case_14b8511fa7c7b3b8",
+    "status": "success",
+    "group": "embeddings",
+    "started_at": 1775423013.080055,
+    "provider_requested": "ollama",
+    "provider_effective": "ollama",
+    "model_requested": "embeddinggemma:300m",
+    "model_effective": "embeddinggemma:300m",
+    "requested_runtime_family": "ollama_local",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "embeddinggemma:300m"
+    ],
+    "provider_label": "Ollama (local)",
+    "candidate_id": "ollama_embeddinggemma_300m",
+    "candidate_role": "baseline_general_retrieval",
+    "dataset_id": "phase8_5_embedding_pdf_corpus",
+    "subset_id": "general_retrieval",
+    "subset_label": "General document retrieval",
+    "subset_kind": "general",
+    "question_set_id": "embedding_benchmark_questions.example",
+    "question_set_path": "baseline://external_files/e782925e68594614_embedding_benchmark_questions.example.json",
+    "document_count": 4,
+    "question_count": 8,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "repetition": 1,
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "api_route": "http://localhost:11434/api/embed",
+      "requested_num_ctx": 512,
+      "model": "embeddinggemma:300m",
+      "truncate": true,
+      "show_available": true,
+      "declared_context_length": 2048,
+      "model_modified_at": "2026-03-14T12:51:40.469083155-03:00",
+      "validation_summary": "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+    },
+    "error": null,
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "embeddinggemma:300m",
+    "backend_equivalence_key": "ollama::embeddinggemma:300m",
+    "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+    "path_overhead_expected": false,
+    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+    "resolved_runtime_family": "ollama_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "indexing_seconds": 182.6087,
+    "sync_status": {
+      "ok": true,
+      "backend": "chroma",
+      "chunks_in_json": 1747,
+      "chunks_in_chroma": 1747,
+      "persist_dir_exists": true,
+      "message": "Chroma sincronizado com 1747 chunk(s)."
+    },
+    "aggregate_metrics": {
+      "question_count": 8,
+      "hit_at_1": 0.875,
+      "hit_at_k": 1.0,
+      "mrr": 0.9062,
+      "average_retrieval_seconds": 0.7704,
+      "median_retrieval_seconds": 0.7295,
+      "max_retrieval_seconds": 1.021
+    },
+    "per_question_results": [
+      {
+        "question": "Which document discusses OCR for text inside natural scene images using a hierarchical centroid shape descriptor and reports 97.87% accuracy with SVM?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": false,
+        "hit_at_k": true,
+        "reciprocal_rank": 0.25,
+        "first_relevant_rank": 4,
+        "retrieval_seconds": 1.021,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 31,
+            "score": 0.5122,
+            "vector_score": 0.5996,
+            "lexical_score": 0.35,
+            "snippet": "n and Pattern Recognition\n(CVPR), volume 2, pages 338–345 vol. 2, 2005.\n[13] J. Liang, D. DeMenthon, and D. Doermann. Geometric\nrectiﬁcation of camera-captured document images. IEEE\nTransactions on Pattern Analysis and Machine Intelligence ,\n30(4):591–605, 2008.\n[14] S. Lu, B. M."
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 29,
+            "score": 0.4915,
+            "vector_score": 0.5677,
+            "lexical_score": 0.35,
+            "snippet": "-Y osef, N. Hagbi, K. Kedem, and I. Dinstein. Line seg-\nmentation for degraded handwritten historical documents. In\nProceedings of the 10th International Conference on Doc-\nument Analysis and Recognition , pages 1161–1165, July\n2009.\n[3] S. Bukhari, F. Shafait, and T. Breuel. Tex"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 33,
+            "score": 0.4849,
+            "vector_score": 0.5844,
+            "lexical_score": 0.3,
+            "snippet": "ed docu-\nment images. IEEE Transactions on Image Processing ,\n20(4):910–920, 2011.\n[25] Y . Tian and S. Narasimhan. Rectiﬁcation and 3d recon-\nstruction of curved document images. In Proceedings of\nIEEE Conference on Computer Vision and Pattern Recog-\nnition (CVPR), pages 377–384"
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 12,
+            "score": 0.4737,
+            "vector_score": 0.5673,
+            "lexical_score": 0.3,
+            "snippet": "he obtained feature vector is\nthen learned for classification using Support Vector Machine\non the dataset created using different ty pe of font sizes and\ntypes.\nThe performance is analyzed using different combinations of\nSVM type and its kernels on 10 -fold cross validation\nproce"
+          }
+        ]
+      },
+      {
+        "question": "Which document presents a method for extracting virtual baselines from scene text using curvilinear projection and emphasizes robustness to blur, noise, and non-text objects?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.7948,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 2,
+            "score": 0.6755,
+            "vector_score": 0.7316,
+            "lexical_score": 0.5714,
+            "snippet": "base-\nlines can be well approximated by linear segments. Based\nupon these observations, we propose a curvilinear projec-\ntion based method and model the estimation of curved base-\nlines as a constrained sequential optimization problem. A\ndynamic programming algorithm is then deve"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 1,
+            "score": 0.6626,
+            "vector_score": 0.7117,
+            "lexical_score": 0.5714,
+            "snippet": "[Página 1]\nExtraction of Virtual Baselines from Distorted Document Images\nUsing Curvilinear Projection\nGaofeng MENG∗†, Zuming HUANG†, Y onghong SONG‡,\nShiming XIANG† and Chunhong PAN†\n† National Laboratory of Pattern Recognition, Institute of Automation\nChinese Academy of Science"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 8,
+            "score": 0.6408,
+            "vector_score": 0.7295,
+            "lexical_score": 0.4762,
+            "snippet": "ten text lines, they generally\ncannot be directly used to extract baselines from a distorted\ndocument image, due to the complicated page layouts and\nexisting of large areas of non-textual objects in images.\nIn this paper, we propose a novel curvilinear projec-\ntion based method f"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 26,
+            "score": 0.6322,
+            "vector_score": 0.7418,
+            "lexical_score": 0.4286,
+            "snippet": "trip, it requires the available visual cues within the\nstrip to be dominant. As a result, the projection may fail if\nan image strip consists of very sparse visual cues or large\nareas of non-textual objects that have too little available in-\nformation to infer the correct projecti"
+          }
+        ]
+      },
+      {
+        "question": "Which document explains the distinction between retroactive and nonretroactive requirements for weighing and measuring devices?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6877,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 31,
+            "score": 0.6528,
+            "vector_score": 0.6582,
+            "lexical_score": 0.6429,
+            "snippet": "sh in combination with the codes\nthemselves the date or dates at which nonretroactive requirements are to become retroactive.  In other cases, give\nequally effective notice at the earliest practicable date.\nA nonretroactive requirement, in italic type, will indicate the year from"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 30,
+            "score": 0.6422,
+            "vector_score": 0.7188,
+            "lexical_score": 0.5,
+            "snippet": "quirements are those that, while clearly desirable, are not so vital that they should at once be enforced\nwith respect to all apparatus.  Nonretroactive requirements are printed in italic type.\nIt is not expected that, after their promulgation in a given jurisdiction, nonretroact"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 45,
+            "score": 0.5926,
+            "vector_score": 0.604,
+            "lexical_score": 0.5714,
+            "snippet": "ed 2008 and 2022)\n(b) To any accessory attached to or used in connection with a commercial weighing or measuring device\nwhen such accessory is so designed that its operation affects the accuracy of the device.\n2. To weighing and measuring equipment in official use for the enforce"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 47,
+            "score": 0.5879,
+            "vector_score": 0.6353,
+            "lexical_score": 0.5,
+            "snippet": "-2025\n[Página 24]\n1.10.  General Code   Handbook 44 – 2025\n1-4\nG-A.6. Nonretroactive Requirements. – “Nonretroactive” requirements are enforceable on or after the effective\ndate for devices:\n(a) manufactured within a state after the effective date;\n(b) both new and used, brought "
+          }
+        ]
+      },
+      {
+        "question": "Which document includes instructions about battery handling, USB base connection, and proper disposal precautions for a handheld scanner?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.7586,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 31,
+            "score": 0.5484,
+            "vector_score": 0.6219,
+            "lexical_score": 0.4118,
+            "snippet": "nificant, it may be more\ncost effective to locate a local recycle/disposal company.\nConnecting the Base\nA base can be connected between the keyboard and PC as a “keyboard\nwedge,” plugged into the serial port, plugged into a USB port, or connected to a\nportable data terminal in wa"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 9,
+            "score": 0.546,
+            "vector_score": 0.5549,
+            "lexical_score": 0.5294,
+            "snippet": "............ 1-2\nAbout the Battery ........................................................ 1-2\nProper Disposal of the Battery .................................... 1-3\nConnecting the Base................................................... 1-3\nConnecting the Base with USB ........"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 29,
+            "score": 0.4932,
+            "vector_score": 0.6004,
+            "lexical_score": 0.2941,
+            "snippet": "hipped with\na battery.  (See Product Specifications beginning on page 13-1.)\nCharging Information\nThe battery is designed to charge while the image scanner is positioned in the\ncordless base unit.  Refer to \"2020 LED Sequences and Meaning\" on page 3-4\nfor an interpretation of the"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 222,
+            "score": 0.4834,
+            "vector_score": 0.5854,
+            "lexical_score": 0.2941,
+            "snippet": "nects to your terminal\nSupply ground\nCord shield\n1\n2\n3\n4\n5\n6\n7\n8\n9\n[Página 252]\n13 - 8\nStandard Cable Pinouts\nSerial Output\n10 Pin RJ41 Modular Plugconnects to the base\n1\n2 Cord shield\n3 Prog 1 (Tied to supply power for primary cable)\n4 Supply ground\n5 Receive data - Serial data "
+          }
+        ]
+      },
+      {
+        "question": "In which document would you find discussion of Support Vector Machine and K-Nearest Neighbor as classifiers used after OCR feature extraction?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8315,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 8,
+            "score": 0.5246,
+            "vector_score": 0.5977,
+            "lexical_score": 0.3889,
+            "snippet": "considering coordinate values relative to the original image.\nThe length of the  feature vector is give as: 2^d -1, where d is\nthe parametric value which denotes the recursive depth or\ndivisions. But it produces subdivisions along one axis twice as\ncompare to other. Therefore, in"
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 11,
+            "score": 0.5041,
+            "vector_score": 0.5662,
+            "lexical_score": 0.3889,
+            "snippet": "performance of classification on LIBSVM tool is\nmeasured by considering two types of SVM namely, C -SVC\nand nu-SVC and three types of kernels namely, Gaussian RBF\n(Radial Basis Function) kernel, Linear Kernel and Polynomial\nkernel.\nTable 1: Classification results using different "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 14,
+            "score": 0.4976,
+            "vector_score": 0.586,
+            "lexical_score": 0.3333,
+            "snippet": "omput. Sci. Softw. Eng.,\nvol. 2, no. 5, pp. 234–240, 2012.\n[11] K. S. Siddharth, R. Dhir, R. Rani, M. Jangid, and K.\nSingh, “Comparative Recognition of Handwritten\nGurmukhi Numerals Using Different Feature S ets and\nClassifiers,” in Proceedings of International Conference\non Imag"
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 12,
+            "score": 0.4733,
+            "vector_score": 0.5786,
+            "lexical_score": 0.2778,
+            "snippet": "he obtained feature vector is\nthen learned for classification using Support Vector Machine\non the dataset created using different ty pe of font sizes and\ntypes.\nThe performance is analyzed using different combinations of\nSVM type and its kernels on 10 -fold cross validation\nproce"
+          }
+        ]
+      },
+      {
+        "question": "In which document would you find discussion of curved text detection and the relationship between text boundaries and text center lines?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.7005,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 23,
+            "score": 0.5939,
+            "vector_score": 0.6445,
+            "lexical_score": 0.5,
+            "snippet": "a curved document image and estimate the corre-\nsponding baselines by smooth curve ﬁtting. In comparison\nwith their method, our method can exploit the available vi-\nsual cues in the image to estimate the complete baselines\nthrough each pixel, not merely limited to the baselines o"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 27,
+            "score": 0.5848,
+            "vector_score": 0.6304,
+            "lexical_score": 0.5,
+            "snippet": "ete baselines in a high ac-\ncuracy for every pixel in the image, not merely limited to\nthe baselines of textual regions. Moreover, our method is\nscripts insensitive and can well exploit more general types\nof visual cues in the image for baselines estimation, such\nas horizontal te"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 8,
+            "score": 0.5774,
+            "vector_score": 0.6527,
+            "lexical_score": 0.4375,
+            "snippet": "ten text lines, they generally\ncannot be directly used to extract baselines from a distorted\ndocument image, due to the complicated page layouts and\nexisting of large areas of non-textual objects in images.\nIn this paper, we propose a novel curvilinear projec-\ntion based method f"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 33,
+            "score": 0.5719,
+            "vector_score": 0.678,
+            "lexical_score": 0.375,
+            "snippet": "ed docu-\nment images. IEEE Transactions on Image Processing ,\n20(4):910–920, 2011.\n[25] Y . Tian and S. Narasimhan. Rectiﬁcation and 3d recon-\nstruction of curved document images. In Proceedings of\nIEEE Conference on Computer Vision and Pattern Recog-\nnition (CVPR), pages 377–384"
+          }
+        ]
+      },
+      {
+        "question": "Which document would you consult for requirements covering commercial weighing and measuring equipment used in regulation or trade?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.6882,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 45,
+            "score": 0.6167,
+            "vector_score": 0.6459,
+            "lexical_score": 0.5625,
+            "snippet": "ed 2008 and 2022)\n(b) To any accessory attached to or used in connection with a commercial weighing or measuring device\nwhen such accessory is so designed that its operation affects the accuracy of the device.\n2. To weighing and measuring equipment in official use for the enforce"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1203,
+            "score": 0.6035,
+            "vector_score": 0.6593,
+            "lexical_score": 0.5,
+            "snippet": "ions thereof, shall apply to commercial\nweighing and measuring devices in the state.\nIn some states, it is preferred to base technical requirements upon specific action of the state legislature rather than\nupon an act of promulgation by a state officer.  The advantages cited abov"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1202,
+            "score": 0.603,
+            "vector_score": 0.6585,
+            "lexical_score": 0.5,
+            "snippet": "uide in the\ndesign and construction of commercial weighing and measuring equipment, the acceptance and promulgation of these\ncodes by each state are strongly recommended.\n1.2. Form of Promulgation. – A convenient and very effective form of promulgation already successfully used i"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 44,
+            "score": 0.5819,
+            "vector_score": 0.626,
+            "lexical_score": 0.5,
+            "snippet": "t a Central Location. ................................ ...............................  1-14\nThis publication is available free of charge from https://doi.org/10.6028/NIST.HB.44-2025\n[Página 23]\nHandbook 44 – 2025  1.10.  General Code\n1-3\nSection 1.10. General Code\nG-A. Applicati"
+          }
+        ]
+      },
+      {
+        "question": "Which document should be used to check safety instructions before charging, using, or discarding the scanner battery?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.681,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 29,
+            "score": 0.5414,
+            "vector_score": 0.6022,
+            "lexical_score": 0.4286,
+            "snippet": "hipped with\na battery.  (See Product Specifications beginning on page 13-1.)\nCharging Information\nThe battery is designed to charge while the image scanner is positioned in the\ncordless base unit.  Refer to \"2020 LED Sequences and Meaning\" on page 3-4\nfor an interpretation of the"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 225,
+            "score": 0.4697,
+            "vector_score": 0.4919,
+            "lexical_score": 0.4286,
+            "snippet": "(turn\nthe thumbwheel or use a hex wrench).\nInsert Battery into Charge Sleeve\n1. Place the squared-off end of the battery\ninto the sleeve and slide it until it stops.\nThe battery contacts should be show-\ning through the small rectangular open-\ning in the battery sleeve.\n2. Press o"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 226,
+            "score": 0.4279,
+            "vector_score": 0.466,
+            "lexical_score": 0.3571,
+            "snippet": "canner is correc tly placed in the base.\n There is external power or 12 volt host power.\n Charge mode is turned on.  ( See \"Base Charge Mode\" on page 3-3 )\n The battery is not bad or deeply disc harged.  In some cases, the image\nscanner’s battery may trickle charge to bring it"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 30,
+            "score": 0.4265,
+            "vector_score": 0.5407,
+            "lexical_score": 0.2143,
+            "snippet": "ery or throw it  into a fire.  It can explode and cause\nsevere personal injury.\n Although your battery can be recharged many times, it will eventually be\ndepleted.  Replace it after the battery is unable to hold an adequate charge.\n If you are not sure if the battery or ch arge"
+          }
+        ]
+      }
+    ],
+    "hit_at_1": 0.875,
+    "hit_at_k": 1.0,
+    "mrr": 0.9062,
+    "average_retrieval_seconds": 0.7704,
+    "median_retrieval_seconds": 0.7295,
+    "max_retrieval_seconds": 1.021,
+    "total_wall_time_s": 188.7745,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 188.7745,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 317.7188,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak",
+    "finished_at": 1775423201.855194
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-8bd1c776d7",
+    "case_id": "case_721751b68a63b919",
+    "status": "success",
+    "group": "embeddings",
+    "started_at": 1775423201.9512992,
+    "provider_requested": "ollama",
+    "provider_effective": "ollama",
+    "model_requested": "embeddinggemma:300m",
+    "model_effective": "embeddinggemma:300m",
+    "requested_runtime_family": "ollama_local",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "embeddinggemma:300m"
+    ],
+    "provider_label": "Ollama (local)",
+    "candidate_id": "ollama_embeddinggemma_300m",
+    "candidate_role": "baseline_general_retrieval",
+    "dataset_id": "phase8_5_embedding_pdf_corpus",
+    "subset_id": "code_retrieval",
+    "subset_label": "Code retrieval subset",
+    "subset_kind": "code",
+    "question_set_id": "phase8_5_code_embedding_questions",
+    "question_set_path": "baseline://external_files/a37c416f711682a9_phase8_5_code_embedding_questions.json",
+    "document_count": 3,
+    "question_count": 3,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "repetition": 1,
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "api_route": "http://localhost:11434/api/embed",
+      "requested_num_ctx": 512,
+      "model": "embeddinggemma:300m",
+      "truncate": true,
+      "show_available": true,
+      "declared_context_length": 2048,
+      "model_modified_at": "2026-03-14T12:51:40.469083155-03:00",
+      "validation_summary": "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+    },
+    "error": null,
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "embeddinggemma:300m",
+    "backend_equivalence_key": "ollama::embeddinggemma:300m",
+    "equivalent_direct_runtime_key": "ollama::embeddinggemma:300m",
+    "path_overhead_expected": false,
+    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+    "resolved_runtime_family": "ollama_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "indexing_seconds": 3.3038,
+    "sync_status": {
+      "ok": true,
+      "backend": "chroma",
+      "chunks_in_json": 24,
+      "chunks_in_chroma": 24,
+      "persist_dir_exists": true,
+      "message": "Chroma sincronizado com 24 chunk(s)."
+    },
+    "aggregate_metrics": {
+      "question_count": 3,
+      "hit_at_1": 0.6667,
+      "hit_at_k": 0.6667,
+      "mrr": 0.6667,
+      "average_retrieval_seconds": 0.1722,
+      "median_retrieval_seconds": 0.1781,
+      "max_retrieval_seconds": 0.1816
+    },
+    "per_question_results": [
+      {
+        "question": "Which file defines the function `hybrid_rerank_chunks` and calculates a combined rerank score using vector and lexical weights?",
+        "expected_document_names": [
+          "reranking.py"
+        ],
+        "retrieved_names": [
+          "reranking.py",
+          "reranking.py",
+          "reranking.py",
+          "model_comparison.py"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.1781,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "reranking.py",
+            "document_id": "1cc66be21eaff8d4025868987ae08697e3f2f8769c27d7b19e05983d2642682a",
+            "chunk_id": 2,
+            "score": 0.4415,
+            "vector_score": 0.5716,
+            "lexical_score": 0.2,
+            "snippet": ">= 4 and any(\nfragment in normalized_chunk.lower()\nfor fragment in [normalized_query.lower()[: max(len(normalized_query) // 2, 12)]]\n) else 0.0\nreturn round(min(overlap_ratio + exact_phrase_bonus + partial_phrase_bonus, 1.0), 4)\ndef rank_chunks_lexically(query: str, chunks: list["
+          },
+          {
+            "source": "reranking.py",
+            "document_id": "1cc66be21eaff8d4025868987ae08697e3f2f8769c27d7b19e05983d2642682a",
+            "chunk_id": 3,
+            "score": 0.3847,
+            "vector_score": 0.5201,
+            "lexical_score": 0.1333,
+            "snippet": "candidates]:\nkey = chunk_key(candidate)\nexisting = merged.get(key, {})\nvector_score = float(candidate.get(\"vector_score\") or candidate.get(\"score\") or existing.get(\"vector_score\") or 0.0)\ncurrent_text = str(candidate.get(\"text\", \"\"))\nlexical = float(candidate.get(\"lexical_score\")"
+          },
+          {
+            "source": "reranking.py",
+            "document_id": "1cc66be21eaff8d4025868987ae08697e3f2f8769c27d7b19e05983d2642682a",
+            "chunk_id": 1,
+            "score": 0.3829,
+            "vector_score": 0.5532,
+            "lexical_score": 0.0667,
+            "snippet": "from __future__ import annotations\nimport re\nTOKEN_PATTERN = re.compile(r\"[\\w\\-]{3,}\", re.UNICODE)\ndef chunk_key(chunk: dict[str, object]) -> str:\nreturn \"::\".join(\n[\nstr(chunk.get(\"document_id\") or chunk.get(\"file_hash\") or \"documento\"),\nstr(chunk.get(\"chunk_id\") or 0),\nstr(chun"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 3,
+            "score": 0.2696,
+            "vector_score": 0.343,
+            "lexical_score": 0.1333,
+            "snippet": "KET_LABELS = {\n\"local\": \"Local\",\n\"cloud\": \"Cloud\",\n\"experimental_local\": \"Experimental local\",\n}\nMODEL_COMPARISON_QUANTIZATION_LABELS = {\n\"cloud_managed\": \"Cloud managed\",\n\"q2\": \"Q2\",\n\"q3\": \"Q3\",\n\"q4\": \"Q4\",\n\"q5\": \"Q5\",\n\"q6\": \"Q6\",\n\"q8\": \"Q8\",\n\"int4\": \"INT4\",\n\"int8\": \"INT8\",\n\"fp1"
+          }
+        ]
+      },
+      {
+        "question": "Which file defines `run_model_comparison_candidate` and the `MODEL_COMPARISON_USE_CASE_PRESETS` constants for benchmark generation use cases?",
+        "expected_document_names": [
+          "model_comparison.py"
+        ],
+        "retrieved_names": [
+          "model_comparison.py",
+          "model_comparison.py",
+          "model_comparison.py",
+          "model_comparison.py"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.1816,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 3,
+            "score": 0.3635,
+            "vector_score": 0.435,
+            "lexical_score": 0.2308,
+            "snippet": "KET_LABELS = {\n\"local\": \"Local\",\n\"cloud\": \"Cloud\",\n\"experimental_local\": \"Experimental local\",\n}\nMODEL_COMPARISON_QUANTIZATION_LABELS = {\n\"cloud_managed\": \"Cloud managed\",\n\"q2\": \"Q2\",\n\"q3\": \"Q3\",\n\"q4\": \"Q4\",\n\"q5\": \"Q5\",\n\"q6\": \"Q6\",\n\"q8\": \"Q8\",\n\"int4\": \"INT4\",\n\"int8\": \"INT8\",\n\"fp1"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 10,
+            "score": 0.3401,
+            "vector_score": 0.3989,
+            "lexical_score": 0.2308,
+            "snippet": "ndo com '-'.\",\n\"json\": \"Responda somente com JSON válido, sem markdown e sem texto adicional.\",\n}\nextra_instruction = format_instructions.get(response_format, format_instructions[\"plain_text\"])\nreturn f\"{cleaned}\\n\\nFormato desejado: {extra_instruction}\".strip()\ndef estimate_resp"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 2,
+            "score": 0.3114,
+            "vector_score": 0.479,
+            "lexical_score": 0.0,
+            "snippet": "riscos, controles existentes, lacunas e próximos passos recomendados.\",\n\"response_format\": \"bullet_list\",\n\"prompt_profile\": \"neutro\",\n},\n\"policy_compliance\": {\n\"label\": \"Policy / compliance\",\n\"description\": \"Comparar análise documental com foco em obrigações, restrições e necessi"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 1,
+            "score": 0.3073,
+            "vector_score": 0.4313,
+            "lexical_score": 0.0769,
+            "snippet": "from __future__ import annotations\nimport json\nimport re\nimport time\nfrom typing import Any\nfrom ..config import RagSettings\nfrom ..prompt_profiles import build_prompt_messages\nfrom ..providers.registry import resolve_provider_runtime_profile\nfrom ..rag.prompting import inject_ra"
+          }
+        ]
+      },
+      {
+        "question": "Which code sample should be inspected to find a mutation bug involving shared references and unsafe in-place edits?",
+        "expected_document_names": [
+          "05_code_sample.py"
+        ],
+        "retrieved_names": [
+          "model_comparison.py",
+          "model_comparison.py",
+          "model_comparison.py",
+          "model_comparison.py"
+        ],
+        "hit_at_1": false,
+        "hit_at_k": false,
+        "reciprocal_rank": 0.0,
+        "first_relevant_rank": null,
+        "retrieval_seconds": 0.1569,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 2,
+            "score": 0.2191,
+            "vector_score": 0.3371,
+            "lexical_score": 0.0,
+            "snippet": "riscos, controles existentes, lacunas e próximos passos recomendados.\",\n\"response_format\": \"bullet_list\",\n\"prompt_profile\": \"neutro\",\n},\n\"policy_compliance\": {\n\"label\": \"Policy / compliance\",\n\"description\": \"Comparar análise documental com foco em obrigações, restrições e necessi"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 1,
+            "score": 0.2098,
+            "vector_score": 0.3228,
+            "lexical_score": 0.0,
+            "snippet": "from __future__ import annotations\nimport json\nimport re\nimport time\nfrom typing import Any\nfrom ..config import RagSettings\nfrom ..prompt_profiles import build_prompt_messages\nfrom ..providers.registry import resolve_provider_runtime_profile\nfrom ..rag.prompting import inject_ra"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 10,
+            "score": 0.1979,
+            "vector_score": 0.2686,
+            "lexical_score": 0.0667,
+            "snippet": "ndo com '-'.\",\n\"json\": \"Responda somente com JSON válido, sem markdown e sem texto adicional.\",\n}\nextra_instruction = format_instructions.get(response_format, format_instructions[\"plain_text\"])\nreturn f\"{cleaned}\\n\\nFormato desejado: {extra_instruction}\".strip()\ndef estimate_resp"
+          },
+          {
+            "source": "model_comparison.py",
+            "document_id": "94f2c697a8117c538d4ad8934b570ead17ad7a23b065f55c6fd909fb7b4f4c3c",
+            "chunk_id": 3,
+            "score": 0.1964,
+            "vector_score": 0.2662,
+            "lexical_score": 0.0667,
+            "snippet": "KET_LABELS = {\n\"local\": \"Local\",\n\"cloud\": \"Cloud\",\n\"experimental_local\": \"Experimental local\",\n}\nMODEL_COMPARISON_QUANTIZATION_LABELS = {\n\"cloud_managed\": \"Cloud managed\",\n\"q2\": \"Q2\",\n\"q3\": \"Q3\",\n\"q4\": \"Q4\",\n\"q5\": \"Q5\",\n\"q6\": \"Q6\",\n\"q8\": \"Q8\",\n\"int4\": \"INT4\",\n\"int8\": \"INT8\",\n\"fp1"
+          }
+        ]
+      }
+    ],
+    "hit_at_1": 0.6667,
+    "hit_at_k": 0.6667,
+    "mrr": 0.6667,
+    "average_retrieval_seconds": 0.1722,
+    "median_retrieval_seconds": 0.1781,
+    "max_retrieval_seconds": 0.1816,
+    "total_wall_time_s": 3.8227,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 3.8227,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 317.7188,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak",
+    "finished_at": 1775423205.7740889
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-8bd1c776d7",
+    "case_id": "case_b02fdd68269dbb0a",
+    "status": "success",
+    "group": "embeddings",
+    "started_at": 1775423205.835728,
+    "provider_requested": "ollama",
+    "provider_effective": "ollama",
+    "model_requested": "qwen3-embedding:0.6b",
+    "model_effective": "qwen3-embedding:0.6b",
+    "requested_runtime_family": "ollama_local",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "qwen3-embedding:0.6b"
+    ],
+    "provider_label": "Ollama (local)",
+    "candidate_id": "ollama_qwen3_embedding_0_6b",
+    "candidate_role": "challenger_general_retrieval",
+    "dataset_id": "phase8_5_embedding_pdf_corpus",
+    "subset_id": "general_retrieval",
+    "subset_label": "General document retrieval",
+    "subset_kind": "general",
+    "question_set_id": "embedding_benchmark_questions.example",
+    "question_set_path": "baseline://external_files/e782925e68594614_embedding_benchmark_questions.example.json",
+    "document_count": 4,
+    "question_count": 8,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "repetition": 1,
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "api_route": "http://localhost:11434/api/embed",
+      "requested_num_ctx": 512,
+      "model": "qwen3-embedding:0.6b",
+      "truncate": true,
+      "show_available": true,
+      "declared_context_length": 32768,
+      "model_modified_at": "2026-03-14T11:06:42.681642944-03:00",
+      "validation_summary": "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+    },
+    "error": null,
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "qwen3-embedding:0.6b",
+    "backend_equivalence_key": "ollama::qwen3-embedding:0.6b",
+    "equivalent_direct_runtime_key": "ollama::qwen3-embedding:0.6b",
+    "path_overhead_expected": false,
+    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+    "resolved_runtime_family": "ollama_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "indexing_seconds": 255.1088,
+    "sync_status": {
+      "ok": true,
+      "backend": "chroma",
+      "chunks_in_json": 1747,
+      "chunks_in_chroma": 1747,
+      "persist_dir_exists": true,
+      "message": "Chroma sincronizado com 1747 chunk(s)."
+    },
+    "aggregate_metrics": {
+      "question_count": 8,
+      "hit_at_1": 0.875,
+      "hit_at_k": 0.875,
+      "mrr": 0.875,
+      "average_retrieval_seconds": 0.8326,
+      "median_retrieval_seconds": 0.8344,
+      "max_retrieval_seconds": 0.8443
+    },
+    "per_question_results": [
+      {
+        "question": "Which document discusses OCR for text inside natural scene images using a hierarchical centroid shape descriptor and reports 97.87% accuracy with SVM?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": false,
+        "hit_at_k": false,
+        "reciprocal_rank": 0.0,
+        "first_relevant_rank": null,
+        "retrieval_seconds": 0.8411,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 27,
+            "score": 0.4777,
+            "vector_score": 0.5464,
+            "lexical_score": 0.35,
+            "snippet": "ete baselines in a high ac-\ncuracy for every pixel in the image, not merely limited to\nthe baselines of textual regions. Moreover, our method is\nscripts insensitive and can well exploit more general types\nof visual cues in the image for baselines estimation, such\nas horizontal te"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 31,
+            "score": 0.4771,
+            "vector_score": 0.5455,
+            "lexical_score": 0.35,
+            "snippet": "n and Pattern Recognition\n(CVPR), volume 2, pages 338–345 vol. 2, 2005.\n[13] J. Liang, D. DeMenthon, and D. Doermann. Geometric\nrectiﬁcation of camera-captured document images. IEEE\nTransactions on Pattern Analysis and Machine Intelligence ,\n30(4):591–605, 2008.\n[14] S. Lu, B. M."
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 29,
+            "score": 0.4767,
+            "vector_score": 0.5449,
+            "lexical_score": 0.35,
+            "snippet": "-Y osef, N. Hagbi, K. Kedem, and I. Dinstein. Line seg-\nmentation for degraded handwritten historical documents. In\nProceedings of the 10th International Conference on Doc-\nument Analysis and Recognition , pages 1161–1165, July\n2009.\n[3] S. Bukhari, F. Shafait, and T. Breuel. Tex"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 20,
+            "score": 0.4709,
+            "vector_score": 0.5629,
+            "lexical_score": 0.3,
+            "snippet": "es. From the results, we can see that the proposed method\ncan extract the curved baselines in a high accuracy. The\nestimated baselines are also robust to marginal noises and\nnon-textual objects in the images, such as inserted formulas\nand photos. This is mainly because the propos"
+          }
+        ]
+      },
+      {
+        "question": "Which document presents a method for extracting virtual baselines from scene text using curvilinear projection and emphasizes robustness to blur, noise, and non-text objects?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8443,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 2,
+            "score": 0.7058,
+            "vector_score": 0.7782,
+            "lexical_score": 0.5714,
+            "snippet": "base-\nlines can be well approximated by linear segments. Based\nupon these observations, we propose a curvilinear projec-\ntion based method and model the estimation of curved base-\nlines as a constrained sequential optimization problem. A\ndynamic programming algorithm is then deve"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 1,
+            "score": 0.6837,
+            "vector_score": 0.7442,
+            "lexical_score": 0.5714,
+            "snippet": "[Página 1]\nExtraction of Virtual Baselines from Distorted Document Images\nUsing Curvilinear Projection\nGaofeng MENG∗†, Zuming HUANG†, Y onghong SONG‡,\nShiming XIANG† and Chunhong PAN†\n† National Laboratory of Pattern Recognition, Institute of Automation\nChinese Academy of Science"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 27,
+            "score": 0.6695,
+            "vector_score": 0.7736,
+            "lexical_score": 0.4762,
+            "snippet": "ete baselines in a high ac-\ncuracy for every pixel in the image, not merely limited to\nthe baselines of textual regions. Moreover, our method is\nscripts insensitive and can well exploit more general types\nof visual cues in the image for baselines estimation, such\nas horizontal te"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 8,
+            "score": 0.6638,
+            "vector_score": 0.7648,
+            "lexical_score": 0.4762,
+            "snippet": "ten text lines, they generally\ncannot be directly used to extract baselines from a distorted\ndocument image, due to the complicated page layouts and\nexisting of large areas of non-textual objects in images.\nIn this paper, we propose a novel curvilinear projec-\ntion based method f"
+          }
+        ]
+      },
+      {
+        "question": "Which document explains the distinction between retroactive and nonretroactive requirements for weighing and measuring devices?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8218,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 31,
+            "score": 0.6875,
+            "vector_score": 0.7115,
+            "lexical_score": 0.6429,
+            "snippet": "sh in combination with the codes\nthemselves the date or dates at which nonretroactive requirements are to become retroactive.  In other cases, give\nequally effective notice at the earliest practicable date.\nA nonretroactive requirement, in italic type, will indicate the year from"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1,
+            "score": 0.639,
+            "vector_score": 0.6754,
+            "lexical_score": 0.5714,
+            "snippet": "[Página 1]\nNIST Handbook\nNIST HB 44-2025\nSpecifications, Tolerances, and\nOther Technical Requirements for\nWeighing and Measuring Devices\nas adopted by the\n109th National Conference on Weights and Measures\nIsabel Chavez Baucom\nJan Konijnenburg\nG. Diane Lee\nKatrice A. Lippa\nLoren B"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 45,
+            "score": 0.6234,
+            "vector_score": 0.6514,
+            "lexical_score": 0.5714,
+            "snippet": "ed 2008 and 2022)\n(b) To any accessory attached to or used in connection with a commercial weighing or measuring device\nwhen such accessory is so designed that its operation affects the accuracy of the device.\n2. To weighing and measuring equipment in official use for the enforce"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 4,
+            "score": 0.6109,
+            "vector_score": 0.6706,
+            "lexical_score": 0.5,
+            "snippet": "pecifications, tolerances, and other technical requirements for\nweighing and measuring devices.  These requirements are intended to encourage the design,\ninstallation, testing, and use of weighing and measuring devices that provide for accurate,\nrepeatable measurements; facilitat"
+          }
+        ]
+      },
+      {
+        "question": "Which document includes instructions about battery handling, USB base connection, and proper disposal precautions for a handheld scanner?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8312,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 9,
+            "score": 0.5497,
+            "vector_score": 0.5607,
+            "lexical_score": 0.5294,
+            "snippet": "............ 1-2\nAbout the Battery ........................................................ 1-2\nProper Disposal of the Battery .................................... 1-3\nConnecting the Base................................................... 1-3\nConnecting the Base with USB ........"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 31,
+            "score": 0.4867,
+            "vector_score": 0.5271,
+            "lexical_score": 0.4118,
+            "snippet": "nificant, it may be more\ncost effective to locate a local recycle/disposal company.\nConnecting the Base\nA base can be connected between the keyboard and PC as a “keyboard\nwedge,” plugged into the serial port, plugged into a USB port, or connected to a\nportable data terminal in wa"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 28,
+            "score": 0.4853,
+            "vector_score": 0.5882,
+            "lexical_score": 0.2941,
+            "snippet": "eport damage immediately to the\ncarrier who delivered the carton.\n Make sure the items in the carton match your order.\n Save the shipping container fo r later storage or shipping.\nImage Scanner Models\nModels Description\n4820SF0C1CBE Cordless Area Ima ge Scanner, Green aimer, Sp"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 29,
+            "score": 0.4555,
+            "vector_score": 0.5424,
+            "lexical_score": 0.2941,
+            "snippet": "hipped with\na battery.  (See Product Specifications beginning on page 13-1.)\nCharging Information\nThe battery is designed to charge while the image scanner is positioned in the\ncordless base unit.  Refer to \"2020 LED Sequences and Meaning\" on page 3-4\nfor an interpretation of the"
+          }
+        ]
+      },
+      {
+        "question": "In which document would you find discussion of Support Vector Machine and K-Nearest Neighbor as classifiers used after OCR feature extraction?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8221,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 3,
+            "score": 0.5907,
+            "vector_score": 0.6395,
+            "lexical_score": 0.5,
+            "snippet": "formation. Diagonal and transition features were calculated\non the bitmap images of the characters and then Euclidean\ndistance between the testing point and reference point is\ncalculated in o rder to find k -nearest neighbors. The dataset\nused in the study consist of 3500 images "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 1,
+            "score": 0.544,
+            "vector_score": 0.5977,
+            "lexical_score": 0.4444,
+            "snippet": "[Página 2]\nInternational Journal of Computer Applications (0975 – 8887)\nVolume 149 – No.3, September 2016\n25\nrecognition. Some of these studies are briefly reviewed as\nfollows:\nThe zoning mechanism is used for the feature extraction\nwhich is used to train support vecto r machine "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 11,
+            "score": 0.5219,
+            "vector_score": 0.5935,
+            "lexical_score": 0.3889,
+            "snippet": "performance of classification on LIBSVM tool is\nmeasured by considering two types of SVM namely, C -SVC\nand nu-SVC and three types of kernels namely, Gaussian RBF\n(Radial Basis Function) kernel, Linear Kernel and Polynomial\nkernel.\nTable 1: Classification results using different "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 14,
+            "score": 0.5213,
+            "vector_score": 0.6226,
+            "lexical_score": 0.3333,
+            "snippet": "omput. Sci. Softw. Eng.,\nvol. 2, no. 5, pp. 234–240, 2012.\n[11] K. S. Siddharth, R. Dhir, R. Rani, M. Jangid, and K.\nSingh, “Comparative Recognition of Handwritten\nGurmukhi Numerals Using Different Feature S ets and\nClassifiers,” in Proceedings of International Conference\non Imag"
+          }
+        ]
+      },
+      {
+        "question": "In which document would you find discussion of curved text detection and the relationship between text boundaries and text center lines?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8423,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 20,
+            "score": 0.5758,
+            "vector_score": 0.6503,
+            "lexical_score": 0.4375,
+            "snippet": "es. From the results, we can see that the proposed method\ncan extract the curved baselines in a high accuracy. The\nestimated baselines are also robust to marginal noises and\nnon-textual objects in the images, such as inserted formulas\nand photos. This is mainly because the propos"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 23,
+            "score": 0.5626,
+            "vector_score": 0.5963,
+            "lexical_score": 0.5,
+            "snippet": "a curved document image and estimate the corre-\nsponding baselines by smooth curve ﬁtting. In comparison\nwith their method, our method can exploit the available vi-\nsual cues in the image to estimate the complete baselines\nthrough each pixel, not merely limited to the baselines o"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 9,
+            "score": 0.5542,
+            "vector_score": 0.5834,
+            "lexical_score": 0.5,
+            "snippet": "ed text lines, horizontal lines in tables,\nboundaries of pages and inserted photos. It shows great\nrobustness to various scripts, different page layouts, non-\ntextual objects, changes of image resolutions and image\nquality degradation like image blurring and non-uniform il-\n3926\n"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 8,
+            "score": 0.5383,
+            "vector_score": 0.5925,
+            "lexical_score": 0.4375,
+            "snippet": "ten text lines, they generally\ncannot be directly used to extract baselines from a distorted\ndocument image, due to the complicated page layouts and\nexisting of large areas of non-textual objects in images.\nIn this paper, we propose a novel curvilinear projec-\ntion based method f"
+          }
+        ]
+      },
+      {
+        "question": "Which document would you consult for requirements covering commercial weighing and measuring equipment used in regulation or trade?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8375,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 44,
+            "score": 0.6587,
+            "vector_score": 0.7442,
+            "lexical_score": 0.5,
+            "snippet": "t a Central Location. ................................ ...............................  1-14\nThis publication is available free of charge from https://doi.org/10.6028/NIST.HB.44-2025\n[Página 23]\nHandbook 44 – 2025  1.10.  General Code\n1-3\nSection 1.10. General Code\nG-A. Applicati"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 45,
+            "score": 0.6131,
+            "vector_score": 0.6404,
+            "lexical_score": 0.5625,
+            "snippet": "ed 2008 and 2022)\n(b) To any accessory attached to or used in connection with a commercial weighing or measuring device\nwhen such accessory is so designed that its operation affects the accuracy of the device.\n2. To weighing and measuring equipment in official use for the enforce"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1202,
+            "score": 0.6084,
+            "vector_score": 0.6667,
+            "lexical_score": 0.5,
+            "snippet": "uide in the\ndesign and construction of commercial weighing and measuring equipment, the acceptance and promulgation of these\ncodes by each state are strongly recommended.\n1.2. Form of Promulgation. – A convenient and very effective form of promulgation already successfully used i"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1,
+            "score": 0.5989,
+            "vector_score": 0.6522,
+            "lexical_score": 0.5,
+            "snippet": "[Página 1]\nNIST Handbook\nNIST HB 44-2025\nSpecifications, Tolerances, and\nOther Technical Requirements for\nWeighing and Measuring Devices\nas adopted by the\n109th National Conference on Weights and Measures\nIsabel Chavez Baucom\nJan Konijnenburg\nG. Diane Lee\nKatrice A. Lippa\nLoren B"
+          }
+        ]
+      },
+      {
+        "question": "Which document should be used to check safety instructions before charging, using, or discarding the scanner battery?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8203,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 29,
+            "score": 0.5637,
+            "vector_score": 0.6364,
+            "lexical_score": 0.4286,
+            "snippet": "hipped with\na battery.  (See Product Specifications beginning on page 13-1.)\nCharging Information\nThe battery is designed to charge while the image scanner is positioned in the\ncordless base unit.  Refer to \"2020 LED Sequences and Meaning\" on page 3-4\nfor an interpretation of the"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 225,
+            "score": 0.4924,
+            "vector_score": 0.5268,
+            "lexical_score": 0.4286,
+            "snippet": "(turn\nthe thumbwheel or use a hex wrench).\nInsert Battery into Charge Sleeve\n1. Place the squared-off end of the battery\ninto the sleeve and slide it until it stops.\nThe battery contacts should be show-\ning through the small rectangular open-\ning in the battery sleeve.\n2. Press o"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 226,
+            "score": 0.4854,
+            "vector_score": 0.5545,
+            "lexical_score": 0.3571,
+            "snippet": "canner is correc tly placed in the base.\n There is external power or 12 volt host power.\n Charge mode is turned on.  ( See \"Base Charge Mode\" on page 3-3 )\n The battery is not bad or deeply disc harged.  In some cases, the image\nscanner’s battery may trickle charge to bring it"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 224,
+            "score": 0.4645,
+            "vector_score": 0.5608,
+            "lexical_score": 0.2857,
+            "snippet": "the host system\nOFF.\n2. Disconnect the base’s cable from the\nterminal or computer.\n3. Turn the base upside down.\n4. Pull the connector out while\nmaintaining pressure on the\nconnector release clip.\n5. Replace with the new cable.\nInsert the connector into the opening\nand press firm"
+          }
+        ]
+      }
+    ],
+    "hit_at_1": 0.875,
+    "hit_at_k": 0.875,
+    "mrr": 0.875,
+    "average_retrieval_seconds": 0.8326,
+    "median_retrieval_seconds": 0.8344,
+    "max_retrieval_seconds": 0.8443,
+    "total_wall_time_s": 261.7703,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 261.7703,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 480.75,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak",
+    "finished_at": 1775423467.606953
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-8bd1c776d7",
+    "case_id": "case_3e56a0a96d9a555f",
+    "status": "success",
+    "group": "embeddings",
+    "started_at": 1775423467.7189069,
+    "provider_requested": "ollama",
+    "provider_effective": "ollama",
+    "model_requested": "bge-m3",
+    "model_effective": "bge-m3:latest",
+    "requested_runtime_family": "ollama_local",
+    "model_resolution_status": "closest_available",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "bge-m3",
+      "bge-m3:latest"
+    ],
+    "provider_label": "Ollama (local)",
+    "candidate_id": "ollama_bge_m3_latest",
+    "candidate_role": "challenger_general_retrieval",
+    "dataset_id": "phase8_5_embedding_pdf_corpus",
+    "subset_id": "general_retrieval",
+    "subset_label": "General document retrieval",
+    "subset_kind": "general",
+    "question_set_id": "embedding_benchmark_questions.example",
+    "question_set_path": "baseline://external_files/e782925e68594614_embedding_benchmark_questions.example.json",
+    "document_count": 4,
+    "question_count": 8,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "repetition": 1,
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "api_route": "http://localhost:11434/api/embed",
+      "requested_num_ctx": 512,
+      "model": "bge-m3:latest",
+      "truncate": true,
+      "show_available": true,
+      "declared_context_length": 8192,
+      "model_modified_at": "2026-03-11T23:14:33.530452573-03:00",
+      "validation_summary": "O endpoint nativo `/api/embed` aceita `truncate` e `options`. O app envia `options.num_ctx` como controle operacional da janela de embedding, mas o comportamento efetivo ainda depende do modelo e do runtime do Ollama."
+    },
+    "error": null,
+    "runtime_path": "direct_runtime",
+    "runtime_path_label": "Direct runtime",
+    "backend_equivalence_type": "native_runtime",
+    "backend_provider_resolved": "ollama",
+    "backend_model_ref_resolved": "bge-m3:latest",
+    "backend_equivalence_key": "ollama::bge-m3:latest",
+    "equivalent_direct_runtime_key": "ollama::bge-m3:latest",
+    "path_overhead_expected": false,
+    "path_comparison_note": "Direct provider path with no hub-wrapper layer.",
+    "resolved_runtime_family": "ollama_local",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "indexing_seconds": 180.0501,
+    "sync_status": {
+      "ok": true,
+      "backend": "chroma",
+      "chunks_in_json": 1747,
+      "chunks_in_chroma": 1747,
+      "persist_dir_exists": true,
+      "message": "Chroma sincronizado com 1747 chunk(s)."
+    },
+    "aggregate_metrics": {
+      "question_count": 8,
+      "hit_at_1": 1.0,
+      "hit_at_k": 1.0,
+      "mrr": 1.0,
+      "average_retrieval_seconds": 0.8626,
+      "median_retrieval_seconds": 0.8589,
+      "max_retrieval_seconds": 0.9053
+    },
+    "per_question_results": [
+      {
+        "question": "Which document discusses OCR for text inside natural scene images using a hierarchical centroid shape descriptor and reports 97.87% accuracy with SVM?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8832,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 7,
+            "score": 0.4702,
+            "vector_score": 0.508,
+            "lexical_score": 0.4,
+            "snippet": "ges\nobtained after scanning are stored in a PNG format. Since\ndigitized images are in gray tone fashion, they are converted\nto binary images using simple thresholding method based on\nhistogram.\n3.3 Feature Extraction\nArmon [12] proposed a hierarchical centroid method for\nfeatures"
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 4,
+            "score": 0.4586,
+            "vector_score": 0.544,
+            "lexical_score": 0.3,
+            "snippet": "collected from 20 writers of different age groups. In\npreprocessing stage, an image was converted to b inary by\nusing Otsu’s method. The median filter and morphological\noperation was also applied on raw image as part of\npreprocessing. Iterative approach was used for the\nsegmentat"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 31,
+            "score": 0.4568,
+            "vector_score": 0.5143,
+            "lexical_score": 0.35,
+            "snippet": "n and Pattern Recognition\n(CVPR), volume 2, pages 338–345 vol. 2, 2005.\n[13] J. Liang, D. DeMenthon, and D. Doermann. Geometric\nrectiﬁcation of camera-captured document images. IEEE\nTransactions on Pattern Analysis and Machine Intelligence ,\n30(4):591–605, 2008.\n[14] S. Lu, B. M."
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 1,
+            "score": 0.4546,
+            "vector_score": 0.5109,
+            "lexical_score": 0.35,
+            "snippet": "[Página 2]\nInternational Journal of Computer Applications (0975 – 8887)\nVolume 149 – No.3, September 2016\n25\nrecognition. Some of these studies are briefly reviewed as\nfollows:\nThe zoning mechanism is used for the feature extraction\nwhich is used to train support vecto r machine "
+          }
+        ]
+      },
+      {
+        "question": "Which document presents a method for extracting virtual baselines from scene text using curvilinear projection and emphasizes robustness to blur, noise, and non-text objects?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8594,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 1,
+            "score": 0.6581,
+            "vector_score": 0.7048,
+            "lexical_score": 0.5714,
+            "snippet": "[Página 1]\nExtraction of Virtual Baselines from Distorted Document Images\nUsing Curvilinear Projection\nGaofeng MENG∗†, Zuming HUANG†, Y onghong SONG‡,\nShiming XIANG† and Chunhong PAN†\n† National Laboratory of Pattern Recognition, Institute of Automation\nChinese Academy of Science"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 2,
+            "score": 0.6571,
+            "vector_score": 0.7032,
+            "lexical_score": 0.5714,
+            "snippet": "base-\nlines can be well approximated by linear segments. Based\nupon these observations, we propose a curvilinear projec-\ntion based method and model the estimation of curved base-\nlines as a constrained sequential optimization problem. A\ndynamic programming algorithm is then deve"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 8,
+            "score": 0.6273,
+            "vector_score": 0.7087,
+            "lexical_score": 0.4762,
+            "snippet": "ten text lines, they generally\ncannot be directly used to extract baselines from a distorted\ndocument image, due to the complicated page layouts and\nexisting of large areas of non-textual objects in images.\nIn this paper, we propose a novel curvilinear projec-\ntion based method f"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 26,
+            "score": 0.5987,
+            "vector_score": 0.6903,
+            "lexical_score": 0.4286,
+            "snippet": "trip, it requires the available visual cues within the\nstrip to be dominant. As a result, the projection may fail if\nan image strip consists of very sparse visual cues or large\nareas of non-textual objects that have too little available in-\nformation to infer the correct projecti"
+          }
+        ]
+      },
+      {
+        "question": "Which document explains the distinction between retroactive and nonretroactive requirements for weighing and measuring devices?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.834,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 31,
+            "score": 0.6546,
+            "vector_score": 0.6609,
+            "lexical_score": 0.6429,
+            "snippet": "sh in combination with the codes\nthemselves the date or dates at which nonretroactive requirements are to become retroactive.  In other cases, give\nequally effective notice at the earliest practicable date.\nA nonretroactive requirement, in italic type, will indicate the year from"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1420,
+            "score": 0.5993,
+            "vector_score": 0.6528,
+            "lexical_score": 0.5,
+            "snippet": "measured quantity with no means to return to zero. [3.30, 3.37, 3.39, 3.40]\n(Added 2019) (Amended 2022)\nnonretroactive. – “Nonretroactive” requirements are enforceable after the effective date for:\n1. devices manufactured within a state after the effective date;\n2. both new and u"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 30,
+            "score": 0.5846,
+            "vector_score": 0.6301,
+            "lexical_score": 0.5,
+            "snippet": "quirements are those that, while clearly desirable, are not so vital that they should at once be enforced\nwith respect to all apparatus.  Nonretroactive requirements are printed in italic type.\nIt is not expected that, after their promulgation in a given jurisdiction, nonretroact"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 147,
+            "score": 0.5755,
+            "vector_score": 0.6161,
+            "lexical_score": 0.5,
+            "snippet": "hich the device complies with the applicable requirements for each accuracy class.\n[Nonretroactive as of January 1, 1988]\n(Amended 2024)\n9. For vehicle and axle-load scales only.  The CLC shall be added to the load-receiving element of any such scale\nnot previously marked at the "
+          }
+        ]
+      },
+      {
+        "question": "Which document includes instructions about battery handling, USB base connection, and proper disposal precautions for a handheld scanner?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8408,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 31,
+            "score": 0.5126,
+            "vector_score": 0.5669,
+            "lexical_score": 0.4118,
+            "snippet": "nificant, it may be more\ncost effective to locate a local recycle/disposal company.\nConnecting the Base\nA base can be connected between the keyboard and PC as a “keyboard\nwedge,” plugged into the serial port, plugged into a USB port, or connected to a\nportable data terminal in wa"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 29,
+            "score": 0.4962,
+            "vector_score": 0.605,
+            "lexical_score": 0.2941,
+            "snippet": "hipped with\na battery.  (See Product Specifications beginning on page 13-1.)\nCharging Information\nThe battery is designed to charge while the image scanner is positioned in the\ncordless base unit.  Refer to \"2020 LED Sequences and Meaning\" on page 3-4\nfor an interpretation of the"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 222,
+            "score": 0.4716,
+            "vector_score": 0.5672,
+            "lexical_score": 0.2941,
+            "snippet": "nects to your terminal\nSupply ground\nCord shield\n1\n2\n3\n4\n5\n6\n7\n8\n9\n[Página 252]\n13 - 8\nStandard Cable Pinouts\nSerial Output\n10 Pin RJ41 Modular Plugconnects to the base\n1\n2 Cord shield\n3 Prog 1 (Tied to supply power for primary cable)\n4 Supply ground\n5 Receive data - Serial data "
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 28,
+            "score": 0.4639,
+            "vector_score": 0.5553,
+            "lexical_score": 0.2941,
+            "snippet": "eport damage immediately to the\ncarrier who delivered the carton.\n Make sure the items in the carton match your order.\n Save the shipping container fo r later storage or shipping.\nImage Scanner Models\nModels Description\n4820SF0C1CBE Cordless Area Ima ge Scanner, Green aimer, Sp"
+          }
+        ]
+      },
+      {
+        "question": "In which document would you find discussion of Support Vector Machine and K-Nearest Neighbor as classifiers used after OCR feature extraction?",
+        "expected_document_names": [
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "retrieved_names": [
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf",
+          "kaur-2016-ijca-911367.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8482,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 3,
+            "score": 0.5543,
+            "vector_score": 0.5835,
+            "lexical_score": 0.5,
+            "snippet": "formation. Diagonal and transition features were calculated\non the bitmap images of the characters and then Euclidean\ndistance between the testing point and reference point is\ncalculated in o rder to find k -nearest neighbors. The dataset\nused in the study consist of 3500 images "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 1,
+            "score": 0.5136,
+            "vector_score": 0.5509,
+            "lexical_score": 0.4444,
+            "snippet": "[Página 2]\nInternational Journal of Computer Applications (0975 – 8887)\nVolume 149 – No.3, September 2016\n25\nrecognition. Some of these studies are briefly reviewed as\nfollows:\nThe zoning mechanism is used for the feature extraction\nwhich is used to train support vecto r machine "
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 14,
+            "score": 0.4931,
+            "vector_score": 0.5792,
+            "lexical_score": 0.3333,
+            "snippet": "omput. Sci. Softw. Eng.,\nvol. 2, no. 5, pp. 234–240, 2012.\n[11] K. S. Siddharth, R. Dhir, R. Rani, M. Jangid, and K.\nSingh, “Comparative Recognition of Handwritten\nGurmukhi Numerals Using Different Feature S ets and\nClassifiers,” in Proceedings of International Conference\non Imag"
+          },
+          {
+            "source": "kaur-2016-ijca-911367.pdf",
+            "document_id": "b88d96e8424a2a9e80ca8761dc5b6e8b34ecab01738a70459e5613d920184494",
+            "chunk_id": 5,
+            "score": 0.4796,
+            "vector_score": 0.5882,
+            "lexical_score": 0.2778,
+            "snippet": "results. SVM gives best results with\nsecond parameters whereas with PNN and k -NN, third feature\nset gives best results. The 5 fold cross validation scheme is\nused for validation of results [11].\nLehal et.al worked on one another technique for the Gurmukhi\nscript recognition. In "
+          }
+        ]
+      },
+      {
+        "question": "In which document would you find discussion of curved text detection and the relationship between text boundaries and text center lines?",
+        "expected_document_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "retrieved_names": [
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+          "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8712,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 33,
+            "score": 0.5238,
+            "vector_score": 0.604,
+            "lexical_score": 0.375,
+            "snippet": "ed docu-\nment images. IEEE Transactions on Image Processing ,\n20(4):910–920, 2011.\n[25] Y . Tian and S. Narasimhan. Rectiﬁcation and 3d recon-\nstruction of curved document images. In Proceedings of\nIEEE Conference on Computer Vision and Pattern Recog-\nnition (CVPR), pages 377–384"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 8,
+            "score": 0.5143,
+            "vector_score": 0.5557,
+            "lexical_score": 0.4375,
+            "snippet": "ten text lines, they generally\ncannot be directly used to extract baselines from a distorted\ndocument image, due to the complicated page layouts and\nexisting of large areas of non-textual objects in images.\nIn this paper, we propose a novel curvilinear projec-\ntion based method f"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 1,
+            "score": 0.5126,
+            "vector_score": 0.553,
+            "lexical_score": 0.4375,
+            "snippet": "[Página 1]\nExtraction of Virtual Baselines from Distorted Document Images\nUsing Curvilinear Projection\nGaofeng MENG∗†, Zuming HUANG†, Y onghong SONG‡,\nShiming XIANG† and Chunhong PAN†\n† National Laboratory of Pattern Recognition, Institute of Automation\nChinese Academy of Science"
+          },
+          {
+            "source": "Meng_Extraction_of_Virtual_ICCV_2015_paper.pdf",
+            "document_id": "1f4bbc821e9463e0b553b149691705cf845a282397e56df8249502258c3590fd",
+            "chunk_id": 20,
+            "score": 0.5018,
+            "vector_score": 0.5364,
+            "lexical_score": 0.4375,
+            "snippet": "es. From the results, we can see that the proposed method\ncan extract the curved baselines in a high accuracy. The\nestimated baselines are also robust to marginal noises and\nnon-textual objects in the images, such as inserted formulas\nand photos. This is mainly because the propos"
+          }
+        ]
+      },
+      {
+        "question": "Which document would you consult for requirements covering commercial weighing and measuring equipment used in regulation or trade?",
+        "expected_document_names": [
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "retrieved_names": [
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf",
+          "2025-HB-44-20250106-Final-508.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.8584,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 44,
+            "score": 0.603,
+            "vector_score": 0.6585,
+            "lexical_score": 0.5,
+            "snippet": "t a Central Location. ................................ ...............................  1-14\nThis publication is available free of charge from https://doi.org/10.6028/NIST.HB.44-2025\n[Página 23]\nHandbook 44 – 2025  1.10.  General Code\n1-3\nSection 1.10. General Code\nG-A. Applicati"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1203,
+            "score": 0.5957,
+            "vector_score": 0.6473,
+            "lexical_score": 0.5,
+            "snippet": "ions thereof, shall apply to commercial\nweighing and measuring devices in the state.\nIn some states, it is preferred to base technical requirements upon specific action of the state legislature rather than\nupon an act of promulgation by a state officer.  The advantages cited abov"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1,
+            "score": 0.5881,
+            "vector_score": 0.6356,
+            "lexical_score": 0.5,
+            "snippet": "[Página 1]\nNIST Handbook\nNIST HB 44-2025\nSpecifications, Tolerances, and\nOther Technical Requirements for\nWeighing and Measuring Devices\nas adopted by the\n109th National Conference on Weights and Measures\nIsabel Chavez Baucom\nJan Konijnenburg\nG. Diane Lee\nKatrice A. Lippa\nLoren B"
+          },
+          {
+            "source": "2025-HB-44-20250106-Final-508.pdf",
+            "document_id": "02c34c9068afc67af7809d29d6a76fbbea37d4fc342b498c32c97317558993a1",
+            "chunk_id": 1202,
+            "score": 0.5821,
+            "vector_score": 0.6263,
+            "lexical_score": 0.5,
+            "snippet": "uide in the\ndesign and construction of commercial weighing and measuring equipment, the acceptance and promulgation of these\ncodes by each state are strongly recommended.\n1.2. Form of Promulgation. – A convenient and very effective form of promulgation already successfully used i"
+          }
+        ]
+      },
+      {
+        "question": "Which document should be used to check safety instructions before charging, using, or discarding the scanner battery?",
+        "expected_document_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "retrieved_names": [
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+          "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf"
+        ],
+        "hit_at_1": true,
+        "hit_at_k": true,
+        "reciprocal_rank": 1.0,
+        "first_relevant_rank": 1,
+        "retrieval_seconds": 0.9053,
+        "backend_used": "chroma",
+        "candidate_pool_size": 8,
+        "reranking_applied": true,
+        "top_sources": [
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 29,
+            "score": 0.575,
+            "vector_score": 0.6539,
+            "lexical_score": 0.4286,
+            "snippet": "hipped with\na battery.  (See Product Specifications beginning on page 13-1.)\nCharging Information\nThe battery is designed to charge while the image scanner is positioned in the\ncordless base unit.  Refer to \"2020 LED Sequences and Meaning\" on page 3-4\nfor an interpretation of the"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 226,
+            "score": 0.506,
+            "vector_score": 0.5862,
+            "lexical_score": 0.3571,
+            "snippet": "canner is correc tly placed in the base.\n There is external power or 12 volt host power.\n Charge mode is turned on.  ( See \"Base Charge Mode\" on page 3-3 )\n The battery is not bad or deeply disc harged.  In some cases, the image\nscanner’s battery may trickle charge to bring it"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 8,
+            "score": 0.4914,
+            "vector_score": 0.6022,
+            "lexical_score": 0.2857,
+            "snippet": "ner LEDs have been tested and classified as “EXEMPT RISK GROUP”\nto the standard: IEC 62471:2006.\nRadio Technology\nClass II\nCB Scheme\nCertified to CB Scheme IEC 60950-1, Second Edition.\nSolids and Water Protection\nThe 4820 has a rating of IP41, immunity of foreign particles and dr"
+          },
+          {
+            "source": "c9c938dc-08e0-4f18-bf1d-a5d513c93ed8.pdf",
+            "document_id": "e9b286b573301c5e0f9c920a70f8c4831acc66b14b1a2866b2fe812f9c06ba87",
+            "chunk_id": 27,
+            "score": 0.4619,
+            "vector_score": 0.5952,
+            "lexical_score": 0.2143,
+            "snippet": "de Page Mapping of Printed Bar Codes................. A-7\nAppendix B -  Minimizing Bluetooth/ISM Band\nNetwork Activity\nAuto Reconnect Mode ... .......................................B-1\nMaximum Link Attempts .......................................B-2\nRelink Time-Out ............."
+          }
+        ]
+      }
+    ],
+    "hit_at_1": 1.0,
+    "hit_at_k": 1.0,
+    "mrr": 1.0,
+    "average_retrieval_seconds": 0.8626,
+    "median_retrieval_seconds": 0.8589,
+    "max_retrieval_seconds": 0.9053,
+    "total_wall_time_s": 186.9512,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 186.9512,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 480.75,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak",
+    "finished_at": 1775423654.670772
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-8bd1c776d7",
+    "case_id": "case_225c99667173bde1",
+    "status": "failed",
+    "group": "embeddings",
+    "started_at": 1775423654.686111,
+    "provider_requested": "huggingface_server",
+    "provider_effective": "huggingface_server",
+    "model_requested": "embeddinggemma:300m",
+    "model_effective": "embeddinggemma:300m",
+    "requested_runtime_family": "hf_local_llm_service",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "embeddinggemma:300m",
+      "bge-m3",
+      "qwen3-embedding:0.6b"
+    ],
+    "provider_label": "Hugging Face server local",
+    "candidate_id": "huggingface_server_service_embed",
+    "candidate_role": "optional_local_hub",
+    "dataset_id": "phase8_5_embedding_pdf_corpus",
+    "subset_id": "general_retrieval",
+    "subset_label": "General document retrieval",
+    "subset_kind": "general",
+    "question_set_id": "embedding_benchmark_questions.example",
+    "question_set_path": "baseline://external_files/e782925e68594614_embedding_benchmark_questions.example.json",
+    "document_count": 4,
+    "question_count": 8,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "repetition": 1,
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "runtime": "huggingface_server",
+      "base_url": "http://127.0.0.1:8788/v1",
+      "requested_num_ctx": 512,
+      "model": "embeddinggemma:300m",
+      "show_available": true,
+      "declared_context_length": 32768,
+      "supports_embeddings": true,
+      "backend_provider": "huggingface_local",
+      "backend_model_ref": "google/embeddinggemma-300m",
+      "validation_summary": "O serviço expõe `/api/show`, então o app consegue inspecionar se o alias/modelo do hub suporta embeddings."
+    },
+    "error": "Error code: 503 - {'error': 'Pouca memória livre para rodar este provider com segurança. Disponível: 3.9 GB · livre: 149.0 MB. Use Ollama/GGUF ou reduza contexto/tokens antes de tentar novamente.', 'error_code': 'memory_preflight_blocked', 'details': {'provider_name': 'huggingface_local', 'operation': 'create_embeddings', 'model_name': 'google/embeddinggemma-300m', 'checked_at': '2026-04-05T21:14:26Z', 'memory_snapshot': {'supported': True, 'platform': 'darwin', 'total_bytes': 17179869184, 'total_human': '16.0 GB', 'free_bytes': 156188672, 'free_human': '149.0 MB', 'available_bytes': 4164861952, 'available_human': '3.9 GB', 'inactive_bytes': 3931242496, 'inactive_human': '3.7 GB', 'speculative_bytes': 46759936, 'speculative_human': '44.6 MB', 'purgeable_bytes': 30670848, 'purgeable_human': '29.2 MB', 'page_size_bytes': 16384, 'source': 'vm_stat', 'error': None}, 'limits': {'min_available_bytes': 8589934592, 'min_free_bytes': 4294967296, 'reserve_ratio': 0.15}, 'applies': True, 'blocked': True, 'required_available_bytes': 8589934592, 'required_free_bytes': 4294967296}, 'path': '/v1/embeddings', 'method': 'POST', 'error_type': 'LocalMemoryPreflightError'}",
+    "runtime_path": "hub_wrapped_runtime",
+    "runtime_path_label": "Hub-wrapped runtime",
+    "backend_equivalence_type": "wrapped_backend",
+    "backend_provider_resolved": "huggingface_local",
+    "backend_model_ref_resolved": "google/embeddinggemma-300m",
+    "backend_equivalence_key": "huggingface_local::google/embeddinggemma-300m",
+    "equivalent_direct_runtime_key": null,
+    "path_overhead_expected": true,
+    "path_comparison_note": "Requests flow through the local hub layer before reaching the effective backend.",
+    "resolved_runtime_family": "hf_local_llm_service",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "total_wall_time_s": 12.2028,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 12.2028,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 480.75,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak",
+    "finished_at": 1775423666.88895
+  },
+  {
+    "event_type": "case_result",
+    "run_id": "phase8-5-matrix-8bd1c776d7",
+    "case_id": "case_d9e3600339c9d83e",
+    "status": "failed",
+    "group": "embeddings",
+    "started_at": 1775423666.891482,
+    "provider_requested": "huggingface_server",
+    "provider_effective": "huggingface_server",
+    "model_requested": "embeddinggemma:300m",
+    "model_effective": "embeddinggemma:300m",
+    "requested_runtime_family": "hf_local_llm_service",
+    "model_resolution_status": "exact",
+    "model_resolution_source": "provider_inventory",
+    "requested_model_candidates": [
+      "embeddinggemma:300m",
+      "bge-m3",
+      "qwen3-embedding:0.6b"
+    ],
+    "provider_label": "Hugging Face server local",
+    "candidate_id": "huggingface_server_service_embed",
+    "candidate_role": "optional_local_hub",
+    "dataset_id": "phase8_5_embedding_pdf_corpus",
+    "subset_id": "code_retrieval",
+    "subset_label": "Code retrieval subset",
+    "subset_kind": "code",
+    "question_set_id": "phase8_5_code_embedding_questions",
+    "question_set_path": "baseline://external_files/a37c416f711682a9_phase8_5_code_embedding_questions.json",
+    "document_count": 3,
+    "question_count": 3,
+    "embedding_context_window": 512,
+    "embedding_truncate": true,
+    "chunk_size": 1200,
+    "chunk_overlap": 80,
+    "top_k": 4,
+    "rerank_pool_size": 8,
+    "rerank_lexical_weight": 0.35,
+    "pdf_extraction_mode": "basic",
+    "pdf_docling_enabled": false,
+    "pdf_ocr_fallback_enabled": false,
+    "pdf_scan_image_ocr_enabled": false,
+    "pdf_evidence_pipeline_enabled": false,
+    "repetition": 1,
+    "runtime_bucket": "local",
+    "quantization_family": "unspecified_local",
+    "runtime_artifact": {
+      "runtime": "huggingface_server",
+      "base_url": "http://127.0.0.1:8788/v1",
+      "requested_num_ctx": 512,
+      "model": "embeddinggemma:300m",
+      "show_available": true,
+      "declared_context_length": 32768,
+      "supports_embeddings": true,
+      "backend_provider": "huggingface_local",
+      "backend_model_ref": "google/embeddinggemma-300m",
+      "validation_summary": "O serviço expõe `/api/show`, então o app consegue inspecionar se o alias/modelo do hub suporta embeddings."
+    },
+    "error": "Error code: 503 - {'error': 'Pouca memória livre para rodar este provider com segurança. Disponível: 3.8 GB · livre: 169.9 MB. Use Ollama/GGUF ou reduza contexto/tokens antes de tentar novamente.', 'error_code': 'memory_preflight_blocked', 'details': {'provider_name': 'huggingface_local', 'operation': 'create_embeddings', 'model_name': 'google/embeddinggemma-300m', 'checked_at': '2026-04-05T21:14:28Z', 'memory_snapshot': {'supported': True, 'platform': 'darwin', 'total_bytes': 17179869184, 'total_human': '16.0 GB', 'free_bytes': 178126848, 'free_human': '169.9 MB', 'available_bytes': 4106895360, 'available_human': '3.8 GB', 'inactive_bytes': 3880992768, 'inactive_human': '3.6 GB', 'speculative_bytes': 41189376, 'speculative_human': '39.3 MB', 'purgeable_bytes': 6586368, 'purgeable_human': '6.3 MB', 'page_size_bytes': 16384, 'source': 'vm_stat', 'error': None}, 'limits': {'min_available_bytes': 8589934592, 'min_free_bytes': 4294967296, 'reserve_ratio': 0.15}, 'applies': True, 'blocked': True, 'required_available_bytes': 8589934592, 'required_free_bytes': 4294967296}, 'path': '/v1/embeddings', 'method': 'POST', 'error_type': 'LocalMemoryPreflightError'}",
+    "runtime_path": "hub_wrapped_runtime",
+    "runtime_path_label": "Hub-wrapped runtime",
+    "backend_equivalence_type": "wrapped_backend",
+    "backend_provider_resolved": "huggingface_local",
+    "backend_model_ref_resolved": "google/embeddinggemma-300m",
+    "backend_equivalence_key": "huggingface_local::google/embeddinggemma-300m",
+    "equivalent_direct_runtime_key": null,
+    "path_overhead_expected": true,
+    "path_comparison_note": "Requests flow through the local hub layer before reaching the effective backend.",
+    "resolved_runtime_family": "hf_local_llm_service",
+    "runtime_family_resolution_status": "exact",
+    "runtime_family_resolution_note": null,
+    "total_wall_time_s": 1.2755,
+    "total_wall_time_status": "measured",
+    "ttft_s": null,
+    "ttft_status": "not_supported",
+    "throughput_tokens_per_s": null,
+    "throughput_status": "not_supported",
+    "cold_start_wall_time_s": 1.2755,
+    "cold_start_status": "estimated",
+    "warm_start_wall_time_s": null,
+    "warm_start_status": "not_supported",
+    "memory_peak_estimate_mb": 480.75,
+    "memory_status": "estimated",
+    "memory_measurement_method": "resource_ru_maxrss_process_peak",
+    "finished_at": 1775423668.167082
+  }
+]

@@ -1,0 +1,349 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "Sarah Chen - Senior ML Engineer CV.pdf",
+  "file_type": "pdf",
+  "file_hash": "6827d5298bede81ca3b5ef928b1e18e5af9988300286bec6aa53850189adacc3",
+  "text": "[CV CONFIRMED FIELDS]\nName: Sarah Chen\nEmails: sarah.chen@candidate-mail.example\nPhones: +1 (415) 555-0172\n\n[CV EDUCATION]\n- B.S. Electrical Engineering and Computer Science | M.S. Computer Science, Pacific Coast University  2018 | M.S. Computer Science, Pacific Coast University  2018 | PUBLICATIONS AND LEADERSHIP\n  • B.S. Electrical Engineering and Computer Science, Bay City Institute  2016\n  • ●\n\n[CV SKILLS]\n- Weights & Biases\n- feature stores\n- experiment tracking\n- CI for ML\n- observability-driven rollout.\n\n[CV RAW TEXT]\nSynthetic candidate profile for demo use only. Page 1 Sarah Chen Senior ML Engineer  San Francisco, CA  sarah.chen@candidate-mail.example  +1 (415) 555-0172 SUMMARY Senior ML engineer with 8 years of experience across research, model optimization, and production systems. Strong record in transformer-based workloads, large-scale inference, and technical leadership in fast-moving product environments. CORE STRENGTHS ● Transformer architectures, instruction tuning, evaluation design, and training-cost optimisation. ● Production ML systems with 10M+ daily predictions and modern MLOps tooling. ● Technical leadership for small ML teams, mentorship, and cross-functional delivery. ● Research communication, publication writing, and experiment-driven iteration. EXPERIENCE Aurora AI Systems — Senior ML Engineer  2022 — Present Led RLHF and evaluation pipeline improvements for enterprise language-assistance products; reduced training and evaluation costs by 34%; partnered with product and infra teams to roll out production model updates with audit-friendly change logs. Atlas Data Robotics — ML Engineer  2020 — 2022 Built data quality scoring and annotation automation for large-scale ML workflows; supported high-throughput inference systems serving more than 10M daily predictions; collaborated closely with product and operations stakeholders. Northstar Research Labs — Research Engineer  2018 — 2020 Contributed to transformer-model experiments, published two peer-reviewed papers on attention mechanisms, and mentored interns on evaluation pipelines and reproducibility practices. EDUCATION M.S. Computer Science, Pacific Coast University  2018 B.S. Electrical Engineering and Computer Science, Bay City Institute  2016 PUBLICATIONS AND LEADERSHIP ● Five peer-reviewed conference papers across model evaluation and efficient transformer training. ● Led a five-person ML pod during a product-scale rollout at Aurora AI Systems. ● Mentored three interns and two junior engineers on experimentation, tooling, and model release process. TOOLS AND SYSTEMS PyTorch, JAX, Kubeflow, MLflow, Weights & Biases, Kubernetes, feature stores, experiment tracking, CI for ML, observability-driven rollout.",
+  "metadata": {
+    "extractor": "evidence_cv_pipeline",
+    "strategy": "evidence_parallel",
+    "strategy_label": "Evidence CV pipeline",
+    "evidence_pipeline_used": true,
+    "evidence_summary": {
+      "document_id": "6827d5298bede81ca3b5ef928b1e18e5af9988300286bec6aa53850189adacc3",
+      "source_type": "digital_pdf",
+      "warnings": [],
+      "emails_found": 1,
+      "phones_found": 1,
+      "name_status": "confirmed",
+      "location_status": "not_found",
+      "name_value": "Sarah Chen",
+      "location_value": null,
+      "emails": [
+        "sarah.chen@candidate-mail.example"
+      ],
+      "phones": [
+        "+1 (415) 555-0172"
+      ]
+    },
+    "source_type": "nextcloud",
+    "warnings": [],
+    "page_count": 1,
+    "product_consumption": {
+      "policy": {
+        "confirmed": "usable",
+        "visual_candidate": "review_required",
+        "needs_review": "review_required",
+        "not_found": "missing"
+      },
+      "name": {
+        "status": "confirmed",
+        "directly_usable": true,
+        "value": "Sarah Chen"
+      },
+      "location": {
+        "status": "not_found",
+        "directly_usable": false,
+        "value": null
+      },
+      "emails": [
+        {
+          "status": "confirmed",
+          "directly_usable": true,
+          "value": "sarah.chen@candidate-mail.example"
+        }
+      ],
+      "phones": [
+        {
+          "status": "confirmed",
+          "directly_usable": true,
+          "value": "+1 (415) 555-0172"
+        }
+      ],
+      "vl_runtime": {
+        "enabled": true,
+        "model": "qwen3-vl:235b-cloud",
+        "regions_attempted": 0,
+        "regions_succeeded": 0,
+        "regions_failed": 0,
+        "timeouts": 0,
+        "fallback_used": false,
+        "warnings": []
+      }
+    },
+    "vl_runtime": {
+      "enabled": true,
+      "model": "qwen3-vl:235b-cloud",
+      "regions_attempted": 0,
+      "regions_succeeded": 0,
+      "regions_failed": 0,
+      "timeouts": 0,
+      "fallback_used": false,
+      "warnings": []
+    },
+    "vl_router": {
+      "enabled": false,
+      "decision": "skip_vl",
+      "reasons": [],
+      "document_signals": {
+        "source_type": "digital_pdf",
+        "low_text_pages": 0,
+        "contacts_found_after_ocr": 2,
+        "name_missing": false,
+        "location_missing": true,
+        "header_missing": true,
+        "top_fragmented": true,
+        "header_contact_hits": 1,
+        "strong_header_structure_problem": false
+      },
+      "regions_selected": [],
+      "skipped_because": [
+        "digital_pdf_with_good_ocr_skip_vl"
+      ]
+    },
+    "indexing_payload": {
+      "document_id": "6827d5298bede81ca3b5ef928b1e18e5af9988300286bec6aa53850189adacc3",
+      "raw_text": "Synthetic candidate profile for demo use only.\n\nPage 1\n\nSarah Chen\n\nSenior ML Engineer  San Francisco, CA  sarah.chen@candidate-mail.example  +1 (415) 555-0172\n\nSUMMARY\n\nSenior ML engineer with 8 years of experience across research, model optimization, and production systems. Strong record in\n\ntransformer-based workloads, large-scale inference, and technical leadership in fast-moving product environments.\n\nCORE STRENGTHS\n●\n\nTransformer architectures, instruction tuning, evaluation design, and training-cost optimisation.\n●\n\nProduction ML systems with 10M+ daily predictions and modern MLOps tooling.\n●\n\nTechnical leadership for small ML teams, mentorship, and cross-functional delivery.\n●\n\nResearch communication, publication writing, and experiment-driven iteration.\n\nEXPERIENCE\n\nAurora AI Systems — Senior ML Engineer  2022 — Present\nLed RLHF and evaluation pipeline improvements for enterprise language-assistance products; reduced training and evaluation\ncosts by 34%; partnered with product and infra teams to roll out production model updates with audit-friendly change logs.\n\nAtlas Data Robotics — ML Engineer  2020 — 2022\nBuilt data quality scoring and annotation automation for large-scale ML workflows; supported high-throughput inference systems\nserving more than 10M daily predictions; collaborated closely with product and operations stakeholders.\n\nNorthstar Research Labs — Research Engineer  2018 — 2020\n\nContributed to transformer-model experiments, published two peer-reviewed papers on attention mechanisms, and mentored\ninterns on evaluation pipelines and reproducibility practices.\n\nEDUCATION\n\nM.S. Computer Science, Pacific Coast University  2018\n\nB.S. Electrical Engineering and Computer Science, Bay City Institute  2016\n\nPUBLICATIONS AND LEADERSHIP\n●\n\nFive peer-reviewed conference papers across model evaluation and efficient transformer training.\n●\n\nLed a five-person ML pod during a product-scale rollout at Aurora AI Systems.\n●\n\nMentored three interns and two junior engineers on experimentation, tooling, and model release process.\n\nTOOLS AND SYSTEMS\n\nPyTorch, JAX, Kubeflow, MLflow, Weights & Biases, Kubernetes, feature stores, experiment tracking, CI for ML,\nobservability-driven rollout.",
+      "confirmed_fields": {
+        "name": "Sarah Chen",
+        "location": null,
+        "emails": [
+          "sarah.chen@candidate-mail.example"
+        ],
+        "phones": [
+          "+1 (415) 555-0172"
+        ]
+      },
+      "structured": {
+        "experience": [],
+        "education": [
+          {
+            "institution": {
+              "value": "M.S. Computer Science, Pacific Coast University  2018",
+              "status": "confirmed",
+              "evidence_text": "M.S. Computer Science, Pacific Coast University  2018",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_19",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": "First-pass institution guess"
+            },
+            "degree": {
+              "value": "B.S. Electrical Engineering and Computer Science",
+              "status": "needs_review",
+              "evidence_text": "M.S. Computer Science, Pacific Coast University  2018",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_19",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "date_range": {
+              "value": "M.S. Computer Science, Pacific Coast University  2018",
+              "status": "needs_review",
+              "evidence_text": "M.S. Computer Science, Pacific Coast University  2018",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_19",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "location": {
+              "value": "PUBLICATIONS AND LEADERSHIP",
+              "status": "needs_review",
+              "evidence_text": "M.S. Computer Science, Pacific Coast University  2018",
+              "page": 1,
+              "bbox": null,
+              "block_ref": "p1_fallback_19",
+              "source_type": "native_text+ocr",
+              "confidence": null,
+              "notes": null
+            },
+            "notes": [
+              {
+                "value": "B.S. Electrical Engineering and Computer Science, Bay City Institute  2016",
+                "status": "confirmed",
+                "evidence_text": "M.S. Computer Science, Pacific Coast University  2018",
+                "page": 1,
+                "bbox": null,
+                "block_ref": "p1_fallback_19",
+                "source_type": "native_text+ocr",
+                "confidence": null,
+                "notes": null
+              },
+              {
+                "value": "●",
+                "status": "confirmed",
+                "evidence_text": "M.S. Computer Science, Pacific Coast University  2018",
+                "page": 1,
+                "bbox": null,
+                "block_ref": "p1_fallback_19",
+                "source_type": "native_text+ocr",
+                "confidence": null,
+                "notes": null
+              }
+            ]
+          }
+        ],
+        "skills": [
+          {
+            "value": "Weights & Biases",
+            "status": "confirmed",
+            "evidence_text": "PyTorch, JAX, Kubeflow, MLflow, Weights & Biases, Kubernetes, feature stores, experiment tracking, CI for ML,\nobservability-driven rollout.",
+            "page": 1,
+            "bbox": null,
+            "block_ref": "p1_fallback_26",
+            "source_type": "native_text+ocr",
+            "confidence": null,
+            "notes": null
+          },
+          {
+            "value": "feature stores",
+            "status": "confirmed",
+            "evidence_text": "PyTorch, JAX, Kubeflow, MLflow, Weights & Biases, Kubernetes, feature stores, experiment tracking, CI for ML,\nobservability-driven rollout.",
+            "page": 1,
+            "bbox": null,
+            "block_ref": "p1_fallback_26",
+            "source_type": "native_text+ocr",
+            "confidence": null,
+            "notes": null
+          },
+          {
+            "value": "experiment tracking",
+            "status": "confirmed",
+            "evidence_text": "PyTorch, JAX, Kubeflow, MLflow, Weights & Biases, Kubernetes, feature stores, experiment tracking, CI for ML,\nobservability-driven rollout.",
+            "page": 1,
+            "bbox": null,
+            "block_ref": "p1_fallback_26",
+            "source_type": "native_text+ocr",
+            "confidence": null,
+            "notes": null
+          },
+          {
+            "value": "CI for ML",
+            "status": "confirmed",
+            "evidence_text": "PyTorch, JAX, Kubeflow, MLflow, Weights & Biases, Kubernetes, feature stores, experiment tracking, CI for ML,\nobservability-driven rollout.",
+            "page": 1,
+            "bbox": null,
+            "block_ref": "p1_fallback_26",
+            "source_type": "native_text+ocr",
+            "confidence": null,
+            "notes": null
+          },
+          {
+            "value": "observability-driven rollout.",
+            "status": "confirmed",
+            "evidence_text": "PyTorch, JAX, Kubeflow, MLflow, Weights & Biases, Kubernetes, feature stores, experiment tracking, CI for ML,\nobservability-driven rollout.",
+            "page": 1,
+            "bbox": null,
+            "block_ref": "p1_fallback_26",
+            "source_type": "native_text+ocr",
+            "confidence": null,
+            "notes": null
+          }
+        ],
+        "languages": []
+      }
+    },
+    "indexing_text_strategy": "structured_payload",
+    "indexing_payload_quality": {
+      "confirmed_fields_usable": true,
+      "included_structured_sections": [
+        "confirmed_fields",
+        "education",
+        "skills"
+      ],
+      "dropped_structured_sections": [],
+      "dropped_section_reasons": [],
+      "raw_text_present": true,
+      "structured_payload_usable": true
+    },
+    "included_structured_sections": [
+      "confirmed_fields",
+      "education",
+      "skills"
+    ],
+    "dropped_structured_sections": [],
+    "dropped_section_reasons": [],
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": true,
+      "cv_like_content_detected": true,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "cv_like_sections_detected",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 0,
+      "rollout_selected": true,
+      "decision": "evidence_path",
+      "reason": "cv_like_match"
+    },
+    "hybrid_contact_policy": {
+      "emails": [
+        "sarah.chen@candidate-mail.example"
+      ],
+      "phones": [
+        "+1 (415) 555-0172"
+      ],
+      "name": "Sarah Chen",
+      "location": null,
+      "policy": {
+        "emails": "legacy_confirmed_first_fill_from_evidence_confirmed",
+        "phones": "legacy_confirmed_first_fill_from_evidence_confirmed",
+        "name": "use_evidence_confirmed_only",
+        "location": "use_evidence_confirmed_only"
+      },
+      "stats": {
+        "email_complements": 1,
+        "phone_complements": 1,
+        "email_conflicts": 0,
+        "phone_conflicts": 0
+      }
+    },
+    "shadow_rollout": {
+      "agreements": 0,
+      "email_complements": 1,
+      "phone_complements": 1,
+      "email_conflicts": 0,
+      "phone_conflicts": 0
+    },
+    "legacy_shadow_reference": {
+      "extractor": "pdf_hybrid",
+      "strategy": "hybrid"
+    },
+    "fallback_available": true,
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 3772,
+    "grounding_text_excerpt": "[CV CONFIRMED FIELDS]\nName: Sarah Chen\nEmails: sarah.chen@candidate-mail.example\nPhones: +1 (415) 555-0172\n\n[CV EDUCATION]\n- B.S. Electrical Engineering and Computer Science | M.S. Computer Science, Pacific Coast University  2018 | M.S. Computer Science, Pacific Coast University  2018 | PUBLICATIONS AND LEADERSHIP\n  • B.S. Electrical Engineering and Computer Science, Bay City Institute  2016\n  • ●\n\n[CV SKILLS]\n- Weights & Biases\n- feature stores\n- experiment tracking\n- CI for ML\n- observability-driven rollout.\n\n[CV RAW TEXT]\nSynthetic candidate profile for demo use only. Page 1 Sarah Chen Senior ML Engineer  San Francisco, CA  sarah.chen@candidate-mail.example  +1 (415) 555-0172 SUMMARY Senior ML engineer with 8 years of experience across research, model optimization, and production systems. Strong record in transformer-based workloads, large-scale inference, and technical leadership in fast-moving product environments. CORE STRENGTHS ● Transformer architectures, instruction tuning, evaluation design, and training-cost optimisation. ● Production ML systems with 10M+ daily predictions and modern MLOps tooling. ● Technical leadership for small ML teams, mentorship, and cross-functional delivery. ● Research communication, publication writing, and experiment-driven iteration. EXPERIENCE Aurora AI Systems — Senior ML Engineer  2022 — Present Led RLHF and evaluation pipeline improvements for enterprise language-assistance products; reduced training and evaluation costs by 34%; partnered with product and infra teams to roll out production model updates with audit-friendly change logs. Atlas Data Robotics — ML Engineer  2020 — 2022 Built data quality scoring and annotation automation for large-scale ML workflows; supported high-throughput inference systems serving more than 10M daily predictions; collaborated closely with product and operations stakeholders. Northstar Research Labs — Research Engineer  2018 — 2020 Contributed to transformer-model experiments, published two peer-reviewed papers on attention mechanisms, and mentored interns on evaluation pipelines and reproducibility practices. EDUCATION M.S. Computer Science, Pacific Coast University  2018 B.S. Electrical Engineering and Computer Science, Bay City Institute  2016 PUBLICATIONS AND LEADERSHIP ● Five peer-reviewed conference papers across model evaluation and efficient transformer training. ● Led a five-person ML pod during a product-scale rollout at Aurora AI Systems. ● Mentored three interns and two junior engineers on experimentation, tooling, and model release process. TOOLS AND SYSTEMS PyTorch, JAX, Kubeflow, MLflow, Weights & Biases, Kubernetes, feature stores, experiment tracking, CI for ML, observability-driven rollout.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic CV is text-first; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "relative_path": "hiring/Sarah Chen - Senior ML Engineer CV.pdf",
+    "nextcloud_relative_path": "hiring/Sarah Chen - Senior ML Engineer CV.pdf",
+    "source_relative_path": "hiring/Sarah Chen - Senior ML Engineer CV.pdf",
+    "filename": "Sarah Chen - Senior ML Engineer CV.pdf",
+    "title": "Sarah Chen - Senior ML Engineer CV",
+    "category": "hiring",
+    "preindex": {
+      "relative_path": "hiring/Sarah Chen - Senior ML Engineer CV.pdf",
+      "filename": "Sarah Chen - Senior ML Engineer CV.pdf",
+      "title": "Sarah Chen - Senior ML Engineer CV",
+      "category": "hiring",
+      "document_id": "hiring/Sarah Chen - Senior ML Engineer CV.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:21"
+}

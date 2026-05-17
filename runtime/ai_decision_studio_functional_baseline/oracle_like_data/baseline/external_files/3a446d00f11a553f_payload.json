@@ -1,0 +1,205 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-20",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Document Review",
+      "subtitle": "Executive review of the latest grounded document analysis",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Export kind: document_review_deck. Deck family: review. Sources: structured_result, document_agent."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "Internal Audit Checklist for Northwind Cloud Systems LLC: 1 risk(s), 2 gap(s) and 5 mitigation action(s) identified. Top risk: Control design partially adequate with evidence quality and contract alignment gaps Main evidence gap: No explicit owner assigned to remediation due dates",
+      "bullets": [
+        "Control design partially adequate with evidence quality and contract alignm…",
+        "No explicit owner assigned to remediation due dates",
+        "No specific due dates provided for corrective actions"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "cards": [],
+      "metrics": [
+        {
+          "value": "2",
+          "label": "Source count"
+        },
+        {
+          "value": "3",
+          "label": "Findings"
+        },
+        {
+          "value": "5",
+          "label": "Actions"
+        },
+        {
+          "value": "No",
+          "label": "Needs review"
+        }
+      ],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Top findings",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Type",
+        "Finding",
+        "Evidence",
+        "Owner"
+      ],
+      "table_rows": [
+        [
+          "risk",
+          "Control design partially adequate with eviden…",
+          "Conclusion control design is partially adequate, bu…",
+          "-"
+        ],
+        [
+          "gap",
+          "No explicit owner assigned to remediation due…",
+          "-",
+          "-"
+        ],
+        [
+          "gap",
+          "No specific due dates provided for corrective…",
+          "-",
+          "-"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Findings grounded in the structured/document-agent payload."
+    },
+    {
+      "type": "table",
+      "title": "Action plan",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "table_rows": [
+        [
+          "Remediate missing Appendix C (SCCs) attachment",
+          "Internal Audit",
+          "-",
+          "pending"
+        ],
+        [
+          "Provide privileged access approval evidence for standing vendor admin accounts",
+          "Internal Audit",
+          "-",
+          "pending"
+        ],
+        [
+          "Supply incident‑notification evidence meeting explicit 24‑hour or 48‑hour clause",
+          "Internal Audit",
+          "-",
+          "pending"
+        ],
+        [
+          "Deliver formal notice package for subprocessor change",
+          "Internal Audit",
+          "-",
+          "pending"
+        ],
+        [
+          "Update SLA to meet 99.95% target or obtain approved exception",
+          "Internal Audit",
+          "-",
+          "pending"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "two_column",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Remediate missing Appendix C (SCCs) attachment",
+          "bullets": [
+            "Remediate missing Appendix C (SCCs) attachment",
+            "Provide privileged access approval evidence for standing vendor admin a…"
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "No explicit owner assigned to remediation due dates",
+          "bullets": [
+            "No specific due dates provided for corrective actions",
+            "Open-ended questions may require additional human reading when the docu…"
+          ]
+        }
+      ],
+      "speaker_notes": "Decision framing for the grounded document review."
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Remediate missing Appendix C (SCCs) attachment",
+        "Provide privileged access approval evidence for standing vendor admin accounts",
+        "Supply incident‑notification evidence meeting explicit 24‑hour or 48‑hour clause",
+        "Deliver formal notice package for subprocessor change"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    }
+  ]
+}

@@ -1,0 +1,501 @@
+{
+  "generated_at": "2026-03-24T22:00:28.490017",
+  "fixture": "baseline://external_files/f42f51b38f96b8e3_06_checklist_who_surgical_gold.json",
+  "provider": "ollama",
+  "model": null,
+  "context_strategy": "document_scan",
+  "resolved_document": {
+    "document_id": "2e0548b2429cec5206c6f5e21c69a3ef0c426b8318bdb8c6c88be3c80d92d77d",
+    "name": "9789241598590_eng.pdf",
+    "file_type": "pdf",
+    "chunk_count": 39
+  },
+  "success": true,
+  "validation_error": null,
+  "parsing_error": null,
+  "execution_metadata": {
+    "checklist_mode": "full_document_map_reduce",
+    "checklist_profile": "generic",
+    "full_document_chars": 46233,
+    "sanitized_document_chars": 37151,
+    "checklist_question_count": 35,
+    "checklist_line_count": 769,
+    "context_chars_sent": 10819,
+    "context_note": "Checklist gerado a partir do documento inteiro em múltiplas partes, seguido de consolidação final.",
+    "stages": [
+      {
+        "stage_type": "map",
+        "label": "Checklist part 1 of 2",
+        "chars_sent": 28000,
+        "context_preview": "Surgical Safety Checklist\nHas the patient confirmed his/her identity,\nsite, procedure, and consent?\nYes\nIs the site marked?\nNot applicable\nIs the anaesthesia machine and medication\ncheck complete?\nIs the pulse oximeter on the patient and\nfunctioning?\nDoes the patient have a:\nKnown allergy?\nNo\nDifficult airway or aspiration risk?\nYes, and equipment/assistance available\nRisk of >500ml blood loss (7ml/kg in children)?\nYes, and two IVs/central access and fluids\nplanned\nConfirm all team members have\nintroduced themselves by name and role.\nConfirm the patient’s name, procedure,\nand where the incision will be made.\nHas antibiotic prophylaxis been given within\nthe last 60 minutes?\nAnticipated Critical Events\nTo Surgeon:\nWhat are the critical or non-routine steps?\nHow long will the case take?\nWhat is the anticipated blood loss?\nTo Anaesthetist:\nAre there any patient-specific concerns?\nTo Nursing Team:\nHas sterility (including indicator results)\nbeen confirmed?\nAre there equipment issues or any concerns?\nIs essential imaging displayed\nrmed?\nIs essential imaging displayed?\nNurse Verbally Confirms:\nThe name of the procedure\nCompletion of instrument, sponge and needle\ncounts\nSpecimen labelling (read specimen labels aloud,\nincluding patient name)\nWhether there are any equipment problems to be\naddressed\nTo Surgeon, Anaesthetist and Nurse:\nWhat are the key concerns for recovery and\nmanagement of this patient?\nThis checklist is not intended to be comprehensive. Additions and modifications to fit local practice are encouraged. Revised 1 / 2009 – © WHO, 2009\n(with at least nurse and anaesthetist) (with nurse, anaesthetist and surgeon) (with nurse, anaesthetist and surgeon)\nBefore induction of anaesthesia Before skin incision Before patient leaves operating room\nter on the patient and\nmanagement\n, Anaesthetist and Nurse:\n1 Haynes AB, et al. A Surgical Safety Checklist to Reduce Morbidity and Mortality in a Global Population. New England Journal of Medicine, 2009; 360:491-9.\nIn this manual, the “operating team” is understood to\ncomprise the surgeons, anaesthetists, nurses, technicians\nand other operating room personnel involved in surgery.\nMuch as an airplane pilot must rely on the ground crew,\nflight personnel and air traffic controllers for a safe and\nsuccessful flight, a surgeon is an essential but not solitary\nmember of a team responsible for patient care. All members\nof the operating team play a role in ensuring the safety and\nsucce\n. All members\nsuccess of an operation.\nThis manual provides guidance on using the checklist,\nsuggestions for implementation, and recommendations\nfor measuring surgical services and outcomes. Different\npractice settings should adapt it to their own circumstances.\nEach safety check has been included based on clinical\nevidence or expert opinion that its inclusion will reduce\nthe likelihood of serious, avoidable surgical harm and\nthat adherence to it is unlikely to introduce injury or\nunmanageable cost. The Checklist was also designed\nfor simplicity and brevity. Many of the individual steps are\nalready accepted as routine practice in facilities around the\nworld, though they are rarely followed in their entirety. Each\nsurgical department must practice with the Checklist and\nexamine how to sensibly integrate these essential safety\nsteps into their normal operative workflow.\nThe ultimate goal of the WHO Surgical Safety\nChecklist—and of this manual—is to help ensure that\nteams consistently follow a few critical safety steps and\nthereby minimize the most common and avoidable risks\nendangering the lives and wellbeing of surgical pa\nst common and avoidable risks\nendangering the lives and wellbeing of surgical patients.\nThe Checklist guides a verbal team-based interaction as a\nmeans of confirming that appropriate standards of care are\nensured for every patient.\nHow to run the Checklist (in brief)\nIn order to implement the Checklist during surgery, a single\nperson must be made responsible for performing the safety\nchecks on the list. This designated Checklist coordinator\nwill often be a circulating nurse, but it can be any clinician\nparticipating in the operation.\nThe Checklist divides the operation into three phases, each\ncorresponding to a specific time period in the normal flow\nof a procedure—the period before induction of anaesthesia,\nthe period after induction and before surgical incision, and\nthe period during or immediately after wound closure but\nbefore removing the patient from the operating room. In\neach phase, the Checklist coordinator must be permitted\nto confirm that the team has completed its tasks before it\nproceeds onward. As operating teams become familiar with\nthe steps of the Checklist, they can integrate the checks into\ntheir familiar work patterns and verbalize their completion of\neach step\ns into\neach step without the explicit intervention of the Checklist\ncoordinator. Each team should seek to incorporate use of\nthe Checklist into its work with maximum efficiency and\nminimum disruption while aiming to accomplish the steps\neffectively.\nAll steps should be checked verbally with the appropriate\nteam member to ensure that the key actions have been\nperformed. Therefore, before induction of anaesthesia, the\nperson coordinating the Checklist will verbally review with\nthe anaesthetist and patient (when possible) that patient\nidentity has been confirmed, that the procedure and site\nare correct and that consent for surgery has been given.\nThe coordinator will visualize and verbally confirm that\nthe operative site has been marked (if appropriate) and\nwill review with the anaesthetist the patient’s risk of blood\nloss, airway difficulty and allergic reaction and whether\nan anaesthesia machine and medication safety check\nhas been completed. Ideally the surgeon will be present\nduring this phase as the surgeon may have a clearer idea\nof anticipated blood loss, allergies, or other complicating\npatient factors. However, th\nipated blood loss, allergies, or other complicating\npatient f",
+        "prompt_preview": "\nYou are a checklist generator.\nYou are extracting checklist items from PART 1 of 2 of a larger document.\nReturn only valid JSON.\nUse only the content in this part.\nDo not invent steps.\nFocus on operational actions, phase boundaries, and explicit checklist questions/instructions.\nIgnore editorial/manual/front-matter text when operational content is present.\n- Keep checklist items atomic: one explicit instruction/question = one item.\n- Never merge adjacent checklist questions into a single item.\n- If a line or paragraph contains multiple explicit checklist questions/instructions, split them into separate items.\n- Preserve the source order of checklist items exactly as they appear in this part.\n- Do not skip explicit checklist questions just because they are followed by explanatory paragraphs.\n- When the source uses short prefixes like roles, teams, or sections before a colon, keep that prefix available via `category` when it helps preserve structure.\n\nUser intent / task:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nDocument part:\nSurgical Safety Checklist\nHas the patient confirmed his/her identity,\nsite, procedure, and consent?\nYes\nIs the site marked?\nNot applicable\nIs the anaesthesia machine and medication\ncheck complete?\nIs the pulse oximeter on the patient and\nfunctioning?\nDoes the patient have a:\nKnown allergy?\nNo\nDifficult airway or aspiration risk?\nYes, and equipment/assistance available\nRisk of >500ml blood loss (7ml/kg in children)?\nYes, and two IVs/central access and fluids\nplanned\nConfirm all team members have\nintroduced themselves by name and role.\nConfirm the patient’s name, procedure,\nand where the incision will be made.\nHas antibiotic prophylaxis been given within\nthe last 60 minutes?\nAnticipated Critical Events\nTo Surgeon:\nWhat are the critical or non-routine steps?\nHow long will the case take?\nWhat is the anticipated blood loss?\nTo Anaesthetist:\nAre there any patient-specific concerns?\nTo Nursing Team:\nHas sterility (including indicator results)\nbeen confirmed?\nAre there equipment issues or any concerns?\nIs essential imaging displayed\nrmed?\nIs essential imaging displayed?\nNurse Verbally Confirms:\nThe name of the procedure\nCompletion of instrument, sponge and needle\ncounts\nSpecimen labelling (read specimen labels aloud,\nincluding patient name)\nWhether there are any equipment problems to be\naddressed\nTo Surgeon, Anaesthetist and Nurse:\nWhat are the key concerns for recovery and\nmanagement of this patient?\nThis checklist is not intended to be comprehensive. Additions and modifications to fit local practice are encouraged. Revised 1 / 2009 – © WHO, 2009\n(with at least nurse and anaesthetist) (with nurse, anaesthetist and surgeon) (with nurse, anaesthetist and surgeon)\nBefore induction of anaesthesia Before skin incision Before patient leaves operating room\nter on the patient and\nmanagement\n, Anaesthetist and Nurse:\n1 Haynes AB, et al. A Surgical Safety Checklist to Reduce Morbidity and Mortality in a Global Population. New England Journal of Medicine, 2009; 360:491-9.\nIn this manual, the “operating team” is understood to\ncomprise the surgeons, anaesthetists, nurses, technicians\nand other operating room personnel involved in surgery.\nMuch as an airplane pilot must rely on the ground crew,\nflight personnel and air traffic controllers for a safe and\nsuccessful flight, a surgeon is an essential but not solitary\nmember of a team responsible for patient care. All members\nof the operating team play a role in ensuring the safety and\nsucce\n. All members\nsuccess of an operation.\nThis manual provides guidance on using the checklist,\nsuggestions for implementation, and recommendations\nfor measuring surgical services and outcomes. Different\npractice settings should adapt it to their own circumstances.\nEach safety check has been included based on clinical\nevidence or expert opinion that its inclusion will reduce\nthe likelihood of serious, avoidable surgical harm and\nthat adherence to it is unlikely to introduce injury or\nunmanageable cost. The Checklist was also designed\nfor simplicity and brevity. Many of the individual steps are\nalready accepted as routine practice in facilities around the\nworld, though they are rarely followed in their entirety. Each\nsurgical department must practice with the Checklist and\nexamine how to sensibly integrate these essential safety\nsteps into their normal operative workflow.\nThe ultimate goal of the WHO Surgical Safety\nChecklist—and of this manual—is to help ensure that\nteams consistently follow a few critical safety steps and\nthereby minimize the most common and avoidable risks\nendangering the lives and wellbeing of surgical pa\nst common and avoidable risks\nendangering the lives and wellbeing of surgical patients.\nThe Checklist guides a verbal team-based interaction as a\nmeans of confirming that appropriate standards of care are\nensured for every patient.\nHow to run the Checklist (in brief)\nIn order to implement the Checklist during surgery, a single\nperson must be made responsible for performing the safety\nchecks on the list. This designated Checklist coordinator\nwill often be a circulating nurse, but it can be any clinician\nparticipating in the operation.\nThe Checklist divides the operation into three phases, each\ncorresponding to a specific time period in the normal flow\nof a procedure—the period before induction of anaesthesia,\nthe period after induction and before surgical incision, and\nthe period during or immediately after wound closure but\nbefore removing the patient from the operating room. In\neach phase, the Checklist coordinator must be permitted\nto confirm that the team has completed its tasks before it\nproceeds onward. As operating teams become familiar with\nthe steps of the Checklist, they can integrate the checks into\ntheir familiar work patterns and verbalize their completion ",
+        "success": true
+      },
+      {
+        "stage_type": "map",
+        "label": "Checklist part 2 of 2",
+        "chars_sent": 9550,
+        "context_preview": "setting. The real-time feedback\nof clinicians is essential to succe\nin a\nof clinicians is essential to successful\ndevelopment of a Checklist and its\nintegration into the processes of care.\nTesting through a “simulation” as simple\nas running through the Checklist with\nteam members sitting around a table is\nimportant. We also suggest using the\nChecklist for a single day by a single\noperating team and collecting feedback.\nModify the Checklist or the way that it\nis incorporated into care accordingly\nand then try the Checklist again in a\nsingle operating room. Continue this\nprocess until you are comfortable that\nthe Checklist you have created works\nin your environment. Then consider a\nwider implementation program.\nAdditional notes\nPromoting a safety culture\nIntegrated Many institutions already have strategies\nto insure the reliable performance of\nmany of the processes that are part\nof the WHO Checklist. Integrating\nnew safety checks into the processes\nis challenging but possible in nearly\nall settings. The major additions to\nexisting routines involve the integration\nof team communication, brief\nitions to\nof team communication, briefings, and\ndebriefings. These items are of critical\nimportance and should not be removed\nfrom the Checklist.\nIn order to ensure brevity, the WHO Surgical Safety\nChecklist was not intended to be comprehensive. Teams\nmay consider adding other safety checks for specific\nprocedures, particularly if they are part of a routine process\nestablished in the facility. Each phase should be used\nas an opportunity to verify that critical safety steps are\nconsistently completed. Additional steps might include\nconfirmation of venous thromboembolism prophylaxis by\nmechanical means (such as sequential compression boots\nand stockings) and/or medical means (such as heparin\nor warfarin) when indicated, the availability of essential\nimplants (such as mesh or a prosthetic), other equipment\nneeds or critical preoperative biopsy results, laboratory\nresults or blood type. Each locale is encouraged to\nreformat, reorder or revise the Checklist to accommodate\nlocal practice while ensuring completion of the critical safety\nsteps in an efficient manner. As noted above facilities and\nindividuals are cautioned against making the Checkli\nnoted above facilities and\nindividuals are cautioned against making the Checklist\nunmanageably complex.\nIt will take practice for teams to learn to use the Checklist\neffectively. Some individuals will consider it an imposition\nor even a waste of time. The goal is not rote recitation or to\nfrustrate workflow. The Checklist is intended to give teams a\nsimple, efficient set of priority checks for improving effective\nteamwork and communication and to encourage active\nconsideration of the safety of patients in every operation\nperformed. Many of the steps on the Checklist are already\nfollowed in operating rooms around the world; few, however,\nfollow all of them reliably. The Checklist has two purposes:\nensuring consistency in patient safety and introducing (or\nmaintaining) a culture that values achieving it.\nSuccessful implementation requires adapting the Checklist\nto local routines and expectations. This will not be possible\nwithout sincere commitment by hospital leaders. For the\nChecklist to succeed, the chiefs of surgery, anaesthesia\nand nursing departments must publicly embrace the\nchiefs of surgery, anaesthesia\nand nursing departments must publicly embrace the belief\nthat safety is a priority and that use of the WHO Surgical\nSafety Checklist can help make it a reality. To demonstrate\nthis, they should use the Checklist in their own cases and\nregularly ask others how implementation is proceeding. If\nthere is no demonstrable leadership, instituting a Checklist\nof this sort may breed discontent and antagonism.\nPrevious quality improvement work has provided a\nnumber of models for how to implement such a Checklist\ninto the operating room. Experience with the pilot study\nconfirmed the utility of many of these strategies. A number\nof suggested steps are outlined below for consideration as\nfacilities begin implementation of the WHO Surgical Safety\nChecklist.\nBuild a team Commitment by all clinical team\nmembers involved in surgical\nprocedures is essential. Start building\nsupport by involving clinicians who are\nlikely to be most supportive. Include\ncolleagues from as many clinical\ndisciplines (surgery, anaesthesia,\nnursing) as possible. Identify a core\ngroup of people who are enthusiastic\nabout the Checklist while trying to\ninvolve at least one member from\neach of the\neach of the clinical disciplines. At this\nearly stage, work with those who are\ninterested rather than trying to convince\nthe most resistant people. Also involve\nhospital leaders and administrators,\nif possible. Emphasize the benefits\nof lower complication rates and the\npotential for cost savings.\nStart small,\nthen expand Start small, testing out the Checklist in\none operating room with one team and\nmoving forward after problems have\nbeen addressed and when enthusiasm\nbuilds. During the original evaluation by\nWHO, sites that tried to implement the\nChecklist in multiple operating rooms\nsimultaneously or hospital-wide faced\nthe most resistance and had the most\ntrouble convincing staff to use the\nChecklist effectively. Once one team is\ncomfortable using the Checklist, spread\nit to another operating room. Discuss\nthese efforts with different surgical\ndepartments and surgeons. Make sure\nthe team members who were originally\ninvolved in the process are using the\nChecklist in their own operating rooms.\nCustomize the Checklist for each setting\nas necessary, but do not remove safety\nsteps just because they cannot be\naccompli\ns necessary, but do not remove safety\naccomplished. Address resistance as\nit arises. Clinicians who have used the\nChecklist and have good experiences\nwith it make great champions for\npromoting it and defending its use and\nspread in the hospital.\nTrack changes\nand\nencourages the monitoring of surgical\nre",
+        "prompt_preview": "\nYou are a checklist generator.\nYou are extracting checklist items from PART 2 of 2 of a larger document.\nReturn only valid JSON.\nUse only the content in this part.\nDo not invent steps.\nFocus on operational actions, phase boundaries, and explicit checklist questions/instructions.\nIgnore editorial/manual/front-matter text when operational content is present.\n- Keep checklist items atomic: one explicit instruction/question = one item.\n- Never merge adjacent checklist questions into a single item.\n- If a line or paragraph contains multiple explicit checklist questions/instructions, split them into separate items.\n- Preserve the source order of checklist items exactly as they appear in this part.\n- Do not skip explicit checklist questions just because they are followed by explanatory paragraphs.\n- When the source uses short prefixes like roles, teams, or sections before a colon, keep that prefix available via `category` when it helps preserve structure.\n\nUser intent / task:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nDocument part:\nsetting. The real-time feedback\nof clinicians is essential to succe\nin a\nof clinicians is essential to successful\ndevelopment of a Checklist and its\nintegration into the processes of care.\nTesting through a “simulation” as simple\nas running through the Checklist with\nteam members sitting around a table is\nimportant. We also suggest using the\nChecklist for a single day by a single\noperating team and collecting feedback.\nModify the Checklist or the way that it\nis incorporated into care accordingly\nand then try the Checklist again in a\nsingle operating room. Continue this\nprocess until you are comfortable that\nthe Checklist you have created works\nin your environment. Then consider a\nwider implementation program.\nAdditional notes\nPromoting a safety culture\nIntegrated Many institutions already have strategies\nto insure the reliable performance of\nmany of the processes that are part\nof the WHO Checklist. Integrating\nnew safety checks into the processes\nis challenging but possible in nearly\nall settings. The major additions to\nexisting routines involve the integration\nof team communication, brief\nitions to\nof team communication, briefings, and\ndebriefings. These items are of critical\nimportance and should not be removed\nfrom the Checklist.\nIn order to ensure brevity, the WHO Surgical Safety\nChecklist was not intended to be comprehensive. Teams\nmay consider adding other safety checks for specific\nprocedures, particularly if they are part of a routine process\nestablished in the facility. Each phase should be used\nas an opportunity to verify that critical safety steps are\nconsistently completed. Additional steps might include\nconfirmation of venous thromboembolism prophylaxis by\nmechanical means (such as sequential compression boots\nand stockings) and/or medical means (such as heparin\nor warfarin) when indicated, the availability of essential\nimplants (such as mesh or a prosthetic), other equipment\nneeds or critical preoperative biopsy results, laboratory\nresults or blood type. Each locale is encouraged to\nreformat, reorder or revise the Checklist to accommodate\nlocal practice while ensuring completion of the critical safety\nsteps in an efficient manner. As noted above facilities and\nindividuals are cautioned against making the Checkli\nnoted above facilities and\nindividuals are cautioned against making the Checklist\nunmanageably complex.\nIt will take practice for teams to learn to use the Checklist\neffectively. Some individuals will consider it an imposition\nor even a waste of time. The goal is not rote recitation or to\nfrustrate workflow. The Checklist is intended to give teams a\nsimple, efficient set of priority checks for improving effective\nteamwork and communication and to encourage active\nconsideration of the safety of patients in every operation\nperformed. Many of the steps on the Checklist are already\nfollowed in operating rooms around the world; few, however,\nfollow all of them reliably. The Checklist has two purposes:\nensuring consistency in patient safety and introducing (or\nmaintaining) a culture that values achieving it.\nSuccessful implementation requires adapting the Checklist\nto local routines and expectations. This will not be possible\nwithout sincere commitment by hospital leaders. For the\nChecklist to succeed, the chiefs of surgery, anaesthesia\nand nursing departments must publicly embrace the\nchiefs of surgery, anaesthesia\nand nursing departments must publicly embrace the belief\nthat safety is a priority and that use of the WHO Surgical\nSafety Checklist can help make it a reality. To demonstrate\nthis, they should use the Checklist in their own cases and\nregularly ask others how implementation is proceeding. If\nthere is no demonstrable leadership, instituting a Checklist\nof this sort may breed discontent and antagonism.\nPrevious quality improvement work has provided a\nnumber of models for how to implement such a Checklist\ninto the operating room. Experience with the pilot study\nconfirmed the utility of many of these strategies. A number\nof suggested steps are outlined below for consideration as\nfacilities begin implementation of the WHO Surgical Safety\nChecklist.\nBuild a team Commitment by all clinical team\nmembers involved in surgical\nprocedures is essential. Start building\nsupport by involving clinicians who are\nlikely to be most supportive. Include\ncolleagues from as many clinical\ndisciplines (surgery, anaesthesia,\nnursing) as possible. Identify a core\ngroup of people who are enthusiastic\nabout the Checklist while trying to\ninvolve at least one member from\neach of the\neach of the clinical disciplines. At this\nearly stage, work with those who are\ninterested rather than trying to convince\nthe most resistant people. Also involve\nhospital leaders and administrators,\nif possible. Emphasize the",
+        "success": true
+      },
+      {
+        "stage_type": "reduce",
+        "label": "Final checklist synthesis",
+        "chars_sent": 10819,
+        "context_preview": "\nYou are a checklist generator.\nReturn only valid JSON.\nYou are receiving partial checklist extractions from different parts of the same document.\nMerge them into one final checklist.\nDo not invent steps.\nDeduplicate semantically repeated items.\nPreserve document phases/categories when grounded.\nDo not collapse the final output to a single phase if multiple phases are present.\n- Keep checklist items atomic during consolidation.\n- Never merge two distinct checklist questions/instructions into one output item just because they are adjacent in the source.\n- If partial extractions contain combined questions, split them into separate final items.\n- Preserve the original document order from the first checklist item to the last.\n- Do not drop explicit checklist questions during consolidation.\n- If two items are different questions, keep both even if they are topically related.\n\nUser intent / task:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nPartial checklists:\n[PARTIAL CHECKLIST 1]\nTitle: Surgical Safety Checklist - Part 1 of 2\nDescription: Operational actions and phase boundaries for the surgical safety checklist.\nItems:\n{\"title\": \"Confirm patient identity, site, procedure, and consent\", \"category\": null, \"description\": \"Ensure the patient's identity, planned procedure, and consent have been confirmed.\", \"source_text\": \"Has the patient confirmed his/her identity, site, procedure and consent?\"}\n{\"title\": \"Mark the surgical site if applicable\", \"category\": null, \"description\": \"Confirm that the surgical site has been marked.\", \"source_text\": \"Is the site marked?\"}\n{\"title\": \"Complete anaesthesia machine and medication check\", \"category\": null, \"description\": \"Verify that the anaesthesia machine and medications have been checked.\", \"source_text\": \"Is the anaesthesia machine and medication check complete?\"}\n{\"title\": \"Ensure pulse oximeter is on patient and functioning\", \"category\": null, \"description\": \"Confirm that a pulse oximeter is placed on the patient and functioning correctly.\", \"source_text\": \"Is the pulse oximeter on the patient and functioning?\"}\n{\"title\": \"Check for known allergies in the patient\", \"category\": null, \"description\": \"Determine if the patient has any known allergies.\", \"source_text\": \"Does the patient have a known allergy?\"}\n{\"title\": \"Evaluate airway risk for difficult intubation or aspiration\", \"category\": null, \"description\": \"Assess the patient's risk of a difficult airway and aspiration.\", \"source_text\": \"Does the patient have a difficult airway or aspiration risk?\"}\n{\"title\": \"Check for potential blood loss during surgery\", \"category\": null, \"description\": \"Determine if the patient is at risk of significant blood loss.\", \"source_text\": \"Does the patient have a risk of >500 ml blood loss (7 ml/kg in children)?\"}\n{\"title\": \"Confirm team members have introduced themselves by name and role\", \"category\": null, \"description\": \"Ensure all team members introduce themselves by name and role.\", \"source_text\": \"Confirm all team members have introduced themselves by name and role.\"}\n{\"title\": \"Verify patient's identity, procedure, and incision site\", \"category\": null, \"description\": \"Confirm the patient’s name, procedure, and where the incision will be made.\", \"source_text\": \"Confirm the patient’s name, procedure, and where the incision will be made.\"}\n{\"title\": \"Check if antibiotic prophylaxis has been given within the last 60 minutes\", \"category\": null, \"description\": \"Verify that antibiotic prophylaxis has been administered in the last 60 minutes.\", \"source_text\": \"Has antibiotic prophylaxis been given within the last 60 minutes?\"}\n\n[PARTIAL CHECKLIST 2]\nTitle: Checklist for Implementing the WHO Surgical Safety Checklist\nDescription: Operational actions and steps to implement the WHO Surgical Safety Checklist in a healthcare setting.\nItems:\n{\"title\": \"Obtain real-time feedback from clinicians\", \"category\": null, \"description\": \"Gather input from clinicians on the development of the Checklist and its integration into care processes.\", \"source_text\": \"The real-time feedback of clinicians is essential to successful development of a Checklist and its integration into the processes of care.\"}\n{\"title\": \"Test the Checklist through a simulation\", \"category\": null, \"description\": \"Run through the Checklist with team members sitting around a table to test its effectiveness.\", \"source_text\": \"Testing through a “simulation” as simple as running through the Checklist with team members sitting around a table is important.\"}\n{\"title\": \"Implement the Checklist for a single day by a single operating team\", \"category\": null, \"description\": \"Use the Checklist for a full day in one operating room and collect feedback.\", \"source_text\": \"We also suggest using the Checklist for a single day by a single operating team and collecting feedback.\"}\n{\"title\": \"Modify the Checklist based on feedback\", \"category\": null, \"description\": \"Make changes to the Checklist or its incorporation into care processes based on collected feedback.\", \"source_text\": \"Modify the Checklist or the way that it is incorporated into care accordingly and then try the Checklist again in a single operating room.\"}\n{\"title\": \"Continue testing until comfortable with implementation\", \"category\": null, \"description\": \"Repeat the process in a single operating room until you are confident that the Checklist works in your environment.\", \"source_text\": \"Continue this process until you are comfortable that the Checklist you have created works in your environment. Then consider a wider implementation program.\"}\n{\"title\": \"Promote a safety culture\", \"category\": null, \"description\": \"Integrate new safety checks into existing routines, focusing on team communication and briefings.\", \"source_text\": \"Integrated Many institutions already have strategies to insure the reliable per",
+        "prompt_preview": "\nYou are a checklist generator.\nReturn only valid JSON.\nYou are receiving partial checklist extractions from different parts of the same document.\nMerge them into one final checklist.\nDo not invent steps.\nDeduplicate semantically repeated items.\nPreserve document phases/categories when grounded.\nDo not collapse the final output to a single phase if multiple phases are present.\n- Keep checklist items atomic during consolidation.\n- Never merge two distinct checklist questions/instructions into one output item just because they are adjacent in the source.\n- If partial extractions contain combined questions, split them into separate final items.\n- Preserve the original document order from the first checklist item to the last.\n- Do not drop explicit checklist questions during consolidation.\n- If two items are different questions, keep both even if they are topically related.\n\nUser intent / task:\nGenerate an operational checklist from the selected document. Preserve source order, keep one explicit checklist question or instruction per item, and keep phase boundaries when they are grounded in the source.\n\nPartial checklists:\n[PARTIAL CHECKLIST 1]\nTitle: Surgical Safety Checklist - Part 1 of 2\nDescription: Operational actions and phase boundaries for the surgical safety checklist.\nItems:\n{\"title\": \"Confirm patient identity, site, procedure, and consent\", \"category\": null, \"description\": \"Ensure the patient's identity, planned procedure, and consent have been confirmed.\", \"source_text\": \"Has the patient confirmed his/her identity, site, procedure and consent?\"}\n{\"title\": \"Mark the surgical site if applicable\", \"category\": null, \"description\": \"Confirm that the surgical site has been marked.\", \"source_text\": \"Is the site marked?\"}\n{\"title\": \"Complete anaesthesia machine and medication check\", \"category\": null, \"description\": \"Verify that the anaesthesia machine and medications have been checked.\", \"source_text\": \"Is the anaesthesia machine and medication check complete?\"}\n{\"title\": \"Ensure pulse oximeter is on patient and functioning\", \"category\": null, \"description\": \"Confirm that a pulse oximeter is placed on the patient and functioning correctly.\", \"source_text\": \"Is the pulse oximeter on the patient and functioning?\"}\n{\"title\": \"Check for known allergies in the patient\", \"category\": null, \"description\": \"Determine if the patient has any known allergies.\", \"source_text\": \"Does the patient have a known allergy?\"}\n{\"title\": \"Evaluate airway risk for difficult intubation or aspiration\", \"category\": null, \"description\": \"Assess the patient's risk of a difficult airway and aspiration.\", \"source_text\": \"Does the patient have a difficult airway or aspiration risk?\"}\n{\"title\": \"Check for potential blood loss during surgery\", \"category\": null, \"description\": \"Determine if the patient is at risk of significant blood loss.\", \"source_text\": \"Does the patient have a risk of >500 ml blood loss (7 ml/kg in children)?\"}\n{\"title\": \"Confirm team members have introduced themselves by name and role\", \"category\": null, \"description\": \"Ensure all team members introduce themselves by name and role.\", \"source_text\": \"Confirm all team members have introduced themselves by name and role.\"}\n{\"title\": \"Verify patient's identity, procedure, and incision site\", \"category\": null, \"description\": \"Confirm the patient’s name, procedure, and where the incision will be made.\", \"source_text\": \"Confirm the patient’s name, procedure, and where the incision will be made.\"}\n{\"title\": \"Check if antibiotic prophylaxis has been given within the last 60 minutes\", \"category\": null, \"description\": \"Verify that antibiotic prophylaxis has been administered in the last 60 minutes.\", \"source_text\": \"Has antibiotic prophylaxis been given within the last 60 minutes?\"}\n\n[PARTIAL CHECKLIST 2]\nTitle: Checklist for Implementing the WHO Surgical Safety Checklist\nDescription: Operational actions and steps to implement the WHO Surgical Safety Checklist in a healthcare setting.\nItems:\n{\"title\": \"Obtain real-time feedback from clinicians\", \"category\": null, \"description\": \"Gather input from clinicians on the development of the Checklist and its integration into care processes.\", \"source_text\": \"The real-time feedback of clinicians is essential to successful development of a Checklist and its integration into the processes of care.\"}\n{\"title\": \"Test the Checklist through a simulation\", \"category\": null, \"description\": \"Run through the Checklist with team members sitting around a table to test its effectiveness.\", \"source_text\": \"Testing through a “simulation” as simple as running through the Checklist with team members sitting around a table is important.\"}\n{\"title\": \"Implement the Checklist for a single day by a single operating team\", \"category\": null, \"description\": \"Use the Checklist for a full day in one operating room and collect feedback.\", \"source_text\": \"We also suggest using the Checklist for a single day by a single operating team and collecting feedback.\"}\n{\"title\": \"Modify the Checklist based on feedback\", \"category\": null, \"description\": \"Make changes to the Checklist or its incorporation into care processes based on collected feedback.\", \"source_text\": \"Modify the Checklist or the way that it is incorporated into care accordingly and then try the Checklist again in a single operating room.\"}\n{\"title\": \"Continue testing until comfortable with implementation\", \"category\": null, \"description\": \"Repeat the process in a single operating room until you are confident that the Checklist works in your environment.\", \"source_text\": \"Continue this process until you are comfortable that the Checklist you have created works in your environment. Then consider a wider implementation program.\"}\n{\"title\": \"Promote a safety culture\", \"category\": null, \"description\": \"Integrate new safety checks into existing routines, focusing on team communication and briefings.\", \"source_text\": \"Integrated Many institutions already have strategies to insure the reliable per"
+      }
+    ],
+    "resolved_context_window": 24576,
+    "context_window_cap": 8192,
+    "document_chars_estimate": 46157
+  },
+  "payload": {
+    "task_type": "checklist",
+    "schema_version": "1.0",
+    "title": "Operational Checklist for Implementing the WHO Surgical Safety Checklist",
+    "description": "A comprehensive checklist to ensure patient safety and effective implementation of the World Health Organization's Surgical Safety Checklist in a healthcare setting.",
+    "items": [
+      {
+        "id": "item-1",
+        "title": "Has the patient confirmed his/her identity, site, procedure and consent",
+        "description": "Has the patient confirmed his/her identity, site, procedure and consent?",
+        "source_text": "Has the patient confirmed his/her identity, site, procedure and consent?",
+        "evidence": "Has the patient confirmed his/her identity, site, procedure and consent?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-2",
+        "title": "Is the site marked",
+        "description": "Is the site marked?",
+        "source_text": "Is the site marked?",
+        "evidence": "Is the site marked?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-3",
+        "title": "Is the anaesthesia machine and medication check complete",
+        "description": "Is the anaesthesia machine and medication check complete?",
+        "source_text": "Is the anaesthesia machine and medication check complete?",
+        "evidence": "Is the anaesthesia machine and medication check complete?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-4",
+        "title": "Is the pulse oximeter on the patient and functioning",
+        "description": "Is the pulse oximeter on the patient and functioning?",
+        "source_text": "Is the pulse oximeter on the patient and functioning?",
+        "evidence": "Is the pulse oximeter on the patient and functioning?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-5",
+        "title": "Does the patient have a known allergy",
+        "description": "Does the patient have a known allergy?",
+        "source_text": "Does the patient have a known allergy?",
+        "evidence": "Does the patient have a known allergy?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-6",
+        "title": "Does the patient have a difficult airway or aspiration risk",
+        "description": "Does the patient have a difficult airway or aspiration risk?",
+        "source_text": "Does the patient have a difficult airway or aspiration risk?",
+        "evidence": "Does the patient have a difficult airway or aspiration risk?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-7",
+        "title": "Does the patient have a risk of >500 ml blood loss (7 ml/kg in children)",
+        "description": "Does the patient have a risk of >500 ml blood loss (7 ml/kg in children)?",
+        "source_text": "Does the patient have a risk of >500 ml blood loss (7 ml/kg in children)?",
+        "evidence": "Does the patient have a risk of >500 ml blood loss (7 ml/kg in children)?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-8",
+        "title": "Confirm all team members have introduced themselves by name and role",
+        "description": "Confirm all team members have introduced themselves by name and role.",
+        "source_text": "Confirm all team members have introduced themselves by name and role.",
+        "evidence": "Confirm all team members have introduced themselves by name and role.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-9",
+        "title": "Confirm the patient’s name, procedure, and where the incision will be made",
+        "description": "Confirm the patient’s name, procedure, and where the incision will be made.",
+        "source_text": "Confirm the patient’s name, procedure, and where the incision will be made.",
+        "evidence": "Confirm the patient’s name, procedure, and where the incision will be made.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-10",
+        "title": "Has antibiotic prophylaxis been given within the last 60 minutes",
+        "description": "Has antibiotic prophylaxis been given within the last 60 minutes?",
+        "source_text": "Has antibiotic prophylaxis been given within the last 60 minutes?",
+        "evidence": "Has antibiotic prophylaxis been given within the last 60 minutes?",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-11",
+        "title": "The real-time feedback of clinicians is essential to successful development of a Checklist and its integration into the processes of care",
+        "description": "The real-time feedback of clinicians is essential to successful development of a Checklist and its integration into the processes of care.",
+        "source_text": "The real-time feedback of clinicians is essential to successful development of a Checklist and its integration into the processes of care.",
+        "evidence": "The real-time feedback of clinicians is essential to successful development of a Checklist and its integration into the processes of care.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-12",
+        "title": "Testing through a “simulation” as simple as running through the Checklist with team members sitting around a table is important",
+        "description": "Testing through a “simulation” as simple as running through the Checklist with team members sitting around a table is important.",
+        "source_text": "Testing through a “simulation” as simple as running through the Checklist with team members sitting around a table is important.",
+        "evidence": "Testing through a “simulation” as simple as running through the Checklist with team members sitting around a table is important.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-13",
+        "title": "We also suggest using the Checklist for a single day by a single operating team and collecting feedback",
+        "description": "We also suggest using the Checklist for a single day by a single operating team and collecting feedback.",
+        "source_text": "We also suggest using the Checklist for a single day by a single operating team and collecting feedback.",
+        "evidence": "We also suggest using the Checklist for a single day by a single operating team and collecting feedback.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-14",
+        "title": "Modify the Checklist or the way that it is incorporated into care accordingly and then try the Checklist again in a single operating room",
+        "description": "Modify the Checklist or the way that it is incorporated into care accordingly and then try the Checklist again in a single operating room.",
+        "source_text": "Modify the Checklist or the way that it is incorporated into care accordingly and then try the Checklist again in a single operating room.",
+        "evidence": "Modify the Checklist or the way that it is incorporated into care accordingly and then try the Checklist again in a single operating room.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-15",
+        "title": "Continue this process until you are comfortable that the Checklist you have created works in your environment. Then consider a wider implementation program",
+        "description": "Continue this process until you are comfortable that the Checklist you have created works in your environment. Then consider a wider implementation program.",
+        "source_text": "Continue this process until you are comfortable that the Checklist you have created works in your environment. Then consider a wider implementation program.",
+        "evidence": "Continue this process until you are comfortable that the Checklist you have created works in your environment. Then consider a wider implementation program.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-16",
+        "title": "Integrated Many institutions already have strategies to insure the reliable performance of many of the processes that are part of the WHO Checklist. Integrating new safety checks into the processes is challenging but possible in nearly all settings",
+        "description": "Integrated Many institutions already have strategies to insure the reliable performance of many of the processes that are part of the WHO Checklist. Integrating new safety checks into the processes is challenging but possible in nearly all settings.",
+        "source_text": "Integrated Many institutions already have strategies to insure the reliable performance of many of the processes that are part of the WHO Checklist. Integrating new safety checks into the processes is challenging but possible in nearly all settings.",
+        "evidence": "Integrated Many institutions already have strategies to insure the reliable performance of many of the processes that are part of the WHO Checklist. Integrating new safety checks into the processes is challenging but possible in nearly all settings.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-17",
+        "title": "Each locale is encouraged to reformat, reorder or revise the Checklist to accommodate local practice while ensuring completion of the critical safety steps in an efficient manner. As noted above facilities and individuals are cautioned against making the Checkli noted above facilities and individuals are cautioned against making the Checklist unmanageably complex",
+        "description": "Each locale is encouraged to reformat, reorder or revise the Checklist to accommodate local practice while ensuring completion of the critical safety steps in an efficient manner. As noted above facilities and individuals are cautioned against making the Checkli noted above facilities and individuals are cautioned against making the Checklist unmanageably complex.",
+        "source_text": "Each locale is encouraged to reformat, reorder or revise the Checklist to accommodate local practice while ensuring completion of the critical safety steps in an efficient manner. As noted above facilities and individuals are cautioned against making the Checkli noted above facilities and individuals are cautioned against making the Checklist unmanageably complex.",
+        "evidence": "Each locale is encouraged to reformat, reorder or revise the Checklist to accommodate local practice while ensuring completion of the critical safety steps in an efficient manner. As noted above facilities and individuals are cautioned against making the Checkli noted above facilities and individuals are cautioned against making the Checklist unmanageably complex.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-18",
+        "title": "Build a team Commitment by all clinical team members involved in surgical procedures is essential. Start building support by involving clinicians who are likely to be most supportive. Include colleagues from as many clinical disciplines (surgery, anaesthesia, nursing) as possible. Identify a core group of people who are enthusiastic about the Checklist while trying to involve at least one member from each of the clinical disciplines",
+        "description": "Build a team Commitment by all clinical team members involved in surgical procedures is essential. Start building support by involving clinicians who are likely to be most supportive. Include colleagues from as many clinical disciplines (surgery, anaesthesia, nursing) as possible. Identify a core group of people who are enthusiastic about the Checklist while trying to involve at least one member from each of the clinical disciplines.",
+        "source_text": "Build a team Commitment by all clinical team members involved in surgical procedures is essential. Start building support by involving clinicians who are likely to be most supportive. Include colleagues from as many clinical disciplines (surgery, anaesthesia, nursing) as possible. Identify a core group of people who are enthusiastic about the Checklist while trying to involve at least one member from each of the clinical disciplines.",
+        "evidence": "Build a team Commitment by all clinical team members involved in surgical procedures is essential. Start building support by involving clinicians who are likely to be most supportive. Include colleagues from as many clinical disciplines (surgery, anaesthesia, nursing) as possible. Identify a core group of people who are enthusiastic about the Checklist while trying to involve at least one member from each of the clinical disciplines.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-19",
+        "title": "Start small, then expand Start small, testing out the Checklist in one operating room with one team and moving forward after problems have been addressed and when enthusiasm builds. During the original evaluation by WHO, sites that tried to implement the Checklist in multiple operating rooms simultaneously or hospital-wide faced the most resistance and had the most trouble convincing staff to use the Checklist effectively",
+        "description": "Start small, then expand Start small, testing out the Checklist in one operating room with one team and moving forward after problems have been addressed and when enthusiasm builds. During the original evaluation by WHO, sites that tried to implement the Checklist in multiple operating rooms simultaneously or hospital-wide faced the most resistance and had the most trouble convincing staff to use the Checklist effectively.",
+        "source_text": "Start small, then expand Start small, testing out the Checklist in one operating room with one team and moving forward after problems have been addressed and when enthusiasm builds. During the original evaluation by WHO, sites that tried to implement the Checklist in multiple operating rooms simultaneously or hospital-wide faced the most resistance and had the most trouble convincing staff to use the Checklist effectively.",
+        "evidence": "Start small, then expand Start small, testing out the Checklist in one operating room with one team and moving forward after problems have been addressed and when enthusiasm builds. During the original evaluation by WHO, sites that tried to implement the Checklist in multiple operating rooms simultaneously or hospital-wide faced the most resistance and had the most trouble convincing staff to use the Checklist effectively.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-20",
+        "title": "Customize the Checklist for each setting as necessary, but do not remove safety steps just because they cannot be accomplished. Address resistance as it arises. Clinicians who have used the Checklist and have good experiences with it make great champions for promoting it and defending its use and spread in the hospital",
+        "description": "Customize the Checklist for each setting as necessary, but do not remove safety steps just because they cannot be accomplished. Address resistance as it arises. Clinicians who have used the Checklist and have good experiences with it make great champions for promoting it and defending its use and spread in the hospital.",
+        "source_text": "Customize the Checklist for each setting as necessary, but do not remove safety steps just because they cannot be accomplished. Address resistance as it arises. Clinicians who have used the Checklist and have good experiences with it make great champions for promoting it and defending its use and spread in the hospital.",
+        "evidence": "Customize the Checklist for each setting as necessary, but do not remove safety steps just because they cannot be accomplished. Address resistance as it arises. Clinicians who have used the Checklist and have good experiences with it make great champions for promoting it and defending its use and spread in the hospital.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-21",
+        "title": "Track changes and encourages the monitoring of surgical results and complications. Ideally hospitals and facilities should track process and outcome measures, for example the percent of operations having antibiotics administered at the correct time and the surgical site infection rate",
+        "description": "Track changes and encourages the monitoring of surgical results and complications. Ideally hospitals and facilities should track process and outcome measures, for example the percent of operations having antibiotics administered at the correct time and the surgical site infection rate.",
+        "source_text": "Track changes and encourages the monitoring of surgical results and complications. Ideally hospitals and facilities should track process and outcome measures, for example the percent of operations having antibiotics administered at the correct time and the surgical site infection rate.",
+        "evidence": "Track changes and encourages the monitoring of surgical results and complications. Ideally hospitals and facilities should track process and outcome measures, for example the percent of operations having antibiotics administered at the correct time and the surgical site infection rate.",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      },
+      {
+        "id": "item-22",
+        "title": "A few suggestions for measurement, even on an intermittent basis, are the frequencies of compliance with: • Marking of the operative site by the surgeon • Performance of an anaesthesia safety check of the machine and medications • Use of pulse oximetry throughout administration of anaesthesia in all cases • Objective evaluation of the airway • Use of sterility indicators to ensure adequacy of sterility practices • Administration of prophylactic antibiotics within one hour • Verbal confirmation of patient, site and procedure immediately before incision with all team members present • Preoperative team briefing to discuss clinical concerns, operative plan, and other critical issues • Post-operative team debriefing to discuss problems during the case and concerns for recovery and management of the patient",
+        "description": "A few suggestions for measurement, even on an intermittent basis, are the frequencies of compliance with: • Marking of the operative site by the surgeon • Performance of an anaesthesia safety check of the machine and medications • Use of pulse oximetry throughout administration of anaesthesia in all cases • Objective evaluation of the airway • Use of sterility indicators to ensure adequacy of sterility practices • Administration of prophylactic antibiotics within one hour • Verbal confirmation of patient, site and procedure immediately before incision with all team members present • Preoperative team briefing to discuss clinical concerns, operative plan, and other critical issues • Post-operative team debriefing to discuss problems during the case and concerns for recovery and management of the patient",
+        "source_text": "A few suggestions for measurement, even on an intermittent basis, are the frequencies of compliance with: • Marking of the operative site by the surgeon • Performance of an anaesthesia safety check of the machine and medications • Use of pulse oximetry throughout administration of anaesthesia in all cases • Objective evaluation of the airway • Use of sterility indicators to ensure adequacy of sterility practices • Administration of prophylactic antibiotics within one hour • Verbal confirmation of patient, site and procedure immediately before incision with all team members present • Preoperative team briefing to discuss clinical concerns, operative plan, and other critical issues • Post-operative team debriefing to discuss problems during the case and concerns for recovery and management of the patient",
+        "evidence": "A few suggestions for measurement, even on an intermittent basis, are the frequencies of compliance with: • Marking of the operative site by the surgeon • Performance of an anaesthesia safety check of the machine and medications • Use of pulse oximetry throughout administration of anaesthesia in all cases • Objective evaluation of the airway • Use of sterility indicators to ensure adequacy of sterility practices • Administration of prophylactic antibiotics within one hour • Verbal confirmation of patient, site and procedure immediately before incision with all team members present • Preoperative team briefing to discuss clinical concerns, operative plan, and other critical issues • Post-operative team debriefing to discuss problems during the case and concerns for recovery and management of the patient",
+        "category": null,
+        "priority": null,
+        "status": "pending",
+        "dependencies": [],
+        "estimated_time_minutes": null
+      }
+    ],
+    "total_items": 22,
+    "completed_items": 0,
+    "progress_percentage": 0.0
+  },
+  "evaluation": {
+    "status": "FAIL",
+    "coverage": 0.5,
+    "expected_items": 22,
+    "matched_items": 11,
+    "missing_items": [
+      "surgeon_critical_steps",
+      "surgeon_case_duration",
+      "surgeon_anticipated_blood_loss",
+      "anaesthetist_patient_specific_concerns",
+      "equipment_issues_or_concerns",
+      "essential_imaging_displayed",
+      "procedure_name_confirmed",
+      "instrument_sponge_needle_counts",
+      "specimen_labelling",
+      "equipment_problems_to_be_addressed",
+      "recovery_management_concerns"
+    ],
+    "matched": [
+      {
+        "expected_id": "identity_site_procedure_consent",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 0,
+        "matched_title": "Has the patient confirmed his/her identity, site, procedure and consent"
+      },
+      {
+        "expected_id": "site_marked",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 1,
+        "matched_title": "Is the site marked"
+      },
+      {
+        "expected_id": "anaesthesia_machine_medication_check",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 2,
+        "matched_title": "Is the anaesthesia machine and medication check complete"
+      },
+      {
+        "expected_id": "pulse_oximeter_functioning",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 3,
+        "matched_title": "Is the pulse oximeter on the patient and functioning"
+      },
+      {
+        "expected_id": "known_allergy",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 4,
+        "matched_title": "Does the patient have a known allergy"
+      },
+      {
+        "expected_id": "difficult_airway_aspiration_risk",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 5,
+        "matched_title": "Does the patient have a difficult airway or aspiration risk"
+      },
+      {
+        "expected_id": "blood_loss_risk_preop",
+        "phase": "Before induction of anaesthesia",
+        "matched_item_index": 6,
+        "matched_title": "Does the patient have a risk of >500 ml blood loss (7 ml/kg in children)"
+      },
+      {
+        "expected_id": "team_introductions",
+        "phase": "Before skin incision",
+        "matched_item_index": 7,
+        "matched_title": "Confirm all team members have introduced themselves by name and role"
+      },
+      {
+        "expected_id": "confirm_name_procedure_incision_site",
+        "phase": "Before skin incision",
+        "matched_item_index": 8,
+        "matched_title": "Confirm the patient’s name, procedure, and where the incision will be made"
+      },
+      {
+        "expected_id": "antibiotic_prophylaxis",
+        "phase": "Before skin incision",
+        "matched_item_index": 9,
+        "matched_title": "Has antibiotic prophylaxis been given within the last 60 minutes"
+      },
+      {
+        "expected_id": "sterility_confirmed",
+        "phase": "Before skin incision",
+        "matched_item_index": 21,
+        "matched_title": "A few suggestions for measurement, even on an intermittent basis, are the frequencies of compliance with: • Marking of the operative site by the surgeon • Performance of an anaesthesia safety check of the machine and medications • Use of pulse oximetry throughout administration of anaesthesia in all cases • Objective evaluation of the airway • Use of sterility indicators to ensure adequacy of sterility practices • Administration of prophylactic antibiotics within one hour • Verbal confirmation of patient, site and procedure immediately before incision with all team members present • Preoperative team briefing to discuss clinical concerns, operative plan, and other critical issues • Post-operative team debriefing to discuss problems during the case and concerns for recovery and management of the patient"
+      }
+    ],
+    "duplicate_ids": [],
+    "artifact_items": [],
+    "style_issue_items": [],
+    "order_breaks": [],
+    "collapsed_items": [
+      {
+        "item_index": 8,
+        "title": "Confirm the patient’s name, procedure, and where the incision will be made",
+        "matched_expected_ids": [
+          "confirm_name_procedure_incision_site",
+          "procedure_name_confirmed"
+        ]
+      },
+      {
+        "item_index": 21,
+        "title": "A few suggestions for measurement, even on an intermittent basis, are the frequencies of compliance with: • Marking of the operative site by the surgeon • Performance of an anaesthesia safety check of the machine and medications • Use of pulse oximetry throughout administration of anaesthesia in all cases • Objective evaluation of the airway • Use of sterility indicators to ensure adequacy of sterility practices • Administration of prophylactic antibiotics within one hour • Verbal confirmation of patient, site and procedure immediately before incision with all team members present • Preoperative team briefing to discuss clinical concerns, operative plan, and other critical issues • Post-operative team debriefing to discuss problems during the case and concerns for recovery and management of the patient",
+        "matched_expected_ids": [
+          "site_marked",
+          "anaesthesia_machine_medication_check",
+          "sterility_confirmed",
+          "recovery_management_concerns"
+        ]
+      }
+    ],
+    "unexpected_items": [
+      {
+        "item_index": 10,
+        "title": "The real-time feedback of clinicians is essential to successful development of a Checklist and its integration into the processes of care",
+        "category": null
+      },
+      {
+        "item_index": 11,
+        "title": "Testing through a “simulation” as simple as running through the Checklist with team members sitting around a table is important",
+        "category": null
+      },
+      {
+        "item_index": 12,
+        "title": "We also suggest using the Checklist for a single day by a single operating team and collecting feedback",
+        "category": null
+      },
+      {
+        "item_index": 13,
+        "title": "Modify the Checklist or the way that it is incorporated into care accordingly and then try the Checklist again in a single operating room",
+        "category": null
+      },
+      {
+        "item_index": 14,
+        "title": "Continue this process until you are comfortable that the Checklist you have created works in your environment. Then consider a wider implementation program",
+        "category": null
+      },
+      {
+        "item_index": 15,
+        "title": "Integrated Many institutions already have strategies to insure the reliable performance of many of the processes that are part of the WHO Checklist. Integrating new safety checks into the processes is challenging but possible in nearly all settings",
+        "category": null
+      },
+      {
+        "item_index": 16,
+        "title": "Each locale is encouraged to reformat, reorder or revise the Checklist to accommodate local practice while ensuring completion of the critical safety steps in an efficient manner. As noted above facilities and individuals are cautioned against making the Checkli noted above facilities and individuals are cautioned against making the Checklist unmanageably complex",
+        "category": null
+      },
+      {
+        "item_index": 17,
+        "title": "Build a team Commitment by all clinical team members involved in surgical procedures is essential. Start building support by involving clinicians who are likely to be most supportive. Include colleagues from as many clinical disciplines (surgery, anaesthesia, nursing) as possible. Identify a core group of people who are enthusiastic about the Checklist while trying to involve at least one member from each of the clinical disciplines",
+        "category": null
+      },
+      {
+        "item_index": 18,
+        "title": "Start small, then expand Start small, testing out the Checklist in one operating room with one team and moving forward after problems have been addressed and when enthusiasm builds. During the original evaluation by WHO, sites that tried to implement the Checklist in multiple operating rooms simultaneously or hospital-wide faced the most resistance and had the most trouble convincing staff to use the Checklist effectively",
+        "category": null
+      },
+      {
+        "item_index": 19,
+        "title": "Customize the Checklist for each setting as necessary, but do not remove safety steps just because they cannot be accomplished. Address resistance as it arises. Clinicians who have used the Checklist and have good experiences with it make great champions for promoting it and defending its use and spread in the hospital",
+        "category": null
+      },
+      {
+        "item_index": 20,
+        "title": "Track changes and encourages the monitoring of surgical results and complications. Ideally hospitals and facilities should track process and outcome measures, for example the percent of operations having antibiotics administered at the correct time and the surgical site infection rate",
+        "category": null
+      }
+    ],
+    "reasons": [
+      "collapsed items detected: 2",
+      "coverage too low: 50.00%"
+    ]
+  }
+}

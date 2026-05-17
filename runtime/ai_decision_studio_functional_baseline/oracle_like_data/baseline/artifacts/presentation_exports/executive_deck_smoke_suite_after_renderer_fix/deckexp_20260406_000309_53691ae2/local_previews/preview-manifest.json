@@ -1,0 +1,58 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "candidate_review_deck",
+  "output_dir": "baseline://artifacts/presentation_exports/executive_deck_smoke_suite_after_renderer_fix/deckexp_20260406_000309_53691ae2/local_previews",
+  "presentation_title": "candidate_review_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 8,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/be763abdb9eff819_candidate_review_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "candidate_review_deck-01.png",
+      "path": "baseline://external_files/27d118e9c2b68809_candidate_review_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "candidate_review_deck-02.png",
+      "path": "baseline://external_files/71f5e9a19f6f7d36_candidate_review_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "candidate_review_deck-03.png",
+      "path": "baseline://external_files/891f203a08b74b61_candidate_review_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "candidate_review_deck-04.png",
+      "path": "baseline://external_files/177bb27288d46df5_candidate_review_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "candidate_review_deck-05.png",
+      "path": "baseline://external_files/2c01f099314e2bff_candidate_review_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "candidate_review_deck-06.png",
+      "path": "baseline://external_files/2a84da173193cf9c_candidate_review_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "candidate_review_deck-07.png",
+      "path": "baseline://external_files/3462e545ab023b11_candidate_review_deck-07.png"
+    },
+    {
+      "slide_number": 8,
+      "filename": "candidate_review_deck-08.png",
+      "path": "baseline://external_files/664f31553350f191_candidate_review_deck-08.png"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "evidence_pack_deck_local_fallback",
+  "output_dir": "baseline://artifacts/presentation_exports/executive_deck_smoke_suite/deckexp_20260405_234932_4db57b5a/local_fallback_previews",
+  "presentation_title": "evidence_pack_deck_local_fallback",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/03b179bc4baa1506_evidence_pack_deck_local_fallback.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "evidence_pack_deck_local_fallback-01.png",
+      "path": "baseline://external_files/3eba500829ad8481_evidence_pack_deck_local_fallback-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "evidence_pack_deck_local_fallback-02.png",
+      "path": "baseline://external_files/49a9011e0bec6fbb_evidence_pack_deck_local_fallback-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "evidence_pack_deck_local_fallback-03.png",
+      "path": "baseline://external_files/21b0df5128614c03_evidence_pack_deck_local_fallback-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "evidence_pack_deck_local_fallback-04.png",
+      "path": "baseline://external_files/5602231b69e36404_evidence_pack_deck_local_fallback-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "evidence_pack_deck_local_fallback-05.png",
+      "path": "baseline://external_files/347d901ea8663828_evidence_pack_deck_local_fallback-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "evidence_pack_deck_local_fallback-06.png",
+      "path": "baseline://external_files/d5ff89b210b4ef15_evidence_pack_deck_local_fallback-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "evidence_pack_deck_local_fallback-07.png",
+      "path": "baseline://external_files/dfb8456179292a08_evidence_pack_deck_local_fallback-07.png"
+    }
+  ]
+}

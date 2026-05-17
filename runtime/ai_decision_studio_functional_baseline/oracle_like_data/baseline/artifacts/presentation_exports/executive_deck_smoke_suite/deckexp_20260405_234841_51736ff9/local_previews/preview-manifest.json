@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "benchmark_eval_executive_deck_local_fallback",
+  "output_dir": "baseline://artifacts/presentation_exports/executive_deck_smoke_suite/deckexp_20260405_234841_51736ff9/local_previews",
+  "presentation_title": "benchmark_eval_executive_deck_local_fallback",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/e8f386820f28060e_benchmark_eval_executive_deck_local_fallback.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "benchmark_eval_executive_deck_local_fallback-01.png",
+      "path": "baseline://external_files/48253c908b652362_benchmark_eval_executive_deck_local_fallback-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "benchmark_eval_executive_deck_local_fallback-02.png",
+      "path": "baseline://external_files/89f5eb7b8e85c217_benchmark_eval_executive_deck_local_fallback-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "benchmark_eval_executive_deck_local_fallback-03.png",
+      "path": "baseline://external_files/fdf7e334989a120b_benchmark_eval_executive_deck_local_fallback-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "benchmark_eval_executive_deck_local_fallback-04.png",
+      "path": "baseline://external_files/c0f3fa035e6a3c3c_benchmark_eval_executive_deck_local_fallback-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "benchmark_eval_executive_deck_local_fallback-05.png",
+      "path": "baseline://external_files/1bf0893f6f49d498_benchmark_eval_executive_deck_local_fallback-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "benchmark_eval_executive_deck_local_fallback-06.png",
+      "path": "baseline://external_files/2f4e2d83ac4ffb51_benchmark_eval_executive_deck_local_fallback-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "benchmark_eval_executive_deck_local_fallback-07.png",
+      "path": "baseline://external_files/f640710a33564e94_benchmark_eval_executive_deck_local_fallback-07.png"
+    }
+  ]
+}

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import time
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Callable
 
 from src.config import RagSettings
 from src.services.app_logging import get_logger
@@ -19,6 +22,10 @@ from src.rag.vector_store import ChromaVectorStore, LocalVectorStore
 
 
 logger = get_logger(__name__)
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 
@@ -212,6 +219,7 @@ def _remove_chroma_persist_dir(path: Path) -> None:
 def sync_chroma_from_rag_index(
     settings: RagSettings,
     rag_index: dict[str, object] | None,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
 ) -> dict[str, object]:
     normalized = _coerce_rag_index(rag_index, settings)
     chunks = [chunk for chunk in normalized.get("chunks", []) if isinstance(chunk, dict)]
@@ -219,7 +227,17 @@ def sync_chroma_from_rag_index(
     try:
         chroma_store = ChromaVectorStore(settings.chroma_path)
         if chunks:
-            chroma_store.rebuild(chunks)
+            if progress_callback is not None:
+                progress_callback(
+                    {
+                        "phase": "prepare",
+                        "detail": f"Preparing Chroma synchronization for {len(chunks)} chunk(s).",
+                        "processed_chunks": 0,
+                        "total_chunks": len(chunks),
+                        "progress_pct": 0.0,
+                    }
+                )
+            chroma_store.rebuild(chunks, progress_callback=progress_callback)
             collection_count = chroma_store.count_entries()
             return {
                 "ok": True,
@@ -424,9 +442,31 @@ def upsert_documents_in_rag_index(
     settings: RagSettings,
     embedding_provider,
     rag_index: dict[str, object] | None = None,
+    progress_callback: Callable[[str, dict[str, object]], None] | None = None,
 ) -> tuple[dict[str, object], dict[str, object]]:
+    def emit_progress(stage_key: str, *, status: str, detail: str | None = None, metadata: dict[str, Any] | None = None) -> None:
+        if progress_callback is None:
+            return
+        progress_callback(
+            stage_key,
+            {
+                "status": status,
+                "detail": detail,
+                "metadata": dict(metadata or {}),
+            },
+        )
+
     normalized = _coerce_rag_index(rag_index, settings)
     document_ids_to_replace = {document.file_hash for document in documents}
+    embedding_batch_size = max(
+        1,
+        int(
+            os.getenv(
+                "RAG_INDEX_EMBED_BATCH_SIZE",
+                os.getenv("OLLAMA_EMBED_BATCH_SIZE", "16"),
+            )
+        ),
+    )
 
     existing_documents = {
         document.get("document_id") or document.get("file_hash"): document
@@ -439,26 +479,151 @@ def upsert_documents_in_rag_index(
         if isinstance(chunk, dict) and (chunk.get("document_id") or chunk.get("file_hash")) not in document_ids_to_replace
     ]
 
-    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    now = _utc_now_iso()
+    total_documents = len(documents)
 
-    for document in documents:
+    for position, document in enumerate(documents, start=1):
         document_id = document.file_hash
+        emit_progress(
+            "chunking",
+            status="running",
+            detail=f"Chunking {document.name} ({position}/{total_documents}).",
+            metadata={
+                "document_name": document.name,
+                "current_document": position,
+                "total_documents": total_documents,
+                "processed_chunks": 0,
+                "progress_pct": 0.0,
+            },
+        )
         chunks = chunk_text(
             text=document.text,
             chunk_size=settings.chunk_size,
             chunk_overlap=settings.chunk_overlap,
             source_name=document.name,
             strategy=settings.chunking_strategy,
+            progress_callback=lambda payload: emit_progress(
+                "chunking",
+                status="running",
+                detail=(
+                    f"Chunking progress for {document.name}: "
+                    f"{int(payload.get('processed_chunks') or 0)} chunk(s) created."
+                ),
+                metadata={
+                    "document_name": document.name,
+                    "current_document": position,
+                    "total_documents": total_documents,
+                    **(payload if isinstance(payload, dict) else {}),
+                },
+            ),
         )
 
         if not chunks:
             raise RuntimeError(f"Could not generate chunks from document `{document.name}`.")
 
-        embeddings = embedding_provider.create_embeddings(
-            [chunk["text"] for chunk in chunks],
-            model=settings.embedding_model,
-            context_window=settings.embedding_context_window,
-            truncate=settings.embedding_truncate,
+        emit_progress(
+            "chunking",
+            status="completed",
+            detail=f"{len(chunks)} chunk(s) created for {document.name}.",
+            metadata={
+                "document_name": document.name,
+                "chunk_count": len(chunks),
+                "processed_chunks": len(chunks),
+                "total_chunks": len(chunks),
+                "current_document": position,
+                "total_documents": total_documents,
+                "progress_pct": 100.0,
+            },
+        )
+
+        emit_progress(
+            "embeddings",
+            status="running",
+            detail=f"Generating embeddings for {document.name} ({len(chunks)} chunk(s)).",
+            metadata={
+                "document_name": document.name,
+                "chunk_count": len(chunks),
+                "current_document": position,
+                "total_documents": total_documents,
+                "processed_chunks": 0,
+                "total_chunks": len(chunks),
+                "processed_batches": 0,
+                "total_batches": max(1, (len(chunks) + embedding_batch_size - 1) // embedding_batch_size),
+                "progress_pct": 0.0,
+            },
+        )
+
+        chunk_texts = [chunk["text"] for chunk in chunks]
+        total_chunks = len(chunk_texts)
+        total_batches = max(1, (total_chunks + embedding_batch_size - 1) // embedding_batch_size)
+        embeddings: list[list[float]] = []
+
+        for batch_index, start_index in enumerate(range(0, total_chunks, embedding_batch_size), start=1):
+            completed_chunks = len(embeddings)
+            emit_progress(
+                "embeddings",
+                status="running",
+                detail=(
+                    f"Generating embeddings for {document.name} — batch {batch_index}/{total_batches} "
+                    f"({completed_chunks}/{total_chunks} chunk(s) ready)."
+                ),
+                metadata={
+                    "document_name": document.name,
+                    "chunk_count": total_chunks,
+                    "processed_chunks": completed_chunks,
+                    "total_chunks": total_chunks,
+                    "processed_batches": batch_index - 1,
+                    "total_batches": total_batches,
+                    "current_document": position,
+                    "total_documents": total_documents,
+                    "progress_pct": round((completed_chunks / total_chunks) * 100, 1) if total_chunks else 100.0,
+                },
+            )
+
+            batch = chunk_texts[start_index : start_index + embedding_batch_size]
+            batch_embeddings = embedding_provider.create_embeddings(
+                batch,
+                model=settings.embedding_model,
+                context_window=settings.embedding_context_window,
+                truncate=settings.embedding_truncate,
+            )
+            embeddings.extend(batch_embeddings)
+
+            emit_progress(
+                "embeddings",
+                status="running",
+                detail=(
+                    f"Embeddings progress for {document.name}: {len(embeddings)}/{total_chunks} chunk(s) "
+                    f"processed ({batch_index}/{total_batches} batches)."
+                ),
+                metadata={
+                    "document_name": document.name,
+                    "chunk_count": total_chunks,
+                    "processed_chunks": len(embeddings),
+                    "total_chunks": total_chunks,
+                    "processed_batches": batch_index,
+                    "total_batches": total_batches,
+                    "current_document": position,
+                    "total_documents": total_documents,
+                    "progress_pct": round((len(embeddings) / total_chunks) * 100, 1) if total_chunks else 100.0,
+                },
+            )
+
+        emit_progress(
+            "embeddings",
+            status="completed",
+            detail=f"Embeddings ready for {document.name}.",
+            metadata={
+                "document_name": document.name,
+                "embedding_count": len(embeddings),
+                "processed_chunks": len(embeddings),
+                "total_chunks": total_chunks,
+                "processed_batches": total_batches,
+                "total_batches": total_batches,
+                "current_document": position,
+                "total_documents": total_documents,
+                "progress_pct": 100.0,
+            },
         )
 
         chunking_strategy_used = next(
@@ -508,7 +673,45 @@ def upsert_documents_in_rag_index(
         "settings": _settings_payload(settings),
         "updated_at": now,
     }
-    sync_status = sync_chroma_from_rag_index(settings, updated_index)
+
+    emit_progress(
+        "index_sync",
+        status="running",
+        detail="Synchronizing the updated corpus with the vector backend.",
+        metadata={
+            "document_count": total_documents,
+            "chunk_count": len(existing_chunks),
+            "processed_chunks": 0,
+            "total_chunks": len(existing_chunks),
+            "progress_pct": 0.0,
+        },
+    )
+    sync_status = sync_chroma_from_rag_index(
+        settings,
+        updated_index,
+        progress_callback=lambda payload: emit_progress(
+            "index_sync",
+            status="running",
+            detail=str(payload.get("detail") or "Synchronizing the updated corpus with the vector backend."),
+            metadata={
+                "document_count": total_documents,
+                "chunk_count": len(existing_chunks),
+                **(payload if isinstance(payload, dict) else {}),
+            },
+        ),
+    )
+    emit_progress(
+        "index_sync",
+        status="completed",
+        detail=str(sync_status.get("message") or "Index synchronization completed."),
+        metadata={
+            "document_count": total_documents,
+            "processed_chunks": len(existing_chunks),
+            "total_chunks": len(existing_chunks),
+            "progress_pct": 100.0,
+            **(sync_status if isinstance(sync_status, dict) else {}),
+        },
+    )
     return updated_index, sync_status
 
 
@@ -542,7 +745,7 @@ def remove_documents_from_rag_index(
         "documents": remaining_documents,
         "chunks": remaining_chunks,
         "settings": normalized.get("settings", _settings_payload(settings)),
-        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "updated_at": _utc_now_iso(),
     }
     sync_status = sync_chroma_from_rag_index(settings, updated_index)
     return updated_index, sync_status
@@ -583,9 +786,10 @@ def retrieve_relevant_chunks_detailed(
         }
 
     vector_backend_status = inspect_vector_backend_status(rag_index, settings)
+    reranking_enabled = int(getattr(settings, "rerank_pool_size", 0) or 0) > 0
     candidate_pool_size = build_candidate_pool_size(
         top_k=settings.top_k,
-        rerank_pool_size=settings.rerank_pool_size,
+        rerank_pool_size=settings.rerank_pool_size if reranking_enabled else settings.top_k,
         filtered_chunks_count=len(filtered_chunks),
     )
     vector_candidates: list[dict[str, object]] = []
@@ -610,14 +814,28 @@ def retrieve_relevant_chunks_detailed(
             retrieval_strategy_fallback_reason = langchain_error or "langchain_returned_no_results"
 
     query_embedding = None
+    embedding_error: str | None = None
     if not vector_candidates:
-        query_embedding = embedding_provider.create_embeddings(
-            [query],
-            model=settings.embedding_model,
-            context_window=settings.embedding_context_window,
-            truncate=settings.embedding_truncate,
-        )[0]
+        try:
+            query_embedding = embedding_provider.create_embeddings(
+                [query],
+                model=settings.embedding_model,
+                context_window=settings.embedding_context_window,
+                truncate=settings.embedding_truncate,
+            )[0]
+        except Exception as error:
+            embedding_error = str(error)
+            logger.warning("Embedding generation failed; using lexical/document fallback: %s", error)
+            vector_backend_status = {
+                **vector_backend_status,
+                "status": "degraded",
+                "backend_ready": False,
+                "message": f"Embedding request failed: {error}",
+            }
+            backend_used = "lexical_fallback"
+            backend_message = f"Embedding request failed for `{settings.embedding_provider}` / `{settings.embedding_model}`; retrieval fell back to lexical ranking."
 
+    if not vector_candidates and query_embedding is not None:
         try:
             chroma_store = ChromaVectorStore(settings.chroma_path)
             chroma_results = chroma_store.similarity_search(
@@ -642,7 +860,7 @@ def retrieve_relevant_chunks_detailed(
                 "message": f"Chroma retrieval failure: {error}",
             }
 
-    if not vector_candidates:
+    if not vector_candidates and query_embedding is not None:
         store = LocalVectorStore(filtered_chunks)
         local_results = store.similarity_search(query_embedding, candidate_pool_size)
         vector_candidates = [{**chunk, "vector_score": chunk.get("score", 0.0)} for chunk in local_results]
@@ -650,30 +868,35 @@ def retrieve_relevant_chunks_detailed(
         backend_message = "Retrieval served by local fallback from the canonical JSON."
         effective_retrieval_strategy = "manual_hybrid"
 
-    lexical_candidates = rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)
-    reranked_chunks = hybrid_rerank_chunks(
-        query,
-        vector_candidates,
-        lexical_candidates,
-        top_k=settings.top_k,
-        lexical_weight=settings.rerank_lexical_weight,
-    )
+    if reranking_enabled:
+        lexical_candidates = rank_chunks_lexically(query, filtered_chunks, candidate_pool_size)
+        selected_chunks = hybrid_rerank_chunks(
+            query,
+            vector_candidates,
+            lexical_candidates,
+            top_k=settings.top_k,
+            lexical_weight=settings.rerank_lexical_weight,
+        )
+    else:
+        selected_chunks = list(vector_candidates[: settings.top_k])
+        if not selected_chunks:
+            selected_chunks = rank_chunks_lexically(query, filtered_chunks, settings.top_k)
 
     return {
-        "chunks": reranked_chunks,
+        "chunks": selected_chunks,
         "backend_used": backend_used,
         "backend_message": backend_message,
         "filtered_chunks_available": len(filtered_chunks),
         "candidate_pool_size": candidate_pool_size,
-        "reranking_applied": True,
+        "reranking_applied": reranking_enabled,
         "vector_backend_status": vector_backend_status,
         "retrieval_strategy_requested": requested_retrieval_strategy,
         "retrieval_strategy_used": effective_retrieval_strategy,
         "retrieval_strategy_label": describe_retrieval_strategy(effective_retrieval_strategy),
         "retrieval_strategy_fallback_reason": retrieval_strategy_fallback_reason,
         "rerank_strategy": {
-            "type": "hybrid_vector_lexical",
-            "lexical_weight": settings.rerank_lexical_weight,
+            "type": "hybrid_vector_lexical" if reranking_enabled else "disabled",
+            "lexical_weight": settings.rerank_lexical_weight if reranking_enabled else 0.0,
             "candidate_pool_size": candidate_pool_size,
         },
     }

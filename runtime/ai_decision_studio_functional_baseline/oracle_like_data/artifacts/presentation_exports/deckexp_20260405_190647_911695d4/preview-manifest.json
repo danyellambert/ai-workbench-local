@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "action_plan_deck",
+  "output_dir": "baseline://outputs/ai_workbench_export_previews/deckexp_20260405_190647_911695d4",
+  "presentation_title": "action_plan_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/05f0d9b6437b139d_action_plan_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "action_plan_deck-01.png",
+      "path": "baseline://external_files/0bfa58534b29a690_action_plan_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "action_plan_deck-02.png",
+      "path": "baseline://external_files/7e3ca5f2a5be2cb0_action_plan_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "action_plan_deck-03.png",
+      "path": "baseline://external_files/84953cad4840011e_action_plan_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "action_plan_deck-04.png",
+      "path": "baseline://external_files/2b013bc2f50c21f8_action_plan_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "action_plan_deck-05.png",
+      "path": "baseline://external_files/d7b255676ba59030_action_plan_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "action_plan_deck-06.png",
+      "path": "baseline://external_files/39657aa1cfdfe3ad_action_plan_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "action_plan_deck-07.png",
+      "path": "baseline://external_files/2c109ee3b4d93d03_action_plan_deck-07.png"
+    }
+  ]
+}

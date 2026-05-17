@@ -1,0 +1,214 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Action Plan",
+      "subtitle": "Operational action plan grounded in current action backlog",
+      "author": "AI Workbench Local",
+      "date": "2026-04-18",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Action Plan"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Action Plan",
+        "subtitle": "Operational action plan grounded in current action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Grounded in the current Action Plan run and cited document evidence."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "2 open action(s) remain in the current plan and now require explicit owner follow-through, evidence closure and sequencing into the next operating review.",
+        "bullets": [
+          "2 total actions are tracked in the current plan",
+          "2 action(s) include owner, due date or status context",
+          "Use the appendix for full task wording and source traceability."
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Concise executive framing for the grounded action plan and execution posture."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Total actions"
+          },
+          {
+            "value": "2",
+            "label": "Open"
+          },
+          {
+            "value": "0",
+            "label": "Overdue"
+          },
+          {
+            "value": "0",
+            "label": "Approval required"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "cards",
+        "title": "Priority workstreams",
+        "bullets": [],
+        "cards": [
+          {
+            "title": "Priority 1",
+            "body": "Archive approval with Q1 access-review evidence pack",
+            "footer": "Priya Nair • - • Open"
+          },
+          {
+            "title": "Priority 2",
+            "body": "Revalidate approval if named administrators change",
+            "footer": "Compliance Operations • - • Open"
+          },
+          {
+            "title": "Evidence posture",
+            "body": "Backlog requires evidence closure and sequence confirmation before close-out.",
+            "footer": "Grounded review signal"
+          }
+        ],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Priority actions grouped from the current grounded run."
+      },
+      {
+        "type": "table",
+        "title": "Action backlog",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Ref",
+          "Owner",
+          "Due",
+          "Status"
+        ],
+        "table_rows": [
+          [
+            "EVIDENCE",
+            "Priya Nair",
+            "-",
+            "Open"
+          ],
+          [
+            "A02",
+            "Compliance Operations",
+            "-",
+            "Open"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Use the paired action-detail slide for full task wording and source references."
+      },
+      {
+        "type": "bullets",
+        "title": "Action details appendix",
+        "body": "Full task wording, accountable owner, due date and source traceability.",
+        "bullets": [
+          "EVIDENCE — Archive approval with Q1 access-review evidence pack",
+          "Owner: Priya Nair • Due: - • Status: Open • Source: Privileged Account Approval Email",
+          "A02 — Revalidate approval if named administrators change",
+          "Owner: Compliance Operations • Due: - • Status: Open • Source: Privileged Account Approval Email"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "[EVIDENCE] Source: Privileged Account Approval Email.pdf | Evidence: Please archive this approval with the Q1 access-review evidence pack\n[A02] Source: Privileged Account Approval Email.pdf | Evidence: If either named administrator changes, this approval must be revalidated before access is retained"
+      },
+      {
+        "type": "timeline",
+        "title": "Execution timeline",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [
+          {
+            "title": "Step 1",
+            "body": "EVIDENCE · Archive approval with Q1 access-review evidence pack",
+            "tag": "P1"
+          },
+          {
+            "title": "Step 2",
+            "body": "A02 · Revalidate approval if named administrators change",
+            "tag": "P2"
+          }
+        ],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Execution sequence derived from the current action plan items."
+      },
+      {
+        "type": "two_column",
+        "title": "Blockers vs mitigations",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Blockers",
+            "body": "No major blocker flagged in the current run.",
+            "bullets": [
+              "EVIDENCE — Archive approval with Q1 access-review evidence pack",
+              "A02 — Revalidate approval if named administrators change"
+            ]
+          },
+          {
+            "title": "Mitigations",
+            "body": "Execute the named actions in order, close cited evidence gaps and confirm approval dependencies before closure.",
+            "bullets": [
+              "EVIDENCE — Archive approval with Q1 access-review evidence pack",
+              "A02 — Revalidate approval if named administrators change"
+            ]
+          }
+        ],
+        "speaker_notes": "Execution blockers and concrete mitigation actions from the current run."
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_230808_09d62ac5/action_plan_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_230808_09d62ac5",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

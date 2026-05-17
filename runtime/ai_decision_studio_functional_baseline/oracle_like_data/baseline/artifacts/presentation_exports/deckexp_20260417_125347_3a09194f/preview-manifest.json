@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview",
+  "basename": "action_plan_deck",
+  "output_dir": "baseline://external/Users_danyellambert_ppt_creator_app_outputs_ai_workbench_export_previews/deckexp_20260417_125347_3a09194f",
+  "presentation_title": "AI Workbench Local — Action Plan",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "spec",
+  "real_preview": false,
+  "backend_requested": "synthetic",
+  "backend_used": "synthetic",
+  "office_runtime": null,
+  "office_conversion_strategy": null,
+  "input_pptx": null,
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "action_plan_deck-01.png",
+      "path": "baseline://external_files/06048fbd25e1f01f_action_plan_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "action_plan_deck-02.png",
+      "path": "baseline://external_files/2673949bbc0b5817_action_plan_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "action_plan_deck-03.png",
+      "path": "baseline://external_files/219f3dcff25a6b50_action_plan_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "action_plan_deck-04.png",
+      "path": "baseline://external_files/da8eb80be20f206b_action_plan_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "action_plan_deck-05.png",
+      "path": "baseline://external_files/3f44cbb5b45a1527_action_plan_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "action_plan_deck-06.png",
+      "path": "baseline://external_files/9a68a7bfff7c6d2d_action_plan_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "action_plan_deck-07.png",
+      "path": "baseline://external_files/5c759d4e3086d722_action_plan_deck-07.png"
+    }
+  ]
+}

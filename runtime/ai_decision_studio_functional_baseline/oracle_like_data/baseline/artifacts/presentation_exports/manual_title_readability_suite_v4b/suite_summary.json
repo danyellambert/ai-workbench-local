@@ -1,0 +1,30 @@
+{
+  "cases": {
+    "02_long_title_split_panel_v4b": {
+      "status": "ok",
+      "average_score": 93,
+      "pptx_path": "baseline://external_files/877e68a864de2281_02_long_title_split_panel_v4b.pptx",
+      "thumbnail_sheet": "baseline://external_files/48b8426966406bd1_02_long_title_split_panel_v4b-thumbnails.png",
+      "first_preview": "baseline://external_files/0e214078240717fd_02_long_title_split_panel_v4b-01.png"
+    },
+    "03_very_long_title_hero_cover_v4b": {
+      "status": "ok",
+      "average_score": 93,
+      "pptx_path": "baseline://external_files/09c55ba3c2509c8a_03_very_long_title_hero_cover_v4b.pptx",
+      "thumbnail_sheet": "baseline://external_files/e48a26da734d2d05_03_very_long_title_hero_cover_v4b-thumbnails.png",
+      "first_preview": "baseline://external_files/9f7090848484926f_03_very_long_title_hero_cover_v4b-01.png"
+    },
+    "05_extreme_title_collision_check_v4b": {
+      "status": "ok",
+      "average_score": 93,
+      "pptx_path": "baseline://external_files/3d86082e480748b6_05_extreme_title_collision_check_v4b.pptx",
+      "thumbnail_sheet": "baseline://external_files/12e31173a61647c5_05_extreme_title_collision_check_v4b-thumbnails.png",
+      "first_preview": "baseline://external_files/dc0264bda042e135_05_extreme_title_collision_check_v4b-01.png"
+    }
+  },
+  "comparisons": {
+    "02_long_title_split_panel_v4": "baseline://external_files/47becb416f21d6b7_02_long_title_split_panel_v4_vs_02_long_title_split_panel_v4b.png",
+    "03_very_long_title_hero_cover_v4": "baseline://external_files/51e020c405fbdeb8_03_very_long_title_hero_cover_v4_vs_03_very_long_title_hero_cover_v4b.png",
+    "05_extreme_title_collision_check_v4": "baseline://external_files/bf80fdfeb3a4edb8_05_extreme_title_collision_check_v4_vs_05_extreme_title_collision_check_v4b.png"
+  }
+}

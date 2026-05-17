@@ -4,6 +4,7 @@ import TopBar from './TopBar';
 import CommandPalette from './CommandPalette';
 import RuntimeDrawer from './RuntimeDrawer';
 import AuroraBackground from './AuroraBackground';
+import GuidedWorkbenchTour from './GuidedWorkbenchTour';
 
 export default function AppShell() {
   return (
@@ -18,6 +19,7 @@ export default function AppShell() {
       </div>
       <CommandPalette />
       <RuntimeDrawer />
+      <GuidedWorkbenchTour />
     </div>
   );
 }

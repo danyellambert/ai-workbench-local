@@ -1,8 +1,4 @@
-.env
-.venv/
-__pycache__/
 *.pyc
-.DS_Store
 *.db
 *.sqlite
 *.sqlite3
@@ -16,31 +12,179 @@ __pycache__/
 .phase95_evidenceops_worklog.json
 .runtime_execution_log.json
 .chroma_rag/
-.runtime/
-artifacts/
-outputs/
-materials_local/
-.vscode/
-old/auxiliar.py
-benchmark_runs/*
-!benchmark_runs/.gitkeep
-benchmark_pdfs/*
-!benchmark_pdfs/.gitkeep
+.runtime_policy_comparison_real/
+diagnostics/
+data/
+docs/deployment/aws-cost-audit.md
 
 phase5_eval/reports/
 phase5_eval/resume_benchmark_quick/
 phase5_eval/resume_benchmark_full/
 
-data/*
-!data/materials_demo/
-data/materials_demo/*
-!data/materials_demo/README.md
-!data/materials_demo/public_material_sources.json
-historico/
-.clinerules
+screenshots_ai_lab
+screenshots_frontend
+screenshots_gradio
+frontend/tmp_*.md
+.tmp_action_plan_isolated_selected_e2e/
+frontend/.tmp_action_plan_isolated_selected_e2e/
+.tmp_ai_lab_e2e/
+tmp_ai_lab_e2e.zip
+frontend/.tmp_frontend_surface_e2e/
+.tmp_candidate_review_validation/
+runtime-state-diagnosis*.txt
+test-results/
+.env.oracle
+.env.docker.local
 
-src/structured/s
-s.txt
-proximos_passos.md
-implementation_plan.md
-implementation_task_draft.md
+# Environment contracts: real env files stay local/host-only.
+.env
+.env.local
+.env.docker
+.env.docker.local
+.env.aws
+.env.aws.local
+.env.oracle
+.env.oracle.local
+.env.production
+.env.production.local
+
+# Versioned safe examples.
+!.env.local.example
+!.env.docker.example
+!.env.aws.example
+
+# >>> AI Decision Studio local/generated hygiene
+
+# OS/editor local noise
+.DS_Store
+**/.DS_Store
+.vscode/
+.clinerules/
+
+# Python local runtime/cache
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+*.py[cod]
+.venv/
+.venv_*/
+.venv_policy_comparison/
+
+# Node/frontend generated artifacts
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/playwright-report/
+frontend/.DS_Store
+frontend/src/.DS_Store
+frontend/src/**/.DS_Store
+
+# Playwright/browser temp output
+.tmp_playwright/
+
+# Local app runtime/state
+runtime/
+.runtime/
+.runtime_policy_comparison_real/
+.runtime_execution_log.json
+.chroma_rag/
+artifacts/
+outputs/
+
+# Local screenshots and scratch notes
+screenshots_ai_lab/
+screenshots_gradio/
+screenshots_frontend/
+
+# Local provider/eval/debug databases and logs
+.chat_history.json
+.phase55_langchain_shadow_log.json
+.phase55_langgraph_shadow_log.json
+.phase6_document_agent_log.json
+.phase7_model_comparison_log.json
+.phase8_eval_runs.sqlite3
+.phase95_evidenceops_actions.sqlite3
+runtime-provider-trace*.log
+runtime-state-diagnosis*.txt
+
+# Keep tracked fixtures/.gitkeep/public demo assets only.
+phase5_eval/reports/
+phase5_eval/resume_benchmark*/
+phase8_eval/.DS_Store
+
+# Local legacy scratch
+
+# Diagnostics caches
+diagnostics/__pycache__/
+scripts/__pycache__/
+src/**/__pycache__/
+tests/__pycache__/
+# <<< AI Decision Studio local/generated hygiene
+
+# AI Decision Studio deploy payload
+# Keep broad runtime outputs ignored, but allow only the mounted Docker/AWS data payload.
+!runtime/
+runtime/*
+!runtime/ai_decision_studio_functional_baseline/
+runtime/ai_decision_studio_functional_baseline/*
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/
+runtime/ai_decision_studio_functional_baseline/oracle_like_data/*
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/baseline/
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/baseline/**
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/runtime/
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/runtime/**
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/artifacts/
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/artifacts/**
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/users/
+!runtime/ai_decision_studio_functional_baseline/oracle_like_data/users/**
+
+# Keep local noise and backup archives out even inside the deploy payload.
+runtime/ai_decision_studio_functional_baseline/oracle_like_data/**/.DS_Store
+runtime/ai_decision_studio_functional_baseline/oracle_like_data/backups/**
+
+# Local eval and benchmark workspaces kept out of the public repo root
+phase5_eval/
+phase8_eval/
+benchmark_pdfs/
+benchmark_runs/
+
+# Generated eval artifacts
+evals/generated/*
+!evals/generated/README.md
+
+# Local benchmark payloads under evals
+evals/benchmark-pdfs/*
+!evals/benchmark-pdfs/README.md
+!evals/benchmark-pdfs/.gitkeep
+
+evals/benchmark-runs/*
+!evals/benchmark-runs/README.md
+!evals/benchmark-runs/.gitkeep
+
+evals/**/.DS_Store
+!legacy/deploy/oracle/.env.oracle.example
+
+# Product architecture asset policy:
+# track only canonical README visuals, ignore all other drafts/exports.
+docs/assets/product/*
+!docs/assets/product/architecture-overview.svg
+!docs/assets/product/readme-header.svg
+!docs/assets/product/operating-model.svg
+!docs/assets/product/document-review.png
+!docs/assets/product/policy-comparison.png
+!docs/assets/product/action-plan.png
+!docs/assets/product/candidate-review.png
+!docs/assets/product/hero-decision-loop.webp
+!docs/assets/product/delivery-layer.png
+!docs/assets/product/ai-lab-runtime.webp
+
+# Private credential stores / local secrets
+/secrets/
+/runtime/private_secrets/
+**/credential_store.json
+**/*credential*store*.json
+**/*secret*store*.json
+
+# Local/private product usage telemetry logs
+runtime/**/usage_events.jsonl
+.runtime/**/usage_events.jsonl

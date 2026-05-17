@@ -1,0 +1,108 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "evidence_pack_deck",
+  "deck_family": "evidence_audit",
+  "presentation": {
+    "title": "AI Workbench Local — Evidence Pack Review",
+    "subtitle": "Audit / compliance executive handoff grounded in EvidenceOps",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Evidence Pack"
+  },
+  "context": {
+    "review_type": "risk_gap_review",
+    "workflow_id": null
+  },
+  "executive_summary": "Lucas de Souza Ferreira CV: 0 risco(s), 1 lacuna(s) e 0 ação(ões) de mitigação identificada(s).",
+  "key_highlights": [
+    "No owner is named for the migration task",
+    "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+    "Encaminhe o resultado para revisão humana antes de tomar uma decisão final."
+  ],
+  "key_metrics": [
+    {
+      "label": "Findings",
+      "value": "1"
+    },
+    {
+      "label": "Action items",
+      "value": "0"
+    },
+    {
+      "label": "Open actions",
+      "value": "3"
+    },
+    {
+      "label": "Unique docs",
+      "value": "10"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Findings",
+      "columns": [
+        "Type",
+        "Title",
+        "Description",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "gap",
+          "No owner is named for the migration task",
+          "No owner is named for the migration task",
+          "-"
+        ]
+      ]
+    },
+    {
+      "title": "Action status",
+      "columns": [
+        "Type",
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "recommended_action",
+          "Encaminhe o resultado para revisão humana antes de tomar uma decisão final.",
+          "-",
+          "-",
+          "recommended"
+        ],
+        [
+          "recommended_action",
+          "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+          "-",
+          "-",
+          "recommended"
+        ],
+        [
+          "recommended_action",
+          "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+          "-",
+          "-",
+          "recommended"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+  "watchouts": [
+    "Há ações abertas sem owner definido no action store.",
+    "No owner is named for the migration task",
+    "Perguntas abertas podem exigir leitura humana adicional quando o documento tiver ambiguidade contextual.",
+    "A resposta foi marcada para revisão humana antes de uso decisório."
+  ],
+  "next_steps": [
+    "Abra os trechos-fonte citados para confirmar a interpretação antes de agir.",
+    "Encaminhe o resultado para revisão humana antes de tomar uma decisão final."
+  ],
+  "data_sources": [
+    "evidenceops_worklog",
+    "evidenceops_action_store"
+  ]
+}

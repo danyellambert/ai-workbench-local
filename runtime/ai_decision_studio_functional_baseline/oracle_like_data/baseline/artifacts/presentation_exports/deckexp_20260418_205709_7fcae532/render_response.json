@@ -1,0 +1,809 @@
+{
+  "mode": "render",
+  "rendered": true,
+  "dry_run": false,
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_205709_7fcae532/action_plan_deck.pptx",
+  "presentation_title": "AI Workbench Local — Action Plan",
+  "theme": "executive_premium_minimal",
+  "slide_count": 8,
+  "missing_asset_count": 0,
+  "missing_assets": [],
+  "quality_review": {
+    "mode": "review",
+    "presentation_title": "AI Workbench Local — Action Plan",
+    "theme": "executive_premium_minimal",
+    "slide_count": 8,
+    "slides": [
+      {
+        "slide_number": 1,
+        "slide_type": "title",
+        "title": "AI Workbench Local — Action Plan",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 1.8,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 2,
+        "slide_type": "summary",
+        "title": "Executive summary",
+        "score": 86,
+        "status": "review",
+        "content_weight": 3.46,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 2.16,
+        "risk_level": "high",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [
+          "summary:panel_width_pressure"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "summary:panel_width_pressure",
+            "density": 6.357,
+            "threshold": 4.2,
+            "severity": "high",
+            "message": "summary takeaways are dense enough to overwhelm the side panel width"
+          }
+        ],
+        "severity_counts": {
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "high",
+            "message": "summary takeaways are dense enough to overwhelm the side panel width"
+          }
+        ]
+      },
+      {
+        "slide_number": 3,
+        "slide_type": "metrics",
+        "title": "Executive snapshot",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 6.14,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 4,
+        "slide_type": "cards",
+        "title": "Priority workstreams",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 7.31,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 5,
+        "slide_type": "table",
+        "title": "Action backlog",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 3.79,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 6,
+        "slide_type": "bullets",
+        "title": "Action details appendix",
+        "score": 93,
+        "status": "ok",
+        "content_weight": 3.18,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.74,
+        "risk_level": "medium",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [
+          "bullets:list"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "bullets:list",
+            "density": 4.636,
+            "threshold": 3.9,
+            "severity": "medium",
+            "message": "bullet list region is dense enough to risk crowding or overlap"
+          }
+        ],
+        "severity_counts": {
+          "high": 0,
+          "medium": 1,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "bullet list region is dense enough to risk crowding or overlap"
+          }
+        ]
+      },
+      {
+        "slide_number": 7,
+        "slide_type": "timeline",
+        "title": "Execution timeline",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 5.13,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 8,
+        "slide_type": "two_column",
+        "title": "Blockers vs mitigations",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 6.25,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      }
+    ],
+    "missing_assets": [],
+    "average_score": 97,
+    "status": "ok",
+    "issue_count": 2,
+    "warning_count": 2,
+    "severity_counts": {
+      "high": 1,
+      "medium": 1,
+      "low": 0
+    },
+    "overflow_risk_count": 0,
+    "clipping_risk_count": 0,
+    "collision_risk_count": 2,
+    "balance_warning_count": 0,
+    "top_risk_slides": [
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "high",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 2.16
+      },
+      {
+        "slide_number": 6,
+        "title": "Action details appendix",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.74
+      }
+    ],
+    "issues": [
+      "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+      "slide 06 (Action details appendix): bullet list region is dense enough to risk crowding or overlap"
+    ],
+    "warnings": [
+      "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+      "slide 06 (Action details appendix): bullet list region is dense enough to risk crowding or overlap"
+    ]
+  },
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532",
+  "preview_source": "spec",
+  "preview_result": {
+    "mode": "preview",
+    "output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532",
+    "preview_count": 8,
+    "previews": [
+      "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-01.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-02.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-03.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-04.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-05.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-06.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-07.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-08.png"
+    ],
+    "thumbnail_sheet": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-thumbnails.png",
+    "quality_review": {
+      "mode": "review",
+      "presentation_title": "AI Workbench Local — Action Plan",
+      "theme": "executive_premium_minimal",
+      "slide_count": 8,
+      "slides": [
+        {
+          "slide_number": 1,
+          "slide_type": "title",
+          "title": "AI Workbench Local — Action Plan",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 1.8,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        },
+        {
+          "slide_number": 2,
+          "slide_type": "summary",
+          "title": "Executive summary",
+          "score": 86,
+          "status": "review",
+          "content_weight": 3.46,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 2.16,
+          "risk_level": "high",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [
+            "summary:panel_width_pressure"
+          ],
+          "layout_pressure_signals": [
+            {
+              "region": "summary:panel_width_pressure",
+              "density": 6.357,
+              "threshold": 4.2,
+              "severity": "high",
+              "message": "summary takeaways are dense enough to overwhelm the side panel width"
+            }
+          ],
+          "severity_counts": {
+            "high": 1,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": [
+            {
+              "severity": "high",
+              "message": "summary takeaways are dense enough to overwhelm the side panel width"
+            }
+          ]
+        },
+        {
+          "slide_number": 3,
+          "slide_type": "metrics",
+          "title": "Executive snapshot",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 6.14,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        },
+        {
+          "slide_number": 4,
+          "slide_type": "cards",
+          "title": "Priority workstreams",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 7.31,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        },
+        {
+          "slide_number": 5,
+          "slide_type": "table",
+          "title": "Action backlog",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 3.79,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        },
+        {
+          "slide_number": 6,
+          "slide_type": "bullets",
+          "title": "Action details appendix",
+          "score": 93,
+          "status": "ok",
+          "content_weight": 3.18,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.74,
+          "risk_level": "medium",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [
+            "bullets:list"
+          ],
+          "layout_pressure_signals": [
+            {
+              "region": "bullets:list",
+              "density": 4.636,
+              "threshold": 3.9,
+              "severity": "medium",
+              "message": "bullet list region is dense enough to risk crowding or overlap"
+            }
+          ],
+          "severity_counts": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+          },
+          "issues": [
+            {
+              "severity": "medium",
+              "message": "bullet list region is dense enough to risk crowding or overlap"
+            }
+          ]
+        },
+        {
+          "slide_number": 7,
+          "slide_type": "timeline",
+          "title": "Execution timeline",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 5.13,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        },
+        {
+          "slide_number": 8,
+          "slide_type": "two_column",
+          "title": "Blockers vs mitigations",
+          "score": 100,
+          "status": "ok",
+          "content_weight": 6.25,
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 0,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0,
+          "risk_level": "low",
+          "likely_overflow_regions": [],
+          "likely_collision_regions": [],
+          "layout_pressure_signals": [],
+          "severity_counts": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "issues": []
+        }
+      ],
+      "missing_assets": [],
+      "average_score": 97,
+      "status": "ok",
+      "issue_count": 2,
+      "warning_count": 2,
+      "severity_counts": {
+        "high": 1,
+        "medium": 1,
+        "low": 0
+      },
+      "overflow_risk_count": 0,
+      "clipping_risk_count": 0,
+      "collision_risk_count": 2,
+      "balance_warning_count": 0,
+      "top_risk_slides": [
+        {
+          "slide_number": 2,
+          "title": "Executive summary",
+          "risk_level": "high",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 2.16
+        },
+        {
+          "slide_number": 6,
+          "title": "Action details appendix",
+          "risk_level": "medium",
+          "overflow_risk_count": 0,
+          "clipping_risk_count": 0,
+          "collision_risk_count": 1,
+          "balance_warning_count": 0,
+          "layout_pressure_score": 0.74
+        }
+      ],
+      "issues": [
+        "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+        "slide 06 (Action details appendix): bullet list region is dense enough to risk crowding or overlap"
+      ],
+      "warnings": [
+        "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+        "slide 06 (Action details appendix): bullet list region is dense enough to risk crowding or overlap"
+      ]
+    },
+    "preview_artifact_review": {
+      "status": "review",
+      "preview_count": 8,
+      "edge_contact_count": 1,
+      "safe_margin_warning_count": 0,
+      "edge_density_warning_count": 0,
+      "body_edge_contact_count": 1,
+      "safe_area_intrusion_count": 3,
+      "footer_intrusion_count": 0,
+      "corner_density_warning_count": 0,
+      "slides": [
+        {
+          "slide_number": 1,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-01.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1250,
+            "bottom": 687
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1250,
+            "bottom": 471
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content appears to intrude into an unsafe margin region"
+          ]
+        },
+        {
+          "slide_number": 2,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-02.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1276,
+            "bottom": 687
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1276,
+            "bottom": 521
+          },
+          "edge_contact": true,
+          "safe_margin_warning": true,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.008247,
+          "body_max_edge_ratio": 0.009024,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "foreground touches the slide edge",
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region"
+          ]
+        },
+        {
+          "slide_number": 3,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-03.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1189,
+            "bottom": 687
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1189,
+            "bottom": 451
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        },
+        {
+          "slide_number": 4,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-04.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1191,
+            "bottom": 687
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1191,
+            "bottom": 471
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        },
+        {
+          "slide_number": 5,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-05.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1189,
+            "bottom": 687
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 78,
+            "right": 1189,
+            "bottom": 375
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        },
+        {
+          "slide_number": 6,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-06.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1189,
+            "bottom": 687
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 958,
+            "bottom": 400
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        },
+        {
+          "slide_number": 7,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-07.png",
+          "foreground_bbox": {
+            "left": 60,
+            "top": 82,
+            "right": 1221,
+            "bottom": 687
+          },
+          "body_foreground_bbox": {
+            "left": 60,
+            "top": 82,
+            "right": 1221,
+            "bottom": 478
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content appears to intrude into an unsafe margin region"
+          ]
+        },
+        {
+          "slide_number": 8,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/action_plan_deck-08.png",
+          "foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1189,
+            "bottom": 687
+          },
+          "body_foreground_bbox": {
+            "left": 92,
+            "top": 82,
+            "right": 1185,
+            "bottom": 521
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": false,
+          "safe_area_intrusion": false,
+          "footer_intrusion_warning": false,
+          "corner_density_warning": false,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.0,
+          "max_corner_ratio": 0.0,
+          "issues": []
+        }
+      ]
+    },
+    "visual_regression": null,
+    "debug_grid": false,
+    "debug_safe_areas": false,
+    "preview_source": "spec",
+    "real_preview": false,
+    "preview_manifest": "outputs/ai_workbench_export_previews/deckexp_20260418_205709_7fcae532/preview-manifest.json",
+    "backend_requested": "synthetic",
+    "backend_used": "synthetic",
+    "backend_fallback_reason": null,
+    "office_runtime": null,
+    "office_conversion_strategy": null
+  }
+}

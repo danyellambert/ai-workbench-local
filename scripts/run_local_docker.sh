@@ -1,0 +1,330 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENV_FILE="${ENV_FILE:-.env.docker}"
+PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ai-decision-studio}"
+CONFIG_ONLY="false"
+DOWN_ONLY="false"
+NO_BUILD="false"
+SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE="${SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE:-0}"
+SKIP_OLLAMA_EMBEDDING_MODEL_PULL="${SKIP_OLLAMA_EMBEDDING_MODEL_PULL:-0}"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  scripts/run_local_docker.sh
+  scripts/run_local_docker.sh --config-only
+  scripts/run_local_docker.sh --down
+  scripts/run_local_docker.sh --no-build
+
+Optional env:
+  ENV_FILE=.env.docker
+  COMPOSE_PROJECT_NAME=ai-decision-studio
+  SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE=1
+  SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1
+  AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL=embeddinggemma:300m
+
+Behavior:
+  - Uses docker-compose.local.yml as the local Docker topology.
+  - Does not use the AWS compose file.
+  - Frontend container serves the app through Nginx.
+  - Nginx proxies /api and /health to product-api:8011 inside Docker.
+  - Vite local-dev proxy is not used for Docker.
+  - Ensures the local Docker Nextcloud volume has the golden baseline:
+      data/danyel/files/EvidenceOpsDemo
+  - Restores the baseline from an external tarball when the volume is empty/missing it.
+  - Ensures the configured Ollama embedding model is pulled into the Ollama volume.
+  - --config-only renders compose config without building or starting containers.
+  - --down stops/removes compose containers without removing volumes.
+USAGE
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --config-only)
+      CONFIG_ONLY="true"
+      shift
+      ;;
+    --down)
+      DOWN_ONLY="true"
+      shift
+      ;;
+    --no-build)
+      NO_BUILD="true"
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "ERROR: unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "ERROR: env file not found: $ENV_FILE" >&2
+  echo "Create it from .env.docker.example and adjust local data-root paths/secrets." >&2
+  exit 1
+fi
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "ERROR: required command not found: $1" >&2
+    exit 1
+  fi
+}
+
+require_command docker
+require_command grep
+
+compose() {
+  docker compose \
+    --env-file "$ENV_FILE" \
+    -p "$PROJECT_NAME" \
+    -f docker-compose.local.yml \
+    "$@"
+}
+
+get_env_value() {
+  key="$1"
+  default="$2"
+  awk -F= -v k="$key" -v d="$default" '
+    $1 == k {
+      v = substr($0, index($0, "=") + 1)
+    }
+    END {
+      if (v == "") print d
+      else {
+        gsub(/^"|"$/, "", v)
+        gsub(/^'\''|'\''$/, "", v)
+        print v
+      }
+    }
+  ' "$ENV_FILE"
+}
+
+compose_project_has_running_containers() {
+  docker ps \
+    --filter "label=com.docker.compose.project=$PROJECT_NAME" \
+    --format '{{.Names}}' \
+    | grep -q .
+}
+
+volume_has_nextcloud_golden_baseline() {
+  local volume="$1"
+  local user="$2"
+  local root_path="$3"
+
+  docker run --rm \
+    -e NEXTCLOUD_GOLDEN_USER="$user" \
+    -e NEXTCLOUD_GOLDEN_ROOT="$root_path" \
+    -v "$volume:/target:ro" \
+    alpine sh -lc '
+      root="${NEXTCLOUD_GOLDEN_ROOT#/}"
+      test -d "/target/data/${NEXTCLOUD_GOLDEN_USER}/files/${root}"
+    ' >/dev/null 2>&1
+}
+
+restore_nextcloud_golden_baseline() {
+  if [ "$SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE" = "1" ]; then
+    echo "SKIP: Nextcloud golden baseline restore disabled by SKIP_NEXTCLOUD_GOLDEN_BASELINE_RESTORE=1"
+    return 0
+  fi
+
+  local volume
+  local archive
+  local expected_sha
+  local user
+  local root_path
+
+  volume="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_VOLUME "${PROJECT_NAME}_nextcloud_app")"
+  archive="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_ARCHIVE "./runtime/ai_decision_studio_functional_baseline/nextcloud_golden_baseline/nextcloud-golden-baseline-v1.tar.gz")"
+  expected_sha="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_SHA256 "4dd4fb301249fa2ed6e6cc7e223df3beaed2a175b85c352b24ff3ca95636ddb2")"
+  user="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_USER "$(get_env_value EVIDENCEOPS_NEXTCLOUD_USERNAME danyel)")"
+  root_path="$(get_env_value AI_DECISION_STUDIO_NEXTCLOUD_GOLDEN_BASELINE_ROOT "$(get_env_value EVIDENCEOPS_NEXTCLOUD_ROOT_PATH /EvidenceOpsDemo)")"
+
+  echo
+  echo "== Nextcloud golden baseline check =="
+  echo "volume=$volume"
+  echo "user=$user"
+  echo "root_path=$root_path"
+
+  if volume_has_nextcloud_golden_baseline "$volume" "$user" "$root_path"; then
+    echo "OK: Nextcloud golden baseline already present in Docker volume."
+    return 0
+  fi
+
+  if compose_project_has_running_containers; then
+    echo "WARN: compose project has running containers, stopping before restoring Nextcloud volume."
+    compose down --remove-orphans
+  fi
+
+  if [ ! -f "$archive" ]; then
+    echo "ERROR: Nextcloud golden baseline is missing from the Docker volume and archive was not found:" >&2
+    echo "  $archive" >&2
+    echo "Expected external runtime artifact, not committed to Git." >&2
+    exit 1
+  fi
+
+  require_command shasum
+
+  local actual_sha
+  actual_sha="$(shasum -a 256 "$archive" | awk '{print $1}')"
+  echo "archive=$archive"
+  echo "actual_sha=$actual_sha"
+
+  if [ "$actual_sha" != "$expected_sha" ]; then
+    echo "ERROR: Nextcloud golden baseline SHA mismatch." >&2
+    echo "expected_sha=$expected_sha" >&2
+    echo "actual_sha=$actual_sha" >&2
+    exit 1
+  fi
+
+  local archive_dir
+  local archive_name
+  archive_dir="$(cd "$(dirname "$archive")" && pwd -P)"
+  archive_name="$(basename "$archive")"
+
+  echo "Restoring Nextcloud golden baseline into volume $volume ..."
+
+  docker run --rm \
+    -e NEXTCLOUD_GOLDEN_USER="$user" \
+    -e NEXTCLOUD_GOLDEN_ROOT="$root_path" \
+    -v "$volume:/target" \
+    -v "$archive_dir:/golden:ro" \
+    alpine sh -lc '
+      set -e
+      find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+      tar -xzf "/golden/'"$archive_name"'" -C /target
+      root="${NEXTCLOUD_GOLDEN_ROOT#/}"
+      test -d "/target/data/${NEXTCLOUD_GOLDEN_USER}/files/${root}"
+      echo "OK: restored /target/data/${NEXTCLOUD_GOLDEN_USER}/files/${root}"
+    '
+
+  echo "OK: Nextcloud golden baseline restored."
+}
+
+ensure_ollama_embedding_model() {
+  if [ "$SKIP_OLLAMA_EMBEDDING_MODEL_PULL" = "1" ]; then
+    echo "SKIP: Ollama embedding model pull disabled by SKIP_OLLAMA_EMBEDDING_MODEL_PULL=1"
+    return 0
+  fi
+
+  local embedding_model
+  embedding_model="$(get_env_value AI_DECISION_STUDIO_OLLAMA_EMBEDDING_MODEL_PULL "embeddinggemma:300m")"
+
+  if [ -z "$embedding_model" ]; then
+    echo "SKIP: no Ollama embedding model configured."
+    return 0
+  fi
+
+  echo
+  echo "== Ensure Ollama embedding model =="
+  echo "model=$embedding_model"
+
+  compose up -d ollama
+
+  for i in $(seq 1 60); do
+    if compose exec -T ollama ollama list >/tmp/ads_local_ollama_list.txt 2>/dev/null; then
+      break
+    fi
+    if [ "$i" = "60" ]; then
+      echo "ERROR: Ollama container did not become ready for model pull." >&2
+      compose logs --tail=120 ollama || true
+      exit 1
+    fi
+    sleep 2
+  done
+
+  compose exec -T ollama ollama pull "$embedding_model"
+  echo "OK: Ollama embedding model is available."
+}
+
+if [ "$DOWN_ONLY" = "true" ]; then
+  echo "== Local Docker down =="
+  echo "env_file=$ENV_FILE"
+  echo "project_name=$PROJECT_NAME"
+  compose down --remove-orphans
+  echo "OK: local Docker stack stopped without removing volumes."
+  exit 0
+fi
+
+CFG="/tmp/ads_local_docker_compose_$(date +%Y%m%d_%H%M%S).yml"
+
+compose config > "$CFG"
+
+grep -q 'image: ai-decision-studio-product-api:local' "$CFG"
+grep -q 'image: ai-decision-studio-frontend:local' "$CFG"
+grep -q 'image: ai-decision-studio-ppt-creator:local' "$CFG"
+grep -q 'image: ollama/ollama' "$CFG"
+grep -q 'image: nextcloud:29-apache' "$CFG"
+grep -q 'APP_USERS_ROOT: /app/users' "$CFG"
+grep -q 'OLLAMA_BASE_URL: http://ollama:11434/v1' "$CFG"
+grep -q 'PRESENTATION_EXPORT_BASE_URL: http://ppt-creator:8787' "$CFG"
+grep -q 'EVIDENCEOPS_NEXTCLOUD_BASE_URL: http://nextcloud/remote.php/dav/files/' "$CFG"
+grep -q 'EVIDENCEOPS_NEXTCLOUD_ROOT_PATH: /EvidenceOpsDemo' "$CFG"
+grep -q 'proxy_pass http://product-api:8011' frontend/nginx.docker.conf
+
+if [ "$CONFIG_ONLY" = "true" ]; then
+  echo "OK: local Docker compose config rendered: $CFG"
+  exit 0
+fi
+
+restore_nextcloud_golden_baseline
+
+FRONTEND_BIND_HOST="$(get_env_value AI_DECISION_STUDIO_FRONTEND_BIND_HOST 127.0.0.1)"
+FRONTEND_PUBLIC_PORT="$(get_env_value AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT 8071)"
+BASE_URL="http://${FRONTEND_BIND_HOST}:${FRONTEND_PUBLIC_PORT}"
+
+echo "== Local Docker up =="
+echo "env_file=$ENV_FILE"
+echo "project_name=$PROJECT_NAME"
+echo "base_url=$BASE_URL"
+echo "compose_config=$CFG"
+
+if [ "$NO_BUILD" = "true" ]; then
+  compose up -d
+else
+  compose up -d --build
+fi
+
+ensure_ollama_embedding_model
+
+compose ps
+
+require_command curl
+
+echo
+echo "== Waiting for frontend/API through Docker Nginx =="
+for i in $(seq 1 120); do
+  if curl -fsS "$BASE_URL/health" >/tmp/ads_local_docker_health.json 2>/dev/null; then
+    echo "Health OK after ${i}s"
+    cat /tmp/ads_local_docker_health.json
+    echo
+    echo "Local Docker is running:"
+    echo "  Frontend/API: $BASE_URL"
+    echo "  Health:       $BASE_URL/health"
+    echo "  Logs:"
+    echo "    docker compose --env-file $ENV_FILE -p $PROJECT_NAME -f docker-compose.local.yml logs -f"
+    exit 0
+  fi
+
+  sleep 1
+done
+
+echo "ERROR: local Docker stack did not become healthy through $BASE_URL/health" >&2
+echo
+echo "== compose ps =="
+compose ps || true
+echo
+echo "== frontend logs =="
+compose logs --tail=160 frontend || true
+echo
+echo "== product-api logs =="
+compose logs --tail=160 product-api || true
+exit 1
+BASH

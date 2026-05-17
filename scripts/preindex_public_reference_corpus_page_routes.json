@@ -1,0 +1,450 @@
+{
+  "kind": "evidenceops_preindex_pdf_vlm_page_routes.v1",
+  "description": "Hardcoded cloud-VLM page routing for the EvidenceOpsDemo corpus ZIP. Pages not listed here use Docling/text/OCR extraction only. Includes Public Reference Corpus and Demo Synthetic Corpus routing.",
+  "default_route": "docling",
+  "documents": {
+    "audit and monitoring/cms_internal_monitoring_auditing_checklists.pdf": {
+      "pages": 13,
+      "cloud_vlm_pages": [
+        1,
+        10,
+        11,
+        12
+      ],
+      "docling_pages": "all_other",
+      "reason": "Page 1 has prominent embedded visual/front matter; page 10 has a large embedded visual; pages 11-12 are dense numeric/table-style checklist pages where visual structure helps retrieval."
+    },
+    "audit and monitoring/osha_safety_and_health_program_audit_tool.pdf": {
+      "pages": 11,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Text/form-like pages are extractable enough with Docling; avoid cloud VLM spend."
+    },
+    "contracts and procurement/palm_beach_county_contract_review_checklist.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [
+        1
+      ],
+      "docling_pages": "all_other",
+      "reason": "Single-page checklist with dense table/form structure; cloud VLM helps preserve visual row/field meaning."
+    },
+    "contracts and procurement/world_bank_spd_rfp_consulting_services.pdf": {
+      "pages": 201,
+      "cloud_vlm_pages": [
+        1
+      ],
+      "docling_pages": "all_other",
+      "reason": "Very long text-first procurement document. Only the visual cover/front matter is routed to cloud VLM; the remaining 200 pages are handled by Docling/text extraction to save credits."
+    },
+    "human resources/CV_Francis_Taylor.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Text-based CV; Docling extraction is sufficient and avoids unnecessary cloud VLM use."
+    },
+    "human resources/jd_scientist_ii_preclinical_rd_medical_devices.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Text-based job description; Docling extraction is sufficient."
+    },
+    "incident and action tracking/cbiac-september-10-2025-meeting-summary-and-action-items.pdf": {
+      "pages": 3,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Text-based meeting summary/action items; Docling extraction is sufficient."
+    },
+    "incident and action tracking/lanl_subcontractor_nonconformance_report.pdf": {
+      "pages": 9,
+      "cloud_vlm_pages": [
+        1,
+        2,
+        9
+      ],
+      "docling_pages": "all_other",
+      "reason": "Pages 1 and 9 contain large embedded visual/scanned regions; page 2 is a visually structured form/table page."
+    },
+    "incident and action tracking/osha_near_miss_incident_report_form.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Simple one-page form with extractable text; Docling extraction is enough."
+    },
+    "policy and governance/cornell_retention_of_university_records.pdf": {
+      "pages": 32,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Text-first policy document; detected visual content is not important enough to spend cloud VLM credits."
+    },
+    "policy and governance/grambling_third_party_vendor_management_policy.pdf": {
+      "pages": 3,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Short text-first policy document; Docling extraction is sufficient."
+    },
+    "policy and governance/northeastern_supplier_code_of_conduct.pdf": {
+      "pages": 4,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Short text-first code of conduct; Docling extraction is sufficient."
+    },
+    "policy and governance/northwestern_information_security_policy.pdf": {
+      "pages": 4,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Short text-first security policy; Docling extraction is sufficient."
+    },
+    "reference frameworks/nih_ibc_meeting_minutes_template.pdf": {
+      "pages": 8,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Template/form text is extractable; skip cloud VLM to save credits."
+    },
+    "reference frameworks/nist_csf_2_0.pdf": {
+      "pages": 32,
+      "cloud_vlm_pages": [
+        1,
+        8,
+        10,
+        11,
+        13,
+        15,
+        18
+      ],
+      "docling_pages": "all_other",
+      "reason": "Selected pages contain cover/figure/diagram imagery that benefits from visual description. Other pages are text-first and use Docling only."
+    },
+    "reference frameworks/nist_csf_v1_1.pdf": {
+      "pages": 55,
+      "cloud_vlm_pages": [
+        13,
+        19,
+        24
+      ],
+      "docling_pages": "all_other",
+      "reason": "Selected pages contain framework diagrams/figures. Remaining pages are text-first and use Docling only."
+    },
+    "audit/Access Review Evidence Log.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic text-first PDF; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/audit/Access Review Evidence Log.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic text-first PDF; Docling/text extraction is sufficient."
+    },
+    "audit/Governance Committee Minutes and Action Items.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic text-first meeting/action-items PDF; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/audit/Governance Committee Minutes and Action Items.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic text-first meeting/action-items PDF; Docling/text extraction is sufficient."
+    },
+    "audit/Internal Audit Checklist - Vendor Controls.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic checklist is text/vector content; Docling extracts it without cloud VLM."
+    },
+    "Demo Synthetic Corpus/audit/Internal Audit Checklist - Vendor Controls.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic checklist is text/vector content; Docling extracts it without cloud VLM."
+    },
+    "audit/Nonconformance Report - Vendor Access Review.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic text-first report; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/audit/Nonconformance Report - Vendor Access Review.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic text-first report; Docling/text extraction is sufficient."
+    },
+    "audit/Remediation Closure Note - Vendor Access Review.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic text-first note; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/audit/Remediation Closure Note - Vendor Access Review.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic text-first note; Docling/text extraction is sufficient."
+    },
+    "contracts/Cloud Infrastructure SLA.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic contract/SLA is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/contracts/Cloud Infrastructure SLA.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic contract/SLA is text-first; Docling/text extraction is sufficient."
+    },
+    "contracts/Data Processing Addendum 2024.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic DPA is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/contracts/Data Processing Addendum 2024.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic DPA is text-first; Docling/text extraction is sufficient."
+    },
+    "contracts/MSA Negotiation Baseline - Approved Position.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic negotiation baseline is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/contracts/MSA Negotiation Baseline - Approved Position.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic negotiation baseline is text-first; Docling/text extraction is sufficient."
+    },
+    "contracts/Master Service Agreement v4.2.pdf": {
+      "pages": 3,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic MSA is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/contracts/Master Service Agreement v4.2.pdf": {
+      "pages": 3,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic MSA is text-first; Docling/text extraction is sufficient."
+    },
+    "evidence/Privileged Account Approval Email.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic email evidence is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/evidence/Privileged Account Approval Email.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic email evidence is text-first; Docling/text extraction is sufficient."
+    },
+    "governance/GDPR Compliance Checklist.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic checklist is text/vector content; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/governance/GDPR Compliance Checklist.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic checklist is text/vector content; Docling/text extraction is sufficient."
+    },
+    "governance/Q1 2024 Board Memo.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic board memo is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/governance/Q1 2024 Board Memo.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic board memo is text-first; Docling/text extraction is sufficient."
+    },
+    "hiring/Hiring Scorecard - Sarah Chen.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic scorecard is text/vector content; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/hiring/Hiring Scorecard - Sarah Chen.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic scorecard is text/vector content; Docling/text extraction is sufficient."
+    },
+    "hiring/Interview Feedback Memo - Sarah Chen.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic interview memo is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/hiring/Interview Feedback Memo - Sarah Chen.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic interview memo is text-first; Docling/text extraction is sufficient."
+    },
+    "hiring/Sarah Chen - Senior ML Engineer CV.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic CV is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/hiring/Sarah Chen - Senior ML Engineer CV.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic CV is text-first; Docling/text extraction is sufficient."
+    },
+    "hiring/Senior ML Engineer Role Brief.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic role brief is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/hiring/Senior ML Engineer Role Brief.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic role brief is text-first; Docling/text extraction is sufficient."
+    },
+    "legal/Legal Redline Summary - MSA v4.2.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic legal redline summary is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/legal/Legal Redline Summary - MSA v4.2.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic legal redline summary is text-first; Docling/text extraction is sufficient."
+    },
+    "operations/Employee Handbook 2024.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic handbook excerpt is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/operations/Employee Handbook 2024.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic handbook excerpt is text-first; Docling/text extraction is sufficient."
+    },
+    "policies/Data Retention Policy.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic policy is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/policies/Data Retention Policy.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic policy is text-first; Docling/text extraction is sufficient."
+    },
+    "policies/Information Security Policy v3.1.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic policy is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/policies/Information Security Policy v3.1.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic policy is text-first; Docling/text extraction is sufficient."
+    },
+    "policies/Information Security Policy v3.2.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic policy is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/policies/Information Security Policy v3.2.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic policy is text-first; Docling/text extraction is sufficient."
+    },
+    "policies/Third-Party Supplier Code of Conduct.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic supplier code is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/policies/Third-Party Supplier Code of Conduct.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic supplier code is text-first; Docling/text extraction is sufficient."
+    },
+    "privacy/Subprocessor Change Notice.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic notice is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/privacy/Subprocessor Change Notice.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic notice is text-first; Docling/text extraction is sufficient."
+    },
+    "risk/Temporary Risk Acceptance Request - SLA Uptime.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic risk acceptance request is text-first; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/risk/Temporary Risk Acceptance Request - SLA Uptime.pdf": {
+      "pages": 1,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic risk acceptance request is text-first; Docling/text extraction is sufficient."
+    },
+    "risk/Vendor Risk Assessment Template.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic risk template is text/vector content; Docling/text extraction is sufficient."
+    },
+    "Demo Synthetic Corpus/risk/Vendor Risk Assessment Template.pdf": {
+      "pages": 2,
+      "cloud_vlm_pages": [],
+      "docling_pages": "all",
+      "reason": "Synthetic risk template is text/vector content; Docling/text extraction is sufficient."
+    },
+    "technical/Technical Architecture Brief.pdf": {
+      "pages": 15,
+      "cloud_vlm_pages": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "docling_pages": "all_other",
+      "reason": "Pages 1-11 are text-first and should use Docling/text extraction only. Pages 12-15 are embedded image-only appendix captures; OCR gets rough text, but cloud VLM is worth using to preserve diagram/whiteboard/checklist meaning for retrieval."
+    },
+    "Demo Synthetic Corpus/technical/Technical Architecture Brief.pdf": {
+      "pages": 15,
+      "cloud_vlm_pages": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "docling_pages": "all_other",
+      "reason": "Pages 1-11 are text-first and should use Docling/text extraction only. Pages 12-15 are embedded image-only appendix captures; OCR gets rough text, but cloud VLM is worth using to preserve diagram/whiteboard/checklist meaning for retrieval."
+    }
+  }
+}

@@ -1,3 +1,4 @@
+from .action_plan_presenter import build_action_plan_view
 from .models import (
     PRODUCT_WORKFLOW_IDS,
     GroundingPreview,
@@ -8,7 +9,7 @@ from .models import (
     ProductWorkflowRequest,
     ProductWorkflowResult,
 )
-from .presenters import build_product_result_sections
+from .presenters import build_document_review_view, build_policy_comparison_view, build_product_result_sections
 from .service import (
     build_grounding_preview,
     build_product_workflow_catalog,
@@ -28,6 +29,9 @@ __all__ = [
     "ProductWorkflowRequest",
     "ProductWorkflowResult",
     "build_grounding_preview",
+    "build_action_plan_view",
+    "build_document_review_view",
+    "build_policy_comparison_view",
     "build_product_result_sections",
     "build_product_workflow_catalog",
     "generate_product_workflow_deck",

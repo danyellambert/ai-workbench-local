@@ -1,0 +1,149 @@
+{
+  "generated_at": "2026-03-29T14:19:19.105104",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "extraction",
+      "status": "PASS",
+      "score": 5,
+      "max_score": 5,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "extraction",
+        "schema_version": "1.0",
+        "main_subject": "Maintenance Agreement between Acme Energia and NovaGrid Solutions",
+        "entities": [
+          {
+            "type": "organization",
+            "value": "Acme Energia",
+            "confidence": 0.95,
+            "source_text": "Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation.",
+            "position_start": 0,
+            "position_end": 12
+          },
+          {
+            "type": "organization",
+            "value": "NovaGrid Solutions",
+            "confidence": 0.95,
+            "source_text": "Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation.",
+            "position_start": 24,
+            "position_end": 38
+          },
+          {
+            "type": "location",
+            "value": "Porto Alegre",
+            "confidence": 0.95,
+            "source_text": "Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation.",
+            "position_start": 61,
+            "position_end": 72
+          },
+          {
+            "type": "person",
+            "value": "Mariana Costa",
+            "confidence": 0.9,
+            "source_text": "Mariana Costa",
+            "position_start": 216,
+            "position_end": 229
+          },
+          {
+            "type": "person",
+            "value": "Lucas Pereira",
+            "confidence": 0.9,
+            "source_text": "Lucas Pereira",
+            "position_start": 247,
+            "position_end": 260
+          },
+          {
+            "type": "location",
+            "value": "Porto Alegre substation",
+            "confidence": 0.9,
+            "source_text": "Porto Alegre substation",
+            "position_start": 95,
+            "position_end": 118
+          }
+        ],
+        "categories": [
+          "Maintenance Agreement"
+        ],
+        "relationships": [
+          {
+            "from_entity": "Acme Energia",
+            "to_entity": "NovaGrid Solutions",
+            "relationship": "signed maintenance agreement with",
+            "confidence": 0.8,
+            "evidence": "Acme Energia signed a maintenance agreement with NovaGrid Solutions for the Porto Alegre substation."
+          },
+          {
+            "from_entity": "Acme Energia",
+            "to_entity": "NovaGrid Solutions",
+            "relationship": "signed_agreement_with",
+            "confidence": 0.9,
+            "evidence": "Acme Energia signed a maintenance agreement with NovaGrid Solutions"
+          },
+          {
+            "from_entity": "NovaGrid Solutions",
+            "to_entity": "Porto Alegre substation",
+            "relationship": "applies_to_site",
+            "confidence": 0.85,
+            "evidence": "for the Porto Alegre substation"
+          }
+        ],
+        "extracted_fields": [
+          {
+            "name": "contract_value",
+            "value": "R$ 480,000",
+            "evidence": null
+          },
+          {
+            "name": "contract_period_start_date",
+            "value": "2026-04-01",
+            "evidence": null
+          },
+          {
+            "name": "project_manager",
+            "value": "Mariana Costa",
+            "evidence": null
+          },
+          {
+            "name": "technical_lead",
+            "value": "Lucas Pereira",
+            "evidence": null
+          }
+        ],
+        "important_dates": [
+          "2026-03-12",
+          "2026-04-15"
+        ],
+        "important_numbers": [
+          "R$ 480,000",
+          "12-month period"
+        ],
+        "risks": [
+          {
+            "description": "Delayed delivery of replacement transformers may cause project delays.",
+            "impact": null,
+            "owner": null,
+            "due_date": null,
+            "evidence": "The main risk identified is delayed delivery of replacement transformers."
+          }
+        ],
+        "action_items": [
+          {
+            "description": "Schedule next review meeting for April 15, 2026",
+            "owner": null,
+            "due_date": null,
+            "status": null,
+            "evidence": "The next review meeting is scheduled for April 15, 2026."
+          }
+        ],
+        "missing_information": []
+      }
+    }
+  ]
+}

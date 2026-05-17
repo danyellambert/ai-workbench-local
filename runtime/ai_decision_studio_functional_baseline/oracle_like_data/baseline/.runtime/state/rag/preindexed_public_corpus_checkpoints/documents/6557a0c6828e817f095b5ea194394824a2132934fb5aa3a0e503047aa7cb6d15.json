@@ -1,0 +1,98 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "GDPR Compliance Checklist.pdf",
+  "file_type": "pdf",
+  "file_hash": "6557a0c6828e817f095b5ea194394824a2132934fb5aa3a0e503047aa7cb6d15",
+  "text": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nGOV-001  GDPR Compliance Checklist\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nGDPR Compliance Checklist\nWorking compliance checklist used during contract review and privacy sign-off.\nDocument ID\nGOV-001\nOwner\nPrivacy Counsel\nVersion\n0.9 working copy\nPrepared Date\n2024-03-13\nStatus\nIn review / indexing\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nChecklist Scope\nWorking review of the Northwind contract package against the most relevant GDPR controller-processor and cross-border\ntransfer expectations for Meridian’s planned EU analytics workloads.\nRequirement Matrix\nReq ID\nRequirement\nPrimary Source\nStatus\nNotes\nGDPR-ART-2\n8\nProcessor obligations documented in\nwriting.\nCTR-013 DPA §§1-2\nPass\nRoles and security measures\ncaptured.\nGDPR-ART-3\n2\nAppropriate technical and organisational\nmeasures documented.\nCTR-013 DPA §2\nPartial\nHigh-level controls only;\nevidence pack still required.\nGDPR-ART-4\n4\nInternational transfers use a lawful\nmechanism.\nCTR-013 DPA §5.4\nGap\nSCC Appendix C reserved\nbut not attached.\nGDPR-ART-4\n6\nAppropriate safeguards for transfers are\ndocumented.\nCTR-013 / LEG-001\nGap\nNo executed SCCs or\nsupplemental-measures\nmemo included.\nGDPR-ART-3\n0\nProcessing details captured.\nCTR-013 Appendix\nA\nPass\nProcessing categories and\ndata subjects described.\nGDPR-ART-3\n3\nIncident escalation and reporting pathway\ndefined.\nPOL-031 / CTR-010\nPartial\nPolicy and contract timing\nremain vague or inconsistent.\nKey open action: attach SCC Appendix C and either restrict EU analytics data to EEA processing or\ndocument the transfer-impact rationale.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 1,
+    "baseline_text_chars": 1795,
+    "final_text_chars": 1795,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1807,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "top_contact_profile_structure",
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 82,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 4356,
+    "grounding_text_excerpt": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nGOV-001  GDPR Compliance Checklist\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nGDPR Compliance Checklist\nWorking compliance checklist used during contract review and privacy sign-off.\nDocument ID\nGOV-001\nOwner\nPrivacy Counsel\nVersion\n0.9 working copy\nPrepared Date\n2024-03-13\nStatus\nIn review / indexing\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nChecklist Scope\nWorking review of the Northwind contract package against the most relevant GDPR controller-processor and cross-border\ntransfer expectations for Meridian’s planned EU analytics workloads.\nRequirement Matrix\nReq ID\nRequirement\nPrimary Source\nStatus\nNotes\nGDPR-ART-2\n8\nProcessor obligations documented in\nwriting.\nCTR-013 DPA §§1-2\nPass\nRoles and security measures\ncaptured.\nGDPR-ART-3\n2\nAppropriate technical and organisational\nmeasures documented.\nCTR-013 DPA §2\nPartial\nHigh-level controls only;\nevidence pack still required.\nGDPR-ART-4\n4\nInternational transfers use a lawful\nmechanism.\nCTR-013 DPA §5.4\nGap\nSCC Appendix C reserved\nbut not attached.\nGDPR-ART-4\n6\nAppropriate safeguards for transfers are\ndocumented.\nCTR-013 / LEG-001\nGap\nNo executed SCCs or\nsupplemental-measures\nmemo included.\nGDPR-ART-3\n0\nProcessing details captured.\nCTR-013 Appendix\nA\nPass\nProcessing categories and\ndata subjects described.\nGDPR-ART-3\n3\nIncident escalation and reporting pathway\ndefined.\nPOL-031 / CTR-010\nPartial\nPolicy and contract timing\nremain vague or inconsistent.\nKey open action: attach SCC Appendix C and either restrict EU analytics data to EEA processing or\ndocument the transfer-impact rationale.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Synthetic checklist is text/vector content; Docling/text extraction is sufficient.",
+      "page_count": 1
+    },
+    "source_type": "nextcloud",
+    "relative_path": "governance/GDPR Compliance Checklist.pdf",
+    "nextcloud_relative_path": "governance/GDPR Compliance Checklist.pdf",
+    "source_relative_path": "governance/GDPR Compliance Checklist.pdf",
+    "filename": "GDPR Compliance Checklist.pdf",
+    "title": "GDPR Compliance Checklist",
+    "category": "governance",
+    "preindex": {
+      "relative_path": "governance/GDPR Compliance Checklist.pdf",
+      "filename": "GDPR Compliance Checklist.pdf",
+      "title": "GDPR Compliance Checklist",
+      "category": "governance",
+      "document_id": "governance/GDPR Compliance Checklist.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:49:06"
+}

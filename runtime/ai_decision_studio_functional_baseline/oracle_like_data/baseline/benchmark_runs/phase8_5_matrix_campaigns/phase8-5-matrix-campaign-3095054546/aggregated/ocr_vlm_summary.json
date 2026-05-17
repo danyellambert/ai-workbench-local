@@ -1,0 +1,80 @@
+{
+  "total_cases": 1,
+  "successful_cases": 1,
+  "failed_cases": 0,
+  "variant_ranking": [
+    {
+      "variant": "evidence_with_vl",
+      "requested_runtime_family": "ollama_vl_local",
+      "resolved_runtime_family": "ollama_local",
+      "case_count": 1,
+      "avg_latency_s": 0.5099,
+      "avg_f1": 1.0,
+      "helped_cases": 1
+    },
+    {
+      "variant": "evidence_no_vl_docling_disabled",
+      "requested_runtime_family": "ocr_local_pipeline",
+      "resolved_runtime_family": "huggingface_local",
+      "case_count": 1,
+      "avg_latency_s": 0.5351,
+      "avg_f1": 1.0,
+      "helped_cases": 1
+    },
+    {
+      "variant": "evidence_no_vl",
+      "requested_runtime_family": "evidence_pipeline_local",
+      "resolved_runtime_family": "huggingface_local",
+      "case_count": 1,
+      "avg_latency_s": 1.358,
+      "avg_f1": 1.0,
+      "helped_cases": 1
+    },
+    {
+      "variant": "legacy_pdf",
+      "requested_runtime_family": "legacy_pdf_text_extraction",
+      "resolved_runtime_family": "legacy_pdf_text_extraction",
+      "case_count": 1,
+      "avg_latency_s": 0.038,
+      "avg_f1": 0.25,
+      "helped_cases": 0
+    },
+    {
+      "variant": "pdf_hybrid",
+      "requested_runtime_family": "pdf_hybrid_local",
+      "resolved_runtime_family": "pdf_hybrid_local",
+      "case_count": 1,
+      "avg_latency_s": 0.0391,
+      "avg_f1": 0.25,
+      "helped_cases": 0
+    },
+    {
+      "variant": "pdf_complete",
+      "requested_runtime_family": "pdf_complete_local",
+      "resolved_runtime_family": "pdf_complete_local",
+      "case_count": 1,
+      "avg_latency_s": 14.2009,
+      "avg_f1": 0.25,
+      "helped_cases": 0
+    }
+  ],
+  "best_ocr_tradeoff": {
+    "variant": "evidence_no_vl",
+    "requested_runtime_family": "evidence_pipeline_local",
+    "resolved_runtime_family": "huggingface_local",
+    "case_count": 1,
+    "avg_latency_s": 1.358,
+    "avg_f1": 1.0,
+    "helped_cases": 1
+  },
+  "best_vlm_tradeoff": {
+    "variant": "evidence_with_vl",
+    "requested_runtime_family": "ollama_vl_local",
+    "resolved_runtime_family": "ollama_local",
+    "case_count": 1,
+    "avg_latency_s": 0.5099,
+    "avg_f1": 1.0,
+    "helped_cases": 1
+  },
+  "support_level": "partially_supported"
+}

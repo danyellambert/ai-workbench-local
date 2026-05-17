@@ -1,0 +1,201 @@
+{
+  "generated_at": "2026-03-18T23:58:58.668538",
+  "provider": "ollama",
+  "model": null,
+  "tasks": [
+    {
+      "task": "cv_analysis",
+      "status": "PASS",
+      "score": 8,
+      "max_score": 7,
+      "reasons": [],
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "cv_analysis",
+        "schema_version": "1.0",
+        "personal_info": {
+          "full_name": "Lucas de Souza Ferreira",
+          "email": "lucas.souza-ferreira@student-cs.fr",
+          "phone": "07/2024 - 12/2024",
+          "location": "Rue São Bras, 370. Rio de Janeiro, Brésil",
+          "links": [
+            "/in/lucas-de-souza-ferreira/"
+          ],
+          "birth_date": "06/05/1999"
+        },
+        "headline": "la recherche d’un poste d’ingénieur dans le secteur d’énergie",
+        "sections": [
+          {
+            "section_type": "experience",
+            "title": "Professional Experience",
+            "content": [
+              {
+                "text": "Stage : Développement d’interface pour l'analyse de la courbe de charge du système électrique brésilien, ONS 07/2024 - 12/2024",
+                "details": {
+                  "organization": "ONS",
+                  "duration": "07/2024 - 12/2024"
+                }
+              },
+              {
+                "text": "Stage : Modélisation de services de support dans une centrale électrique hybride, Laboratoire des sources alternatives d’énergie 01/2024 - 06/2024",
+                "details": {
+                  "organization": "Laboratoire des sources alternatives d’énergie",
+                  "duration": "01/2024 - 06/2024"
+                }
+              },
+              {
+                "text": "Stage : Développement de nouveaux algorithmes pour le l'outil Qualité d'alimentation des territoires, EDF R&D 05/2023 - 11/2023",
+                "details": {
+                  "organization": "EDF R&D",
+                  "duration": "05/2023 - 11/2023"
+                }
+              }
+            ],
+            "confidence": 0.9
+          }
+        ],
+        "skills": [
+          "Powerfactory",
+          "Python",
+          "Base de Données",
+          "SIMULINK",
+          "MATLAB",
+          "PSCAD",
+          "Matpower",
+          "Réseaux Électriques",
+          "Énergies Renouvelables",
+          "Optimisation",
+          "Statistique et Modélisation Mathématique",
+          "Travail en équipe",
+          "Communicative et pro-activité",
+          "Gestion de projets",
+          "Leadership",
+          "Base de",
+          "Énergies"
+        ],
+        "skill_groups": {
+          "Compétences Informatiques": [
+            "Powerfactory",
+            "Python",
+            "Base de Données",
+            "SIMULINK",
+            "MATLAB",
+            "PSCAD",
+            "Matpower"
+          ],
+          "Compétences Académiques": [
+            "Réseaux Électriques",
+            "Énergies Renouvelables",
+            "Optimisation",
+            "Statistique et Modélisation Mathématique"
+          ],
+          "Soft Skills": [
+            "Travail en équipe",
+            "Communicative et pro-activité",
+            "Gestion de projets",
+            "Leadership"
+          ]
+        },
+        "languages": [
+          "Portugais (Natif)",
+          "Français (Bilingue)",
+          "Anglais (Bilingue)"
+        ],
+        "education_entries": [
+          {
+            "degree": "Ingénieur spécialisé en Énergie",
+            "institution": "CentraleSupélec",
+            "location": "Paris-Saclay, France",
+            "date_range": "2021-2023",
+            "description": "Ingénieur spécialisé en Énergie | CentraleSupélec | 2021-2023"
+          },
+          {
+            "degree": "Master Spécialisé en Réseaux et Renouvelables",
+            "institution": "Université Paris-Saclay",
+            "location": "Paris, France",
+            "date_range": "2022-2023",
+            "description": "Master Spécialisé en Réseaux et Renouvelables | Université Paris-Saclay | 2022-2023"
+          },
+          {
+            "degree": "Ingénieur spécialisé en Électrotechnique",
+            "institution": "Université Fédérale du Rio de Janeiro",
+            "location": "Rio de Janeiro, Brazil",
+            "date_range": "2018-2024",
+            "description": "Ingénieur spécialisé en Électrotechnique | Université Fédérale du Rio de Janeiro | 2018-2024"
+          }
+        ],
+        "experience_entries": [
+          {
+            "title": "Stage : Développement d’interface pour l'analyse de la courbe de charge du système électrique brésilien",
+            "organization": "ONS",
+            "location": null,
+            "date_range": "07/2024 - 12/2024",
+            "bullets": [
+              "Analyse de sensibilité des principales variables qui composent la courbe de charge du système électrique brésilien.",
+              "Développement d’une interface de surveillance pour la visualisation en temps réel des données de courbes de charge."
+            ],
+            "description": "Stage : Développement d’interface pour l'analyse de la courbe de charge du système électrique brésilien | ONS | 07/2024 - 12/2024"
+          },
+          {
+            "title": "Stage : Modélisation de services de support dans une centrale électrique hybride",
+            "organization": "Laboratoire des sources alternatives d’énergie",
+            "location": null,
+            "date_range": "01/2024 - 06/2024",
+            "bullets": [
+              "Modélisation du contrôle des convertisseurs d'un système photovoltaïque pour un fonctionnement Grid Following.",
+              "Étude et mise en œuvre de services de support de fréquence et tension pour les micro-réseaux."
+            ],
+            "description": "Stage : Modélisation de services de support dans une centrale électrique hybride | Laboratoire des sources alternatives d’énergie | 01/2024 - 06/2024"
+          },
+          {
+            "title": "Stage : Développement de nouveaux algorithmes pour le l'outil Qualité d'alimentation des territoires",
+            "organization": "EDF R&D",
+            "location": null,
+            "date_range": "05/2023 - 11/2023",
+            "bullets": [
+              "Modélisation statistique des événements extrêmes (tempêtes) dans le réseau électrique et analyse de leur influence sur la continuité de fourniture d’énergie.",
+              "Quantification des clients mal alimentés par rapport à la qualité de l'onde, mise en place de load flow.",
+              "Analyse des données du réseau électrique sous Python."
+            ],
+            "description": "Stage : Développement de nouveaux algorithmes pour le l'outil Qualité d'alimentation des territoires | EDF R&D | 05/2023 - 11/2023"
+          },
+          {
+            "title": null,
+            "organization": "ONS",
+            "location": null,
+            "date_range": "07/2024 - 12/2024",
+            "bullets": [],
+            "description": "Stage : Développement d’interface pour l'analyse de la courbe de charge du système électrique brésilien, ONS 07/2024 - 12/2024"
+          },
+          {
+            "title": null,
+            "organization": "Laboratoire des sources alternatives d’énergie",
+            "location": null,
+            "date_range": "01/2024 - 06/2024",
+            "bullets": [],
+            "description": "Stage : Modélisation de services de support dans une centrale électrique hybride, Laboratoire des sources alternatives d’énergie 01/2024 - 06/2024"
+          },
+          {
+            "title": null,
+            "organization": "EDF R&D",
+            "location": null,
+            "date_range": "05/2023 - 11/2023",
+            "bullets": [],
+            "description": "Stage : Développement de nouveaux algorithmes pour le l'outil Qualité d'alimentation des territoires, EDF R&D 05/2023 - 11/2023"
+          }
+        ],
+        "experience_years": 2.0,
+        "interests": [
+          "Musique (Guitare et Flûte depuis 2014)",
+          "Sports (Équipe d'athlétisme)",
+          "Technologie"
+        ],
+        "strengths": [],
+        "improvement_areas": []
+      }
+    }
+  ]
+}

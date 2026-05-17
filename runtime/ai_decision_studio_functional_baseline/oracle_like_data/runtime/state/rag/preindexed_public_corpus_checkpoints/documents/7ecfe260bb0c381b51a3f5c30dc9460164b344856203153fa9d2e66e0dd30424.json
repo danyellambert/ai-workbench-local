@@ -1,0 +1,119 @@
+{
+  "kind": "evidenceops_preindex_loaded_document_checkpoint.v1",
+  "name": "grambling_third_party_vendor_management_policy.pdf",
+  "file_type": "pdf",
+  "file_hash": "7ecfe260bb0c381b51a3f5c30dc9460164b344856203153fa9d2e66e0dd30424",
+  "text": "[Page 1]\nThird Party & Vendor Management Policy\nGrambling State University Information Technology\nJay Ellis, Chief Information Officer\nRevision History:\nVersion Number Revision Date\n1.0\nIntroduction\nThird party entities play an important role in assisting and supporting Grambling State\nUniversity business and academic operations.  Each service provider (vendors, consultants, third\nparties) shall implement written policies and procedures designed to ensure the security,\nconfidentiality and integrity of Grambling State University data and assets.  When properly\nauthorized, covered entities may be able to view, copy, and modify data and audit logs.\nAdditionally, they may assist in correcting software and operating system problems, monitor and\nfine tune system performance, monitor hardware performance and errors, modify environmental\nsystems, and reset alarm thresholds. Setting limits and controls on covered entities helps reduce\nthe risk of security incidents, financial liability, loss of trust and other damaging consequences.\nThis policy also requires third parties, vendors, contractors, etc., and any subcontractors with\nwhom it is authorized to share the data, to share only the minimum information necessary, to\nsecurely return or destroy the data upon expiration of the contract, and to provide immediate\nnotification to the campus, whenever there is a breach of sensitive data or services that may\naffect or impact the University.\nPurpose\nThe purpose of this policy is to provide a set of measures, standards and guidelines that will help\nmitigate information security risks associated with third party & vendor access and their\nresponsibility for the protection and security of Grambling State University.\nThis policy and corresponding procedures will help ensure that Grambling State University has\nsafeguards in place to oversee service providers, by:\n\n[Page 2]\n1.  Taking reasonable steps to select and retain service providers that can maintain\nappropriate safeguards for the customer information at issue.\n2.  Requiring service providers by contract to implement and maintain such safeguards\n3.  Periodically assessing service providers based on the risk they present and the\ncontinued adequacy of their safeguards.\nPolicy\nThird party access to Grambling State University’s network and system resources must comply\nwith all University’s applicable rules, policies, standards, and agreements.\nGrambling State University will provide a point of contact for each third party or vendor as part\nof the onboarding process. The point of contact will work with the third party or vendor to make\ncertain that he or she is in compliance with these rules.\n1. Each third party user with access to Grambling State University sensitive information\nmust be cleared to handle that information.\n2. All third party personnel with access to any information system, must adhere to all\nregulations and governance standards associated with accessible data (e.g. PCI and\nsecurity requirements for cardholder data, FERPA requirements, HIPPA, GLBA, etc.)\n3. Third party personnel must report all security incidents directly to their assigned point of\ncontact.\n4. Third party personnel must follow all applicable University change management\nprocesses and procedures.\n5. Third party credentials must be uniquely identifiable, and password management must\nfollow Grambling State University’s password procedures and policies.\n6. Upon termination of a contract or at the request of Grambling State University, the third\nparty must surrender all equipment and supplies immediately.\n7. Third parties are required to comply with Grambling State University’s auditing\nrequirements.\nProcedures\nTo properly oversee service providers, third parties, consultants, contractors, etc., Grambling\nState University will follow these procedures in the selection and monitoring each entities\nsecurity program and the appropriate safeguards and controls that help protect and secure\nUniversity data, assets and resources.\n1. No entity, that deals with technology or University data, will be onboarded without the\napproval of Grambling State University Information Technology/Security Department.\n2. Due Diligence efforts will include a review of all necessary documentation deemed\nappropriate to make a reasonable determination of each entities security posture.\n3. Security review will happen prior to onboarding new provider.\n4. Existing providers will undergo an annual review to continually monitor their security\nprogram and controls.\n\n[Page 3]\n5. Documentation reviewed may consist of contracts, hecvats, vpats, soc reports, etc., and\nwill be stored and maintained throughout the lifecycle of the partnership.\nEnforcement\nViolation of this Policy may result in disciplinary action which may include termination for\nemployees, termination of business relationships for contractors or consultants. Additionally,\nindividuals are subject to loss of Grambling State University information resources, access\nprivileges, and potential civil and criminal prosecution.\nExclusions or Special Circumstances\nExceptions to this Policy shall only be allowed if approved by the Chief Information Officer or\ndelegate, and this approval must be documented, saved, and monitored.",
+  "metadata": {
+    "extractor": "pdf_hybrid",
+    "strategy": "hybrid",
+    "strategy_label": "Smart hybrid · pypdf + selective Docling",
+    "page_count": 3,
+    "baseline_text_chars": 5249,
+    "final_text_chars": 5249,
+    "baseline_text_coverage_ratio": 1.0,
+    "suspicious_pages": 0,
+    "suspicious_page_numbers": [],
+    "docling_enabled": true,
+    "docling_attempted": false,
+    "docling_mode": "none",
+    "docling_error": null,
+    "docling_pages_used": [],
+    "baseline_page_errors": [],
+    "baseline_page_error_count": 0,
+    "docling_force_full_page_ocr": false,
+    "docling_picture_description": false,
+    "image_first_ocr_enabled": true,
+    "image_first_ocr_attempted": false,
+    "image_first_ocr_applied": false,
+    "image_first_ocr_reason": null,
+    "image_first_ocr_error": null,
+    "pdf_encrypted": false,
+    "pdf_decryption_attempted": false,
+    "pdf_decryption_method": null,
+    "pdf_decryption_error": null,
+    "pages_analysis": [
+      {
+        "page_number": 1,
+        "text_chars": 1905,
+        "image_count": 1,
+        "image_area_ratio_estimate": 0.023,
+        "caption_markers": [],
+        "suspicious_score": 0.28,
+        "suspicious_reasons": [
+          "contains images"
+        ],
+        "used_docling": false
+      },
+      {
+        "page_number": 2,
+        "text_chars": 2680,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      },
+      {
+        "page_number": 3,
+        "text_chars": 728,
+        "image_count": 0,
+        "image_area_ratio_estimate": 0.0,
+        "caption_markers": [],
+        "suspicious_score": 0.0,
+        "suspicious_reasons": [],
+        "used_docling": false
+      }
+    ],
+    "evidence_summary": {
+      "emails": [],
+      "phones": [],
+      "name_value": null,
+      "location_value": null
+    },
+    "routing_diagnostics": {
+      "feature_flag_enabled": true,
+      "filename_hint": false,
+      "cv_like_content_detected": false,
+      "cv_like_reasons": [
+        "sufficient_resume_like_content"
+      ],
+      "strong_scan_like": false,
+      "rollout_percentage": 100,
+      "rollout_bucket": 77,
+      "rollout_selected": true,
+      "strong_scan_like_skipped_reason": "filename_not_cv_like",
+      "decision": "legacy_path",
+      "reason": "generic_pdf_legacy_path"
+    },
+    "loader_strategy_requested": "manual",
+    "loader_strategy_used": "manual",
+    "loader_strategy_label": "Local manual",
+    "size_bytes": 105557,
+    "grounding_text_excerpt": "[Page 1]\nThird Party & Vendor Management Policy\nGrambling State University Information Technology\nJay Ellis, Chief Information Officer\nRevision History:\nVersion Number Revision Date\n1.0\nIntroduction\nThird party entities play an important role in assisting and supporting Grambling State\nUniversity business and academic operations.  Each service provider (vendors, consultants, third\nparties) shall implement written policies and procedures designed to ensure the security,\nconfidentiality and integrity of Grambling State University data and assets.  When properly\nauthorized, covered entities may be able to view, copy, and modify data and audit logs.\nAdditionally, they may assist in correcting software and operating system problems, monitor and\nfine tune system performance, monitor hardware performance and errors, modify environmental\nsystems, and reset alarm thresholds. Setting limits and controls on covered entities helps reduce\nthe risk of security incidents, financial liability, loss of trust and other damaging consequences.\nThis policy also requires third parties, vendors, contractors, etc., and any subcontractors with\nwhom it is authorized to share the data, to share only the minimum information necessary, to\nsecurely return or destroy the data upon expiration of the contract, and to provide immediate\nnotification to the campus, whenever there is a breach of sensitive data or services that may\naffect or impact the University.\nPurpose\nThe purpose of this policy is to provide a set of measures, standards and guidelines that will help\nmitigate information security risks associated with third party & vendor access and their\nresponsibility for the protection and security of Grambling State University.\nThis policy and corresponding procedures will help ensure that Grambling State University has\nsafeguards in place to oversee service providers, by:\n\n[Page 2]\n1.  Taking reasonable steps to select and retain service providers that can maintain\nappropriate safeguards for the customer information at issue.\n2.  Requiring service providers by contract to implement and maintain such safeguards\n3.  Periodically assessing service providers based on the risk they present and the\ncontinued adequacy of their safeguards.\nPolicy\nThird party access to Grambling State University’s network and system resources must comply\nwith all University’s applicable rules, policies, standards, and agreements.\nGrambling State University will provide a point of contact for each third party or vendor as part\nof the onboarding process. The point of contact will work with the third party or vendor to make\ncertain that he or she is in compliance with these rules.\n1. Each third party user with access to Grambling State University sensitive information\nmust be cleared to handle that information.\n2. All third party personnel with access to any information system, must adhere to all\nregulations and governance standards associated with accessible data (e.g. PCI and\nsecurity requirements for cardholder data, FERPA requirements, HIPPA, GLBA, etc.)\n3. Third party personnel must report all security incidents directly to their assigned point of\ncontact.\n4. Third party personnel must follow all applicable University change management\nprocesses and procedures.\n5. Third party credentials must be uniquely identifiable, and password management must\nfollow Grambling State University’s password procedures and policies.\n6. Upon termination of a contract or at the request of Grambling State University, the third\nparty must surrender all equipment and supplies immediately.\n7. Third parties are required to comply with Grambling State University’s auditing\nrequirements.\nProcedures\nTo properly oversee service providers, third parties, consultants, contractors, etc., Grambling\nState University will follow these procedures in the selection and monitoring each entities\nsecurity program and the appropriate safeguards and controls that help protect and secure\nUniversity data, assets and resources.\n1. No entity, that deals with technology or University data, will be onboarded without the\napproval of Grambling State University Information Technology/Security Department.\n2. Due Diligence efforts will include a review of all necessary documentation deemed\nappropriate to make a reasonable determination of each entities security posture.\n3. Security review will happen prior to onboarding new provider.\n4. Existing providers will undergo an annual review to continually monitor their security\nprogram and controls.\n\n[Page 3]\n5. Documentation reviewed may consist of contracts, hecvats, vpats, soc reports, etc., and\nwill be stored and maintained throughout the lifecycle of the partnership.\nEnforcement\nViolation of this Policy may result in disciplinary action which may include termination for\nemployees, termination of business relationships for contractors or consultants. Additionally,\nindividuals are subject to loss of Grambling State University information resources, access\nprivileges, and potential civil and criminal prosecution.\nExclusions or Special Circumstances\nExceptions to this Policy shall only be allowed if approved by the Chief Information Officer or\ndelegate, and this approval must be documented, saved, and monitored.",
+    "preindex_pdf_vlm": {
+      "enabled": false,
+      "skipped": true,
+      "route_source": "manifest",
+      "route_reason": "Short text-first policy document; Docling extraction is sufficient.",
+      "page_count": 3
+    },
+    "source_type": "nextcloud",
+    "relative_path": "policy and governance/grambling_third_party_vendor_management_policy.pdf",
+    "nextcloud_relative_path": "policy and governance/grambling_third_party_vendor_management_policy.pdf",
+    "source_relative_path": "policy and governance/grambling_third_party_vendor_management_policy.pdf",
+    "filename": "grambling_third_party_vendor_management_policy.pdf",
+    "title": "grambling third party vendor management policy",
+    "category": "policy and governance",
+    "preindex": {
+      "relative_path": "policy and governance/grambling_third_party_vendor_management_policy.pdf",
+      "filename": "grambling_third_party_vendor_management_policy.pdf",
+      "title": "grambling third party vendor management policy",
+      "category": "policy and governance",
+      "document_id": "policy and governance/grambling_third_party_vendor_management_policy.pdf",
+      "webdav_url": ""
+    }
+  },
+  "saved_at": "2026-04-26 22:20:50"
+}

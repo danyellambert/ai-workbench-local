@@ -4,16 +4,25 @@ import json
 import hashlib
 import sqlite3
 from collections import Counter
-from datetime import datetime
+from contextlib import contextmanager
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 
-def _connect(path: Path) -> sqlite3.Connection:
+@contextmanager
+def _connect(path: Path) -> Iterator[sqlite3.Connection]:
     path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(path)
     connection.row_factory = sqlite3.Row
-    return connection
+    try:
+        yield connection
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
 
 
 def ensure_eval_store(path: Path) -> None:
@@ -87,7 +96,7 @@ def _build_run_key(payload: dict[str, Any]) -> str:
 def append_eval_run(path: Path, entry: dict[str, Any]) -> int:
     ensure_eval_store(path)
     payload = {
-        "created_at": str(entry.get("created_at") or datetime.now().isoformat()),
+        "created_at": str(entry.get("created_at") or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")),
         "suite_name": str(entry.get("suite_name") or "eval").strip() or "eval",
         "task_type": str(entry.get("task_type") or "").strip() or None,
         "case_name": str(entry.get("case_name") or "").strip() or None,
@@ -231,6 +240,7 @@ def summarize_eval_runs(entries: list[dict[str, Any]]) -> dict[str, Any]:
             "needs_review_rate": 0.0,
             "suite_leaderboard": [],
             "task_leaderboard": [],
+            "latest_created_at": None,
         }
 
     status_counter: Counter[str] = Counter()
@@ -337,6 +347,7 @@ def summarize_eval_runs(entries: list[dict[str, Any]]) -> dict[str, Any]:
         "needs_review_rate": round(needs_review_count / max(total_runs, 1), 3),
         "suite_leaderboard": _leaderboard_from_metrics(suite_metrics, "suite_name"),
         "task_leaderboard": _leaderboard_from_metrics(task_metrics, "task_type"),
+        "latest_created_at": entries[0].get("created_at"),
     }
 
 

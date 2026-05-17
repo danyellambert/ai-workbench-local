@@ -1,7 +1,7 @@
 """Execution envelope for structured outputs."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List
 from uuid import uuid4
 
@@ -25,7 +25,7 @@ class ExecutionError(BaseModel):
     error_type: str = Field(description="Type of error that occurred")
     message: str = Field(description="Error message")
     details: Optional[Dict[str, Any]] = Field(default=None, description="Additional error details")
-    timestamp: datetime = Field(default_factory=datetime.now, description="When error occurred")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When error occurred")
 
 
 class StructuredResult(BaseModel):
@@ -34,7 +34,7 @@ class StructuredResult(BaseModel):
     success: bool = Field(description="Whether the structured task was successful")
     task_type: str = Field(description="Type of task executed")
     execution_id: str = Field(default_factory=lambda: str(uuid4()), description="Unique execution ID")
-    executed_at: datetime = Field(default_factory=datetime.now, description="When the task was executed")
+    executed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When the task was executed")
 
     raw_output_text: Optional[str] = Field(default=None, description="Raw output from LLM")
     parsed_json: Optional[Dict[str, Any]] = Field(default=None, description="Parsed JSON from raw output")
@@ -69,7 +69,10 @@ class TaskExecutionRequest(BaseModel):
     context_strategy: str = Field(default="document_scan", description="Context strategy for structured tasks: document_scan or retrieval")
     provider: str = Field(default="ollama", description="Provider to use")
     model: Optional[str] = Field(default=None, description="Model to use; falls back to task/app default when omitted")
+    prompt_profile: Optional[str] = Field(default=None, description="Prompt profile/system prompt preset to apply")
     temperature: Optional[float] = Field(default=None, description="Temperature setting")
+    top_p: Optional[float] = Field(default=None, description="Optional top-p override")
+    max_tokens: Optional[int] = Field(default=None, description="Optional max output tokens override")
     context_window: Optional[int] = Field(default=None, description="Context window size")
     progress_callback: Any = Field(default=None, description="Optional callback for UI progress updates during execution")
     telemetry: Dict[str, Any] = Field(default_factory=dict, description="Mutable telemetry collected during execution")

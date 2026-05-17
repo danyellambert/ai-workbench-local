@@ -25,11 +25,11 @@ export interface WorkflowRun {
 
 export const workflowRuns: WorkflowRun[] = [
   { id: 'r1', workflow: 'Document Review', status: 'completed', documents: ['Master Service Agreement v4.2'], startedAt: '2024-03-15T10:30:00Z', duration: '2m 14s', findings: 12, artifacts: ['review_deck.pptx', 'review.json'] },
-  { id: 'r2', workflow: 'Policy Comparison', status: 'completed', documents: ['Info Security Policy v3.1', 'GDPR Checklist'], startedAt: '2024-03-15T09:15:00Z', duration: '3m 42s', findings: 8, artifacts: ['comparison_deck.pptx', 'diff.json'] },
-  { id: 'r3', workflow: 'Candidate Review', status: 'completed', documents: ['Sarah Chen CV'], startedAt: '2024-03-15T08:45:00Z', duration: '1m 08s', findings: 6, artifacts: ['candidate_deck.pptx'] },
-  { id: 'r4', workflow: 'Action Plan', status: 'warning', documents: ['Vendor Risk Assessment'], startedAt: '2024-03-14T16:20:00Z', duration: '4m 31s', findings: 15, artifacts: ['action_plan.pptx'] },
+  { id: 'r2', workflow: 'Policy Comparison', status: 'completed', documents: ['Information Security Policy v3.1', 'GDPR Compliance Checklist'], startedAt: '2024-03-15T09:15:00Z', duration: '3m 42s', findings: 8, artifacts: ['comparison_deck.pptx', 'diff.json'] },
+  { id: 'r3', workflow: 'Candidate Review', status: 'completed', documents: ['Sarah Chen - Senior ML Engineer CV'], startedAt: '2024-03-15T08:45:00Z', duration: '1m 08s', findings: 6, artifacts: ['candidate_deck.pptx'] },
+  { id: 'r4', workflow: 'Action Plan', status: 'warning', documents: ['Vendor Risk Assessment Template'], startedAt: '2024-03-14T16:20:00Z', duration: '4m 31s', findings: 15, artifacts: ['action_plan.pptx'] },
   { id: 'r5', workflow: 'Document Review', status: 'error', documents: ['Technical Architecture Brief'], startedAt: '2024-03-14T15:00:00Z', duration: '0m 23s' },
-  { id: 'r6', workflow: 'Policy Comparison', status: 'running', documents: ['MSA v4.2', 'Cloud SLA'], startedAt: '2024-03-15T11:00:00Z', duration: '—' },
+  { id: 'r6', workflow: 'Policy Comparison', status: 'running', documents: ['Master Service Agreement v4.2', 'Cloud Infrastructure SLA'], startedAt: '2024-03-15T11:00:00Z', duration: '—' },
 ];
 
 // ─── Findings ──────────────────────────────────────────────
@@ -79,15 +79,15 @@ export const candidateData = {
 export interface ModelConfig {
   id: string; provider: string; model: string; family: string; quantization: string;
   latency: number; outputChars: number; adherence: number; groundedness: number;
-  useCaseFit: number; runtimeBucket: string;
+  useCaseFit: number; runtimeBucket: string; profileTag?: string;
 }
 
 export const models: ModelConfig[] = [
-  { id: 'm1', provider: 'ollama', model: 'llama3.1:70b-instruct-q4_K_M', family: 'Llama 3.1', quantization: 'Q4_K_M', latency: 12.4, outputChars: 3420, adherence: 0.89, groundedness: 0.87, useCaseFit: 0.85, runtimeBucket: 'local_gpu' },
-  { id: 'm2', provider: 'ollama', model: 'qwen2.5:32b-instruct-q5_K_M', family: 'Qwen 2.5', quantization: 'Q5_K_M', latency: 8.7, outputChars: 2980, adherence: 0.92, groundedness: 0.90, useCaseFit: 0.88, runtimeBucket: 'local_gpu' },
-  { id: 'm3', provider: 'openai-compatible', model: 'gpt-4o', family: 'GPT-4', quantization: 'N/A', latency: 3.2, outputChars: 4100, adherence: 0.96, groundedness: 0.93, useCaseFit: 0.94, runtimeBucket: 'cloud_api' },
-  { id: 'm4', provider: 'ollama', model: 'mistral:7b-instruct-v0.3', family: 'Mistral', quantization: 'Q4_0', latency: 2.1, outputChars: 1890, adherence: 0.78, groundedness: 0.72, useCaseFit: 0.70, runtimeBucket: 'local_gpu' },
-  { id: 'm5', provider: 'huggingface_server', model: 'microsoft/phi-3-medium-128k', family: 'Phi-3', quantization: 'FP16', latency: 6.8, outputChars: 2670, adherence: 0.85, groundedness: 0.82, useCaseFit: 0.80, runtimeBucket: 'local_gpu' },
+  { id: 'm1', provider: 'ollama', model: 'llama3.1:70b-instruct-q4_K_M', family: 'Llama 3.1', quantization: 'Q4_K_M', latency: 12.4, outputChars: 3420, adherence: 0.89, groundedness: 0.87, useCaseFit: 0.85, runtimeBucket: 'local_gpu', profileTag: 'Deep analysis (local)' },
+  { id: 'm2', provider: 'ollama', model: 'qwen2.5:32b-instruct-q5_K_M', family: 'Qwen 2.5', quantization: 'Q5_K_M', latency: 8.7, outputChars: 2980, adherence: 0.92, groundedness: 0.90, useCaseFit: 0.91, runtimeBucket: 'local_gpu', profileTag: 'Recommended production' },
+  { id: 'm3', provider: 'openai-compatible', model: 'gpt-4o', family: 'GPT-4o', quantization: 'N/A', latency: 3.2, outputChars: 4100, adherence: 0.96, groundedness: 0.93, useCaseFit: 0.94, runtimeBucket: 'cloud_api', profileTag: 'External reference' },
+  { id: 'm4', provider: 'ollama', model: 'mistral:7b-instruct-v0.3', family: 'Mistral 7B', quantization: 'Q4_0', latency: 2.1, outputChars: 1890, adherence: 0.78, groundedness: 0.72, useCaseFit: 0.70, runtimeBucket: 'local_gpu', profileTag: 'Fast triage (local)' },
+  { id: 'm5', provider: 'huggingface_server', model: 'microsoft/phi-3-medium-128k', family: 'Phi-3 Medium', quantization: 'FP16', latency: 6.8, outputChars: 2670, adherence: 0.85, groundedness: 0.82, useCaseFit: 0.80, runtimeBucket: 'local_gpu', profileTag: 'Long-context local' },
 ];
 
 // ─── Artifacts ─────────────────────────────────────────────
@@ -98,11 +98,11 @@ export interface Artifact {
 
 export const artifacts: Artifact[] = [
   { id: 'a1', name: 'MSA Risk Review Deck', type: 'pptx', workflow: 'Document Review', createdAt: '2024-03-15T10:35:00Z', size: '2.1 MB', status: 'ready' },
-  { id: 'a2', name: 'Policy Comparison Summary', type: 'pptx', workflow: 'Policy Comparison', createdAt: '2024-03-15T09:20:00Z', size: '1.8 MB', status: 'ready' },
+  { id: 'a2', name: 'InfoSec vs GDPR Comparison Summary', type: 'pptx', workflow: 'Policy Comparison', createdAt: '2024-03-15T09:20:00Z', size: '1.8 MB', status: 'ready' },
   { id: 'a3', name: 'Sarah Chen — Candidate Review', type: 'pptx', workflow: 'Candidate Review', createdAt: '2024-03-15T08:50:00Z', size: '1.2 MB', status: 'ready' },
   { id: 'a4', name: 'Vendor Risk Action Plan', type: 'pptx', workflow: 'Action Plan', createdAt: '2024-03-14T16:30:00Z', size: '1.5 MB', status: 'ready' },
-  { id: 'a5', name: 'contract_payload.json', type: 'json', workflow: 'Document Review', createdAt: '2024-03-15T10:34:00Z', size: '48 KB', status: 'ready' },
-  { id: 'a6', name: 'SLA vs MSA Comparison', type: 'pptx', workflow: 'Policy Comparison', createdAt: '2024-03-15T11:05:00Z', size: '—', status: 'generating' },
+  { id: 'a5', name: 'msa_extraction_payload.json', type: 'json', workflow: 'Document Review', createdAt: '2024-03-15T10:34:00Z', size: '48 KB', status: 'ready' },
+  { id: 'a6', name: 'Master Service Agreement v4.2 vs Cloud Infrastructure SLA Comparison', type: 'pptx', workflow: 'Policy Comparison', createdAt: '2024-03-15T11:05:00Z', size: '—', status: 'generating' },
 ];
 
 // ─── MCP Tools ─────────────────────────────────────────────
@@ -118,9 +118,9 @@ export const mcpTools = [
 // ─── Chat Messages ─────────────────────────────────────────
 export const chatMessages = [
   { id: 'c1', role: 'user' as const, content: 'What are the key liability provisions in the Master Service Agreement?', timestamp: '2024-03-15T10:00:00Z' },
-  { id: 'c2', role: 'assistant' as const, content: 'Based on the Master Service Agreement v4.2, I identified three key liability provisions:\n\n**1. Unlimited Liability (Section 7.3)**\nThe agreement contains an unlimited liability clause that exposes both parties to uncapped financial risk. This is unusual for enterprise SaaS agreements.\n\n**2. Indemnification Scope (Section 7.5)**\nIndemnification covers IP infringement and data breaches, but notably excludes consequential damages.\n\n**3. Limitation Period (Section 7.8)**\nClaims must be brought within 12 months of the event, which is shorter than the typical 24-month window.', timestamp: '2024-03-15T10:00:05Z', sources: [{ doc: 'MSA v4.2', chunk: 'chunk_142', score: 0.94 }, { doc: 'MSA v4.2', chunk: 'chunk_156', score: 0.91 }] },
-  { id: 'c3', role: 'user' as const, content: 'How does this compare to industry standard terms?', timestamp: '2024-03-15T10:01:00Z' },
-  { id: 'c4', role: 'assistant' as const, content: 'Compared to industry standards, several provisions deviate significantly:\n\n• **Liability cap**: Standard practice is 1-2x annual contract value. The unlimited clause here is a red flag.\n• **Notice period**: 90-day auto-renewal notice is aggressive; 30-60 days is typical.\n• **SLA target**: 99.5% is below the 99.95% enterprise standard.\n\nI recommend prioritizing the liability cap negotiation before proceeding.', timestamp: '2024-03-15T10:01:08Z', sources: [{ doc: 'MSA v4.2', chunk: 'chunk_289', score: 0.92 }, { doc: 'Cloud SLA', chunk: 'chunk_023', score: 0.88 }] },
+  { id: 'c2', role: 'assistant' as const, content: 'Based on the Master Service Agreement v4.2, I identified three key liability provisions:\n\n**1. Unlimited Liability (Section 7.3)**\nThe agreement contains an unlimited liability clause that exposes both parties to uncapped financial risk. This is unusual for enterprise SaaS agreements.\n\n**2. Indemnification Scope (Section 7.5)**\nIndemnification covers IP infringement and data breaches, but notably excludes consequential damages.\n\n**3. Limitation Period (Section 7.8)**\nClaims must be brought within 12 months of the event, which is shorter than the typical 24-month window.', timestamp: '2024-03-15T10:00:05Z', sources: [{ doc: 'Master Service Agreement v4.2', chunk: 'chunk_142', score: 0.94 }, { doc: 'Master Service Agreement v4.2', chunk: 'chunk_156', score: 0.91 }] },
+  { id: 'c3', role: 'user' as const, content: 'How does this compare to the Cloud Infrastructure SLA terms?', timestamp: '2024-03-15T10:01:00Z' },
+  { id: 'c4', role: 'assistant' as const, content: 'Comparing the Master Service Agreement v4.2 against the Cloud Infrastructure SLA, several provisions diverge significantly:\n\n• **Liability cap**: The MSA has unlimited liability, while the Cloud Infrastructure SLA caps liability at 12 months of fees paid — a critical gap.\n• **Notice period**: The MSA requires 90-day auto-renewal notice; the SLA has no auto-renewal clause.\n• **Uptime commitment**: The Cloud Infrastructure SLA specifies 99.5% uptime, which is below the 99.95% enterprise standard.\n\nI recommend prioritizing the liability cap negotiation and SLA uptime renegotiation before proceeding.', timestamp: '2024-03-15T10:01:08Z', sources: [{ doc: 'Master Service Agreement v4.2', chunk: 'chunk_289', score: 0.92 }, { doc: 'Cloud Infrastructure SLA', chunk: 'chunk_023', score: 0.88 }, { doc: 'Cloud Infrastructure SLA', chunk: 'chunk_041', score: 0.84 }] },
 ];
 
 // ─── Action Items ──────────────────────────────────────────
@@ -130,12 +130,12 @@ export interface ActionItem {
 }
 
 export const actionItems: ActionItem[] = [
-  { id: 'ai1', title: 'Negotiate liability cap with vendor legal', owner: 'Maria Santos', dueDate: '2024-03-22', priority: 'critical', status: 'in_progress', evidence: 'Section 7.3 unlimited liability clause', source: 'MSA v4.2' },
-  { id: 'ai2', title: 'Draft SCCs appendix for data residency', owner: 'James Park', dueDate: '2024-03-25', priority: 'high', status: 'open', evidence: 'Missing data residency clause in DPA', source: 'DPA 2024' },
-  { id: 'ai3', title: 'Request revised SLA with 99.95% target', owner: 'Maria Santos', dueDate: '2024-03-20', priority: 'high', status: 'done', evidence: 'Current SLA at 99.5%', source: 'Cloud SLA' },
-  { id: 'ai4', title: 'Define incident response SLOs', owner: 'Alex Rivera', dueDate: '2024-03-28', priority: 'high', status: 'open', evidence: 'Vague "reasonable effort" language', source: 'InfoSec Policy v3.1' },
-  { id: 'ai5', title: 'Set up auto-renewal calendar alerts', owner: 'Operations', dueDate: '2024-03-18', priority: 'medium', status: 'in_progress', evidence: '90-day notice period risk', source: 'MSA v4.2' },
-  { id: 'ai6', title: 'Review vendor SOC2 Type II report', owner: 'Alex Rivera', dueDate: '2024-04-01', priority: 'medium', status: 'blocked', evidence: 'Awaiting vendor response', source: 'Vendor Risk Assessment' },
+  { id: 'ai1', title: 'Negotiate liability cap with vendor legal', owner: 'Maria Santos', dueDate: '2024-03-22', priority: 'critical', status: 'in_progress', evidence: 'Section 7.3 unlimited liability clause', source: 'Master Service Agreement v4.2' },
+  { id: 'ai2', title: 'Draft SCCs appendix for data residency', owner: 'James Park', dueDate: '2024-03-25', priority: 'high', status: 'open', evidence: 'Missing data residency clause in DPA', source: 'Data Processing Addendum 2024' },
+  { id: 'ai3', title: 'Request revised SLA with 99.95% target', owner: 'Maria Santos', dueDate: '2024-03-20', priority: 'high', status: 'done', evidence: 'Current SLA at 99.5%', source: 'Cloud Infrastructure SLA' },
+  { id: 'ai4', title: 'Define incident response SLOs', owner: 'Alex Rivera', dueDate: '2024-03-28', priority: 'high', status: 'open', evidence: 'Vague "reasonable effort" language', source: 'Information Security Policy v3.1' },
+  { id: 'ai5', title: 'Set up auto-renewal calendar alerts', owner: 'Operations', dueDate: '2024-03-18', priority: 'medium', status: 'in_progress', evidence: '90-day notice period risk', source: 'Master Service Agreement v4.2' },
+  { id: 'ai6', title: 'Review vendor SOC2 Type II report', owner: 'Alex Rivera', dueDate: '2024-04-01', priority: 'medium', status: 'blocked', evidence: 'Awaiting vendor response', source: 'Vendor Risk Assessment Template' },
 ];
 
 // ─── Comparison Data ───────────────────────────────────────
@@ -159,7 +159,7 @@ export const structuredTasks = [
   { id: 'st3', name: 'checklist', label: 'Compliance Checklist', description: 'Evaluate documents against compliance criteria', icon: 'CheckSquare' },
   { id: 'st4', name: 'document_agent', label: 'Document Agent', description: 'Multi-step document analysis with reasoning', icon: 'Bot' },
   { id: 'st5', name: 'cv_analysis', label: 'CV Analysis', description: 'Parse and evaluate candidate profiles', icon: 'User' },
-  { id: 'st6', name: 'code_analysis', label: 'Code Analysis', description: 'Analyze code structure and quality', icon: 'Code' },
+  { id: 'st6', name: 'contract_risk_extraction', label: 'Contract Risk Extraction', description: 'Identify risk clauses, liability gaps and commercial exposure', icon: 'ShieldAlert' },
 ];
 
 // ─── System Stats ──────────────────────────────────────────

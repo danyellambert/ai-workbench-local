@@ -1,0 +1,1255 @@
+{
+  "request": {
+    "workflow_id": "document_review",
+    "document_ids": [
+      "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+    ],
+    "input_text": "Review Access Review Evidence Log.pdf and summarize the main findings, risks and next actions.",
+    "provider": "ollama",
+    "model": "nemotron-3-nano:30b-cloud",
+    "prompt_profile": "neutro",
+    "temperature": 0.2,
+    "top_p": 0.95,
+    "max_tokens": 4096,
+    "context_window_mode": "auto",
+    "context_window": null,
+    "use_document_context": true,
+    "context_strategy": null
+  },
+  "result": {
+    "workflow_id": "document_review",
+    "workflow_label": "Document Review",
+    "status": "warning",
+    "summary": "Privileged Access Approval Email: 1 risk(s), 1 gap(s) and 2 mitigation action(s) identified. Top risk: Access must be revalidated if named administrator changes Main evidence gap: No explicit owner assigned for archival or revalidation action items",
+    "highlights": [
+      "Access must be revalidated if named administrator changes",
+      "No explicit owner assigned for archival or revalidation action items",
+      "Archive approval with Q1 access-review evidence pack",
+      "Revalidate approval if named administrator changes"
+    ],
+    "recommendation": "Archive approval with Q1 access-review evidence pack",
+    "structured_result": {
+      "success": true,
+      "task_type": "document_agent",
+      "execution_id": "1d5c0d21-5532-42c9-a692-f6511b8fdc42",
+      "executed_at": "2026-04-20T14:00:20.786024",
+      "raw_output_text": null,
+      "parsed_json": {
+        "task_type": "document_agent",
+        "schema_version": "1.0",
+        "agent_label": "Document Operations Copilot",
+        "user_intent": "document_risk_review",
+        "intent_reason": "product_workflow_default:document_review",
+        "answer_mode": "friendly",
+        "tool_used": "review_document_risks",
+        "summary": "Privileged Access Approval Email: 1 risk(s), 1 gap(s) and 2 mitigation action(s) identified. Top risk: Access must be revalidated if named administrator changes Main evidence gap: No explicit owner assigned for archival or revalidation action items",
+        "key_points": [
+          "Access must be revalidated if named administrator changes",
+          "No explicit owner assigned for archival or revalidation action items",
+          "Archive approval with Q1 access-review evidence pack",
+          "Revalidate approval if named administrator changes"
+        ],
+        "limitations": [
+          "No explicit owner assigned for archival or revalidation action items",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity.",
+          "Estimated confidence below ideal (66%)."
+        ],
+        "recommended_actions": [
+          "Archive approval with Q1 access-review evidence pack",
+          "Revalidate approval if named administrator changes",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "guardrails_applied": [
+          "Response restricted to documents selected in the document base.",
+          "Grounding assembled by document scan to prioritize broader document coverage.",
+          "The response includes traceable sources for manual auditing.",
+          "The agent avoids stating facts without strong grounding in the selected documents."
+        ],
+        "available_tools": [
+          {
+            "name": "consult_documents",
+            "label": "Consult indexed documents",
+            "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "summarize_document",
+            "label": "Summarize document",
+            "description": "Generate a grounded executive summary for the selected document or document set.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "draft_business_response",
+            "label": "Draft document-grounded response",
+            "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_structured_data",
+            "label": "Extract structured information",
+            "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+            "answer_mode": "json",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "compare_documents",
+            "label": "Compare documents",
+            "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+            "answer_mode": "comparison_structured",
+            "min_document_count": 2,
+            "available": false,
+            "availability_reason": "requires_at_least_2_documents"
+          },
+          {
+            "name": "generate_operational_checklist",
+            "label": "Generate operational checklist",
+            "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+            "answer_mode": "checklist",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_policy_compliance",
+            "label": "Review policy/compliance",
+            "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_document_risks",
+            "label": "Review risks and gaps",
+            "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_operational_tasks",
+            "label": "Extract operational tasks",
+            "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "assist_technical_document",
+            "label": "Assist technical document",
+            "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          }
+        ],
+        "compared_documents": [],
+        "comparison_findings": [],
+        "document_review_decision_summary": {
+          "label": "Approve with changes",
+          "status": "Requires Review",
+          "rationale": "Findings reflect grounded risks and gaps; no invented details."
+        },
+        "document_review_findings": [
+          {
+            "severity": "medium",
+            "category": "Grounded Finding",
+            "title": "Access must be revalidated if named administrator changes",
+            "description": "Access must be revalidated if named administrator changes",
+            "recommendation": "Archive approval with Q1 access-review evidence pack",
+            "confidence": 0.85,
+            "evidence": "If either named administrator changes, this approval must be revalidated before access is retained",
+            "impact": "Potential disruption to privileged access if personnel changes",
+            "source_document_id": "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+            "source_label": "Privileged Account Approval Email.pdf",
+            "chunk_id": 1
+          }
+        ],
+        "document_review_top_blockers": [
+          "Access must be revalidated if named administrator changes"
+        ],
+        "document_review_business_impact": [
+          "Risk of access disruption if administrator changes"
+        ],
+        "checklist_preview": [],
+        "structured_response": {
+          "review_type": "risk_gap_review",
+          "risks": [
+            "Access must be revalidated if named administrator changes"
+          ],
+          "gaps": [
+            "No explicit owner assigned for archival or revalidation action items"
+          ],
+          "actions": [
+            "Archive approval with Q1 access-review evidence pack",
+            "Revalidate approval if named administrator changes"
+          ],
+          "extraction_payload": {
+            "task_type": "extraction",
+            "schema_version": "1.0",
+            "main_subject": "Privileged Access Approval Email",
+            "entities": [
+              {
+                "type": "organization",
+                "value": "Meridian Holdings",
+                "confidence": 0.95,
+                "source_text": "Meridian Holdings Frontend Demo Grounded Corpus",
+                "position_start": 0,
+                "position_end": 18
+              },
+              {
+                "type": "person",
+                "value": "Priya Nair",
+                "confidence": 0.95,
+                "source_text": "Priya Nair <priya.nair@meridian.example>",
+                "position_start": 20,
+                "position_end": 35
+              },
+              {
+                "type": "person",
+                "value": "Alex Rivera",
+                "confidence": 0.95,
+                "source_text": "Alex Rivera <alex.rivera@meridian.example>",
+                "position_start": 78,
+                "position_end": 93
+              },
+              {
+                "type": "organization",
+                "value": "Northwind",
+                "confidence": 0.95,
+                "source_text": "Northwind support accounts",
+                "position_start": 115,
+                "position_end": 123
+              },
+              {
+                "type": "location",
+                "value": "PST",
+                "confidence": 0.95,
+                "source_text": "08:42 PST",
+                "position_start": 100,
+                "position_end": 104
+              },
+              {
+                "type": "person",
+                "value": "Review Access Review Evidence Log",
+                "confidence": 0.9,
+                "source_text": "Review Access Review Evidence Log",
+                "position_start": 0,
+                "position_end": 33
+              }
+            ],
+            "categories": [
+              "Access Review",
+              "Privileged Access",
+              "Audit Evidence"
+            ],
+            "relationships": [
+              {
+                "from_entity": "Priya Nair",
+                "to_entity": "Meridian Holdings",
+                "relationship": "sent",
+                "confidence": 0.95,
+                "evidence": "Priya Nair <priya.nair@meridian.example>"
+              },
+              {
+                "from_entity": "Alex Rivera",
+                "to_entity": "Priya Nair",
+                "relationship": "requested approval from",
+                "confidence": 0.95,
+                "evidence": "Need owner approval for standing vendor admin accounts before onboarding completes"
+              },
+              {
+                "from_entity": "Northwind",
+                "to_entity": "Meridian Holdings",
+                "relationship": "support accounts",
+                "confidence": 0.95,
+                "evidence": "standing privileged access for Northwind support accounts"
+              }
+            ],
+            "extracted_fields": [
+              {
+                "name": "document_id",
+                "value": "EVD-102",
+                "evidence": "Document ID EVD-102"
+              },
+              {
+                "name": "export_date",
+                "value": "2024-03-16",
+                "evidence": "Export Date 2024-03-16"
+              },
+              {
+                "name": "related_evidence",
+                "value": "EV-002",
+                "evidence": "Related Evidence EV-002"
+              },
+              {
+                "name": "classification",
+                "value": "Internal Use",
+                "evidence": "Classification Internal Use"
+              },
+              {
+                "name": "email_date",
+                "value": "2024-01-22",
+                "evidence": "Date 2024-01-22 08:42 PST"
+              },
+              {
+                "name": "approval_condition_scoping",
+                "value": "access remains scoped to ticketed support and break-fix tasks only",
+                "evidence": "access remains scoped to ticketed support and break-fix tasks only"
+              },
+              {
+                "name": "approval_condition_logging",
+                "value": "all privileged activity continues to feed the Meridian logging pipeline",
+                "evidence": "all privileged activity continues to feed the Meridian logging pipeline"
+              },
+              {
+                "name": "approval_condition_recertification",
+                "value": "the accounts are reviewed again at the next quarterly access recertification",
+                "evidence": "the accounts are reviewed again at the next quarterly access recertification"
+              },
+              {
+                "name": "approval_condition_vendor_confirmation",
+                "value": "the vendor confirms the named personnel list before each quarter begins",
+                "evidence": "the vendor confirms the named personnel list before each quarter begins"
+              },
+              {
+                "name": "archival_instruction",
+                "value": "Please archive this approval with the Q1 access-review evidence pack",
+                "evidence": "Please archive this approval with the Q1 access-review evidence pack"
+              },
+              {
+                "name": "document_type",
+                "value": "Access Review",
+                "evidence": "Privileged Access Approval Email"
+              },
+              {
+                "name": "counterparties",
+                "value": "Meridian Holdings; Northwind",
+                "evidence": "Privileged Access Approval Email"
+              }
+            ],
+            "important_dates": [
+              "2024-01-22",
+              "2024-03-16"
+            ],
+            "important_numbers": [],
+            "risks": [
+              {
+                "description": "Access must be revalidated if named administrator changes",
+                "impact": "Potential disruption to privileged access if personnel changes",
+                "owner": null,
+                "due_date": null,
+                "evidence": "If either named administrator changes, this approval must be revalidated before access is retained"
+              }
+            ],
+            "action_items": [
+              {
+                "description": "Archive approval with Q1 access-review evidence pack",
+                "owner": null,
+                "due_date": null,
+                "status": null,
+                "evidence": "Please archive this approval with the Q1 access-review evidence pack"
+              },
+              {
+                "description": "Revalidate approval if named administrator changes",
+                "owner": null,
+                "due_date": null,
+                "status": null,
+                "evidence": "If either named administrator changes, this approval must be revalidated before access is retained"
+              }
+            ],
+            "missing_information": [
+              "No explicit owner assigned for archival or revalidation action items"
+            ]
+          },
+          "findings_synthesis": {
+            "task_type": "document_review_findings",
+            "schema_version": "1.0",
+            "decision_summary": {
+              "label": "Approve with changes",
+              "status": "Requires Review",
+              "rationale": "Findings reflect grounded risks and gaps; no invented details."
+            },
+            "findings": [
+              {
+                "severity": "medium",
+                "category": "Grounded Finding",
+                "title": "Access must be revalidated if named administrator changes",
+                "description": "Access must be revalidated if named administrator changes",
+                "recommendation": "Archive approval with Q1 access-review evidence pack",
+                "confidence": 0.85,
+                "evidence": "If either named administrator changes, this approval must be revalidated before access is retained",
+                "impact": "Potential disruption to privileged access if personnel changes",
+                "source_document_id": "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+                "source_label": "Privileged Account Approval Email.pdf",
+                "chunk_id": 1
+              }
+            ],
+            "top_blockers": [
+              "Access must be revalidated if named administrator changes"
+            ],
+            "business_impact": [
+              "Risk of access disruption if administrator changes"
+            ]
+          },
+          "findings_synthesis_metadata": {
+            "success": true,
+            "model": "nemotron-3-nano:30b-cloud",
+            "prompt_style": "hybrid",
+            "finding_count": 1,
+            "attempts": 1
+          }
+        },
+        "sources": [
+          {
+            "source": "Privileged Account Approval Email.pdf",
+            "document_id": "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+            "file_type": "pdf",
+            "chunk_id": 1,
+            "score": null,
+            "vector_score": null,
+            "lexical_score": null,
+            "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-102  Approval Email\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nPrivileged Account Approval Email\nPDF export of the approval artifact referenced as missing evidence during the audit.\nDocument ID\nEVD-102\nFormat\nEmail export to PDF\nExport Date\n2024-03-16\nRelated Evidenc"
+          },
+          {
+            "source": "Privileged Account Approval Email.pdf",
+            "document_id": "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+            "file_type": "pdf",
+            "chunk_id": 2,
+            "score": null,
+            "vector_score": null,
+            "lexical_score": null,
+            "snippet": "d activity continues to feed the Meridian logging pipeline;\n●\nthe accounts are reviewed again at the next quarterly access recertification;\n●\nthe vendor confirms the named personnel list before each quarter begins.\nPlease archive this approval with the Q1 access-review evidence pack. If either named administrator changes, this approval\nmust be revalidated before access is retained.\nThanks,\nPriya\nQ"
+          }
+        ],
+        "tool_runs": [
+          {
+            "tool_name": "review_document_risks",
+            "status": "success",
+            "detail": "Risk and gap analysis completed."
+          }
+        ],
+        "confidence": 0.66,
+        "needs_review": false,
+        "needs_review_reason": null
+      },
+      "validated_output": {
+        "task_type": "document_agent",
+        "schema_version": "1.0",
+        "agent_label": "Document Operations Copilot",
+        "user_intent": "document_risk_review",
+        "intent_reason": "product_workflow_default:document_review",
+        "answer_mode": "friendly",
+        "tool_used": "review_document_risks",
+        "summary": "Privileged Access Approval Email: 1 risk(s), 1 gap(s) and 2 mitigation action(s) identified. Top risk: Access must be revalidated if named administrator changes Main evidence gap: No explicit owner assigned for archival or revalidation action items",
+        "key_points": [
+          "Access must be revalidated if named administrator changes",
+          "No explicit owner assigned for archival or revalidation action items",
+          "Archive approval with Q1 access-review evidence pack",
+          "Revalidate approval if named administrator changes"
+        ],
+        "limitations": [
+          "No explicit owner assigned for archival or revalidation action items",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity.",
+          "Estimated confidence below ideal (66%)."
+        ],
+        "recommended_actions": [
+          "Archive approval with Q1 access-review evidence pack",
+          "Revalidate approval if named administrator changes",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "guardrails_applied": [
+          "Response restricted to documents selected in the document base.",
+          "Grounding assembled by document scan to prioritize broader document coverage.",
+          "The response includes traceable sources for manual auditing.",
+          "The agent avoids stating facts without strong grounding in the selected documents."
+        ],
+        "available_tools": [
+          {
+            "name": "consult_documents",
+            "label": "Consult indexed documents",
+            "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "summarize_document",
+            "label": "Summarize document",
+            "description": "Generate a grounded executive summary for the selected document or document set.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "draft_business_response",
+            "label": "Draft document-grounded response",
+            "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_structured_data",
+            "label": "Extract structured information",
+            "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+            "answer_mode": "json",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "compare_documents",
+            "label": "Compare documents",
+            "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+            "answer_mode": "comparison_structured",
+            "min_document_count": 2,
+            "available": false,
+            "availability_reason": "requires_at_least_2_documents"
+          },
+          {
+            "name": "generate_operational_checklist",
+            "label": "Generate operational checklist",
+            "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+            "answer_mode": "checklist",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_policy_compliance",
+            "label": "Review policy/compliance",
+            "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_document_risks",
+            "label": "Review risks and gaps",
+            "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_operational_tasks",
+            "label": "Extract operational tasks",
+            "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "assist_technical_document",
+            "label": "Assist technical document",
+            "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          }
+        ],
+        "compared_documents": [],
+        "comparison_findings": [],
+        "document_review_decision_summary": {
+          "label": "Approve with changes",
+          "status": "Requires Review",
+          "rationale": "Findings reflect grounded risks and gaps; no invented details."
+        },
+        "document_review_findings": [
+          {
+            "severity": "medium",
+            "category": "Grounded Finding",
+            "title": "Access must be revalidated if named administrator changes",
+            "description": "Access must be revalidated if named administrator changes",
+            "recommendation": "Archive approval with Q1 access-review evidence pack",
+            "confidence": 0.85,
+            "evidence": "If either named administrator changes, this approval must be revalidated before access is retained",
+            "impact": "Potential disruption to privileged access if personnel changes",
+            "source_document_id": "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+            "source_label": "Privileged Account Approval Email.pdf",
+            "chunk_id": 1
+          }
+        ],
+        "document_review_top_blockers": [
+          "Access must be revalidated if named administrator changes"
+        ],
+        "document_review_business_impact": [
+          "Risk of access disruption if administrator changes"
+        ],
+        "checklist_preview": [],
+        "structured_response": {
+          "review_type": "risk_gap_review",
+          "risks": [
+            "Access must be revalidated if named administrator changes"
+          ],
+          "gaps": [
+            "No explicit owner assigned for archival or revalidation action items"
+          ],
+          "actions": [
+            "Archive approval with Q1 access-review evidence pack",
+            "Revalidate approval if named administrator changes"
+          ],
+          "extraction_payload": {
+            "task_type": "extraction",
+            "schema_version": "1.0",
+            "main_subject": "Privileged Access Approval Email",
+            "entities": [
+              {
+                "type": "organization",
+                "value": "Meridian Holdings",
+                "confidence": 0.95,
+                "source_text": "Meridian Holdings Frontend Demo Grounded Corpus",
+                "position_start": 0,
+                "position_end": 18
+              },
+              {
+                "type": "person",
+                "value": "Priya Nair",
+                "confidence": 0.95,
+                "source_text": "Priya Nair <priya.nair@meridian.example>",
+                "position_start": 20,
+                "position_end": 35
+              },
+              {
+                "type": "person",
+                "value": "Alex Rivera",
+                "confidence": 0.95,
+                "source_text": "Alex Rivera <alex.rivera@meridian.example>",
+                "position_start": 78,
+                "position_end": 93
+              },
+              {
+                "type": "organization",
+                "value": "Northwind",
+                "confidence": 0.95,
+                "source_text": "Northwind support accounts",
+                "position_start": 115,
+                "position_end": 123
+              },
+              {
+                "type": "location",
+                "value": "PST",
+                "confidence": 0.95,
+                "source_text": "08:42 PST",
+                "position_start": 100,
+                "position_end": 104
+              },
+              {
+                "type": "person",
+                "value": "Review Access Review Evidence Log",
+                "confidence": 0.9,
+                "source_text": "Review Access Review Evidence Log",
+                "position_start": 0,
+                "position_end": 33
+              }
+            ],
+            "categories": [
+              "Access Review",
+              "Privileged Access",
+              "Audit Evidence"
+            ],
+            "relationships": [
+              {
+                "from_entity": "Priya Nair",
+                "to_entity": "Meridian Holdings",
+                "relationship": "sent",
+                "confidence": 0.95,
+                "evidence": "Priya Nair <priya.nair@meridian.example>"
+              },
+              {
+                "from_entity": "Alex Rivera",
+                "to_entity": "Priya Nair",
+                "relationship": "requested approval from",
+                "confidence": 0.95,
+                "evidence": "Need owner approval for standing vendor admin accounts before onboarding completes"
+              },
+              {
+                "from_entity": "Northwind",
+                "to_entity": "Meridian Holdings",
+                "relationship": "support accounts",
+                "confidence": 0.95,
+                "evidence": "standing privileged access for Northwind support accounts"
+              }
+            ],
+            "extracted_fields": [
+              {
+                "name": "document_id",
+                "value": "EVD-102",
+                "evidence": "Document ID EVD-102"
+              },
+              {
+                "name": "export_date",
+                "value": "2024-03-16",
+                "evidence": "Export Date 2024-03-16"
+              },
+              {
+                "name": "related_evidence",
+                "value": "EV-002",
+                "evidence": "Related Evidence EV-002"
+              },
+              {
+                "name": "classification",
+                "value": "Internal Use",
+                "evidence": "Classification Internal Use"
+              },
+              {
+                "name": "email_date",
+                "value": "2024-01-22",
+                "evidence": "Date 2024-01-22 08:42 PST"
+              },
+              {
+                "name": "approval_condition_scoping",
+                "value": "access remains scoped to ticketed support and break-fix tasks only",
+                "evidence": "access remains scoped to ticketed support and break-fix tasks only"
+              },
+              {
+                "name": "approval_condition_logging",
+                "value": "all privileged activity continues to feed the Meridian logging pipeline",
+                "evidence": "all privileged activity continues to feed the Meridian logging pipeline"
+              },
+              {
+                "name": "approval_condition_recertification",
+                "value": "the accounts are reviewed again at the next quarterly access recertification",
+                "evidence": "the accounts are reviewed again at the next quarterly access recertification"
+              },
+              {
+                "name": "approval_condition_vendor_confirmation",
+                "value": "the vendor confirms the named personnel list before each quarter begins",
+                "evidence": "the vendor confirms the named personnel list before each quarter begins"
+              },
+              {
+                "name": "archival_instruction",
+                "value": "Please archive this approval with the Q1 access-review evidence pack",
+                "evidence": "Please archive this approval with the Q1 access-review evidence pack"
+              },
+              {
+                "name": "document_type",
+                "value": "Access Review",
+                "evidence": "Privileged Access Approval Email"
+              },
+              {
+                "name": "counterparties",
+                "value": "Meridian Holdings; Northwind",
+                "evidence": "Privileged Access Approval Email"
+              }
+            ],
+            "important_dates": [
+              "2024-01-22",
+              "2024-03-16"
+            ],
+            "important_numbers": [],
+            "risks": [
+              {
+                "description": "Access must be revalidated if named administrator changes",
+                "impact": "Potential disruption to privileged access if personnel changes",
+                "owner": null,
+                "due_date": null,
+                "evidence": "If either named administrator changes, this approval must be revalidated before access is retained"
+              }
+            ],
+            "action_items": [
+              {
+                "description": "Archive approval with Q1 access-review evidence pack",
+                "owner": null,
+                "due_date": null,
+                "status": null,
+                "evidence": "Please archive this approval with the Q1 access-review evidence pack"
+              },
+              {
+                "description": "Revalidate approval if named administrator changes",
+                "owner": null,
+                "due_date": null,
+                "status": null,
+                "evidence": "If either named administrator changes, this approval must be revalidated before access is retained"
+              }
+            ],
+            "missing_information": [
+              "No explicit owner assigned for archival or revalidation action items"
+            ]
+          },
+          "findings_synthesis": {
+            "task_type": "document_review_findings",
+            "schema_version": "1.0",
+            "decision_summary": {
+              "label": "Approve with changes",
+              "status": "Requires Review",
+              "rationale": "Findings reflect grounded risks and gaps; no invented details."
+            },
+            "findings": [
+              {
+                "severity": "medium",
+                "category": "Grounded Finding",
+                "title": "Access must be revalidated if named administrator changes",
+                "description": "Access must be revalidated if named administrator changes",
+                "recommendation": "Archive approval with Q1 access-review evidence pack",
+                "confidence": 0.85,
+                "evidence": "If either named administrator changes, this approval must be revalidated before access is retained",
+                "impact": "Potential disruption to privileged access if personnel changes",
+                "source_document_id": "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+                "source_label": "Privileged Account Approval Email.pdf",
+                "chunk_id": 1
+              }
+            ],
+            "top_blockers": [
+              "Access must be revalidated if named administrator changes"
+            ],
+            "business_impact": [
+              "Risk of access disruption if administrator changes"
+            ]
+          },
+          "findings_synthesis_metadata": {
+            "success": true,
+            "model": "nemotron-3-nano:30b-cloud",
+            "prompt_style": "hybrid",
+            "finding_count": 1,
+            "attempts": 1
+          }
+        },
+        "sources": [
+          {
+            "source": "Privileged Account Approval Email.pdf",
+            "document_id": "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+            "file_type": "pdf",
+            "chunk_id": 1,
+            "score": null,
+            "vector_score": null,
+            "lexical_score": null,
+            "snippet": "[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-102  Approval Email\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nPrivileged Account Approval Email\nPDF export of the approval artifact referenced as missing evidence during the audit.\nDocument ID\nEVD-102\nFormat\nEmail export to PDF\nExport Date\n2024-03-16\nRelated Evidenc"
+          },
+          {
+            "source": "Privileged Account Approval Email.pdf",
+            "document_id": "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38",
+            "file_type": "pdf",
+            "chunk_id": 2,
+            "score": null,
+            "vector_score": null,
+            "lexical_score": null,
+            "snippet": "d activity continues to feed the Meridian logging pipeline;\n●\nthe accounts are reviewed again at the next quarterly access recertification;\n●\nthe vendor confirms the named personnel list before each quarter begins.\nPlease archive this approval with the Q1 access-review evidence pack. If either named administrator changes, this approval\nmust be revalidated before access is retained.\nThanks,\nPriya\nQ"
+          }
+        ],
+        "tool_runs": [
+          {
+            "tool_name": "review_document_risks",
+            "status": "success",
+            "detail": "Risk and gap analysis completed."
+          }
+        ],
+        "confidence": 0.66,
+        "needs_review": true,
+        "needs_review_reason": "document_agent_confidence_below_review_threshold:0.660"
+      },
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "repair_applied": false,
+      "source_documents": [
+        "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+      ],
+      "context_used": true,
+      "execution_metadata": {
+        "agent_intent": "document_risk_review",
+        "agent_intent_label": "Document risk review",
+        "agent_intent_reason": "product_workflow_default:document_review",
+        "agent_tool": "review_document_risks",
+        "agent_tool_label": "Review risks and gaps",
+        "agent_tool_reason": "product_workflow_default:document_review",
+        "agent_answer_mode": "friendly",
+        "agent_context_strategy": "document_scan",
+        "agent_document_count": 1,
+        "agent_source_count": 2,
+        "agent_available_tools": [
+          {
+            "name": "consult_documents",
+            "label": "Consult indexed documents",
+            "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "summarize_document",
+            "label": "Summarize document",
+            "description": "Generate a grounded executive summary for the selected document or document set.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "draft_business_response",
+            "label": "Draft document-grounded response",
+            "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_structured_data",
+            "label": "Extract structured information",
+            "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+            "answer_mode": "json",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "compare_documents",
+            "label": "Compare documents",
+            "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+            "answer_mode": "comparison_structured",
+            "min_document_count": 2,
+            "available": false,
+            "availability_reason": "requires_at_least_2_documents"
+          },
+          {
+            "name": "generate_operational_checklist",
+            "label": "Generate operational checklist",
+            "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+            "answer_mode": "checklist",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_policy_compliance",
+            "label": "Review policy/compliance",
+            "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "review_document_risks",
+            "label": "Review risks and gaps",
+            "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "extract_operational_tasks",
+            "label": "Extract operational tasks",
+            "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          },
+          {
+            "name": "assist_technical_document",
+            "label": "Assist technical document",
+            "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+            "answer_mode": "friendly",
+            "min_document_count": 1,
+            "available": true,
+            "availability_reason": "ready"
+          }
+        ],
+        "needs_review": true,
+        "needs_review_reason": "document_agent_confidence_below_review_threshold:0.660",
+        "agent_limitations": [
+          "No explicit owner assigned for archival or revalidation action items",
+          "Open-ended questions may require additional human reading when the document has contextual ambiguity.",
+          "Estimated confidence below ideal (66%)."
+        ],
+        "agent_recommended_actions": [
+          "Archive approval with Q1 access-review evidence pack",
+          "Revalidate approval if named administrator changes",
+          "Open the cited source excerpts to confirm the interpretation before acting."
+        ],
+        "agent_guardrails_applied": [
+          "Response restricted to documents selected in the document base.",
+          "Grounding assembled by document scan to prioritize broader document coverage.",
+          "The response includes traceable sources for manual auditing.",
+          "The agent avoids stating facts without strong grounding in the selected documents."
+        ],
+        "tool_runs": [
+          {
+            "tool_name": "review_document_risks",
+            "status": "success",
+            "detail": "Risk and gap analysis completed."
+          }
+        ],
+        "retrieval_backend_used": null,
+        "retrieval_backend_message": null,
+        "retrieval_strategy_used": null,
+        "retrieval_strategy_requested": null,
+        "execution_strategy_requested": "langgraph_context_retry",
+        "execution_strategy_used": "langgraph_context_retry",
+        "execution_strategy_fallback_reason": null,
+        "workflow_id": "lgw-401f785e",
+        "workflow_route_decision": "coverage_first_document_agent",
+        "workflow_guardrail_decision": "finish_needs_review_agent",
+        "provider": "ollama",
+        "provider_requested": "ollama",
+        "provider_effective": "ollama",
+        "model": "nemotron-3-nano:30b-cloud",
+        "resolved_context_window": 16384,
+        "context_window_cap": 256000,
+        "document_chars_estimate": 1941,
+        "telemetry": {
+          "product_workflow_id": "document_review",
+          "product_workflow_label": "Document Review",
+          "product_surface": "gradio",
+          "product_workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md",
+          "product_workflow_expected_outputs": [
+            "Executive review summary",
+            "Grounded findings and risks",
+            "Recommended next actions",
+            "Document Review deck artifact"
+          ],
+          "product_deck_export_kind": "document_review_deck",
+          "agent_intent": "document_risk_review",
+          "agent_tool": "review_document_risks",
+          "agent_answer_mode": "friendly",
+          "document_review_findings_synthesis_enabled": true,
+          "document_review_findings_prompt_style": "hybrid",
+          "agent_intent_reason": "product_workflow_default:document_review",
+          "agent_tool_reason": "product_workflow_default:document_review",
+          "agent_context_strategy": "document_scan",
+          "provider_requested": "ollama",
+          "provider_effective": "ollama",
+          "agent_available_tools": [
+            {
+              "name": "consult_documents",
+              "label": "Consult indexed documents",
+              "description": "Consult indexed documents, retrieve relevant excerpts, and answer with grounding and sources.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "summarize_document",
+              "label": "Summarize document",
+              "description": "Generate a grounded executive summary for the selected document or document set.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "draft_business_response",
+              "label": "Draft document-grounded response",
+              "description": "Draft a response, email, or short position based only on the selected documents and ready for human review.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_structured_data",
+              "label": "Extract structured information",
+              "description": "Extract fields, entities, risks, and actions in a structured and auditable format.",
+              "answer_mode": "json",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "compare_documents",
+              "label": "Compare documents",
+              "description": "Compare selected documents and highlight differences, convergences, and relevant findings.",
+              "answer_mode": "comparison_structured",
+              "min_document_count": 2,
+              "available": false,
+              "availability_reason": "requires_at_least_2_documents"
+            },
+            {
+              "name": "generate_operational_checklist",
+              "label": "Generate operational checklist",
+              "description": "Turn the document into an actionable operational checklist without inferring steps beyond the text.",
+              "answer_mode": "checklist",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_policy_compliance",
+              "label": "Review policy/compliance",
+              "description": "Review clauses, obligations, restrictions, and compliance risks with document grounding.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "review_document_risks",
+              "label": "Review risks and gaps",
+              "description": "Analyze risks, gaps, pending items, and possible red flags explicitly present in the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "extract_operational_tasks",
+              "label": "Extract operational tasks",
+              "description": "Extract actionable tasks, next steps, dates, and operational dependencies from the document.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            },
+            {
+              "name": "assist_technical_document",
+              "label": "Assist technical document",
+              "description": "Analyze technical documents or code excerpts with a focus on bugs, risks, refactoring, and tests.",
+              "answer_mode": "friendly",
+              "min_document_count": 1,
+              "available": true,
+              "availability_reason": "ready"
+            }
+          ],
+          "timings_s": {
+            "total_s": 6.5805
+          }
+        },
+        "workflow_total_s": 6.7055,
+        "workflow_attempts": 1,
+        "workflow_context_strategies": [
+          "document_scan"
+        ],
+        "workflow_trace": [
+          {
+            "node": "prepare_agent_request",
+            "detail": "Preparing initial request for the document agent",
+            "attempt": 1,
+            "context_strategy": "retrieval"
+          },
+          {
+            "node": "classify_intent",
+            "detail": "Using explicit agent intent from telemetry: product_workflow_default:document_review",
+            "attempt": 1,
+            "context_strategy": "retrieval"
+          },
+          {
+            "node": "select_tool",
+            "detail": "Using explicit agent tool from telemetry: product_workflow_default:document_review",
+            "attempt": 1,
+            "context_strategy": "retrieval"
+          },
+          {
+            "node": "route_agent_context_strategy",
+            "detail": "Selecting agent context strategy: coverage_first_document_agent",
+            "attempt": 1,
+            "context_strategy": "document_scan"
+          },
+          {
+            "node": "execute_task",
+            "detail": "Executing structured_service within the LangGraph workflow",
+            "attempt": 1,
+            "context_strategy": "document_scan",
+            "success": true
+          },
+          {
+            "node": "evaluate_agent_guardrails",
+            "detail": "Agent response marked for human review",
+            "attempt": 1,
+            "context_strategy": "document_scan",
+            "success": true
+          },
+          {
+            "node": "mark_needs_review",
+            "detail": "document_agent_confidence_below_review_threshold:0.660",
+            "attempt": 1,
+            "context_strategy": "document_scan",
+            "success": true
+          }
+        ],
+        "workflow_node_count": 7
+      },
+      "available_render_modes": [
+        {
+          "mode": "json",
+          "label": "JSON",
+          "available": true,
+          "priority": 1
+        },
+        {
+          "mode": "friendly",
+          "label": "Friendly view",
+          "available": true,
+          "priority": 0
+        }
+      ],
+      "primary_render_mode": "friendly",
+      "overall_confidence": 0.66,
+      "quality_score": 0.66
+    },
+    "grounding_preview": {
+      "strategy": "retrieval",
+      "document_ids": [
+        "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+      ],
+      "context_chars": 2033,
+      "source_block_count": 2,
+      "preview_text": "[Source: Privileged Account Approval Email.pdf]\n[Page 1]\nMeridian Holdings  Frontend Demo Grounded Corpus\nEVD-102  Approval Email\nControlled synthetic enterprise document — for retrieval, review, and workflow testing.\nPage 1\nDOCUMENT CONTROL\nPrivileged Account Approval Email\nPDF export of the approval artifact referenced as missing evidence during the audit.\nDocument ID\nEVD-102\nFormat\nEmail export to PDF\nExport Date\n2024-03-16\nRelated Evidence\nEV-002\nClassification\nInternal Use\nSynthetic corporate document for demo, evaluation, and retrieval workflows only. All parties, people, systems, repositories, and events are\nfictional.\nEmail Header\nFrom\nPriya Nair <priya.nair@meridian.example>\nTo\nnorthwind-ops@northwind.example; alex.rivera@meridian.example\nCC\nmaria.santos@meridian.example; grc-archive@meridian.example\nDate\n2024-01-22 08:42 PST\nSubject\nApproval — standing privileged access for Northwind support accounts\nHi team,\nApproved for the two named Northwind production-support administrators to retain standing privileged access during the\npilot period, provided that:\n●\naccess remains scoped to ticketed support and break-fix tasks only;\nall privileged activity continues to feed the Meridian logging pipeline;\nthe accounts are r\n\n[Source: Privileged Account Approval Email.pdf]\nd activity continues to feed the Meridian logging pipeline;\n●\nthe accounts are reviewed again at the next quarterly access recertification;\nthe vendor confirms the named personnel list before each quarter begins.\nPlease archive this approval with the Q1 access-review evidence pack. If either named administrator changes, this approval\nmust be revalidated before access is retained.\nThanks,\nPriya\nQuoted Thread Excerpt\nFrom: Alex Rivera <alex.rivera@meridian.example>\nSent: 2024-01-21 17:06 PST\nSubject: Need owner approval for standing vendor admin accounts before onboarding completes\nRequesting approval for two named Northwind support administrators to maintain standing access during\nthe pilot to meet the contracted response targets.",
+      "warnings": []
+    },
+    "artifacts": [],
+    "deck_export_kind": "document_review_deck",
+    "deck_available": true,
+    "warnings": [
+      "document_agent_confidence_below_review_threshold:0.660",
+      "No explicit owner assigned for archival or revalidation action items",
+      "Open-ended questions may require additional human reading when the document has contextual ambiguity.",
+      "Estimated confidence below ideal (66%)."
+    ],
+    "debug_metadata": {
+      "task_type": "document_agent",
+      "provider": "ollama",
+      "model": "nemotron-3-nano:30b-cloud",
+      "prompt_profile": "neutro",
+      "top_p": 0.95,
+      "max_tokens": 4096,
+      "context_strategy": "retrieval",
+      "source_documents": [
+        "524ee5f1a9c9f96466c334821179f7108143780f8a337fcfcb344f2c71f4cc38"
+      ],
+      "workflow_contract": "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md",
+      "expected_outputs": [
+        "Executive review summary",
+        "Grounded findings and risks",
+        "Recommended next actions",
+        "Document Review deck artifact"
+      ],
+      "preferred_context_strategy": "retrieval",
+      "deck_export_label": "Document Review Deck"
+    }
+  },
+  "summary": {
+    "task_id": "draft_business_response",
+    "workflow_id": "document_review",
+    "duration_s": 8.5449,
+    "confidence": 0.66,
+    "needs_review": true,
+    "review_reason": "document_agent_confidence_below_review_threshold:0.660"
+  }
+}

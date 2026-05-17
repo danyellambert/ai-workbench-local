@@ -1,0 +1,182 @@
+{
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "The Access Review Evidence Log and Privileged Account Approval Email reflect distinct but interrelated control mechanisms: one documents evidence gaps in vendor access reviews, while the other governs conditional, time-bound approvals for privileged system access. Both emphasize accountability and compliance, but differ in scope and enforcement triggers.\n\n- The Access Review Evidence Log focuses on validating completed evidence for Q1 2024 vendor controls, with unresolved gaps like EV-002 blocking closure.  \n- The Privileged Account Approval Email governs conditional access for specific administrators, requiring ongoing oversight and revalidation upon personnel changes.  \n- Evidence gaps in the Access Log are technical and procedural, tied to artifact provenance; approval in the Email hinges on logging compliance and vendor confirmation.  \n- Closure of the Access Log depends on full provenance verification, whereas the Email approval requires archival of documentation and quarterly reviews.  \n- The Access Log is a retrospective audit artifact; the Email is a proactive, conditional control with lifecycle dependencies.  \n- Both rely on documentation archiving but serve different phases: one validates past activity, the other enforces future compliance.",
+      "bullets": [
+        "The Access Review Evidence Log and Privileged Account Approval Email reflec…",
+        "The Access Review Evidence Log focuses on validating completed evidence for…",
+        "The Privileged Account Approval Email governs conditional access for specif…"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+    },
+    {
+      "type": "metrics",
+      "title": "Executive snapshot",
+      "bullets": [],
+      "cards": [],
+      "metrics": [
+        {
+          "value": "2",
+          "label": "Compared docs"
+        },
+        {
+          "value": "8",
+          "label": "Findings"
+        },
+        {
+          "value": "4",
+          "label": "Sources"
+        },
+        {
+          "value": "No",
+          "label": "Needs review"
+        }
+      ],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    },
+    {
+      "type": "table",
+      "title": "Comparison findings",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "table_rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Critical evidence gaps, such as EV-002, must be resolved before control closure. | Status tracking ensures accountabili…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "The approval is conditional and time-bound, requiring ongoing oversight and revalidation upon personnel changes. | Comp…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log and Privileged Account…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic record used to test Q1 2024 vendor…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "The Access Review Evidence Log focuses on validating…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic record used to test Q1 2024 vendor…"
+        ],
+        [
+          "approval_change",
+          "The Privileged Account Approval Email governs conditional access…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): EV-002: System owner approval email for privileged vendor accounts — Missing | Pr…"
+        ],
+        [
+          "approval_change",
+          "Evidence gaps in the Access Log are technical…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic record used to test Q1 2024 vendor…"
+        ],
+        [
+          "approval_change",
+          "Closure of the Access Log depends on full…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic record used to test Q1 2024 vendor…"
+        ],
+        [
+          "auditability_delta",
+          "The Access Log is a retrospective audit artifact;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log is a synthetic record used to test Q1 2024 vendor…"
+        ]
+      ],
+      "comparison_columns": [],
+      "two_column_columns": [],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    },
+    {
+      "type": "two_column",
+      "title": "Recommendation vs watchouts",
+      "bullets": [],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": [
+        {
+          "title": "Recommendation",
+          "body": "Open the cited source excerpts to confirm the interpretation before acting.",
+          "bullets": [
+            "Open the cited source excerpts to confirm the interpretation before act…",
+            "Validate critical differences directly in the compared documents before…"
+          ]
+        },
+        {
+          "title": "Watchouts",
+          "body": "No critical watchouts recorded for this slice.",
+          "bullets": []
+        }
+      ],
+      "speaker_notes": "Executive decision framing for this slice."
+    },
+    {
+      "type": "bullets",
+      "title": "Next steps",
+      "bullets": [
+        "Open the cited source excerpts to confirm the interpretation before acting.",
+        "Validate critical differences directly in the compared documents before consoli…"
+      ],
+      "cards": [],
+      "metrics": [],
+      "timeline_items": [],
+      "table_columns": [],
+      "table_rows": [],
+      "comparison_columns": [],
+      "two_column_columns": []
+    }
+  ]
+}

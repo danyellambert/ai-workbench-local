@@ -1,10 +1,10 @@
-# AI Decision Studio Frontend
+# Axiovance Frontend
 
-This is the **web product surface** for the AI Workbench Local ecosystem.
+This is the **web product surface** for the Axiovance ecosystem.
 
 If the root repository explains the platform as a whole, this folder explains the **product experience the platform is converging toward**.
 
-In the UI, this surface is branded as **AI Decision Studio**. In architectural terms, it should be read as the frontend north star for **AI Workbench Local**.
+In the UI, this surface is branded as **Axiovance**. In architectural terms, it should be read as the frontend north star for **Axiovance**.
 
 ---
 
@@ -154,15 +154,4 @@ That combination is exactly what makes the overall project much stronger.
 
 ---
 
-## Honesty note for reviewers and recruiters
 
-If you are reviewing this repository, the correct reading is:
-
-- this frontend already defines the intended product UX and workflow architecture
-- the platform underneath already contains many of the core service foundations
-- the remaining work is largely about **wiring the product surface to the platform more completely**
-
-That is a much stronger and more credible story than either:
-
-- pretending everything is already fully integrated
-- or hiding the frontend and underselling the actual product ambition

@@ -1,0 +1,210 @@
+{
+  "generated_at": "2026-03-29T18:46:22.187593",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "extraction",
+      "mode": "indexed_document",
+      "status": "PASS",
+      "score": 27,
+      "max_score": 39,
+      "reasons": [
+        "gold:entity coverage too low: 2",
+        "gold:field coverage too low: 4",
+        "gold:risk coverage too low: 2",
+        "gold:clause coverage too low: 4"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "566ac85b61bdd056f7b784f3ede220451608ca811550035a6e53747fd0d93e86",
+        "name": "exhib101.pdf",
+        "file_type": "pdf",
+        "chunk_count": 44
+      },
+      "gold_fixture_path": "baseline://external_files/4f10b7b6bd7f6bc0_09_extraction_exhib101_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "PASS",
+        "score": 27,
+        "max_score": 39,
+        "reasons": [
+          "entity coverage too low: 2",
+          "field coverage too low: 4",
+          "risk coverage too low: 2",
+          "clause coverage too low: 4"
+        ],
+        "metrics": {
+          "main_subject_hit": 1,
+          "category_hits": 2,
+          "entity_hits": 2,
+          "field_hits": 4,
+          "relationship_hits": 1,
+          "clause_hits": 4,
+          "risk_hits": 2,
+          "action_hits": 6,
+          "restriction_hits": 1,
+          "date_hits": 1,
+          "number_hits": 3
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "extraction",
+        "schema_version": "1.0",
+        "main_subject": "Separation Agreement between Enron Corp. and Portland General Electric Company",
+        "entities": [
+          {
+            "type": "organization",
+            "value": "Enron Corp.",
+            "confidence": 0.98,
+            "source_text": "ENRON CORP.",
+            "position_start": 0,
+            "position_end": 10
+          },
+          {
+            "type": "organization",
+            "value": "Portland General Electric Company",
+            "confidence": 0.98,
+            "source_text": "PORTLAND GENERAL ELECTRIC COMPANY",
+            "position_start": 30,
+            "position_end": 55
+          }
+        ],
+        "categories": [
+          "Separation Agreement",
+          "Legal Agreement"
+        ],
+        "relationships": [
+          {
+            "from_entity": "Enron Corp.",
+            "to_entity": "Portland General Electric Company",
+            "relationship": "party_to",
+            "confidence": 0.99,
+            "evidence": "SEPARATION AGREEMENT BETWEEN ENRON CORP. AND PORTLAND GENERAL ELECTRIC COMPANY"
+          }
+        ],
+        "extracted_fields": [
+          {
+            "name": "effective_date",
+            "value": "April 3, 2006",
+            "evidence": "dated as of April 3, 2006"
+          },
+          {
+            "name": "governing_law",
+            "value": "Texas",
+            "evidence": "governed by and construed in accordance with ... the internal laws of the State of Texas"
+          },
+          {
+            "name": "notice_period",
+            "value": "90 days",
+            "evidence": "at least ninety (90) days' prior notice"
+          },
+          {
+            "name": "stock_issuance_shares",
+            "value": "62,500,000",
+            "evidence": "62,500,000 shares of common stock"
+          },
+          {
+            "name": "tax_allocation_agreement_termination",
+            "value": "effective as of April 3, 2006",
+            "evidence": "The Tax Allocation Agreement is hereby terminated effective as of the date hereof"
+          },
+          {
+            "name": "document_type",
+            "value": "Separation Agreement",
+            "evidence": "Separation Agreement between Enron Corp. and Portland General Electric Company"
+          },
+          {
+            "name": "counterparties",
+            "value": "Enron Corp.; Portland General Electric Company",
+            "evidence": "Separation Agreement between Enron Corp. and Portland General Electric Company"
+          }
+        ],
+        "important_dates": [
+          "April 3, 2006"
+        ],
+        "important_numbers": [
+          "365"
+        ],
+        "risks": [
+          {
+            "description": "Potential breach of confidentiality obligations",
+            "impact": "Possible legal exposure and loss of privilege",
+            "owner": null,
+            "due_date": null,
+            "evidence": "disclosure of which would cause the Enron Group or the PGE Group ... to breach a confidentiality obligation"
+          },
+          {
+            "description": "Limitation on indemnification after bankruptcy closure",
+            "impact": "Indemnification may cease before all claims are resolved",
+            "owner": null,
+            "due_date": null,
+            "evidence": "Enron's obligations to indemnify ... shall terminate upon the closing of the Bankruptcy Cases"
+          },
+          {
+            "description": "Waiver of jury trial may limit legal recourse",
+            "impact": "Parties cannot demand jury trial for disputes",
+            "owner": null,
+            "due_date": null,
+            "evidence": "THE PARTIES HEREBY IRREVOCABLY AND UNCONDITIONALLY WAIVE ... any right ... to trial by jury"
+          }
+        ],
+        "action_items": [
+          {
+            "description": "Preserve records and provide cooperation",
+            "owner": "Enron Corp.; PGE",
+            "due_date": "until the earlier of (x) seven (7) years from the date of this Agreement or (y) the closing of the Bankruptcy Cases",
+            "status": "ongoing",
+            "evidence": "Each of Enron and PGE shall preserve and keep in its possession all records ... and shall make such records ... available to the other party"
+          },
+          {
+            "description": "Provide notice of governmental inquiries",
+            "owner": "Enron Corp.; PGE",
+            "due_date": null,
+            "status": "ongoing",
+            "evidence": "each of Enron and PGE shall, and shall cause each of its Subsidiaries to, provide the other party with notice of any governmental inquiries or investigations"
+          },
+          {
+            "description": "Amend organizational documents to remove Enron and Portland General Electric names",
+            "owner": "PGE",
+            "due_date": "within 365 days after April 3, 2006",
+            "status": "pending",
+            "evidence": "PGE shall ... amend its organizational documents ... to remove the \"Enron\" name ... within three hundred sixty five (365) days thereafter"
+          },
+          {
+            "description": "Amend organizational documents to remove Portland General Electric name",
+            "owner": "Enron Corp.",
+            "due_date": "within 365 days after April 3, 2006",
+            "status": "pending",
+            "evidence": "Enron shall ... amend its organizational documents ... to remove the \"Portland General Electric\" name ... within three hundred sixty five (365) days thereafter"
+          },
+          {
+            "description": "Cancel and issue shares of New PGE Common Stock",
+            "owner": "PGE",
+            "due_date": "concurrently with execution and delivery of this Agreement",
+            "status": "pending",
+            "evidence": "PGE is canceling all shares of PGE Common Stock ... and issuing the New PGE Common Stock to Stephen Forbes Cooper LLC"
+          },
+          {
+            "description": "Provide written notice of governmental requests for confidential information",
+            "owner": "Enron Corp.; PGE",
+            "due_date": null,
+            "status": "ongoing",
+            "evidence": "the Person receiving such request or demand shall use all reasonable efforts to provide the other party with written notice ... as promptly as practicable"
+          }
+        ],
+        "missing_information": []
+      }
+    }
+  ]
+}

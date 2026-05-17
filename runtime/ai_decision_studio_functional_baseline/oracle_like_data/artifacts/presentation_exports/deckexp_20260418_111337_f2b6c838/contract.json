@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe Access Review Evidence Log serves as a control evidence tracker for vendor reviews, with closure contingent on resolving missing or pending artifacts—particularly EV-002—highlighting operational gaps in evidence completeness. In contrast, the Privileged Account Approval Email outlines a conditional, time-bound governance control requiring strict scoping, logging, quarterly reviews, and personnel verification to maintain access, emphasizing proactive accountability rather than reactive evidence resolution.\n\n- Control closure in the Access Review Evidence Log depends on verifying incomplete or pending evidence, directly impacting control status.  \n- The Privileged Account Approval Email mandates ongoing governance conditions, including quarterly reviews and personnel revalidation, to sustain access.  \n- Evidence gaps in the Access Review Log affect immediate control closure, while the approval email requires continuous compliance to prevent access drift.  \n- The Access Review Evidence Log is synthetic and for demonstration only; the approval email reflects a live, conditional governance process.  \n- Missing evidence in the Access Review Log is a tactical gap; the approval email enforces strategic governance through structured accountability.  \n- Control ownership differs: the Access Review Log assigns ownership to evidence verification, whereas the approval email ties ownership to personnel and audit adherence.",
+  "key_highlights": [
+    "The Access Review Evidence Log serves as a control evidence tracker for vendor reviews, with closure contingent on resolving missing or pending artifacts—particularly EV-002—highlighting operational gaps in evidence completeness. In contrast, the Privileged Account Approval Email outlines a conditional, time-bound governance control requiring strict scoping, logging, quarterly reviews, and personnel verification to maintain access, emphasizing proactive accountability rather than reactive evidence resolution.",
+    "Control closure in the Access Review Evidence Log depends on verifying incomplete or pending evidence, directly impacting control status.",
+    "The Privileged Account Approval Email mandates ongoing governance conditions, including quarterly reviews and personnel revalidation, to sustain access.",
+    "Evidence gaps in the Access Review Log affect immediate control closure, while the approval email requires continuous compliance to prevent access drift.",
+    "The Access Review Evidence Log is synthetic and for demonstration only; the approval email reflects a live, conditional governance process.",
+    "Missing evidence in the Access Review Log is a tactical gap; the approval email enforces strategic governance through structured accountability."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Control closure depends on verifying missing or in-progress evidence, particularly EV-002. | The log is synthetic and i…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "The approval is conditional and time-bound, tied to specific operational and audit requirements. | Governance controls…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log serves as a…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "auditability_delta",
+          "Control closure in the Access Review Evidence Log…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "approval_change",
+          "The Privileged Account Approval Email mandates ongoing governance…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "approval_change",
+          "Evidence gaps in the Access Review Log affect…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log is synthetic and…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ],
+        [
+          "approval_change",
+          "Missing evidence in the Access Review Log is…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents Q1 2024 vendor-contr…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

@@ -1,0 +1,1118 @@
+frontend/src/App.tsx:38:    queryKey: ['preferences'],
+frontend/src/App.tsx:66:                <Route path="documents" element={<DocumentsPage />} />
+frontend/src/App.tsx:76:                <Route path="lab/runtime" element={<RuntimeObservabilityPage />} />
+frontend/src/App.tsx:79:                <Route path="lab/benchmarks" element={<BenchmarksPage />} />
+frontend/src/App.tsx:80:                <Route path="lab/evals" element={<EvalsDiagnosisPage />} />
+frontend/src/App.tsx:81:                <Route path="lab/artifacts" element={<AdvancedExperimentsPage />} />
+frontend/src/App.tsx:82:                <Route path="lab/evidenceops" element={<EvidenceOpsPage />} />
+frontend/src/App.tsx:84:                <Route path="lab/models" element={<Navigate to="/app/lab/benchmarks" replace />} />
+frontend/src/App.tsx:85:                <Route path="settings/runtime" element={<RuntimeControlsPage />} />
+frontend/src/App.tsx:86:                <Route path="settings/preferences" element={<PreferencesPage />} />
+frontend/src/components/landing/LandingWhyGrounded.tsx:6:  { icon: CheckCircle2, title: 'Grounded Outputs', desc: 'Every finding, recommendation and claim is directly linked to source material from your documents.' },
+frontend/src/components/landing/LandingFinalCTA.tsx:31:            extracted directly from your documents.
+frontend/src/components/landing/LandingArtifacts.tsx:5:const artifacts = [
+frontend/src/components/landing/LandingArtifacts.tsx:10:  { icon: ClipboardCheck, title: 'Action Plans', desc: 'Operational handoff documents with owners, timelines, priorities and completion criteria.', preview: 'owner · priority · deadline' },
+frontend/src/components/landing/LandingArtifacts.tsx:29:            Not just answers. Decision-ready artifacts.
+frontend/src/components/landing/LandingArtifacts.tsx:37:          {artifacts.map((art, i) => (
+frontend/src/components/landing/LandingWorkflows.tsx:59:            Each workflow is purpose-built to extract structured, evidence-backed insights from your documents.
+frontend/src/components/landing/LandingHero.tsx:32:          grounded in your documents.
+frontend/src/components/landing/LandingHowItWorks.tsx:27:            From documents to decisions in four steps.
+frontend/src/components/landing/LandingAILab.tsx:7:  { icon: Layers, title: 'Structured Outputs', desc: 'Define schemas and extract typed, validated data from documents with JSON-mode generation.' },
+frontend/src/components/ai-lab/ArtifactExplorerPanel.tsx:16:  artifacts: LabArtifact[];
+frontend/src/components/ai-lab/ArtifactExplorerPanel.tsx:25:export function ArtifactExplorerPanel({ artifacts, dataSource }: ArtifactExplorerPanelProps) {
+frontend/src/components/ai-lab/ArtifactExplorerPanel.tsx:26:  const grouped = artifacts.reduce<Record<string, LabArtifact[]>>((acc, artifact) => {
+frontend/src/components/ai-lab/ArtifactExplorerPanel.tsx:41:      <div className="flex items-center gap-2" data-tour="lab-artifacts-explorer-start">
+frontend/src/components/ai-lab/ArtifactExplorerPanel.tsx:48:          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3" data-tour={groupIndex === 0 ? 'lab-artifacts-explorer-start' : undefined}>
+frontend/src/components/ai-lab/ArtifactExplorerPanel.tsx:69:                  data-tour={groupIndex === 0 && index < 2 ? 'lab-artifacts-explorer-start' : undefined}
+frontend/src/components/layout/CommandPalette.tsx:16:      { label: 'Document Library', path: '/app/documents', icon: FileText },
+frontend/src/components/layout/CommandPalette.tsx:34:      { label: 'Open Runtime Controls', path: '/app/settings/runtime', icon: Settings },
+frontend/src/components/layout/TopBar.tsx:7:import { getRuntimeConnection } from '@/lib/runtime-controls-ui';
+frontend/src/components/layout/TopBar.tsx:11:  '/app/documents': 'Document Library',
+frontend/src/components/layout/TopBar.tsx:20:  '/app/settings/runtime': 'Runtime Controls',
+frontend/src/components/layout/TopBar.tsx:21:  '/app/settings/preferences': 'Preferences',
+frontend/src/components/layout/TopBar.tsx:27:  const { data: runtimeControls, isLoading: runtimeControlsLoading, isError: runtimeControlsError } = useQuery({
+frontend/src/components/layout/TopBar.tsx:28:    queryKey: ['runtime-controls'],
+frontend/src/components/layout/TopBar.tsx:39:  const activeProfile = runtimeControls?.active_profile;
+frontend/src/components/layout/TopBar.tsx:40:  const primaryConnection = activeProfile ? getRuntimeConnection(runtimeControls, activeProfile.primaryConnectionId) : undefined;
+frontend/src/components/layout/TopBar.tsx:41:  const runtimeLabel = runtimeControlsLoading
+frontend/src/components/layout/TopBar.tsx:42:    ? 'Loading runtime…'
+frontend/src/components/layout/TopBar.tsx:43:    : runtimeControlsError || !activeProfile
+frontend/src/components/layout/TopBar.tsx:58:          <span>{runtimeLabel}</span>
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:47:type ActiveTourKind = 'document-library' | 'workflow' | 'document-review' | 'policy-comparison' | 'action-plan' | 'candidate-review' | 'deck-center' | 'run-history' | 'runtime-controls' | 'preferences' | 'lab-overview' | 'lab-runtime' | 'lab-document-experiments' | 'lab-workflow-inspector' | 'lab-benchmarks' | 'lab-evals' | 'lab-artifacts' | 'lab-evidenceops';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:61:const RUNTIME_CONTROLS_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-runtime-controls-complete';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:62:const PREFERENCES_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-preferences-complete';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:64:const LAB_RUNTIME_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-lab-runtime-complete';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:67:const LAB_BENCHMARKS_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-lab-benchmarks-complete';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:68:const LAB_EVALS_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-lab-evals-complete';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:69:const LAB_ARTIFACTS_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-lab-artifacts-complete';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:70:const LAB_EVIDENCEOPS_TOUR_COMPLETED_STORAGE_KEY = 'workbench-tour-lab-evidenceops-complete';
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:80:    body: 'Use this first screen to understand the product promise: bring documents in, run grounded workflows, and turn the results into decisions and artifacts.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:91:    body: 'These cards show the current state of the workspace: indexed documents, available chunks, completed runs, and generated artifacts. Use them to confirm that the demo has enough evidence to run.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:111:    body: 'Recent Runs shows what was executed most recently. Quick Launch is useful after the right documents are indexed and you want to jump straight into a workflow.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:120:    id: 'command-center-lab-artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:122:    selector: '[data-tour="command-center-lab-artifacts"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:125:    body: 'The AI Engineering Lab leads to observability, benchmarks, evaluations, and MCP/evidence surfaces. Recent Artifacts shows the decks and outputs generated from workflow runs.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:130:    id: 'nav-documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:132:    selector: '[data-tour="nav-documents"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:135:    body: 'Every grounded workflow starts from indexed documents. The sidebar keeps the main product areas one click away as you move through the workspace.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:140:    id: 'documents-actions',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:141:    path: '/app/documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:142:    selector: '[data-tour="documents-page-actions"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:155:    id: 'documents-pipeline',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:156:    path: '/app/documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:157:    selector: '[data-tour="documents-pipeline"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:165:    id: 'documents-table',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:166:    path: '/app/documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:167:    selector: '[data-tour="documents-indexed-sample"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:168:    fallbackSelector: '[data-tour="documents-indexed-table"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:171:    body: 'After indexing, documents appear here with status, chunks, characters, loader, and actions. Use this table to confirm that the corpus is ready before launching a workflow.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:177:    path: '/app/documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:181:    body: 'Nextcloud keeps two main corpus areas: Demo Synthetic Corpus for polished walkthrough files, and Public Reference Corpus for public documents that feel closer to real-world evidence.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:193:    path: '/app/documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:215:    path: '/app/documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:219:    body: 'You can open folders, check individual files, or use Select all shown PDFs when the current folder already contains exactly the documents you want.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:220:    tip: 'Keep the selection focused. Import only the documents you plan to use in the upcoming workflow demo.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:227:    path: '/app/documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:258:    body: 'This strip summarizes how many workflow definitions are loaded, how many grounded documents are available, and how much run history the product can use for context.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:268:    body: 'Use this card when the user wants to inspect one indexed document deeply, summarize key findings, surface risks, and generate review-ready artifacts.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:291:    body: 'Use this workflow when several grounded documents need to become owners, tasks, blockers, timelines, evidence gaps, and downstream handoff outputs.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:359:    title: 'Review findings, evidence, and generated artifacts here.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:380:    body: 'The publishing area stays downstream from the evidence review. Once findings and artifacts exist, the user can preview Trello cards or a Notion handoff before publishing.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:394:    body: 'This workflow compares two related documents side by side and turns the deltas into grounded business guidance.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:405:    body: 'The progress rail shows when the two documents are selected, grounded, analyzed, reviewed, and ready for export.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:414:    title: 'Choose the two documents that should be compared.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:415:    body: 'Policy Comparison needs two different indexed documents. The selectors keep both sides explicit instead of letting the workflow guess the pair.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:471:    id: 'policy-comparison-watchouts-artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:473:    selector: '[data-tour="policy-comparison-watchouts-artifacts"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:474:    fallbackSelector: '[data-tour="policy-comparison-artifacts"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:475:    eyebrow: 'Step 9 - Watchouts and artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:476:    title: 'Review watchouts and generated artifacts together.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:487:    body: 'The publishing surface is downstream from the summary, deltas, and artifacts so external handoff happens after the evidence is checked.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:521:    title: 'Choose the documents that should become work.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:522:    body: 'Action Plan can use several indexed documents at once. The compact selection card keeps the evidence set explicit before extracting owners, tasks, risks, and next steps.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:579:    eyebrow: 'Step 8 - Summary and artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:580:    title: 'Use the run summary and generated artifacts for handoff.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:591:    body: 'The publishing surface sits last so Trello cards or Notion handoffs are created after the evidence, board, gaps, and artifacts are checked.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:697:    title: 'Publish or inspect artifacts only after the review is ready.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:698:    body: 'The final section keeps Trello, Notion, deck artifacts, and export files downstream from the grounded review.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:722:    body: 'These cards summarize how many artifacts exist, how many are ready, which need review, and how many preview assets are available.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:765:    body: 'Run History shows what the workflows have actually executed, including status, source documents, duration, result sections, artifacts, and rerun controls.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:796:    body: 'Each row keeps the workflow label, documents, timestamp, duration, finding count, and recommendation visible before the detail panel changes.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:806:    body: 'The detail panel collects the summary, source counts, artifacts, deliveries, request payload, response payload, and rerun button so run operations stay auditable.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:815:    id: 'runtime-controls-header',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:816:    path: '/app/settings/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:817:    selector: '[data-tour="runtime-controls-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:826:    id: 'runtime-controls-summary',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:827:    path: '/app/settings/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:828:    selector: '[data-tour="runtime-controls-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:830:    title: 'Confirm the effective runtime profile.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:836:    id: 'runtime-controls-generation',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:837:    path: '/app/settings/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:838:    selector: '[data-tour="runtime-controls-generation"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:846:    id: 'runtime-controls-retrieval',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:847:    path: '/app/settings/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:848:    selector: '[data-tour="runtime-controls-retrieval"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:850:    title: 'Tune how documents become grounded context.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:856:    id: 'runtime-controls-doc-processing',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:857:    path: '/app/settings/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:858:    selector: '[data-tour="runtime-controls-doc-processing"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:872:    id: 'preferences-header',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:873:    path: '/app/settings/preferences',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:874:    selector: '[data-tour="preferences-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:877:    body: 'Preferences stores provider connections, runtime profiles, and operator preferences. Runtime Controls stays focused on the active execution route.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:883:    id: 'preferences-metrics',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:884:    path: '/app/settings/preferences',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:885:    selector: '[data-tour="preferences-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:888:    body: 'These cards count provider connections, healthy connections, and saved runtime profiles so setup coverage is visible immediately.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:893:    id: 'preferences-summary',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:894:    path: '/app/settings/preferences',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:895:    selector: '[data-tour="preferences-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:903:    id: 'preferences-connections',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:904:    path: '/app/settings/preferences',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:905:    selector: '[data-tour="preferences-connections"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:915:    id: 'preferences-profiles',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:916:    path: '/app/settings/preferences',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:917:    selector: '[data-tour="preferences-profiles"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:925:    id: 'preferences-operator',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:926:    path: '/app/settings/preferences',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:927:    selector: '[data-tour="preferences-operator"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:928:    eyebrow: 'Step 6 - Operator preferences',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:930:    body: 'Operator preferences keep source badges, export format, and benchmark baseline visible as the final saved workspace defaults.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:944:    body: 'The product walkthrough is complete. AI Lab is the operator view: it explains runtime health, quality signals, alerts, experiments, and auditability behind the product experience.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:986:    body: 'The surface map points to specialist pages. Finish here, then use Continue tour beside Runtime & Observability to go deeper into runtime diagnostics.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:994:    id: 'lab-runtime-header',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:995:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:996:    selector: '[data-tour="lab-runtime-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:998:    title: 'Inspect runtime behavior as an operator.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1005:    id: 'lab-runtime-metrics',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1006:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1007:    selector: '[data-tour="lab-runtime-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1009:    title: 'Check runtime health before diagnostics.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1010:    body: 'These top cards give a fast read on success rate, p95 latency, review pressure, token volume, empty retrievals, and recent throughput.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1015:    id: 'lab-runtime-summary-cards',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1016:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1017:    selector: '[data-tour="lab-runtime-summary-cards"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1025:    id: 'lab-runtime-config',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1026:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1027:    selector: '[data-tour="lab-runtime-config"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1035:    id: 'lab-runtime-grounding',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1036:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1037:    selector: '[data-tour="lab-runtime-grounding"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1045:    id: 'lab-runtime-latency',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1046:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1047:    selector: '[data-tour="lab-runtime-latency"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1049:    title: 'Look at where runtime time is spent.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1055:    id: 'lab-runtime-cost-simulation',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1056:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1057:    selector: '[data-tour="lab-runtime-cost-simulation"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1065:    id: 'lab-runtime-trend',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1066:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1067:    selector: '[data-tour="lab-runtime-trend"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1069:    title: 'Read the runtime trend over recent runs.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1070:    body: 'This graph shows latency and grounding coverage over time. Use it to spot spikes and then confirm whether the issue was runtime delay or over-broad evidence usage.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1075:    id: 'lab-runtime-retrieval-cost',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1076:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1077:    selector: '[data-tour="lab-runtime-retrieval-cost"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1080:    body: 'This card pairs empty retrievals, retrieved chunks, prompt truncation, tokens, cost, and priced-run coverage so retrieval quality and spend are not treated as separate mysteries.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1085:    id: 'lab-runtime-vector-diagnostics',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1086:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1087:    selector: '[data-tour="lab-runtime-vector-diagnostics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1090:    body: 'This card explains the vector backend, index status, retrieval diagnostics, and related runtime posture. It is the technical check for whether grounding infrastructure is healthy.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1095:    id: 'lab-runtime-trace-watchlist',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1096:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1097:    selector: '[data-tour="lab-runtime-trace-watchlist"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1105:    id: 'lab-runtime-failure-modes',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1106:    path: '/app/lab/runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1107:    selector: '[data-tour="lab-runtime-failure-modes"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1126:    body: 'Document Experiments is the technical RAG playground: ask questions, inspect source behavior, test selected documents, and preserve useful traces for debugging.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1149:    body: 'The prompt bar lives under the chat. Operators use it to test a specific retrieval or answer-quality hypothesis against the selected documents.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1168:    id: 'lab-document-experiments-documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1170:    selector: '[data-tour="lab-document-experiments-documents"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1171:    eyebrow: 'Step 5 - Selected documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1172:    title: 'Control which documents ground the next answer.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1196:    body: 'Workflow Inspector shows selected documents, task instructions, routing decisions, confidence, guardrail triggers, sources, and persisted traces.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1232:    id: 'lab-workflow-inspector-documents',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1234:    selector: '[data-tour="lab-workflow-inspector-documents"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1309:    id: 'lab-benchmarks-header',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1310:    path: '/app/lab/benchmarks',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1311:    selector: '[data-tour="lab-benchmarks-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1314:    body: 'Benchmarks is where the technical tour moves from live runtime traces into measured comparisons: runs, scored models, scenarios, latency, fit, groundedness, and retrieval strategy evidence.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1320:    id: 'lab-benchmarks-metrics',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1321:    path: '/app/lab/benchmarks',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1322:    selector: '[data-tour="lab-benchmarks-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1330:    id: 'lab-benchmarks-coverage',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1331:    path: '/app/lab/benchmarks',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1332:    selector: '[data-tour="lab-benchmarks-coverage"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1340:    id: 'lab-benchmarks-highlights',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1341:    path: '/app/lab/benchmarks',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1342:    selector: '[data-tour="lab-benchmarks-highlights"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1343:    fallbackSelector: '[data-tour="lab-benchmarks-tabs"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1351:    id: 'lab-benchmarks-tabs',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1352:    path: '/app/lab/benchmarks',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1353:    selector: '[data-tour="lab-benchmarks-tabs"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1361:    id: 'lab-benchmarks-leaderboard',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1362:    path: '/app/lab/benchmarks',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1363:    selector: '[data-tour="lab-benchmarks-leaderboard-row"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1364:    fallbackSelector: '[data-tour="lab-benchmarks-leaderboard"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1378:    id: 'lab-evals-header',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1379:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1380:    selector: '[data-tour="lab-evals-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1389:    id: 'lab-evals-metrics',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1390:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1391:    selector: '[data-tour="lab-evals-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1399:    id: 'lab-evals-coverage',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1400:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1401:    selector: '[data-tour="lab-evals-coverage"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1409:    id: 'lab-evals-distribution',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1410:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1411:    selector: '[data-tour="lab-evals-distribution"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1414:    body: 'The distribution charts show how historical suites and live workflow evals are split across pass, warning, and failure outcomes.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1419:    id: 'lab-evals-suite-leaderboard',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1420:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1421:    selector: '[data-tour="lab-evals-suite-leaderboard"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1422:    fallbackSelector: '[data-tour="lab-evals-investigate"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1432:    id: 'lab-evals-investigate',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1433:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1434:    selector: '[data-tour="lab-evals-investigate-first"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1435:    fallbackSelector: '[data-tour="lab-evals-investigate"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1445:    id: 'lab-evals-provider-breakdown',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1446:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1447:    selector: '[data-tour="lab-evals-provider-breakdown"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1448:    fallbackSelector: '[data-tour="lab-evals-breakdowns"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1458:    id: 'lab-evals-task-coverage',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1459:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1460:    selector: '[data-tour="lab-evals-task-coverage"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1461:    fallbackSelector: '[data-tour="lab-evals-breakdowns"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1471:    id: 'lab-evals-attention-queue',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1472:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1473:    selector: '[data-tour="lab-evals-attention-queue"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1474:    fallbackSelector: '[data-tour="lab-evals-breakdowns"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1484:    id: 'lab-evals-recent-cases',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1485:    path: '/app/lab/evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1486:    selector: '[data-tour="lab-evals-recent-cases-start"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1487:    fallbackSelector: '[data-tour="lab-evals-recent-cases"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1501:    id: 'lab-artifacts-header',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1502:    path: '/app/lab/artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1503:    selector: '[data-tour="lab-artifacts-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1504:    eyebrow: 'Step 1 - Experiments and artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1512:    id: 'lab-artifacts-metrics',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1513:    path: '/app/lab/artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1514:    selector: '[data-tour="lab-artifacts-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1517:    body: 'These metrics show export bundle count, ready bundles, attention items, and how many workflow runs are linked to artifacts.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1522:    id: 'lab-artifacts-registry-summary',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1523:    path: '/app/lab/artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1524:    selector: '[data-tour="lab-artifacts-registry-summary"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1532:    id: 'lab-artifacts-run-registry',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1533:    path: '/app/lab/artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1534:    selector: '[data-tour="lab-artifacts-run-registry"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1536:    title: 'Link sessions, workflow runs, and artifacts.',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1542:    id: 'lab-artifacts-recent-bundles',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1543:    path: '/app/lab/artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1544:    selector: '[data-tour="lab-artifacts-recent-bundles"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1552:    id: 'lab-artifacts-diagnostics',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1553:    path: '/app/lab/artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1554:    selector: '[data-tour="lab-artifacts-diagnostics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1562:    id: 'lab-artifacts-explorer',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1563:    path: '/app/lab/artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1564:    selector: '[data-tour="lab-artifacts-explorer-start"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1565:    fallbackSelector: '[data-tour="lab-artifacts-explorer"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1579:    id: 'lab-evidenceops-header',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1580:    path: '/app/lab/evidenceops',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1581:    selector: '[data-tour="lab-evidenceops-header"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1590:    id: 'lab-evidenceops-metrics',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1591:    path: '/app/lab/evidenceops',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1592:    selector: '[data-tour="lab-evidenceops-metrics"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1600:    id: 'lab-evidenceops-repository',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1601:    path: '/app/lab/evidenceops',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1602:    selector: '[data-tour="lab-evidenceops-repository"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1610:    id: 'lab-evidenceops-delivery',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1611:    path: '/app/lab/evidenceops',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1612:    selector: '[data-tour="lab-evidenceops-delivery"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1623:    id: 'lab-evidenceops-tabs',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1624:    path: '/app/lab/evidenceops',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1625:    selector: '[data-tour="lab-evidenceops-tabs"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1633:    id: 'lab-evidenceops-tools',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1634:    path: '/app/lab/evidenceops',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1635:    selector: '[data-tour="lab-evidenceops-tools-start"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1636:    fallbackSelector: '[data-tour="lab-evidenceops-tools"]',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1657:  'runtime-controls': RUNTIME_CONTROLS_TOUR_STEPS,
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1658:  preferences: PREFERENCES_TOUR_STEPS,
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1660:  'lab-runtime': LAB_RUNTIME_TOUR_STEPS,
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1663:  'lab-benchmarks': LAB_BENCHMARKS_TOUR_STEPS,
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1664:  'lab-evals': LAB_EVALS_TOUR_STEPS,
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1665:  'lab-artifacts': LAB_ARTIFACTS_TOUR_STEPS,
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1666:  'lab-evidenceops': LAB_EVIDENCEOPS_TOUR_STEPS,
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1678:  'runtime-controls': '?tour=runtime-controls',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1679:  preferences: '?tour=preferences',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1681:  'lab-runtime': '?tour=lab-runtime',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1684:  'lab-benchmarks': '?tour=lab-benchmarks',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1685:  'lab-evals': '?tour=lab-evals',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1686:  'lab-artifacts': '?tour=lab-artifacts',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:1687:  'lab-evidenceops': '?tour=lab-evidenceops',
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2129:    window.dispatchEvent(new CustomEvent('workbench-tour:ready-for-runtime-controls-tour'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2139:    window.dispatchEvent(new CustomEvent('workbench-tour:runtime-controls-complete'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2140:    window.dispatchEvent(new CustomEvent('workbench-tour:ready-for-preferences-tour'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2150:    window.dispatchEvent(new CustomEvent('workbench-tour:preferences-complete'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2162:    window.dispatchEvent(new CustomEvent('workbench-tour:ready-for-lab-runtime-tour'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2172:    window.dispatchEvent(new CustomEvent('workbench-tour:lab-runtime-complete'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2195:    window.dispatchEvent(new CustomEvent('workbench-tour:ready-for-lab-benchmarks-tour'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2205:    window.dispatchEvent(new CustomEvent('workbench-tour:lab-benchmarks-complete'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2206:    window.dispatchEvent(new CustomEvent('workbench-tour:ready-for-lab-evals-tour'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2216:    window.dispatchEvent(new CustomEvent('workbench-tour:lab-evals-complete'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2217:    window.dispatchEvent(new CustomEvent('workbench-tour:ready-for-lab-artifacts-tour'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2227:    window.dispatchEvent(new CustomEvent('workbench-tour:lab-artifacts-complete'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2228:    window.dispatchEvent(new CustomEvent('workbench-tour:ready-for-lab-evidenceops-tour'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2238:    window.dispatchEvent(new CustomEvent('workbench-tour:lab-evidenceops-complete'));
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2275:    if (activeTourKind === 'runtime-controls') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2279:    if (activeTourKind === 'preferences') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2287:    if (activeTourKind === 'lab-runtime') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2299:    if (activeTourKind === 'lab-benchmarks') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2303:    if (activeTourKind === 'lab-evals') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2307:    if (activeTourKind === 'lab-artifacts') {
+frontend/src/components/layout/GuidedWorkbenchTour.tsx:2311:    if (activeTourKind === 'lab-evidenceops') {
+frontend/src/components/layout/RuntimeDrawer.tsx:16:} from '@/lib/runtime-controls-ui';
+frontend/src/components/layout/RuntimeDrawer.tsx:39:  const { runtimeDrawerOpen, setRuntimeDrawerOpen } = useAppStore();
+frontend/src/components/layout/RuntimeDrawer.tsx:41:    queryKey: ['runtime-controls'],
+frontend/src/components/layout/RuntimeDrawer.tsx:55:    <Sheet open={runtimeDrawerOpen} onOpenChange={setRuntimeDrawerOpen}>
+frontend/src/components/layout/RuntimeDrawer.tsx:69:              {isLoading ? 'Loading live runtime controls…' : isError ? 'Runtime Controls unavailable from backend.' : 'No runtime profile available.'}
+frontend/src/components/layout/RuntimeDrawer.tsx:91:                    <Link to="/app/settings/runtime">Open full Runtime Controls</Link>
+frontend/src/components/layout/AppSidebar.tsx:19:  { label: 'Document Library', path: '/app/documents', icon: FileText, tourId: 'nav-documents' },
+frontend/src/components/layout/AppSidebar.tsx:33:  { label: 'Runtime Controls', path: '/app/settings/runtime', icon: Server, tourId: 'nav-runtime-controls' },
+frontend/src/components/layout/AppSidebar.tsx:34:  { label: 'Preferences', path: '/app/settings/preferences', icon: Palette, tourId: 'nav-preferences' },
+frontend/src/components/layout/AppSidebar.tsx:44:type TourShortcutKind = 'workflow' | 'document-review' | 'policy-comparison' | 'action-plan' | 'candidate-review' | 'deck-center' | 'run-history' | 'runtime-controls' | 'preferences' | 'lab-overview' | 'lab-runtime' | 'lab-document-experiments' | 'lab-workflow-inspector' | 'lab-benchmarks' | 'lab-evals' | 'lab-artifacts' | 'lab-evidenceops';
+frontend/src/components/layout/AppSidebar.tsx:93:      if (window.localStorage.getItem('workbench-tour-lab-artifacts-complete') === '1') return 'lab-evidenceops';
+frontend/src/components/layout/AppSidebar.tsx:94:      if (window.localStorage.getItem('workbench-tour-lab-evals-complete') === '1') return 'lab-artifacts';
+frontend/src/components/layout/AppSidebar.tsx:95:      if (window.localStorage.getItem('workbench-tour-lab-benchmarks-complete') === '1') return 'lab-evals';
+frontend/src/components/layout/AppSidebar.tsx:96:      if (window.localStorage.getItem('workbench-tour-lab-workflow-inspector-complete') === '1') return 'lab-benchmarks';
+frontend/src/components/layout/AppSidebar.tsx:98:      if (window.localStorage.getItem('workbench-tour-lab-runtime-complete') === '1') return 'lab-document-experiments';
+frontend/src/components/layout/AppSidebar.tsx:99:      if (window.localStorage.getItem('workbench-tour-lab-overview-complete') === '1') return 'lab-runtime';
+frontend/src/components/layout/AppSidebar.tsx:100:      if (window.localStorage.getItem('workbench-tour-preferences-complete') === '1') return 'lab-overview';
+frontend/src/components/layout/AppSidebar.tsx:101:      if (window.localStorage.getItem('workbench-tour-runtime-controls-complete') === '1') return 'preferences';
+frontend/src/components/layout/AppSidebar.tsx:102:      if (window.localStorage.getItem('workbench-tour-run-history-complete') === '1') return 'runtime-controls';
+frontend/src/components/layout/AppSidebar.tsx:118:      if (kind === 'lab-evidenceops') {
+frontend/src/components/layout/AppSidebar.tsx:119:        window.localStorage.removeItem('workbench-tour-lab-artifacts-complete');
+frontend/src/components/layout/AppSidebar.tsx:120:      } else if (kind === 'lab-artifacts') {
+frontend/src/components/layout/AppSidebar.tsx:121:        window.localStorage.removeItem('workbench-tour-lab-evals-complete');
+frontend/src/components/layout/AppSidebar.tsx:122:      } else if (kind === 'lab-evals') {
+frontend/src/components/layout/AppSidebar.tsx:123:        window.localStorage.removeItem('workbench-tour-lab-benchmarks-complete');
+frontend/src/components/layout/AppSidebar.tsx:124:      } else if (kind === 'lab-benchmarks') {
+frontend/src/components/layout/AppSidebar.tsx:129:        window.localStorage.removeItem('workbench-tour-lab-runtime-complete');
+frontend/src/components/layout/AppSidebar.tsx:130:      } else if (kind === 'lab-runtime') {
+frontend/src/components/layout/AppSidebar.tsx:133:        window.localStorage.removeItem('workbench-tour-preferences-complete');
+frontend/src/components/layout/AppSidebar.tsx:134:      } else if (kind === 'preferences') {
+frontend/src/components/layout/AppSidebar.tsx:135:        window.localStorage.removeItem('workbench-tour-runtime-controls-complete');
+frontend/src/components/layout/AppSidebar.tsx:136:      } else if (kind === 'runtime-controls') {
+frontend/src/components/layout/AppSidebar.tsx:164:      nextKind === 'lab-evidenceops'
+frontend/src/components/layout/AppSidebar.tsx:165:        ? '/app/lab/evidenceops?tour=lab-evidenceops'
+frontend/src/components/layout/AppSidebar.tsx:166:        : nextKind === 'lab-artifacts'
+frontend/src/components/layout/AppSidebar.tsx:167:          ? '/app/lab/artifacts?tour=lab-artifacts'
+frontend/src/components/layout/AppSidebar.tsx:168:          : nextKind === 'lab-evals'
+frontend/src/components/layout/AppSidebar.tsx:169:            ? '/app/lab/evals?tour=lab-evals'
+frontend/src/components/layout/AppSidebar.tsx:170:            : nextKind === 'lab-benchmarks'
+frontend/src/components/layout/AppSidebar.tsx:171:              ? '/app/lab/benchmarks?tour=lab-benchmarks'
+frontend/src/components/layout/AppSidebar.tsx:176:          : nextKind === 'lab-runtime'
+frontend/src/components/layout/AppSidebar.tsx:177:            ? '/app/lab/runtime?tour=lab-runtime'
+frontend/src/components/layout/AppSidebar.tsx:180:              : nextKind === 'preferences'
+frontend/src/components/layout/AppSidebar.tsx:181:                ? '/app/settings/preferences?tour=preferences'
+frontend/src/components/layout/AppSidebar.tsx:182:                : nextKind === 'runtime-controls'
+frontend/src/components/layout/AppSidebar.tsx:183:          ? '/app/settings/runtime?tour=runtime-controls'
+frontend/src/components/layout/AppSidebar.tsx:204:  const nextTourCopy = tourShortcutKind === 'lab-evidenceops'
+frontend/src/components/layout/AppSidebar.tsx:210:    : tourShortcutKind === 'lab-artifacts'
+frontend/src/components/layout/AppSidebar.tsx:214:          cta: 'Start artifacts tour',
+frontend/src/components/layout/AppSidebar.tsx:216:      : tourShortcutKind === 'lab-evals'
+frontend/src/components/layout/AppSidebar.tsx:220:            cta: 'Start evals tour',
+frontend/src/components/layout/AppSidebar.tsx:222:        : tourShortcutKind === 'lab-benchmarks'
+frontend/src/components/layout/AppSidebar.tsx:226:              cta: 'Start benchmarks tour',
+frontend/src/components/layout/AppSidebar.tsx:237:          body: 'This AI Lab section is for probing grounded chat behavior, selected documents, and RAG quality outside the product workflow.',
+frontend/src/components/layout/AppSidebar.tsx:240:      : tourShortcutKind === 'lab-runtime'
+frontend/src/components/layout/AppSidebar.tsx:243:            body: 'This AI Lab section is the technical runtime view: provider health, retrieval behavior, latency, cost, and trace signals.',
+frontend/src/components/layout/AppSidebar.tsx:244:            cta: 'Start runtime lab tour',
+frontend/src/components/layout/AppSidebar.tsx:252:          : tourShortcutKind === 'preferences'
+frontend/src/components/layout/AppSidebar.tsx:256:                cta: 'Start preferences tour',
+frontend/src/components/layout/AppSidebar.tsx:258:            : tourShortcutKind === 'runtime-controls'
+frontend/src/components/layout/AppSidebar.tsx:262:          cta: 'Start runtime tour',
+frontend/src/components/layout/AppSidebar.tsx:309:        if (window.localStorage.getItem('workbench-tour-lab-artifacts-complete') === '1') {
+frontend/src/components/layout/AppSidebar.tsx:310:          setTourShortcutKind('lab-evidenceops');
+frontend/src/components/layout/AppSidebar.tsx:313:        if (window.localStorage.getItem('workbench-tour-lab-evals-complete') === '1') {
+frontend/src/components/layout/AppSidebar.tsx:314:          setTourShortcutKind('lab-artifacts');
+frontend/src/components/layout/AppSidebar.tsx:317:        if (window.localStorage.getItem('workbench-tour-lab-benchmarks-complete') === '1') {
+frontend/src/components/layout/AppSidebar.tsx:318:          setTourShortcutKind('lab-evals');
+frontend/src/components/layout/AppSidebar.tsx:322:          setTourShortcutKind('lab-benchmarks');
+frontend/src/components/layout/AppSidebar.tsx:329:        if (window.localStorage.getItem('workbench-tour-lab-runtime-complete') === '1') {
+frontend/src/components/layout/AppSidebar.tsx:334:          setTourShortcutKind('lab-runtime');
+frontend/src/components/layout/AppSidebar.tsx:337:        if (window.localStorage.getItem('workbench-tour-preferences-complete') === '1') {
+frontend/src/components/layout/AppSidebar.tsx:341:        if (window.localStorage.getItem('workbench-tour-runtime-controls-complete') === '1') {
+frontend/src/components/layout/AppSidebar.tsx:342:          setTourShortcutKind('preferences');
+frontend/src/components/layout/AppSidebar.tsx:346:          setTourShortcutKind('runtime-controls');
+frontend/src/components/layout/AppSidebar.tsx:394:    window.addEventListener('workbench-tour:runtime-controls-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:395:    window.addEventListener('workbench-tour:preferences-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:397:    window.addEventListener('workbench-tour:lab-runtime-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:400:    window.addEventListener('workbench-tour:lab-benchmarks-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:401:    window.addEventListener('workbench-tour:lab-evals-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:402:    window.addEventListener('workbench-tour:lab-artifacts-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:403:    window.addEventListener('workbench-tour:lab-evidenceops-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:411:    window.addEventListener('workbench-tour:ready-for-runtime-controls-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:412:    window.addEventListener('workbench-tour:ready-for-preferences-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:414:    window.addEventListener('workbench-tour:ready-for-lab-runtime-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:417:    window.addEventListener('workbench-tour:ready-for-lab-benchmarks-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:418:    window.addEventListener('workbench-tour:ready-for-lab-evals-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:419:    window.addEventListener('workbench-tour:ready-for-lab-artifacts-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:420:    window.addEventListener('workbench-tour:ready-for-lab-evidenceops-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:431:      window.removeEventListener('workbench-tour:runtime-controls-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:432:      window.removeEventListener('workbench-tour:preferences-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:434:      window.removeEventListener('workbench-tour:lab-runtime-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:437:      window.removeEventListener('workbench-tour:lab-benchmarks-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:438:      window.removeEventListener('workbench-tour:lab-evals-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:439:      window.removeEventListener('workbench-tour:lab-artifacts-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:440:      window.removeEventListener('workbench-tour:lab-evidenceops-complete', syncShortcut);
+frontend/src/components/layout/AppSidebar.tsx:448:      window.removeEventListener('workbench-tour:ready-for-runtime-controls-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:449:      window.removeEventListener('workbench-tour:ready-for-preferences-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:451:      window.removeEventListener('workbench-tour:ready-for-lab-runtime-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:454:      window.removeEventListener('workbench-tour:ready-for-lab-benchmarks-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:455:      window.removeEventListener('workbench-tour:ready-for-lab-evals-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:456:      window.removeEventListener('workbench-tour:ready-for-lab-artifacts-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:457:      window.removeEventListener('workbench-tour:ready-for-lab-evidenceops-tour', openPrompt);
+frontend/src/components/layout/AppSidebar.tsx:464:      const targetSelector = tourShortcutKind === 'lab-evidenceops'
+frontend/src/components/layout/AppSidebar.tsx:465:        ? '[data-tour="nav-lab-evidenceops"]'
+frontend/src/components/layout/AppSidebar.tsx:466:        : tourShortcutKind === 'lab-artifacts'
+frontend/src/components/layout/AppSidebar.tsx:467:          ? '[data-tour="nav-lab-artifacts"]'
+frontend/src/components/layout/AppSidebar.tsx:468:          : tourShortcutKind === 'lab-evals'
+frontend/src/components/layout/AppSidebar.tsx:469:            ? '[data-tour="nav-lab-evals"]'
+frontend/src/components/layout/AppSidebar.tsx:470:            : tourShortcutKind === 'lab-benchmarks'
+frontend/src/components/layout/AppSidebar.tsx:471:              ? '[data-tour="nav-lab-benchmarks"]'
+frontend/src/components/layout/AppSidebar.tsx:476:          : tourShortcutKind === 'lab-runtime'
+frontend/src/components/layout/AppSidebar.tsx:477:            ? '[data-tour="nav-lab-runtime"]'
+frontend/src/components/layout/AppSidebar.tsx:480:              : tourShortcutKind === 'preferences'
+frontend/src/components/layout/AppSidebar.tsx:481:                ? '[data-tour="nav-preferences"]'
+frontend/src/components/layout/AppSidebar.tsx:482:                : tourShortcutKind === 'runtime-controls'
+frontend/src/components/layout/AppSidebar.tsx:483:                  ? '[data-tour="nav-runtime-controls"]'
+frontend/src/components/layout/AppSidebar.tsx:508:  const shortcutLabel = tourShortcutKind === 'lab-evidenceops'
+frontend/src/components/layout/AppSidebar.tsx:510:    : tourShortcutKind === 'lab-artifacts'
+frontend/src/components/layout/AppSidebar.tsx:512:      : tourShortcutKind === 'lab-evals'
+frontend/src/components/layout/AppSidebar.tsx:514:        : tourShortcutKind === 'lab-benchmarks'
+frontend/src/components/layout/AppSidebar.tsx:520:      : tourShortcutKind === 'lab-runtime'
+frontend/src/components/layout/AppSidebar.tsx:528:              : tourShortcutKind === 'runtime-controls'
+frontend/src/components/layout/AppSidebar.tsx:530:                : tourShortcutKind === 'preferences'
+frontend/src/components/layout/AppSidebar.tsx:533:  const ShortcutIcon = tourShortcutKind === 'lab-evidenceops'
+frontend/src/components/layout/AppSidebar.tsx:535:    : tourShortcutKind === 'lab-artifacts'
+frontend/src/components/layout/AppSidebar.tsx:537:      : tourShortcutKind === 'lab-evals'
+frontend/src/components/layout/AppSidebar.tsx:539:        : tourShortcutKind === 'lab-benchmarks'
+frontend/src/components/layout/AppSidebar.tsx:545:      : tourShortcutKind === 'lab-runtime'
+frontend/src/components/layout/AppSidebar.tsx:553:              : tourShortcutKind === 'runtime-controls'
+frontend/src/components/layout/AppSidebar.tsx:555:                : tourShortcutKind === 'preferences'
+frontend/src/components/product/NextcloudImportSheet.tsx:88:function buildFolderTree(documents: ProductNextcloudDocument[]): FolderNode {
+frontend/src/components/product/NextcloudImportSheet.tsx:90:  for (const document of documents) {
+frontend/src/components/product/NextcloudImportSheet.tsx:214:    queryKey: ['product-integrations', 'nextcloud-documents', 'library-import'],
+frontend/src/components/product/NextcloudImportSheet.tsx:220:  const documents = nextcloudQuery.data?.documents ?? [];
+frontend/src/components/product/NextcloudImportSheet.tsx:221:  const root = useMemo(() => buildFolderTree(documents), [documents]);
+frontend/src/components/product/NextcloudImportSheet.tsx:224:  const documentByPath = useMemo(() => new Map(documents.map((document) => [String(document.relative_path || ''), document])), [documents]);
+frontend/src/components/product/NextcloudImportSheet.tsx:261:    if (!documents.length) {
+frontend/src/components/product/NextcloudImportSheet.tsx:268:      const matches = documents
+frontend/src/components/product/NextcloudImportSheet.tsx:293:  }, [documents, focusSyntheticCorpus]);
+frontend/src/components/product/NextcloudImportSheet.tsx:355:    if (!open || !pendingStarterSelection || !documents.length) return;
+frontend/src/components/product/NextcloudImportSheet.tsx:357:  }, [documents.length, open, pendingStarterSelection, selectStarterSet]);
+frontend/src/components/product/NextcloudImportSheet.tsx:365:    mutationFn: async (documentsToImport: ProductNextcloudDocument[]) => importProductDocumentsFromNextcloud(documentsToImport.map(toImportPayload)),
+frontend/src/components/product/NextcloudImportSheet.tsx:394:  const addDocumentsToSelection = (documentsToAdd: ProductNextcloudDocument[]) => {
+frontend/src/components/product/NextcloudImportSheet.tsx:395:    const nextPaths = documentsToAdd.filter(isPdfDocument).map((document) => String(document.relative_path || '')).filter(Boolean);
+frontend/src/components/product/NextcloudImportSheet.tsx:494:                  <span className="text-[10px] text-muted-foreground">{documents.length}</span>
+frontend/src/components/product/DeliveryLoopPanel.tsx:76:function normalizeDocuments(documents: ProductNextcloudDocument[]) {
+frontend/src/components/product/DeliveryLoopPanel.tsx:77:  return documents.map((document) => ({
+frontend/src/components/product/DeliveryLoopPanel.tsx:111:    queryKey: ['product-integrations', 'nextcloud-documents'],
+frontend/src/components/product/DeliveryLoopPanel.tsx:120:      queryClient.invalidateQueries({ queryKey: ['product-integrations', 'nextcloud-documents'] }),
+frontend/src/components/product/DeliveryLoopPanel.tsx:179:    () => normalizeDocuments(nextcloudQuery.data?.documents ?? []),
+frontend/src/components/product/DeliveryLoopPanel.tsx:180:    [nextcloudQuery.data?.documents],
+frontend/src/components/product/DeliveryLoopPanel.tsx:354:                  )) : <p className="text-xs text-muted-foreground">Nextcloud corpus mapping is ready, but no remote documents were listed yet.</p>}
+frontend/src/components/product/WorkflowPublishActions.tsx:434:      queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+frontend/src/lib/ai-lab-navigation.ts:26:    key: 'runtime',
+frontend/src/lib/ai-lab-navigation.ts:28:    path: '/app/lab/runtime',
+frontend/src/lib/ai-lab-navigation.ts:31:    operatorQuestion: 'Is the runtime healthy and cost-controlled?',
+frontend/src/lib/ai-lab-navigation.ts:50:    key: 'benchmarks',
+frontend/src/lib/ai-lab-navigation.ts:52:    path: '/app/lab/benchmarks',
+frontend/src/lib/ai-lab-navigation.ts:58:    key: 'evals',
+frontend/src/lib/ai-lab-navigation.ts:60:    path: '/app/lab/evals',
+frontend/src/lib/ai-lab-navigation.ts:66:    key: 'artifacts',
+frontend/src/lib/ai-lab-navigation.ts:68:    path: '/app/lab/artifacts',
+frontend/src/lib/ai-lab-navigation.ts:74:    key: 'evidenceops',
+frontend/src/lib/ai-lab-navigation.ts:76:    path: '/app/lab/evidenceops',
+frontend/src/lib/ai-lab-navigation.ts:90:  '/app/lab/models': '/app/lab/benchmarks',
+frontend/src/lib/settings-mock.ts:54:    description: 'Optional cloud endpoint for benchmarks, evals, and long-context review when workspace policy allows escalation.',
+frontend/src/lib/settings-mock.ts:90:    id: 'current-product-runtime',
+frontend/src/lib/settings-mock.ts:152:    summary: 'Fully local profile for privacy-first runs. Keeps prompts, retrieval, and document context on the local Ollama runtime.',
+frontend/src/lib/settings-mock.ts:164:  { id: 'cloud-benchmarks-only', label: 'Restrict cloud to benchmarks/evals', description: 'When enabled, cloud reference models are limited to benchmark and eval workflows.', enabled: true },
+frontend/src/lib/settings-mock.ts:173:  defaultBenchmarkBaseline: 'current-product-runtime',
+frontend/src/lib/ai-lab-data.ts:39:  runtime: Record<string, unknown> & {
+frontend/src/lib/ai-lab-data.ts:59:  runtime: Record<string, unknown> & {
+frontend/src/lib/ai-lab-data.ts:143:    scope?: 'product' | 'runtime';
+frontend/src/lib/ai-lab-data.ts:262:  selected_documents: LabDocumentOption[];
+frontend/src/lib/ai-lab-data.ts:263:  available_documents?: LabDocumentOption[];
+frontend/src/lib/ai-lab-data.ts:351:    artifacts?: Array<{ label: string; path?: string | null }>;
+frontend/src/lib/ai-lab-data.ts:424:    runtimeBucket?: string;
+frontend/src/lib/ai-lab-data.ts:542:  artifacts: Array<{
+frontend/src/lib/ai-lab-data.ts:666:async function fetchJson<T>(path: string): Promise<T> {
+frontend/src/lib/ai-lab-data.ts:674:async function postJson<T>(path: string, payload: object): Promise<T> {
+frontend/src/lib/ai-lab-data.ts:688:  runtime: ['ai-lab', 'runtime'] as const,
+frontend/src/lib/ai-lab-data.ts:691:  benchmarks: ['ai-lab', 'benchmarks'] as const,
+frontend/src/lib/ai-lab-data.ts:692:  evals: ['ai-lab', 'evals'] as const,
+frontend/src/lib/ai-lab-data.ts:693:  artifacts: ['ai-lab', 'artifacts'] as const,
+frontend/src/lib/ai-lab-data.ts:694:  evidenceOps: ['ai-lab', 'evidenceops'] as const,
+frontend/src/lib/ai-lab-data.ts:695:  evidenceSearch: (query: string) => ['ai-lab', 'evidenceops-search', query] as const,
+frontend/src/lib/ai-lab-data.ts:699:  return fetchJson<LabOverviewPageData>('/api/lab/overview');
+frontend/src/lib/ai-lab-data.ts:703:  return fetchJson<LabRuntimePayload>('/api/lab/runtime');
+frontend/src/lib/ai-lab-data.ts:708:  return fetchJson<LabChatPageData>(`/api/lab/chat${query}`);
+frontend/src/lib/ai-lab-data.ts:712:  return postJson<CreateLabChatSessionResponse>('/api/lab/chat/sessions', payload);
+frontend/src/lib/ai-lab-data.ts:716:  return postJson<SendLabChatMessageResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/messages`, payload);
+frontend/src/lib/ai-lab-data.ts:720:  return postJson<DeleteLabChatSessionResponse>(`/api/lab/chat/sessions/${encodeURIComponent(sessionId)}/delete`, {});
+frontend/src/lib/ai-lab-data.ts:724:  return fetchJson<LabWorkflowInspectorPageData>('/api/lab/workflow-inspector');
+frontend/src/lib/ai-lab-data.ts:728:  return postJson<RunLabWorkflowInspectorResponse>('/api/lab/workflow-inspector/run', payload);
+frontend/src/lib/ai-lab-data.ts:732:  return fetchJson<LabBenchmarksPageData>('/api/lab/benchmarks');
+frontend/src/lib/ai-lab-data.ts:736:  return fetchJson<LabEvalsPageData>('/api/lab/evals');
+frontend/src/lib/ai-lab-data.ts:740:  return fetchJson<LabArtifactsPageData>('/api/lab/artifacts');
+frontend/src/lib/ai-lab-data.ts:744:  return fetchJson<LabEvidenceOpsPageData>('/api/lab/evidenceops');
+frontend/src/lib/ai-lab-data.ts:748:  return fetchJson<LabEvidenceOpsSearchResponse>(`/api/lab/evidenceops/search?q=${encodeURIComponent(query)}`);
+frontend/src/lib/ai-lab-data.ts:752:  return postJson<{ ok: boolean; diff?: Record<string, unknown>; page: LabEvidenceOpsPageData }>('/api/lab/evidenceops/sync', {});
+frontend/src/lib/ai-lab-data.ts:756:  return postJson<{ ok: boolean; action?: Record<string, unknown>; page: LabEvidenceOpsPageData }>(`/api/lab/evidenceops/actions/${encodeURIComponent(String(actionId))}`, payload);
+frontend/src/lib/preferences-ui.ts:26:    return 'No API key is required for the local runtime path.';
+frontend/src/lib/product-api.ts:43:  indexed_documents: number;
+frontend/src/lib/product-api.ts:46:  artifacts_generated: number;
+frontend/src/lib/product-api.ts:61:  documents: string[];
+frontend/src/lib/product-api.ts:67:  artifacts?: string[];
+frontend/src/lib/product-api.ts:127:  recent_artifacts: ProductArtifactEntry[];
+frontend/src/lib/product-api.ts:157:    total_artifacts: number;
+frontend/src/lib/product-api.ts:158:    completed_artifacts: number;
+frontend/src/lib/product-api.ts:159:    error_artifacts: number;
+frontend/src/lib/product-api.ts:161:  artifacts: ProductArtifactEntry[];
+frontend/src/lib/product-api.ts:206:    total_documents: number;
+frontend/src/lib/product-api.ts:207:    indexed_documents: number;
+frontend/src/lib/product-api.ts:208:    warning_documents: number;
+frontend/src/lib/product-api.ts:209:    error_documents: number;
+frontend/src/lib/product-api.ts:210:    pending_documents: number;
+frontend/src/lib/product-api.ts:211:    indexing_documents: number;
+frontend/src/lib/product-api.ts:220:  documents: ProductDocumentLibraryEntry[];
+frontend/src/lib/product-api.ts:240:  indexed_documents?: ProductDocumentLibraryEntry[];
+frontend/src/lib/product-api.ts:251:  documents: ProductDocumentLibraryEntry[];
+frontend/src/lib/product-api.ts:299:  artifacts: ProductWorkflowArtifact[];
+frontend/src/lib/product-api.ts:359:  artifacts: ProductWorkflowArtifact[];
+frontend/src/lib/product-api.ts:388:  compared_documents: string[];
+frontend/src/lib/product-api.ts:393:    documents: string[];
+frontend/src/lib/product-api.ts:408:  artifacts: ProductWorkflowArtifact[];
+frontend/src/lib/product-api.ts:458:  documents: number;
+frontend/src/lib/product-api.ts:459:  artifacts: number;
+frontend/src/lib/product-api.ts:493:  artifacts: ProductWorkflowArtifact[];
+frontend/src/lib/product-api.ts:508:  artifacts: ProductWorkflowArtifact[];
+frontend/src/lib/product-api.ts:546:  artifacts: ProductWorkflowArtifact[];
+frontend/src/lib/product-api.ts:748:  documents: ProductNextcloudDocument[];
+frontend/src/lib/product-api.ts:786:  runtime: {
+frontend/src/lib/product-api.ts:890:  runtime_profiles: RuntimeProfile[];
+frontend/src/lib/product-api.ts:892:  operator_preferences: OperatorPreferences;
+frontend/src/lib/product-api.ts:900:  runtime_profiles?: RuntimeProfile[];
+frontend/src/lib/product-api.ts:902:  operator_preferences?: Partial<OperatorPreferences>;
+frontend/src/lib/product-api.ts:964:  return fetchProductApi<ProductCommandCenterResponse>("/api/product/command-center");
+frontend/src/lib/product-api.ts:968:  return fetchProductApi<ProductWorkflowCatalogResponse>("/api/product/workflows");
+frontend/src/lib/product-api.ts:972:  return fetchProductApi<ProductRunHistoryResponse>("/api/product/run-history");
+frontend/src/lib/product-api.ts:1000:  return fetchProductApi<ProductRunHistoryDetailResponse>(`/api/product/run-history/${encodeURIComponent(runId)}`);
+frontend/src/lib/product-api.ts:1004:  return postProductApi<ProductRunWorkflowResponse>(`/api/product/run-history/${encodeURIComponent(runId)}/rerun`, {});
+frontend/src/lib/product-api.ts:1008:  return fetchProductApi<ProductArtifactsResponse>("/api/product/artifacts");
+frontend/src/lib/product-api.ts:1012:  return fetchProductApi<ProductArtifactDetailResponse>(`/api/product/artifacts/${encodeURIComponent(artifactId)}`);
+frontend/src/lib/product-api.ts:1016:  return fetchProductApi<LabOverviewResponse>("/api/lab/overview");
+frontend/src/lib/product-api.ts:1020:  return fetchProductApi<LabEvalsResponse>("/api/lab/evals");
+frontend/src/lib/product-api.ts:1024:  return fetchProductApi<ProductDocumentLibraryResponse>("/api/product/document-library");
+frontend/src/lib/product-api.ts:1032:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/upload-documents`, {
+frontend/src/lib/product-api.ts:1050:  return fetchProductApi<ProductUploadDocumentsResponse>(`/api/product/upload-jobs/${encodeURIComponent(jobId)}`);
+frontend/src/lib/product-api.ts:1068:  return fetchProductApi<ProductGroundingPreviewResponse>(`/api/product/grounding-preview?${query.toString()}`);
+frontend/src/lib/product-api.ts:1083:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/run-workflow`, {
+frontend/src/lib/product-api.ts:1105:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/generate-deck`, {
+frontend/src/lib/product-api.ts:1127:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-trello`, {
+frontend/src/lib/product-api.ts:1156:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/publish-to-notion`, {
+frontend/src/lib/product-api.ts:1182:  return fetchProductApi<ProductIntegrationHubResponse>('/api/product/integrations');
+frontend/src/lib/product-api.ts:1186:  return fetchProductApi<ProductNotionEntriesResponse>(`/api/product/integrations/notion?limit=${encodeURIComponent(String(limit))}`);
+frontend/src/lib/product-api.ts:1191:  return fetchProductApi<ProductNextcloudDocumentsResponse>(`/api/product/integrations/nextcloud?limit=${encodeURIComponent(String(normalizedLimit))}`);
+frontend/src/lib/product-api.ts:1215:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/integrations/nextcloud/import`, {
+frontend/src/lib/product-api.ts:1239:  const documents = options.map(serializeNextcloudImportDocument).filter((item) => (
+frontend/src/lib/product-api.ts:1242:  if (documents.length <= 1) {
+frontend/src/lib/product-api.ts:1243:    return postNextcloudImportPayload(documents[0] || {});
+frontend/src/lib/product-api.ts:1245:  return postNextcloudImportPayload({ documents });
+frontend/src/lib/product-api.ts:1249:  return postProductApi<ProductNextcloudSyncResponse>('/api/product/integrations/nextcloud/sync', { dry_run: options?.dryRun ?? false });
+frontend/src/lib/product-api.ts:1254:  return `${PRODUCT_API_BASE_URL}/api/product/artifact?${params.toString()}`;
+frontend/src/lib/product-api.ts:1272:  return `${PRODUCT_API_BASE_URL}/api/product/integrations/nextcloud/open?${params.toString()}`;
+frontend/src/lib/product-api.ts:1307:  const response = await fetch(`${PRODUCT_API_BASE_URL}/api/product/delete-documents`, {
+frontend/src/lib/product-api.ts:1326:  return fetchProductApi<RuntimeControlsResponse>('/api/runtime/controls');
+frontend/src/lib/product-api.ts:1330:  return patchProductApi<RuntimeControlsResponse>('/api/runtime/controls', payload);
+frontend/src/lib/product-api.ts:1334:  return fetchProductApi<PreferencesResponse>('/api/preferences');
+frontend/src/lib/product-api.ts:1338:  return patchProductApi<PreferencesResponse>('/api/preferences', payload);
+frontend/src/lib/product-api.ts:1342:  return postProductApi<PreferencesConnectionTestResponse>(`/api/preferences/connections/${encodeURIComponent(connectionId)}/test`);
+frontend/src/lib/product-api.ts:1346:  return postProductApi<PreferencesResponse>(`/api/preferences/connections/${encodeURIComponent(connectionId)}/credential`, { api_key: apiKey });
+frontend/src/lib/workflow-demo-documents.ts:51:  documents: ProductDocumentLibraryEntry[],
+frontend/src/lib/workflow-demo-documents.ts:54:  return documents.find((document) => isRecommendedNameMatch(document.name, recommendedName));
+frontend/src/lib/workflow-demo-documents.ts:58:  documents: ProductDocumentLibraryEntry[],
+frontend/src/lib/workflow-demo-documents.ts:65:    const match = findRecommendedDocument(documents, name);
+frontend/src/lib/mock-data.ts:7:export const documents: Document[] = [
+frontend/src/lib/mock-data.ts:23:  documents: string[]; startedAt: string; duration: string; findings?: number; artifacts?: string[];
+frontend/src/lib/mock-data.ts:27:  { id: 'r1', workflow: 'Document Review', status: 'completed', documents: ['Master Service Agreement v4.2'], startedAt: '2024-03-15T10:30:00Z', duration: '2m 14s', findings: 12, artifacts: ['review_deck.pptx', 'review.json'] },
+frontend/src/lib/mock-data.ts:28:  { id: 'r2', workflow: 'Policy Comparison', status: 'completed', documents: ['Information Security Policy v3.1', 'GDPR Compliance Checklist'], startedAt: '2024-03-15T09:15:00Z', duration: '3m 42s', findings: 8, artifacts: ['comparison_deck.pptx', 'diff.json'] },
+frontend/src/lib/mock-data.ts:29:  { id: 'r3', workflow: 'Candidate Review', status: 'completed', documents: ['Sarah Chen - Senior ML Engineer CV'], startedAt: '2024-03-15T08:45:00Z', duration: '1m 08s', findings: 6, artifacts: ['candidate_deck.pptx'] },
+frontend/src/lib/mock-data.ts:30:  { id: 'r4', workflow: 'Action Plan', status: 'warning', documents: ['Vendor Risk Assessment Template'], startedAt: '2024-03-14T16:20:00Z', duration: '4m 31s', findings: 15, artifacts: ['action_plan.pptx'] },
+frontend/src/lib/mock-data.ts:31:  { id: 'r5', workflow: 'Document Review', status: 'error', documents: ['Technical Architecture Brief'], startedAt: '2024-03-14T15:00:00Z', duration: '0m 23s' },
+frontend/src/lib/mock-data.ts:32:  { id: 'r6', workflow: 'Policy Comparison', status: 'running', documents: ['Master Service Agreement v4.2', 'Cloud Infrastructure SLA'], startedAt: '2024-03-15T11:00:00Z', duration: '—' },
+frontend/src/lib/mock-data.ts:82:  useCaseFit: number; runtimeBucket: string; profileTag?: string;
+frontend/src/lib/mock-data.ts:86:  { id: 'm1', provider: 'ollama', model: 'llama3.1:70b-instruct-q4_K_M', family: 'Llama 3.1', quantization: 'Q4_K_M', latency: 12.4, outputChars: 3420, adherence: 0.89, groundedness: 0.87, useCaseFit: 0.85, runtimeBucket: 'local_gpu', profileTag: 'Deep analysis (local)' },
+frontend/src/lib/mock-data.ts:87:  { id: 'm2', provider: 'ollama', model: 'qwen2.5:32b-instruct-q5_K_M', family: 'Qwen 2.5', quantization: 'Q5_K_M', latency: 8.7, outputChars: 2980, adherence: 0.92, groundedness: 0.90, useCaseFit: 0.91, runtimeBucket: 'local_gpu', profileTag: 'Recommended production' },
+frontend/src/lib/mock-data.ts:88:  { id: 'm3', provider: 'openai-compatible', model: 'gpt-4o', family: 'GPT-4o', quantization: 'N/A', latency: 3.2, outputChars: 4100, adherence: 0.96, groundedness: 0.93, useCaseFit: 0.94, runtimeBucket: 'cloud_api', profileTag: 'External reference' },
+frontend/src/lib/mock-data.ts:89:  { id: 'm4', provider: 'ollama', model: 'mistral:7b-instruct-v0.3', family: 'Mistral 7B', quantization: 'Q4_0', latency: 2.1, outputChars: 1890, adherence: 0.78, groundedness: 0.72, useCaseFit: 0.70, runtimeBucket: 'local_gpu', profileTag: 'Fast triage (local)' },
+frontend/src/lib/mock-data.ts:90:  { id: 'm5', provider: 'huggingface_server', model: 'microsoft/phi-3-medium-128k', family: 'Phi-3 Medium', quantization: 'FP16', latency: 6.8, outputChars: 2670, adherence: 0.85, groundedness: 0.82, useCaseFit: 0.80, runtimeBucket: 'local_gpu', profileTag: 'Long-context local' },
+frontend/src/lib/mock-data.ts:99:export const artifacts: Artifact[] = [
+frontend/src/lib/mock-data.ts:111:  { name: 'search_documents', description: 'Search indexed documents by semantic query', status: 'active', lastCall: '2024-03-15T10:30:00Z' },
+frontend/src/lib/mock-data.ts:157:  { id: 'st1', name: 'extraction', label: 'Entity Extraction', description: 'Extract structured entities from documents', icon: 'Layers' },
+frontend/src/lib/mock-data.ts:159:  { id: 'st3', name: 'checklist', label: 'Compliance Checklist', description: 'Evaluate documents against compliance criteria', icon: 'CheckSquare' },
+frontend/src/lib/mock-data.ts:173:  artifactsGenerated: 23,
+frontend/src/lib/store.ts:18:  runtimeDrawerOpen: boolean;
+frontend/src/lib/store.ts:20:  preferencesLoaded: boolean;
+frontend/src/lib/store.ts:31:  runtimeDrawerOpen: false,
+frontend/src/lib/store.ts:33:  preferencesLoaded: false,
+frontend/src/lib/store.ts:37:  setRuntimeDrawerOpen: (open) => set({ runtimeDrawerOpen: open }),
+frontend/src/lib/store.ts:39:    const operatorPreferences = payload?.operator_preferences ?? DEFAULT_OPERATOR_PREFERENCES;
+frontend/src/lib/store.ts:40:    const profiles = payload?.runtime_profiles ?? [];
+frontend/src/lib/store.ts:44:      preferencesLoaded: Boolean(payload),
+frontend/src/pages/ComparisonPage.test.tsx:73:      artifacts: [],
+frontend/src/pages/ComparisonPage.test.tsx:80:      compared_documents: ["Policy A.pdf", "Policy B.pdf"],
+frontend/src/pages/ComparisonPage.test.tsx:89:        documents: ["Policy A.pdf", "Policy B.pdf"],
+frontend/src/pages/ComparisonPage.test.tsx:123:      artifacts: [],
+frontend/src/pages/ComparisonPage.test.tsx:148:        total_documents: 2,
+frontend/src/pages/ComparisonPage.test.tsx:149:        indexed_documents: 2,
+frontend/src/pages/ComparisonPage.test.tsx:150:        warning_documents: 0,
+frontend/src/pages/ComparisonPage.test.tsx:151:        error_documents: 0,
+frontend/src/pages/ComparisonPage.test.tsx:152:        pending_documents: 0,
+frontend/src/pages/ComparisonPage.test.tsx:153:        indexing_documents: 0,
+frontend/src/pages/ComparisonPage.test.tsx:157:      documents: [
+frontend/src/pages/ComparisonPage.test.tsx:191:      artifacts: [
+frontend/src/pages/ComparisonPage.test.tsx:203:  it("runs the comparison, renders grounded deltas and generates deck artifacts", async () => {
+frontend/src/pages/ComparisonPage.test.tsx:226:    expect(window.open).toHaveBeenCalledWith(`${PRODUCT_API_BASE_URL}/api/product/artifact?path=%2Ftmp%2Fpolicy-comparison-deck.pptx`, "_blank", "noopener,noreferrer");
+frontend/src/pages/ComparisonPage.test.tsx:235:      artifacts: [],
+frontend/src/pages/EvidenceOpsPage.tsx:74:      <div data-tour="lab-evidenceops-header">
+frontend/src/pages/EvidenceOpsPage.tsx:102:      <div data-tour="lab-evidenceops-metrics">
+frontend/src/pages/EvidenceOpsPage.tsx:115:      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3 mb-6" data-tour="lab-evidenceops-repository">
+frontend/src/pages/EvidenceOpsPage.tsx:133:      <div data-tour="lab-evidenceops-delivery">
+frontend/src/pages/EvidenceOpsPage.tsx:144:        <TabsList data-tour="lab-evidenceops-tabs" className="bg-secondary/30 border border-border/50 mb-4">
+frontend/src/pages/EvidenceOpsPage.tsx:155:        <TabsContent value="tools" className="mt-0 space-y-3" data-tour="lab-evidenceops-tools">
+frontend/src/pages/EvidenceOpsPage.tsx:162:              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2" data-tour="lab-evidenceops-tools-start">Local MCP-console tools</p>
+frontend/src/pages/EvidenceOpsPage.tsx:166:              data-tour={index < 4 ? 'lab-evidenceops-tools-start' : undefined}
+frontend/src/pages/EvidenceOpsPage.tsx:365:        <TabsContent value="readiness" className="mt-0" data-tour="lab-evidenceops-finish">
+frontend/src/pages/EvidenceOpsPage.tsx:390:              <p>repository_documents: {summary?.repositoryDocumentCount ?? 0}</p>
+frontend/src/pages/EvidenceOpsPage.tsx:432:                <p className="text-xs text-muted-foreground">Enter a query to search indexed repository documents via live backend search.</p>
+frontend/src/pages/DocumentReviewPage.tsx:30:import { findRecommendedDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
+frontend/src/pages/DocumentReviewPage.tsx:67:function dedupeArtifacts(artifacts: ProductWorkflowArtifact[]): ProductWorkflowArtifact[] {
+frontend/src/pages/DocumentReviewPage.tsx:70:  for (const artifact of artifacts) {
+frontend/src/pages/DocumentReviewPage.tsx:104:  const [activeTab, setActiveTab] = useState<'findings' | 'evidence' | 'artifacts'>(defaultTab);
+frontend/src/pages/DocumentReviewPage.tsx:111:  const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
+frontend/src/pages/DocumentReviewPage.tsx:127:    () => (documentLibrary?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
+frontend/src/pages/DocumentReviewPage.tsx:189:    setGeneratedArtifacts(run.artifact_items ?? hydratedWorkflowResponse.result.artifacts ?? []);
+frontend/src/pages/DocumentReviewPage.tsx:228:      setGeneratedArtifacts(payload.artifacts);
+frontend/src/pages/DocumentReviewPage.tsx:229:      setActiveTab('artifacts');
+frontend/src/pages/DocumentReviewPage.tsx:231:        queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+frontend/src/pages/DocumentReviewPage.tsx:235:      toast.success('Executive deck artifacts generated successfully.');
+frontend/src/pages/DocumentReviewPage.tsx:250:    () => dedupeArtifacts([...(reviewView?.artifacts ?? []), ...generatedArtifacts]),
+frontend/src/pages/DocumentReviewPage.tsx:350:      {documentsError && (
+frontend/src/pages/DocumentReviewPage.tsx:362:              <SelectTrigger className="h-8 text-xs bg-secondary/30"><SelectValue placeholder={documentsLoading ? 'Loading documents...' : 'Select a document'} /></SelectTrigger>
+frontend/src/pages/DocumentReviewPage.tsx:474:              aria-selected={activeTab === 'artifacts'}
+frontend/src/pages/DocumentReviewPage.tsx:475:              aria-controls="document-review-panel-artifacts"
+frontend/src/pages/DocumentReviewPage.tsx:476:              className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all ${activeTab === 'artifacts' ? 'bg-secondary text-foreground shadow-sm' : ''}`}
+frontend/src/pages/DocumentReviewPage.tsx:477:              onClick={() => setActiveTab('artifacts')}
+frontend/src/pages/DocumentReviewPage.tsx:552:          {activeTab === 'artifacts' && (
+frontend/src/pages/DocumentReviewPage.tsx:553:            <div id="document-review-panel-artifacts" role="tabpanel" className="mt-0">
+frontend/src/pages/DocumentReviewPage.tsx:593:                  )) : <div className="text-xs text-muted-foreground">Run the workflow and generate the deck to populate real artifacts here.</div>}
+frontend/src/pages/DocumentReviewPage.tsx:607:          description="After reviewing findings, evidence and artifacts, preview the Trello cards or the Notion handoff before publishing."
+frontend/src/pages/DocumentReviewPage.tsx:621:            documents: selectedDocument ? [selectedDocument.name] : [],
+frontend/src/pages/DocumentReviewPage.tsx:622:            primary_documents: selectedDocument ? [selectedDocument.name] : [],
+frontend/src/pages/DocumentReviewPage.test.tsx:75:      artifacts: [],
+frontend/src/pages/DocumentReviewPage.test.tsx:140:      artifacts: [],
+frontend/src/pages/DocumentReviewPage.test.tsx:164:        total_documents: 1,
+frontend/src/pages/DocumentReviewPage.test.tsx:165:        indexed_documents: 1,
+frontend/src/pages/DocumentReviewPage.test.tsx:166:        warning_documents: 0,
+frontend/src/pages/DocumentReviewPage.test.tsx:167:        error_documents: 0,
+frontend/src/pages/DocumentReviewPage.test.tsx:168:        pending_documents: 0,
+frontend/src/pages/DocumentReviewPage.test.tsx:169:        indexing_documents: 0,
+frontend/src/pages/DocumentReviewPage.test.tsx:173:      documents: [
+frontend/src/pages/DocumentReviewPage.test.tsx:208:      artifacts: [
+frontend/src/pages/DocumentReviewPage.test.tsx:220:  it("runs the review, renders grounded findings/evidence and generates deck artifacts", async () => {
+frontend/src/pages/DocumentReviewPage.test.tsx:248:    expect(window.open).toHaveBeenCalledWith(`${PRODUCT_API_BASE_URL}/api/product/artifact?path=%2Ftmp%2Fdocument-review-deck.pptx`, "_blank", "noopener,noreferrer");
+frontend/src/pages/CandidateReviewPage.test.tsx:76:      artifacts: [
+frontend/src/pages/CandidateReviewPage.test.tsx:108:      artifacts: [
+frontend/src/pages/CandidateReviewPage.test.tsx:138:        total_documents: 1,
+frontend/src/pages/CandidateReviewPage.test.tsx:139:        indexed_documents: 1,
+frontend/src/pages/CandidateReviewPage.test.tsx:140:        warning_documents: 0,
+frontend/src/pages/CandidateReviewPage.test.tsx:141:        error_documents: 0,
+frontend/src/pages/CandidateReviewPage.test.tsx:142:        pending_documents: 0,
+frontend/src/pages/CandidateReviewPage.test.tsx:143:        indexing_documents: 0,
+frontend/src/pages/CandidateReviewPage.test.tsx:147:      documents: [
+frontend/src/pages/CandidateReviewPage.test.tsx:178:      artifacts: [
+frontend/src/pages/CandidateReviewPage.test.tsx:258:  it('runs the live candidate workflow and renders grounded sections plus deck artifacts', async () => {
+frontend/src/pages/RuntimeObservabilityPage.tsx:147:    queryKey: aiLabQueryKeys.runtime,
+frontend/src/pages/RuntimeObservabilityPage.tsx:153:  const runtime = data?.runtime;
+frontend/src/pages/RuntimeObservabilityPage.tsx:172:  const coverageSignalRuns = Math.max(0, Math.round(runtime?.sourceCoverageRunCount ?? sourceCoverageValues.length));
+frontend/src/pages/RuntimeObservabilityPage.tsx:174:  const avgSourceCoverageRaw = runtime?.avgSourceCoveragePct ?? runtime?.avgContextUtilizationPct ?? retrievalHealth?.avgContextUtilizationPct;
+frontend/src/pages/RuntimeObservabilityPage.tsx:181:    typeof runtime?.medianSourceCoveragePct === 'number' && runtime.medianSourceCoveragePct > 0
+frontend/src/pages/RuntimeObservabilityPage.tsx:182:      ? runtime.medianSourceCoveragePct
+frontend/src/pages/RuntimeObservabilityPage.tsx:186:    typeof runtime?.p90SourceCoveragePct === 'number' && runtime.p90SourceCoveragePct > 0
+frontend/src/pages/RuntimeObservabilityPage.tsx:187:      ? runtime.p90SourceCoveragePct
+frontend/src/pages/RuntimeObservabilityPage.tsx:191:    typeof runtime?.latestSourceCoveragePct === 'number' && runtime.latestSourceCoveragePct > 0
+frontend/src/pages/RuntimeObservabilityPage.tsx:192:      ? runtime.latestSourceCoveragePct
+frontend/src/pages/RuntimeObservabilityPage.tsx:196:    typeof runtime?.minSourceCoveragePct === 'number' && runtime.minSourceCoveragePct > 0
+frontend/src/pages/RuntimeObservabilityPage.tsx:197:      ? runtime.minSourceCoveragePct
+frontend/src/pages/RuntimeObservabilityPage.tsx:201:    typeof runtime?.maxSourceCoveragePct === 'number' && runtime.maxSourceCoveragePct > 0
+frontend/src/pages/RuntimeObservabilityPage.tsx:202:      ? runtime.maxSourceCoveragePct
+frontend/src/pages/RuntimeObservabilityPage.tsx:205:  const sourceCoverageHighRunCount = Math.max(0, Math.round(runtime?.sourceCoverageHighRunCount ?? sourceCoverageValues.filter((value) => value >= 90).length));
+frontend/src/pages/RuntimeObservabilityPage.tsx:206:  const sourceCoverageFocusedRunCount = Math.max(0, Math.round(runtime?.sourceCoverageFocusedRunCount ?? sourceCoverageValues.filter((value) => value < 35).length));
+frontend/src/pages/RuntimeObservabilityPage.tsx:207:  const sourceCoverageBalancedRunCount = Math.max(0, Math.round(runtime?.sourceCoverageBalancedRunCount ?? sourceCoverageValues.filter((value) => value >= 35 && value < 85).length));
+frontend/src/pages/RuntimeObservabilityPage.tsx:208:  const sourceCoverageBroadRunCount = Math.max(0, Math.round(runtime?.sourceCoverageBroadRunCount ?? sourceCoverageValues.filter((value) => value >= 85).length));
+frontend/src/pages/RuntimeObservabilityPage.tsx:223:  const surfaceWindowLabel = data?.surface_window?.label ?? opsSummary?.recentWindowLabel ?? 'recent runtime traces';
+frontend/src/pages/RuntimeObservabilityPage.tsx:236:      <div data-tour="lab-runtime-header">
+frontend/src/pages/RuntimeObservabilityPage.tsx:239:        description="Operational posture for the AI runtime — configuration applied, throughput, latency, retrieval health, cost signals and recent trace issues."
+frontend/src/pages/RuntimeObservabilityPage.tsx:240:        operatorQuestion="Is the runtime healthy enough to operate, and where should I escalate next if it is not?"
+frontend/src/pages/RuntimeObservabilityPage.tsx:242:          runtime
+frontend/src/pages/RuntimeObservabilityPage.tsx:244:                label: runtime.vectorBackendStatus === 'healthy' ? 'Runtime healthy' : 'Runtime degraded',
+frontend/src/pages/RuntimeObservabilityPage.tsx:245:                variant: runtime.vectorBackendStatus === 'healthy' ? 'success' : 'warning',
+frontend/src/pages/RuntimeObservabilityPage.tsx:247:            : { label: isLoading ? 'Loading runtime…' : 'Runtime unavailable', variant: isError ? 'warning' : 'default' },
+frontend/src/pages/RuntimeObservabilityPage.tsx:248:          runtime ? { label: `${runtime.indexedDocumentCount} docs`, variant: 'default' } : { label: 'Document inventory pending', variant: 'default' },
+frontend/src/pages/RuntimeObservabilityPage.tsx:249:          runtime ? { label: runtime.retrievalStrategy, variant: 'default' } : { label: 'Waiting for retrieval settings', variant: 'default' },
+frontend/src/pages/RuntimeObservabilityPage.tsx:266:      <div data-tour="lab-runtime-metrics">
+frontend/src/pages/RuntimeObservabilityPage.tsx:295:            label: 'Empty Retrievals',
+frontend/src/pages/RuntimeObservabilityPage.tsx:312:      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 mb-6" data-tour="lab-runtime-summary-cards">
+frontend/src/pages/RuntimeObservabilityPage.tsx:316:          <p className="mt-1 text-xs text-muted-foreground">{strongestProvider ? `${strongestProvider.runs} of ${data?.surface_window?.size ?? strongestProvider.runs} runs · ${Math.round(strongestProvider.errorRate * 100)}% error rate` : 'Provider/model mix appears once runtime traces exist.'}</p>
+frontend/src/pages/RuntimeObservabilityPage.tsx:331:          <p className="mt-1 text-xs text-muted-foreground">How much of runtime traffic has usable cost accounting attached.</p>
+frontend/src/pages/RuntimeObservabilityPage.tsx:336:      <div className="grid lg:grid-cols-2 gap-4 mb-6" data-tour="lab-runtime-config">
+frontend/src/pages/RuntimeObservabilityPage.tsx:373:        <GlassCard delay={0.2} data-tour="lab-runtime-grounding">
+frontend/src/pages/RuntimeObservabilityPage.tsx:386:              Grounded evidence usage will appear once recent runtime traces emit a usable coverage signal.
+frontend/src/pages/RuntimeObservabilityPage.tsx:441:                {typeof runtime?.contextBudgetUsed === 'number' && typeof runtime?.contextBudgetTotal === 'number' && runtime.contextBudgetTotal > 0 ? (
+frontend/src/pages/RuntimeObservabilityPage.tsx:443:                    Latest grounded evidence packet: {runtime.contextBudgetUsed.toLocaleString()} of {runtime.contextBudgetTotal.toLocaleString()} characters used.
+frontend/src/pages/RuntimeObservabilityPage.tsx:452:          <GlassCard delay={0.25} data-tour="lab-runtime-latency">
+frontend/src/pages/RuntimeObservabilityPage.tsx:487:          <GlassCard delay={0.27} data-tour="lab-runtime-cost-simulation">
+frontend/src/pages/RuntimeObservabilityPage.tsx:494:              Model your expected runtime spend using provider-style pricing per 1M tokens. This only changes the simulation, never the real observed cost.
+frontend/src/pages/RuntimeObservabilityPage.tsx:534:        <GlassCard delay={0.3} data-tour="lab-runtime-trend">
+frontend/src/pages/RuntimeObservabilityPage.tsx:541:            <p className="text-xs text-muted-foreground">Recent product run trend appears when runtime history is available.</p>
+frontend/src/pages/RuntimeObservabilityPage.tsx:562:        <GlassCard delay={0.32} data-tour="lab-runtime-retrieval-cost">
+frontend/src/pages/RuntimeObservabilityPage.tsx:602:        <GlassCard delay={0.34} data-tour="lab-runtime-vector-diagnostics">
+frontend/src/pages/RuntimeObservabilityPage.tsx:606:            <StatusPill status={runtime?.vectorBackendStatus === 'healthy' ? 'active' : runtime ? 'degraded' : 'inactive'} />
+frontend/src/pages/RuntimeObservabilityPage.tsx:626:        <GlassCard delay={0.36} data-tour="lab-runtime-trace-watchlist">
+frontend/src/pages/RuntimeObservabilityPage.tsx:675:        <GlassCard delay={0.38} data-tour="lab-runtime-failure-modes">
+frontend/src/pages/RuntimeObservabilityPage.tsx:683:              <p className="text-xs text-muted-foreground">No recurring failure mode was derived from the persisted runtime traces.</p>
+frontend/src/pages/RuntimeObservabilityPage.tsx:699:              <p className="text-xs text-muted-foreground">No runtime watchout is currently elevated.</p>
+frontend/src/pages/WorkflowInspectorPage.tsx:35:      return 'Compare the selected documents and summarize the main deltas, business impact, risks and follow-up actions.';
+frontend/src/pages/WorkflowInspectorPage.tsx:37:      return 'Extract the most important operational next steps, owners, blockers and evidence-backed actions from the selected documents.';
+frontend/src/pages/WorkflowInspectorPage.tsx:106:    ? (data?.capabilities.reason ?? 'Execution is unavailable in the current runtime.')
+frontend/src/pages/WorkflowInspectorPage.tsx:108:      ? 'Policy / Contract Comparison needs at least 2 indexed documents so you can compare a policy against a contract.'
+frontend/src/pages/WorkflowInspectorPage.tsx:110:        ? 'Select two different indexed documents before running the policy comparison.'
+frontend/src/pages/WorkflowInspectorPage.tsx:112:          ? 'Pick the two documents you want to compare. The inspector will use exactly that pair.'
+frontend/src/pages/WorkflowInspectorPage.tsx:167:      queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.artifacts });
+frontend/src/pages/WorkflowInspectorPage.tsx:168:      queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime });
+frontend/src/pages/WorkflowInspectorPage.tsx:289:          <GlassCard delay={0.15} data-tour="lab-workflow-inspector-documents">
+frontend/src/pages/AiLabPages.test.tsx:28:  if (url.includes('/api/lab/overview')) {
+frontend/src/pages/AiLabPages.test.tsx:32:      runtime: {
+frontend/src/pages/AiLabPages.test.tsx:49:  if (url.includes('/api/lab/runtime')) {
+frontend/src/pages/AiLabPages.test.tsx:53:      runtime: { provider: 'ollama', model: 'nemotron-3-nano:30b-cloud' },
+frontend/src/pages/AiLabPages.test.tsx:60:  if (url.includes('/api/lab/chat')) {
+frontend/src/pages/AiLabPages.test.tsx:80:      selected_documents: [
+frontend/src/pages/AiLabPages.test.tsx:96:  if (url.includes('/api/lab/workflow-inspector')) {
+frontend/src/pages/AiLabPages.test.tsx:123:  if (url.includes('/api/lab/benchmarks')) {
+frontend/src/pages/AiLabPages.test.tsx:153:          runtimeBucket: 'cloud',
+frontend/src/pages/AiLabPages.test.tsx:170:          runtimeBucket: 'cloud',
+frontend/src/pages/AiLabPages.test.tsx:200:  if (url.includes('/api/lab/evals')) {
+frontend/src/pages/AiLabPages.test.tsx:211:  if (url.includes('/api/lab/artifacts')) {
+frontend/src/pages/AiLabPages.test.tsx:215:      artifacts: [{
+frontend/src/pages/AiLabPages.test.tsx:239:  if (url.includes('/api/lab/evidenceops/search')) {
+frontend/src/pages/AiLabPages.test.tsx:248:  if (url.includes('/api/lab/evidenceops')) {
+frontend/src/pages/AiLabPages.test.tsx:255:      operations: [{ id: 'repository-scan', operation: 'repository_scan', tool: 'local_repository_scan', status: 'success', timestamp: '2026-04-18T00:00:00Z', durationMs: 12, detail: '4 documents visible.' }],
+frontend/src/pages/AiLabPages.test.tsx:260:  if (url.includes('/api/product/document-library')) {
+frontend/src/pages/AiLabPages.test.tsx:263:      summary: { total_documents: 2, indexed_documents: 2, warning_documents: 0, error_documents: 0, pending_documents: 0, indexing_documents: 0, total_chunks: 6, total_chars: 1200 },
+frontend/src/pages/AiLabPages.test.tsx:264:      documents: [
+frontend/src/pages/AiLabPages.test.tsx:270:  if (url.includes('/api/runtime/controls')) {
+frontend/src/pages/AiLabPages.test.tsx:282:  if (url.includes('/api/product/run-workflow')) {
+frontend/src/pages/RuntimeControlsPage.tsx:31:} from '@/lib/runtime-controls-ui';
+frontend/src/pages/RuntimeControlsPage.tsx:71:    queryKey: ['runtime-controls'],
+frontend/src/pages/RuntimeControlsPage.tsx:90:      queryClient.setQueryData(['runtime-controls'], response);
+frontend/src/pages/RuntimeControlsPage.tsx:96:      toast.error(mutationError instanceof Error ? mutationError.message : 'Failed to save runtime controls.');
+frontend/src/pages/RuntimeControlsPage.tsx:160:            Loading live runtime
+frontend/src/pages/RuntimeControlsPage.tsx:164:          <div className="text-xs text-muted-foreground">Loading runtime controls from the backend…</div>
+frontend/src/pages/RuntimeControlsPage.tsx:189:      <div data-tour="runtime-controls-header">
+frontend/src/pages/RuntimeControlsPage.tsx:192:          description="Edit the currently active runtime profile. Workspace defaults and the saved profile library live in Preferences, while this screen focuses on the active execution path."
+frontend/src/pages/RuntimeControlsPage.tsx:196:            Live runtime
+frontend/src/pages/RuntimeControlsPage.tsx:199:            {data?.contract_version || 'runtime_controls.v1'}
+frontend/src/pages/RuntimeControlsPage.tsx:215:        <GlassCard data-tour="runtime-controls-summary">
+frontend/src/pages/RuntimeControlsPage.tsx:304:            These controls are persisted and affect the real runtime path. They also synchronize back to the active saved profile shown in Preferences.
+frontend/src/pages/RuntimeControlsPage.tsx:308:        <GlassCard data-tour="runtime-controls-generation">
+frontend/src/pages/RuntimeControlsPage.tsx:379:        <GlassCard data-tour="runtime-controls-retrieval">
+frontend/src/pages/RuntimeControlsPage.tsx:452:        <GlassCard data-tour="runtime-controls-doc-processing">
+frontend/src/pages/PreferencesPage.tsx:34:import { CONNECTION_ROLE_LABELS, credentialStatusCopy, formatConnectionCheckedAt } from '@/lib/preferences-ui';
+frontend/src/pages/PreferencesPage.tsx:35:import { buildCatalogLookup } from '@/lib/runtime-controls-ui';
+frontend/src/pages/PreferencesPage.tsx:344:    queryKey: ['preferences'],
+frontend/src/pages/PreferencesPage.tsx:364:      queryClient.setQueryData(['preferences'], response);
+frontend/src/pages/PreferencesPage.tsx:365:      queryClient.invalidateQueries({ queryKey: ['runtime-controls'] });
+frontend/src/pages/PreferencesPage.tsx:369:      toast.error(mutationError instanceof Error ? mutationError.message : 'Failed to update preferences.');
+frontend/src/pages/PreferencesPage.tsx:379:      queryClient.setQueryData<PreferencesResponse | undefined>(['preferences'], (current) => {
+frontend/src/pages/PreferencesPage.tsx:410:      queryClient.setQueryData(['preferences'], response);
+frontend/src/pages/PreferencesPage.tsx:411:      queryClient.invalidateQueries({ queryKey: ['runtime-controls'] });
+frontend/src/pages/PreferencesPage.tsx:426:      runtime_profiles: data.runtime_profiles ?? [],
+frontend/src/pages/PreferencesPage.tsx:435:  const profiles = normalizedData?.runtime_profiles ?? [];
+frontend/src/pages/PreferencesPage.tsx:436:  const operatorPreferences = normalizedData?.operator_preferences;
+frontend/src/pages/PreferencesPage.tsx:448:    savePreferences({ active_profile_id: profileId }, 'Active runtime profile updated.');
+frontend/src/pages/PreferencesPage.tsx:452:    savePreferences({ operator_preferences: patch }, successMessage);
+frontend/src/pages/PreferencesPage.tsx:460:          description="Saved provider connections, runtime profiles, and operator preferences."
+frontend/src/pages/PreferencesPage.tsx:463:            Loading live preferences
+frontend/src/pages/PreferencesPage.tsx:469:              <div className="text-xs text-muted-foreground">Loading preferences from the backend…</div>
+frontend/src/pages/PreferencesPage.tsx:484:          description="Saved provider connections, runtime profiles, and operator preferences."
+frontend/src/pages/PreferencesPage.tsx:496:              <Button variant="ghost" size="sm" className="h-8 text-[10px] text-muted-foreground" onClick={() => window.location.assign('/app/settings/runtime')}>
+frontend/src/pages/PreferencesPage.tsx:508:      <div data-tour="preferences-header">
+frontend/src/pages/PreferencesPage.tsx:511:          description="Saved provider connections, runtime profiles, and operator preferences."
+frontend/src/pages/PreferencesPage.tsx:515:            Live preferences
+frontend/src/pages/PreferencesPage.tsx:530:        <div className="grid gap-3 md:grid-cols-3" data-tour="preferences-metrics">
+frontend/src/pages/PreferencesPage.tsx:536:        <GlassCard data-tour="preferences-summary">
+frontend/src/pages/PreferencesPage.tsx:564:        <div data-tour="preferences-connections">
+frontend/src/pages/PreferencesPage.tsx:570:            Live provider connections are discovered from the backend runtime registry, with workspace-safe metadata overlays and connection tests.
+frontend/src/pages/PreferencesPage.tsx:588:        <div data-tour="preferences-profiles">
+frontend/src/pages/PreferencesPage.tsx:614:        <GlassCard data-tour="preferences-operator">
+frontend/src/pages/RunHistoryPage.tsx:76:  const artifacts = run?.artifact_items ?? [];
+frontend/src/pages/RunHistoryPage.tsx:78:  return artifacts.filter((artifact) => {
+frontend/src/pages/RunHistoryPage.tsx:176:        `${run.id} ${run.workflow_label} ${(run.documents || []).join(' ')} ${run.recommendation || ''}`.toLowerCase().includes(needle);
+frontend/src/pages/RunHistoryPage.tsx:214:        queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+frontend/src/pages/RunHistoryPage.tsx:226:  const artifacts = dedupeArtifacts(detailRun);
+frontend/src/pages/RunHistoryPage.tsx:333:                  <p className="text-xs text-muted-foreground truncate">{(run.documents || []).join(', ') || 'No document labels captured'}</p>
+frontend/src/pages/RunHistoryPage.tsx:400:                  <p className="mt-1 text-sm font-medium text-foreground">{detailRun.documents?.length ?? 0}</p>
+frontend/src/pages/RunHistoryPage.tsx:404:                  <p className="mt-1 text-sm font-medium text-foreground">{artifacts.length}</p>
+frontend/src/pages/RunHistoryPage.tsx:463:              {artifacts.length ? (
+frontend/src/pages/RunHistoryPage.tsx:465:                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">Linked artifacts</h4>
+frontend/src/pages/RunHistoryPage.tsx:467:                    {artifacts.map((artifact) => (
+frontend/src/pages/OverviewPage.tsx:18:  { title: 'Document Review', desc: 'Review documents for risks, gaps and findings with grounded evidence', icon: Shield, path: '/app/workflows/document-review', color: 'primary' },
+frontend/src/pages/OverviewPage.tsx:46:  const recentArtifacts = data?.recent_artifacts ?? [];
+frontend/src/pages/OverviewPage.tsx:60:            Turn documents into<br />
+frontend/src/pages/OverviewPage.tsx:64:            Review, compare and operationalize enterprise documents with AI-powered evidence workflows.
+frontend/src/pages/OverviewPage.tsx:72:              <Link to="/app/documents">Document Library</Link>
+frontend/src/pages/OverviewPage.tsx:80:        <MetricCard label="Indexed Documents" value={isLoading ? '—' : (summary?.indexed_documents ?? 0)} icon={FileText} glowColor="primary" delay={0.1} />
+frontend/src/pages/OverviewPage.tsx:83:        <MetricCard label="Artifacts Generated" value={isLoading ? '—' : (summary?.artifacts_generated ?? 0)} icon={FileOutput} glowColor="warning" delay={0.25} />
+frontend/src/pages/OverviewPage.tsx:146:                    <p className="text-[10px] text-muted-foreground truncate">{(run.documents || []).join(', ') || 'No documents registered'}</p>
+frontend/src/pages/OverviewPage.tsx:179:      <div className="grid lg:grid-cols-2 gap-3" data-tour="command-center-lab-artifacts">
+frontend/src/pages/OverviewPage.tsx:185:          <p className="text-xs text-muted-foreground mb-4">Explore the upgraded AI Lab operating console, observability surfaces, benchmarks, evaluations and artifact evidence.</p>
+frontend/src/pages/OverviewPage.tsx:187:            {AI_LAB_ROUTES.filter((route) => ['overview', 'runtime', 'benchmarks', 'evidenceops'].includes(route.key)).map(route => (
+frontend/src/pages/OverviewPage.tsx:206:                {isLoading ? 'Loading artifacts...' : 'No generated artifacts were found yet.'}
+frontend/src/pages/DeckCenterPage.test.tsx:36:      artifact_root: 'artifacts/presentation_exports',
+frontend/src/pages/DeckCenterPage.test.tsx:38:        total_artifacts: 1,
+frontend/src/pages/DeckCenterPage.test.tsx:39:        completed_artifacts: 1,
+frontend/src/pages/DeckCenterPage.test.tsx:40:        error_artifacts: 0,
+frontend/src/pages/DeckCenterPage.test.tsx:42:      artifacts: [
+frontend/src/pages/DeckCenterPage.test.tsx:53:          local_pptx_path: 'artifacts/presentation_exports/candidate-review-deck.pptx',
+frontend/src/pages/DeckCenterPage.test.tsx:54:          local_payload_path: 'artifacts/presentation_exports/candidate-review-payload.json',
+frontend/src/pages/DeckCenterPage.test.tsx:67:              path: 'artifacts/presentation_exports/candidate-review-deck.pptx',
+frontend/src/pages/DeckCenterPage.test.tsx:77:      artifact_root: 'artifacts/presentation_exports',
+frontend/src/pages/DeckCenterPage.test.tsx:88:        local_pptx_path: 'artifacts/presentation_exports/candidate-review-deck.pptx',
+frontend/src/pages/DeckCenterPage.test.tsx:89:        local_payload_path: 'artifacts/presentation_exports/candidate-review-payload.json',
+frontend/src/pages/DeckCenterPage.test.tsx:105:            path: 'artifacts/presentation_exports/candidate-review-deck.pptx',
+frontend/src/pages/DeckCenterPage.test.tsx:111:            path: 'artifacts/presentation_exports/candidate-review-payload.json',
+frontend/src/pages/DeckCenterPage.test.tsx:119:            path: 'artifacts/presentation_exports/preview/slide-1.png',
+frontend/src/pages/EvalsDiagnosisPage.tsx:47:    queryKey: aiLabQueryKeys.evals,
+frontend/src/pages/EvalsDiagnosisPage.tsx:99:      <div data-tour="lab-evals-header">
+frontend/src/pages/EvalsDiagnosisPage.tsx:114:            This page now scopes to product-observed workflows only. The Product API is unavailable, so live product evals could not be refreshed.
+frontend/src/pages/EvalsDiagnosisPage.tsx:119:      <div data-tour="lab-evals-metrics">
+frontend/src/pages/EvalsDiagnosisPage.tsx:132:      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-evals-coverage">
+frontend/src/pages/EvalsDiagnosisPage.tsx:145:          <p className="mt-2 text-sm font-semibold text-foreground">{liveTotals.total ? (liveWindow?.label ?? 'Retained product telemetry') : 'No live evals yet'}</p>
+frontend/src/pages/EvalsDiagnosisPage.tsx:155:      <div className="grid lg:grid-cols-2 gap-4 mb-6" data-tour="lab-evals-distribution">
+frontend/src/pages/EvalsDiagnosisPage.tsx:211:      <div className="grid lg:grid-cols-2 gap-4 mb-6" data-tour="lab-evals-investigate">
+frontend/src/pages/EvalsDiagnosisPage.tsx:212:        <GlassCard delay={0.12} data-tour="lab-evals-suite-leaderboard">
+frontend/src/pages/EvalsDiagnosisPage.tsx:246:        <GlassCard delay={0.15} data-tour="lab-evals-investigate-first">
+frontend/src/pages/EvalsDiagnosisPage.tsx:286:      <div className="grid xl:grid-cols-3 gap-4 mb-6" data-tour="lab-evals-breakdowns">
+frontend/src/pages/EvalsDiagnosisPage.tsx:287:        <GlassCard delay={0.18} data-tour="lab-evals-provider-breakdown">
+frontend/src/pages/EvalsDiagnosisPage.tsx:310:        <GlassCard delay={0.2} data-tour="lab-evals-task-coverage">
+frontend/src/pages/EvalsDiagnosisPage.tsx:333:        <GlassCard delay={0.22} data-tour="lab-evals-attention-queue">
+frontend/src/pages/EvalsDiagnosisPage.tsx:362:        <GlassCard className="mb-6" delay={0.2} data-tour="lab-evals-adaptation">
+frontend/src/pages/EvalsDiagnosisPage.tsx:370:              <div key={candidate.task_type} data-tour={index < 4 ? 'lab-evals-adaptation-row' : undefined} className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-secondary/20 transition-colors gap-4">
+frontend/src/pages/EvalsDiagnosisPage.tsx:389:      <GlassCard delay={0.25} data-tour="lab-evals-recent-cases">
+frontend/src/pages/EvalsDiagnosisPage.tsx:390:        <div className="flex items-center gap-2 mb-4" data-tour="lab-evals-recent-cases-start">
+frontend/src/pages/EvalsDiagnosisPage.tsx:406:                <tr key={item.id} data-tour={index < 4 ? 'lab-evals-recent-cases-start' : undefined} className="border-b border-border/20 hover:bg-secondary/10 transition-colors">
+frontend/src/pages/DocumentsPage.tsx:38:  if (totalDocuments === 0) return 'No documents were found in the indexed corpus.';
+frontend/src/pages/DocumentsPage.tsx:39:  if (search.trim()) return `No documents match “${search.trim()}”.`;
+frontend/src/pages/DocumentsPage.tsx:40:  return 'No documents were found in the indexed corpus.';
+frontend/src/pages/DocumentsPage.tsx:161:  const documents = data?.documents ?? [];
+frontend/src/pages/DocumentsPage.tsx:164:  const filtered = documents.filter(d => {
+frontend/src/pages/DocumentsPage.tsx:168:  const emptyStateMessage = buildEmptyStateMessage(isLoading, documents.length, search);
+frontend/src/pages/DocumentsPage.tsx:215:        <div className="-m-1 flex items-center gap-2 rounded-xl p-1" data-tour="documents-page-actions">
+frontend/src/pages/DocumentsPage.tsx:216:          <Button variant="outline" className="h-9 px-4 text-xs border-border/50" onClick={() => setNextcloudSheetOpen(true)} disabled={uploadInProgress} data-testid="open-nextcloud-import" data-tour="documents-nextcloud-button">
+frontend/src/pages/DocumentsPage.tsx:251:      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" data-tour="documents-stats">
+frontend/src/pages/DocumentsPage.tsx:252:        <MetricCard label="Total Documents" value={isLoading ? '—' : (summary?.total_documents ?? 0)} icon={FileText} glowColor="primary" />
+frontend/src/pages/DocumentsPage.tsx:253:        <MetricCard label="Indexed" value={isLoading ? '—' : (summary?.indexed_documents ?? 0)} icon={Check} glowColor="success" />
+frontend/src/pages/DocumentsPage.tsx:278:        <GlassCard className="mb-6" data-tour="documents-pipeline">
+frontend/src/pages/DocumentsPage.tsx:288:              const runtimeStep = pipelineStageLookup.get(step.key);
+frontend/src/pages/DocumentsPage.tsx:289:              const status = runtimeStep?.status || 'pending';
+frontend/src/pages/DocumentsPage.tsx:290:              const detail = runtimeStep?.detail || (status === 'pending' ? 'Waiting for indexing to reach this step.' : null);
+frontend/src/pages/DocumentsPage.tsx:325:          data-tour="documents-intake"
+frontend/src/pages/DocumentsPage.tsx:358:      <motion.div variants={item} className="flex items-center justify-between mb-4 gap-4" data-tour="documents-library-controls">
+frontend/src/pages/DocumentsPage.tsx:361:          <Input placeholder="Search documents..." value={search} onChange={e => setSearch(e.target.value)}
+frontend/src/pages/DocumentsPage.tsx:376:        <motion.div variants={item} className="glass rounded-xl overflow-hidden" data-tour="documents-indexed-table">
+frontend/src/pages/DocumentsPage.tsx:390:                  data-tour={i < 3 ? 'documents-indexed-sample' : undefined}
+frontend/src/pages/DocumentsPage.tsx:599:                      Explore the documents that are already available in this demo workspace.
+frontend/src/pages/DocumentsPage.tsx:621:              Want to see it with your own documents or use case? I’d be happy to walk you through a guided demo.
+frontend/src/pages/WorkflowCatalogPage.tsx:42:function countEligibleDocuments(workflow: ProductWorkflowDefinition, documents: ProductDocumentLibraryEntry[]): number {
+frontend/src/pages/WorkflowCatalogPage.tsx:44:    return documents.filter(isCandidateLikeDocument).length;
+frontend/src/pages/WorkflowCatalogPage.tsx:46:  return documents.length;
+frontend/src/pages/WorkflowCatalogPage.tsx:49:function workflowSurfaceStatus(workflow: ProductWorkflowDefinition, documents: ProductDocumentLibraryEntry[]): 'ready' | 'degraded' | 'pending' {
+frontend/src/pages/WorkflowCatalogPage.tsx:50:  const eligibleCount = countEligibleDocuments(workflow, documents);
+frontend/src/pages/WorkflowCatalogPage.tsx:52:  if (documents.length > 0) return 'degraded';
+frontend/src/pages/WorkflowCatalogPage.tsx:61:    return `${workflow.required_document_count_min}-${workflow.required_document_count_max} documents`;
+frontend/src/pages/WorkflowCatalogPage.tsx:63:  return `${workflow.required_document_count_min}+ documents`;
+frontend/src/pages/WorkflowCatalogPage.tsx:99:  const availableDocuments = (documentLibraryQuery.data?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning');
+frontend/src/pages/WorkflowCatalogPage.tsx:166:                  : `No indexed documents are available yet for ${workflow.label}.`;
+frontend/src/pages/LabOverviewPage.tsx:80:function formatRuntimeLabel(runtime: Record<string, unknown>) {
+frontend/src/pages/LabOverviewPage.tsx:81:  const provider = String(runtime?.generationProvider || '').trim();
+frontend/src/pages/LabOverviewPage.tsx:82:  const model = String(runtime?.generationModel || '').trim();
+frontend/src/pages/LabOverviewPage.tsx:118:function getLatencyTrendFromRuntime(runtime: Record<string, unknown>): string | undefined {
+frontend/src/pages/LabOverviewPage.tsx:120:    runtime.avgLatencyDeltaS ??
+frontend/src/pages/LabOverviewPage.tsx:121:      runtime.avg_latency_delta_s ??
+frontend/src/pages/LabOverviewPage.tsx:122:      runtime.latencyDeltaS ??
+frontend/src/pages/LabOverviewPage.tsx:123:      runtime.latency_delta_s ??
+frontend/src/pages/LabOverviewPage.tsx:124:      runtime.avgLatencyDelta ??
+frontend/src/pages/LabOverviewPage.tsx:125:      runtime.avg_latency_delta
+frontend/src/pages/LabOverviewPage.tsx:132:  runtime: Record<string, unknown>,
+frontend/src/pages/LabOverviewPage.tsx:146:  const runtimeLatencyTrend = getLatencyTrendFromRuntime(runtime);
+frontend/src/pages/LabOverviewPage.tsx:165:      { label: 'Indexed Documents', value: formatMetricValue(runtime.indexedDocumentCount), status: 'healthy', icon: Activity },
+frontend/src/pages/LabOverviewPage.tsx:166:      { label: 'Total Chunks', value: formatMetricValue(runtime.totalChunks), status: 'healthy', icon: Database },
+frontend/src/pages/LabOverviewPage.tsx:179:      trend: metric.trend || (isLatencyMetric ? runtimeLatencyTrend : undefined),
+frontend/src/pages/LabOverviewPage.tsx:193:  const runtime = data?.runtime ?? {};
+frontend/src/pages/LabOverviewPage.tsx:203:  const topMetrics = pickTopMetrics(kpis, reviewRate, runtime, workflowMix);
+frontend/src/pages/LabOverviewPage.tsx:204:  const runtimeStatus = normalizeStatus(typeof runtime?.vectorBackendStatus === 'string' ? runtime.vectorBackendStatus : undefined);
+frontend/src/pages/LabOverviewPage.tsx:213:        description="Unified view of runtime health, quality signals, active alerts and operational readiness."
+frontend/src/pages/LabOverviewPage.tsx:218:            label: runtime?.vectorBackendStatus === 'healthy' ? 'Runtime Healthy' : 'Runtime Degraded',
+frontend/src/pages/LabOverviewPage.tsx:219:            variant: runtime?.vectorBackendStatus === 'healthy' ? 'success' : 'warning',
+frontend/src/pages/LabOverviewPage.tsx:242:            <span className="text-foreground truncate">{formatRuntimeLabel(runtime)}</span>
+frontend/src/pages/LabOverviewPage.tsx:249:            <StatusPill status={runtimeStatus} />
+frontend/src/pages/LabOverviewPage.tsx:316:            <p className="text-xs text-muted-foreground">Workflow distribution appears once the product runtime has persisted workflow history.</p>
+frontend/src/pages/PreferencesPage.test.tsx:28:    contract_version: 'preferences.v1',
+frontend/src/pages/PreferencesPage.test.tsx:43:        description: 'Primary local runtime.',
+frontend/src/pages/PreferencesPage.test.tsx:60:    runtime_profiles: [
+frontend/src/pages/PreferencesPage.test.tsx:164:    operator_preferences: {
+frontend/src/pages/PreferencesPage.test.tsx:242:  it('loads live preferences, activates a saved profile and tests a provider connection', async () => {
+frontend/src/pages/PreferencesPage.test.tsx:245:    expect(await screen.findByText('Live preferences')).toBeInTheDocument();
+frontend/src/pages/AdvancedExperimentsPage.tsx:18:    queryKey: aiLabQueryKeys.artifacts,
+frontend/src/pages/AdvancedExperimentsPage.tsx:24:  const artifacts = data?.artifacts ?? [];
+frontend/src/pages/AdvancedExperimentsPage.tsx:34:      <div data-tour="lab-artifacts-header">
+frontend/src/pages/AdvancedExperimentsPage.tsx:54:      <div data-tour="lab-artifacts-metrics">
+frontend/src/pages/AdvancedExperimentsPage.tsx:66:      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-artifacts-registry-summary">
+frontend/src/pages/AdvancedExperimentsPage.tsx:94:        <GlassCard delay={0.08} data-tour="lab-artifacts-run-registry">
+frontend/src/pages/AdvancedExperimentsPage.tsx:117:        <GlassCard delay={0.1} data-tour="lab-artifacts-recent-bundles">
+frontend/src/pages/AdvancedExperimentsPage.tsx:155:      <GlassCard className="mb-6" delay={0.1} data-tour="lab-artifacts-diagnostics">
+frontend/src/pages/AdvancedExperimentsPage.tsx:162:          <p className="text-xs text-muted-foreground">Loading diagnostics from runtime state and artifact metadata…</p>
+frontend/src/pages/AdvancedExperimentsPage.tsx:193:      <GlassCard delay={0.2} data-tour="lab-artifacts-explorer">
+frontend/src/pages/AdvancedExperimentsPage.tsx:194:        <ArtifactExplorerPanel artifacts={artifacts} dataSource={data?.meta.source ?? 'derived'} />
+frontend/src/pages/WorkflowCatalogPage.test.tsx:47:          description: 'Grounded candidate review using indexed resume and hiring packet documents.',
+frontend/src/pages/WorkflowCatalogPage.test.tsx:85:        total_documents: 2,
+frontend/src/pages/WorkflowCatalogPage.test.tsx:86:        indexed_documents: 2,
+frontend/src/pages/WorkflowCatalogPage.test.tsx:87:        warning_documents: 0,
+frontend/src/pages/WorkflowCatalogPage.test.tsx:88:        error_documents: 0,
+frontend/src/pages/WorkflowCatalogPage.test.tsx:89:        pending_documents: 0,
+frontend/src/pages/WorkflowCatalogPage.test.tsx:90:        indexing_documents: 0,
+frontend/src/pages/WorkflowCatalogPage.test.tsx:94:      documents: [
+frontend/src/pages/WorkflowCatalogPage.test.tsx:136:          documents: ['Sarah Chen - Senior ML Engineer CV.pdf'],
+frontend/src/pages/DeckCenterPage.tsx:75:function sortArtifacts(artifacts: ProductArtifactEntry[]): ProductArtifactEntry[] {
+frontend/src/pages/DeckCenterPage.tsx:76:  return [...artifacts].sort((left, right) => {
+frontend/src/pages/DeckCenterPage.tsx:90:  const artifactsQuery = useQuery({
+frontend/src/pages/DeckCenterPage.tsx:91:    queryKey: ['product-artifacts'],
+frontend/src/pages/DeckCenterPage.tsx:96:  const artifacts = artifactsQuery.data?.artifacts ?? [];
+frontend/src/pages/DeckCenterPage.tsx:97:  const rankedArtifacts = useMemo(() => sortArtifacts(artifacts), [artifacts]);
+frontend/src/pages/DeckCenterPage.tsx:121:    () => artifacts.filter((artifact) => artifact.status !== 'ready').length,
+frontend/src/pages/DeckCenterPage.tsx:122:    [artifacts],
+frontend/src/pages/DeckCenterPage.tsx:168:      {(artifactsQuery.isError || artifactDetailQuery.isError) && (
+frontend/src/pages/DeckCenterPage.tsx:178:        <MetricCard label="Artifacts" value={artifactsQuery.data?.summary.total_artifacts ?? artifacts.length} icon={FileOutput} delay={0.05} />
+frontend/src/pages/DeckCenterPage.tsx:179:        <MetricCard label="Ready" value={artifactsQuery.data?.summary.completed_artifacts ?? artifacts.filter((artifact) => artifact.status === 'ready').length} icon={CheckCircle2} glowColor="success" delay={0.08} />
+frontend/src/pages/DeckCenterPage.tsx:180:        <MetricCard label="Needs review" value={artifacts.filter((artifact) => artifact.status === 'warning').length} icon={AlertTriangle} glowColor="warning" delay={0.11} />
+frontend/src/pages/DeckCenterPage.tsx:181:        <MetricCard label="Preview assets" value={artifacts.reduce((accumulator, artifact) => accumulator + safeNumber(artifact.preview_count), 0)} icon={Layers} glowColor="accent" delay={0.14} />
+frontend/src/pages/DeckCenterPage.tsx:225:                {artifactsQuery.isLoading
+frontend/src/pages/DeckCenterPage.tsx:226:                  ? 'Loading persisted deck artifacts...'
+frontend/src/pages/DeckCenterPage.tsx:227:                  : 'No artifacts matched the current filters. Clear the search or switch the status filter to inspect incomplete exports.'}
+frontend/src/pages/ComparisonPage.tsx:27:import { findRecommendedDocument, normalizeDemoDocumentName, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
+frontend/src/pages/ComparisonPage.tsx:35:function dedupeArtifacts(artifacts: ProductWorkflowArtifact[]): ProductWorkflowArtifact[] {
+frontend/src/pages/ComparisonPage.tsx:38:  for (const artifact of artifacts) {
+frontend/src/pages/ComparisonPage.tsx:61:  const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
+frontend/src/pages/ComparisonPage.tsx:77:    () => (documentLibrary?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
+frontend/src/pages/ComparisonPage.tsx:176:    setGeneratedArtifacts(run.artifact_items?.length ? run.artifact_items : hydratedWorkflowResponse.result.artifacts ?? []);
+frontend/src/pages/ComparisonPage.tsx:215:      setGeneratedArtifacts(payload.artifacts);
+frontend/src/pages/ComparisonPage.tsx:217:      const hasArtifacts = payload.artifacts.length > 0;
+frontend/src/pages/ComparisonPage.tsx:226:        ? 'Comparison artifacts were generated and are ready for review.'
+frontend/src/pages/ComparisonPage.tsx:234:        queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+frontend/src/pages/ComparisonPage.tsx:239:        toast.success('Policy comparison deck artifacts generated successfully.');
+frontend/src/pages/ComparisonPage.tsx:256:    () => dedupeArtifacts([...(comparisonView?.artifacts ?? []), ...generatedArtifacts]),
+frontend/src/pages/ComparisonPage.tsx:257:    [comparisonView?.artifacts, generatedArtifacts],
+frontend/src/pages/ComparisonPage.tsx:307:      <div data-tour="policy-comparison-header"><PageHeader title="Policy & Contract Comparison" description="Compare two documents side by side and surface grounded deltas.">
+frontend/src/pages/ComparisonPage.tsx:327:      {documentsError && (
+frontend/src/pages/ComparisonPage.tsx:334:      {!documentsLoading && availableDocuments.length < 2 && (
+frontend/src/pages/ComparisonPage.tsx:337:          At least two indexed documents are required to run a grounded policy comparison.
+frontend/src/pages/ComparisonPage.tsx:427:                        : groundingPreview?.preview_text || 'Select two different indexed documents to preview the grounded comparison context before running the workflow.'}
+frontend/src/pages/ComparisonPage.tsx:446:                Analysis between <span className="text-foreground">{comparisonView.executive_summary.documents[0] || selectedDocumentA?.name || 'Document A'}</span> and <span className="text-foreground">{comparisonView.executive_summary.documents[1] || selectedDocumentB?.name || 'Document B'}</span> reveals
+frontend/src/pages/ComparisonPage.tsx:451:              'Select two indexed documents and run the comparison to populate grounded deltas, must-fix items and negotiation priorities.'
+frontend/src/pages/ComparisonPage.tsx:571:      <div className="grid lg:grid-cols-2 gap-4 mt-6" data-tour="policy-comparison-watchouts-artifacts">
+frontend/src/pages/ComparisonPage.tsx:581:        <div data-tour="policy-comparison-artifacts">
+frontend/src/pages/ComparisonPage.tsx:633:            )) : <div className="text-xs text-muted-foreground">Run the workflow and generate the deck to populate comparison artifacts.</div>}
+frontend/src/pages/ComparisonPage.tsx:645:          description="After reviewing the comparison summary, deltas and artifacts, preview the remediation cards or Notion memo before publishing."
+frontend/src/pages/ComparisonPage.tsx:648:            title: comparisonView?.executive_summary.documents?.join(' vs ') || 'Policy comparison',
+frontend/src/pages/ComparisonPage.tsx:658:            documents: comparisonView?.compared_documents || [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+frontend/src/pages/ComparisonPage.tsx:659:            primary_documents: [selectedDocumentA?.name, selectedDocumentB?.name].filter(Boolean),
+frontend/src/pages/ActionPlanPage.test.tsx:81:      artifacts: [],
+frontend/src/pages/ActionPlanPage.test.tsx:98:        documents: 2,
+frontend/src/pages/ActionPlanPage.test.tsx:99:        artifacts: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:191:      artifacts: [],
+frontend/src/pages/ActionPlanPage.test.tsx:234:        total_documents: 2,
+frontend/src/pages/ActionPlanPage.test.tsx:235:        indexed_documents: 2,
+frontend/src/pages/ActionPlanPage.test.tsx:236:        warning_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:237:        error_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:238:        pending_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:239:        indexing_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:243:      documents: [
+frontend/src/pages/ActionPlanPage.test.tsx:289:      artifacts: [
+frontend/src/pages/ActionPlanPage.test.tsx:319:  it('shows the no-documents state when the library is empty', async () => {
+frontend/src/pages/ActionPlanPage.test.tsx:323:        total_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:324:        indexed_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:325:        warning_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:326:        error_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:327:        pending_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:328:        indexing_documents: 0,
+frontend/src/pages/ActionPlanPage.test.tsx:332:      documents: [],
+frontend/src/pages/ActionPlanPage.test.tsx:337:    expect(await screen.findByText(/No indexed documents available/i)).toBeInTheDocument();
+frontend/src/pages/ActionPlanPage.test.tsx:341:  it('runs the workflow, renders live tabs, generates deck artifacts and opens an artifact', async () => {
+frontend/src/pages/ActionPlanPage.test.tsx:354:    expect(screen.getByText(/2 documents selected - Privileged Account Approval Email\.pdf \+ Access Review Evidence Log\.pdf/i)).toBeInTheDocument();
+frontend/src/pages/ActionPlanPage.test.tsx:388:    const expectedUrl = `${PRODUCT_API_BASE_URL}/api/product/artifact?${new URLSearchParams({
+frontend/src/pages/ActionPlanPage.tsx:47:import { ACTION_PLAN_DOCUMENT_LIMIT, findRecommendedDocuments, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
+frontend/src/pages/ActionPlanPage.tsx:77:function dedupeArtifacts(artifacts: ProductWorkflowArtifact[]): ProductWorkflowArtifact[] {
+frontend/src/pages/ActionPlanPage.tsx:80:  for (const artifact of artifacts) {
+frontend/src/pages/ActionPlanPage.tsx:89:function selectedDocumentSummary(documents: ProductDocumentLibraryEntry[]): string {
+frontend/src/pages/ActionPlanPage.tsx:90:  if (!documents.length) return 'Select grounded documents to build a live action plan.';
+frontend/src/pages/ActionPlanPage.tsx:91:  if (documents.length === 1) return `1 document selected - ${documents[0].name}`;
+frontend/src/pages/ActionPlanPage.tsx:92:  if (documents.length === 2) return `2 documents selected - ${documents[0].name} + ${documents[1].name}`;
+frontend/src/pages/ActionPlanPage.tsx:93:  return `${documents.length} documents selected - ${documents[0].name} + ${documents.length - 1} more`;
+frontend/src/pages/ActionPlanPage.tsx:119:    documents: documentCount,
+frontend/src/pages/ActionPlanPage.tsx:120:    artifacts: artifactCount,
+frontend/src/pages/ActionPlanPage.tsx:176:  const { data: documentLibrary, isLoading: documentsLoading, isError: documentsError } = useQuery({
+frontend/src/pages/ActionPlanPage.tsx:192:    () => (documentLibrary?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
+frontend/src/pages/ActionPlanPage.tsx:275:    setGeneratedArtifacts(run.artifact_items?.length ? run.artifact_items : hydratedWorkflowResponse.result.artifacts ?? []);
+frontend/src/pages/ActionPlanPage.tsx:315:      setGeneratedArtifacts(payload.artifacts);
+frontend/src/pages/ActionPlanPage.tsx:317:        queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+frontend/src/pages/ActionPlanPage.tsx:321:      toast.success('Action plan deck artifacts generated successfully.');
+frontend/src/pages/ActionPlanPage.tsx:335:    () => dedupeArtifacts([...(actionPlanView?.artifacts ?? []), ...(workflowResponse?.result.artifacts ?? []), ...generatedArtifacts]),
+frontend/src/pages/ActionPlanPage.tsx:353:      ? 'Preview available for the selected documents'
+frontend/src/pages/ActionPlanPage.tsx:354:      : 'Select documents to prepare a preview';
+frontend/src/pages/ActionPlanPage.tsx:408:        toast.warning(`Action Plan uses up to ${ACTION_PLAN_DOCUMENT_LIMIT} documents at once. Deselect one before adding another.`);
+frontend/src/pages/ActionPlanPage.tsx:442:          disabled={!selectedDocumentIds.length || runActionPlanMutation.isPending || documentsLoading}
+frontend/src/pages/ActionPlanPage.tsx:468:      {documentsError && (
+frontend/src/pages/ActionPlanPage.tsx:482:      {documentsLoading && (
+frontend/src/pages/ActionPlanPage.tsx:491:      {!documentsLoading && !availableDocuments.length && (
+frontend/src/pages/ActionPlanPage.tsx:496:              <p className="text-sm font-medium text-foreground">No indexed documents available</p>
+frontend/src/pages/ActionPlanPage.tsx:498:                Upload and index the curated audit, evidence and risk documents before running the Action Plan workflow.
+frontend/src/pages/ActionPlanPage.tsx:545:                    {hasSelectedDocuments ? 'Review selection first' : 'No documents selected'}
+frontend/src/pages/ActionPlanPage.tsx:562:                          title={!selected && maximumSelectionReached ? `Limit of ${ACTION_PLAN_DOCUMENT_LIMIT} selected documents reached` : undefined}
+frontend/src/pages/ActionPlanPage.tsx:683:                              Confirm the workflow is using the intended documents, enough source blocks and the expected evidence themes before execution.
+frontend/src/pages/ActionPlanPage.tsx:808:                    Select the grounded audit, evidence and risk documents, then run the live workflow to populate the board, table, timeline and evidence tabs.
+frontend/src/pages/ActionPlanPage.tsx:1017:            <h3 className="text-sm font-medium text-foreground">Generated artifacts</h3>
+frontend/src/pages/ActionPlanPage.tsx:1086:            <p className="text-xs text-muted-foreground">Run the workflow and generate the deck to populate export artifacts here.</p>
+frontend/src/pages/ActionPlanPage.tsx:1118:          description="After reviewing the board, evidence gaps and generated artifacts, preview the selected Trello card or the Notion handoff before publishing."
+frontend/src/pages/ActionPlanPage.tsx:1129:            documents: selectedDocuments.map((document) => document.name),
+frontend/src/pages/ActionPlanPage.tsx:1130:            primary_documents: selectedDocuments.map((document) => document.name),
+frontend/src/pages/BenchmarksPage.tsx:110:    queryKey: aiLabQueryKeys.benchmarks,
+frontend/src/pages/BenchmarksPage.tsx:210:      <div data-tour="lab-benchmarks-header">
+frontend/src/pages/BenchmarksPage.tsx:241:                  The latest recorded benchmark is <span className="text-foreground font-medium">historical</span> ({freshnessLabel}). This surface is useful for comparison evidence, but it is not showing live product traffic. Local Phase 8.5 runtime winners are merged in when that decision bundle exists.
+frontend/src/pages/BenchmarksPage.tsx:254:      <div data-tour="lab-benchmarks-metrics">
+frontend/src/pages/BenchmarksPage.tsx:268:      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-benchmarks-coverage">
+frontend/src/pages/BenchmarksPage.tsx:300:        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" data-tour="lab-benchmarks-highlights">
+frontend/src/pages/BenchmarksPage.tsx:313:        <TabsList data-tour="lab-benchmarks-tabs" className="bg-secondary/30 border border-border/50 mb-4">
+frontend/src/pages/BenchmarksPage.tsx:323:          <GlassCard data-tour="lab-benchmarks-leaderboard">
+frontend/src/pages/BenchmarksPage.tsx:343:                      data-tour={index < 3 ? 'lab-benchmarks-leaderboard-row' : undefined}
+frontend/src/pages/BenchmarksPage.tsx:486:                    <div><span className="block text-muted-foreground/60">Runtime</span>{model.runtimeBucket?.replace(/_/g, ' ') || '—'}</div>
+frontend/src/pages/RunHistoryPage.test.tsx:65:          documents: ['Sarah Chen - Senior ML Engineer CV.pdf'],
+frontend/src/pages/RunHistoryPage.test.tsx:74:              path: 'artifacts/candidate-review-deck.pptx',
+frontend/src/pages/RunHistoryPage.test.tsx:93:        documents: ['Sarah Chen - Senior ML Engineer CV.pdf'],
+frontend/src/pages/RunHistoryPage.test.tsx:112:          artifacts: [],
+frontend/src/pages/RunHistoryPage.test.tsx:122:            path: 'artifacts/candidate-review-deck.pptx',
+frontend/src/pages/RunHistoryPage.test.tsx:137:        documents: ['Sarah Chen - Senior ML Engineer CV.pdf'],
+frontend/src/pages/RunHistoryPage.test.tsx:145:        artifacts: [],
+frontend/src/pages/CandidateReviewPage.tsx:46:import { findRecommendedDocument, WORKFLOW_RECOMMENDED_DOCUMENTS } from '@/lib/workflow-demo-documents';
+frontend/src/pages/CandidateReviewPage.tsx:317:function dedupeArtifacts(artifacts: ProductWorkflowArtifact[]): ProductWorkflowArtifact[] {
+frontend/src/pages/CandidateReviewPage.tsx:320:  for (const artifact of artifacts) {
+frontend/src/pages/CandidateReviewPage.tsx:422:    () => (documentLibraryQuery.data?.documents ?? []).filter((document) => document.status === 'indexed' || document.status === 'warning'),
+frontend/src/pages/CandidateReviewPage.tsx:423:    [documentLibraryQuery.data?.documents],
+frontend/src/pages/CandidateReviewPage.tsx:527:    setGeneratedArtifacts(run.artifact_items?.length ? run.artifact_items : hydratedWorkflowResponse.result.artifacts ?? []);
+frontend/src/pages/CandidateReviewPage.tsx:565:      setGeneratedArtifacts(payload.artifacts);
+frontend/src/pages/CandidateReviewPage.tsx:567:        queryClient.invalidateQueries({ queryKey: ['product-artifacts'] }),
+frontend/src/pages/CandidateReviewPage.tsx:571:      toast.success('Candidate review deck artifacts generated successfully.');
+frontend/src/pages/CandidateReviewPage.tsx:600:    () => dedupeArtifacts([...(candidateReviewView?.artifacts ?? []), ...(sections?.artifacts ?? []), ...generatedArtifacts]),
+frontend/src/pages/CandidateReviewPage.tsx:601:    [candidateReviewView?.artifacts, generatedArtifacts, sections?.artifacts],
+frontend/src/pages/CandidateReviewPage.tsx:661:            No indexed documents are available yet. Use the Document Library to import or index a CV before running Candidate Review.
+frontend/src/pages/CandidateReviewPage.tsx:1062:              documents: selectedDocument ? [selectedDocument.name] : [],
+frontend/src/pages/CandidateReviewPage.tsx:1063:              primary_documents: selectedDocument ? [selectedDocument.name] : [],
+frontend/src/pages/CandidateReviewPage.tsx:1081:                <p className="text-xs text-muted-foreground">Generated deck artifacts and any structured exports registered by the live candidate-review flow.</p>
+frontend/src/pages/CandidateReviewPage.tsx:1133:              <p className="text-xs text-muted-foreground">Run the workflow and generate the deck to register downloadable candidate-review artifacts here.</p>
+frontend/src/pages/ChatPage.tsx:209:function normalizeDocuments(documents: unknown): LabDocumentOption[] {
+frontend/src/pages/ChatPage.tsx:210:  if (!Array.isArray(documents)) {
+frontend/src/pages/ChatPage.tsx:214:  return documents.flatMap((document, index) => {
+frontend/src/pages/ChatPage.tsx:329:  const serverSelectedDocuments = useMemo(() => normalizeDocuments(data?.selected_documents), [data?.selected_documents]);
+frontend/src/pages/ChatPage.tsx:331:    () => (productDocumentLibraryQuery.data?.documents ?? [])
+frontend/src/pages/ChatPage.tsx:334:    [productDocumentLibraryQuery.data?.documents],
+frontend/src/pages/ChatPage.tsx:337:    const pageAvailableDocuments = normalizeDocuments((data as { available_documents?: unknown } | undefined)?.available_documents ?? data?.selected_documents);
+frontend/src/pages/ChatPage.tsx:402:      queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.artifacts });
+frontend/src/pages/ChatPage.tsx:403:      queryClient.invalidateQueries({ queryKey: aiLabQueryKeys.runtime });
+frontend/src/pages/ChatPage.tsx:597:              placeholder={canSend ? 'Ask about your documents…' : 'Select documents to ground this chat'}
+frontend/src/pages/ChatPage.tsx:684:          <GlassCard data-tour="lab-document-experiments-documents">
+frontend/src/pages/ChatPage.tsx:704:                  placeholder="Filter documents..."
+frontend/src/pages/ChatPage.tsx:708:                  <span>Indexed documents</span>
+frontend/src/pages/ChatPage.tsx:713:                    <p className="text-[10px] text-muted-foreground px-1 py-2">No documents match the current filter.</p>
+frontend/src/pages/ChatPage.tsx:745:                <p className="text-xs text-muted-foreground">No documents selected for the next grounded turn.</p>

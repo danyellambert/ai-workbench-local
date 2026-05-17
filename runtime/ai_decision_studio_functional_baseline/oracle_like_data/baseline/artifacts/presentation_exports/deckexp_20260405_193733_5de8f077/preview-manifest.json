@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview-pptx",
+  "basename": "evidence_pack_deck",
+  "output_dir": "baseline://outputs/ai_workbench_export_previews/deckexp_20260405_193733_5de8f077",
+  "presentation_title": "evidence_pack_deck",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "input_pptx",
+  "real_preview": true,
+  "backend_requested": "office",
+  "backend_used": "office",
+  "office_runtime": "/opt/homebrew/bin/soffice",
+  "office_conversion_strategy": "pdf_via_ghostscript",
+  "input_pptx": "baseline://external_files/a31bc330da75212f_evidence_pack_deck.pptx",
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "evidence_pack_deck-01.png",
+      "path": "baseline://external_files/3ff1497509668f95_evidence_pack_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "evidence_pack_deck-02.png",
+      "path": "baseline://external_files/dac1ab522c4e6e75_evidence_pack_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "evidence_pack_deck-03.png",
+      "path": "baseline://external_files/8d050cec032280d1_evidence_pack_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "evidence_pack_deck-04.png",
+      "path": "baseline://external_files/b905846b8c71e8a2_evidence_pack_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "evidence_pack_deck-05.png",
+      "path": "baseline://external_files/afa895b95c311565_evidence_pack_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "evidence_pack_deck-06.png",
+      "path": "baseline://external_files/ed2d3ee17a472629_evidence_pack_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "evidence_pack_deck-07.png",
+      "path": "baseline://external_files/416a9bc96357ac4d_evidence_pack_deck-07.png"
+    }
+  ]
+}

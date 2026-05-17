@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -39,8 +40,14 @@ class ProductBootstrap:
 def build_product_bootstrap() -> ProductBootstrap:
     settings = get_ollama_settings()
     rag_settings = get_rag_settings()
+    raw_workspace_root = os.getenv("APP_WORKSPACE_ROOT", "").strip()
+    workspace_root = (
+        Path(raw_workspace_root).expanduser().resolve()
+        if raw_workspace_root
+        else Path(__file__).resolve().parents[2]
+    )
     return ProductBootstrap(
-        workspace_root=Path(__file__).resolve().parents[2],
+        workspace_root=workspace_root,
         product_settings=get_gradio_product_settings(),
         settings=settings,
         rag_settings=rag_settings,

@@ -1,0 +1,129 @@
+name: ai-decision-studio-frontend-public-demo
+
+services:
+  product-api:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.public-demo
+    image: ai-decision-studio-product-api:frontend-public-demo
+    container_name: ai-decision-studio-product-api-frontend-public-demo
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PRODUCT_API_SERVER_NAME: "0.0.0.0"
+      PRODUCT_API_SERVER_PORT: "8011"
+      APP_PUBLIC_DEMO_MODE: "true"
+      APP_WORKSPACE_ROOT: "/app/baseline"
+      APP_RUNTIME_ROOT: "/app/baseline/.runtime"
+      APP_ARTIFACT_ROOT: "/app/baseline/artifacts"
+      PRESENTATION_EXPORT_LOCAL_ARTIFACT_DIR: "/app/baseline/artifacts/presentation_exports"
+
+      # Docker runtime provider topology.
+      # Inside a container, localhost is the product-api container itself.
+      # Services published on the Mac host are reached through host.docker.internal.
+      OLLAMA_BASE_URL: "${AI_DECISION_STUDIO_DOCKER_OLLAMA_BASE_URL:-http://host.docker.internal:11435/v1}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-qwen2.5:7b}"
+      OLLAMA_AVAILABLE_MODELS: "${OLLAMA_AVAILABLE_MODELS:-}"
+      OLLAMA_AVAILABLE_EMBEDDING_MODELS: "${OLLAMA_AVAILABLE_EMBEDDING_MODELS:-embeddinggemma:300m}"
+      OLLAMA_EMBEDDING_MODEL: "${OLLAMA_EMBEDDING_MODEL:-embeddinggemma:300m}"
+      OLLAMA_HTTP_TIMEOUT_SECONDS: "${OLLAMA_HTTP_TIMEOUT_SECONDS:-300}"
+      OLLAMA_EMBED_BATCH_SIZE: "${OLLAMA_EMBED_BATCH_SIZE:-16}"
+
+      OLLAMA_HOSTED_BASE_URL: "${OLLAMA_HOSTED_BASE_URL:-https://ollama.com/api}"
+      OLLAMA_HOSTED_MODEL: "${OLLAMA_HOSTED_MODEL:-}"
+      OLLAMA_HOSTED_AVAILABLE_MODELS: "${OLLAMA_HOSTED_AVAILABLE_MODELS:-}"
+      OLLAMA_HOSTED_AVAILABLE_EMBEDDING_MODELS: "${OLLAMA_HOSTED_AVAILABLE_EMBEDDING_MODELS:-}"
+      OLLAMA_HOSTED_API_KEY: "${OLLAMA_HOSTED_API_KEY:-}"
+
+      HUGGINGFACE_INFERENCE_BASE_URL: "${HUGGINGFACE_INFERENCE_BASE_URL:-https://router.huggingface.co/v1}"
+      HUGGINGFACE_INFERENCE_API_KEY: "${HUGGINGFACE_INFERENCE_API_KEY:-}"
+      HUGGINGFACE_INFERENCE_MODEL: "${HUGGINGFACE_INFERENCE_MODEL:-}"
+      HUGGINGFACE_INFERENCE_AVAILABLE_MODELS: "${HUGGINGFACE_INFERENCE_AVAILABLE_MODELS:-}"
+      HUGGINGFACE_INFERENCE_EMBEDDING_MODEL: "${HUGGINGFACE_INFERENCE_EMBEDDING_MODEL:-}"
+      HUGGINGFACE_INFERENCE_AVAILABLE_EMBEDDING_MODELS: "${HUGGINGFACE_INFERENCE_AVAILABLE_EMBEDDING_MODELS:-}"
+
+      HUGGINGFACE_SERVER_BASE_URL: "${AI_DECISION_STUDIO_DOCKER_HF_SERVER_BASE_URL:-}"
+      HUGGINGFACE_SERVER_API_KEY: "${HUGGINGFACE_SERVER_API_KEY:-}"
+      HUGGINGFACE_SERVER_MODEL: "${HUGGINGFACE_SERVER_MODEL:-}"
+      HUGGINGFACE_SERVER_AVAILABLE_MODELS: "${HUGGINGFACE_SERVER_AVAILABLE_MODELS:-}"
+      HUGGINGFACE_SERVER_EMBEDDING_MODEL: "${HUGGINGFACE_SERVER_EMBEDDING_MODEL:-}"
+      HUGGINGFACE_SERVER_AVAILABLE_EMBEDDING_MODELS: "${HUGGINGFACE_SERVER_AVAILABLE_EMBEDDING_MODELS:-}"
+
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_MODEL: "${OPENAI_MODEL:-gpt-4o-mini}"
+      OPENAI_AVAILABLE_MODELS: "${OPENAI_AVAILABLE_MODELS:-gpt-4o-mini}"
+      OPENAI_EMBEDDING_MODEL: "${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}"
+      OPENAI_AVAILABLE_EMBEDDING_MODELS: "${OPENAI_AVAILABLE_EMBEDDING_MODELS:-text-embedding-3-small,text-embedding-3-large}"
+
+      PRESENTATION_EXPORT_ENABLED: "${PRESENTATION_EXPORT_ENABLED:-true}"
+      PRESENTATION_EXPORT_BASE_URL: "${AI_DECISION_STUDIO_DOCKER_PPT_CREATOR_BASE_URL:-http://host.docker.internal:8787}"
+      PRESENTATION_EXPORT_TIMEOUT_SECONDS: "${PRESENTATION_EXPORT_TIMEOUT_SECONDS:-120}"
+      PRESENTATION_EXPORT_REMOTE_OUTPUT_DIR: "${PRESENTATION_EXPORT_REMOTE_OUTPUT_DIR:-outputs/ai_workbench_exports}"
+      PRESENTATION_EXPORT_REMOTE_PREVIEW_DIR: "${PRESENTATION_EXPORT_REMOTE_PREVIEW_DIR:-outputs/ai_workbench_export_previews}"
+      PRESENTATION_EXPORT_INCLUDE_REVIEW: "${PRESENTATION_EXPORT_INCLUDE_REVIEW:-true}"
+      PRESENTATION_EXPORT_PREVIEW_BACKEND: "${PRESENTATION_EXPORT_PREVIEW_BACKEND:-auto}"
+      PRESENTATION_EXPORT_REQUIRE_REAL_PREVIEWS: "${PRESENTATION_EXPORT_REQUIRE_REAL_PREVIEWS:-false}"
+      PRESENTATION_EXPORT_FAIL_ON_REGRESSION: "${PRESENTATION_EXPORT_FAIL_ON_REGRESSION:-false}"
+
+      EVIDENCEOPS_NEXTCLOUD_BASE_URL: "${AI_DECISION_STUDIO_DOCKER_NEXTCLOUD_BASE_URL:-http://host.docker.internal:8085/remote.php/dav/files/danyel}"
+      EVIDENCEOPS_NEXTCLOUD_USERNAME: "${EVIDENCEOPS_NEXTCLOUD_USERNAME:-}"
+      EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD: "${EVIDENCEOPS_NEXTCLOUD_APP_PASSWORD:-}"
+      EVIDENCEOPS_NEXTCLOUD_ROOT_PATH: "${EVIDENCEOPS_NEXTCLOUD_ROOT_PATH:-/EvidenceOpsDemo}"
+
+      EVIDENCEOPS_TRELLO_API_KEY: "${EVIDENCEOPS_TRELLO_API_KEY:-}"
+      EVIDENCEOPS_TRELLO_TOKEN: "${EVIDENCEOPS_TRELLO_TOKEN:-}"
+      EVIDENCEOPS_TRELLO_BOARD_ID: "${EVIDENCEOPS_TRELLO_BOARD_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_OPEN_ID: "${EVIDENCEOPS_TRELLO_LIST_OPEN_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_REVIEW_ID: "${EVIDENCEOPS_TRELLO_LIST_REVIEW_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_APPROVED_ID: "${EVIDENCEOPS_TRELLO_LIST_APPROVED_ID:-}"
+      EVIDENCEOPS_TRELLO_LIST_DONE_ID: "${EVIDENCEOPS_TRELLO_LIST_DONE_ID:-}"
+
+      EVIDENCEOPS_NOTION_API_KEY: "${EVIDENCEOPS_NOTION_API_KEY:-}"
+      EVIDENCEOPS_NOTION_DATABASE_ID: "${EVIDENCEOPS_NOTION_DATABASE_ID:-}"
+      EVIDENCEOPS_NOTION_PARENT_PAGE_ID: "${EVIDENCEOPS_NOTION_PARENT_PAGE_ID:-}"
+      EVIDENCEOPS_NOTION_API_VERSION: "${EVIDENCEOPS_NOTION_API_VERSION:-2022-06-28}"
+    volumes:
+      - "${AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT:?Set AI_DECISION_STUDIO_BASELINE_OVERLAY_ROOT to a writable sanitized baseline overlay}:/app/baseline:rw"
+    ports:
+      - "${AI_DECISION_STUDIO_PRODUCT_API_PUBLIC_PORT:-8013}:8011"
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import json; from urllib.request import urlopen; r=urlopen('http://127.0.0.1:8011/health', timeout=5); assert r.status == 200 and json.loads(r.read().decode()).get('ok') is True\""]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.frontend-public-demo
+      args:
+        VITE_PRODUCT_API_BASE_URL: "/"
+    image: ai-decision-studio-frontend:frontend-public-demo
+    container_name: ai-decision-studio-frontend-public-demo
+    depends_on:
+      product-api:
+        condition: service_healthy
+    ports:
+      - "${AI_DECISION_STUDIO_FRONTEND_PUBLIC_PORT:-8059}:8080"
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=64m,mode=1777
+      - /var/run:size=16m,mode=1777
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/ >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

@@ -1,0 +1,117 @@
+[
+  {
+    "relative_path": "README.txt",
+    "file_size": 503,
+    "sha256": "2f701ce45ba1c4d53a55d634b1fffbf580c8c40928cbc8972e66f3d920c31f0d"
+  },
+  {
+    "relative_path": "README_plus_metadata.txt",
+    "file_size": 325,
+    "sha256": "c7e17ccf84313f43839d07200ffd610ee5efc0fd15695f6bea48ecaec2d66da0"
+  },
+  {
+    "relative_path": "audit/AUD-001_Internal_Audit_Checklist_Vendor_Controls.pdf",
+    "file_size": 4047,
+    "sha256": "5a5a7a39734ac094f297b1cb105014943fab220a8fb6f7a246c2dc9654fa7c22"
+  },
+  {
+    "relative_path": "audit/AUD-002_Nonconformance_Report_Vendor_Access_Review.pdf",
+    "file_size": 5178,
+    "sha256": "494fa47ec7d597dddfc7754cf5e56353d5b531af2f7c15e2ce8f8fbbf0167309"
+  },
+  {
+    "relative_path": "audit/EVD-001_Access_Review_Evidence_Log.pdf",
+    "file_size": 3909,
+    "sha256": "a710ef6a3e5242312b42ffa8e15ddfd66f8e64e9a7c4d1218bffbf17329a0ef0"
+  },
+  {
+    "relative_path": "audit/MIN-001_Governance_Committee_Minutes_Action_Items.pdf",
+    "file_size": 4350,
+    "sha256": "836d725084046bb7dea326c35b88b8773c2fc899a5c8b4d6e8e65ad7cdef47be"
+  },
+  {
+    "relative_path": "contracts/CTR-001_Master_Services_Agreement_Approved_Baseline.pdf",
+    "file_size": 4620,
+    "sha256": "849a8d80c12f35d57c8e4486dc26f8719a18f10224f5bc87824ae65efc142dec"
+  },
+  {
+    "relative_path": "contracts/CTR-002_Master_Services_Agreement_Vendor_Draft.pdf",
+    "file_size": 4290,
+    "sha256": "05d3e1a27621ebe25b768e99a5dd59b6e538b577d00110c502fdc7709303339a"
+  },
+  {
+    "relative_path": "contracts/CTR-003_Service_Level_Agreement.pdf",
+    "file_size": 4164,
+    "sha256": "8f3af9a3294f6ec1ae241fe718646cc0aeb763e0cd309735c5fdb987fca9a59a"
+  },
+  {
+    "relative_path": "contracts/CTR-004_Data_Processing_Addendum.pdf",
+    "file_size": 4043,
+    "sha256": "aacb22bf7d0a33f3557583d87d708d45ce82ee1f594eedfbfc464f2747eaa24f"
+  },
+  {
+    "relative_path": "metadata/evidenceops_corpora_review_bundle (1).zip",
+    "file_size": 22792,
+    "sha256": "3806de85f0adc3026db9eff4ba1d187a113aa10a724b39887764ffcca2162c1e"
+  },
+  {
+    "relative_path": "metadata/option_b_storylines.csv",
+    "file_size": 4480,
+    "sha256": "f0ee27e73f1944934c821771cb717c8eada07de6b69ef2645fdbb2592f3f4ed5"
+  },
+  {
+    "relative_path": "metadata/option_b_storylines.json",
+    "file_size": 5944,
+    "sha256": "f29973c6a7eab6b89fa9b847da6eed98e9d566c0499484c3835e7148242224cf"
+  },
+  {
+    "relative_path": "metadata/option_b_upgrade_backlog.md",
+    "file_size": 1895,
+    "sha256": "cc210771e65c4ed33097770d704e968c583f67eb0183239bcab04886c987290f"
+  },
+  {
+    "relative_path": "metadata/option_b_v2_relational_manifest.csv",
+    "file_size": 8849,
+    "sha256": "bab2fef7e4ccff6f2bc103e94e81119f5bd14dbc38d0e3b1d1aacdb2c1781fe1"
+  },
+  {
+    "relative_path": "metadata/option_b_v2_relational_manifest.json",
+    "file_size": 13911,
+    "sha256": "53b86b815a98ea06a8bc9e99a1f13efeb4eb12b6c68879453b8ff6d98f3fe201"
+  },
+  {
+    "relative_path": "policies/POL-001_Information_Security_Policy_v1.pdf",
+    "file_size": 5906,
+    "sha256": "89438893528ab9cea3b9ff4502a8ddc232eb805a72b28c1894a39183464a0996"
+  },
+  {
+    "relative_path": "policies/POL-002_Information_Security_Policy_v2.pdf",
+    "file_size": 6177,
+    "sha256": "0c862af1e2c6437ad50d5ea0c0035e235ca8851dc85a633beab48c488e25ff06"
+  },
+  {
+    "relative_path": "policies/POL-003_Data_Retention_Policy.pdf",
+    "file_size": 4370,
+    "sha256": "8587e35bfcef162f38ebd1f601a40069f53a0240c17adca9a5e665af41121e9c"
+  },
+  {
+    "relative_path": "policies/POL-004_Third_Party_Supplier_Code_of_Conduct.pdf",
+    "file_size": 4180,
+    "sha256": "040197a94b72c9e4aba080c938cb731ed79280dccb9f8b1d5c64badde77fa1b3"
+  },
+  {
+    "relative_path": "templates/TPL-001_Approved_Policy_Template.pdf",
+    "file_size": 3844,
+    "sha256": "4be4a14a3dbce44956d2681a7f03f7416affd8caf561e6ca967fbdba72729f81"
+  },
+  {
+    "relative_path": "templates/TPL-002_Approved_Contract_Review_Template.pdf",
+    "file_size": 3953,
+    "sha256": "7749be6a08842bd56314c658dc706822d054d32f5577aa52262579e7107d6349"
+  },
+  {
+    "relative_path": "templates/TPL-003_Evidence_Pack_Template.pdf",
+    "file_size": 4108,
+    "sha256": "7ed7ee45776785a2fada6bcea7b336a2504ae0aae145d68d9a0c319792b31fb6"
+  }
+]

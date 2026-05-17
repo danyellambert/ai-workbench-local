@@ -1,0 +1,72 @@
+{
+  "presentation": {
+    "title": "Strategy review",
+    "subtitle": "Priorities, trade-offs, and sequencing",
+    "client_name": "Executive Leadership",
+    "author": "PPT Creator",
+    "date": "2026-03-26",
+    "theme": "dark_boardroom",
+    "footer_text": "Board brand pack",
+    "primary_color": "14263F",
+    "secondary_color": "B08B5B"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "Strategy review",
+      "subtitle": "Priorities, trade-offs, and sequencing",
+      "layout_variant": "hero_cover",
+      "eyebrow": "Board review"
+    },
+    {
+      "type": "timeline",
+      "title": "Strategic sequence",
+      "timeline_items": [
+        {
+          "title": "Diagnose",
+          "body": "Clarify the few questions that matter most."
+        },
+        {
+          "title": "Decide",
+          "body": "Choose the winning priorities and explicit trade-offs."
+        },
+        {
+          "title": "Sequence",
+          "body": "Stage execution in a realistic order."
+        }
+      ]
+    },
+    {
+      "type": "two_column",
+      "title": "Strategic trade-off",
+      "two_column_columns": [
+        {
+          "title": "If focus drifts",
+          "body": "Execution spreads too thin and decisions stay noisy."
+        },
+        {
+          "title": "If focus sharpens",
+          "bullets": [
+            "Clearer trade-offs",
+            "Better capital allocation",
+            "Faster learning"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "bullets": [
+        "Focus on fewer bets",
+        "Stage execution deliberately",
+        "Review strategy through measurable milestones"
+      ]
+    },
+    {
+      "type": "closing",
+      "title": "Closing thought",
+      "quote": "Strategy compounds when sequencing is as disciplined as ambition."
+    }
+  ]
+}

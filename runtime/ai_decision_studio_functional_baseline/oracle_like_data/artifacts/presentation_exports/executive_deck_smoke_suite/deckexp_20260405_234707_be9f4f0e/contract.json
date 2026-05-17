@@ -1,0 +1,132 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "candidate_review_deck",
+  "deck_family": "candidate_review",
+  "presentation": {
+    "title": "AI Workbench Local — Candidate Review · Jane Doe",
+    "subtitle": "Executive hiring summary grounded in cv_analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-05",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Candidate Review"
+  },
+  "context": {
+    "task_type": "cv_analysis",
+    "candidate_name": "Jane Doe",
+    "headline": "Applied AI Engineer · Python, RAG",
+    "location": "São Paulo",
+    "experience_entries": 1
+  },
+  "candidate_profile": {
+    "name": "Jane Doe",
+    "headline": "Applied AI Engineer · Python, RAG",
+    "location": "São Paulo"
+  },
+  "executive_summary": "Jane Doe presents as a hiring profile centered on Applied AI Engineer · Python, RAG from São Paulo. Grounded evidence suggests about 3.5 year(s) of experience across 1 structured role(s). Top strengths: Strong applied AI execution; Good product + engineering bridge. Primary watchout: Validate scale/production depth.",
+  "key_highlights": [
+    "Strong applied AI execution",
+    "Good product + engineering bridge",
+    "Python",
+    "RAG",
+    "Structured outputs"
+  ],
+  "strengths": [
+    "Strong applied AI execution",
+    "Good product + engineering bridge"
+  ],
+  "gaps": [
+    "Validate scale/production depth",
+    "Leadership and ownership signals are not explicit in the current CV."
+  ],
+  "evidence_highlights": [
+    {
+      "label": "Experience",
+      "value": "3.5 years",
+      "detail": "1 structured role(s)"
+    },
+    {
+      "label": "Core skills",
+      "value": "Python, RAG, Structured outputs",
+      "detail": "3 mapped skill(s)"
+    },
+    {
+      "label": "Languages",
+      "value": "English, Portuguese",
+      "detail": "2 language(s)"
+    },
+    {
+      "label": "Recent anchor",
+      "value": "Applied AI Engineer",
+      "detail": "Acme"
+    }
+  ],
+  "key_metrics": [
+    {
+      "label": "Experience years",
+      "value": "3.5"
+    },
+    {
+      "label": "Skills",
+      "value": "3"
+    },
+    {
+      "label": "Languages",
+      "value": "2"
+    },
+    {
+      "label": "Experience entries",
+      "value": "1"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Experience highlights",
+      "columns": [
+        "Role",
+        "Organization",
+        "Date",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "Applied AI Engineer",
+          "Acme",
+          "2022-2025",
+          "Built RAG pipelines | Shipped eval-driven AI features"
+        ]
+      ]
+    },
+    {
+      "title": "Education snapshot",
+      "columns": [
+        "Degree",
+        "Institution",
+        "Date",
+        "Location"
+      ],
+      "rows": [
+        [
+          "BSc Computer Science",
+          "USP",
+          "2018-2022",
+          "São Paulo"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Advance to the next stage with focused validation of leadership, scope and business impact.",
+  "watchouts": [
+    "Validate scale/production depth",
+    "Leadership and ownership signals are not explicit in the current CV."
+  ],
+  "next_steps": [
+    "Validate scale/production depth",
+    "Validate leadership and ownership signals are not explicit in the current CV",
+    "Run a focused interview on leadership, ownership and stakeholder management examples.",
+    "Validate delivery depth with concrete examples of architecture, execution and business outcomes."
+  ],
+  "data_sources": [
+    "structured_result",
+    "cv_analysis"
+  ]
+}

@@ -1,0 +1,466 @@
+{
+  "benchmark_eval": {
+    "export_id": "deckexp_20260405_190259_5230da5b",
+    "status": "completed",
+    "average_score": 99,
+    "review_status": "ok",
+    "issue_count": 1,
+    "warning_count": 1,
+    "top_risk_slides": [
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.2
+      }
+    ],
+    "slides": [
+      {
+        "slide_number": 1,
+        "type": "title",
+        "title": "AI Workbench Local — Benchmark & Eval Review",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 2,
+        "type": "summary",
+        "title": "Executive summary",
+        "score": 93,
+        "status": "ok"
+      },
+      {
+        "slide_number": 3,
+        "type": "metrics",
+        "title": "Benchmark and eval snapshot",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 4,
+        "type": "table",
+        "title": "Model leaderboard",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 5,
+        "type": "table",
+        "title": "Eval suite leaderboard",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 6,
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 7,
+        "type": "bullets",
+        "title": "Next steps",
+        "score": 100,
+        "status": "ok"
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_190259_5230da5b"
+  },
+  "document_review": {
+    "export_id": "deckexp_20260405_190305_961a1cf9",
+    "status": "completed",
+    "average_score": 97,
+    "review_status": "ok",
+    "issue_count": 3,
+    "warning_count": 3,
+    "top_risk_slides": [
+      {
+        "slide_number": 4,
+        "title": "Top findings",
+        "risk_level": "high",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 2,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.31
+      }
+    ],
+    "slides": [
+      {
+        "slide_number": 1,
+        "type": "title",
+        "title": "AI Workbench Local — Document Review",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 2,
+        "type": "summary",
+        "title": "Executive summary",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 3,
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 4,
+        "type": "table",
+        "title": "Top findings",
+        "score": 79,
+        "status": "review"
+      },
+      {
+        "slide_number": 5,
+        "type": "table",
+        "title": "Action plan",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 6,
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 7,
+        "type": "bullets",
+        "title": "Next steps",
+        "score": 100,
+        "status": "ok"
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_190305_961a1cf9"
+  },
+  "policy_contract_comparison": {
+    "export_id": "deckexp_20260405_190309_0d33039b",
+    "status": "completed",
+    "average_score": 100,
+    "review_status": "ok",
+    "issue_count": 0,
+    "warning_count": 0,
+    "top_risk_slides": [],
+    "slides": [
+      {
+        "slide_number": 1,
+        "type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 2,
+        "type": "summary",
+        "title": "Executive summary",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 3,
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 4,
+        "type": "table",
+        "title": "Comparison findings",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 5,
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 6,
+        "type": "bullets",
+        "title": "Next steps",
+        "score": 100,
+        "status": "ok"
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_190309_0d33039b"
+  },
+  "action_plan": {
+    "export_id": "deckexp_20260405_190313_06c0f6c6",
+    "status": "completed",
+    "average_score": 92,
+    "review_status": "ok",
+    "issue_count": 7,
+    "warning_count": 7,
+    "top_risk_slides": [
+      {
+        "slide_number": 7,
+        "title": "Blockers vs mitigations",
+        "risk_level": "high",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 4,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.97
+      },
+      {
+        "slide_number": 5,
+        "title": "Action backlog",
+        "risk_level": "medium",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.29
+      },
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "high",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 1.42
+      }
+    ],
+    "slides": [
+      {
+        "slide_number": 1,
+        "type": "title",
+        "title": "AI Workbench Local — Action Plan",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 2,
+        "type": "summary",
+        "title": "Executive summary",
+        "score": 86,
+        "status": "review"
+      },
+      {
+        "slide_number": 3,
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 4,
+        "type": "cards",
+        "title": "Priority workstreams",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 5,
+        "type": "table",
+        "title": "Action backlog",
+        "score": 86,
+        "status": "review"
+      },
+      {
+        "slide_number": 6,
+        "type": "timeline",
+        "title": "Execution timeline",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 7,
+        "type": "two_column",
+        "title": "Blockers vs mitigations",
+        "score": 72,
+        "status": "review"
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_190313_06c0f6c6"
+  },
+  "candidate_review": {
+    "export_id": "deckexp_20260405_190318_8181ce2c",
+    "status": "completed",
+    "average_score": 96,
+    "review_status": "ok",
+    "issue_count": 4,
+    "warning_count": 4,
+    "top_risk_slides": [
+      {
+        "slide_number": 5,
+        "title": "Experience highlights",
+        "risk_level": "medium",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.65
+      },
+      {
+        "slide_number": 6,
+        "title": "Gaps vs hiring thesis",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 1,
+        "layout_pressure_score": 0.19
+      }
+    ],
+    "slides": [
+      {
+        "slide_number": 1,
+        "type": "title",
+        "title": "AI Workbench Local — Candidate Review · Jane Doe",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 2,
+        "type": "summary",
+        "title": "Executive summary",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 3,
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 4,
+        "type": "cards",
+        "title": "Strengths snapshot",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 5,
+        "type": "table",
+        "title": "Experience highlights",
+        "score": 86,
+        "status": "review"
+      },
+      {
+        "slide_number": 6,
+        "type": "two_column",
+        "title": "Gaps vs hiring thesis",
+        "score": 86,
+        "status": "review"
+      },
+      {
+        "slide_number": 7,
+        "type": "bullets",
+        "title": "Next steps",
+        "score": 100,
+        "status": "ok"
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_190318_8181ce2c"
+  },
+  "evidence_pack": {
+    "export_id": "deckexp_20260405_190322_6bd5d0bf",
+    "status": "completed",
+    "average_score": 89,
+    "review_status": "review",
+    "issue_count": 10,
+    "warning_count": 10,
+    "top_risk_slides": [
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "high",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 4,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 4.15
+      },
+      {
+        "slide_number": 6,
+        "title": "Risks vs mitigations",
+        "risk_level": "high",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 3,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.81
+      },
+      {
+        "slide_number": 5,
+        "title": "Action status",
+        "risk_level": "medium",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.29
+      }
+    ],
+    "slides": [
+      {
+        "slide_number": 1,
+        "type": "title",
+        "title": "AI Workbench Local — Evidence Pack Review",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 2,
+        "type": "summary",
+        "title": "Executive summary",
+        "score": 65,
+        "status": "attention"
+      },
+      {
+        "slide_number": 3,
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "score": 100,
+        "status": "ok"
+      },
+      {
+        "slide_number": 4,
+        "type": "table",
+        "title": "Findings",
+        "score": 93,
+        "status": "ok"
+      },
+      {
+        "slide_number": 5,
+        "type": "table",
+        "title": "Action status",
+        "score": 86,
+        "status": "review"
+      },
+      {
+        "slide_number": 6,
+        "type": "two_column",
+        "title": "Risks vs mitigations",
+        "score": 79,
+        "status": "review"
+      },
+      {
+        "slide_number": 7,
+        "type": "bullets",
+        "title": "Next steps",
+        "score": 100,
+        "status": "ok"
+      }
+    ],
+    "artifact_dir": "baseline://artifacts/presentation_exports/deckexp_20260405_190322_6bd5d0bf"
+  }
+}

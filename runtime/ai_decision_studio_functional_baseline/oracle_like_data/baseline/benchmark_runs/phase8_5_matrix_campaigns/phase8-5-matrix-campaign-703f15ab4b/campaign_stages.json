@@ -1,0 +1,38 @@
+[
+  {
+    "group": "generation",
+    "run_id": "phase8-5-matrix-86c4a39861",
+    "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/group_runs/01_generation_phase8-5-matrix-86c4a39861",
+    "status": "executed",
+    "total_cases": 32,
+    "successful_cases": 32,
+    "failed_cases": 0
+  },
+  {
+    "group": "embeddings",
+    "run_id": "phase8-5-matrix-8bd1c776d7",
+    "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/group_runs/02_embeddings_phase8-5-matrix-8bd1c776d7",
+    "status": "executed",
+    "total_cases": 6,
+    "successful_cases": 4,
+    "failed_cases": 2
+  },
+  {
+    "group": "rerankers",
+    "run_id": "phase8-5-matrix-fe4b8efa36",
+    "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/group_runs/03_rerankers_phase8-5-matrix-fe4b8efa36",
+    "status": "executed",
+    "total_cases": 4,
+    "successful_cases": 2,
+    "failed_cases": 2
+  },
+  {
+    "group": "ocr_vlm",
+    "run_id": "phase8-5-matrix-c8a56f2231",
+    "run_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix_campaigns/phase8-5-matrix-campaign-703f15ab4b/group_runs/04_ocr_vlm_phase8-5-matrix-c8a56f2231",
+    "status": "executed",
+    "total_cases": 4,
+    "successful_cases": 4,
+    "failed_cases": 0
+  }
+]

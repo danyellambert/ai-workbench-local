@@ -17,7 +17,7 @@ class GradioComponentsCandidateReviewTests(unittest.TestCase):
         self.assertIn("Example prompts", html)
         self.assertIn("Expected outputs", html)
         self.assertIn("Workflow contract:", html)
-        self.assertIn("docs/EXECUTIVE_DECK_GENERATION_CANDIDATE_REVIEW_DECK_CONTRACT_V1.md", html)
+        self.assertIn("docs/architecture/executive-deck-generation/candidate-review-deck-contract-v1.md", html)
         self.assertIn("Add hiring context", html)
 
     def test_build_result_summary_html_renders_candidate_review_sections(self) -> None:

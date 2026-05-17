@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe documents reflect distinct control mechanisms—one focused on evidence completeness for vendor control closure, the other on ongoing governance of privileged access with strict lifecycle requirements. While the first emphasizes proactive verification and resolution of missing artifacts to close controls, the second underscores continuous oversight, recertification, and accountability in privileged account management.\n\n- Evidence gaps must be resolved before control closure, requiring documented provenance.  \n- Missing artifacts can be validated via archived email-export evidence (EV-002).  \n- Privileged access requires quarterly recertification and logging integration.  \n- Access approvals are contingent on strict scoping and logging controls.  \n- Personnel changes trigger immediate revalidation of access rights.  \n- Governance models differ: one is evidence-driven for control closure; the other is lifecycle-driven for access accountability.",
+  "key_highlights": [
+    "The documents reflect distinct control mechanisms—one focused on evidence completeness for vendor control closure, the other on ongoing governance of privileged access with strict lifecycle requirements. While the first emphasizes proactive verification and resolution of missing artifacts to close controls, the second underscores continuous oversight, recertification, and accountability in privileged account management.",
+    "Evidence gaps must be resolved before control closure, requiring documented provenance.",
+    "Missing artifacts can be validated via archived email-export evidence (EV-002).",
+    "Privileged access requires quarterly recertification and logging integration.",
+    "Access approvals are contingent on strict scoping and logging controls.",
+    "Personnel changes trigger immediate revalidation of access rights."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Missing or incomplete evidence blocks control closure until provenance is verified. | EV-002 can be satisfied by an att…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "The approval is conditional on continuous logging integration and quarterly recertification, indicating a governance-fo…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "The documents reflect distinct control mechanisms—one focused on…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Q1 2024 Northwind vendor-control review uses a synthetic evidence register (E…"
+        ],
+        [
+          "auditability_delta",
+          "Evidence gaps must be resolved before control closure,…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Q1 2024 Northwind vendor-control review uses a synthetic evidence register (E…"
+        ],
+        [
+          "auditability_delta",
+          "Missing artifacts can be validated via archived email-export…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Q1 2024 Northwind vendor-control review uses a synthetic evidence register (E…"
+        ],
+        [
+          "approval_change",
+          "Privileged access requires quarterly recertification and logging integration",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Q1 2024 Northwind vendor-control review uses a synthetic evidence register (E…"
+        ],
+        [
+          "approval_change",
+          "Access approvals are contingent on strict scoping and…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Q1 2024 Northwind vendor-control review uses a synthetic evidence register (E…"
+        ],
+        [
+          "approval_change",
+          "Personnel changes trigger immediate revalidation of access rights",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Q1 2024 Northwind vendor-control review uses a synthetic evidence register (E…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

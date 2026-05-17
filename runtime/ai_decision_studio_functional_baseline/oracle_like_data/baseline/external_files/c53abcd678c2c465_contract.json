@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "Executive Comparison:  \nThe Access Review Evidence Log highlights a critical control gap due to missing or incomplete evidence, directly blocking control closure and exposing a material risk to audit readiness. In contrast, the Privileged Account Approval Email demonstrates a governed, proactive access management approach with strict scoping, logging, and quarterly recertification requirements, reflecting a mature control environment despite being in a pilot phase.\n\n- Access Review Evidence Log shows incomplete evidence, risking control failure and audit non-compliance.  \n- Privileged Account Approval Email enforces strict access controls with mandatory logging and quarterly reviews.  \n- Evidence gaps in the log require immediate verification; the email process is designed for ongoing governance.  \n- The log’s missing evidence directly impacts control closure; the email process includes revalidation triggers for personnel changes.  \n- The log reflects reactive evidence collection; the email reflects a structured, preventive access approval workflow.  \n- Material difference: One reveals a control breakdown, while the other demonstrates a controlled, auditable access model.",
+  "key_highlights": [
+    "The Access Review Evidence Log highlights a critical control gap due to missing or incomplete evidence, directly blocking control closure and exposing a material risk to audit readiness. In contrast, the Privileged Account Approval Email demonstrates a governed, proactive access management approach with strict scoping, logging, and quarterly recertification requirements, reflecting a mature control environment despite being in a pilot phase.",
+    "Access Review Evidence Log shows incomplete evidence, risking control failure and audit non-compliance.",
+    "Privileged Account Approval Email enforces strict access controls with mandatory logging and quarterly reviews.",
+    "Evidence gaps in the log require immediate verification; the email process is designed for ongoing governance.",
+    "The log’s missing evidence directly impacts control closure; the email process includes revalidation triggers for personnel changes.",
+    "The log reflects reactive evidence collection; the email reflects a structured, preventive access approval workflow."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Control closure is blocked until all evidence items are verified and properly archived. | Missing or incomplete evidenc…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is tightly scoped to operational tasks and requires continuous logging integration. | Governance includes mandat…"
+        ],
+        [
+          "approval_change",
+          "The Access Review Evidence Log highlights a critical…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items for the Q1 2024 Nort…"
+        ],
+        [
+          "auditability_delta",
+          "Access Review Evidence Log shows incomplete evidence, risking…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items for the Q1 2024 Nort…"
+        ],
+        [
+          "approval_change",
+          "Privileged Account Approval Email enforces strict access controls…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): EV-002: System owner approval email for privileged vendor accounts | Privileged A…"
+        ],
+        [
+          "auditability_delta",
+          "Evidence gaps in the log require immediate verification;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items for the Q1 2024 Nort…"
+        ],
+        [
+          "approval_change",
+          "The log’s missing evidence directly impacts control closure;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): Missing or incomplete evidence directly impacts the ability to satisfy the tested…"
+        ],
+        [
+          "approval_change",
+          "The log reflects reactive evidence collection; the email…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log documents five evidence items for the Q1 2024 Nort…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

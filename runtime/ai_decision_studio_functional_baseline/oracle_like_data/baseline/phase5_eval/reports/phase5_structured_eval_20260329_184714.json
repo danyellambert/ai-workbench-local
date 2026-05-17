@@ -1,0 +1,183 @@
+{
+  "generated_at": "2026-03-29T18:47:14.108852",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "summary",
+      "mode": "indexed_document",
+      "status": "PASS",
+      "score": 20,
+      "max_score": 31,
+      "reasons": [
+        "gold:key insight coverage too low: 2"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e",
+        "name": "fy25-afr-final-tagged.pdf",
+        "file_type": "pdf",
+        "chunk_count": 208
+      },
+      "gold_fixture_path": "baseline://external_files/59b08f4e22a2b3b3_10_summary_fy25_afr_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "PASS",
+        "score": 20,
+        "max_score": 31,
+        "reasons": [
+          "key insight coverage too low: 2"
+        ],
+        "metrics": {
+          "topic_hits": 5,
+          "fact_hits": 5,
+          "exec_signal_hits": 5,
+          "key_insight_hits": 2,
+          "number_hits": 3
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "FY 2025 Financial Highlights and Audit Status",
+            "key_points": [
+              "Clean audit opinion for the 15th consecutive year, confirming strong fiscal stewardship and compliance with federal financial management requirements.",
+              "$35.6B budget with $39.6B total assets, $28.155B fund balance with Treasury, and $10.474B net PP&E, reflecting robust financial position and heritage asset preservation."
+            ],
+            "relevance_score": 0.95,
+            "supporting_evidence": [
+              "NASA announced its 2025 Astronaut Candidate Class on Sept. 22, 2025.",
+              "Under the leadership of the Office of the Chief Financial Officer, NASA has once again received an unmodified “clean” audit opinion on its 2025 financial statements for the 15th consecutive year, with no reported material weaknesses.",
+              "Total Assets $39,579 (in millions); Total Liabilities $7,505 (in millions); NASA complies with OMB Circular A-123, Management’s Responsibility for Enterprise Risk Management and Internal Control.",
+              "$ 10,474; Structures, Facilities and Leasehold Improvements Straight-Line 15-40 Years $ 12,720 $ (9,855) $ 2,865; Heritage assets possess one or more of the following characteristics: Historical or natural significance; Cultural, educational, or artistic importance; Significant architectural characteristics.",
+              "FY 2025 Status of Fund Balance with Treasury: Unobligated Balance $ 12,687 Obligated Balance Not Yet Disbursed 15,438 Total Fund Balance with Treasury $ 28,155"
+            ]
+          },
+          {
+            "title": "Mission Performance and Strategic Initiatives",
+            "key_points": [
+              "Artemis II crewed mission remains on track for an April 2026 launch, marking critical progress toward lunar exploration.",
+              "Strategic initiatives include lunar nuclear power development targeted for deployment by 2030 and updates to the Commercial Low Earth Orbit Destinations Strategy to prioritize affordability and flexibility."
+            ],
+            "relevance_score": 0.92,
+            "supporting_evidence": [
+              "Artemis will continue to inspire the next generation of explorers.",
+              "A significant directive issued in July 2025 accelerates the development of a nuclear power system, targeted for deployment on the Moon by 2030.",
+              "In low Earth orbit, our July 2025 directive updated our Commercial Low Earth Orbit Destinations Strategy, prioritizing affordability and flexibility."
+            ]
+          },
+          {
+            "title": "Technology Demonstrations and Science Missions",
+            "key_points": [
+              "Successful execution of OSIRIS-REx asteroid sampling and Parker Solar Probe solar environment research, advancing planetary science and heliophysics.",
+              "Progress on cryogenic fluid management and DSOC laser communication technologies through industry partnerships, moving toward operational maturity."
+            ],
+            "relevance_score": 0.89,
+            "supporting_evidence": [
+              "OSIRIS-Rex was the first U.S. mission to collect a sample from an asteroid and return it to Earth.",
+              "Parker Solar Probe is orbiting the Sun closer than any ever before, collecting measurements and images to expand our knowledge of the origin and evolution of solar wind;",
+              "Critical testing and demos with industry have begun for cryogenic fluid management technologies;",
+              "DSOC utilizes laser communications instead of traditional radio frequency without increasing mass, volume, or power requirements;",
+              "In low Earth orbit, our July 2025 directive updated our Commercial Low Earth Orbit Destinations Strategy, prioritizing affordability and flexibility."
+            ]
+          },
+          {
+            "title": "Enterprise Risk Management and Internal Controls",
+            "key_points": [
+              "Enterprise Risk Management (ERM) framework UNICORN ensures risk‑informed decisions across Mission Directorates and Centers, with no material internal control weaknesses identified in FY 2025.",
+              "SAP Enterprise Central Component (ECC) modernization to a next‑gen ERP system is underway, targeting completion by 2027 to enhance financial oversight and real‑time analytics."
+            ],
+            "relevance_score": 0.87,
+            "supporting_evidence": [
+              "The ARMO works in concert with Mission Directorates, Centers, Technical Authorities and Offices to increase awareness, understanding, and consideration of risks to NASA's strategic goals and objectives as well as opportunities to support risk-informed decision-making.",
+              "The NASA Unified Comprehensive Operational Risk Network (UNICORN), NASA's ERM framework, is the framework for the communication and exchange of risk information between NASA's functional organizations and the Agency leadership (see Figure 2).",
+              "Based on the results of this evaluation, NASA provides reasonable assurance that its system of internal control was operating effectively as of September 30, 2025, to ensure the effectiveness and efficiency of operations and compliance with laws, regulations, and policies.",
+              "No material weaknesses were found in the design or implementation of internal controls.",
+              "The SAP Enterprise Central Component (ECC) is NASA’s core financial system and functions as the central hub for the Agency’s business operations.",
+              "With SAP ECC reaching its end-of-life in December 2027, the Chief Information Officer is exploring options to modernize the current centralized core financial system."
+            ]
+          },
+          {
+            "title": "Environmental, Property, and Lease Accounting",
+            "key_points": [
+              "Heritage assets are excluded from depreciation and reported by physical unit, preserving historically significant assets.",
+              "Environmental liabilities total $2.39B, comprising $63M funded and $2.327B unfunded components, reflecting substantial long‑term cleanup obligations.",
+              "Lease accounting under SFFAS 54 generates $49.1M revenue and $2.48B lease receivable net, with $5.4M annual lease expense, and no allowance for doubtful accounts."
+            ],
+            "relevance_score": 0.84,
+            "supporting_evidence": [
+              "$ 10,474; Structures, Facilities and Leasehold Improvements Straight-Line 15-40 Years $ 12,720 $ (9,855) $ 2,865; Heritage assets possess one or more of the following characteristics: Historical or natural significance; Cultural, educational, or artistic importance; Significant architectural characteristics.",
+              "$ 2,390; $ 2,140; $ 5.4 million of annual lease expense; Total $ 24 $ 3 $ 27",
+              "NASA recognized $49.1 million of annual lease revenue in FY 2025 associated with leases under SFFAS 54;",
+              "Lease Receivable, Net $ 698 $ 1,781 $ 2,479; Allowance — ——;",
+              "NASA does not consider these types of arrangements to meet the criteria and characteristics for P3 disclosure; NASA has determined two other categories as meeting the P3 disclosure requirements: energy savings performance/utility energy service contracts and leases"
+            ]
+          },
+          {
+            "title": "Audit Findings and Management Assurance",
+            "key_points": [
+              "Unmodified audit opinion confirmed, but a significant deficiency was identified in accrual posting documentation and change‑management controls for budgetary entries.",
+              "Management will fully document future changes to ensure sufficient evidence of rationale, review, and approval."
+            ],
+            "relevance_score": 0.81,
+            "supporting_evidence": [
+              "Our opinion on the financial statements is unmodified;",
+              "Our tests disclosed no instances of noncompliance;",
+              "NASA will re‑visit the changes that were implemented in FY25, and fully document any updates to ensure sufficient evidence is available that captures the rationale, and management review and approval of future changes;",
+              "NASA reviewed and analyzed all period‑end accruals to determine the applicability of the revised OMB Circular A‑11 guidance"
+            ]
+          },
+          {
+            "title": "Cybersecurity, Workforce, and Infrastructure Modernization",
+            "key_points": [
+              "Implementation of Zero Trust architecture across the Agency, supported by the Cybersecurity Improvements Portfolio managing nearly 300 requirements and a dozen federal mandates.",
+              "Targeted talent development and infrastructure right‑sizing to sustain mission‑critical capabilities and fiscal responsibility."
+            ],
+            "relevance_score": 0.78,
+            "supporting_evidence": [
+              "In a Zero Trust architecture, access to resources is based on the principle of least privilege.;",
+              "NASA’s Office of the Chief Information Officer (OCIO), through its Cybersecurity Improvements Portfolio (CIP), leads focused efforts to mature Zero Trust implementation Agency-wide. The CIP manages scope, cost, schedule, performance, and risk for projects and initiatives and tracks nearly 300 Zero Trust requirements and a dozen federal mandates.;",
+              "NASA refines its workforce planning process to align institutional operations with priority mission needs.;",
+              "NASA takes a disciplined, data-driven approach to modernize and right-size infrastructure to support current and future mission needs.;",
+              "The Space Communications and Navigation (SCaN) program is executing National policy guidance to transition services to the commercial sector where practicable.;",
+              "Oracle Private Cloud Appliances were upgraded to a more robust, cloud-enabled system, reducing processing time and enabling multi-scenario schedule planning."
+            ]
+          },
+          {
+            "title": "Public Engagement and Program Oversight",
+            "key_points": [
+              "FY 2025 Agency Financial Report (AFR) integrates financial accountability with operational milestones such as the Crew‑10 mission, emphasizing international collaboration and multi‑platform public outreach.",
+              "Digital platforms (Facebook, X) are leveraged to enhance real‑time public engagement with NASA missions."
+            ],
+            "relevance_score": 0.75,
+            "supporting_evidence": [
+              "Electronic copies of this report are available on the Agency's website.;",
+              "NASA astronauts Anne McClain and Nichole Ayers, along with JAXA astronaut Takuya Onishi and Roscosmos cosmonaut Kirill Peskov; - facebook.com/NASA; - x.com/NASA;",
+              "Crew10 is the 10th crew rotation mission with SpaceX to the International Space Station"
+            ]
+          }
+        ],
+        "executive_summary": "NASA’s FY 2025 financial report confirms a clean audit for the 15th consecutive year, reflecting robust fiscal stewardship and $35.6B budgetary resources. The Agency advances Artemis II toward an April 2026 crewed lunar launch, accelerates lunar nuclear power development, and updates its Commercial Low Earth Orbit Destinations Strategy. Key science missions — OSIRIS‑REx asteroid sampling and Parker Solar Probe solar research — have achieved success, while technology demonstrations in cryogenic fluid management and laser communications progress toward operational maturity. Enterprise Risk Management (ERM) via the UNICORN framework ensures risk‑informed decisions across Centers, with no material internal control weaknesses identified. Heritage assets are preserved without depreciation, environmental liabilities remain substantial, and lease accounting under SFFAS 54 generates $49.1M revenue with a $2.48B receivable. A significant deficiency in accrual posting documentation was noted, prompting enhanced change‑management controls. Cybersecurity modernization, workforce planning, and infrastructure right‑sizing under a Zero Trust model support mission‑critical capabilities and fiscal responsibility. The FY 2025 AFR integrates financial accountability with program milestones, including the Crew‑10 mission, and leverages digital platforms for public engagement.",
+        "key_insights": [
+          "NASA maintains fiscal transparency with a clean audit for 15 consecutive years, underscoring strong internal controls and compliance.",
+          "Strategic lunar initiatives — Artemis II crewed mission and lunar nuclear power — are on schedule, driving continued inspiration and exploration leadership.",
+          "Technology demonstrations and science missions are advancing critical capabilities, supported by industry partnerships and robust risk management."
+        ],
+        "reading_time_minutes": 4,
+        "completeness_score": 0.93
+      }
+    }
+  ]
+}

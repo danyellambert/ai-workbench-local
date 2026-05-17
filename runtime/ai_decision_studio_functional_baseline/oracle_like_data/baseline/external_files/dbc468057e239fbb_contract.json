@@ -1,0 +1,145 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "document_review_deck",
+  "deck_family": "review",
+  "presentation": {
+    "title": "AI Workbench Local — Document Review",
+    "subtitle": "Executive review of the latest grounded document analysis",
+    "author": "AI Workbench Local",
+    "date": "2026-04-22",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Document Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "source_documents": [
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52"
+    ],
+    "tool_used": "review_document_risks",
+    "review_type": "risk_gap_review",
+    "document_ids": [
+      "37130abe86ed3e754c1f7695b2480679d15ef02d143030463439403417f98f52"
+    ]
+  },
+  "executive_summary": "Governance Committee Minutes Review of Northwind Contract: 3 risk(s), 0 gap(s) and 5 mitigation action(s) identified. Top risk: Potential delay in contract approval due to insufficient liability, transfer mechanism, and incident-notification language",
+  "key_highlights": [
+    "Potential delay in contract approval due to insufficient liability, transfer mechanism, and incident-notification language",
+    "Access-review evidence gap must be corrected before launch close-out",
+    "Temporary uptime risk acceptance for pilot phase subject to compensating controls and monthly reporting",
+    "Negotiate liability cap with vendor legal",
+    "Draft SCC Appendix for data residency"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Source count",
+      "value": "3"
+    },
+    {
+      "label": "Findings",
+      "value": "3"
+    },
+    {
+      "label": "Actions",
+      "value": "5"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Top findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Owner",
+        "Due",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "risk",
+          "Potential delay in contract approval due to insufficient liability, transfer mechanism, and incident-notification langu…",
+          "-",
+          "-",
+          "The committee agreed that the MSA package cannot be approved unless liability, transfer mechanism, and incident-notific…"
+        ],
+        [
+          "risk",
+          "Access-review evidence gap must be corrected before launch close-out",
+          "-",
+          "-",
+          "The committee accepted opening NCR-2024-011 and required correction of the access-review evidence gap before launch clo…"
+        ],
+        [
+          "risk",
+          "Temporary uptime risk acceptance for pilot phase subject to compensating controls and monthly reporting",
+          "-",
+          "-",
+          "The committee allowed Procurement to pursue a temporary uptime risk acceptance for the pilot phase only, subject to com…"
+        ]
+      ],
+      "speaker_notes": "Findings grounded in the structured/document-agent payload."
+    },
+    {
+      "title": "Action plan",
+      "columns": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Negotiate liability cap with vendor legal",
+          "Maria Santos",
+          "2024-03-22",
+          "In progress"
+        ],
+        [
+          "Draft SCC Appendix for data residency",
+          "James Park",
+          "2024-03-25",
+          "Open"
+        ],
+        [
+          "Request revised SLA with 99.95% target",
+          "Maria Santos",
+          "2024-03-20",
+          "Done"
+        ],
+        [
+          "Define incident response SLOs",
+          "Alex Rivera",
+          "2024-03-28",
+          "Open"
+        ],
+        [
+          "Set up auto-renewal calendar alerts",
+          "Operations",
+          "2024-03-18",
+          "In progress"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Negotiate liability cap with vendor legal",
+  "watchouts": [
+    "Open-ended questions may require additional human reading when the document has contextual ambiguity."
+  ],
+  "next_steps": [
+    "Negotiate liability cap with vendor legal",
+    "Draft SCC Appendix for data residency",
+    "Request revised SLA with 99.95% target",
+    "Define incident response SLOs",
+    "Open the cited source excerpts to confirm the interpretation before acting."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent"
+  ]
+}

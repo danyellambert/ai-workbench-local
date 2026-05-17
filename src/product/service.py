@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from src.config import BASE_DIR, PresentationExportSettings, RagSettings
 from src.providers.registry import resolve_provider_runtime_profile
 from src.rag.loaders import LoadedDocument
-from src.rag.service import get_indexed_documents, normalize_rag_index, upsert_documents_in_rag_index
+from src.rag.service import get_indexed_documents, normalize_rag_index, remove_documents_from_rag_index, upsert_documents_in_rag_index
 from src.services.document_context import build_structured_document_context
+from src.services.runtime_controls import resolve_runtime_fallback_provider
 from src.services.presentation_export import (
     ACTION_PLAN_EXPORT_KIND,
     CANDIDATE_REVIEW_EXPORT_KIND,
@@ -16,7 +17,8 @@ from src.services.presentation_export import (
     POLICY_CONTRACT_COMPARISON_EXPORT_KIND,
 )
 from src.services.presentation_export_service import generate_executive_deck
-from src.storage.rag_store import load_rag_store, save_rag_store
+from src.services.evidenceops_external_targets import create_trello_cards_from_product_result
+from src.storage.rag_store import clear_rag_store, load_rag_document_catalog, load_rag_store, save_rag_store
 from src.storage.runtime_paths import (
     get_phase95_evidenceops_action_store_path,
     get_phase95_evidenceops_worklog_path,
@@ -25,6 +27,7 @@ from src.structured.base import CVAnalysisPayload, DocumentAgentPayload
 from src.structured.envelope import StructuredResult, TaskExecutionRequest
 from src.structured.langgraph_workflow import run_structured_execution_workflow
 
+from .action_plan_presenter import build_action_plan_view
 from .models import (
     GroundingPreview,
     ProductArtifact,
@@ -34,26 +37,29 @@ from .models import (
     ProductWorkflowRequest,
     ProductWorkflowResult,
 )
+from .candidate_review_context import normalize_role_brief_text_with_model, render_candidate_review_input_text
 
 DEFAULT_WORKFLOW_QUERIES: dict[ProductWorkflowId, str] = {
-    "document_review": "Review the selected documents and produce a grounded executive summary with key findings, risks, gaps and recommended next actions.",
+    "document_review": "List the main risks, gaps and red flags in the selected documents. Produce grounded executive findings, top blockers, business impact and recommended next actions.",
     "policy_contract_comparison": "Compare the selected documents and identify the most relevant differences, business impact, watchouts and a grounded recommendation.",
     "action_plan_evidence_review": "Review the selected documents and derive a grounded action plan with owners, deadlines, evidence gaps and recommended next steps.",
     "candidate_review": "Review this candidate profile and summarize relevant experience, strengths, gaps, seniority signals and an initial recommendation.",
 }
 
 WORKFLOW_CONTRACT_DOCS: dict[ProductWorkflowId, str] = {
-    "document_review": "docs/EXECUTIVE_DECK_GENERATION_DOCUMENT_REVIEW_DECK_CONTRACT_V1.md",
-    "policy_contract_comparison": "docs/EXECUTIVE_DECK_GENERATION_POLICY_CONTRACT_COMPARISON_DECK_CONTRACT_V1.md",
-    "action_plan_evidence_review": "docs/EXECUTIVE_DECK_GENERATION_ACTION_PLAN_DECK_CONTRACT_V1.md",
-    "candidate_review": "docs/EXECUTIVE_DECK_GENERATION_CANDIDATE_REVIEW_DECK_CONTRACT_V1.md",
+    "document_review": "docs/architecture/executive-deck-generation/document-review-deck-contract-v1.md",
+    "policy_contract_comparison": "docs/architecture/executive-deck-generation/policy-contract-comparison-deck-contract-v1.md",
+    "action_plan_evidence_review": "docs/architecture/executive-deck-generation/action-plan-deck-contract-v1.md",
+    "candidate_review": "docs/architecture/executive-deck-generation/candidate-review-deck-contract-v1.md",
 }
 
-DOCUMENT_AGENT_WORKFLOW_DEFAULTS: dict[ProductWorkflowId, dict[str, str]] = {
+DOCUMENT_AGENT_WORKFLOW_DEFAULTS: dict[ProductWorkflowId, dict[str, object]] = {
     "document_review": {
         "agent_intent": "document_risk_review",
         "agent_tool": "review_document_risks",
         "agent_answer_mode": "friendly",
+        "document_review_findings_synthesis_enabled": False,
+        "document_review_findings_prompt_style": "hybrid",
     },
     "policy_contract_comparison": {
         "agent_intent": "document_comparison",
@@ -198,49 +204,128 @@ def _load_current_rag_index(rag_settings: RagSettings) -> dict[str, object] | No
     return normalize_rag_index(load_rag_store(rag_settings.store_path), rag_settings)
 
 
+def _format_size_label(size_bytes: int | None) -> str | None:
+    if not isinstance(size_bytes, int) or size_bytes <= 0:
+        return None
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    if size_bytes < 1024 * 1024:
+        return f"{round(size_bytes / 1024, 1)} KB"
+    return f"{round(size_bytes / (1024 * 1024), 1)} MB"
+
+
+def _normalize_document_warnings(raw_value: object) -> list[str]:
+    if not isinstance(raw_value, list):
+        return []
+    warnings: list[str] = []
+    for item in raw_value:
+        normalized = " ".join(str(item or "").split()).strip()
+        if normalized:
+            warnings.append(normalized)
+    return warnings
+
+
+def _derive_product_document_status(*, indexed_at: str | None, chunk_count: int, warnings: list[str]) -> str:
+    if indexed_at and chunk_count > 0:
+        return "warning" if warnings else "indexed"
+    if warnings:
+        return "error"
+    if chunk_count > 0:
+        return "indexing"
+    return "pending"
+
+
 def list_product_documents(rag_settings: RagSettings) -> list[ProductDocumentRef]:
-    rag_index = _load_current_rag_index(rag_settings)
-    documents = get_indexed_documents(rag_index, rag_settings) if rag_index else []
+    lightweight_documents = load_rag_document_catalog(rag_settings.store_path)
+    if isinstance(lightweight_documents, list):
+        documents = lightweight_documents
+    else:
+        rag_index = _load_current_rag_index(rag_settings)
+        documents = get_indexed_documents(rag_index, rag_settings) if rag_index else []
     normalized: list[ProductDocumentRef] = []
     for document in documents:
         loader_metadata = document.get("loader_metadata") if isinstance(document.get("loader_metadata"), dict) else {}
+        warnings = _normalize_document_warnings(loader_metadata.get("warnings"))
+        indexed_at = str(document.get("indexed_at") or "").strip() or None
+        size_bytes_raw = loader_metadata.get("size_bytes")
+        size_bytes = int(size_bytes_raw) if isinstance(size_bytes_raw, (int, float)) else None
+        chunk_count = int(document.get("chunk_count") or 0)
         normalized.append(
             ProductDocumentRef(
                 document_id=str(document.get("document_id") or document.get("file_hash") or "document"),
                 name=str(document.get("name") or "document"),
                 file_type=str(document.get("file_type") or "").strip() or None,
                 char_count=int(document.get("char_count") or 0),
-                chunk_count=int(document.get("chunk_count") or 0),
-                indexed_at=str(document.get("indexed_at") or "").strip() or None,
+                chunk_count=chunk_count,
+                indexed_at=indexed_at,
                 loader_strategy_label=str(loader_metadata.get("loader_strategy_label") or loader_metadata.get("strategy_label") or "").strip() or None,
+                status=_derive_product_document_status(indexed_at=indexed_at, chunk_count=chunk_count, warnings=warnings),
+                size_bytes=size_bytes,
+                size_label=_format_size_label(size_bytes),
+                warnings=warnings,
+                source_type=str(loader_metadata.get("source_type") or "").strip() or None,
+                page_count=int(loader_metadata.get("page_count")) if isinstance(loader_metadata.get("page_count"), (int, float)) else None,
             )
         )
     return normalized
 
+
+
+
+class _BoundEmbeddingProvider:
+    def __init__(self, provider, forced_model: str | None = None):
+        self._provider = provider
+        self._forced_model = str(forced_model or "").strip() or None
+
+    def create_embeddings(self, texts, model, context_window=None, truncate=True):
+        effective_model = self._forced_model or str(model or "").strip()
+        return self._provider.create_embeddings(
+            texts,
+            model=effective_model,
+            context_window=context_window,
+            truncate=truncate,
+        )
+
+    def __getattr__(self, name):
+        return getattr(self._provider, name)
 
 def index_loaded_documents(
     documents: list[LoadedDocument],
     *,
     rag_settings: RagSettings,
     provider_registry: dict[str, dict[str, object]],
+    progress_callback: Callable[[str, dict[str, object]], None] | None = None,
 ) -> tuple[list[ProductDocumentRef], dict[str, object]]:
     if not documents:
         return list_product_documents(rag_settings), {"ok": False, "message": "No documents were provided for indexing."}
+    workspace_root = rag_settings.store_path.parent
+    fallback_provider = resolve_runtime_fallback_provider("embeddings", workspace_root)
     runtime_profile = resolve_provider_runtime_profile(
         provider_registry,
         rag_settings.embedding_provider,
         capability="embeddings",
-        fallback_provider="ollama",
+        fallback_provider=fallback_provider,
     )
     embedding_provider = runtime_profile.get("provider_instance")
     if embedding_provider is None:
         raise RuntimeError("No embedding provider is available to index the uploaded documents.")
+    forced_model = str(rag_settings.embedding_model or "").strip()
+    effective_provider = str(runtime_profile.get("effective_provider") or "").strip()
+    requested_provider = str(rag_settings.embedding_provider or "").strip()
+    if effective_provider and requested_provider and effective_provider != requested_provider:
+        from src.services.runtime_controls import resolve_runtime_fallback_step
+        fallback_step = resolve_runtime_fallback_step("embeddings", workspace_root)
+        fallback_model = str((fallback_step or {}).get("model") or runtime_profile.get("default_model") or "").strip()
+        if fallback_model:
+            forced_model = fallback_model
+    embedding_provider = _BoundEmbeddingProvider(embedding_provider, forced_model)
     rag_index = _load_current_rag_index(rag_settings)
     updated_index, sync_status = upsert_documents_in_rag_index(
         documents=documents,
         settings=rag_settings,
         embedding_provider=embedding_provider,
         rag_index=rag_index,
+        progress_callback=progress_callback,
     )
     save_rag_store(rag_settings.store_path, updated_index)
     documents_after = list_product_documents(rag_settings)
@@ -248,6 +333,38 @@ def index_loaded_documents(
         "ok": True,
         "message": f"{len(documents)} document(s) indexed successfully.",
         "embedding_provider": runtime_profile.get("effective_provider"),
+        "sync_status": sync_status,
+    }
+
+
+def delete_product_documents(
+    document_ids: list[str],
+    *,
+    rag_settings: RagSettings,
+) -> tuple[list[ProductDocumentRef], dict[str, object]]:
+    normalized_ids = [str(item).strip() for item in document_ids if str(item).strip()]
+    if not normalized_ids:
+        return list_product_documents(rag_settings), {"ok": False, "message": "No document ids were provided for deletion.", "removed_count": 0}
+
+    documents_before = list_product_documents(rag_settings)
+    existing_document_ids = {item.document_id for item in documents_before}
+    removable_ids = [document_id for document_id in normalized_ids if document_id in existing_document_ids]
+    if not removable_ids:
+        return documents_before, {"ok": False, "message": "No matching indexed documents were found for deletion.", "removed_count": 0}
+
+    rag_index = _load_current_rag_index(rag_settings)
+    updated_index, sync_status = remove_documents_from_rag_index(rag_index, rag_settings, removable_ids)
+    if updated_index is None:
+        clear_rag_store(rag_settings.store_path)
+    else:
+        save_rag_store(rag_settings.store_path, updated_index)
+
+    documents_after = list_product_documents(rag_settings)
+    return documents_after, {
+        "ok": True,
+        "message": f"{len(removable_ids)} document(s) removed successfully.",
+        "removed_count": len(removable_ids),
+        "removed_document_ids": removable_ids,
         "sync_status": sync_status,
     }
 
@@ -643,6 +760,58 @@ def _summarize_payload(
     return summary.strip(), [], None, warnings
 
 
+
+def _policy_comparison_v2_quality_is_clean(structured_result: StructuredResult) -> bool:
+    payload = getattr(structured_result, "validated_output", None)
+    structured_response = getattr(payload, "structured_response", None)
+    if not isinstance(structured_response, dict):
+        return False
+
+    policy_v2 = structured_response.get("policy_comparison_v2")
+    if not isinstance(policy_v2, dict):
+        return False
+
+    quality_report = policy_v2.get("quality_report")
+    if not isinstance(quality_report, dict):
+        return False
+
+    deltas = policy_v2.get("deltas") if isinstance(policy_v2.get("deltas"), list) else []
+    priorities = policy_v2.get("negotiation_priorities") if isinstance(policy_v2.get("negotiation_priorities"), list) else []
+
+    generic_priority_labels = {"critical", "high", "medium", "low", "urgent", "p0", "p1", "p2", "p3"}
+    has_generic_priorities = any(
+        "".join(ch for ch in str(item or "").casefold() if ch.isalnum()) in generic_priority_labels
+        for item in priorities
+    )
+
+    required_delta_fields = {
+        "title",
+        "impact",
+        "category",
+        "change_summary",
+        "doc_a_evidence",
+        "doc_b_evidence",
+        "must_fix_title",
+        "negotiation_priority",
+        "watchout",
+        "next_step",
+    }
+    returned_deltas = [item for item in deltas if isinstance(item, dict)]
+    returned_deltas_complete = all(
+        all(str(item.get(field) or "").strip() for field in required_delta_fields)
+        for item in returned_deltas
+    )
+
+    return (
+        returned_deltas_complete
+        and not has_generic_priorities
+        and not quality_report.get("final_issues")
+        and not quality_report.get("blocking_issues")
+        and not quality_report.get("json_extraction_failed")
+        and not quality_report.get("needs_review")
+    )
+
+
 def _run_structured_product_workflow(
     request: ProductWorkflowRequest,
     *,
@@ -673,7 +842,10 @@ def _run_structured_product_workflow(
         context_strategy=strategy,
         provider=request.provider,
         model=request.model,
+        prompt_profile=request.prompt_profile,
         temperature=request.temperature,
+        top_p=request.top_p,
+        max_tokens=request.max_tokens,
         context_window=(request.context_window if request.context_window_mode == "manual" else None),
         telemetry=telemetry,
     )
@@ -685,8 +857,17 @@ def _run_structured_product_workflow(
         workflow_id=request.workflow_id,
         structured_result=structured_result,
     )
+
+    # Policy Comparison watchouts are business cautions used by the UI, not technical
+    # workflow warnings. When policy_comparison_v2 is structurally clean, keep the
+    # run completed even if the payload carries watchouts/limitations.
+    if request.workflow_id == "policy_contract_comparison" and _policy_comparison_v2_quality_is_clean(structured_result):
+        warnings = []
+
     status = "completed" if structured_result.success else "error"
-    if status == "completed" and warnings:
+    # Document Review warnings are business review signals, not technical execution failures.
+    # Keep the run completed when the structured workflow succeeded.
+    if status == "completed" and warnings and request.workflow_id not in {"document_review", "action_plan_evidence_review"}:
         status = "warning"
     if request.workflow_id == "candidate_review" and len(request.document_ids) > 1:
         warnings.insert(0, "Candidate Review is designed for one CV at a time.")
@@ -708,12 +889,18 @@ def _run_structured_product_workflow(
             "task_type": task_type,
             "provider": request.provider,
             "model": request.model,
+            "prompt_profile": request.prompt_profile,
+            "top_p": request.top_p,
+            "max_tokens": request.max_tokens,
             "context_strategy": strategy,
             "source_documents": list(request.document_ids),
             "workflow_contract": workflow_definition.workflow_contract,
             "expected_outputs": list(workflow_definition.expected_outputs),
             "preferred_context_strategy": workflow_definition.preferred_context_strategy,
             "deck_export_label": workflow_definition.default_export_label,
+            "input_text": effective_query,
+            "effective_query": effective_query,
+            "query": effective_query,
         },
     )
 
@@ -745,13 +932,68 @@ def run_action_plan_evidence_review_workflow(request: ProductWorkflowRequest) ->
     )
 
 
+def _candidate_review_request_with_role_brief(request: ProductWorkflowRequest) -> tuple[ProductWorkflowRequest, dict[str, Any] | None, dict[str, Any], list[str]]:
+    role_brief_document_id = str(getattr(request, "role_brief_document_id", None) or "").strip()
+    if not role_brief_document_id:
+        return request, None, {}, []
+
+    warnings: list[str] = []
+    raw_role_brief_text = build_structured_document_context(
+        query="Extract the hiring thesis, must-haves, preferred signals, leadership scope, interview focus and red flags from this role brief.",
+        document_ids=[role_brief_document_id],
+        strategy="document_scan",
+        max_chars=50000,
+    ).strip()
+
+    if not raw_role_brief_text:
+        warnings.append("Role brief document was selected, but no document context could be assembled.")
+        return request, None, {"source": "empty_document_context"}, warnings
+
+    manual_context_window = request.context_window if request.context_window_mode == "manual" else None
+    role_context, normalization_metadata = normalize_role_brief_text_with_model(
+        raw_role_brief_text,
+        provider=request.provider,
+        model=request.model,
+        temperature=0.0,
+        top_p=request.top_p,
+        max_tokens=min(int(request.max_tokens or 1400), 2000),
+        context_window=manual_context_window,
+    )
+    normalized_input_text = render_candidate_review_input_text(role_context) if role_context.raw_text else request.input_text
+    if not str(normalized_input_text or "").strip():
+        normalized_input_text = request.input_text
+
+    effective_request = request.model_copy(update={"input_text": normalized_input_text})
+    if normalization_metadata.get("source") == "heuristic_fallback":
+        warnings.append("Role brief normalization used deterministic fallback because the model normalization did not complete.")
+
+    role_context_payload = role_context.to_dict()
+    role_context_payload.pop("raw_text", None)
+    return effective_request, role_context_payload, normalization_metadata, warnings
+
 def run_candidate_review_workflow(request: ProductWorkflowRequest) -> ProductWorkflowResult:
-    return _run_structured_product_workflow(
-        request,
+    effective_request, role_context, normalization_metadata, role_warnings = _candidate_review_request_with_role_brief(request)
+    result = _run_structured_product_workflow(
+        effective_request,
         task_type="cv_analysis",
         workflow_label="Candidate Review",
         deck_export_kind=CANDIDATE_REVIEW_EXPORT_KIND,
     )
+
+    role_brief_document_id = str(getattr(request, "role_brief_document_id", None) or "").strip()
+    if role_brief_document_id:
+        result.debug_metadata["role_brief_document_id"] = role_brief_document_id
+        result.debug_metadata["role_context"] = role_context or {}
+        result.debug_metadata["role_normalization"] = normalization_metadata or {}
+        existing_warnings = list(result.warnings or [])
+        for warning in role_warnings:
+            if warning and warning not in existing_warnings:
+                existing_warnings.append(warning)
+        result.warnings = existing_warnings
+        if result.status == "completed" and existing_warnings:
+            result.status = "warning"
+
+    return result
 
 
 def run_product_workflow(request: ProductWorkflowRequest) -> ProductWorkflowResult:
@@ -780,6 +1022,30 @@ def _artifact_or_none(artifact_type: str, label: str, path_value: object) -> Pro
     )
 
 
+def _build_action_plan_export_entries(result: ProductWorkflowResult) -> list[dict[str, Any]]:
+    if result.workflow_id != "action_plan_evidence_review":
+        return []
+    view = build_action_plan_view(result)
+    entries: list[dict[str, Any]] = []
+    for item in view.get("items", []):
+        if not isinstance(item, dict):
+            continue
+        entries.append(
+            {
+                "action_type": "action_item",
+                "priority": item.get("priority"),
+                "description": item.get("title"),
+                "owner": item.get("owner"),
+                "due_date": item.get("due_date"),
+                "status": item.get("status") or "open",
+                "source": item.get("source"),
+                "evidence": item.get("evidence") or item.get("rationale"),
+                "review_type": "action_plan_evidence_review",
+            }
+        )
+    return entries
+
+
 def generate_product_workflow_deck(
     result: ProductWorkflowResult,
     *,
@@ -788,11 +1054,13 @@ def generate_product_workflow_deck(
 ) -> tuple[dict[str, Any], list[ProductArtifact]]:
     if not result.deck_export_kind:
         raise ValueError("This workflow does not expose a deck export kind.")
+    explicit_action_entries = _build_action_plan_export_entries(result)
     export_result = generate_executive_deck(
         export_kind=result.deck_export_kind,
         structured_result=result.structured_result,
+        evidenceops_action_entries=(explicit_action_entries or None),
         phase95_evidenceops_worklog_path=get_phase95_evidenceops_worklog_path(workspace_root or BASE_DIR),
-        phase95_evidenceops_action_store_path=get_phase95_evidenceops_action_store_path(workspace_root or BASE_DIR),
+        phase95_evidenceops_action_store_path=(None if explicit_action_entries else get_phase95_evidenceops_action_store_path(workspace_root or BASE_DIR)),
         settings=settings,
     )
     artifacts = [
@@ -808,3 +1076,21 @@ def generate_product_workflow_deck(
         if artifact is not None
     ]
     return export_result, artifacts
+
+
+def publish_product_workflow_to_trello(
+    result: ProductWorkflowResult,
+    *,
+    dry_run: bool = True,
+    max_cards: int = 8,
+    preview_payload: dict[str, Any] | None = None,
+    selected_card_index: int | None = None,
+) -> dict[str, Any]:
+    """Create or plan Trello cards for a workflow result without leaking EvidenceOps internals to the API layer."""
+    return create_trello_cards_from_product_result(
+        result,
+        dry_run=dry_run,
+        max_cards=max_cards,
+        preview_payload=preview_payload,
+        selected_card_index=selected_card_index,
+    )

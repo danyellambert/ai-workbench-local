@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "The summaries highlight two distinct aspects of Northwind’s access governance: one focuses on evidence gaps in vendor control reviews, while the other addresses conditional approval for privileged access with governance safeguards. Material differences include the nature of the controls (evidence completeness vs. access authorization), the scope of accountability (vendor artifacts vs. personnel), and the requirement for proactive verification (archival validation vs. revalidation upon personnel change). Both underscore the need for rigor, but one centers on documentation integrity and the other on operational governance of access privileges.\n\n- The Access Review Evidence Log documents missing or incomplete evidence artifacts, requiring archival verification to close controls.  \n- The Privileged Account Approval Email outlines a time-bound, conditional authorization subject to governance controls and revalidation upon personnel changes.  \n- Evidence gaps involve provenance verification of vendor documentation; privileged access requires proactive verification of personnel and operational conditions.  \n- The evidence log is tied to control closure in a vendor review; privileged access approval is tied to ongoing governance and audit readiness.  \n- Missing evidence prevents full control closure; conditional approval permits continued access only under strict, monitored conditions.  \n- One addresses synthetic documentation as test material; the other treats access as a governed, accountable function requiring oversight.",
+  "key_highlights": [
+    "The summaries highlight two distinct aspects of Northwind’s access governance: one focuses on evidence gaps in vendor control reviews, while the other addresses conditional approval for privileged access with governance safeguards. Material differences include the nature of the controls (evidence completeness vs. access authorization), the scope of accountability (vendor artifacts vs. personnel), and the requirement for proactive verification (archival validation vs. revalidation upon personnel change). Both underscore the need for rigor, but one centers on documentation integrity and the other on operational governance of access privileges.",
+    "The Access Review Evidence Log documents missing or incomplete evidence artifacts, requiring archival verification to close controls.",
+    "The Privileged Account Approval Email outlines a time-bound, conditional authorization subject to governance controls and revalidation upon personnel changes.",
+    "Evidence gaps involve provenance verification of vendor documentation; privileged access requires proactive verification of personnel and operational conditions.",
+    "The evidence log is tied to control closure in a vendor review; privileged access approval is tied to ongoing governance and audit readiness.",
+    "Missing evidence prevents full control closure; conditional approval permits continued access only under strict, monitored conditions."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Critical evidence items such as EV-002 require archival verification before they can satisfy the control. | The presenc…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "The approval is conditional and time-bound, tied to specific operational controls and governance checkpoints. | Governa…"
+        ],
+        [
+          "approval_change",
+          "The summaries highlight two distinct aspects of Northwind’s…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+        ],
+        [
+          "auditability_delta",
+          "The Access Review Evidence Log documents missing or…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+        ],
+        [
+          "approval_change",
+          "The Privileged Account Approval Email outlines a time-bound,…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): EV-002 (System owner approval email) is missing but can be satisfied by an attach…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Evidence gaps involve provenance verification of vendor documentation;…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+        ],
+        [
+          "approval_change",
+          "The evidence log is tied to control closure…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+        ],
+        [
+          "approval_change",
+          "Missing evidence prevents full control closure; conditional approval…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) serves as the evidence register for the…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

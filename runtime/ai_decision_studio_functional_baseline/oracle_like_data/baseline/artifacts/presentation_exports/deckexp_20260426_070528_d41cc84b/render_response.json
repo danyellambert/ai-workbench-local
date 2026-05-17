@@ -1,0 +1,618 @@
+{
+  "mode": "render",
+  "rendered": true,
+  "dry_run": false,
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260426_070528_d41cc84b/document_review_deck.pptx",
+  "presentation_title": "AI Workbench Local — Document Review",
+  "theme": "executive_premium_minimal",
+  "slide_count": 7,
+  "missing_asset_count": 0,
+  "missing_assets": [],
+  "quality_review": {
+    "mode": "review",
+    "presentation_title": "AI Workbench Local — Document Review",
+    "theme": "executive_premium_minimal",
+    "slide_count": 7,
+    "slides": [
+      {
+        "slide_number": 1,
+        "slide_type": "title",
+        "title": "AI Workbench Local — Document Review",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 1.8,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 2,
+        "slide_type": "summary",
+        "title": "Executive summary",
+        "score": 93,
+        "status": "ok",
+        "content_weight": 3.59,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.2,
+        "risk_level": "medium",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [
+          "summary:panel_width_pressure"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "summary:panel_width_pressure",
+            "density": 4.401,
+            "threshold": 4.2,
+            "severity": "medium",
+            "message": "summary takeaways are dense enough to overwhelm the side panel width"
+          }
+        ],
+        "severity_counts": {
+          "high": 0,
+          "medium": 1,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "summary takeaways are dense enough to overwhelm the side panel width"
+          }
+        ]
+      },
+      {
+        "slide_number": 3,
+        "slide_type": "metrics",
+        "title": "Executive snapshot",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 6.14,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 4,
+        "slide_type": "table",
+        "title": "Top findings",
+        "score": 58,
+        "status": "attention",
+        "content_weight": 6.84,
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 4,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 2.71,
+        "risk_level": "high",
+        "likely_overflow_regions": [
+          "table"
+        ],
+        "likely_collision_regions": [
+          "table:column_2",
+          "table:column_3",
+          "table:r2c3",
+          "table:row_imbalance"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "table:column_2",
+            "density": 3.563,
+            "threshold": 2.8,
+            "severity": "medium",
+            "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "region": "table:column_3",
+            "density": 4.313,
+            "threshold": 2.8,
+            "severity": "high",
+            "message": "table column 3 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "region": "table:r2c3",
+            "density": 8.394,
+            "threshold": 8.0,
+            "severity": "medium",
+            "message": "table cell r2c3 is dense enough to risk clipping"
+          },
+          {
+            "region": "table:row_imbalance",
+            "density": 1.09375,
+            "threshold": 1.05,
+            "severity": "medium",
+            "message": "table rows vary significantly in density and may create visual imbalance"
+          }
+        ],
+        "severity_counts": {
+          "high": 1,
+          "medium": 4,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "some table cells are likely too long"
+          },
+          {
+            "severity": "medium",
+            "message": "table column 2 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "severity": "high",
+            "message": "table column 3 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "severity": "medium",
+            "message": "table cell r2c3 is dense enough to risk clipping"
+          },
+          {
+            "severity": "medium",
+            "message": "table rows vary significantly in density and may create visual imbalance"
+          }
+        ]
+      },
+      {
+        "slide_number": 5,
+        "slide_type": "table",
+        "title": "Action plan",
+        "score": 79,
+        "status": "review",
+        "content_weight": 7.45,
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 2,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.48,
+        "risk_level": "high",
+        "likely_overflow_regions": [
+          "table"
+        ],
+        "likely_collision_regions": [
+          "table:column_1",
+          "table:row_imbalance"
+        ],
+        "layout_pressure_signals": [
+          {
+            "region": "table:column_1",
+            "density": 2.969,
+            "threshold": 2.8,
+            "severity": "medium",
+            "message": "table column 1 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "region": "table:row_imbalance",
+            "density": 1.36,
+            "threshold": 1.05,
+            "severity": "medium",
+            "message": "table rows vary significantly in density and may create visual imbalance"
+          }
+        ],
+        "severity_counts": {
+          "high": 0,
+          "medium": 3,
+          "low": 0
+        },
+        "issues": [
+          {
+            "severity": "medium",
+            "message": "some table cells are likely too long"
+          },
+          {
+            "severity": "medium",
+            "message": "table column 1 is dense enough to risk cramped cells across multiple rows"
+          },
+          {
+            "severity": "medium",
+            "message": "table rows vary significantly in density and may create visual imbalance"
+          }
+        ]
+      },
+      {
+        "slide_number": 6,
+        "slide_type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 5.31,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      },
+      {
+        "slide_number": 7,
+        "slide_type": "bullets",
+        "title": "Next steps",
+        "score": 100,
+        "status": "ok",
+        "content_weight": 2.47,
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 0,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0,
+        "risk_level": "low",
+        "likely_overflow_regions": [],
+        "likely_collision_regions": [],
+        "layout_pressure_signals": [],
+        "severity_counts": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "issues": []
+      }
+    ],
+    "missing_assets": [],
+    "average_score": 90,
+    "status": "ok",
+    "issue_count": 9,
+    "warning_count": 9,
+    "severity_counts": {
+      "high": 1,
+      "medium": 8,
+      "low": 0
+    },
+    "overflow_risk_count": 2,
+    "clipping_risk_count": 2,
+    "collision_risk_count": 7,
+    "balance_warning_count": 0,
+    "top_risk_slides": [
+      {
+        "slide_number": 4,
+        "title": "Top findings",
+        "risk_level": "high",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 4,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 2.71
+      },
+      {
+        "slide_number": 5,
+        "title": "Action plan",
+        "risk_level": "high",
+        "overflow_risk_count": 1,
+        "clipping_risk_count": 1,
+        "collision_risk_count": 2,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.48
+      },
+      {
+        "slide_number": 2,
+        "title": "Executive summary",
+        "risk_level": "medium",
+        "overflow_risk_count": 0,
+        "clipping_risk_count": 0,
+        "collision_risk_count": 1,
+        "balance_warning_count": 0,
+        "layout_pressure_score": 0.2
+      }
+    ],
+    "issues": [
+      "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+      "slide 04 (Top findings): some table cells are likely too long",
+      "slide 04 (Top findings): table column 2 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Top findings): table column 3 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Top findings): table cell r2c3 is dense enough to risk clipping",
+      "slide 04 (Top findings): table rows vary significantly in density and may create visual imbalance",
+      "slide 05 (Action plan): some table cells are likely too long",
+      "slide 05 (Action plan): table column 1 is dense enough to risk cramped cells across multiple rows",
+      "slide 05 (Action plan): table rows vary significantly in density and may create visual imbalance"
+    ],
+    "warnings": [
+      "slide 02 (Executive summary): summary takeaways are dense enough to overwhelm the side panel width",
+      "slide 04 (Top findings): some table cells are likely too long",
+      "slide 04 (Top findings): table column 2 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Top findings): table column 3 is dense enough to risk cramped cells across multiple rows",
+      "slide 04 (Top findings): table cell r2c3 is dense enough to risk clipping",
+      "slide 04 (Top findings): table rows vary significantly in density and may create visual imbalance",
+      "slide 05 (Action plan): some table cells are likely too long",
+      "slide 05 (Action plan): table column 1 is dense enough to risk cramped cells across multiple rows",
+      "slide 05 (Action plan): table rows vary significantly in density and may create visual imbalance"
+    ]
+  },
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b",
+  "preview_source": "rendered_pptx",
+  "preview_result": {
+    "mode": "preview-pptx",
+    "input_pptx": "/work/outputs/ai_workbench_exports/deckexp_20260426_070528_d41cc84b/document_review_deck.pptx",
+    "output_dir": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b",
+    "preview_count": 7,
+    "previews": [
+      "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-01.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-02.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-03.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-04.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-05.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-06.png",
+      "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-07.png"
+    ],
+    "thumbnail_sheet": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-thumbnails.png",
+    "quality_review": null,
+    "preview_artifact_review": {
+      "status": "review",
+      "preview_count": 7,
+      "edge_contact_count": 0,
+      "safe_margin_warning_count": 0,
+      "edge_density_warning_count": 0,
+      "body_edge_contact_count": 7,
+      "safe_area_intrusion_count": 7,
+      "footer_intrusion_count": 7,
+      "corner_density_warning_count": 7,
+      "slides": [
+        {
+          "slide_number": 1,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-01.png",
+          "foreground_bbox": {
+            "left": 128,
+            "top": 112,
+            "right": 2001,
+            "bottom": 1130
+          },
+          "body_foreground_bbox": {
+            "left": 128,
+            "top": 112,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.278481,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 2,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-02.png",
+          "foreground_bbox": {
+            "left": 129,
+            "top": 180,
+            "right": 2001,
+            "bottom": 1130
+          },
+          "body_foreground_bbox": {
+            "left": 137,
+            "top": 180,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.323957,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 3,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-03.png",
+          "foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 1130
+          },
+          "body_foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.842944,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 4,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-04.png",
+          "foreground_bbox": {
+            "left": 127,
+            "top": 126,
+            "right": 2001,
+            "bottom": 1130
+          },
+          "body_foreground_bbox": {
+            "left": 127,
+            "top": 126,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.788795,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 5,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-05.png",
+          "foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 1130
+          },
+          "body_foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.778833,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 6,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-06.png",
+          "foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 1130
+          },
+          "body_foreground_bbox": {
+            "left": 128,
+            "top": 126,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.861697,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        },
+        {
+          "slide_number": 7,
+          "preview_path": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/document_review_deck-07.png",
+          "foreground_bbox": {
+            "left": 129,
+            "top": 165,
+            "right": 2001,
+            "bottom": 1130
+          },
+          "body_foreground_bbox": {
+            "left": 137,
+            "top": 165,
+            "right": 2001,
+            "bottom": 658
+          },
+          "edge_contact": false,
+          "safe_margin_warning": false,
+          "edge_density_warning": false,
+          "body_edge_contact": true,
+          "safe_area_intrusion": true,
+          "footer_intrusion_warning": true,
+          "corner_density_warning": true,
+          "max_edge_ratio": 0.0,
+          "body_max_edge_ratio": 0.337553,
+          "max_corner_ratio": 0.0,
+          "issues": [
+            "body content touches a slide boundary before the footer region",
+            "body content appears to intrude into an unsafe margin region",
+            "body content approaches the footer boundary and may clip or collide",
+            "corner density suggests content is packed into unsafe corners"
+          ]
+        }
+      ]
+    },
+    "visual_regression": null,
+    "preview_source": "input_pptx",
+    "real_preview": true,
+    "preview_manifest": "outputs/ai_workbench_export_previews/deckexp_20260426_070528_d41cc84b/preview-manifest.json",
+    "backend_requested": "office",
+    "backend_used": "office",
+    "backend_fallback_reason": null,
+    "office_runtime": "/usr/bin/soffice",
+    "office_conversion_strategy": "pdf_via_ghostscript"
+  }
+}

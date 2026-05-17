@@ -1,0 +1,141 @@
+{
+  "generated_at": "2026-03-29T19:29:24.434624",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "code_analysis",
+      "mode": "indexed_document",
+      "status": "PASS",
+      "score": 13,
+      "max_score": 14,
+      "reasons": [],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218",
+        "name": "demo_code_analysis.py",
+        "file_type": "py",
+        "chunk_count": 1
+      },
+      "gold_fixture_path": "baseline://external_files/3f5fd09ed6527416_07_code_analysis_demo_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "PASS",
+        "score": 13,
+        "max_score": 14,
+        "reasons": [],
+        "metrics": {
+          "snippet_summary_hit": 1,
+          "main_purpose_hit": 1,
+          "issue_hits": 3,
+          "refactor_hits": 3,
+          "test_hits": 3,
+          "maintainability_hits": 1,
+          "risk_hits": 1
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "code_analysis",
+        "schema_version": "1.0",
+        "snippet_summary": "Função normalize_scores ajusta pontuações e processa uma lista de itens, enquanto process calcula a média das pontuações.",
+        "main_purpose": "Normalizar pontuações dentro do intervalo [0, 100] e calcular a média das pontuações normalizadas.",
+        "detected_issues": [
+          {
+            "severity": "high",
+            "category": "runtime_failure",
+            "title": "Divisão por zero quando a lista está vazia",
+            "description": "A média é calculada como total / len(values) sem verificar se values pode estar vazio, podendo gerar ZeroDivisionError.",
+            "evidence": "total / len(values) na função process sem proteção contra lista vazia.",
+            "recommendation": "Adicione verificação para lista vazia antes da divisão e defina `average = 0.0` quando não houver valores para agregar."
+          },
+          {
+            "severity": "high",
+            "category": "shared_reference",
+            "title": "Mutação in-place de objetos de entrada",
+            "description": "A função normalize_scores modifica o dicionário de entrada (item) diretamente ao atribuir item[\"score\"] = 100 ou 0, o que pode causar efeitos colaterais inesperados para quem chama.",
+            "evidence": "item[\"score\"] = 100 e item[\"score\"] = 0 alteram o objeto original.",
+            "recommendation": "Criar e retornar um novo dicionário com as pontuações normalizadas, preservando o objeto original."
+          },
+          {
+            "severity": "high",
+            "category": "type_validation",
+            "title": "Assunção de que cada item contém a chave \"score\"",
+            "description": "O código verifica apenas se \"score\" está presente antes de acessá‑la, mas não garante que o valor seja numérico nem que outros campos necessários existam, podendo gerar TypeError ou KeyError em itens malformados.",
+            "evidence": "item.get(\"name\") é usado sem validação, e item[\"score\"] é acessado após o teste \"score\" in item, mas não há verificação de tipo ou de outros campos.",
+            "recommendation": "Validar que item[\"score\"] seja um número (int ou float) antes de compará‑lo e tratar itens sem a chave \"name\" de forma segura."
+          },
+          {
+            "severity": "high",
+            "category": "runtime_failure",
+            "title": "Division by zero on empty input",
+            "description": "A divisão por `len(...)` pode falhar quando a coleção processada estiver vazia.",
+            "evidence": "average = total / len(values)",
+            "recommendation": "Adicione verificação para lista vazia antes da divisão e defina `average = 0.0` quando não houver valores para agregar."
+          },
+          {
+            "severity": "medium",
+            "category": "input_mutation",
+            "title": "Mutates caller-provided items in place",
+            "description": "O código altera objetos recebidos do chamador diretamente durante a normalização.",
+            "evidence": "item[\"score\"] = ...",
+            "recommendation": "Construir um novo objeto normalizado em vez de mutar o objeto original."
+          },
+          {
+            "severity": "medium",
+            "category": "api_contract",
+            "title": "Output structure is inconsistent",
+            "description": "Ramos diferentes retornam itens com formatos diferentes, o que fragiliza o contrato da API.",
+            "evidence": "result.append({\"name\": ...}) / result.append(item)",
+            "recommendation": "Padronizar a estrutura de saída para que todos os itens retornem o mesmo shape."
+          }
+        ],
+        "readability_improvements": [
+          "Renomear a variável \"values\" para algo mais descritivo, como \"normalized_items\".",
+          "Documentar claramente o schema esperado de entrada e saída."
+        ],
+        "maintainability_improvements": [
+          "Extrair a lógica de normalização de pontuação para uma função auxiliar pura que não modifique o objeto de entrada.",
+          "Adicionar docstring explicando o comportamento esperado e os limites de entrada.",
+          "Explicitar o contrato de imutabilidade da entrada e preservar esse contrato na implementação.",
+          "Separar a etapa de normalização da etapa de agregação para simplificar o fluxo e o contrato da API."
+        ],
+        "refactor_plan": [
+          "Passo 1: Criar uma nova função normalize_item(item) que receba um dicionário e retorne um novo dicionário com a pontuação normalizada, sem mutar o original.",
+          "Passo 2: Modificar normalize_scores para iterar sobre items, aplicar normalize_item a cada um e coletar os resultados em uma nova lista.",
+          "Passo 3: No process, antes de calcular a média, verificar se len(values) > 0; se não, definir average = 0.0.",
+          "Passo 4: Validar que o valor de \"score\" seja numérico antes de compará‑lo, lançando ou tratando erro apropriado.",
+          "Passo 5: Atualizar o logger para usar f‑strings ou formatação segura e incluir mensagem de aviso quando a lista estiver vazia.",
+          "Tratar entrada vazia antes do cálculo da média e retornar `0.0` quando não houver itens.",
+          "Evitar mutação in-place construindo novos objetos normalizados para a saída.",
+          "Normalizar o schema de saída para que todos os itens retornem a mesma estrutura."
+        ],
+        "test_suggestions": [
+          "Teste unitário que envia uma lista vazia para process e verifica se average é 0.0 sem levantar exceção.",
+          "Teste que fornece um item sem a chave \"score\" e confirma que a função não falha, mas trata o caso adequadamente (ex.: ignora ou define score = 0).",
+          "Teste que insere um item com pontuação fora do intervalo [0, 100] e verifica se o valor normalizado está dentro do intervalo esperado.",
+          "Teste que usa um dicionário mutável como entrada e confirma que o objeto original permanece inalterado após a chamada.",
+          "Adicionar teste para entrada vazia verificando que a média retorna `0.0` sem exceção.",
+          "Adicionar teste para garantir que os objetos de entrada não sejam modificados in-place.",
+          "Adicionar teste cobrindo itens sem `score` e verificando que o formato de saída continua consistente."
+        ],
+        "risk_notes": [
+          "Se a lista de entrada estiver vazia, o código atual causará ZeroDivisionError ao dividir por len(values).",
+          "A mutação in‑place de items pode corromper dados de chamadores que esperam que seus objetos não sejam alterados.",
+          "A falta de validação de tipo em \"score\" pode levar a exceções inesperadas quando valores não numéricos forem encontrados.",
+          "Uma entrada vazia pode causar falha em tempo de execução por divisão por zero.",
+          "Saídas com formatos mistos podem quebrar consumidores que esperam uma estrutura estável."
+        ]
+      }
+    }
+  ]
+}

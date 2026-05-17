@@ -1,0 +1,123 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "The documents address distinct compliance controls: one focuses on vendor evidence completeness for a quarterly review, while the other governs privileged access with strict operational and verification requirements. Both emphasize documentation rigor but target different regulatory domains.\n\n- Document 1 concerns a synthetic evidence register for vendor control remediation, requiring resolution of missing items like EV-002 to close the control.  \n- Document 2 approves limited privileged access for specific administrators under a pilot, mandating scoping, logging, quarterly reviews, and vendor confirmation.  \n- Document 1 is a retrospective compliance artifact; Document 2 is a prospective access authorization with ongoing governance.  \n- Document 1 mandates evidence provenance and archival; Document 2 requires continuous logging integration and vendor validation.  \n- Document 1 centers on control closure through evidence completeness; Document 2 centers on access governance through periodic recertification.  \n- Document 1 applies to vendor management processes; Document 2 applies to internal privileged access management.",
+  "key_highlights": [
+    "The documents address distinct compliance controls: one focuses on vendor evidence completeness for a quarterly review, while the other governs privileged access with strict operational and verification requirements. Both emphasize documentation rigor but target different regulatory domains.",
+    "Document 1 concerns a synthetic evidence register for vendor control remediation, requiring resolution of missing items like EV-002 to close the control.",
+    "Document 2 approves limited privileged access for specific administrators under a pilot, mandating scoping, logging, quarterly reviews, and vendor confirmation.",
+    "Document 1 is a retrospective compliance artifact; Document 2 is a prospective access authorization with ongoing governance.",
+    "Document 1 mandates evidence provenance and archival; Document 2 requires continuous logging integration and vendor validation.",
+    "Document 1 centers on control closure through evidence completeness; Document 2 centers on access governance through periodic recertification."
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "8"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "The synthetic nature of the document indicates it is designed for testing rather than operational use. | Control closur…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on strict task scoping and continuous logging integration. | Quarterly recertification and vendor…"
+        ],
+        [
+          "approval_change",
+          "The documents address distinct compliance controls: one focuses…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The document outlines a synthetic evidence register for a Q1 2024 vendor-control…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Document 1 concerns a synthetic evidence register for…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The document outlines a synthetic evidence register for a Q1 2024 vendor-control…"
+        ],
+        [
+          "approval_change",
+          "Document 2 approves limited privileged access for specific…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): EV-002 System owner approval email for privileged vendor accounts Operations Dire…"
+        ],
+        [
+          "cross_document_observation",
+          "Document 1 is a retrospective compliance artifact; Document…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The document outlines a synthetic evidence register for a Q1 2024 vendor-control…"
+        ],
+        [
+          "vendor_oversight_delta",
+          "Document 1 mandates evidence provenance and archival; Document…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The document outlines a synthetic evidence register for a Q1 2024 vendor-control…"
+        ],
+        [
+          "auditability_delta",
+          "Document 1 centers on control closure through evidence…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The document outlines a synthetic evidence register for a Q1 2024 vendor-control…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

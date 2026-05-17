@@ -1,0 +1,541 @@
+{
+  "aggregate": {
+    "vl_called_cases": 12,
+    "category_counts": {
+      "vl_called_and_added_value": 8,
+      "vl_called_and_added_partial_value": 4
+    }
+  },
+  "cases": [
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "182d6a91cf04a3c373661d3dc298fc2b486f613faee7a6c1b1b5adde035bf207",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective helped confirm header/contact information"
+        ],
+        "emails_found": 2,
+        "phones_found": 1,
+        "name_status": "confirmed",
+        "location_status": "confirmed",
+        "name_value": "Beatriz Barbosa Martins",
+        "location_value": "Grenoble, France",
+        "emails": [
+          "barbosa.martins@example.com",
+          "beatriz.barbosa.martins@example.com"
+        ],
+        "phones": [
+          "+55 11 98242-5650"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_value",
+      "semantic_diagnosis": {
+        "name_value": "Beatriz Barbosa Martins",
+        "location_value": "Grenoble, France",
+        "semantic_false_positive": false,
+        "name_gain": true,
+        "location_gain": true,
+        "review_only": false,
+        "added_noise": false
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "missing_contacts_after_ocr",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "c7f253ea14f13a097e64c35911f6a80cf21905247b3e990ede60713f6c03b442",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "No confirmed email found",
+          "No confirmed phone found",
+          "VL selective added visual candidates that still need review"
+        ],
+        "emails_found": 1,
+        "phones_found": 2,
+        "name_status": "visual_candidate",
+        "location_status": "visual_candidate",
+        "name_value": "Matheus Araujo Carvalho",
+        "location_value": "Campinas, Brazil",
+        "emails": [
+          "matheus.araujo.carvalho@example.com"
+        ],
+        "phones": [
+          "+55 1199489-8588",
+          "+55 11 99 489-6568"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_partial_value",
+      "semantic_diagnosis": {
+        "name_value": "Matheus Araujo Carvalho",
+        "location_value": "Campinas, Brazil",
+        "semantic_false_positive": false,
+        "name_gain": false,
+        "location_gain": false,
+        "review_only": true,
+        "added_noise": true
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0014_hard_scan_like_image_pdf_lucas.martins.ferreira.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "1b7a510078f6d4af773bcea8ff9c538d7a59dcd0b9b660b3a8cb808a4f05e4ac",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective added visual candidates that still need review"
+        ],
+        "emails_found": 2,
+        "phones_found": 1,
+        "name_status": "visual_candidate",
+        "location_status": "confirmed",
+        "name_value": "Lucas Martins Ferreira",
+        "location_value": "Gif-sur-Yvette, France",
+        "emails": [
+          "martinsferreira@example.com",
+          "lucas.martins.ferreira@example.com"
+        ],
+        "phones": [
+          "+55 11 96545-8828"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_value",
+      "semantic_diagnosis": {
+        "name_value": "Lucas Martins Ferreira",
+        "location_value": "Gif-sur-Yvette, France",
+        "semantic_false_positive": false,
+        "name_gain": false,
+        "location_gain": true,
+        "review_only": true,
+        "added_noise": false
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0019_medium_scan_like_image_pdf_bruno.souza.costa.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "824b552375e450c6d3e596a73fe7f1fd4daeadedf55d2ed7f83891081f14966d",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective added visual candidates that still need review"
+        ],
+        "emails_found": 1,
+        "phones_found": 2,
+        "name_status": "visual_candidate",
+        "location_status": "not_found",
+        "name_value": "Bruno Souza Costa",
+        "location_value": null,
+        "emails": [
+          "bruno.souza.costa@example.com"
+        ],
+        "phones": [
+          "+55 11 95571-8156",
+          "2018-01 10 2022-12"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_partial_value",
+      "semantic_diagnosis": {
+        "name_value": "Bruno Souza Costa",
+        "location_value": null,
+        "semantic_false_positive": false,
+        "name_gain": false,
+        "location_gain": false,
+        "review_only": true,
+        "added_noise": true
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0024_simple_scan_like_image_pdf_camila.oliveira.oliveira.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "0841a85490484e1f3acde2d9d245e8a3251bedeaad97ee830f4331b07464d1b1",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective helped confirm header/contact information"
+        ],
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "confirmed",
+        "location_status": "confirmed",
+        "name_value": "Camila Oliveira Oliveira",
+        "location_value": "Grenoble, France",
+        "emails": [
+          "camila.oliveiraoliveira@example.com"
+        ],
+        "phones": [
+          "+55 11 98525-3845"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_value",
+      "semantic_diagnosis": {
+        "name_value": "Camila Oliveira Oliveira",
+        "location_value": "Grenoble, France",
+        "semantic_false_positive": false,
+        "name_gain": true,
+        "location_gain": true,
+        "review_only": false,
+        "added_noise": false
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0029_hard_scan_like_image_pdf_isabela.araujo.carvalho.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "f80d3e73deda518db24b1542a2f8be7800fb734a77220246a3135b2834f7d618",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective helped confirm header/contact information"
+        ],
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "confirmed",
+        "location_status": "confirmed",
+        "name_value": "Isabela Araujo Carvalho",
+        "location_value": "Lille, France",
+        "emails": [
+          "isabela.araujo.carvalho@example.com"
+        ],
+        "phones": [
+          "+55 11 98360-8507"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_value",
+      "semantic_diagnosis": {
+        "name_value": "Isabela Araujo Carvalho",
+        "location_value": "Lille, France",
+        "semantic_false_positive": false,
+        "name_gain": true,
+        "location_gain": true,
+        "review_only": false,
+        "added_noise": false
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0034_medium_scan_like_image_pdf_carolina.oliveira.carvalho.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "14487b14f29ce76daec3d2e558d322fe0d6c7f7031d83146763f502354ab649b",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective added visual candidates that still need review"
+        ],
+        "emails_found": 1,
+        "phones_found": 2,
+        "name_status": "visual_candidate",
+        "location_status": "confirmed",
+        "name_value": "Carolina Oliveira Carvalho",
+        "location_value": "Lille, France",
+        "emails": [
+          "carolina.oliveira.carvalho@example.com"
+        ],
+        "phones": [
+          "+55 1196923-8550",
+          "2019-01 102024-12"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_value",
+      "semantic_diagnosis": {
+        "name_value": "Carolina Oliveira Carvalho",
+        "location_value": "Lille, France",
+        "semantic_false_positive": false,
+        "name_gain": false,
+        "location_gain": true,
+        "review_only": true,
+        "added_noise": false
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0039_simple_scan_like_image_pdf_larissa.gomes.barbosa.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "missing_contacts_after_ocr",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "af68e4e1367305696841b0fe9d9409d4cddcc8349436224137b6332dd5a6c33e",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "No confirmed email found",
+          "No confirmed phone found",
+          "VL selective added visual candidates that still need review"
+        ],
+        "emails_found": 0,
+        "phones_found": 0,
+        "name_status": "confirmed",
+        "location_status": "visual_candidate",
+        "name_value": "Larissa Gomes Barbosa",
+        "location_value": "Recife, Brazil",
+        "emails": [],
+        "phones": []
+      },
+      "vl_value_category": "vl_called_and_added_value",
+      "semantic_diagnosis": {
+        "name_value": "Larissa Gomes Barbosa",
+        "location_value": "Recife, Brazil",
+        "semantic_false_positive": false,
+        "name_gain": true,
+        "location_gain": false,
+        "review_only": true,
+        "added_noise": false
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0044_hard_scan_like_image_pdf_felipe.silva.nascimento.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "222195ff0658db1da92c7dfa82b6ed97b89fb6e3a51b1d3f858ff4f95ba4692d",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective helped confirm header/contact information"
+        ],
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "confirmed",
+        "location_status": "confirmed",
+        "name_value": "Felipe Silva Nascimento",
+        "location_value": "Porto Alegre, Brazil",
+        "emails": [
+          "felipe.silva.nascimento@example.com"
+        ],
+        "phones": [
+          "+55 1192616-4658"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_value",
+      "semantic_diagnosis": {
+        "name_value": "Felipe Silva Nascimento",
+        "location_value": "Porto Alegre, Brazil",
+        "semantic_false_positive": false,
+        "name_gain": true,
+        "location_gain": true,
+        "review_only": false,
+        "added_noise": false
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0049_medium_scan_like_image_pdf_bruno.araujo.almeida.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "low_text_coverage",
+        "missing_contacts_after_ocr",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "695943533df9c0f6fe0b9f2edf7c1ea46775b9c675dbc63e4647b05a907f0fda",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "No confirmed email found",
+          "No confirmed phone found",
+          "VL selective added visual candidates that still need review"
+        ],
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "visual_candidate",
+        "location_status": "visual_candidate",
+        "name_value": "Bruno Araujo Almeida",
+        "location_value": "Florianópolis, Brazil",
+        "emails": [
+          "brunoaraujoalmeida@example.com"
+        ],
+        "phones": [
+          "+55 11 94094-7079"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_partial_value",
+      "semantic_diagnosis": {
+        "name_value": "Bruno Araujo Almeida",
+        "location_value": "Florianópolis, Brazil",
+        "semantic_false_positive": false,
+        "name_gain": false,
+        "location_gain": false,
+        "review_only": true,
+        "added_noise": true
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0054_simple_scan_like_image_pdf_felipe.lima.ferreira.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "7f726d308200e940ccc48ffda77d2264d9c26198e273d682124ba8de33087c25",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "VL selective helped confirm header/contact information"
+        ],
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "confirmed",
+        "location_status": "confirmed",
+        "name_value": "Felipe Lima Ferreira",
+        "location_value": "Lyon, France",
+        "emails": [
+          "felipe.lima.ferreira@example.com"
+        ],
+        "phones": [
+          "+55 11 93757-3730"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_value",
+      "semantic_diagnosis": {
+        "name_value": "Felipe Lima Ferreira",
+        "location_value": "Lyon, France",
+        "semantic_false_positive": false,
+        "name_gain": true,
+        "location_gain": true,
+        "review_only": false,
+        "added_noise": false
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0059_hard_scan_like_image_pdf_juliana.barbosa.ribeiro.pdf",
+      "source_type": "scanned_pdf",
+      "reasons": [
+        "scanned_pdf",
+        "missing_contacts_after_ocr",
+        "header_fields_missing"
+      ],
+      "regions_selected": [
+        "header_top_block",
+        "contact_block",
+        "top_center",
+        "top_left"
+      ],
+      "evidence_summary": {
+        "document_id": "9312f9b4077c7d877c4927826a222514227ded2cd523210692fb0db54ff277a9",
+        "source_type": "scanned_pdf",
+        "warnings": [
+          "No confirmed email found",
+          "No confirmed phone found",
+          "VL selective added visual candidates that still need review"
+        ],
+        "emails_found": 1,
+        "phones_found": 1,
+        "name_status": "visual_candidate",
+        "location_status": "visual_candidate",
+        "name_value": "Juliana Barbosa Ribeiro",
+        "location_value": "Rio de Janeiro, Brazil",
+        "emails": [
+          "juliana.barbosa.ribeiro@example.com"
+        ],
+        "phones": [
+          "+55 11 92460-6464"
+        ]
+      },
+      "vl_value_category": "vl_called_and_added_partial_value",
+      "semantic_diagnosis": {
+        "name_value": "Juliana Barbosa Ribeiro",
+        "location_value": "Rio de Janeiro, Brazil",
+        "semantic_false_positive": false,
+        "name_gain": false,
+        "location_gain": false,
+        "review_only": true,
+        "added_noise": true
+      }
+    }
+  ]
+}

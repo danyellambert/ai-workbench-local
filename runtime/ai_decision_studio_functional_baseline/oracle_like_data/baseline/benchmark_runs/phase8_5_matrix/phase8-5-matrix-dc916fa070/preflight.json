@@ -1,0 +1,55 @@
+{
+  "run_id": "phase8-5-matrix-dc916fa070",
+  "output_dir": "baseline://workspace/benchmark_runs/phase8_5_matrix/phase8-5-matrix-dc916fa070",
+  "selected_groups": [
+    "rerankers",
+    "ocr_vlm"
+  ],
+  "smoke": false,
+  "provider_filter": null,
+  "model_filter": null,
+  "resume_requested": false,
+  "planned_case_count": 6,
+  "resume_success_case_count": 0,
+  "groups": {
+    "generation": {
+      "planned_cases": 24,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_55f5a96bc75722f0",
+        "case_14615474db28c71e",
+        "case_c00eb27b288d2a23",
+        "case_ce2140df15c4d3be",
+        "case_f5c4af805fc7336b"
+      ]
+    },
+    "embeddings": {
+      "planned_cases": 4,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_ea4034ab8139c53f",
+        "case_b0c0105d3a8bcfef",
+        "case_fa2130d2174198fe",
+        "case_d6e1e702be27a108"
+      ]
+    },
+    "rerankers": {
+      "planned_cases": 2,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_1742d3903a2f2a23",
+        "case_9c176dac3590a3ed"
+      ]
+    },
+    "ocr_vlm": {
+      "planned_cases": 4,
+      "skipped_candidates": [],
+      "sample_case_ids": [
+        "case_85bde34a52093a17",
+        "case_914efbbf35cd8589",
+        "case_0697651c773537a2",
+        "case_2f1d860f92799763"
+      ]
+    }
+  }
+}

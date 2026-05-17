@@ -1,0 +1,311 @@
+{
+  "sampled_cvs": [
+    "0000_simple_classic_one_column_marina.ferreira.pereira.pdf",
+    "0006_simple_modern_two_column_lucas.lima.carvalho.pdf",
+    "0012_simple_compact_sidebar_pedro.lima.costa.pdf",
+    "0003_simple_dense_executive_ana.barbosa.pereira.pdf",
+    "0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+    "0010_medium_classic_one_column_laura.ribeiro.rodrigues.pdf",
+    "0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+    "0007_medium_compact_sidebar_ana.ferreira.souza.pdf",
+    "0013_medium_dense_executive_vinicius.silva.gomes.pdf",
+    "0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf"
+  ],
+  "aggregate": {
+    "sample_size": 10,
+    "verdict_counts": {
+      "ready_for_indexing": 10
+    },
+    "area_strength": {
+      "raw_text": 10,
+      "confirmed_fields": 10,
+      "experience": 10,
+      "education": 10,
+      "skills": 10,
+      "languages": 3
+    },
+    "aggregate_verdict": "structured_payload_already_useful_with_caution",
+    "recommended_indexing_strategy": "raw_text + confirmed_fields + structured payload"
+  },
+  "per_file": [
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0000_simple_classic_one_column_marina.ferreira.pereira.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "marina.ferreira.pereira@example.com"
+          ],
+          "phones": [
+            "+55 11 92887-5892"
+          ]
+        },
+        "experience_count": 2,
+        "education_count": 2,
+        "skills_count": 11,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0006_simple_modern_two_column_lucas.lima.carvalho.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "lucas.lima.carvalho@example.com"
+          ],
+          "phones": [
+            "+55 11 91163-9002"
+          ]
+        },
+        "experience_count": 1,
+        "education_count": 1,
+        "skills_count": 32,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0012_simple_compact_sidebar_pedro.lima.costa.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "pedro.lima.costa@example.com"
+          ],
+          "phones": [
+            "+55 11 91863-1254"
+          ]
+        },
+        "experience_count": 4,
+        "education_count": 2,
+        "skills_count": 15,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0003_simple_dense_executive_ana.barbosa.pereira.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "acceptable"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "ana.barbosa.pereira@example.com"
+          ],
+          "phones": [
+            "+55 11 96237-8651"
+          ]
+        },
+        "experience_count": 2,
+        "education_count": 2,
+        "skills_count": 10,
+        "languages_count": 3
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0009_simple_scan_like_image_pdf_matheus.araujo.carvalho.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [],
+          "phones": [
+            "+55 11 99489-6586",
+            "2020-01 102021-12"
+          ]
+        },
+        "experience_count": 3,
+        "education_count": 2,
+        "skills_count": 6,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0010_medium_classic_one_column_laura.ribeiro.rodrigues.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "laura.ribeiro.rodrigues@example.com"
+          ],
+          "phones": [
+            "+55 11 91391-5953"
+          ]
+        },
+        "experience_count": 2,
+        "education_count": 2,
+        "skills_count": 11,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0001_medium_modern_two_column_gabriel.gomes.almeida.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "gabriel.gomes.almeida@example.com"
+          ],
+          "phones": [
+            "+55 11 92878-8327"
+          ]
+        },
+        "experience_count": 5,
+        "education_count": 1,
+        "skills_count": 12,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0007_medium_compact_sidebar_ana.ferreira.souza.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "ana.ferreira.souza@example.com"
+          ],
+          "phones": [
+            "+55 11 91966-3181"
+          ]
+        },
+        "experience_count": 2,
+        "education_count": 1,
+        "skills_count": 10,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0013_medium_dense_executive_vinicius.silva.gomes.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "acceptable"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "vinicius.silva.gomes@example.com"
+          ],
+          "phones": [
+            "+55 11 91701-4544"
+          ]
+        },
+        "experience_count": 3,
+        "education_count": 2,
+        "skills_count": 9,
+        "languages_count": 3
+      }
+    },
+    {
+      "file": "data/synthetic/resumes_multilayout/pdf/0004_medium_scan_like_image_pdf_beatriz.barbosa.martins.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "acceptable"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [],
+          "phones": [
+            "+455 11 98242-5850",
+            "202001 2022-12",
+            "2017-01 2021-12"
+          ]
+        },
+        "experience_count": 5,
+        "education_count": 2,
+        "skills_count": 11,
+        "languages_count": 1
+      }
+    }
+  ]
+}

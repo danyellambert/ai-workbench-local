@@ -1,0 +1,329 @@
+{
+  "generated_at": "2026-03-30T18:38:29.466326",
+  "provider": "ollama",
+  "model": null,
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "cv_analysis",
+      "suite_name": "structured_real_document_eval",
+      "mode": "indexed_document",
+      "status": "FAIL",
+      "score": 9,
+      "max_score": 23,
+      "reasons": [
+        "gold:skill coverage too low: 0",
+        "gold:education coverage too low: 1"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "01055dd735831b1395021195082d017d683178573e27843945cdb9b5c73755d1",
+        "name": "Sample-Resume-1-07262023.pdf",
+        "file_type": "pdf",
+        "chunk_count": 3
+      },
+      "gold_fixture_path": "baseline://external_files/58572c9c56d885f1_14_cv_sample_resume_1_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "FAIL",
+        "score": 9,
+        "max_score": 23,
+        "reasons": [
+          "skill coverage too low: 0",
+          "education coverage too low: 1"
+        ],
+        "thresholds": {
+          "pass_ratio": 0.64,
+          "warn_ratio": 0.44,
+          "notes": "CV analysis tolera pequenas variações de wording, mas exige boa cobertura de identidade, educação e experiência."
+        },
+        "metrics": {
+          "personal_hits": 3,
+          "profile_hit": 1,
+          "language_hits": 0,
+          "skill_hits": 0,
+          "interest_hits": 0,
+          "education_hits": 1,
+          "experience_hits": 3,
+          "experience_years_hit": 1
+        }
+      },
+      "thresholds": {
+        "pass_ratio": 0.64,
+        "warn_ratio": 0.44,
+        "notes": "CV analysis tolera pequenas variações de wording, mas exige boa cobertura de identidade, educação e experiência."
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "cv_analysis",
+        "schema_version": "1.0",
+        "personal_info": {
+          "full_name": "Francis B. Taylor",
+          "email": "francisjtaylor@gmail.com",
+          "phone": "617-343-0338",
+          "location": "Cincinnati, OH 45201",
+          "links": []
+        },
+        "sections": [
+          {
+            "section_type": "personal_info",
+            "title": "Personal Info",
+            "content": [
+              {
+                "text": "Francis B. Taylor",
+                "details": {}
+              },
+              {
+                "text": "francisjtaylor@gmail.com",
+                "details": {}
+              },
+              {
+                "text": "Cincinnati, OH 45201",
+                "details": {}
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "education",
+            "title": "Education",
+            "content": [
+              {
+                "text": "Bachelor of Science, Biochemistry Johnson & Johnson, Cincinnati, OH — Present - Scientist, Creighton University"
+              }
+            ],
+            "confidence": 0.8
+          },
+          {
+            "section_type": "experience",
+            "title": "Experience",
+            "content": [
+              {
+                "text": "Scientist | Johnson & Johnson | Cincinnati, OH | July 2019—Present",
+                "details": {
+                  "title": "Scientist",
+                  "organization": "Johnson & Johnson",
+                  "location": "Cincinnati, OH",
+                  "date_range": "July 2019—Present",
+                  "bullets": [
+                    "Provide scientific support to project leaders during studies conducted in preclinical research facilities.",
+                    "Offer surgical support during research and development of animate and inanimate models.",
+                    "Perform testing to aid in the development of new medical devices.",
+                    "Demonstrated flexibility and team-oriented mindset during Covid-19 pandemic."
+                  ]
+                }
+              },
+              {
+                "text": "Teaching Assistant | Creighton University Department of Chemistry | Omaha, NE | August 2016—May 2019",
+                "details": {
+                  "title": "Teaching Assistant",
+                  "organization": "Creighton University Department of Chemistry",
+                  "location": "Omaha, NE",
+                  "date_range": "August 2016—May 2019",
+                  "bullets": [
+                    "Assisted in the design of lectures, assignments, quizzes, and laboratory manuals for General Chemistry I, General Chemistry II Lab, and Organic Chemistry Lab.",
+                    "Served as grader and primary point of contact for over 150 students; supported 30 students in individual research projects."
+                  ]
+                }
+              },
+              {
+                "text": "Admissions Fellow | Creighton University Admissions Office | Omaha, NE | Summer 2016, 2017, 2018",
+                "details": {
+                  "title": "Admissions Fellow",
+                  "organization": "Creighton University Admissions Office",
+                  "location": "Omaha, NE",
+                  "date_range": "Summer 2016, 2017, 2018",
+                  "bullets": [
+                    "Conducted interviews with prospective applicants and produced written evaluations for the admissions committee.",
+                    "Led tours and information sessions to prospective students, families, and other visitors."
+                  ]
+                }
+              },
+              {
+                "text": "Proctor | Creighton Residential Life | Omaha, NE | August 2016—May 2019",
+                "details": {
+                  "title": "Proctor",
+                  "organization": "Creighton Residential Life",
+                  "location": "Omaha, NE",
+                  "date_range": "August 2016—May 2019",
+                  "bullets": [
+                    "Lived in first-year residence hall and provided emotional and academic support to 24 students.",
+                    "Attended weekly trainings focused on conflict mediation and community building."
+                  ]
+                }
+              },
+              {
+                "text": "Forward, Co-Captain | Creighton Women’s Varsity Soccer | Omaha, NE | August 2015—Nov 2018",
+                "details": {
+                  "title": "Forward, Co-Captain",
+                  "organization": "Creighton Women’s Varsity Soccer",
+                  "location": "Omaha, NE",
+                  "date_range": "August 2015—Nov 2018",
+                  "bullets": [
+                    "Competed in Division I women’s soccer for four years; trained for 10 hours/week in the off-season, and competed against Big East peers during the fall semester.",
+                    "Served as co-captain for the 2018 season."
+                  ]
+                }
+              },
+              {
+                "text": "July 2019—Present",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "July 2019—Present",
+                  "bullets": []
+                }
+              },
+              {
+                "text": "August 2016—May 2019",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "August 2016—May 2019",
+                  "bullets": []
+                }
+              },
+              {
+                "text": "Summer 2016, 2017, 2018",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "Summer 2016, 2017, 2018",
+                  "bullets": []
+                }
+              },
+              {
+                "text": "August 2015—Nov 2018",
+                "details": {
+                  "title": null,
+                  "organization": null,
+                  "location": null,
+                  "date_range": "August 2015—Nov 2018",
+                  "bullets": []
+                }
+              }
+            ],
+            "confidence": 0.8
+          }
+        ],
+        "skills": [],
+        "languages": [],
+        "education_entries": [
+          {
+            "degree": "Bachelor of Science, Biochemistry Johnson & Johnson, Cincinnati, OH — Present - Scientist",
+            "institution": "Creighton University",
+            "location": "Omaha, NE",
+            "date_range": "May 2019 - July 2019",
+            "description": "Bachelor of Science, Biochemistry Johnson & Johnson, Cincinnati, OH — Present - Scientist, Creighton University"
+          }
+        ],
+        "experience_entries": [
+          {
+            "title": "Scientist",
+            "organization": "Johnson & Johnson",
+            "location": "Cincinnati, OH",
+            "date_range": "July 2019—Present",
+            "bullets": [
+              "Provide scientific support to project leaders during studies conducted in preclinical research facilities.",
+              "Offer surgical support during research and development of animate and inanimate models.",
+              "Perform testing to aid in the development of new medical devices.",
+              "Demonstrated flexibility and team-oriented mindset during Covid-19 pandemic."
+            ],
+            "description": "Scientist | Johnson & Johnson | Cincinnati, OH | July 2019—Present"
+          },
+          {
+            "title": "Teaching Assistant",
+            "organization": "Creighton University Department of Chemistry",
+            "location": "Omaha, NE",
+            "date_range": "August 2016—May 2019",
+            "bullets": [
+              "Assisted in the design of lectures, assignments, quizzes, and laboratory manuals for General Chemistry I, General Chemistry II Lab, and Organic Chemistry Lab.",
+              "Served as grader and primary point of contact for over 150 students; supported 30 students in individual research projects."
+            ],
+            "description": "Teaching Assistant | Creighton University Department of Chemistry | Omaha, NE | August 2016—May 2019"
+          },
+          {
+            "title": "Admissions Fellow",
+            "organization": "Creighton University Admissions Office",
+            "location": "Omaha, NE",
+            "date_range": "Summer 2016, 2017, 2018",
+            "bullets": [
+              "Conducted interviews with prospective applicants and produced written evaluations for the admissions committee.",
+              "Led tours and information sessions to prospective students, families, and other visitors."
+            ],
+            "description": "Admissions Fellow | Creighton University Admissions Office | Omaha, NE | Summer 2016, 2017, 2018"
+          },
+          {
+            "title": "Proctor",
+            "organization": "Creighton Residential Life",
+            "location": "Omaha, NE",
+            "date_range": "August 2016—May 2019",
+            "bullets": [
+              "Lived in first-year residence hall and provided emotional and academic support to 24 students.",
+              "Attended weekly trainings focused on conflict mediation and community building."
+            ],
+            "description": "Proctor | Creighton Residential Life | Omaha, NE | August 2016—May 2019"
+          },
+          {
+            "title": "Forward, Co-Captain",
+            "organization": "Creighton Women’s Varsity Soccer",
+            "location": "Omaha, NE",
+            "date_range": "August 2015—Nov 2018",
+            "bullets": [
+              "Competed in Division I women’s soccer for four years; trained for 10 hours/week in the off-season, and competed against Big East peers during the fall semester.",
+              "Served as co-captain for the 2018 season."
+            ],
+            "description": "Forward, Co-Captain | Creighton Women’s Varsity Soccer | Omaha, NE | August 2015—Nov 2018"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "July 2019—Present",
+            "bullets": [],
+            "description": "July 2019—Present"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "August 2016—May 2019",
+            "bullets": [],
+            "description": "August 2016—May 2019"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "Summer 2016, 2017, 2018",
+            "bullets": [],
+            "description": "Summer 2016, 2017, 2018"
+          },
+          {
+            "title": null,
+            "organization": null,
+            "location": null,
+            "date_range": "August 2015—Nov 2018",
+            "bullets": [],
+            "description": "August 2015—Nov 2018"
+          }
+        ],
+        "experience_years": 4.4,
+        "strengths": [],
+        "improvement_areas": [],
+        "projects": []
+      }
+    }
+  ]
+}

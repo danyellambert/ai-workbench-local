@@ -1,0 +1,91 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "policy_contract_comparison_deck",
+  "deck_family": "comparison",
+  "presentation": {
+    "title": "AI Workbench Local — Policy / Contract Comparison",
+    "subtitle": "Executive comparison review of grounded document differences",
+    "author": "AI Workbench Local",
+    "date": "2026-04-22",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Comparison Review"
+  },
+  "context": {
+    "task_type": "document_agent",
+    "review_type": "compare_documents",
+    "compared_documents": [
+      "Access Review Evidence Log.pdf (pdf)",
+      "Privileged Account Approval Email.pdf (pdf)"
+    ]
+  },
+  "executive_summary": "The summaries highlight complementary but distinct governance requirements for privileged access controls: one mandates formal evidence archiving and status tracking for synthetic testing items to close Q1 compliance, while the other enforces conditional approval with strict operational and audit trail obligations tied to personnel and scope. Both emphasize archiving as a non-negotiable step, but the first focuses on resolving missing evidence to meet control closure, whereas the second requires proactive revalidation upon personnel changes and integration with quarterly evidence. The most relevant difference is that the Access Review Evidence Log demands immediate resolution of gaps like EV-002 to finalize closure, while the Privileged Account Approval Email introduces ongoing governance conditions (e.g., revalidation triggers) that extend beyond initial approval. A key watchout is ensuring archived evidence from the email aligns with the Evidence Log’s closure requirements to avoid gaps in audit readiness. Recommendation: Immediately archive the Privileged Account Approval Email and resolve EV-002 to synchronize evidence trails, ensuring both control closure and ongoing compliance are audit-ready.",
+  "key_highlights": [
+    "The summaries highlight complementary but distinct governance requirements for privileged access controls: one mandates formal evidence archiving and status tracking for synthetic testing items to close Q1 compliance, while the other enforces conditional approval with strict operational and audit trail obligations tied to personnel and scope. Both emphasize archiving as a non-negotiable step, but the first focuses on resolving missing evidence to meet control closure, whereas the second requires proactive revalidation upon personnel changes and integration with quarterly evidence. The most relevant difference is that the Access Review Evidence Log demands immediate resolution of gaps like EV-002 to finalize closure, while the Privileged Account Approval Email introduces ongoing governance conditions (e.g., revalidation triggers) that extend beyond initial approval. A key watchout is ensuring archived evidence from the email aligns with the Evidence Log’s closure requirements to avoid gaps in audit readiness. Recommendation: Immediately archive the Privileged Account Approval Email and resolve EV-002 to synchronize evidence trails, ensuring both control closure and ongoing compliance are audit-ready.",
+    "Summary of Access Review Evidence Log.pdf (pdf)",
+    "Summary of Privileged Account Approval Email.pdf (pdf)",
+    "The summaries highlight complementary but distinct governance requirements…"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Compared docs",
+      "value": "2"
+    },
+    {
+      "label": "Findings",
+      "value": "3"
+    },
+    {
+      "label": "Sources",
+      "value": "4"
+    },
+    {
+      "label": "Needs review",
+      "value": "No"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Comparison findings",
+      "columns": [
+        "Type",
+        "Finding",
+        "Documents",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "document_summary",
+          "Summary of Access Review Evidence Log.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf)",
+          "Evidence items are tied to specific controls and must be formally archived to validate compliance. | Status tracking is…"
+        ],
+        [
+          "document_summary",
+          "Summary of Privileged Account Approval Email.pdf (pdf)",
+          "Privileged Account Approval Email.pdf (pdf)",
+          "Access is conditional on narrow operational scope and audit trail compliance | Governance requires proactive revalidati…"
+        ],
+        [
+          "approval_change",
+          "The summaries highlight complementary but distinct governance requirements…",
+          "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+          "Access Review Evidence Log.pdf (pdf): The Access Review Evidence Log (EVD-101) documents Q1 2024 vendor control evidenc…"
+        ]
+      ],
+      "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+    }
+  ],
+  "recommendation": "Open the cited source excerpts to confirm the interpretation before acting.",
+  "watchouts": [],
+  "next_steps": [
+    "Open the cited source excerpts to confirm the interpretation before acting.",
+    "Validate critical differences directly in the compared documents before consolidating a decision."
+  ],
+  "data_sources": [
+    "structured_result",
+    "document_agent_comparison"
+  ]
+}

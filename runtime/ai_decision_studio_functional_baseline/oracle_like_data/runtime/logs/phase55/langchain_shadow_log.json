@@ -1,0 +1,65 @@
+[
+  {
+    "timestamp": "2026-03-27 13:19:13",
+    "query": "o que faz esse codigo ?",
+    "provider": "ollama",
+    "model": "nemotron-3-nano:30b-cloud",
+    "document_ids": [
+      "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218"
+    ],
+    "primary_strategy": "langchain_chroma",
+    "alternate_strategy": "manual_hybrid",
+    "primary_count": 1,
+    "alternate_count": 1,
+    "overlap_count": 1,
+    "overlap_ratio": 1.0,
+    "same_top_1": true,
+    "same_top_3_order": true,
+    "primary_top_1": "demo_code_analysis.py#1 (score=0.1464)",
+    "alternate_top_1": "demo_code_analysis.py#1 (score=0.1464)",
+    "alternate_backend_message": "Retrieval servido pelo Chroma persistido sincronizado.",
+    "alternate_fallback_reason": null
+  },
+  {
+    "timestamp": "2026-03-27 13:26:57",
+    "query": "sobre o que fala esse documento ?",
+    "provider": "ollama",
+    "model": "nemotron-3-nano:30b-cloud",
+    "document_ids": [
+      "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e"
+    ],
+    "primary_strategy": "langchain_chroma",
+    "alternate_strategy": "manual_hybrid",
+    "primary_count": 4,
+    "alternate_count": 4,
+    "overlap_count": 4,
+    "overlap_ratio": 1.0,
+    "same_top_1": true,
+    "same_top_3_order": true,
+    "primary_top_1": "fy25-afr-final-tagged.pdf#3 (score=0.2406)",
+    "alternate_top_1": "fy25-afr-final-tagged.pdf#3 (score=0.2406)",
+    "alternate_backend_message": "Retrieval servido pelo Chroma persistido sincronizado.",
+    "alternate_fallback_reason": null
+  },
+  {
+    "timestamp": "2026-03-28 22:20:35",
+    "query": "como estão os dados financeiros, eles estão se saindo bem ?",
+    "provider": "huggingface_inference",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "document_ids": [
+      "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e"
+    ],
+    "primary_strategy": "langchain_chroma",
+    "alternate_strategy": "manual_hybrid",
+    "primary_count": 4,
+    "alternate_count": 4,
+    "overlap_count": 4,
+    "overlap_ratio": 1.0,
+    "same_top_1": true,
+    "same_top_3_order": true,
+    "primary_top_1": "fy25-afr-final-tagged.pdf#36 (score=0.2338)",
+    "alternate_top_1": "fy25-afr-final-tagged.pdf#36 (score=0.2338)",
+    "alternate_backend_message": "Retrieval servido pelo Chroma persistido sincronizado.",
+    "alternate_fallback_reason": null
+  }
+]

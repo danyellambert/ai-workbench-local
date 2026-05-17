@@ -1,0 +1,190 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "author": "AI Workbench Local",
+      "date": "2026-04-18",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Comparison Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "subtitle": "Executive comparison review of grounded document differences",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "**Executive Comparison:**  \nThe Access Review Evidence Log highlights gaps in evidence archiving that prevent control closure, while the Privileged Account Approval Email establishes a conditional, time-bound access arrangement with strict operational and review requirements. The former underscores a compliance dependency on artifact completeness, whereas the latter defines a controlled, auditable access model with explicit governance conditions.\n\n- Access Review Evidence Log requires archiving of missing evidence to close control; Privileged Account Approval mandates quarterly verification and usage restrictions.  \n- Evidence gaps block control closure; Access approval is contingent on limited scope and revalidation for changes.  \n- Repository archiving is a compliance prerequisite; Usage is restricted to ticketed support and break-fix tasks only.  \n- Missing evidence items must be verified and archived; Personnel must be re-verified before each quarter.  \n- Control closure depends on evidence completeness; Access remains conditional and subject to audit.  \n- Evidence status impacts control status; Access requires strict adherence to defined operational boundaries.",
+        "bullets": [
+          "The Access Review Evidence Log highlights gaps in evidence archiving that p…",
+          "Access Review Evidence Log requires archiving of missing evidence to close…",
+          "Evidence gaps block control closure; Access approval is contingent on limit…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Executive summary consolidated from the product's grounded signals."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Compared docs"
+          },
+          {
+            "value": "8",
+            "label": "Findings"
+          },
+          {
+            "value": "4",
+            "label": "Sources"
+          },
+          {
+            "value": "No",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Comparison findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Documents",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "document_summary",
+            "Summary of Access Review Evidence Log.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf)",
+            "Critical evidence items must be archived in the approved repository to satisfy control requirements. | The presence of…"
+          ],
+          [
+            "document_summary",
+            "Summary of Privileged Account Approval Email.pdf (pdf)",
+            "Privileged Account Approval Email.pdf (pdf)",
+            "Access is conditional on being limited to ticketed support and break-fix tasks only. | Vendor must verify personnel bef…"
+          ],
+          [
+            "approval_change",
+            "The Access Review Evidence Log highlights gaps in…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents the Q1 2024 Northwin…"
+          ],
+          [
+            "approval_change",
+            "Access Review Evidence Log requires archiving of missing…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents the Q1 2024 Northwin…"
+          ],
+          [
+            "approval_change",
+            "Evidence gaps block control closure; Access approval is…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents the Q1 2024 Northwin…"
+          ],
+          [
+            "cross_document_observation",
+            "Repository archiving is a compliance prerequisite; Usage is…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents the Q1 2024 Northwin…"
+          ],
+          [
+            "auditability_delta",
+            "Missing evidence items must be verified and archived;…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents the Q1 2024 Northwin…"
+          ],
+          [
+            "auditability_delta",
+            "Control closure depends on evidence completeness; Access remains…",
+            "Access Review Evidence Log.pdf (pdf), Privileged Account Approval Email.pdf (pdf)",
+            "Access Review Evidence Log.pdf (pdf): The synthetic Access Review Evidence Log (EVD-101) documents the Q1 2024 Northwin…"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Differences and impacts extracted from the document-comparison flow."
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Open the cited source excerpts to confirm the interpretation before acting.",
+            "bullets": [
+              "Open the cited source excerpts to confirm the interpretation before act…",
+              "Validate critical differences directly in the compared documents before…"
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "No critical watchouts recorded for this slice.",
+            "bullets": []
+          }
+        ],
+        "speaker_notes": "Executive decision framing for this slice."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Open the cited source excerpts to confirm the interpretation before acting.",
+          "Validate critical differences directly in the compared documents before consoli…"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_exports/deckexp_20260418_112729_b6469d32/policy_contract_comparison_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_previews/deckexp_20260418_112729_b6469d32",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

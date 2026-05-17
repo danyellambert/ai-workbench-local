@@ -1,0 +1,131 @@
+{
+  "generated_at": "2026-03-29T19:53:23.128968",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "summary",
+      "mode": "indexed_document",
+      "status": "PASS",
+      "score": 25,
+      "max_score": 31,
+      "reasons": [],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "d09e430236bc55aa70654be8f301ce2061038cfc8028a740839f1852d5dd733e",
+        "name": "fy25-afr-final-tagged.pdf",
+        "file_type": "pdf",
+        "chunk_count": 208
+      },
+      "gold_fixture_path": "baseline://external_files/59b08f4e22a2b3b3_10_summary_fy25_afr_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "PASS",
+        "score": 25,
+        "max_score": 31,
+        "reasons": [],
+        "metrics": {
+          "topic_hits": 6,
+          "fact_hits": 5,
+          "exec_signal_hits": 6,
+          "key_insight_hits": 4,
+          "number_hits": 4
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "summary",
+        "schema_version": "1.0",
+        "topics": [
+          {
+            "title": "FY 2025 Financial Highlights and Audit Status",
+            "key_points": [
+              "NASA received an unmodified audit opinion for FY 2025, marking the 15th consecutive year of clean audit with no material weaknesses.",
+              "$35.6 billion FY 2025 budget supported operations, with $28,155 million fund balance with Treasury and $91 million net accounts receivable."
+            ],
+            "relevance_score": 0.95,
+            "supporting_evidence": [
+              "NASA has once again received an unmodified “clean” audit opinion on its 2025 financial statements for the 15th consecutive year, with no reported material weaknesses.",
+              "$35.6 Billion FY 2025 BUDGET",
+              "Fund Balance with Treasury $28,155",
+              "Net accounts receivable $91"
+            ]
+          },
+          {
+            "title": "Artemis Program and Lunar Exploration Advancements",
+            "key_points": [
+              "Artemis II remains on schedule for a crewed lunar mission launch no later than April 2026, supported by completed Space Launch System assembly and Orion spacecraft progress.",
+              "Strategic shift includes development of lunar nuclear power systems targeting deployment by 2030 and restructuring of commercial LEO strategy ahead of ISS retirement in 2030."
+            ],
+            "relevance_score": 0.9,
+            "supporting_evidence": [
+              "Artemis campaign achieved critical milestones, including fully assembling the Space Launch System rocket, keeping Artemis II’s crewed lunar mission on schedule for no later than April 2026.",
+              "July 2025 directives accelerate lunar nuclear power development (target 2030 deployment) and restructure commercial LEO strategy to transition from ISS retirement in 2030."
+            ]
+          },
+          {
+            "title": "Earth Science Data Modernization and Mission Successes",
+            "key_points": [
+              "NASA migrated key Earth science data archives to the centralized Earthdata cloud, improving data management efficiency and enabling applications such as coastal erosion monitoring and crop planning.",
+              "Missions OSIRIS-Rex and Parker Solar Probe achieved major success, with OSIRIS-Rex returning the first U.S. asteroid sample and Parker Solar Probe completing its mission objectives."
+            ],
+            "relevance_score": 0.85,
+            "supporting_evidence": [
+              "NASA took steps to consolidate and modernize Earth science data archives by migrating several data archives to the centralized Earthdata cloud platform",
+              "both the Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-Rex) and Parker Solar Probe missions completed mission success criteria",
+              "OSIRIS-Rex was the first U.S. mission to collect a sample from an asteroid and return it to Earth"
+            ]
+          },
+          {
+            "title": "Enterprise Risk Management and Financial Systems Modernization",
+            "key_points": [
+              "NASA’s Enterprise Risk Management framework (UNICORN), led by ARMO, institutionalizes risk-informed decision-making across missions with no material internal control weaknesses identified in FY 2025.",
+              "The agency is modernizing its core SAP financial system ahead of its 2027 end-of-life to maintain audit readiness and improve financial reporting efficiency."
+            ],
+            "relevance_score": 0.88,
+            "supporting_evidence": [
+              "The ARMO works in concert with Mission Directorates, Centers, Technical Authorities and Offices to increase awareness, understanding, and consideration of risks to NASA's strategic goals and objectives",
+              "Based on the results of this evaluation, NASA provides reasonable assurance that its system of internal control was operating effectively as of September 30, 2025",
+              "With SAP ECC reaching its end-of-life in December 2027, the Chief Information Officer is exploring options to modernize the current centralized core financial system"
+            ]
+          },
+          {
+            "title": "Public-Private Partnerships, Lease Accounting, and Contingent Liabilities",
+            "key_points": [
+              "NASA leverages Enhanced Use Leases and other PPP models to generate $49.1 million in lease revenue (FY 2025) without financial guarantees, supporting cost savings and asset utilization.",
+              "Contingent legal liability of $34 million was disclosed, primarily related to reasonably possible loss scenarios, while most private partnerships do not meet SFFAS 49 disclosure requirements.",
+              "Lease receivable net stands at $2.48 billion, with future payments scheduled through 2039."
+            ],
+            "relevance_score": 0.82,
+            "supporting_evidence": [
+              "NASA recognized $49.1 million of annual lease revenue in FY 2025 associated with leases under SFFAS 54",
+              "NASA has 13 lease arrangements under SFFAS 54, Leases, that includes $643 million of Principal and $1.7 billion of Interest totaling $2.35 billion",
+              "NASA currently has one case that is determined reasonably possible, with an estimated loss of $34 million",
+              "Many of these relationships... do not otherwise meet SFFAS 49 requirements"
+            ]
+          }
+        ],
+        "executive_summary": "NASA's FY 2025 financial report highlights a $35.6 billion budget, a 15th consecutive clean audit with no material weaknesses, and strong financial stewardship. The agency is on track for the Artemis II lunar mission launch by April 2026, while advancing lunar nuclear power development and restructuring commercial LEO strategy ahead of ISS retirement in 2030. Key mission successes include the OSIRIS-Rex asteroid sample return and Parker Solar Probe achievements. Earth science data modernization via the Earthdata cloud enhances efficiency and supports critical applications. Enterprise Risk Management through the UNICORN framework ensures risk-informed decisions, though SAP financial system modernization is underway to sustain audit readiness. Public-private partnerships, particularly Enhanced Use Leases, generated $49.1 million in revenue without financial guarantees, though a $34 million contingent liability remains. The agency maintains robust internal controls, compliance with federal financial standards, and continues to modernize infrastructure and cybersecurity to support long-term mission objectives.",
+        "key_insights": [
+          "NASA’s 15-year streak of unmodified audit opinions reflects exceptional financial stewardship and compliance with federal reporting standards.",
+          "Artemis II’s 2026 lunar mission launch is on schedule, supported by critical hardware progress and strategic shifts toward sustainable lunar exploration and commercial LEO development.",
+          "Enterprise risk management and financial system modernization are central to maintaining audit readiness and enabling data-driven decision-making across missions.",
+          "Mission performance was tracked across four key performance goals, with two rated Green and two rated Yellow.",
+          "FY 2025 net cost of operations was $23,699 million.",
+          "Grant oversight remained material, with 1,134 expired grants and $14,938 million in undisbursed balances."
+        ],
+        "reading_time_minutes": 3,
+        "completeness_score": 0.93
+      }
+    }
+  ]
+}

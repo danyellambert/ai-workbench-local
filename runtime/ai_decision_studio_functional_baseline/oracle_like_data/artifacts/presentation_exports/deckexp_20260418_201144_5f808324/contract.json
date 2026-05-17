@@ -1,0 +1,100 @@
+{
+  "contract_version": "executive_deck_generation.v1",
+  "export_kind": "action_plan_deck",
+  "deck_family": "action_plan",
+  "presentation": {
+    "title": "AI Workbench Local — Action Plan",
+    "subtitle": "Operational action plan grounded in current action backlog",
+    "author": "AI Workbench Local",
+    "date": "2026-04-18",
+    "theme": "executive_premium_minimal",
+    "footer_text": "AI Workbench Local • Action Plan"
+  },
+  "context": {
+    "review_type_counts": {
+      "action_plan_evidence_review": 3
+    }
+  },
+  "executive_summary": "The current run identified 3 tracked action(s), with 3 still open, 0 overdue and 0 requiring formal approval follow-up.",
+  "key_highlights": [
+    "Archive approval with Q1 access-review evidence pack",
+    "Archive email-export artifact as evidence EV-002",
+    "Revalidate approval if named administrators change"
+  ],
+  "strengths": [],
+  "gaps": [],
+  "evidence_highlights": [],
+  "key_metrics": [
+    {
+      "label": "Total actions",
+      "value": "3"
+    },
+    {
+      "label": "Open",
+      "value": "3"
+    },
+    {
+      "label": "Overdue",
+      "value": "0"
+    },
+    {
+      "label": "Approval required",
+      "value": "0"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Action backlog",
+      "columns": [
+        "Ref",
+        "Action",
+        "Owner",
+        "Due",
+        "Status",
+        "Source",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "EVIDENCE",
+          "Archive approval with Q1 access-review evidence pack",
+          "Priya Nair",
+          "-",
+          "open",
+          "Privileged Account Approval Email.pdf",
+          "Please archive this approval with the Q1 access-review evidence pack"
+        ],
+        [
+          "EVIDENCE",
+          "Archive email-export artifact as evidence EV-002",
+          "Compliance Operations",
+          "-",
+          "open",
+          "Privileged Account Approval Email.pdf",
+          "EV-002 is satisfied by the attached email-export artifact once archived in the approved repository"
+        ],
+        [
+          "A03",
+          "Revalidate approval if named administrators change",
+          "-",
+          "-",
+          "open",
+          "Privileged Account Approval Email.pdf",
+          "If either named administrator changes, this approval must be revalidated before access is retained"
+        ]
+      ]
+    }
+  ],
+  "recommendation": "Archive approval with Q1 access-review evidence pack",
+  "watchouts": [
+    "There are open actions without a defined owner."
+  ],
+  "next_steps": [
+    "Archive approval with Q1 access-review evidence pack",
+    "Archive email-export artifact as evidence EV-002",
+    "Revalidate approval if named administrators change"
+  ],
+  "data_sources": [
+    "action_plan_run_current"
+  ]
+}

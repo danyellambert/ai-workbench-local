@@ -1,0 +1,158 @@
+{
+  "presentation": {
+    "title": "AI copilots for sales teams",
+    "subtitle": "Executive strategy deck",
+    "author": "Danyel Lambert",
+    "date": "2026-03-22",
+    "theme": "executive_premium_minimal"
+  },
+  "slides": [
+    {
+      "type": "title",
+      "title": "AI copilots for sales teams",
+      "subtitle": "How revenue teams scale quality without scaling friction",
+      "body": "A lightweight operating model for improving seller productivity, pipeline quality, and coaching consistency.",
+      "eyebrow": "Executive Premium Minimal",
+      "speaker_notes": "Open with the business framing: this is about scalable sales quality, not generic AI hype."
+    },
+    {
+      "type": "agenda",
+      "title": "Agenda",
+      "subtitle": "How the discussion will move",
+      "body": "This deck moves from pressure and timing into benefits, operating model, and executive takeaway.",
+      "bullets": [
+        "Why now",
+        "Operational friction",
+        "Executive benefits",
+        "Illustrative KPI impact",
+        "Operating model",
+        "Closing takeaway"
+      ],
+      "speaker_notes": "Use this slide to frame the flow before entering the main argument."
+    },
+    {
+      "type": "section",
+      "title": "Why now",
+      "subtitle": "The economics finally support a focused deployment model",
+      "section_label": "Context",
+      "speaker_notes": "Transition from headline narrative into the market timing and operational pressure on commercial teams."
+    },
+    {
+      "type": "bullets",
+      "title": "Commercial teams are under pressure to do more with the same headcount",
+      "subtitle": "The productivity gap is increasingly a process problem",
+      "eyebrow": "Observed friction",
+      "body": "Most revenue teams have strong talent, but execution quality still varies across discovery, follow-up, account research, and coaching loops.",
+      "bullets": [
+        "Sellers lose time re-writing emails, notes, and summaries that should be system-assisted.",
+        "Managers struggle to scale coaching because deal reviews are inconsistent and manual.",
+        "Enablement content exists, but it is not activated in the exact moment of need.",
+        "Leadership wants measurable lift without introducing workflow clutter."
+      ],
+      "speaker_notes": "Emphasize that the pain is operational inconsistency. Copilots are useful when embedded into specific moments of work."
+    },
+    {
+      "type": "cards",
+      "title": "Three executive benefits",
+      "subtitle": "A focused copilot model creates value at multiple layers",
+      "eyebrow": "Value creation",
+      "cards": [
+        {
+          "title": "Higher seller leverage",
+          "body": "Reduce low-value drafting and research work so sellers can spend more time on customer-facing activity.",
+          "footer": "Productivity without workflow sprawl"
+        },
+        {
+          "title": "Stronger deal consistency",
+          "body": "Standardize discovery summaries, follow-ups, next-step framing, and account preparation across the team.",
+          "footer": "More repeatable execution quality"
+        },
+        {
+          "title": "Better coaching signals",
+          "body": "Turn rep activity into clearer manager visibility so coaching focuses on decisions, not note cleanup.",
+          "footer": "Leadership sees earlier patterns"
+        }
+      ],
+      "speaker_notes": "Frame these three outcomes as the minimum viable executive case for adoption."
+    },
+    {
+      "type": "metrics",
+      "title": "Illustrative KPI impact",
+      "subtitle": "Example targets after a well-scoped deployment",
+      "eyebrow": "Performance lens",
+      "metrics": [
+        {
+          "value": "+18%",
+          "label": "seller time recovered",
+          "detail": "From faster prep, recap, and follow-up drafting",
+          "trend": "Operational efficiency"
+        },
+        {
+          "value": "+11%",
+          "label": "meeting-to-opportunity conversion",
+          "detail": "Driven by stronger discovery quality and cleaner next steps",
+          "trend": "Pipeline quality"
+        },
+        {
+          "value": "2.3x",
+          "label": "manager coaching coverage",
+          "detail": "More reps reviewed with less admin effort",
+          "trend": "Coaching scalability"
+        }
+      ],
+      "speaker_notes": "Clarify that the numbers are illustrative targets to discuss expected shape of impact rather than a promised benchmark."
+    },
+    {
+      "type": "image_text",
+      "title": "What the operating model looks like",
+      "subtitle": "Keep the workflow narrow, disciplined, and measurable",
+      "eyebrow": "Deployment model",
+      "body": "Start with a small set of high-value moments: account prep, call recap, follow-up drafting, and manager review notes.",
+      "bullets": [
+        "Use structured inputs and outputs so quality can be audited.",
+        "Instrument the workflow with lightweight usage and outcome metrics.",
+        "Treat the copilot as an assistant to a process, not a replacement for judgment."
+      ],
+      "image_caption": "Placeholder for future operating-model visual",
+      "speaker_notes": "This slide should make the rollout feel contained and professional. The missing image is intentionally handled with a clean placeholder."
+    },
+    {
+      "type": "faq",
+      "title": "Executive FAQ",
+      "subtitle": "Questions leaders usually ask before scaling rollout",
+      "faq_items": [
+        {
+          "title": "Where should deployment start?",
+          "body": "Start with a narrow workflow that already has clear friction, clear ownership, and measurable outcomes."
+        },
+        {
+          "title": "How should success be measured?",
+          "body": "Measure a mix of workflow adoption, time recovered, and execution quality improvements."
+        },
+        {
+          "title": "What is the main implementation risk?",
+          "body": "Trying to broaden scope too early before the process and quality controls are stable."
+        }
+      ],
+      "speaker_notes": "Use this slide to pre-empt common objections and show operational discipline."
+    },
+    {
+      "type": "closing",
+      "title": "Closing thought",
+      "quote": "The winning AI sales copilot is not the loudest one — it is the one that quietly improves the quality of execution every day.",
+      "attribution": "Executive recommendation",
+      "speaker_notes": "Close on discipline and clarity: consistent execution compounds."
+    },
+    {
+      "type": "summary",
+      "title": "Executive summary",
+      "body": "The most effective deployment is narrow, process-bound, and measured against real workflow outcomes rather than generic AI enthusiasm.",
+      "bullets": [
+        "Target a few high-value seller moments",
+        "Make outputs structured and reviewable",
+        "Measure productivity lift before expanding scope"
+      ],
+      "speaker_notes": "Reinforce the three most important recommendations in one place."
+    }
+  ]
+}

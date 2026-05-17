@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "mode": "preview",
+  "basename": "document_review_deck",
+  "output_dir": "baseline://external/Users_danyellambert_ppt_creator_app_outputs_ai_workbench_export_previews/deckexp_20260418_120339_66dba336",
+  "presentation_title": "AI Workbench Local — Document Review",
+  "theme": "executive_premium_minimal",
+  "preview_count": 7,
+  "preview_source": "spec",
+  "real_preview": false,
+  "backend_requested": "synthetic",
+  "backend_used": "synthetic",
+  "office_runtime": null,
+  "office_conversion_strategy": null,
+  "input_pptx": null,
+  "slides": [
+    {
+      "slide_number": 1,
+      "filename": "document_review_deck-01.png",
+      "path": "baseline://external_files/0ddc8ecd277d1099_document_review_deck-01.png"
+    },
+    {
+      "slide_number": 2,
+      "filename": "document_review_deck-02.png",
+      "path": "baseline://external_files/8effa6670783ca0a_document_review_deck-02.png"
+    },
+    {
+      "slide_number": 3,
+      "filename": "document_review_deck-03.png",
+      "path": "baseline://external_files/509e1315867d5be4_document_review_deck-03.png"
+    },
+    {
+      "slide_number": 4,
+      "filename": "document_review_deck-04.png",
+      "path": "baseline://external_files/62b0e2c53d4f74a3_document_review_deck-04.png"
+    },
+    {
+      "slide_number": 5,
+      "filename": "document_review_deck-05.png",
+      "path": "baseline://external_files/7de987119a3e7caa_document_review_deck-05.png"
+    },
+    {
+      "slide_number": 6,
+      "filename": "document_review_deck-06.png",
+      "path": "baseline://external_files/b56faab6248ac57f_document_review_deck-06.png"
+    },
+    {
+      "slide_number": 7,
+      "filename": "document_review_deck-07.png",
+      "path": "baseline://external_files/6219c792f7cd96e7_document_review_deck-07.png"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-04-05T21:34:32.992434",
+  "suite_dir": "baseline://artifacts/presentation_exports/manual_title_readability_suite",
+  "cases": [
+    {
+      "slug": "01_short_title_baseline",
+      "pptx_path": "baseline://external_files/ceca84995ec7e025_01_short_title_baseline.pptx",
+      "average_score": 100,
+      "status": "ok",
+      "preview_backend": "office",
+      "thumbnail_sheet": "baseline://external_files/1159f857c70cc716_01_short_title_baseline-thumbnails.png",
+      "previews": [
+        "baseline://external_files/eecc4f7f0e6e8287_01_short_title_baseline-01.png"
+      ]
+    },
+    {
+      "slug": "02_long_title_split_panel",
+      "pptx_path": "baseline://external_files/d4228c211381af8a_02_long_title_split_panel.pptx",
+      "average_score": 93,
+      "status": "ok",
+      "preview_backend": "office",
+      "thumbnail_sheet": "baseline://external_files/5ed94eab0e1575ed_02_long_title_split_panel-thumbnails.png",
+      "previews": [
+        "baseline://external_files/72bc1b37466160bd_02_long_title_split_panel-01.png"
+      ]
+    },
+    {
+      "slug": "03_very_long_title_hero_cover",
+      "pptx_path": "baseline://external_files/c05d18bdaa64ceab_03_very_long_title_hero_cover.pptx",
+      "average_score": 93,
+      "status": "ok",
+      "preview_backend": "office",
+      "thumbnail_sheet": "baseline://external_files/324b03956a6518a0_03_very_long_title_hero_cover-thumbnails.png",
+      "previews": [
+        "baseline://external_files/17c1d780bf14aac1_03_very_long_title_hero_cover-01.png"
+      ]
+    },
+    {
+      "slug": "04_readability_mixed_content",
+      "pptx_path": "baseline://external_files/638adf256a2b3030_04_readability_mixed_content.pptx",
+      "average_score": 79,
+      "status": "review",
+      "preview_backend": "office",
+      "thumbnail_sheet": "baseline://external_files/8d10c57737d985e8_04_readability_mixed_content-thumbnails.png",
+      "previews": [
+        "baseline://external_files/b1e310f2c2a55e90_04_readability_mixed_content-01.png",
+        "baseline://external_files/6f02ec49814576e2_04_readability_mixed_content-02.png",
+        "baseline://external_files/519ccee3064279c9_04_readability_mixed_content-03.png",
+        "baseline://external_files/d48c6707e157faf7_04_readability_mixed_content-04.png"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "sampled_cvs": [
+    "0000_simple_lucas.pereira.araujo.pdf",
+    "0003_simple_camila.carvalho.carvalho.pdf",
+    "0006_simple_laura.nascimento.ferreira.pdf",
+    "0001_medium_vinicius.araujo.araujo.pdf",
+    "0004_medium_pedro.martins.nascimento.pdf",
+    "0007_medium_lucas.nascimento.rodrigues.pdf",
+    "0002_hard_gabriel.nascimento.rodrigues.pdf",
+    "0005_hard_felipe.oliveira.souza.pdf",
+    "0008_hard_rafael.gomes.carvalho.pdf"
+  ],
+  "aggregate": {
+    "sample_size": 9,
+    "verdict_counts": {
+      "ready_for_indexing": 9
+    },
+    "area_strength": {
+      "raw_text": 9,
+      "confirmed_fields": 9,
+      "experience": 9,
+      "education": 9,
+      "skills": 9,
+      "languages": 0
+    },
+    "aggregate_verdict": "structured_payload_already_useful_with_caution",
+    "recommended_indexing_strategy": "raw_text + confirmed_fields + structured payload"
+  },
+  "per_file": [
+    {
+      "file": "data/synthetic/resumes/pdf/0000_simple_lucas.pereira.araujo.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "lucas.pereira.araujo@example.com"
+          ],
+          "phones": [
+            "+55 11 99260-2766"
+          ]
+        },
+        "experience_count": 2,
+        "education_count": 2,
+        "skills_count": 17,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes/pdf/0003_simple_camila.carvalho.carvalho.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "camila.carvalho.carvalho@example.com"
+          ],
+          "phones": [
+            "+55 11 98515-5240"
+          ]
+        },
+        "experience_count": 3,
+        "education_count": 2,
+        "skills_count": 19,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes/pdf/0006_simple_laura.nascimento.ferreira.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "laura.nascimento.ferreira@example.com"
+          ],
+          "phones": [
+            "+55 11 91342-8616"
+          ]
+        },
+        "experience_count": 2,
+        "education_count": 2,
+        "skills_count": 13,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes/pdf/0001_medium_vinicius.araujo.araujo.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "vinicius.araujo.araujo@example.com"
+          ],
+          "phones": [
+            "+55 11 93968-3342"
+          ]
+        },
+        "experience_count": 1,
+        "education_count": 2,
+        "skills_count": 17,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes/pdf/0004_medium_pedro.martins.nascimento.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "pedro.martins.nascimento@example.com"
+          ],
+          "phones": [
+            "+55 11 93907-3734"
+          ]
+        },
+        "experience_count": 1,
+        "education_count": 2,
+        "skills_count": 14,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes/pdf/0007_medium_lucas.nascimento.rodrigues.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "lucas.nascimento.rodrigues@example.com"
+          ],
+          "phones": [
+            "+55 11 97946-8629"
+          ]
+        },
+        "experience_count": 1,
+        "education_count": 1,
+        "skills_count": 15,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes/pdf/0002_hard_gabriel.nascimento.rodrigues.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "gabriel.nascimento.rodrigues@example.com"
+          ],
+          "phones": [
+            "+55 11 91165-4657"
+          ]
+        },
+        "experience_count": 4,
+        "education_count": 2,
+        "skills_count": 11,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes/pdf/0005_hard_felipe.oliveira.souza.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "felipe.oliveira.souza@example.com"
+          ],
+          "phones": [
+            "+55 11 93122-9932"
+          ]
+        },
+        "experience_count": 3,
+        "education_count": 2,
+        "skills_count": 9,
+        "languages_count": 0
+      }
+    },
+    {
+      "file": "data/synthetic/resumes/pdf/0008_hard_rafael.gomes.carvalho.pdf",
+      "judgments": {
+        "raw_text": "acceptable",
+        "confirmed_fields": "acceptable",
+        "experience": "acceptable",
+        "education": "acceptable",
+        "skills": "acceptable",
+        "languages": "weak"
+      },
+      "verdict": "ready_for_indexing",
+      "payload_summary": {
+        "confirmed_fields": {
+          "name": null,
+          "location": null,
+          "emails": [
+            "rafael.gomes.carvalho@example.com"
+          ],
+          "phones": [
+            "+55 11 99118-2232"
+          ]
+        },
+        "experience_count": 2,
+        "education_count": 2,
+        "skills_count": 18,
+        "languages_count": 0
+      }
+    }
+  ]
+}

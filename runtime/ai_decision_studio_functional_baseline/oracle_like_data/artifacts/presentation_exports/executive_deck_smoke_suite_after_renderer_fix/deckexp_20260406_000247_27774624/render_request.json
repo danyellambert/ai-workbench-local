@@ -1,0 +1,150 @@
+{
+  "spec": {
+    "presentation": {
+      "title": "AI Workbench Local — Policy / Contract Comparison",
+      "subtitle": "Executive comparison review of grounded document differences",
+      "author": "AI Workbench Local",
+      "date": "2026-04-06",
+      "theme": "executive_premium_minimal",
+      "footer_text": "AI Workbench Local • Comparison Review"
+    },
+    "slides": [
+      {
+        "type": "title",
+        "title": "AI Workbench Local — Policy / Contract Comparison",
+        "subtitle": "Executive comparison review of grounded document differences",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Export kind: policy_contract_comparison_deck. Deck family: comparison. Sources: structured_result, document_agent_comparison."
+      },
+      {
+        "type": "summary",
+        "title": "Executive summary",
+        "body": "A política adiciona obrigações novas e ainda depende de validação jurídica final.",
+        "bullets": [
+          "Nova obrigação de aprovação formal.",
+          "Owner do controle anual ainda não foi definido.",
+          "Formal approval became mandatory"
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Resumo executivo consolidado a partir dos sinais grounded do produto."
+      },
+      {
+        "type": "metrics",
+        "title": "Executive snapshot",
+        "bullets": [],
+        "cards": [],
+        "metrics": [
+          {
+            "value": "2",
+            "label": "Compared docs"
+          },
+          {
+            "value": "1",
+            "label": "Findings"
+          },
+          {
+            "value": "1",
+            "label": "Sources"
+          },
+          {
+            "value": "Yes",
+            "label": "Needs review"
+          }
+        ],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      },
+      {
+        "type": "table",
+        "title": "Comparison findings",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [
+          "Type",
+          "Finding",
+          "Documents",
+          "Evidence"
+        ],
+        "table_rows": [
+          [
+            "obligation_change",
+            "Formal approval became mandatory",
+            "Policy 2025, Policy 2026",
+            "Page 4 - approval formal required"
+          ]
+        ],
+        "comparison_columns": [],
+        "two_column_columns": [],
+        "speaker_notes": "Diferenças e impactos extraídos do fluxo de comparação documental."
+      },
+      {
+        "type": "two_column",
+        "title": "Recommendation vs watchouts",
+        "bullets": [],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": [
+          {
+            "title": "Recommendation",
+            "body": "Definir owner do controle.",
+            "bullets": [
+              "Definir owner do controle.",
+              "Revisar cláusulas críticas com jurídico."
+            ]
+          },
+          {
+            "title": "Watchouts",
+            "body": "Final legal validation is still pending",
+            "bullets": [
+              "Legal sign-off still missing"
+            ]
+          }
+        ],
+        "speaker_notes": "Executive decision framing for this slice."
+      },
+      {
+        "type": "bullets",
+        "title": "Next steps",
+        "bullets": [
+          "Definir owner do controle.",
+          "Revisar cláusulas críticas com jurídico."
+        ],
+        "cards": [],
+        "metrics": [],
+        "timeline_items": [],
+        "table_columns": [],
+        "table_rows": [],
+        "comparison_columns": [],
+        "two_column_columns": []
+      }
+    ]
+  },
+  "output_path": "outputs/ai_workbench_export_smoke_suite/deckexp_20260406_000247_27774624/policy_contract_comparison_deck.pptx",
+  "include_review": true,
+  "preview_output_dir": "outputs/ai_workbench_export_smoke_suite_previews/deckexp_20260406_000247_27774624",
+  "preview_backend": "auto",
+  "preview_require_real": false,
+  "preview_fail_on_regression": false
+}

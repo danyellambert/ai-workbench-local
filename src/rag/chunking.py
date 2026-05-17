@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Callable
+
 
 SUPPORTED_CHUNKING_STRATEGIES = ("manual", "langchain_recursive")
 
@@ -64,6 +66,7 @@ def _chunk_text_manual(
     requested_strategy: str,
     effective_strategy: str,
     fallback_reason: str | None,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
 ) -> list[dict[str, object]]:
     normalized_text = _normalize_text(text)
     if not normalized_text:
@@ -94,6 +97,15 @@ def _chunk_text_manual(
                 )
             )
             chunk_id += 1
+            if progress_callback is not None:
+                progress_callback(
+                    {
+                        "processed_chunks": len(chunks),
+                        "processed_chars": end,
+                        "total_chars": len(normalized_text),
+                        "progress_pct": round((end / len(normalized_text)) * 100, 1) if normalized_text else 100.0,
+                    }
+                )
 
         if end >= len(normalized_text):
             break
@@ -110,6 +122,7 @@ def _chunk_text_langchain_recursive(
     *,
     requested_strategy: str,
     fallback_reason: str | None,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
 ) -> list[dict[str, object]]:
     from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -123,6 +136,7 @@ def _chunk_text_langchain_recursive(
         add_start_index=True,
     )
     documents = splitter.create_documents([normalized_text])
+    total_documents = len(documents)
 
     chunks: list[dict[str, object]] = []
     cursor = 0
@@ -150,6 +164,16 @@ def _chunk_text_langchain_recursive(
                 fallback_reason=fallback_reason,
             )
         )
+        if progress_callback is not None:
+            progress_callback(
+                {
+                    "processed_chunks": len(chunks),
+                    "total_chunks": total_documents,
+                    "processed_chars": end_char,
+                    "total_chars": len(normalized_text),
+                    "progress_pct": round((chunk_id / total_documents) * 100, 1) if total_documents else 100.0,
+                }
+            )
     return chunks
 
 
@@ -160,6 +184,7 @@ def chunk_text(
     source_name: str,
     *,
     strategy: str = "manual",
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
 ) -> list[dict[str, object]]:
     requested_strategy, effective_strategy, fallback_reason = resolve_chunking_strategy(strategy)
     if effective_strategy == "langchain_recursive":
@@ -170,6 +195,7 @@ def chunk_text(
             source_name,
             requested_strategy=requested_strategy,
             fallback_reason=fallback_reason,
+            progress_callback=progress_callback,
         )
 
     return _chunk_text_manual(
@@ -180,4 +206,5 @@ def chunk_text(
         requested_strategy=requested_strategy,
         effective_strategy=effective_strategy,
         fallback_reason=fallback_reason,
+        progress_callback=progress_callback,
     )

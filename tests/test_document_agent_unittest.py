@@ -3,7 +3,19 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from src.structured.base import ActionItem, AgentSource, CodeAnalysisPayload, CodeIssue, ExtractionPayload, RiskItem
+from src.structured.base import (
+    ActionItem,
+    AgentSource,
+    CodeAnalysisPayload,
+    CodeIssue,
+    DocumentReviewDecisionSummary,
+    DocumentReviewFinding,
+    DocumentReviewFindingsPayload,
+    ExtractionPayload,
+    RiskItem,
+    SummaryPayload,
+    Topic,
+)
 from src.structured.envelope import StructuredResult, TaskExecutionRequest
 from src.structured.document_agent import classify_document_agent_intent, list_document_agent_tools, select_document_agent_tool
 from src.structured.tasks import DocumentAgentTaskHandler
@@ -93,6 +105,241 @@ class DocumentAgentIntentTests(unittest.TestCase):
 
 
 class DocumentAgentHandlerTests(unittest.TestCase):
+    def test_resolve_document_review_findings_model_prefers_telemetry_override_then_detected_nemotron(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        request = TaskExecutionRequest(
+            task_type="document_agent",
+            input_text="List the contract risks, gaps, and red flags.",
+            provider="ollama",
+            model="qwen2.5:7b",
+            telemetry={"document_review_findings_model_override": "phi4-mini:3.8b"},
+        )
+
+        class _Provider:
+            def list_available_models(self):
+                return ["qwen2.5:7b", "nemotron-3-super:cloud"]
+
+        self.assertEqual(
+            handler._resolve_document_review_findings_model(request, provider=_Provider()),
+            "phi4-mini:3.8b",
+        )
+
+        request_without_override = request.model_copy(
+            update={
+                "telemetry": {"document_review_findings_prefer_nemotron": True},
+            }
+        )
+        self.assertEqual(
+            handler._resolve_document_review_findings_model(request_without_override, provider=_Provider()),
+            "nemotron-3-super:cloud",
+        )
+
+    def test_maybe_synthesize_document_review_findings_can_be_disabled(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        request = TaskExecutionRequest(
+            task_type="document_agent",
+            input_text="List the contract risks, gaps, and red flags.",
+            provider="ollama",
+            model="qwen2.5:7b",
+            telemetry={"document_review_findings_synthesis_enabled": False},
+        )
+        extraction_payload = ExtractionPayload(
+            task_type="extraction",
+            main_subject="Supply contract",
+            risks=[RiskItem(description="Contract penalty without a clear operational owner", evidence="penalty applies if delivery misses deadline")],
+            action_items=[ActionItem(description="Define an owner to track deadlines", evidence="delivery deadline is binding")],
+            missing_information=["The document does not specify who monitors the SLA."],
+        )
+        findings_payload, metadata = handler._maybe_synthesize_document_review_findings(
+            provider=object(),
+            request=request,
+            extraction_payload=extraction_payload,
+            sources=[AgentSource(source="supply_contract.pdf", document_id="doc-1", file_type="pdf", chunk_id=1, score=0.9, snippet="penalty applies if delivery misses deadline")],
+            summary="Supply contract: 1 risk, 1 gap and 1 mitigation action identified.",
+            risks=["Contract penalty without a clear operational owner"],
+            gaps=["The document does not specify who monitors the SLA."],
+            actions=["Define an owner to track deadlines"],
+        )
+        self.assertIsNone(findings_payload)
+        self.assertEqual(metadata["reason"], "document_review_findings_synthesis_disabled")
+
+    def test_build_document_review_findings_grounded_input_compacts_payload_for_nemotron(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        extraction_payload = ExtractionPayload(
+            task_type="extraction",
+            main_subject="Supply contract",
+            risks=[RiskItem(description="Contract penalty without a clear operational owner", evidence="penalty applies if delivery misses deadline")],
+            action_items=[ActionItem(description="Define an owner to track deadlines", evidence="delivery deadline is binding")],
+            missing_information=["The document does not specify who monitors the SLA."],
+        )
+        sources = [
+            AgentSource(
+                source="supply_contract.pdf",
+                document_id="doc-1",
+                file_type="pdf",
+                chunk_id=1,
+                score=0.9,
+                snippet="penalty applies if delivery misses deadline",
+            )
+        ]
+
+        grounded_input = handler._build_document_review_findings_grounded_input(
+            extraction_payload=extraction_payload,
+            sources=sources,
+            summary="Supply contract: 1 risk, 1 gap and 1 mitigation action identified.",
+            risks=["Contract penalty without a clear operational owner"],
+            gaps=["The document does not specify who monitors the SLA."],
+            actions=["Define an owner to track deadlines"],
+            model_name="nemotron-3-super:cloud",
+        )
+
+        self.assertIn("candidate_findings", grounded_input)
+        self.assertIn("source_digest", grounded_input)
+        self.assertNotIn("sources", grounded_input)
+        self.assertNotIn("grounded_sources", grounded_input)
+        self.assertNotIn("action_items", grounded_input)
+        self.assertTrue(grounded_input["candidate_findings"])
+
+    def test_build_document_review_findings_prompt_adds_nemotron_refinement_rules(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        prompt = handler._build_document_review_findings_prompt(
+            request=None,
+            grounded_input={
+                "summary": "Supply contract summary",
+                "candidate_findings": [
+                    {
+                        "candidate_id": "risk-1",
+                        "proposed_title": "Deadline ownership is missing",
+                        "description": "The contract creates a delivery penalty but does not name a monitoring owner.",
+                        "evidence": "penalty applies if delivery misses deadline",
+                    }
+                ],
+                "source_digest": [{"source": "supply_contract.pdf", "chunk_id": 1, "snippet": "penalty applies if delivery misses deadline"}],
+            },
+            model_name="nemotron-3-super:cloud",
+        )
+
+        self.assertIn("Prefer to refine, merge, or drop the `candidate_findings`", prompt)
+        self.assertIn("Return 2 to 5 findings maximum.", prompt)
+
+    def test_run_compare_documents_tool_builds_bilateral_evidence_from_document_summaries(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        request = TaskExecutionRequest(
+            task_type="document_agent",
+            input_text="Compare the policies and identify the main control changes.",
+            use_document_context=True,
+            source_document_ids=["doc-a", "doc-b"],
+            context_strategy="retrieval",
+            provider="ollama",
+            model="qwen2.5:7b",
+            temperature=0.1,
+            context_window=8192,
+            telemetry={"agent_intent": "document_comparison", "agent_intent_reason": "comparison test"},
+        )
+
+        summary_a = StructuredResult(
+            success=True,
+            task_type="summary",
+            validated_output=SummaryPayload(
+                task_type="summary",
+                executive_summary="Policy A keeps MFA limited to admins and remote access.",
+                key_insights=["MFA applies only to admins and remote access."],
+                topics=[
+                    Topic(
+                        title="Identity controls",
+                        key_points=[
+                            "Privileged access requires manager approval.",
+                            "MFA is limited to admins and remote access.",
+                        ],
+                        relevance_score=0.9,
+                        supporting_evidence=[
+                            "REQ-IDM-05 requires MFA only for administrative and remote access to production systems.",
+                        ],
+                    )
+                ],
+                reading_time_minutes=1,
+                completeness_score=0.9,
+            ),
+            quality_score=0.84,
+        )
+        summary_b = StructuredResult(
+            success=True,
+            task_type="summary",
+            validated_output=SummaryPayload(
+                task_type="summary",
+                executive_summary="Policy B expands MFA to all workforce accounts and adds a 24-hour incident escalation rule.",
+                key_insights=[
+                    "MFA now applies to all workforce accounts.",
+                    "Incidents involving customer data must be escalated within 24 hours.",
+                ],
+                topics=[
+                    Topic(
+                        title="Identity and incident controls",
+                        key_points=[
+                            "MFA is mandatory for all workforce accounts.",
+                            "Customer-data incidents must be escalated within 24 hours.",
+                        ],
+                        relevance_score=0.94,
+                        supporting_evidence=[
+                            "REQ-IDM-05 applies MFA to all workforce accounts.",
+                            "REQ-IR-09 requires escalation no later than 24 hours after confirmation.",
+                        ],
+                    )
+                ],
+                reading_time_minutes=1,
+                completeness_score=0.92,
+            ),
+            quality_score=0.88,
+        )
+
+        with patch.object(handler, "_run_nested_structured_task", side_effect=[summary_a, summary_b]), patch.object(
+            handler,
+            "_build_document_label_map",
+            return_value={"doc-a": "Information Security Policy v3.1.pdf", "doc-b": "Information Security Policy v3.2.pdf"},
+        ), patch.object(
+            handler,
+            "_collect_response_text",
+            return_value=(
+                '{'
+                '"executive_summary":"Policy v3.2 introduces broader identity and incident controls than v3.1.",'
+                '"deltas":[{'
+                '"category":"identity_control_delta",'
+                '"title":"MFA expands to all workforce accounts",'
+                '"change_summary":"Policy v3.2 requires MFA for all workforce accounts instead of only administrators and remote access.",'
+                '"doc_a_evidence":"REQ-IDM-05 requires MFA only for administrative and remote access to production systems.",'
+                '"doc_b_evidence":"REQ-IDM-05 applies MFA to all workforce accounts.",'
+                '"risk_or_impact":"Broader authentication coverage changes the compliance scope."'
+                '},{'
+                '"category":"incident_response_delta",'
+                '"title":"Customer-data incidents require 24-hour escalation",'
+                '"change_summary":"Policy v3.2 adds a 24-hour escalation requirement for customer-data incidents.",'
+                '"doc_a_evidence":"Policy v3.1 does not include a 24-hour customer-data escalation rule.",'
+                '"doc_b_evidence":"REQ-IR-09 requires escalation no later than 24 hours after confirmation.",'
+                '"risk_or_impact":"Incident handling has a stricter timing obligation."'
+                '}],'
+                '"recommendation":"Review implementation owners for the expanded MFA and incident escalation requirements.",'
+                '"negotiation_priorities":["Confirm rollout ownership for workforce MFA."],'
+                '"watchouts":["Validate operational readiness for 24-hour escalation."],'
+                '"next_steps":["Update the control mapping and evidence checklist."]'
+                '}'
+            ),
+        ):
+            payload, tool_runs = handler._run_compare_documents_tool(
+                provider=object(),
+                request=request,
+                answer_mode="comparison_structured",
+                sources=[],
+            )
+
+        self.assertEqual(payload.tool_used, "compare_documents")
+        self.assertEqual(payload.compared_documents, ["Information Security Policy v3.1.pdf", "Information Security Policy v3.2.pdf"])
+        cross_document_findings = [item for item in payload.comparison_findings if item.finding_type != "document_summary"]
+        self.assertTrue(cross_document_findings)
+        self.assertTrue(all(item.evidence for item in cross_document_findings))
+        self.assertTrue(any(item.finding_type == "identity_control_delta" for item in cross_document_findings))
+        self.assertTrue(any("Information Security Policy v3.1.pdf:" in evidence for evidence in cross_document_findings[0].evidence))
+        self.assertTrue(any(run.tool_name == "compare_documents" for run in tool_runs))
+
     def test_execute_document_agent_consult_documents_returns_grounded_payload(self) -> None:
         handler = DocumentAgentTaskHandler()
         request = TaskExecutionRequest(
@@ -414,6 +661,78 @@ class DocumentAgentHandlerTests(unittest.TestCase):
         self.assertEqual(result.validated_output.user_intent, "document_risk_review")
         self.assertEqual(result.validated_output.structured_response.get("review_type"), "risk_gap_review")
         self.assertGreaterEqual(len(result.validated_output.key_points), 1)
+
+    def test_execute_document_agent_risk_review_attaches_native_document_review_findings(self) -> None:
+        handler = DocumentAgentTaskHandler()
+        request = TaskExecutionRequest(
+            task_type="document_agent",
+            input_text="List the contract risks, gaps, and red flags.",
+            use_document_context=True,
+            source_document_ids=["doc-1"],
+            context_strategy="document_scan",
+            provider="ollama",
+            model="qwen2.5:7b",
+            temperature=0.1,
+            context_window=8192,
+        )
+
+        extraction_result = StructuredResult(
+            success=True,
+            task_type="extraction",
+            parsed_json={},
+            validated_output=ExtractionPayload(
+                task_type="extraction",
+                main_subject="Supply contract",
+                risks=[RiskItem(description="Contract penalty without a clear operational owner", evidence="penalty applies if delivery misses deadline")],
+                action_items=[ActionItem(description="Define an owner to track deadlines", evidence="delivery deadline is binding")],
+                missing_information=["The document does not specify who monitors the SLA."],
+            ),
+            quality_score=0.79,
+        )
+        synthesized_payload = DocumentReviewFindingsPayload(
+            decision_summary=DocumentReviewDecisionSummary(
+                label="Approve with changes",
+                status="Requires Review",
+                rationale="The contract has a grounded operational risk that still needs an owner.",
+            ),
+            findings=[
+                DocumentReviewFinding(
+                    severity="high",
+                    category="Operational Risk",
+                    title="Deadline ownership is missing",
+                    description="The contract creates a delivery penalty but does not name a monitoring owner.",
+                    recommendation="Assign an owner to track the delivery deadline.",
+                    confidence=0.82,
+                    evidence="penalty applies if delivery misses deadline",
+                )
+            ],
+            top_blockers=["Deadline ownership is missing"],
+            business_impact=["Missed deadlines can create avoidable contractual penalties."],
+        )
+
+        with patch.object(handler, "_resolve_provider", return_value=object()), patch.object(
+            handler,
+            "_build_document_agent_source_bundle",
+            return_value={
+                "sources": [AgentSource(source="supply_contract.pdf", document_id="doc-1", file_type="pdf", chunk_id=1, score=0.9, snippet="penalty applies if delivery misses deadline")],
+                "context_text": "[Source: supply_contract.pdf]\npenalty applies if delivery misses deadline",
+                "retrieval_details": {},
+            },
+        ), patch.object(handler, "_run_nested_structured_task", return_value=extraction_result), patch.object(
+            handler,
+            "_maybe_synthesize_document_review_findings",
+            return_value=(synthesized_payload, {"success": True, "model": "nemotron", "finding_count": 1}),
+        ):
+            result = handler.execute(request)
+
+        self.assertTrue(result.success)
+        payload = result.validated_output
+        self.assertEqual(payload.document_review_decision_summary.label, "Approve with changes")
+        self.assertEqual(len(payload.document_review_findings), 1)
+        self.assertEqual(payload.document_review_findings[0].title, "Deadline ownership is missing")
+        self.assertEqual(payload.document_review_top_blockers[0], "Deadline ownership is missing")
+        self.assertIn("Missed deadlines", payload.document_review_business_impact[0])
+        self.assertIn("findings_synthesis", payload.structured_response)
 
     def test_execute_document_agent_operational_extraction_returns_payload(self) -> None:
         handler = DocumentAgentTaskHandler()

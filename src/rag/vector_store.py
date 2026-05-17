@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import os
 import shutil
 from math import sqrt
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 def _normalize_embedding(value: object) -> list[float] | None:
@@ -116,16 +117,17 @@ class ChromaVectorStore:
             shutil.rmtree(self.persist_path, ignore_errors=True)
             self._clear_system_cache()
 
-    def rebuild(self, entries: list[dict[str, object]]) -> None:
+    def rebuild(
+        self,
+        entries: list[dict[str, object]],
+        progress_callback: Callable[[dict[str, object]], None] | None = None,
+    ) -> None:
         # Full rebuild of the persisted mirror to keep canonical JSON and Chroma aligned.
         self.clear(remove_persist_dir=False)
         collection = self._get_collection()
 
-        ids: list[str] = []
-        embeddings: list[list[float]] = []
-        metadatas: list[dict[str, object]] = []
-        documents: list[str] = []
         seen_ids: set[str] = set()
+        prepared_entries: list[tuple[str, list[float], dict[str, object], str]] = []
 
         for index, entry in enumerate(entries):
             embedding = _normalize_embedding(entry.get("embedding"))
@@ -137,23 +139,64 @@ class ChromaVectorStore:
                 continue
             seen_ids.add(chunk_chroma_id)
 
-            ids.append(chunk_chroma_id)
-            embeddings.append(embedding)
-            documents.append(str(entry.get("text", "")))
-            metadatas.append(
+            prepared_entries.append(
+                (
+                    chunk_chroma_id,
+                    embedding,
+                    {
+                        "source": str(entry.get("source", "document")),
+                        "chunk_id": _coerce_int(entry.get("chunk_id"), index),
+                        "document_id": str(entry.get("document_id") or entry.get("file_hash") or "document"),
+                        "file_type": str(entry.get("file_type") or ""),
+                        "snippet": str(entry.get("snippet") or ""),
+                        "start_char": _coerce_int(entry.get("start_char"), 0),
+                        "end_char": _coerce_int(entry.get("end_char"), 0),
+                    },
+                    str(entry.get("text", "")),
+                )
+            )
+
+        total_entries = len(prepared_entries)
+        if progress_callback is not None:
+            progress_callback(
                 {
-                    "source": str(entry.get("source", "document")),
-                    "chunk_id": _coerce_int(entry.get("chunk_id"), index),
-                    "document_id": str(entry.get("document_id") or entry.get("file_hash") or "document"),
-                    "file_type": str(entry.get("file_type") or ""),
-                    "snippet": str(entry.get("snippet") or ""),
-                    "start_char": _coerce_int(entry.get("start_char"), 0),
-                    "end_char": _coerce_int(entry.get("end_char"), 0),
+                    "phase": "upload",
+                    "detail": f"Prepared {total_entries} chunk(s) for Chroma sync.",
+                    "processed_chunks": 0,
+                    "total_chunks": total_entries,
+                    "progress_pct": 0.0,
                 }
             )
 
-        if ids:
-            collection.add(ids=ids, embeddings=embeddings, metadatas=metadatas, documents=documents)
+        batch_size = max(1, int(os.getenv("CHROMA_REBUILD_BATCH_SIZE", "256")))
+        total_batches = max(1, (total_entries + batch_size - 1) // batch_size) if total_entries else 1
+
+        for batch_index, start_index in enumerate(range(0, total_entries, batch_size), start=1):
+            batch = prepared_entries[start_index : start_index + batch_size]
+            ids = [item[0] for item in batch]
+            embeddings = [item[1] for item in batch]
+            metadatas = [item[2] for item in batch]
+            documents = [item[3] for item in batch]
+
+            if ids:
+                collection.add(ids=ids, embeddings=embeddings, metadatas=metadatas, documents=documents)
+
+            if progress_callback is not None:
+                processed_chunks = min(start_index + len(batch), total_entries)
+                progress_callback(
+                    {
+                        "phase": "upload",
+                        "detail": (
+                            f"Synchronizing Chroma: {processed_chunks}/{total_entries} chunk(s) written "
+                            f"({batch_index}/{total_batches} batches)."
+                        ),
+                        "processed_chunks": processed_chunks,
+                        "total_chunks": total_entries,
+                        "processed_batches": batch_index,
+                        "total_batches": total_batches,
+                        "progress_pct": round((processed_chunks / total_entries) * 100, 1) if total_entries else 100.0,
+                    }
+                )
 
     def similarity_search(
         self,

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
+from src.storage.secret_store import get_secret
 from src.storage.runtime_paths import (
     get_artifact_root,
     get_chat_history_path,
@@ -28,6 +29,8 @@ class OllamaSettings:
     history_path: Path
     default_top_p: float | None = None
     default_max_tokens: int | None = None
+    api_key: str | None = None
+    api_key_secret_key: str | None = None
 
 
 @dataclass(frozen=True)
@@ -92,6 +95,21 @@ def _optional_int_env(name: str) -> int | None:
     if not raw_value:
         return None
     return int(raw_value)
+
+
+def _env_or_secret(env_name: str, secret_key: str) -> str | None:
+    """Resolve a UI-manageable secret with Keychain taking precedence.
+
+    Preferences can replace supported credentials at runtime without restarting the
+    server. If an older environment variable is still present, the freshly saved
+    Keychain value should win; the environment remains a fallback for first-time
+    setup or headless deployments.
+    """
+    secret_value = str(get_secret(secret_key) or "").strip()
+    if secret_value:
+        return secret_value
+    env_value = str(os.getenv(env_name, "")).strip()
+    return env_value or None
 
 
 @dataclass(frozen=True)
@@ -196,6 +214,7 @@ class GradioProductSettings:
     theme: str
     default_workflow: str
     max_upload_files: int
+    allow_direct_uploads: bool = True
     enable_deck_generation: bool = True
     show_ai_lab_entry: bool = True
     accent_color: str = "#6ae3ff"
@@ -236,7 +255,7 @@ def get_ollama_settings() -> OllamaSettings:
     ]
 
     return OllamaSettings(
-        project_name=os.getenv("PROJECT_NAME", "AI Workbench Local"),
+        project_name=os.getenv("PROJECT_NAME", "Axiovance"),
         base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
         default_model=default_model,
         default_temperature=float(os.getenv("OLLAMA_TEMPERATURE", "0.2")),
@@ -247,6 +266,47 @@ def get_ollama_settings() -> OllamaSettings:
         available_models_env=available_models_env,
         available_embedding_models_env=available_embedding_models_env,
         history_path=get_chat_history_path(BASE_DIR),
+        api_key=None,
+        api_key_secret_key=None,
+    )
+
+
+def get_ollama_hosted_settings() -> OllamaSettings | None:
+    hosted_base_url = os.getenv("OLLAMA_HOSTED_BASE_URL", "").strip()
+    if not hosted_base_url:
+        return None
+
+    default_model = os.getenv("OLLAMA_HOSTED_MODEL", "").strip()
+    available_models_env = [
+        model.strip()
+        for model in os.getenv("OLLAMA_HOSTED_AVAILABLE_MODELS", "").split(",")
+        if model.strip()
+    ]
+    available_embedding_models_env = [
+        model.strip()
+        for model in os.getenv("OLLAMA_HOSTED_AVAILABLE_EMBEDDING_MODELS", "").split(",")
+        if model.strip()
+    ]
+    hosted_top_p = _optional_float_env("OLLAMA_HOSTED_TOP_P")
+    hosted_max_tokens = _optional_int_env("OLLAMA_HOSTED_MAX_TOKENS")
+
+    return OllamaSettings(
+        project_name=os.getenv("PROJECT_NAME", "Axiovance"),
+        base_url=hosted_base_url,
+        default_model=default_model,
+        default_temperature=float(os.getenv("OLLAMA_HOSTED_TEMPERATURE", os.getenv("OLLAMA_TEMPERATURE", "0.2"))),
+        default_context_window=int(os.getenv("OLLAMA_HOSTED_CONTEXT_WINDOW", os.getenv("OLLAMA_CONTEXT_WINDOW", "8192"))),
+        default_top_p=hosted_top_p if hosted_top_p is not None else _optional_float_env("OLLAMA_TOP_P"),
+        default_max_tokens=hosted_max_tokens if hosted_max_tokens is not None else _optional_int_env("OLLAMA_MAX_TOKENS"),
+        default_prompt_profile=os.getenv("DEFAULT_PROMPT_PROFILE", "neutro"),
+        available_models_env=available_models_env,
+        available_embedding_models_env=available_embedding_models_env,
+        history_path=get_chat_history_path(BASE_DIR),
+        # Keep Keychain ahead of the environment so Preferences can replace
+        # the Ollama Hosted credential and the provider registry/diagnostics
+        # reflect the same key that OllamaProvider sends on requests.
+        api_key=_env_or_secret("OLLAMA_HOSTED_API_KEY", "ollama_hosted_api_key"),
+        api_key_secret_key="ollama_hosted_api_key",
     )
 
 
@@ -264,7 +324,7 @@ def get_openai_settings() -> OpenAISettings:
     ]
 
     return OpenAISettings(
-        api_key=os.getenv("OPENAI_API_KEY"),
+        api_key=_env_or_secret("OPENAI_API_KEY", "openai_api_key"),
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         embedding_model=os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
         default_context_window=int(os.getenv("OPENAI_CONTEXT_WINDOW", "128000")),
@@ -335,12 +395,26 @@ def get_huggingface_inference_settings() -> HuggingFaceInferenceSettings:
         for model in os.getenv("HUGGINGFACE_INFERENCE_AVAILABLE_EMBEDDING_MODELS", "").split(",")
         if model.strip()
     ]
+    if not available_embedding_models_env:
+        # Starter set kept intentionally small but biased toward models that are more
+        # commonly exposed on the public HF Inference feature-extraction path.
+        available_embedding_models_env = [
+            "BAAI/bge-small-en-v1.5",
+            "sentence-transformers/all-MiniLM-L6-v2",
+            "thenlper/gte-large",
+            "Qwen/Qwen3-Embedding-0.6B",
+            "google/embeddinggemma-300m",
+        ]
+
+    embedding_model = os.getenv("HUGGINGFACE_INFERENCE_EMBEDDING_MODEL", "").strip()
+    if not embedding_model and available_embedding_models_env:
+        embedding_model = available_embedding_models_env[0]
 
     return HuggingFaceInferenceSettings(
         base_url=os.getenv("HUGGINGFACE_INFERENCE_BASE_URL", "https://router.huggingface.co/v1").strip(),
-        api_key=os.getenv("HUGGINGFACE_INFERENCE_API_KEY"),
+        api_key=_env_or_secret("HUGGINGFACE_INFERENCE_API_KEY", "huggingface_inference_api_key"),
         model=os.getenv("HUGGINGFACE_INFERENCE_MODEL", "").strip(),
-        embedding_model=os.getenv("HUGGINGFACE_INFERENCE_EMBEDDING_MODEL", "").strip(),
+        embedding_model=embedding_model,
         default_context_window=int(os.getenv("HUGGINGFACE_INFERENCE_CONTEXT_WINDOW", "8192")),
         default_top_p=_optional_float_env("HUGGINGFACE_INFERENCE_TOP_P"),
         default_max_tokens=_optional_int_env("HUGGINGFACE_INFERENCE_MAX_TOKENS"),
@@ -383,12 +457,13 @@ def get_presentation_export_settings() -> PresentationExportSettings:
 
 def get_gradio_product_settings() -> GradioProductSettings:
     return GradioProductSettings(
-        app_name=os.getenv("GRADIO_PRODUCT_APP_NAME", "AI Workbench Product").strip() or "AI Workbench Product",
+        app_name=os.getenv("GRADIO_PRODUCT_APP_NAME", "Axiovance Product").strip() or "Axiovance Product",
         server_name=os.getenv("GRADIO_PRODUCT_SERVER_NAME", "127.0.0.1").strip() or "127.0.0.1",
         server_port=int(os.getenv("GRADIO_PRODUCT_SERVER_PORT", "7860")),
         theme=os.getenv("GRADIO_PRODUCT_THEME", "premium_dark").strip() or "premium_dark",
         default_workflow=os.getenv("GRADIO_PRODUCT_DEFAULT_WORKFLOW", "document_review").strip() or "document_review",
         max_upload_files=max(1, int(os.getenv("GRADIO_PRODUCT_MAX_UPLOAD_FILES", "6"))),
+        allow_direct_uploads=os.getenv("GRADIO_PRODUCT_ALLOW_DIRECT_UPLOADS", "false").strip().lower() not in {"0", "false", "no"},
         enable_deck_generation=os.getenv("GRADIO_PRODUCT_ENABLE_DECK_GENERATION", "true").strip().lower() not in {"0", "false", "no"},
         show_ai_lab_entry=os.getenv("GRADIO_PRODUCT_SHOW_AI_LAB_ENTRY", "true").strip().lower() not in {"0", "false", "no"},
         accent_color=os.getenv("GRADIO_PRODUCT_ACCENT_COLOR", "#6ae3ff").strip() or "#6ae3ff",

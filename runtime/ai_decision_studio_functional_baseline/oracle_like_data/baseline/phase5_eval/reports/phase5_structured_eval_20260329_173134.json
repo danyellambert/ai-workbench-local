@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-03-29T17:31:34.703125",
+  "provider": "ollama",
+  "model": "nemotron-3-nano:30b-cloud",
+  "eval_store_path": "baseline://external_files/4bbc4b392a786977_.phase8_eval_runs.sqlite3",
+  "tasks": [
+    {
+      "task": "code_analysis",
+      "mode": "indexed_document",
+      "status": "FAIL",
+      "score": 0,
+      "max_score": 14,
+      "reasons": [
+        "gold:snippet summary did not match the expected grounded purpose",
+        "gold:main purpose did not match the expected normalization/averaging behavior",
+        "gold:expected issue coverage too low: 0",
+        "gold:refactor-plan coverage too low: 0",
+        "gold:test-suggestion coverage too low: 0"
+      ],
+      "context_strategy": "document_scan",
+      "resolved_document": {
+        "document_id": "f446288b3ca19ac7f4997f3d1ba3061c8c1a5e1ad5488badb4f77fb116b4e218",
+        "name": "demo_code_analysis.py",
+        "file_type": "py",
+        "chunk_count": 1
+      },
+      "gold_fixture_path": "baseline://external_files/3f5fd09ed6527416_07_code_analysis_demo_gold.json",
+      "smoke_evaluation": {
+        "status": "PASS",
+        "score": 5,
+        "max_score": 5,
+        "reasons": []
+      },
+      "gold_evaluation": {
+        "status": "FAIL",
+        "score": 0,
+        "max_score": 14,
+        "reasons": [
+          "snippet summary did not match the expected grounded purpose",
+          "main purpose did not match the expected normalization/averaging behavior",
+          "expected issue coverage too low: 0",
+          "refactor-plan coverage too low: 0",
+          "test-suggestion coverage too low: 0"
+        ],
+        "metrics": {
+          "snippet_summary_hit": 0,
+          "main_purpose_hit": 0,
+          "issue_hits": 0,
+          "refactor_hits": 0,
+          "test_hits": 0,
+          "maintainability_hits": 0,
+          "risk_hits": 0
+        }
+      },
+      "success": true,
+      "error": null,
+      "validation_error": null,
+      "parsing_error": null,
+      "payload": {
+        "task_type": "code_analysis",
+        "schema_version": "1.0",
+        "snippet_summary": "Função normalize_scores ajusta pontuações e processa uma lista de itens, calculando média.",
+        "main_purpose": "Normalizar pontuações de itens e retornar lista com objetos atualizados junto com a média das pontuações.",
+        "detected_issues": [
+          {
+            "severity": "high",
+            "category": "runtime_failure",
+            "title": "Divisão por zero quando a lista está vazia",
+            "description": "A média é calculada como total / len(values) sem verificar se values pode estar vazio, o que causará ZeroDivisionError.",
+            "evidence": "average = total / len(values) na função process()",
+            "recommendation": "Adicione verificação para lista vazia antes da divisão e defina `average = 0.0` quando não houver valores para agregar."
+          }
+        ],
+        "readability_improvements": [
+          "Separar a lógica de normalização da iteração para melhorar clareza."
+        ],
+        "maintainability_improvements": [
+          "Evitar mutação in‑place de objetos de entrada e usar cópia rasa para evitar efeitos colaterais."
+        ],
+        "refactor_plan": [
+          "Passo 1: Modificar normalize_scores para retornar uma nova lista de dicionários copiados, preservando o original.",
+          "Passo 2: Adicionar verificação de lista vazia antes de calcular a média, retornando 0.0.0 adequado.",
+          "Passo 3: Atualizar process() para usar a nova assinatura de normalize_scores e garantir que a média seja calculada de forma segura."
+        ],
+        "test_suggestions": [
+          "Criar teste unitário que envia uma lista vazia para process() e verifica se a média retornada não levanta exceção e corresponde ao valor esperado (ex.: 0.0)."
+        ],
+        "risk_notes": [
+          "Se a lista de entrada estiver vazia, a divisão por zero provocará RuntimeError, interrompendo a execução."
+        ]
+      }
+    }
+  ]
+}

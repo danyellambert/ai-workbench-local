@@ -1,0 +1,45 @@
+{
+  "total_cases": 2,
+  "successful_cases": 2,
+  "failed_cases": 0,
+  "generation": {
+    "total_cases": 2,
+    "successful_cases": 2,
+    "failed_cases": 0,
+    "candidate_ranking": [
+      {
+        "candidate": "ollama::qwen2.5:7b",
+        "provider": "ollama",
+        "model": "qwen2.5:7b",
+        "case_count": 2,
+        "success_rate": 1.0,
+        "avg_latency_s": 8.7774,
+        "avg_format_adherence": 1.0,
+        "avg_groundedness_score": 0.4065,
+        "avg_schema_adherence": 0.0,
+        "avg_use_case_fit_score": 1.0,
+        "avg_total_tokens": 384.5
+      }
+    ],
+    "top_candidate": {
+      "candidate": "ollama::qwen2.5:7b",
+      "provider": "ollama",
+      "model": "qwen2.5:7b",
+      "case_count": 2,
+      "success_rate": 1.0,
+      "avg_latency_s": 8.7774,
+      "avg_format_adherence": 1.0,
+      "avg_groundedness_score": 0.4065,
+      "avg_schema_adherence": 0.0,
+      "avg_use_case_fit_score": 1.0,
+      "avg_total_tokens": 384.5
+    }
+  },
+  "embeddings": {
+    "total_cases": 0,
+    "successful_cases": 0,
+    "failed_cases": 0,
+    "candidate_ranking": [],
+    "top_candidate": null
+  }
+}

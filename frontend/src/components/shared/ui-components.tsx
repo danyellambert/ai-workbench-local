@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 
@@ -43,7 +44,14 @@ export function StatusPill({ status, className }: StatusPillProps) {
     error: 'bg-glow-error/10 text-glow-error border-glow-error/20',
     pending: 'bg-muted text-muted-foreground border-border',
     active: 'bg-glow-success/10 text-glow-success border-glow-success/20',
+    connected: 'bg-glow-success/10 text-glow-success border-glow-success/20',
     degraded: 'bg-glow-warning/10 text-glow-warning border-glow-warning/20',
+    live: 'bg-glow-success/10 text-glow-success border-glow-success/20',
+    'derived-live': 'bg-primary/10 text-primary border-primary/20',
+    historical: 'bg-secondary/60 text-secondary-foreground border-border',
+    empty: 'bg-muted text-muted-foreground border-border',
+    disconnected: 'bg-glow-error/10 text-glow-error border-glow-error/20',
+    not_configured: 'bg-muted text-muted-foreground border-border',
     inactive: 'bg-muted text-muted-foreground border-border',
     ready: 'bg-glow-success/10 text-glow-success border-glow-success/20',
     generating: 'bg-primary/10 text-primary border-primary/20',
@@ -57,13 +65,13 @@ export function StatusPill({ status, className }: StatusPillProps) {
     <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border capitalize", config[status] || config.pending, className)}>
       <span className={cn("w-1.5 h-1.5 rounded-full",
         status === 'running' || status === 'indexing' || status === 'generating' ? 'animate-pulse' : '',
-        status === 'completed' || status === 'indexed' || status === 'active' || status === 'ready' || status === 'done' ? 'bg-glow-success' : '',
-        status === 'running' || status === 'indexing' || status === 'generating' || status === 'open' ? 'bg-primary' : '',
+        status === 'completed' || status === 'indexed' || status === 'active' || status === 'connected' || status === 'ready' || status === 'done' || status === 'live' ? 'bg-glow-success' : '',
+        status === 'running' || status === 'indexing' || status === 'generating' || status === 'open' || status === 'derived-live' ? 'bg-primary' : '',
         status === 'warning' || status === 'degraded' || status === 'in_progress' ? 'bg-glow-warning' : '',
-        status === 'error' || status === 'blocked' ? 'bg-glow-error' : '',
-        status === 'pending' || status === 'inactive' ? 'bg-muted-foreground' : '',
+        status === 'error' || status === 'blocked' || status === 'disconnected' ? 'bg-glow-error' : '',
+        status === 'pending' || status === 'inactive' || status === 'not_configured' || status === 'historical' || status === 'empty' ? 'bg-muted-foreground' : '',
       )} />
-      {status.replace('_', ' ')}
+      {({ in_progress: 'Approved / WIP' } as Record<string, string>)[status] || status.split('_').join(' ').split('-').join(' ')}
     </span>
   );
 }
@@ -81,6 +89,46 @@ export function SeverityBadge({ severity }: SeverityBadgeProps) {
     <span className={cn("px-2 py-0.5 rounded text-[10px] font-medium border uppercase tracking-wide", config[severity])}>
       {severity}
     </span>
+  );
+}
+
+type WorkflowProgressStep = { key: string; label: string; status: string };
+
+export function WorkflowProgressHeader({
+  steps,
+  title = 'Workflow progress',
+  description = 'Track how the live run is moving across the workflow.',
+  className,
+}: {
+  steps: WorkflowProgressStep[];
+  title?: string;
+  description?: string;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn('glass rounded-xl p-4 mb-6', className)}
+    >
+      <div className="flex flex-col gap-1.5 mb-4">
+        <h3 className="text-sm font-medium text-foreground">{title}</h3>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+      <div className="flex items-center gap-1">
+        {steps.map((step, index) => (
+          <div key={step.key} className="flex items-center gap-1 flex-1 min-w-0">
+            <div className="flex min-w-0 items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-muted-foreground">
+              <StatusPill status={step.status} />
+              <span className="hidden sm:inline truncate">{step.label}</span>
+            </div>
+            {index < steps.length - 1 && (
+              <div className={cn('flex-1 h-px', step.status === 'completed' ? 'bg-glow-success/40' : 'bg-border')} />
+            )}
+          </div>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 
@@ -112,12 +160,24 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("shimmer rounded-lg", className)} />;
 }
 
-export function GlassCard({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+type GlassCardProps = {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  id?: string;
+  style?: CSSProperties;
+  onClick?: MouseEventHandler<HTMLDivElement>;
+  ['data-testid']?: string;
+  ['data-tour']?: string;
+};
+
+export function GlassCard({ children, className, delay = 0, ...props }: GlassCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn("glass rounded-xl p-5", className)}
+      {...props}
     >
       {children}
     </motion.div>
