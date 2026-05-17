@@ -1,4 +1,4 @@
-name: deploy-aws
+name: AWS CD
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
 
   workflow_run:
     workflows:
-      - product-ci
+      - Product CI
     branches:
       - main
     types:
@@ -48,11 +48,13 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Mask deployment identifiers
+        env:
+          AWS_EC2_INSTANCE_ID: ${{ vars.AWS_EC2_INSTANCE_ID }}
+          AWS_DEPLOY_APP_DIR: ${{ vars.AWS_DEPLOY_APP_DIR }}
         run: |
-          echo "::add-mask::${{ vars.AWS_EC2_INSTANCE_ID }}"
-          echo "::add-mask::${{ vars.AWS_DEPLOY_APP_DIR }}"
+          echo "::add-mask::$AWS_EC2_INSTANCE_ID"
+          echo "::add-mask::$AWS_DEPLOY_APP_DIR"
           echo "::add-mask::/opt/ai-decision-studio"
-          echo "::add-mask::${{ vars.AWS_PRODUCTION_URL }}"
 
       - name: Configure AWS credentials through OIDC
         uses: aws-actions/configure-aws-credentials@v6
