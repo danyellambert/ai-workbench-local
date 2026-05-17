@@ -418,7 +418,9 @@ Keep real secrets out of Git. Only `.example` files should be committed.
 
 The public repository intentionally does not include private credentials, external account identifiers or runtime state.
 
-The Quickstart starts the product stack, but full local feature coverage requires user-owned configuration for admin access, session signing, Nextcloud/WebDAV, hosted model providers, Trello publishing and Notion publishing.
+The Quickstart starts the product stack, but full local feature coverage requires user-owned configuration for admin access, session signing, Nextcloud/WebDAV, hosted model providers, presentation export, Trello publishing and Notion publishing.
+
+For deck generation, the product also needs the `ppt-creator` presentation export service. The Docker path starts it as a sidecar. Host local development expects a PPT Creator API running separately at `http://127.0.0.1:8787`.
 
 For the complete setup, see:
 
@@ -447,9 +449,17 @@ and the Vite frontend at:
 http://127.0.0.1:5173
 ```
 
+Deck export in host local development requires the PPT Creator API to be running separately at:
+
+```text
+http://127.0.0.1:8787/health
+```
+
+The Docker path starts this service automatically as the `ppt-creator` sidecar.
+
 ### 6. Run the local Docker product stack
 
-The Docker path does not require a local Python virtual environment or local frontend dependencies.
+The Docker path does not require a local Python virtual environment or local frontend dependencies. It also starts the `ppt-creator` presentation export sidecar used for deck generation.
 
 For a fresh public clone without the private Nextcloud golden-baseline archive, skip the private baseline restore and configure your own Nextcloud workspace through the full setup guide.
 

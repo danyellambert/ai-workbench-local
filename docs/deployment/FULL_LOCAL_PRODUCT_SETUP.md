@@ -253,6 +253,22 @@ The Docker stack includes:
 - Ollama;
 - `ppt-creator`.
 
+### Presentation export sidecar
+
+Deck generation depends on the PPT Creator HTTP API.
+
+In the Docker path, this is handled automatically by the `ppt-creator` sidecar. The Product API calls it through the internal Docker URL:
+
+```env
+PRESENTATION_EXPORT_ENABLED=true
+PRESENTATION_EXPORT_BASE_URL=http://ppt-creator:8787
+PRESENTATION_EXPORT_TIMEOUT_SECONDS=120
+```
+
+The sidecar exposes its API inside the Docker network on port `8787`, and the Product API waits for the sidecar health check before starting.
+
+You normally do not need to expose this port to the host when using the full Docker stack.
+
 ---
 
 ## 8. Configure model providers
@@ -460,6 +476,22 @@ EVIDENCEOPS_NEXTCLOUD_BASE_URL=http://127.0.0.1:8085/remote.php/dav/files/<usern
 OLLAMA_BASE_URL=http://localhost:11434/v1
 PRESENTATION_EXPORT_BASE_URL=http://127.0.0.1:8787
 ```
+
+For deck export in host local development, start the PPT Creator API separately:
+
+```bash
+cd services/ppt_creator_app
+python -m pip install -e .
+python -m ppt_creator.api --host 127.0.0.1 --port 8787 --asset-root examples
+```
+
+Then validate:
+
+```bash
+curl -fsS http://127.0.0.1:8787/health | python3 -m json.tool
+```
+
+If this service is not running, the main product can still load and run non-export workflows, but deck generation/export actions will fail or appear unavailable.
 
 ---
 
