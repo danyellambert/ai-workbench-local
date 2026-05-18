@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/danyellambert/ai-workbench-local/actions/workflows/product-ci.yml"><img alt="Product CI" src="https://github.com/danyellambert/ai-workbench-local/actions/workflows/product-ci.yml/badge.svg?branch=main" /></a>
-  <a href="https://github.com/danyellambert/ai-workbench-local/actions/workflows/deploy-aws.yml"><img alt="AWS CD" src="https://github.com/danyellambert/ai-workbench-local/actions/workflows/deploy-aws.yml/badge.svg?branch=main" /></a>
+  <a href="https://github.com/danyellambert/Axiovance/actions/workflows/product-ci.yml"><img alt="Product CI" src="https://github.com/danyellambert/Axiovance/actions/workflows/product-ci.yml/badge.svg?branch=main" /></a>
+  <a href="https://github.com/danyellambert/Axiovance/actions/workflows/deploy-aws.yml"><img alt="AWS CD" src="https://github.com/danyellambert/Axiovance/actions/workflows/deploy-aws.yml/badge.svg?branch=main" /></a>
 </p>
 
 <p align="center">
@@ -376,8 +376,8 @@ This makes the product more than a UI around an LLM. It includes the operational
 ### 1. Clone and enter the repository
 
 ```bash
-git clone https://github.com/danyellambert/ai-workbench-local.git
-cd ai-workbench-local
+git clone https://github.com/danyellambert/Axiovance.git
+cd Axiovance
 ```
 
 ### 2. Install prerequisites

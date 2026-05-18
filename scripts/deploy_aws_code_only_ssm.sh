@@ -11,7 +11,7 @@ fi
 AWS_REGION="${AWS_REGION:?AWS_REGION is required}"
 AWS_EC2_INSTANCE_ID="${AWS_EC2_INSTANCE_ID:?AWS_EC2_INSTANCE_ID is required}"
 AWS_DEPLOY_APP_DIR="${AWS_DEPLOY_APP_DIR:?AWS_DEPLOY_APP_DIR is required}"
-REPO="${REPO:-danyellambert/ai-workbench-local}"
+REPO="${REPO:-danyellambert/Axiovance}"
 DEPLOY_SHA="${DEPLOY_SHA:-$(git rev-parse HEAD)}"
 SSM_DEPLOY_VERBOSE="${SSM_DEPLOY_VERBOSE:-0}"
 
