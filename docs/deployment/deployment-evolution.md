@@ -1,6 +1,6 @@
 # Deployment Evolution
 
-This document summarizes how deployment evolved from local experimentation into the current local Docker and AWS product contracts.
+This document summarizes how deployment evolved from local experimentation into the current local Docker, AWS, CI/CD, and code-only deployment contracts.
 
 ## Current Contracts
 
@@ -106,6 +106,54 @@ Primary references:
 - `scripts/build_deployment_bundle.sh`
 - `docs/deployment/AWS_FRESH_EC2_BOOTSTRAP.md`
 
+### GitHub Actions Product CI And AWS CD
+
+The repository now has a visible CI/CD control plane. Product CI validates the
+current Product API, frontend, compose contracts, shell scripts, and current
+Python test gate. AWS CD can run manually in `dry-run` or `execute` mode, and it
+can also run after Product CI succeeds on `main`.
+
+This made deployment a controlled product operation instead of a local-only
+manual procedure.
+
+Primary references:
+
+- `.github/workflows/product-ci.yml`
+- `.github/workflows/deploy-aws.yml`
+- `docs/operations/ci-cd-and-release-controls.md`
+
+### SSM-Based Code-Only Deployment
+
+AWS deployment moved from a direct remote-update habit into a code-only path that
+can be driven through AWS SSM. The Actions workflow opens an SSM port-forwarding
+tunnel to the EC2 host, then runs the code-only deploy path against that tunnel.
+
+The remote host fetches the exact deploy commit, builds a clean deployment
+bundle, validates that runtime data and secrets are excluded, and applies the
+release without replacing mounted operational state.
+
+Primary references:
+
+- `scripts/deploy_aws_code_only.sh`
+- `scripts/deploy_aws_code_only_ssm.sh`
+- `scripts/deploy_aws_code_only_ssm_remote.sh`
+- `docs/deployment/aws-ssm-code-only-deploy.md`
+
+### Low-Disk AWS Rebuild Hardening
+
+AWS rebuilds were hardened for small EC2 disks. The deploy path now treats
+dry-run disk checks as advisory, prunes unused Docker data before live builds,
+cleans temporary staging, and avoids stale Ollama readiness tempfile collisions.
+
+This lets the existing EC2 host rebuild the same five-service product stack while
+keeping runtime state, secrets, and Docker volumes intact.
+
+Primary references:
+
+- `scripts/deploy_aws.sh`
+- `scripts/deploy_aws_code_only.sh`
+- `scripts/smoke_aws.sh`
+
 ## Operational Guarantees
 
 The current deployment story is designed around these guarantees:
@@ -117,6 +165,10 @@ The current deployment story is designed around these guarantees:
 - Product API, Nextcloud, Ollama, and PPT Creator stay on the private network;
 - runtime state is mounted, inspectable, and restorable;
 - credentials stay outside Git;
+- Product CI validates the current product contract before AWS CD;
+- AWS CD can be previewed through dry-run before execute;
+- SSM-based deployment avoids broad public SSH dependence from GitHub Actions;
+- low-disk rebuild safeguards preserve the current AWS host path;
 - smoke and readiness scripts validate the active contracts.
 
 ## Historical Material

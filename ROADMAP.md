@@ -85,6 +85,8 @@ Primary documents:
 - `docs/product/overview.md`
 - `docs/architecture/current-product-surface.md`
 - `docs/deployment/MULTI_ENVIRONMENT_CONTRACT.md`
+- `docs/deployment/aws-ssm-code-only-deploy.md`
+- `docs/operations/ci-cd-and-release-controls.md`
 - `scripts/README.md`
 - `tests/README.md`
 
@@ -126,6 +128,16 @@ scripts/readiness_multi_environment_contract_check.sh
 | 12 | Completed foundation | Production-readiness baseline, Golden Surface, provider strategy, frontend parity, and Docker real-backend discipline |
 | 13 | Completed / legacy-deferred | Oracle-like Docker, public/admin overlays, hardening, sidecars, and later AWS convergence |
 | 14 | In progress | Final validation, repository presentation, release polish, screenshots, and public handoff |
+| 15 | Completed | Public product identity, branding, README narrative, and repository presentation |
+| 16 | Completed | Public/admin runtime policy, session overlays, quotas, and demo safety |
+| 17 | Completed | Cloud deployment hardening and domain-ready AWS operation |
+| 18 | Completed | Product workflow reliability and long-running execution behavior |
+| 19 | Completed | Delivery layer and external integration productization |
+| 20 | Completed | AI Lab, provider controls, evals, and runtime observability |
+| 21 | Completed | Publication readiness and current product gate |
+| 22 | Completed | Public setup package and repository hygiene |
+| 23 | Completed | GitHub Actions Product CI and AWS CD |
+| 24 | Completed | SSM-based AWS deployment and low-disk rebuild hardening |
 
 There is no intended gap between 10.5 and 13. After the original Phase 11
 publication plan, the project entered a production-readiness runbook that used
@@ -1265,6 +1277,104 @@ Primary references:
 - `.github/workflows/product-ci.yml`;
 - `scripts/run_current_test_gate.sh`.
 
+### Phase 22 - Public Setup Package and Repository Hygiene
+
+Purpose:
+
+- make the repository runnable from a clean public clone without relying on private local assumptions;
+- keep private credentials, runtime payloads, scratch files, and generated material out of Git;
+- align the setup path, documentation indexes, assets, and workflow names with the current product contract.
+
+Completed work:
+
+- expanded the README quickstart and linked it to a deeper full local product setup guide;
+- documented the full local path for Docker, admin mode, Nextcloud/WebDAV, provider credentials, deck generation, Trello, and Notion;
+- sanitized Docker and AWS example env files so public configuration examples describe required values without exposing private metadata;
+- reorganized `.gitignore` around current product boundaries, private env files, local scratch material, generated frontend output, and ignored design drafts;
+- added canonical public visual assets for the current product presentation path;
+- renamed evaluation workflows away from phase-specific naming so they read as maintained engineering workflows instead of historical experiments.
+
+Current status:
+
+- the public setup path is documented as a product package rather than a collection of scripts;
+- real secrets, local runtime state, and private baseline archives remain outside source control;
+- the active setup story points to Docker, Product API, frontend, sidecars, and the current documentation map.
+
+Primary references:
+
+- `README.md`;
+- `docs/deployment/FULL_LOCAL_PRODUCT_SETUP.md`;
+- `.env.docker.example`;
+- `.env.aws.example`;
+- `.gitignore`;
+- `.github/workflows/evals.yml`;
+- `.github/workflows/evals-live.yml`;
+- `docs/assets/product/hero-decision-loop.webp`.
+
+### Phase 23 - GitHub Actions Product CI and AWS CD
+
+Purpose:
+
+- make the current product gate visible, repeatable, and tied to the repository's main branch;
+- separate active CI/CD controls from legacy exploratory test material;
+- ensure AWS deployment runs only after the current product contract has passed validation.
+
+Completed work:
+
+- added Product CI for current Product API Python entrypoints, frontend dependency install, frontend tests, frontend build, shell syntax validation, and compose/readiness contract checks;
+- kept the current Python test gate as a focused validation job using root `requirements.txt`;
+- added AWS CD as a protected deployment workflow with manual `dry-run` / `execute` modes;
+- connected AWS CD to successful Product CI runs on `main`;
+- configured GitHub OIDC for AWS credentials and kept instance identifiers, SSH material, and deployment targets in GitHub secrets or environment variables;
+- validated deploy scripts inside Actions before any remote deployment step runs.
+
+Current status:
+
+- the repository has an auditable CI/CD control plane for product validation and AWS deployment;
+- Product CI and AWS CD are documented as operational gates, not as separate demo scripts;
+- manual deploy runs can be inspected before live execution through the `dry-run` path.
+
+Primary references:
+
+- `.github/workflows/product-ci.yml`;
+- `.github/workflows/deploy-aws.yml`;
+- `scripts/run_current_test_gate.sh`;
+- `scripts/readiness_multi_environment_contract_check.sh`;
+- `docs/operations/ci-cd-and-release-controls.md`.
+
+### Phase 24 - SSM-Based AWS Deployment and Low-Disk Rebuild Hardening
+
+Purpose:
+
+- support code-only AWS rebuilds on the existing EC2 host without opening a broad public SSH path;
+- keep deployments reproducible when the host has constrained disk space;
+- preserve runtime state, secrets, and Docker volumes while replacing application code and container images.
+
+Completed work:
+
+- added a GitHub Actions AWS deployment path that reaches EC2 through an AWS SSM port-forwarding tunnel;
+- introduced SSM deploy scripts for code-only deployment, remote bundle creation, persistent-path guardrails, and dry-run verification;
+- made the remote deploy path fetch the exact Git commit, build a clean deployment bundle, and validate that no runtime data or secrets are included;
+- hardened AWS rebuilds for low-disk hosts by pruning unused Docker data before the build and relaxing dry-run disk preflight into an advisory warning;
+- fixed Ollama readiness handling so repeated deploys do not collide on a stale temporary readiness file;
+- kept smoke/readiness checks around the same five-service AWS compose contract.
+
+Current status:
+
+- AWS CD can deploy the current code through SSM and rebuild the product stack with low-disk safeguards;
+- code-only deployment updates app files and images while preserving mounted runtime state, private secrets, baselines, and Docker volumes;
+- the deployment remains traceable to a Git commit and a deployment-bundle report.
+
+Primary references:
+
+- `.github/workflows/deploy-aws.yml`;
+- `scripts/deploy_aws_code_only.sh`;
+- `scripts/deploy_aws_code_only_ssm.sh`;
+- `scripts/deploy_aws_code_only_ssm_remote.sh`;
+- `scripts/deploy_aws.sh`;
+- `scripts/smoke_aws.sh`;
+- `docs/deployment/aws-ssm-code-only-deploy.md`.
+
 ---
 
 ## 5. Current Integrations and Their Status
@@ -1342,6 +1452,10 @@ scripts/run_current_test_gate.sh
 scripts/readiness_multi_environment_contract_check.sh
 ```
 
+GitHub Actions now runs this contract through Product CI, and AWS CD is connected
+to successful Product CI runs on `main` with a manual `dry-run` / `execute`
+control for deployment.
+
 Important interpretation:
 
 - the full historical Python discovery suite is not the canonical validation gate;
@@ -1365,6 +1479,8 @@ Additional focused checks exist for:
 - EvidenceOps UI cache;
 - Trello public visibility;
 - AWS env contract.
+- GitHub Actions Product CI;
+- AWS CD through SSM-based code-only deployment.
 
 ---
 
@@ -1388,6 +1504,8 @@ The repository demonstrates:
 - overlay-based demo safety;
 - deck/artifact generation through a dedicated rendering sidecar;
 - Docker and AWS deployment discipline;
+- GitHub Actions CI/CD discipline;
+- SSM-based AWS deployment hardening;
 - repository cleanup and operational documentation.
 
 ---
@@ -1450,7 +1568,10 @@ AI Decision Studio evolved through a coherent engineering arc:
 13. deck/artifact generation;
 14. production-readiness baseline and public/admin overlay policy;
 15. local Docker and AWS deployment;
-16. repository organization for long-term maintainability.
+16. repository organization for long-term maintainability;
+17. public setup packaging and repository hygiene;
+18. GitHub Actions Product CI and AWS CD;
+19. SSM-based AWS deployment and low-disk rebuild hardening.
 
 The next milestone is final publication polish: screenshots, architecture diagram,
 demo narrative, release tag, and one final preindexed Nextcloud fast-import proof.
