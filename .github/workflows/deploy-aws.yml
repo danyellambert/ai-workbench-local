@@ -58,19 +58,17 @@ jobs:
         run: |
           set -euo pipefail
           bash -n scripts/build_deployment_bundle.sh
+          bash -n scripts/deploy_aws_code_only.sh
           bash -n scripts/deploy_aws_code_only_ssm.sh
           bash -n scripts/deploy_aws_code_only_ssm_remote.sh
           bash -n scripts/deploy_aws.sh
           bash -n scripts/smoke_aws.sh
 
-      - name: Run AWS code-only deploy through SSM
+      - name: Run AWS code-only deploy through SSM tunnel
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           AWS_EC2_INSTANCE_ID: ${{ secrets.AWS_EC2_INSTANCE_ID }}
-          AWS_DEPLOY_APP_DIR: ${{ secrets.AWS_DEPLOY_APP_DIR }}
-          REPO: danyellambert/ai-workbench-local
-          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-          SSM_DEPLOY_VERBOSE: "0"
+          AWS_EC2_SSH_KEY: ${{ secrets.AWS_EC2_SSH_KEY }}
         run: |
           set -euo pipefail
 
@@ -81,4 +79,88 @@ jobs:
           fi
 
           echo "deploy_mode=$MODE"
-          scripts/deploy_aws_code_only_ssm.sh "$MODE"
+
+          if [ -z "${AWS_EC2_INSTANCE_ID}" ]; then
+            echo "ERROR: missing secret AWS_EC2_INSTANCE_ID" >&2
+            exit 1
+          fi
+
+          if [ -z "${AWS_EC2_SSH_KEY}" ]; then
+            echo "ERROR: missing secret AWS_EC2_SSH_KEY" >&2
+            exit 1
+          fi
+
+          echo "== Install Session Manager plugin if needed =="
+          if ! command -v session-manager-plugin >/dev/null 2>&1; then
+            curl -fsSL \
+              "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" \
+              -o "$RUNNER_TEMP/session-manager-plugin.deb"
+            sudo dpkg -i "$RUNNER_TEMP/session-manager-plugin.deb"
+          fi
+          session-manager-plugin --version
+
+          echo "== Configure temporary SSH key =="
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+
+          cat > "$HOME/.ssh/ai-decision-studio-aws.pem" <<PEMEOF
+          $AWS_EC2_SSH_KEY
+          PEMEOF
+          chmod 600 "$HOME/.ssh/ai-decision-studio-aws.pem"
+          ssh-keygen -y -f "$HOME/.ssh/ai-decision-studio-aws.pem" >/dev/null
+
+          cat > "$HOME/.ssh/config" <<'SSHCFG'
+          Host axiovance-ssm
+            HostName 127.0.0.1
+            Port 2222
+            User ubuntu
+            IdentityFile ~/.ssh/ai-decision-studio-aws.pem
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+          SSHCFG
+          chmod 600 "$HOME/.ssh/config"
+
+          echo "== Open SSM port-forwarding tunnel to EC2 SSH =="
+          aws ssm start-session \
+            --region "$AWS_REGION" \
+            --target "$AWS_EC2_INSTANCE_ID" \
+            --document-name AWS-StartPortForwardingSession \
+            --parameters '{"portNumber":["22"],"localPortNumber":["2222"]}' \
+            > "$RUNNER_TEMP/ssm-tunnel.log" 2>&1 &
+
+          SSM_TUNNEL_PID="$!"
+
+          cleanup_tunnel() {
+            kill "$SSM_TUNNEL_PID" 2>/dev/null || true
+            wait "$SSM_TUNNEL_PID" 2>/dev/null || true
+          }
+          trap cleanup_tunnel EXIT
+
+          for attempt in $(seq 1 30); do
+            if timeout 1 bash -c '</dev/tcp/127.0.0.1/2222' 2>/dev/null; then
+              echo "SSM tunnel is ready."
+              break
+            fi
+
+            if ! kill -0 "$SSM_TUNNEL_PID" 2>/dev/null; then
+              echo "ERROR: SSM tunnel process exited early." >&2
+              cat "$RUNNER_TEMP/ssm-tunnel.log" >&2 || true
+              exit 1
+            fi
+
+            echo "waiting_for_tunnel_attempt=$attempt"
+            sleep 1
+          done
+
+          if ! timeout 1 bash -c '</dev/tcp/127.0.0.1/2222' 2>/dev/null; then
+            echo "ERROR: SSM tunnel did not become ready." >&2
+            cat "$RUNNER_TEMP/ssm-tunnel.log" >&2 || true
+            exit 1
+          fi
+
+          echo "== Run legacy code-only deploy through SSM tunnel =="
+          EC2_IP=axiovance-ssm \
+          EC2_USER=ubuntu \
+          SSH_KEY="$HOME/.ssh/ai-decision-studio-aws.pem" \
+          scripts/deploy_aws_code_only.sh "$MODE"
