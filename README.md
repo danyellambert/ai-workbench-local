@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/product/readme-header.svg" alt="Axiovance by Danyel Lambert" width="96%" />
+  <img src="docs/assets/product/readme-header.svg" alt="Axiovance by Danyel Lambert" width="100%" />
 </p>
 
 <p align="center">
