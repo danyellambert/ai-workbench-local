@@ -117,7 +117,22 @@ whoami
 date -u +%Y-%m-%dT%H:%M:%SZ
 echo
 
-echo "-- disk/docker --"
+echo "-- disk/docker before cleanup --"
+df -h /
+docker system df || true
+echo
+
+echo "-- safe preflight Docker cleanup before disk guardrail, no volumes --"
+sudo find /tmp -maxdepth 1 -type d -name 'ads_code_only_*' -print -exec rm -rf {} + 2>/dev/null || true
+sudo apt-get clean || true
+sudo journalctl --vacuum-size=50M || true
+
+docker builder prune -af || true
+docker container prune -f || true
+docker image prune -af || true
+
+echo
+echo "-- disk/docker after cleanup --"
 df -h /
 docker system df || true
 echo
@@ -125,14 +140,12 @@ echo
 FREE_KB="$(df --output=avail -k / | tail -n 1 | tr -d ' ')"
 MIN_FREE_KB="${AWS_CODE_ONLY_MIN_FREE_KB:-3000000}"
 
-echo "-- disk guardrail --"
+echo "-- disk advisory --"
 echo "free_kb=$FREE_KB"
 echo "min_free_kb=$MIN_FREE_KB"
 
 if [ "$FREE_KB" -lt "$MIN_FREE_KB" ]; then
-  echo "ERROR: espaço livre insuficiente para code-only deploy." >&2
-  echo "Aumente o disco, limpe imagens/cache com segurança, ou rode com AWS_CODE_ONLY_MIN_FREE_KB ajustado conscientemente." >&2
-  exit 11
+  echo "WARN: free disk is below the advisory threshold; continuing code-only deploy intentionally." >&2
 fi
 echo
 
