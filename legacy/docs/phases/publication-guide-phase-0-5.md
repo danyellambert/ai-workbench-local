@@ -12,7 +12,7 @@ Complete Phase 0.5 of the roadmap by preparing the project for:
 
 ## Decisions adopted in this phase
 
-- Recommended repository name: `ai-workbench-local`
+- Recommended repository name: `Axiovance`
 - Initial visibility: **private**
 - License: **MIT**
 - Folder `materials_local/`: **excluded from version control**
@@ -49,12 +49,12 @@ If you are authenticated in the GitHub CLI:
 
 ```bash
 gh auth login
-gh repo create ai-workbench-local --private --source=. --remote=origin --push
+gh repo create Axiovance --private --source=. --remote=origin --push
 ```
 
 If you prefer using the website:
 
-1. create a private repository named `ai-workbench-local`
+1. create a private repository named `Axiovance`
 2. copy the remote URL
 3. run:
 
@@ -122,4 +122,4 @@ Recommended next step:
 
 Current remote repository:
 
-- `https://github.com/danyellambert/ai-workbench-local`
+- `https://github.com/danyellambert/Axiovance`

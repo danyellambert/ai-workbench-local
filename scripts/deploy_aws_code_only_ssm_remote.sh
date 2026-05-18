@@ -8,7 +8,7 @@ if [ "$MODE" != "--dry-run" ] && [ "$MODE" != "--execute" ]; then
   exit 2
 fi
 
-REPO="${REPO:-danyellambert/ai-workbench-local}"
+REPO="${REPO:-danyellambert/Axiovance}"
 DEPLOY_SHA="${DEPLOY_SHA:?DEPLOY_SHA is required}"
 APP_DIR="${APP_DIR:-/opt/ai-decision-studio/app}"
 APP_USER="${APP_USER:-ubuntu}"
