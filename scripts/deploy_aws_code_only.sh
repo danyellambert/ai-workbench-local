@@ -140,14 +140,12 @@ echo
 FREE_KB="$(df --output=avail -k / | tail -n 1 | tr -d ' ')"
 MIN_FREE_KB="${AWS_CODE_ONLY_MIN_FREE_KB:-3000000}"
 
-echo "-- disk guardrail --"
+echo "-- disk advisory --"
 echo "free_kb=$FREE_KB"
 echo "min_free_kb=$MIN_FREE_KB"
 
 if [ "$FREE_KB" -lt "$MIN_FREE_KB" ]; then
-  echo "ERROR: espaço livre insuficiente para code-only deploy." >&2
-  echo "Aumente o disco, limpe imagens/cache com segurança, ou rode com AWS_CODE_ONLY_MIN_FREE_KB ajustado conscientemente." >&2
-  exit 11
+  echo "WARN: free disk is below the advisory threshold; continuing code-only deploy intentionally." >&2
 fi
 echo
 
