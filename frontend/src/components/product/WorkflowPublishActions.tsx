@@ -72,7 +72,7 @@ const NOTION_TEMPLATE_OPTIONS: Record<string, NotionTemplateOption[]> = {
 };
 
 const CURRENT_TRELLO_PAGE_URL = 'https://trello.com/b/FhIjewpo/mcp-actions';
-const CURRENT_NOTION_PAGE_URL = 'https://www.notion.so/3431594b7fc080eebe5fdece0899b226?v=3431594b7fc080aca35f000cb7e0cca4';
+const CURRENT_NOTION_PAGE_URL = 'https://apple-tsunami-1ce.notion.site/3431594b7fc080eebe5fdece0899b226?v=3431594b7fc080aca35f000cb7e0cca4&source=copy_link';
 
 function getWorkflowTemplateOptions(workflowId: string): NotionTemplateOption[] {
   return NOTION_TEMPLATE_OPTIONS[workflowId] ?? [{ id: 'executive_summary', label: 'Executive summary', description: 'Default workflow handoff.' }];
