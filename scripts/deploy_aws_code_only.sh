@@ -117,7 +117,22 @@ whoami
 date -u +%Y-%m-%dT%H:%M:%SZ
 echo
 
-echo "-- disk/docker --"
+echo "-- disk/docker before cleanup --"
+df -h /
+docker system df || true
+echo
+
+echo "-- safe preflight Docker cleanup before disk guardrail, no volumes --"
+sudo find /tmp -maxdepth 1 -type d -name 'ads_code_only_*' -print -exec rm -rf {} + 2>/dev/null || true
+sudo apt-get clean || true
+sudo journalctl --vacuum-size=50M || true
+
+docker builder prune -af || true
+docker container prune -f || true
+docker image prune -af || true
+
+echo
+echo "-- disk/docker after cleanup --"
 df -h /
 docker system df || true
 echo
