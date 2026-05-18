@@ -7,8 +7,10 @@ Deployment runbooks and environment contracts for local Docker and AWS. Oracle-l
 - [AI_LAB_GOLDEN_STATE_RESTORE.md](AI_LAB_GOLDEN_STATE_RESTORE.md) — AI Lab Golden State Restore
 - [aws-cost-audit.md](aws-cost-audit.md) — AWS Cost and Resource Audit
 - [aws-deploy.md](aws-deploy.md) — AWS deploy
+- [aws-ssm-code-only-deploy.md](aws-ssm-code-only-deploy.md) — AWS SSM code-only deploy
 - [AWS_FRESH_EC2_BOOTSTRAP.md](AWS_FRESH_EC2_BOOTSTRAP.md) — Axiovance — AWS fresh EC2 bootstrap runbook
 - [deployment-evolution.md](deployment-evolution.md) — Deployment evolution from local Docker to AWS, Caddy, restore, and credential contracts
+- [FULL_LOCAL_PRODUCT_SETUP.md](FULL_LOCAL_PRODUCT_SETUP.md) — Full local product setup
 - [local-docker-compose.md](local-docker-compose.md) — Local Docker Compose
 - [LOCAL_FULL_APP_DEV.md](LOCAL_FULL_APP_DEV.md) — Local full app development
 - [MULTI_ENVIRONMENT_CONTRACT.md](MULTI_ENVIRONMENT_CONTRACT.md) — Axiovance — Multi-environment contract

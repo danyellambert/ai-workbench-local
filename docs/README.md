@@ -12,9 +12,11 @@ Start here if you are new to the repository:
 - architecture/data-payload.md — the versioned Docker/AWS data payload and the four mounted roots.
 - deployment/local-docker-compose.md — how to run the current product locally with Docker Compose.
 - deployment/aws-deploy.md — how the AWS deployment is structured.
+- deployment/aws-ssm-code-only-deploy.md — how GitHub Actions deploys AWS code-only releases through SSM.
 - deployment/deployment-evolution.md — how local Docker, AWS, Caddy, restore, and credentials converged.
 - deployment/python-dependencies.md — current single-file Python dependency contract.
 - operations/backup-and-restore.md — operational backup and restore notes for local/AWS data roots.
+- operations/ci-cd-and-release-controls.md — Product CI, AWS CD, release controls, secrets boundaries, and eval workflow naming.
 - operations/engineering-controls.md — public/admin boundaries, quotas, readiness gates, credentials, and observability.
 - guides/ — task-oriented supporting workflow guides.
 - reference/ — reference material for benchmarks and evidence/CV workflows.

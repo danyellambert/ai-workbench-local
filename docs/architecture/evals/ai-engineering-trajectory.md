@@ -59,9 +59,13 @@ Important threads:
 - model comparison and provider selection;
 - eval typing and live verdict labels;
 - current benchmark/eval UI surfaces.
+- public workflow naming for maintained eval checks through `evals.yml` and
+  `evals-live.yml`, replacing phase-numbered workflow names.
 
 Primary references:
 
+- `.github/workflows/evals.yml`
+- `.github/workflows/evals-live.yml`
 - `docs/architecture/evals/benchmark-execution.md`
 - `docs/architecture/evals/decision-gate.md`
 - `docs/architecture/evals/closure.md`

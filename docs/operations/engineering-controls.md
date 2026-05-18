@@ -61,6 +61,33 @@ Primary references:
 - `.env.docker.example`
 - `docs/deployment/aws-deploy.md`
 
+## CI/CD And Release Controls
+
+The repository now has a maintained CI/CD control plane for the current product
+contract.
+
+Current release controls include:
+
+- Product CI for current Product API entrypoints, frontend tests/build, shell
+  syntax validation, compose readiness, and the current Python test gate;
+- AWS CD with manual `dry-run` / `execute` modes;
+- automatic AWS CD eligibility after Product CI succeeds on `main`;
+- protected AWS deployment environment in GitHub Actions;
+- AWS OIDC instead of committed AWS credentials;
+- SSM-based deployment access to the EC2 host;
+- deploy-script validation before any remote AWS action;
+- renamed eval workflows that read as maintained engineering checks instead of
+  phase-specific scratch workflows.
+
+Primary references:
+
+- `.github/workflows/product-ci.yml`
+- `.github/workflows/deploy-aws.yml`
+- `.github/workflows/evals.yml`
+- `.github/workflows/evals-live.yml`
+- `docs/operations/ci-cd-and-release-controls.md`
+- `docs/deployment/aws-ssm-code-only-deploy.md`
+
 ## Readiness And Smoke Gates
 
 The repository separates active product validation from legacy historical validation.
@@ -71,6 +98,8 @@ Current validation areas:
 - AWS compose config;
 - multi-environment contract checks;
 - current product test gate;
+- Product CI;
+- AWS CD dry-run;
 - AWS smoke path;
 - dependency contract validation.
 
@@ -83,6 +112,8 @@ Primary references:
 - `scripts/readiness_multi_environment_contract_check.sh`
 - `scripts/smoke_aws.sh`
 - `scripts/run_local_docker.sh`
+- `.github/workflows/product-ci.yml`
+- `.github/workflows/deploy-aws.yml`
 
 ## Observability
 
