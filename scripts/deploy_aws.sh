@@ -229,6 +229,30 @@ echo "== Ensure Ollama embedding model =="
   echo "OK: Ollama embedding model is available."
 }
 
+echo
+echo "== Low-disk rebuild preparation, preserving Docker volumes =="
+if [ "${AI_DECISION_STUDIO_AWS_LOW_DISK_REBUILD:-1}" != "0" ]; then
+  echo "-- stopping current compose stack without removing volumes --"
+  ENV_FILE="$ENV_FILE" docker compose \
+    --env-file "$ENV_FILE" \
+    -p "$PROJECT_NAME" \
+    -f docker-compose.aws.yml \
+    down --remove-orphans || true
+
+  echo
+  echo "-- pruning Docker build cache, stopped containers and unused images; volumes are preserved --"
+  docker container prune -f || true
+  docker builder prune -af || true
+  docker image prune -af || true
+
+  echo
+  echo "-- post-prune disk state --"
+  df -h /
+  docker system df || true
+else
+  echo "Low-disk rebuild preparation disabled."
+fi
+
 ensure_ollama_embedding_model
 
 DOCKER_BUILDKIT=1 docker compose \
