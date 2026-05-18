@@ -103,8 +103,11 @@ jobs:
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
 
-          printf '%s\\n' "$AWS_EC2_SSH_KEY" > "$HOME/.ssh/ai-decision-studio-aws.pem"
+          cat > "$HOME/.ssh/ai-decision-studio-aws.pem" <<PEMEOF
+          $AWS_EC2_SSH_KEY
+          PEMEOF
           chmod 600 "$HOME/.ssh/ai-decision-studio-aws.pem"
+          ssh-keygen -y -f "$HOME/.ssh/ai-decision-studio-aws.pem" >/dev/null
 
           cat > "$HOME/.ssh/config" <<'SSHCFG'
           Host axiovance-ssm
